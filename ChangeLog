@@ -10,5 +10,5 @@ March:
     - jobservice.py is now the primary and callable script instead of the custom settings.py
     - Initial fixes -- system now runs partially
     - Added index of inputfiles to the XML response
-
+    - Added inputformats/outputformats to response XML
 

@@ -47,7 +47,7 @@ OUTPUTFORMATS = []
 
 def printlog(msg):
     now = datetime.datetime.now()
-    print "--------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg 
+    print "------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg 
 
 def printdebug(msg):
     global DEBUG
@@ -66,7 +66,7 @@ class JobService:
 
     def __init__(self):    
         global COMMAND,ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS
-        printlog("Starting CLAM JobService, version " + str(self.clam_version) + "...")
+        printlog("Starting CLAM JobService, version " + str(self.clam_version) + " ...")
         if not ROOT or not os.path.isdir(ROOT):
             print >>sys.stderr,"ERROR: Specified root path " + ROOT + " not found"                 
             sys.exit(1)
@@ -110,7 +110,7 @@ class JobService:
         #MAYBE TODO: add selected?
         global INPUTFORMATS
         render = web.template.render('templates')
-        return render.inputformats(name, [ (format.__class__.name, format.name ) for format in INPUTFORMATS ])
+        return render.inputformats(name, [ (format.__class__.__name__, format.name ) for format in INPUTFORMATS ])
     
 
 
@@ -228,7 +228,7 @@ class Project(object):
                     if fmt.match(filename):
                         format = fmt
                         break                                
-                paths.append( ( os.path.basename(f), format.__class__.name, format.encoding ) )
+                paths.append( ( os.path.basename(f), format.__class__.__name__, format.encoding ) )
         return paths
 
     def inputindex(self,project):        
@@ -244,7 +244,7 @@ class Project(object):
 
     def GET(self, project):
         """Main Get method: Get project state, parameters, outputindex"""
-        global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE
+        global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS
         if not self.exists(project):
             raise web.webapi.NotFound()
         statuscode, statusmsg = self.status(project)
@@ -262,7 +262,7 @@ class Project(object):
         else:
             inputpaths = []      
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths)
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
 
 
     def POST(self, project):
@@ -473,7 +473,7 @@ class Uploader:
             if 'upload'+str(i) in postdata:
                 inputformat = None
                 for f in INPUTFORMATS:                
-                    if f.__class__.name == postdata['uploadformat' + str(i)]:
+                    if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                         inputformat = f
             
                 if not inputformat:
@@ -491,7 +491,7 @@ class Uploader:
 
             inputformat = None
             for f in INPUTFORMATS:                
-                if f.__class__.name == postdata['uploadformat' + str(i)]:
+                if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                     inputformat = f
 
             filename = postdata['upload' + str(i)].filename.lower()

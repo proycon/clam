@@ -1,7 +1,7 @@
 
 
 - Look into and fix large file upload problem
-- inputpaths and outputpath should contain both format_id and format_name, not just the latter
+- Implement fromxml parsers for parameters and formats
 - Test archive extraction
 - Implement passing input and outputdir to blackbox
 - Implement selecting a preinstalled corpora
@@ -10,7 +10,7 @@
 - Write user interface
 
 Later:
-- Add version data to xml responses
+- Add version data to xml responses 
 - Make XSDs or DTDs for xml responses
 - Write documentation
 

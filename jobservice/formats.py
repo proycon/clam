@@ -12,6 +12,10 @@
 
 import re
 
+def formatfromxml():
+    #TODO: implement reading formats from XML, return a class derived from Format, xmlnode is lxml Element or string
+    pass
+
 class Format(object):
 
     name = "Unspecified Format"
@@ -48,6 +52,18 @@ class Format(object):
             return filename + '.' + self.extensions[0]
         else:
             return filename
+
+    def xml(self):
+        xml = "<" + self.__class__.__name__
+        xml += ' name="'+self.name + '"'
+        xml += ' encoding="'+self.encoding + '"'
+        if self.mask:
+            xml += ' mask="'+self.mask + '"'
+        xml += '>'
+        for extension in self.extensions:
+            xml += " <extension>" + extension + "</extension>"     
+        xml += "</" + self.__class__.__name__ + ">"
+        return xml
 
 
 class PlainTextFormat(Format):    

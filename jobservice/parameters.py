@@ -10,6 +10,11 @@
 #
 ###############################################################
 
+import lxml
+
+def parameterfromxml(xmlnode):
+    #TODO: implement reading parameters from XML, returns a class derived from AbstractParameter, xmlnode is lxml Element or string
+    pass
 
 class AbstractParameter(object):
     def __init__(self, id, paramflag, name, description, **kwargs):
