@@ -75,7 +75,7 @@ class BooleanParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description, **kwargs):
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
-        #defaults
+        #defaultsisisntance
         self.reverse = False
         for key, value in kwargs.items():
             if key == 'reverse': 

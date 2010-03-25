@@ -25,7 +25,7 @@ SYSTEM_DESCRIPTION = "This is a tokeniser"
 COMMAND = "ucto"
 
 #Root directory for CLAM
-ROOT = "/home/proycon/work/clam/tmproot/"
+ROOT = "/home/proycon/work/clamtmproot/"
 
 #List of supported Input formats by the system
 INPUTFORMATS = [ DCOIFormat(), TokenizedTextFormat(), PlainTextFormat() ]
@@ -33,7 +33,7 @@ INPUTFORMATS = [ DCOIFormat(), TokenizedTextFormat(), PlainTextFormat() ]
 #List of delivered Output formats by the system
 OUTPUTFORMATS = [ DCOIFormat('utf-8',['dcoi.xml']) ]
 
-PARAMETERS =  ( 
+PARAMETERS =  [ 
     ('Main', [ 
         BooleanParameter('lowercase','-l','Lowercase','Convert text to lowercase',forbid=['uppercase']),
         BooleanParameter('uppercase','-u','Uppercase','Convert text to uppercase',forbid=['lowercase']),
@@ -44,4 +44,4 @@ PARAMETERS =  (
         BooleanParameter('verbose','-Tv','Verbose output','Verbose output'),
         ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',[('nl','Nederlands'),('en','English')], nospace=True),
     ] )
-)
+]
