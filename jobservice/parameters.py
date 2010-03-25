@@ -83,27 +83,27 @@ class BooleanParameter(AbstractParameter):
 
 
     def compilearg(self, value):
-        if reverse: value = not value
+        if self.reverse: value = not value
         if value:
             return self.paramflag  
         else:
-            return "":   
+            return ""
 
 class StringParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs)
+    def __init__(self, id, paramflag, name, description, **kwargs):
         super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
         self.value = ""
         self.maxlength = 0 #unlimited
-        for key, value in kwargs.items()
+        for key, value in kwargs.items():
             if key == 'default': 
                 self.value = value  
             elif key == 'maxlength': 
                 self.maxlength = int(value)
 
     def validate(self,value):
-        return ((self.maxlength == 0) || (len(value) <= self.maxlength))
+        return ((self.maxlength == 0) or(len(value) <= self.maxlength))
 
     def compilearg(self, value):
         if value.find(" ") >= 0:
@@ -112,20 +112,20 @@ class StringParameter(AbstractParameter):
 
 
 class ChoiceParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, choices, **kwargs)
+    def __init__(self, id, paramflag, name, description, choices, **kwargs):
         super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
         self.delimiter = ","
         self.choices = [] #list of key,value tuples
-        for x in self.choices:
-            if not isinstance(values,tuple) or len(x) != 2:
+        for x in choices:
+            if not isinstance(x,tuple) or len(x) != 2:
                 self.choices.append( (x,x) ) #list of two tuples
             else:
                 self.choices.append(x) #list of two tuples
         self.value = self.choices[0][0] #first choice is default
                 
-        for key, value in kwargs.items()
+        for key, value in kwargs.items():
             if key == 'default': 
                 self.value = value  
             elif key == 'multi': 
@@ -170,20 +170,20 @@ class ChoiceParameter(AbstractParameter):
         xml += ">"
         for key, value in self.choices:
             if self.value == key:
-                xml += " <choice selected=\"1\">" + choice + "</choice>"
+                xml += " <choice id=\""+key+"\" selected=\"1\">" + value + "</choice>"
             else:
-                xml += " <choice>" + choice + "</choice>"
+                xml += " <choice id=\""+key+"\">" + value + "</choice>"
         xml += "</" + self.__class__.__name__.lower() + ">"
         return xml
 
 class TextParameter(StringParameter): #TextArea based
-    def __init__(self, id, paramflag, name, description, **kwargs)
+    def __init__(self, id, paramflag, name, description, **kwargs):
         super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs)
+    def __init__(self, id, paramflag, name, description, **kwargs):
         super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
         
@@ -191,7 +191,7 @@ class IntegerParameter(AbstractParameter):
         self.default = 0
         self.minvalue = 0
         self.maxvalue = 0 #unlimited
-        for key, value in kwargs.items()
+        for key, value in kwargs.items():
             if key == 'default': 
                 self.value = int(value)
             elif key == 'minvalue': 
@@ -204,18 +204,18 @@ class IntegerParameter(AbstractParameter):
             value = int(value)
         except:
             return False
-        return  ((self.maxvalue < self.minvalue) || ((value >= self.minvalue) &&  (value <= self.maxvalue)))
+        return  ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and (value <= self.maxvalue)))
 
 
 class FloatParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs)
+    def __init__(self, id, paramflag, name, description, **kwargs):
         super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
                 
         #defaults
         self.default = 0
         self.minvalue = 0
         self.maxvalue = -1 #unlimited if maxvalue < minvalue
-        for key, value in kwargs.items()
+        for key, value in kwargs.items():
             if key == 'default': 
                 self.value = float(value)
             elif key == 'minvalue': 
@@ -228,6 +228,6 @@ class FloatParameter(AbstractParameter):
             value = float(value)
         except:
             return False
-        return  ((self.maxvalue < self.minvalue) || ((value >= self.minvalue) &&  (value <= self.maxvalue)))
+        return  ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue)))
         
 

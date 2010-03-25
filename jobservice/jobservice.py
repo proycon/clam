@@ -5,7 +5,7 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Jobservice --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
+#       http://ilk.uvt.nl/~mvgompelcp jobservice.py /tmp/sources/clam/jobservice/
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
 #       
@@ -19,6 +19,9 @@ import os
 import codecs
 import subprocess
 import glob
+import sys
+from parameters import *
+from formats import *
        
 STATUS_READY = 0
 STATUS_RUNNING = 1
@@ -27,6 +30,13 @@ STATUS_UPLOAD = 10 #processing after upload
 STATUS_DOWNLOAD = 11 #preparing before download
 
     
+#Empty defaults
+COMMAND = ""
+ROOT = "."
+PARAMETERS = []
+INPUTFORMATS = []
+OUTPUTFORMATS = []
+
 
 class JobService:
     clam_version = 0.1
@@ -34,7 +44,7 @@ class JobService:
     urls = (
     '/', 'Index',
     '/([A-Za-z0-9_]*)/', 'Project',
-    '/([A-Za-z0-9_]*)/uplohousead', 'Uploader',
+    '/([A-Za-z0-9_]*)/upload', 'Uploader',
     '/([A-Za-z0-9_]*)/download', 'Downloader',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHander',
     )
@@ -43,7 +53,6 @@ class JobService:
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
         self.service.run()
-
 
         
 
@@ -56,8 +65,8 @@ class JobService:
             for f in glob.glob(ROOT + "projects/*"):
                 if os.path.isdir(f):
                     projects.append(os.path.basename(f))
-        render = web.template.render('templates')
-        return render.index(projects)
+            render = web.template.render('templates')
+            return render.index(projects)
 
 
     @staticmethod
@@ -461,3 +470,18 @@ class JobService:
             #    raise web.webapi.InternalError("Unable to process upload package")                
                 
             return output #200
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule"
+        sys.exit(1)
+    settingsmodule = sys.argv[1]
+    if not settingsmodule.isalpha():  #security precaution
+        print >> sys.stderr, "ERROR: Invalid service module specified!"
+        sys.exit(1)
+    else:
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS"
+        exec import_string
+ 
+    JobService() #start

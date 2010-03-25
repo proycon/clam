@@ -14,7 +14,6 @@
 #
 ###############################################################
 
-from jobservice import JobService
 from parameters import *
 from formats import *
 
@@ -46,6 +45,3 @@ PARAMETERS =  (
         ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',[('nl','Nederlands'),('en','English')], nospace=True),
     ] )
 )
-
-if __name__ == "__main__":
-    JobService() #start

@@ -35,13 +35,13 @@ class Format(object):
             if filename[ -1 * len(extension) - 1:] == '.' + extension:
                 return True
         if self.mask:
-            return r.match(filename)
+            return re.match(filename)
         else:
             return False
         
     def filename(self,filename):
         """Rename this file so it matches the defined extension"""
-        if not self.match(filename)
+        if not self.match(filename):
             for ext in self.extensions[0].split("."):
                 if filename[-1 * len(ext):] == ext:
                     filename = filename[:-1 * len(ext)]
@@ -55,7 +55,7 @@ class PlainTextFormat(Format):
     name = "Plain Text Format (not tokenised)"
 
     def __init__(self,encoding = 'utf-8', extensions = ['txt'], mask = None):
-        super(PlainTextFormat,self).__init__(id,encoding, extensions, mask)
+        super(PlainTextFormat,self).__init__(encoding, extensions, mask)
 
 
                 
@@ -64,7 +64,7 @@ class TokenizedTextFormat(Format):
     name = "Plain Text Format (already tokenised)"
 
     def __init__(self,encoding = 'utf-8', extensions = ['tok.txt'], mask = None):
-        super(TokenizedTextFormat,self).__init__(id,encoding, extensions, mask)
+        super(TokenizedTextFormat,self).__init__(encoding, extensions, mask)
 
 
 
@@ -73,8 +73,6 @@ class DCOIFormat(Format):
     name = "SoNaR/DCOI format"
 
     def __init__(self,encoding = 'utf-8', extensions = ['dcoi.xml','sonar.xml'], mask = None):
-        super(DCOIFormat,self).__init__(id,encoding, extensions, mask)
+        super(DCOIFormat,self).__init__(encoding, extensions, mask)
 
 
-    
-                               
