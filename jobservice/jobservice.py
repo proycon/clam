@@ -438,6 +438,7 @@ class Uploader:
             
             if self.isarchive(filename):            
                 for subfilename in self.extract(project,filename, inputformat):
+                    printdebug("Extracted from archive: " + subfilename)
                     self.test(subfilename, inputformat, depth + 1)
                 o += prefix + "</file>\n"    
 

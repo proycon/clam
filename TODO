@@ -1,7 +1,8 @@
 
 
 - Look into and fix large file upload problem
-- Test archive upload
+- inputpaths and outputpath should contain both format_id and format_name, not just the latter
+- Test archive extraction
 - Implement passing input and outputdir to blackbox
 - Implement selecting a preinstalled corpora
 - Implement free text submission
