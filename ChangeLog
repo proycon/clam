@@ -1,0 +1,14 @@
+    
+March:
+    - Concept, brainstorming, initial meetings with Antal, Martin (TICCLops), Tanja (VICI) (starting end of february)
+    - Wrote first jobserver and jobclient (starting end of february)
+    - Discarded jobserver and jobclient, and started RESTful webservice
+    - Invented parameter class scheme
+    - Invented format class scheme and inputformat, outputformat specification
+    - Implemented smart file uploader
+    - First commit to SVN
+    - jobservice.py is now the primary and callable script instead of the custom settings.py
+    - Initial fixes -- system now runs partially
+    - Added index of inputfiles to the XML response
+
+

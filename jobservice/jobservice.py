@@ -46,9 +46,9 @@ class JobService:
 
     urls = (
     '/', 'Index',
-    '/([A-Za-z0-9_]*)/', 'Project',
-    '/([A-Za-z0-9_]*)/upload', 'Uploader',
-    '/([A-Za-z0-9_]*)/download', 'Downloader',
+    '/([A-Za-z0-9_]*)/?', 'Project',
+    '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+    '/([A-Za-z0-9_]*)/download/?', 'Downloader',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHander',
     )
 
@@ -431,14 +431,17 @@ class Uploader:
     def POST(self, project):
         global INPUTFORMATS
 
-        postdata = web.input()
-        if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
-            raise web.webapi.BadRequest('No valid uploadcount specified') #TODO: verify this works
+        #postdata = web.input()
 
+        #defaults (max 25 uploads)
         kwargs = {}
-        for i in range(1,int(postdata['uploadcount']) + 1):    
+        for i in range(1,26):    
             kwargs['upload' + str(i)] = {}                            
         postdata = web.input(**kwargs)
+        if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
+            raise web.webapi.BadRequest('No valid uploadcount specified') #TODO: verify this works
+        if int(postdata['uploadcount']) > 25:
+            raise web.webapi.BadRequest('Too many uploads') #TODO: verify this works
 
         #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
         for i in range(1,int(postdata['uploadcount']) + 1):
