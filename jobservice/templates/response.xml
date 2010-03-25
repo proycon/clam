@@ -1,0 +1,24 @@
+$def with (system_id,system_name,project,statuscode,statusmessage, parameterdata, corpora, outputpaths)
+<?xml version="1.0" encoding="UTF-8"?>
+<clam id="$system_id" name="$system_name" project="$project">
+    <status code="$statuscode" message="$statusmessage" />
+    $if statuscode == 0 or statuscode == 2:
+        <parameters>
+            $for group, parameters in parameterdata:
+                <parametergroup name="$group">
+                    $for parameter in parameters:
+                        $:parameter.xml()
+                </parametergroup>
+        </parameters>
+     $if statuscode == 0:
+        <corpora>
+            $for corpus in corpora:
+                <corpus>$corpus</corpus>
+        </corpora> 
+     $if statuscode == 2:    
+        <output>
+            $for path, format, encoding in outputpaths:
+                <path format="$format" encoding="$encoding">$path</path>
+        </output>
+</clam>
+
