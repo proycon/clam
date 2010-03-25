@@ -1,4 +1,16 @@
 
 - Look into and fix large file upload problem
+- Implement passing input and outputdir to blackbox
+- Implement selecting a preinstalled corpora
+- Implement free text submission
+
+- Write user interface
+
+Later:
+- Add version data to xml responses
+- Make XSDs or DTDs for xml responses
+- Write documentation
+
+
 
 
