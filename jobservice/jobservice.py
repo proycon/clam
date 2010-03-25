@@ -20,6 +20,7 @@ import codecs
 import subprocess
 import glob
 import sys
+import datetime
 from parameters import *
 from formats import *
        
@@ -29,6 +30,8 @@ STATUS_DONE = 2
 STATUS_UPLOAD = 10 #processing after upload
 STATUS_DOWNLOAD = 11 #preparing before download
 
+
+DEBUG = False
     
 #Empty defaults
 SYSTEM_ID = "clam"
@@ -41,6 +44,15 @@ INPUTFORMATS = []
 OUTPUTFORMATS = []
 
 
+
+def printlog(msg):
+    now = datetime.datetime.now()
+    print "--------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg 
+
+def printdebug(msg):
+    global DEBUG
+    if DEBUG: printlog("DEBUG: " + msg)
+        
 class JobService:
     clam_version = 0.1
 
@@ -54,6 +66,7 @@ class JobService:
 
     def __init__(self):    
         global COMMAND,ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS
+        printlog("Starting CLAM JobService, version " + str(self.clam_version) + "...")
         if not ROOT or not os.path.isdir(ROOT):
             print >>sys.stderr,"ERROR: Specified root path " + ROOT + " not found"                 
             sys.exit(1)
@@ -128,6 +141,7 @@ class Project(object):
         """Create project skeleton if it does not already exist (static method)"""
         global ROOT
         if not os.path.isdir(ROOT + "projects/" + project):
+            printlog("Creating project '" + project + "'")
             os.mkdir(ROOT + "projects/" + project)
             os.mkdir(ROOT + "projects/" + project + "/input")
             os.mkdir(ROOT + "projects/" + project + "/output")
@@ -159,6 +173,7 @@ class Project(object):
         if self.pid(project) == 0:
             return False
         try:
+            printlog("Aborting process in project '" + project + "'" )
             os.kill(self.pid, 15)
             os.path.remove(Project.path(project) + ".pid")
             return True
@@ -253,6 +268,7 @@ class Project(object):
     def POST(self, project):
         global COMMAND, PARAMETERS
         
+
         Project.create(project)
                     
         #Generate arguments based on POSTed parameters
@@ -266,9 +282,11 @@ class Project(object):
         
         #Start project with specified parameters
         cmd = [COMMAND] + args #call processing chain 
+        printlog("Starting " + COMMAND + ": " + " ".join(cmd) + " ..." )
         process = subprocess.Popen(cmd,cwd=Project.path(project))				
         if process:
             pid = process.pid
+            printlog("Started with pid " + str(pid) )
             f = open(Project.path(project) + '.pid','w')
             f.write(str(pid))
             f.close()
@@ -284,6 +302,7 @@ class Project(object):
         statuscode, _ = self.status(project)
         if statuscode == STATUS_RUNNING:
             self.abort(project)   
+        printlog("Deleting project '" + project + "'" )
         shutil.rmtree(self.process.dir) #TODO: catch exception (won't work for symlinks)
         return "" #200
 
@@ -369,7 +388,8 @@ class Uploader:
             namelist = 'zip'
         else:
             raise Exception("Invalid archive format") #invalid archive, shouldn't happend
-            
+
+        printlog("Extracting '" + filename + "'" )            
         process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = process.communicate() #waits for process to end 
 
@@ -386,6 +406,7 @@ class Uploader:
 
 
     def test(self,project, filename, inputformat, depth = 0):
+        printdebug("Testing " + filename)
         o = ""       
         #inputformat = None
         #for f in INPUTFORMATS:
@@ -409,8 +430,10 @@ class Uploader:
             else:
                 if inputformat.validate(self.path(project) + filename):
                     o += " validated=\"yes\" />\n"
+                    printlog("Succesfully validated '" + filename + "'" )
                 else:
                     o += " validated=\"no\" />\n"
+                    printlog("File did not validate '" + filename + "'" )
                     remove = True #remove files that don't validate
             
             if self.isarchive(filename):            
@@ -419,6 +442,7 @@ class Uploader:
                 o += prefix + "</file>\n"    
 
         if remove:
+            printdebug("Removing '" + filename + "'" )
             os.unlink(self.path(project) + filename)
 
         return o
@@ -484,6 +508,8 @@ class Uploader:
             #f = open(Project.path(project) + '.upload','w') 
             #f.close()
 
+            printlog("Uploading '" + filename + "'" )
+            printdebug("(start copy upload)" )
             #upload file 
             if archive:
                 f = open(Project.path(project) + 'input/' + filename,'w') #TODO: check for problems with character encoding?
@@ -492,6 +518,7 @@ class Uploader:
             for line in postdata['upload' + str(i)].file:
                 f.write(line)
             f.close()
+            printdebug("(end copy upload)" )
 
             #test uploaded files
             output += self.test(project, filename, inputformat)
@@ -533,5 +560,10 @@ if __name__ == "__main__":
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
-    del sys.argv[1] 
+    del sys.argv[1]
+
+    if len(sys.argv) >= 2 and sys.argv[1] == '-d':
+        DEBUG = True
+        del sys.argv[1]
+
     JobService() #start
