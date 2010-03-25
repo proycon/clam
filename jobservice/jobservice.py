@@ -31,6 +31,9 @@ STATUS_DOWNLOAD = 11 #preparing before download
 
     
 #Empty defaults
+SYSTEM_ID = "clam"
+SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
+SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 COMMAND = ""
 ROOT = "."
 PARAMETERS = []
@@ -116,9 +119,18 @@ class Project(object):
 
     @staticmethod
     def path(project):
-        """Get the path to the project (class method)"""
+        """Get the path to the project (static method)"""
         global ROOT
         return ROOT + "projects/" + project + "/"
+
+    @staticmethod
+    def create(project):         
+        """Create project skeleton if it does not already exist (static method)"""
+        global ROOT
+        if not os.path.isdir(ROOT + "projects/" + project):
+            os.mkdir(ROOT + "projects/" + project)
+            os.mkdir(ROOT + "projects/" + project + "/input")
+            os.mkdir(ROOT + "projects/" + project + "/output")
 
     def pid(self, project):
         pidfile = Project.path(project) + '.pid'
@@ -166,13 +178,6 @@ class Project(object):
         """Check if the project exists"""
         return os.path.isdir(Project.path(project))
 
-    def create(self, project):
-        """create the project skeleton"""
-        os.mkdir(Project.path(project))
-        os.mkdir(Project.path(project) + 'input')
-        os.mkdir(Project.path(project) + 'output')
-
-        
 
     def status(self, project):
         global STATUS_READY, STATUS_RUNNING, STATUS_DONE, STATUS_DOWNLOAD, STATUS_UPLOAD
@@ -186,40 +191,47 @@ class Project(object):
                 return (STATUS_RUNNING, msg)
             else:
                 return (STATUS_RUNNING, "The system is running") #running
-        elif self.done():
+        elif self.done(project):
             return (STATUS_DONE, "Done")
-        elif self.preparingdownload():
+        elif self.preparingdownload(project):
             return (STATUS_DOWNLOAD, "Preparing package for download, please wait...")
-        elif self.processingupload():
+        elif self.processingupload(project):
             return (STATUS_UPLOAD, "Processing upload, please wait...")
         else:
             return (STATUS_READY, "Ready to start")
 
 
+    def dirindex(self, project, formats, mode = 'output', d = ''):
+        paths = []            
+        for f in glob.glob(Project.path(project) + mode + "/" + d + "/*"):
+            if os.path.isdir(f):
+                paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,formats, mode, d+"/"+os.path.basename(f)) ]
+            else:
+                filename = os.path.basename(f)
+                format = Format() #unspecified format
+                for fmt in formats:
+                    if fmt.match(filename):
+                        format = fmt
+                        break                                
+                paths.append( ( os.path.basename(f), format.__class__.name, format.encoding ) )
+        return paths
+
+    def inputindex(self,project):        
+        global INPUTFORMATS
+        return self.dirindex(project,INPUTFORMATS,'input')
+
+
 
     def outputindex(self,project, d = ''):        
         global OUTPUTFORMATS
-        paths = []            
-        for f in glob.glob(Project.path(project) + "output/" + d + "/*"):
-            if os.path.isdir(f):
-                paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,d+"/"+os.path.basename(f)) ]
-            else:
-                filename = os.path.basename(f)
-                outputformat = Format() #unspecified format
-                for o in OUTPUTFORMATS:
-                    if o.match(filename):
-                        outputformat = o
-                        break
-                                
-                paths.append( ( os.path.basename(f), outputformat.__class__.name, outputformat.encoding ) )
-        return paths
+        return self.dirindex(project,OUTPUTFORMATS,'output')
                     
 
     def GET(self, project):
         """Main Get method: Get project state, parameters, outputindex"""
         global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE
         if not self.exists(project):
-            raise web.api.NotFound()
+            raise web.webapi.NotFound()
         statuscode, statusmsg = self.status(project)
         corpora = []
         if statuscode == STATUS_READY:
@@ -230,15 +242,18 @@ class Project(object):
             outputpaths = self.outputindex(project)
         else:
             outputpaths = []        
+        if statuscode == STATUS_READY:
+            inputpaths = self.inputindex(project)
+        else:
+            inputpaths = []      
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, statuscode,statusmessage, PARAMETERS,corpora, outputpaths)
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths)
 
 
     def POST(self, project):
         global COMMAND, PARAMETERS
         
-        if not self.exists(project):
-            self.create(project)
+        Project.create(project)
                     
         #Generate arguments based on POSTed parameters
         args = []
@@ -265,7 +280,7 @@ class Project(object):
     def DELETE(self, project):
         global STATUS_RUNNING
         if not self.exists(project):
-            return web.api.NotFound()
+            return web.webapi.NotFound()
         statuscode, _ = self.status(project)
         if statuscode == STATUS_RUNNING:
             self.abort(project)   
@@ -326,7 +341,7 @@ class Downloader:
 class Uploader:
 
     def path(self, project):
-        return Project.path() + 'input/'
+        return Project.path(project) + 'input/'
 
     def isarchive(self,filename):
         return (filename[-3:] == '.gz' or filename[-4:] == '.bz2' or filename[-4:] == '.zip')
@@ -411,15 +426,19 @@ class Uploader:
 
     def GET(self, project):
         #should use template instead
-        return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + JobService.inputformats('uploadformat1') + '<br/><input type="submit" /></form></body></html>'
+        return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     def POST(self, project):
         global INPUTFORMATS
-        postdata = web.input(corpus={})
+
+        postdata = web.input()
         if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
             raise web.webapi.BadRequest('No valid uploadcount specified') #TODO: verify this works
-                    
 
+        kwargs = {}
+        for i in range(1,int(postdata['uploadcount']) + 1):    
+            kwargs['upload' + str(i)] = {}                            
+        postdata = web.input(**kwargs)
 
         #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
         for i in range(1,int(postdata['uploadcount']) + 1):
@@ -434,28 +453,29 @@ class Uploader:
             else:
                 raise web.forbidden()
 
+        Project.create(project)
 
-        output = "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
+        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):
-            output = "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
+            output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
             inputformat = None
             for f in INPUTFORMATS:                
                 if f.__class__.name == postdata['uploadformat' + str(i)]:
                     inputformat = f
 
-            filename = postdata['corpus'].filename.lower()
+            filename = postdata['upload' + str(i)].filename.lower()
 
             #Is the upload an archive?
-            extension = postdata['upload' + str(i)].split(".")[-1]
+            extension = filename.split(".")[-1]
             if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
                 archive = True
             else:                
                 #upload not an archive:
                 archive = False
-                filename = inputformat.filename(postdata['corpus'].filename) #set proper filename extension
+                filename = inputformat.filename(filename) #set proper filename extension
 
             #write trigger so the system knows uploads are in progress
             #f = open(Project.path(project) + '.upload','w') 
@@ -466,7 +486,7 @@ class Uploader:
                 f = open(Project.path(project) + 'input/' + filename,'w') #TODO: check for problems with character encoding?
             else:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
-            for line in postdata['corpus'].file:
+            for line in postdata['upload' + str(i)].file:
                 f.write(line)
             f.close()
 
@@ -506,7 +526,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS"
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]

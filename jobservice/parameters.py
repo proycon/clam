@@ -18,6 +18,7 @@ class AbstractParameter(object):
         self.name = name #a representational name
         self.description = description
 
+        self.value = False
         self.kwargs = kwargs #make a copy for XML generation later
         self.guest = True
         self.required = False
@@ -47,18 +48,20 @@ class AbstractParameter(object):
             sep = ' '
         return self.paramflag + sep + value
 
-    def xml(self,value):
-        xml = "<" + self.__class__.__name__.lower()
+    def xml(self):
+        xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
-        for key, value in self.kwargs.items():    
-            if isinstance(value, bool):
-                xml += ' ' + key + '="' + str(int(value))+ '"'                    
-            elif isinstance(value, list):
-                xml += ' ' + key + '="'+",".join(value)+ '"'        
+        for key, v in self.kwargs.items():    
+            if isinstance(v, bool):
+                xml += ' ' + key + '="' + str(int(v))+ '"'                    
+            elif isinstance(v, list):
+                xml += ' ' + key + '="'+",".join(v)+ '"'        
             else:
-                xml += ' ' + key + '="'+value+ '"'        
+                xml += ' ' + key + '="'+v+ '"'        
+        if self.value:
+            xml += ' value="'+self.value + '"'
         xml += " />"
         return xml
 
@@ -88,6 +91,8 @@ class BooleanParameter(AbstractParameter):
             return self.paramflag  
         else:
             return ""
+
+
 
 class StringParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description, **kwargs):
@@ -155,7 +160,7 @@ class ChoiceParameter(AbstractParameter):
         super(ChoiceParameter,self).compilearg(value)
 
     def xml(self):
-        xml = "<" + self.__class__.__name__.lower()
+        xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
@@ -173,7 +178,7 @@ class ChoiceParameter(AbstractParameter):
                 xml += " <choice id=\""+key+"\" selected=\"1\">" + value + "</choice>"
             else:
                 xml += " <choice id=\""+key+"\">" + value + "</choice>"
-        xml += "</" + self.__class__.__name__.lower() + ">"
+        xml += "</" + self.__class__.__name__ + ">"
         return xml
 
 class TextParameter(StringParameter): #TextArea based

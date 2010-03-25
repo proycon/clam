@@ -1,4 +1,4 @@
-$def with (system_id,system_name,project,statuscode,statusmessage, parameterdata, corpora, outputpaths)
+$def with (system_id,system_name,project,statuscode,statusmessage, parameterdata, corpora, outputpaths, inputpaths)
 <?xml version="1.0" encoding="UTF-8"?>
 <clam id="$system_id" name="$system_name" project="$project">
     <status code="$statuscode" message="$statusmessage" />
@@ -15,6 +15,11 @@ $def with (system_id,system_name,project,statuscode,statusmessage, parameterdata
             $for corpus in corpora:
                 <corpus>$corpus</corpus>
         </corpora> 
+     $if statuscode == 0:
+        <input>
+            $for path, format, encoding in inputpaths:
+                <path format="$format" encoding="$encoding">$path</path>
+        </input>
      $if statuscode == 2:
         <output>
             $for path, format, encoding in outputpaths:
