@@ -15,7 +15,7 @@ $def with (system_id,system_name,project,statuscode,statusmessage, parameterdata
             $for corpus in corpora:
                 <corpus>$corpus</corpus>
         </corpora> 
-     $if statuscode == 2:    
+     $if statuscode == 2:
         <output>
             $for path, format, encoding in outputpaths:
                 <path format="$format" encoding="$encoding">$path</path>
