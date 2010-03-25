@@ -18,6 +18,7 @@ import shutil
 import os
 import codecs
 import subprocess
+import glob
        
 STATUS_READY = 0
 STATUS_RUNNING = 1
@@ -33,7 +34,7 @@ class JobService:
     urls = (
     '/', 'Index',
     '/([A-Za-z0-9_]*)/', 'Project',
-    '/([A-Za-z0-9_]*)/upload', 'Uploader',
+    '/([A-Za-z0-9_]*)/uplohousead', 'Uploader',
     '/([A-Za-z0-9_]*)/download', 'Downloader',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHander',
     )
@@ -55,7 +56,8 @@ class JobService:
             for f in glob.glob(ROOT + "projects/*"):
                 if os.path.isdir(f):
                     projects.append(os.path.basename(f))
-            return simplejson.dumps(projects)
+        render = web.template.render('templates')
+        return render.index(projects)
 
 
     @staticmethod
@@ -97,7 +99,7 @@ class JobService:
         def running(self,project):
             if self.pid(project) == 0:
                 return False
-        	try:
+            try:
                 os.kill(self.pid, 0) #(doesn't really kill, but throws exception when process does not exist)
                 return True
             except:
@@ -110,7 +112,7 @@ class JobService:
         def abort(self,project):
             if self.pid(project) == 0:
                 return False
-        	try:
+            try:
                 os.kill(self.pid, 15)
                 os.path.remove(JobService.Project.path(project) + ".pid")
                 return True
@@ -166,7 +168,7 @@ class JobService:
             paths = []            
             for f in glob.glob(JobService.Project.path(project) + "output/" + d + "/*"):
                 if os.path.isdir(f):
-                    paths = paths + [ d + "/" + x[0],x[1],x[2] for x in self.dirindex(project,d+"/"+os.path.basename(f)) ]
+                    paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,d+"/"+os.path.basename(f)) ]
                 else:
                     filename = os.path.basename(f)
                     outputformat = Format() #unspecified format
@@ -175,7 +177,7 @@ class JobService:
                             outputformat = o
                             break
                                     
-                    paths.append( ( os.path.basename(f), outputformat.__class__.name, outputformat.encoding ]
+                    paths.append( ( os.path.basename(f), outputformat.__class__.name, outputformat.encoding ) )
             return paths
                       
 
@@ -275,7 +277,7 @@ class JobService:
                 else:
                     format = 'zip' #default          
                 cmd = ['tools/make-download-package.sh', project] #call processing chain 
-                process = subprocess.Popen(cmd, cwd=JobService.Project.path(project))				
+                process = subprocess.Popen(cmd, cwd=JobService.Project.path(project))	        			
                 if process:
                     pid = process.pid
                     f = open(JobService.Project.path(project) + '.download','w') 
@@ -326,9 +328,9 @@ class JobService:
                 for line in out:    
                     line = line.strip()        
                     if namelist == 'tar':
-                        subfiles.append(line):
+                        subfiles.append(line)
                     elif namelist == 'zip':
-                        if line == 'inflating:' #NOTE: assumes unzip runs under english locale!
+                        if line == 'inflating:': #NOTE: assumes unzip runs under english locale!
                             subfiles.append(line[10:]).strip()
             return [ subfile for subfile in subfiles if os.path.exists(self.path(project) + subfile) ] #return only the files that actually exist
            
