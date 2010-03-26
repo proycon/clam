@@ -11,10 +11,28 @@
 ###############################################################
 
 import re
+from lxml import etree as ElementTree
+from StringIO import StringIO
 
-def formatfromxml():
-    #TODO: implement reading formats from XML, return a class derived from Format, xmlnode is lxml Element or string
-    pass
+def formatfromxml(node):
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)) #verify this works? (may need .root?) 
+    if node.tag in globals():
+        encoding = 'utf-8'
+        extensions = []
+        mask = None
+        for attrib, value in node.attrib.items():
+            if attrib == 'encoding':
+                encoding = value
+            elif attrib == 'mask':
+                mask = value
+        for extensionnode in node:
+            if extensionnode.tag == 'extension':
+                extensions.append(extensionnode.value)            
+        if mask:
+            return globals()[node.tag](encoding, extensions, mask) #return format instance
+    else:
+        raise Exception("No such format exists: " + node.tag)
 
 class Format(object):
 

@@ -11,9 +11,33 @@
 ###############################################################
 
 import lxml
+from lxml import etree as ElementTree
 
-def parameterfromxml(xmlnode):
-    #TODO: implement reading parameters from XML, returns a class derived from AbstractParameter, xmlnode is lxml Element or string
+def parameterfromxml(node):
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)) #verify this works? (may need .root?) 
+    if node.tag in globals():
+        id = ''
+        paramflag = ''
+        name = ''
+        description = ''
+        kwargs = {}
+        for attrib, value in node.attrib.items():
+            if attrib == 'id':
+                id = value
+            elif attrib == 'paramflag':
+                paramflag = value       
+            elif attrib == 'name':
+                name = value
+            elif attrib == 'description':
+                description = value
+            else:
+                kwargs[attrib] = value
+        if mask:
+            return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
+    else:
+        raise Exception("No such parameter exists: " + node.tag)
+
     pass
 
 class AbstractParameter(object):
