@@ -11,4 +11,4 @@ March:
     - Initial fixes -- system now runs partially
     - Added index of inputfiles to the XML response
     - Added inputformats/outputformats to response XML
-
+    - Implemented fromxml parsers for parameters and formats

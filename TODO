@@ -1,7 +1,6 @@
 
 
 - Look into and fix large file upload problem
-- Implement fromxml parsers for parameters and formats
 - Test archive extraction
 - Implement passing input and outputdir to blackbox
 - Implement selecting a preinstalled corpora

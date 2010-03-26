@@ -16,7 +16,7 @@ from StringIO import StringIO
 
 def formatfromxml(node):
     if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)) #verify this works? (may need .root?) 
+        node = ElementTree.parse(StringIO(node)).getroot() #verify this works? (may need .root?) 
     if node.tag in globals():
         encoding = 'utf-8'
         extensions = []
