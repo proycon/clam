@@ -1,10 +1,11 @@
 
-- Test system
+
+- Write basic user interface using only XSLT (in progress) [it's a bit more work but I think it's the most elegant solution for a webservice]
 
 - Look into and fix large file upload problem
 - Confine particular formats to subdirectories
 
-- Write user interface
+- Write separate webinterface (django)
 
 Later:
 - Add version data to xml responses 

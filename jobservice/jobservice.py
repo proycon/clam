@@ -58,6 +58,7 @@ class JobService:
 
     urls = (
     '/', 'Index',
+    '/interface.xsl', 'Interface',
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/download/?', 'Downloader',
@@ -286,8 +287,8 @@ class Project(object):
         #Start project with specified parameters
         cmd = COMMAND
         cmd.replace('$PARAMETERS', " ".join(params))
-        if 'selectcorpus' in postdata:
-            corpus = postdata['selectcorpus'].replace('..','') #security            
+        if 'usecorpus' in postdata and postdata['usecorpus']:
+            corpus = postdata['usecorpus'].replace('..','') #security            
             #use a preinstalled corpus:
             if os.path.exists(ROOT + "corpora/" + corpus):
                 cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
@@ -518,7 +519,7 @@ class Uploader:
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata:
+            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)):
                 output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
                 filename = postdata['upload' + str(i)].filename.lower()
@@ -531,9 +532,12 @@ class Uploader:
                     #upload not an archive:
                     archive = False
                     filename = inputformat.filename(filename) #set proper filename extension
-            elif 'uploadtext'+str(i) in postdata:
+                realupload = True
+            elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)] and 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
                 archive = False
                 filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
+                realupload = False
+    
 
             inputformat = None
             for f in INPUTFORMATS:                
@@ -551,10 +555,10 @@ class Uploader:
                 f = open(Project.path(project) + 'input/' + filename,'wb')
             else:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
-            if 'upload'+str(i) in postdata:
+            if realupload:
                 for line in postdata['upload' + str(i)].file:
                     f.write(line)
-            elif 'uploadtext'+str(i) in postdata:
+            else:
                 f.write(postdata['uploadtext' + str(i)])
             f.close()
             printdebug("(end copy upload)" )
@@ -586,6 +590,14 @@ class Uploader:
         return output #200
 
 
+class Interface:
+    """Dynamically(!) generates the XSL to render the XML response"""
+    def GET(self, project):
+        global INPUTFORMATS
+        render = web.template.render('interface')
+        return render.response(parameterclasses, JobService.inputformats('uploadformat1'))
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule [port]"
@@ -595,7 +607,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, ARGUMENTS"
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
