@@ -18,7 +18,7 @@ $def with (system_id,system_name,project,statuscode,statusmessage, parameterdata
         <inputformats>
             $for format in inputformats:
                 $:format.xml()
-        <inputformats>
+        </inputformats>
         <input>
             $for path, format, encoding in inputpaths:
                 <path format="$format" encoding="$encoding">$path</path>
@@ -27,7 +27,7 @@ $def with (system_id,system_name,project,statuscode,statusmessage, parameterdata
         <outputformats>
             $for format in outputformats:
                 $:format.xml()
-        <outputformats>
+        </outputformats>
         <output>
             $for path, format, encoding in outputpaths:
                 <path format="$format" encoding="$encoding">$path</path>

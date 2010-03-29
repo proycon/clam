@@ -390,18 +390,33 @@ class Uploader:
             raise Exception("Invalid archive format") #invalid archive, shouldn't happend
 
         printlog("Extracting '" + filename + "'" )            
-        process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        except:
+            raise web.webapi.InternalError("Unable to extract file: " + cmd + " " + filename + ", cwd="+ self.path(project))       
         out, err = process.communicate() #waits for process to end 
+        print repr(out)
+        print repr(err)
 
         if namelist:
-            for line in out:    
+            firstline = True
+            for line in out.split("\n"):    
                 line = line.strip()        
-                if namelist == 'tar':
-                    subfiles.append(line)
-                elif namelist == 'zip':
-                    if line == 'inflating:': #NOTE: assumes unzip runs under english locale!
-                        subfiles.append(line[10:]).strip()
-        return [ subfile for subfile in subfiles if os.path.exists(self.path(project) + subfile) ] #return only the files that actually exist
+                if line:
+                    subfile = None
+                    if namelist == 'tar':
+                        subfile = line
+                    elif namelist == 'zip' and not firstline: #firstline contains archive name itself, skip it
+                        colon = line.find(":")
+                        if colon:
+                            subfile =  line[colon + 1:].strip()
+                    if subfile and os.path.exists(self.path(project) + subfile):
+                        newsubfile = format.filename(subfile)
+                        os.rename(self.path(project) + subfile, self.path(project) + newsubfile)
+                        subfiles.append(newsubfile)
+                firstline = False
+
+        return [ subfile for subfile in subfiles ] #return only the files that actually exist
         
 
 
@@ -439,12 +454,12 @@ class Uploader:
             if self.isarchive(filename):            
                 for subfilename in self.extract(project,filename, inputformat):
                     printdebug("Extracted from archive: " + subfilename)
-                    self.test(subfilename, inputformat, depth + 1)
+                    o += self.test(project,subfilename, inputformat, depth + 1)
                 o += prefix + "</file>\n"    
 
-        if remove:
-            printdebug("Removing '" + filename + "'" )
-            os.unlink(self.path(project) + filename)
+        if remove and os.path.exists(self.path(project) + filename):
+           printdebug("Removing '" + filename + "'" )
+           os.unlink(self.path(project) + filename)
 
         return o
 
@@ -513,7 +528,7 @@ class Uploader:
             printdebug("(start copy upload)" )
             #upload file 
             if archive:
-                f = open(Project.path(project) + 'input/' + filename,'w') #TODO: check for problems with character encoding?
+                f = open(Project.path(project) + 'input/' + filename,'wb') #TODO: check for problems with character encoding?
             else:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
             for line in postdata['upload' + str(i)].file:
