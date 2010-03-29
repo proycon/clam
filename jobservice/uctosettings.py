@@ -21,9 +21,6 @@ SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Unicode Tokeniser"
 SYSTEM_DESCRIPTION = "This is a tokeniser"
 
-#The system command
-COMMAND = "ucto"
-
 #Root directory for CLAM
 ROOT = "/home/proycon/work/clamtmproot/"
 
@@ -32,6 +29,9 @@ INPUTFORMATS = [ DCOIFormat(), TokenizedTextFormat(), PlainTextFormat() ]
 
 #List of delivered Output formats by the system
 OUTPUTFORMATS = [ DCOIFormat('utf-8',['dcoi.xml']) ]
+
+#The system command (Use the variables $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
+COMMAND = "ucto $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY"
 
 PARAMETERS =  [ 
     ('Main', [ 

@@ -12,3 +12,7 @@ March:
     - Added index of inputfiles to the XML response
     - Added inputformats/outputformats to response XML
     - Implemented fromxml parsers for parameters and formats
+    - Implemented archive extraction
+    - Implemented passing input and outputdir to blackbox
+    - Implemented selecting a preinstalled corpora
+    - Implemented free text submission

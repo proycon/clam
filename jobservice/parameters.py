@@ -142,7 +142,8 @@ class StringParameter(AbstractParameter):
         return ((self.maxlength == 0) or(len(value) <= self.maxlength))
 
     def compilearg(self, value):
-        if value.find(" ") >= 0:
+        if value.find(" ") >= 0 or value.find(";") >= 0:            
+            value = value.replace('"',r'\"')
             value = '"' + value + '"' #wrap in quotes
         super(StringParameter,self).compilearg(value)
 

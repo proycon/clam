@@ -272,18 +272,36 @@ class Project(object):
         Project.create(project)
                     
         #Generate arguments based on POSTed parameters
-        args = []
+        params = []
         postdata = web.input()
         for parametergroup, parameters in PARAMETERS:
             for parameter in parameters:
                 if parameter.id in postdata:
                     parameter.set(postdata[parameter.id])
-                    args.append(parameter.compileargs(parameter.value))
+                    params.append(parameter.compileargs(parameter.value))
+
+
+
         
         #Start project with specified parameters
-        cmd = [COMMAND] + args #call processing chain 
-        printlog("Starting " + COMMAND + ": " + " ".join(cmd) + " ..." )
-        process = subprocess.Popen(cmd,cwd=Project.path(project))				
+        cmd = COMMAND
+        cmd.replace('$PARAMETERS', " ".join(params))
+        if 'selectcorpus' in postdata:
+            corpus = postdata['selectcorpus'].replace('..','') #security            
+            #use a preinstalled corpus:
+            if os.path.exists(ROOT + "corpora/" + corpus):
+                cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+            else:
+                raise web.webapi.NotFound("Corpus " + corpus + " not found")
+        else:
+            cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+        cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
+        #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
+        #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
+        #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
+        #TODO: protect against insertion
+        printlog("Starting " + COMMAND + ": " + repr(cmd) + " ..." )
+        process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
         if process:
             pid = process.pid
             printlog("Started with pid " + str(pid) )
@@ -303,7 +321,7 @@ class Project(object):
         if statuscode == STATUS_RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )
-        shutil.rmtree(self.process.dir) #TODO: catch exception (won't work for symlinks)
+        shutil.rmtree(Project.path(project))
         return "" #200
 
 class FileHandler(object):
@@ -395,8 +413,6 @@ class Uploader:
         except:
             raise web.webapi.InternalError("Unable to extract file: " + cmd + " " + filename + ", cwd="+ self.path(project))       
         out, err = process.communicate() #waits for process to end 
-        print repr(out)
-        print repr(err)
 
         if namelist:
             firstline = True
@@ -485,7 +501,7 @@ class Uploader:
 
         #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
         for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata:
+            if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
                 inputformat = None
                 for f in INPUTFORMATS:                
                     if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
@@ -502,23 +518,27 @@ class Uploader:
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):
-            output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
+            if 'upload'+str(i) in postdata:
+                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
+
+                filename = postdata['upload' + str(i)].filename.lower()
+
+                #Is the upload an archive?
+                extension = filename.split(".")[-1]
+                if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
+                    archive = True
+                else:                
+                    #upload not an archive:
+                    archive = False
+                    filename = inputformat.filename(filename) #set proper filename extension
+            elif 'uploadtext'+str(i) in postdata:
+                archive = False
+                filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
 
             inputformat = None
             for f in INPUTFORMATS:                
                 if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                     inputformat = f
-
-            filename = postdata['upload' + str(i)].filename.lower()
-
-            #Is the upload an archive?
-            extension = filename.split(".")[-1]
-            if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
-                archive = True
-            else:                
-                #upload not an archive:
-                archive = False
-                filename = inputformat.filename(filename) #set proper filename extension
 
             #write trigger so the system knows uploads are in progress
             #f = open(Project.path(project) + '.upload','w') 
@@ -528,11 +548,14 @@ class Uploader:
             printdebug("(start copy upload)" )
             #upload file 
             if archive:
-                f = open(Project.path(project) + 'input/' + filename,'wb') #TODO: check for problems with character encoding?
+                f = open(Project.path(project) + 'input/' + filename,'wb')
             else:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
-            for line in postdata['upload' + str(i)].file:
-                f.write(line)
+            if 'upload'+str(i) in postdata:
+                for line in postdata['upload' + str(i)].file:
+                    f.write(line)
+            elif 'uploadtext'+str(i) in postdata:
+                f.write(postdata['uploadtext' + str(i)])
             f.close()
             printdebug("(end copy upload)" )
 
@@ -572,7 +595,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, ARGUMENTS"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
