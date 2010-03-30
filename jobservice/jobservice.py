@@ -58,7 +58,6 @@ class JobService:
 
     urls = (
     '/', 'Index',
-    '/interface.xsl', 'Interface',
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/download/?', 'Downloader',
@@ -590,12 +589,17 @@ class Uploader:
         return output #200
 
 
-class Interface:
-    """Dynamically(!) generates the XSL to render the XML response"""
-    def GET(self, project):
-        global INPUTFORMATS
-        render = web.template.render('interface')
-        return render.response(parameterclasses, JobService.inputformats('uploadformat1'))
+#class Interface:
+#    """Dynamically(!) generates the XSL to render the XML response"""
+#    def GET(self, project):
+#        global INPUTFORMATS, PARAMETERS
+#        render = web.template.render('interface')   
+#        parameterclasses = []
+#        for parametergroup, parameters in PARAMETERS:
+#            for parameter in parameters:
+#                if not parameter.__class__ in parameterclasses:
+#                    parameterclasses.append(parameter.__class__)
+#        return render.response(parameterclasses, JobService.inputformats('uploadformat1'))
 
 
 if __name__ == "__main__":

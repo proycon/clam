@@ -96,14 +96,6 @@ class AbstractParameter(object):
         xml += " />"
         return xml
 
-    @staticmethod
-    def xsl():
-        #TODO: implement
-        xml = ''
-        return xml
-        
-
-
     def set(self, value):
         if self.validate(value):
             self.value = value

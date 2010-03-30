@@ -1,5 +1,6 @@
 $def with (system_id,system_name,project,statuscode,statusmessage, parameterdata, corpora, outputpaths, inputpaths,outputformats, inputformats)
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="static/interface.xsl"?>
 <clam id="$system_id" name="$system_name" project="$project">
     <status code="$statuscode" message="$statusmessage" />
      $if statuscode == 0 or statuscode == 2:

@@ -1,7 +1,7 @@
-$def with (parameterclasses, inputformats)
 <?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+<xsl:import href="parameters.xsl" />
 
 <xsl:template match="/">
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -17,21 +17,9 @@ $def with (parameterclasses, inputformats)
     <xsl:choose>
       <xsl:when test="code == 0">
         <xsl:apply-templates select="/clam/parameters"/>                
-        <xsl:apply-templates select="/clam/input"/>            
-        <div id="uploadform">
-            <h3>Upload a file from disk</h3>
-            <form method="POST" enctype="multipart/form-data" action="upload">
-                <input type="hidden" name="uploadcount" value="1">
-                <table>
-                 <tr><td><label for="upload1">Upload file:</label></td><td><input type="file" name="upload1" /></td></tr>
-                 <tr><td><label for="uploadformat1">Format:</label></td><td>$:inputformats</td></tr>
-                 <tr><td></td><td><input type="submit" value="Upload file" /></td></tr>
-                </table>
-            </form>
-        </div>
-        <div id="uploadtext">
-            <h3>Enter a text on-line</h3>            
-        </div><form method="POST" enctype="multipart/form-data" action="upload">
+        <xsl:apply-templates select="/clam/input"/>
+        <!-- upload form transformed from input formats -->
+        <xsl:apply-templates select="/clam/inputformats"/>             
       </xsl:when>
       <xsl:when test="code == 2">
         <xsl:apply-templates select="/clam/output"/>            
@@ -41,6 +29,8 @@ $def with (parameterclasses, inputformats)
   </body>
   </html>
 </xsl:template>
+
+
 
 <xsl:template match="/clam/status">
     <div id="status">
@@ -62,6 +52,25 @@ $def with (parameterclasses, inputformats)
     </div>
 </xsl:template>
 
+<xsl:template match="/clam/inputformats">
+        <div id="uploadform">
+            <h3>Upload a file from disk</h3>
+            <form method="POST" enctype="multipart/form-data" action="upload">
+                <input type="hidden" name="uploadcount" value="1">
+                <table>
+                 <tr><td><label for="upload1">Upload file:</label></td><td><input type="file" name="upload1" /></td></tr>
+                 <tr><td><label for="uploadformat1">Format:</label></td><td>
+                    <select name="uploadformat1">
+                    <xsl:foreach select="*">
+                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
+                    </xsl:foreach>
+                    </select>
+                 </td></tr>
+                 <tr><td></td><td><input type="submit" value="Upload file" /></td></tr>
+                </table>
+            </form>
+        </div>
+</xsl>
 
 <xsl:template match="/clam/input">
     <div id="input">
@@ -81,6 +90,7 @@ $def with (parameterclasses, inputformats)
     </div>
 </xsl:template>
 
+<!-- TODO: Verify, probably won't match like this -->
 <xsl:template match="/clam/input/path">
     <tr><td><xsl:value-of select="."/></td><td><xsl:value-of select=".@format"/></td><xsl:value-of select=".@encoding"/></tr>
 
@@ -114,9 +124,3 @@ $def with (parameterclasses, inputformats)
     </form>
 
 </xsl:template>
-
-$for parameterclass in parameterclasses:
-    <xsl:template match="/clam/parameters">
-    $:parameterclass.xsl()
-    </xsl:template>
-
