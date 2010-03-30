@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
   </head>
   <body>
-    <div id="header"></div>
+    <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:apply-templates select="status"/>
     <xsl:choose>
       <xsl:when test="status/@code = 0">              
@@ -26,7 +26,7 @@
         <xsl:apply-templates select="output"/>            
       </xsl:when>
     </xsl:choose>
-    <div id="footer"></div>
+    <div id="footer">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
   </body>
   </html>
 </xsl:template>
