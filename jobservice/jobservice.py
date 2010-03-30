@@ -150,7 +150,7 @@ class Project(object):
         pidfile = Project.path(project) + '.pid'
         if os.path.isfile(pidfile):
             f = open(pidfile,'r')
-            pid = int(f.read(os.path.getfilesize(pidfile)))
+            pid = int(f.read(os.path.getsize(pidfile)))
             f.close()
             return pid
         else:
@@ -201,7 +201,7 @@ class Project(object):
             statusfile = Project.path(project) + ".status"
             if os.path.isfile(statusfile):
                 f = open(statusfile)
-                msg = f.read(os.path.getfilesize(statusfile))
+                msg = f.read(os.path.getsize(statusfile))
                 f.close()
                 return (STATUS_RUNNING, msg)
             else:

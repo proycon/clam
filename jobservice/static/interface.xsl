@@ -32,7 +32,6 @@
 </xsl:template>
 
 
-
 <xsl:template match="/clam/status">
     <div id="status">
      <h3>Status</h3>
@@ -53,10 +52,10 @@
     </div>
 </xsl:template>
 
-<xsl:template match="inputformats">
+<xsl:template match="/clam/inputformats">
         <div id="uploadform">
             <h3>Upload a file from disk</h3>
-            <form method="POST" enctype="multipart/form-data" action="upload">
+            <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
                  <tr><td><label for="upload1">Upload file:</label></td><td><input type="file" name="upload1" /></td></tr>
@@ -73,7 +72,7 @@
         </div>
 </xsl:template>
 
-<xsl:template match="input">
+<xsl:template match="/clam/input">
     <div id="input">
         <h3>Input files</h3>
         <table>
@@ -82,7 +81,7 @@
     </div>
 </xsl:template>
 
-<xsl:template match="output">
+<xsl:template match="/clam/output">
     <div id="output">
         <h3>Output files</h3>
         <table>
@@ -103,7 +102,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template match="parameters">
+<xsl:template match="/clam/parameters">
     <form method="POST" enctype="multipart/form-data" action="upload">
     <div id="parameters">
         <h3>Parameter Selection</h3>
@@ -125,6 +124,39 @@
         </div>
     </div>
     </form>
+</xsl:template>
+
+
+<xsl:template match="/clamupload">
+    <xsl:for-each select="upload">
+        <div id="upload">
+            <ul>
+              <xsl:apply-templates select="file"/>  
+            </ul>
+        </div>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template match="file">
+    <xsl:choose>
+    <xsl:when test="@validated == yes">
+        <li class="ok"><tt><xsl:value-of select="@name" /></tt>: OK</li>    
+    </xsl:when>
+    <xsl:otherwise>
+        <li class="failed"><tt><xsl:value-of select="@name" /></tt>: Failed</li>    
+    </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+
+<xsl:template match="/clamindex">
+    <xsl:for-each select="project">
+        <div id="project">
+            <ul>
+              <a><xsl:attribute select="href"><xsl:value-of select="@name" /></xsl:attribute><xsl:value-of select="." /></a>
+            </ul>
+        </div>
+    </xsl:for-each>
 </xsl:template>
 
 </xsl:stylesheet>
