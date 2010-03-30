@@ -485,7 +485,7 @@ class Uploader:
         return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     def POST(self, project):
-        global INPUTFORMATS
+        global INPUTFORMATS, URL
 
         #postdata = web.input()
 
@@ -514,7 +514,9 @@ class Uploader:
 
         Project.create(project)
 
-        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
+        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + '/static/interface.xsl\"?>"
+        output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):

@@ -1,5 +1,6 @@
 $def with (projects)
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 <clamindex>
 $for project in projects:
     <project>$project</project>
