@@ -3,6 +3,8 @@
 
 <xsl:import href="parameters.xsl" />
 
+<xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes"/>
+
 <xsl:template match="/clam">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
@@ -14,13 +16,13 @@
     <div id="header"></div>
     <xsl:apply-templates select="status"/>
     <xsl:choose>
-      <xsl:when test="@code = 0">
+      <xsl:when test="status/@code = 0">
         <xsl:apply-templates select="parameters"/>                
         <xsl:apply-templates select="input"/>
         <!-- upload form transformed from input formats -->
         <xsl:apply-templates select="inputformats"/>             
       </xsl:when>
-      <xsl:when test="@code = 2">
+      <xsl:when test="status/@code = 2">
         <xsl:apply-templates select="output"/>            
       </xsl:when>
     </xsl:choose>
@@ -31,7 +33,7 @@
 
 
 
-<xsl:template match="status">
+<xsl:template match="/clam/status">
     <div id="status">
      <h3>Status</h3>
      <xsl:choose>
