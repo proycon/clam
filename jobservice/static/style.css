@@ -1,0 +1,47 @@
+body {
+    background: #e6dcca;
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+#status, #parameters, #inputformats, #input, #output, #uploadform {
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+
+#parameters table {
+    width: 90%;
+    text-align: left;
+}
+
+#status .ready {
+    color: #2f7e35;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+h3 {
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+
+#input table, #output table {
+    border: #ca9c4d;
+    text-align: left;
+    width: 60%;
+}
+#input table th, #output table th {
+    font-family: monospace;
+    font-weight: none;    
+    width: 60%;
+}
+#input table td, #output table td {
+    width: 20%;
+    font-style: italic;
+}

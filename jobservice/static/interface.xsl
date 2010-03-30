@@ -10,17 +10,17 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="static/style.css" type="text/css" />
+    <link rel="stylesheet" href="/static/style.css" type="text/css" />
   </head>
   <body>
     <div id="header"></div>
     <xsl:apply-templates select="status"/>
     <xsl:choose>
-      <xsl:when test="status/@code = 0">
-        <xsl:apply-templates select="parameters"/>                
+      <xsl:when test="status/@code = 0">              
         <xsl:apply-templates select="input"/>
         <!-- upload form transformed from input formats -->
         <xsl:apply-templates select="inputformats"/>             
+        <xsl:apply-templates select="parameters"/>  
       </xsl:when>
       <xsl:when test="status/@code = 2">
         <xsl:apply-templates select="output"/>            
@@ -91,15 +91,14 @@
     </div>
 </xsl:template>
 
-<!-- TODO: Verify, probably won't match like this -->
 <xsl:template match="/clam/input/path">
-    <tr><td><xsl:value-of select="."/></td><td><xsl:value-of select="@format"/></td><xsl:value-of select="@encoding"/></tr>
+    <tr><th><xsl:value-of select="."/></th><td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding" /></td></tr>
 </xsl:template>
 
 
 <xsl:template match="/clam/output/path">
     <tr>
-    <td><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute></a></td>
+    <th><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute></a></th>
     <td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>
