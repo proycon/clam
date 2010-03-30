@@ -90,17 +90,17 @@
 </xsl:template>
 
 <xsl:template match="ChoiceParameter">
-    <tr>
-    <th class="parameter">
-    <xsl:value-of select="@name"/>
-    <div class="description"><xsl:value-of select="@description"/></div>
-    </th>
     <xsl:choose>
         <xsl:when test="@multi = true">
+            <tr>
+            <th class="parameter">
+            <xsl:value-of select="@name"/>
+            <div class="description"><xsl:value-of select="@description"/></div>
+            </th>
             <td></td></tr>
             <xsl:foreach select="choice">
                 <tr>
-                <td class="option"><xsl:value-of select="."/><td>
+                <td class="option"><xsl:value-of select="."/></td>
                 <td>
                 <xsl:element name="input">
                     <xsl:attribute name="type">checkbox</xsl:attribute>
@@ -116,10 +116,15 @@
             </xsl:foreach>
         </xsl:when>
         <xsl:when test="@showall = true">
+            <tr>
+            <th class="parameter">
+            <xsl:value-of select="@name"/>
+            <div class="description"><xsl:value-of select="@description"/></div>
+            </th>
             <td></td></tr>
             <xsl:foreach select="choice">
                 <tr>
-                <td class="option"><xsl:value-of select="."/><td>
+                <td class="option"><xsl:value-of select="."/></td>
                 <td>
                 <xsl:element name="input">
                     <xsl:attribute name="type">radio</xsl:attribute>
@@ -135,6 +140,11 @@
             </xsl:foreach>
         </xsl:when>
         <xsl:otherwise>
+            <tr>
+            <th class="parameter">
+            <xsl:value-of select="@name"/>
+            <div class="description"><xsl:value-of select="@description"/></div>
+            </th>
             <td>
             <select name="@id">
                 <xsl:foreach select="choice">
@@ -146,3 +156,5 @@
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
+
+</xsl:stylesheet>
