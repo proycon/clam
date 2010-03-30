@@ -98,7 +98,7 @@
 <xsl:template match="/clam/output/path">
     <tr>
     <td><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute></a></td>
-    <td><xsl:value-of select=".@format"/></td><td><xsl:value-of select=".@encoding"/></td>
+    <td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>
 
@@ -106,7 +106,9 @@
     <form method="POST" enctype="multipart/form-data" action="upload">
     <div id="parameters">
         <h3>Parameter Selection<h3>
+        <table>
         <xsl:apply-templates />
+        </table>
 
         <div id="corpusselection">
         <label for="usecorpus">Input source:</label>
