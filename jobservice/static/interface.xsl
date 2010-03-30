@@ -67,7 +67,7 @@
                     </xsl:for-each>
                     </select>
                  </td></tr>
-                 <tr><td></td><td><input type="submit" value="Upload file" /></td></tr>
+                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Upload file" /></td></tr>
                 </table>
             </form>
         </div>
@@ -121,7 +121,7 @@
         </select>
         </div>
         <div id="startbutton">
-            <input type="submit" value="Start" />
+            <input type="submit" class="start" value="Start" />
         </div>
     </div>
     </form>
