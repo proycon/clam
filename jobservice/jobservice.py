@@ -117,13 +117,13 @@ class JobService:
 class Index(object):
     def GET(self):
         """Get list of projects"""
-        global ROOT, URL
+        global ROOT, URL, SYSTEM_ID, SYSTEM_NAME
         projects = []
         for f in glob.glob(ROOT + "projects/*"):
             if os.path.isdir(f):
                 projects.append(os.path.basename(f))
         render = web.template.render('templates')
-        return render.index(URL, projects)
+        return render.index(SYSTEM_ID, SYSTEM_NAME, URL, projects)
 
 
 
@@ -515,7 +515,7 @@ class Uploader:
         Project.create(project)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + '/static/interface.xsl\"?>"
+        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + "/static/interface.xsl\"?>"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:

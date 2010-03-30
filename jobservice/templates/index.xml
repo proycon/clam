@@ -1,7 +1,7 @@
-$def with (url, projects)
+$def with (system_id, system_name, url, projects)
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
-<clamindex>
+<clamindex id="$system_id" name="$system_name" >
 $for project in projects:
     <project>$project</project>
 </clamindex>

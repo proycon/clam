@@ -7,11 +7,7 @@
 
 <xsl:template match="/clam">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="/static/style.css" type="text/css" />
-  </head>
+  <xsl:call-template name="head" />
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:apply-templates select="status"/>
@@ -26,9 +22,22 @@
         <xsl:apply-templates select="output"/>            
       </xsl:when>
     </xsl:choose>
-    <div id="footer">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
+    <xsl:call-template name="footer" />
   </body>
   </html>
+</xsl:template>
+
+
+<xsl:template name="head">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
+    <link rel="stylesheet" href="/static/style.css" type="text/css" />
+  </head>
+</xsl:template>
+
+<xsl:template name="footer">
+    <div id="footer">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
 </xsl:template>
 
 
@@ -128,6 +137,10 @@
 
 
 <xsl:template match="/clamupload">
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <xsl:call-template name="head" />
+  <body>
+    <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
         <div id="upload">
             <ul>
@@ -135,11 +148,14 @@
             </ul>
         </div>
     </xsl:for-each>
+    <xsl:call-template name="footer" />
+  </body>
+  </html>
 </xsl:template>
 
 <xsl:template match="file">
     <xsl:choose>
-    <xsl:when test="@validated == yes">
+    <xsl:when test="@validated = yes">
         <li class="ok"><tt><xsl:value-of select="@name" /></tt>: OK</li>    
     </xsl:when>
     <xsl:otherwise>
@@ -150,13 +166,20 @@
 
 
 <xsl:template match="/clamindex">
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <xsl:call-template name="head" />
+  <body>
+    <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
+    <div id="index">
     <xsl:for-each select="project">
-        <div id="project">
             <ul>
-              <a><xsl:attribute select="href"><xsl:value-of select="@name" /></xsl:attribute><xsl:value-of select="." /></a>
+              <li><a><xsl:attribute name="href"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></a></li>
             </ul>
-        </div>
     </xsl:for-each>
+    </div>
+    <xsl:call-template name="footer" />
+  </body>
+  </html>
 </xsl:template>
 
 </xsl:stylesheet>
