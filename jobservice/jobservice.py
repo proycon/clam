@@ -42,7 +42,7 @@ ROOT = "."
 PARAMETERS = []
 INPUTFORMATS = []
 OUTPUTFORMATS = []
-
+URL = "http://localhost:8080"
 
 
 def printlog(msg):
@@ -244,7 +244,7 @@ class Project(object):
 
     def GET(self, project):
         """Main Get method: Get project state, parameters, outputindex"""
-        global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS
+        global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
         if not self.exists(project):
             raise web.webapi.NotFound()
         statuscode, statusmsg = self.status(project)
@@ -262,7 +262,7 @@ class Project(object):
         else:
             inputpaths = []      
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
 
 
     def POST(self, project):
@@ -518,7 +518,7 @@ class Uploader:
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)):
+            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]):
                 output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
                 filename = postdata['upload' + str(i)].filename.lower()
@@ -611,7 +611,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]

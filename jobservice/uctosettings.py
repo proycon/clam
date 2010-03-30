@@ -23,6 +23,7 @@ SYSTEM_DESCRIPTION = "This is a tokeniser"
 
 #Root directory for CLAM
 ROOT = "/home/proycon/work/clamtmproot/"
+URL = "http://localhost:8080"
 
 #List of supported Input formats by the system
 INPUTFORMATS = [ DCOIFormat(), TokenizedTextFormat(), PlainTextFormat() ]

@@ -98,7 +98,7 @@
             <div class="description"><xsl:value-of select="@description"/></div>
             </th>
             <td></td></tr>
-            <xsl:foreach select="choice">
+            <xsl:for-each select="choice">
                 <tr>
                 <td class="option"><xsl:value-of select="."/></td>
                 <td>
@@ -113,7 +113,7 @@
                 </xsl:element>
                 </td>
                 </tr>
-            </xsl:foreach>
+            </xsl:for-each>
         </xsl:when>
         <xsl:when test="@showall = true">
             <tr>
@@ -122,7 +122,7 @@
             <div class="description"><xsl:value-of select="@description"/></div>
             </th>
             <td></td></tr>
-            <xsl:foreach select="choice">
+            <xsl:for-each select="choice">
                 <tr>
                 <td class="option"><xsl:value-of select="."/></td>
                 <td>
@@ -137,7 +137,7 @@
                 </xsl:element>
                 </td>
                 </tr>
-            </xsl:foreach>
+            </xsl:for-each>
         </xsl:when>
         <xsl:otherwise>
             <tr>
@@ -147,9 +147,9 @@
             </th>
             <td>
             <select name="@id">
-                <xsl:foreach select="choice">
+                <xsl:for-each select="choice">
                     <option><xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute><xsl:if test="@selected = 1"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="."/></option>
-                </xsl:foreach>
+                </xsl:for-each>
             </select>
             </td>
             </tr>
