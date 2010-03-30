@@ -117,13 +117,13 @@ class JobService:
 class Index(object):
     def GET(self):
         """Get list of projects"""
-        global ROOT
+        global ROOT, URL
         projects = []
         for f in glob.glob(ROOT + "projects/*"):
             if os.path.isdir(f):
                 projects.append(os.path.basename(f))
         render = web.template.render('templates')
-        return render.index(projects)
+        return render.index(URL, projects)
 
 
 
