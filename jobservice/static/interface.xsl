@@ -15,13 +15,13 @@
     <div id="header"></div>
     <xsl:apply-templates select="/clam/status"/>
     <xsl:choose>
-      <xsl:when test="code == 0">
+      <xsl:when test="@code = 0">
         <xsl:apply-templates select="/clam/parameters"/>                
         <xsl:apply-templates select="/clam/input"/>
         <!-- upload form transformed from input formats -->
         <xsl:apply-templates select="/clam/inputformats"/>             
       </xsl:when>
-      <xsl:when test="code == 2">
+      <xsl:when test="@code = 2">
         <xsl:apply-templates select="/clam/output"/>            
       </xsl:when>
     </xsl:choose>
@@ -36,13 +36,13 @@
     <div id="status">
      <h3>Status</h3>
      <xsl:choose>
-      <xsl:when test="code == 0">
+      <xsl:when test="@code = 0">
         <div class="ready"><xsl:value-of select="status@message"/></div>
       </xsl:when>
-      <xsl:when test="code == 1">
+      <xsl:when test="@code = 1">
         <div class="running"><xsl:value-of select="status@message"/></div>
       </xsl:when>
-      <xsl:when test="code == 2">
+      <xsl:when test="@code = 2">
         <div class="done"><xsl:value-of select="status@message"/></div>
       </xsl:when>
       <xsl:otherwise>
