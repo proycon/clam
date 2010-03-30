@@ -170,7 +170,16 @@
   <xsl:call-template name="head" />
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
+    <div id="startproject">
+        <h3>Start a new Project</h3>    
+        <form id="startprojectform" action="">
+            Project ID: <input type="projectname" />
+            <!-- TODO: Add javascript thingies -->
+            <input type="submit" value="Start project" />
+        </form>
+    </div>
     <div id="index">
+    <h3>Projects</h3>
     <xsl:for-each select="project">
             <ul>
               <li><a><xsl:attribute name="href"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></a></li>
