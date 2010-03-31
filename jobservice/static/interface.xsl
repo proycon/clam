@@ -41,9 +41,9 @@
             type: "PUT", 
             url: "/" + $("#projectname").val() + "/", 
             dataType: "xml", 
-            success: function(xml) { 
-                document.location = "/" + $("#projectname").val() + "/";
-            }
+            complete: function(xml){ 
+                window.location.href = $("#projectname").val() + "/";
+            },
          });
          //$("#startprojectform").attr("action",$("#projectname").val());
        });
