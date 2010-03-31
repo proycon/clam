@@ -3,9 +3,15 @@
 
 <xsl:template match="BooleanParameter">
     <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
     </th>
     <td>
     <xsl:element name="input">
@@ -23,9 +29,15 @@
 
 <xsl:template match="StringParameter">
     <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
     </th>
     <td>
     <xsl:element name="input">
@@ -40,9 +52,15 @@
 
 <xsl:template match="TextParameter">
     <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
     </th>
     <td>
     <textarea>
@@ -56,9 +74,15 @@
 
 <xsl:template match="IntegerParameter">
     <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
     </th>
     <td>
     <xsl:element name="input">
@@ -74,9 +98,15 @@
 
 <xsl:template match="FloatParameter">
     <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
     </th>
     <td>
     <xsl:element name="input">
@@ -93,9 +123,15 @@
     <xsl:choose>
         <xsl:when test="@multi = true">
             <tr>
+            <xsl:if test="@error"> 
+             <xsl:attribute name="class">error</xsl:attribute>
+            </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
+            <xsl:if test="@error"> 
+             <div class="error"><xsl:value-of select="@error"/></div>
+            </xsl:if>
             </th>
             <td></td></tr>
             <xsl:for-each select="choice">
@@ -117,9 +153,15 @@
         </xsl:when>
         <xsl:when test="@showall = true">
             <tr>
+            <xsl:if test="@error"> 
+             <xsl:attribute name="class">error</xsl:attribute>
+            </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
+            <xsl:if test="@error"> 
+             <div class="error"><xsl:value-of select="@error"/></div>
+            </xsl:if>
             </th>
             <td></td></tr>
             <xsl:for-each select="choice">
@@ -141,9 +183,15 @@
         </xsl:when>
         <xsl:otherwise>
             <tr>
+            <xsl:if test="@error"> 
+             <xsl:attribute name="class">error</xsl:attribute>
+            </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
+            <xsl:if test="@error"> 
+             <div class="error"><xsl:value-of select="@error"/></div>
+            </xsl:if>
             </th>
             <td>
             <select name="@id">

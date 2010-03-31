@@ -1,8 +1,8 @@
-$def with (system_id,system_name,project, url, statuscode,statusmessage, parameterdata, corpora, outputpaths, inputpaths,outputformats, inputformats)
+$def with (system_id,system_name,project, url, statuscode,statusmessage, errors, errormsg parameterdata, corpora, outputpaths, inputpaths,outputformats, inputformats)
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 <clam id="$system_id" name="$system_name" project="$project">
-    <status code="$statuscode" message="$statusmessage" />
+    <status code="$statuscode" message="$statusmessage" errors="$errors" errormsg="$errormsg" />
      $if statuscode == 0 or statuscode == 2:
         <parameters>
             $for group, parameters in parameterdata:

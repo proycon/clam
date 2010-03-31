@@ -29,8 +29,7 @@ def formatfromxml(node):
         for extensionnode in node:
             if extensionnode.tag == 'extension':
                 extensions.append(extensionnode.value)            
-        if mask:
-            return globals()[node.tag](encoding, extensions, mask) #return format instance
+        return globals()[node.tag](encoding, extensions, mask) #return format instance
     else:
         raise Exception("No such format exists: " + node.tag)
 

@@ -10,7 +10,7 @@
 #
 ###############################################################
 
-import lxml
+
 from lxml import etree as ElementTree
 from StringIO import StringIO
 
@@ -35,8 +35,7 @@ def parameterfromxml(node):
                 description = value
             else:
                 kwargs[attrib] = value
-        if mask:
-            return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
+        return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
     else:
         raise Exception("No such parameter exists: " + node.tag)
 
@@ -48,6 +47,7 @@ class AbstractParameter(object):
         self.paramflag = paramflag #the parameter flag passed to the command (include a trailing space!)        
         self.name = name #a representational name
         self.description = description
+        self.error = None
 
         self.value = False
         self.kwargs = kwargs #make a copy for XML generation later
@@ -57,19 +57,26 @@ class AbstractParameter(object):
         for key, value in kwargs.items():
             if key == 'guest': 
                 self.guest = value  #Show parameter for guests?
+            elif key == 'value' or key == 'default':
+                #set an error message
+                self.set(value)
             elif key == 'required': 
-                self.required = value  #Show parameter for guests?    
+                self.required = value  #Mandatory parameter?  
             elif key == 'force':
                 #if this argument is set, the ones with the following IDs should as well
                 self.force = value
             elif key == 'restrict':
                 #if this argument is set, the ones with the following IDs can not
-                self.force = value
+                self.restrict = value
             elif key == 'nospace':
                 #no space between option and it's value
                 self.nospace = value
+            elif key == 'error':
+                #set an error message (if you also set a value, make sure this is set AFTER the value is set)
+                self.error = value
 
     def validate(self,value):
+        self.error = None #reset error
         return True
 
     def compilearg(self, value):
@@ -93,6 +100,8 @@ class AbstractParameter(object):
                 xml += ' ' + key + '="'+v+ '"'        
         if self.value:
             xml += ' value="'+self.value + '"'
+        if self.error:
+            xml += ' error="'+self.error + '"'
         xml += " />"
         return xml
 
@@ -102,13 +111,14 @@ class AbstractParameter(object):
             return True
         else:
             return False
+       
 
         
 class BooleanParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description, **kwargs):
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
-        #defaultsisisntance
+        #defaultinstance
         self.reverse = False
         for key, value in kwargs.items():
             if key == 'reverse': 
@@ -129,7 +139,8 @@ class StringParameter(AbstractParameter):
         super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
-        self.value = ""
+        if not 'default' in kwargs and not 'value' in kwargs:
+            self.value = ""
         self.maxlength = 0 #unlimited
         for key, value in kwargs.items():
             if key == 'default': 
@@ -138,7 +149,12 @@ class StringParameter(AbstractParameter):
                 self.maxlength = int(value)
 
     def validate(self,value):
-        return ((self.maxlength == 0) or(len(value) <= self.maxlength))
+        self.error = None
+        if self.maxlength > 0 and len(value) > self.maxlength:
+            self.error = "Text too long, maximum of " + str(self.maxlength) + " characters allowed"
+            return False
+        else:
+            return True            
 
     def compilearg(self, value):
         if value.find(" ") >= 0 or value.find(";") >= 0:            
@@ -159,12 +175,11 @@ class ChoiceParameter(AbstractParameter):
                 self.choices.append( (x,x) ) #list of two tuples
             else:
                 self.choices.append(x) #list of two tuples
-        self.value = self.choices[0][0] #first choice is default
+        if not 'value' in kwargs and not 'default' in kwargs:
+            self.value = self.choices[0][0] #no default specified, first choice is default
                 
         for key, value in kwargs.items():
-            if key == 'default': 
-                self.value = value  
-            elif key == 'multi': 
+            if key == 'multi': 
                 self.multi = value #boolean 
             elif key == 'showall': 
                 self.showall = value #show all options at once (radio instead of a pull down) 
@@ -172,10 +187,12 @@ class ChoiceParameter(AbstractParameter):
                 self.delimiter = value #char
 
     def validate(self,values):
+        self.error = None
         if not isinstance(values,list):
             values = [values]
         for v in values:
             if not v in [x[0] for x in self.choices]:
+                self.error = "Selected value was not an option!"
                 return False
         return True
 
@@ -202,7 +219,9 @@ class ChoiceParameter(AbstractParameter):
                 elif isinstance(value, list):
                     xml += ' ' + key + '="'+",".join(value)+ '"'        
                 else:
-                    xml += ' ' + key + '="'+value+ '"'        
+                    xml += ' ' + key + '="'+value+ '"'
+        if self.error:
+             xml += ' error="'+self.error + '"'               
         xml += ">"
         for key, value in self.choices:
             if self.value == key:
@@ -224,23 +243,28 @@ class IntegerParameter(AbstractParameter):
         
         
         #defaults
-        self.default = 0
+        if not 'default' in kwargs and not 'value' in kwargs:
+            self.value = 0
         self.minvalue = 0
         self.maxvalue = 0 #unlimited
         for key, value in kwargs.items():
-            if key == 'default': 
-                self.value = int(value)
-            elif key == 'minvalue': 
+            if key == 'minvalue': 
                 self.minvalue = int(value)
             elif key == 'maxvalue': 
                 self.maxvalue = int(value)
 
     def validate(self, value):
+        self.error = None
         try:
             value = int(value)
         except:
+            self.error = "Not a valid number, note that no decimals are allowed"
             return False
-        return  ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and (value <= self.maxvalue)))
+        if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
+            return True
+        else:
+            self.error = "Number must be a whole number between " + str(self.minvalue) + " and " + str(self.maxvalue)
+            return False
 
 
 class FloatParameter(AbstractParameter):
@@ -248,22 +272,27 @@ class FloatParameter(AbstractParameter):
         super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
                 
         #defaults
-        self.default = 0
-        self.minvalue = 0
-        self.maxvalue = -1 #unlimited if maxvalue < minvalue
+        if not 'default' in kwargs and not 'value' in kwargs:
+            self.value = 0.0
+        self.minvalue = 0.0
+        self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
         for key, value in kwargs.items():
-            if key == 'default': 
-                self.value = float(value)
-            elif key == 'minvalue': 
+            if key == 'minvalue': 
                 self.minvalue = float(value)
             elif key == 'maxvalue': 
                 self.maxvalue = float(value)
 
     def validate(self, value):
+        self.error = None
         try:
             value = float(value)
         except:
+            self.error = "Not a valid number"
             return False
-        return  ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue)))
+        if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
+            return True
+        else:
+            self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
+            return False
         
 

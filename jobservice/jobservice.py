@@ -260,8 +260,17 @@ class Project(object):
             inputpaths = self.inputindex(project)
         else:
             inputpaths = []      
+        #check if there are invalid parameters:
+        errors = "no"
+        errormsg = ""
+        for parametergroup, parameters in PARAMETERS:
+            for parameter in parameters:
+                if parameter.error:
+                    errors = "yes"
+                    errormsg = "One or more parameters are invalid"
+                    break
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
 
     def PUT(self, project):
         """Create an empty project"""
@@ -277,43 +286,51 @@ class Project(object):
         #Generate arguments based on POSTed parameters
         params = []
         postdata = web.input()
+        errors = False
         for parametergroup, parameters in PARAMETERS:
             for parameter in parameters:
                 if parameter.id in postdata:
-                    parameter.set(postdata[parameter.id])
-                    params.append(parameter.compileargs(parameter.value))
+                    if parameter.set(postdata[parameter.id]): #may generate an error in parameter.error
+                        params.append(parameter.compileargs(parameter.value))
+                    else:
+                        errors = True
+                elif parameter.required:
+                    #Not all required parameters were filled!
+                    errors = True
 
-
-
-        
-        #Start project with specified parameters
-        cmd = COMMAND
-        cmd.replace('$PARAMETERS', " ".join(params))
-        if 'usecorpus' in postdata and postdata['usecorpus']:
-            corpus = postdata['usecorpus'].replace('..','') #security            
-            #use a preinstalled corpus:
-            if os.path.exists(ROOT + "corpora/" + corpus):
-                cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+        if errors:
+            #There are parameter errors, return 200 (OK) response, but with error data so it can be corrected
+            #TODO: send a custom 400 (bad request) instead of 200, but with same content as GET!
+            return self.GET(project)
+        else:
+            #Start project with specified parameters
+            cmd = COMMAND
+            cmd.replace('$PARAMETERS', " ".join(params))
+            if 'usecorpus' in postdata and postdata['usecorpus']:
+                corpus = postdata['usecorpus'].replace('..','') #security            
+                #use a preinstalled corpus:
+                if os.path.exists(ROOT + "corpora/" + corpus):
+                    cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+                else:
+                    raise web.webapi.NotFound("Corpus " + corpus + " not found") #TODO: Verify custom not-found messages work?
             else:
-                raise web.webapi.NotFound("Corpus " + corpus + " not found") #TODO: Verify custom not-found messages work?
-        else:
-            cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
-        cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
-        #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
-        #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
-        #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
-        #TODO: protect against insertion
-        printlog("Starting " + COMMAND + ": " + repr(cmd) + " ..." )
-        process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
-        if process:
-            pid = process.pid
-            printlog("Started with pid " + str(pid) )
-            f = open(Project.path(project) + '.pid','w')
-            f.write(str(pid))
-            f.close()
-            return self.GET(project) #return 200 -> GET
-        else:
-            raise web.webapi.InternalError("Unable to launch process")
+                cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+            cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
+            #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
+            #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
+            #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
+            #TODO: protect against insertion
+            printlog("Starting " + COMMAND + ": " + repr(cmd) + " ..." )
+            process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
+            if process:
+                pid = process.pid
+                printlog("Started with pid " + str(pid) )
+                f = open(Project.path(project) + '.pid','w')
+                f.write(str(pid))
+                f.close()
+                return self.GET(project) #return 200 -> GET
+            else:
+                raise web.webapi.InternalError("Unable to launch process")
 
 
     def DELETE(self, project):
