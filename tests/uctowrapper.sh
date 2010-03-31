@@ -6,8 +6,8 @@ INPUTDIR=$1
 OUTPUTDIR=$2
 PARAMETERS=${@:$3}
 
-for f in $INPUTDIR/*.txt; do
+for f in $INPUTDIR*.txt; do
     filename=basename $f
-    ucto $PARAMETERS < $f > $OUTPUTDIR/$f.tok
+    ucto $PARAMETERS < $f > ${OUTPUTDIR}$filename.tok
 done
 

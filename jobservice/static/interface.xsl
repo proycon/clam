@@ -130,7 +130,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/parameters">
-    <form method="POST" enctype="multipart/form-data" action="upload">
+    <form method="POST" enctype="multipart/form-data" action="">
     <div id="parameters">
         <h3>Parameter Selection</h3>
         <table>

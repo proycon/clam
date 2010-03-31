@@ -53,6 +53,15 @@ def printdebug(msg):
     global DEBUG
     if DEBUG: printlog("DEBUG: " + msg)
         
+
+class BadRequest(web.webapi.HTTPError):
+    """`400 Bad Request` error."""
+    def __init__(self, message = "Bad request"):
+        status = "400 Bad Request"
+        headers = {'Content-Type': 'text/html'}
+        HTTPError.__init__(self, status, headers, message)
+
+
 class JobService:
     clam_version = 0.1
 
@@ -165,7 +174,7 @@ class Project(object):
             if os.path.isfile(Project.path(project) + ".pid"):
                 f = open(Project.path(project) + ".done",'w')
                 f.close()
-                os.path.remove(Project.path(project) + ".pid")
+                os.unlink(Project.path(project) + ".pid")
             return False        
     
     def abort(self,project):
@@ -174,7 +183,7 @@ class Project(object):
         try:
             printlog("Aborting process in project '" + project + "'" )
             os.kill(self.pid(project), 15)
-            os.path.remove(Project.path(project) + ".pid")
+            os.unlink(Project.path(project) + ".pid")
             return True
         except:
             return False  
@@ -244,7 +253,7 @@ class Project(object):
         """Main Get method: Get project state, parameters, outputindex"""
         global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
         if not self.exists(project):
-            raise web.webapi.NotFound()
+            return web.webapi.NotFound()
         statuscode, statusmsg = self.status(project)
         corpora = []
         if statuscode == STATUS_READY:
@@ -290,7 +299,7 @@ class Project(object):
             for parameter in parameters:
                 if parameter.id in postdata:
                     if parameter.set(postdata[parameter.id]): #may generate an error in parameter.error
-                        params.append(parameter.compileargs(parameter.value))
+                        params.append(parameter.compilearg(parameter.value))
                     else:
                         errors = True
                 elif parameter.required:
@@ -298,9 +307,8 @@ class Project(object):
                     errors = True
 
         if errors:
-            #There are parameter errors, return 200 (OK) response, but with error data so it can be corrected
-            #TODO: send a custom 400 (bad request) instead of 200, but with same content as GET!
-            return self.GET(project)
+            #There are parameter errors, return 400 (Bad request) response, but with full XML response so it can be corrected
+            raise BadRequest(unicode(self.GET(project)))
         else:
             #Start project with specified parameters
             cmd = COMMAND
@@ -311,7 +319,7 @@ class Project(object):
                 if os.path.exists(ROOT + "corpora/" + corpus):
                     cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
                 else:
-                    raise web.webapi.NotFound("Corpus " + corpus + " not found") #TODO: Verify custom not-found messages work?
+                    raise web.webapi.NotFound("Corpus " + corpus + " not found")
             else:
                 cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
@@ -370,7 +378,7 @@ class Downloader:
             if not os.path.isfile(path):            
                 path = Project.path(project) + "output/" + project + ".zip" 
                 if not os.path.isfile(path):            
-                    raise web.webapi.NotFound() #No download file
+                    raise web.webapi.NotFound("No download package ready for download") #No download file
         for line in open(path,'rb'): #TODO: check for problems with character encoding?
             yield line
 
@@ -514,9 +522,9 @@ class Uploader:
             kwargs['upload' + str(i)] = {}                            
         postdata = web.input(**kwargs)
         if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
-            raise web.webapi.BadRequest('No valid uploadcount specified') #TODO: verify this works
+            raise BadRequest('No valid uploadcount specified') #TODO: verify this works
         if int(postdata['uploadcount']) > 25:
-            raise web.webapi.BadRequest('Too many uploads') #TODO: verify this works
+            raise BadRequest('Too many uploads') #TODO: verify this works
 
         #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
         for i in range(1,int(postdata['uploadcount']) + 1):

@@ -12,6 +12,7 @@
 - Look into and fix large file upload problem
 - Confine particular formats to subdirectories
 - Automatic encoding conversion for inputformats?
+- Remove uploaded files?
 
 - Write separate webinterface (django)
 
