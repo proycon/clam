@@ -132,7 +132,7 @@ class Project(object):
     @staticmethod
     def path(project):
         """Get the path to the project (static method)"""
-    global ROOT
+        global ROOT
         return ROOT + "projects/" + project + "/"
 
     @staticmethod
@@ -263,6 +263,10 @@ class Project(object):
         render = web.template.render('templates')
         return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
 
+    def PUT(self, project):
+        """Create an empty project"""
+        Project.create(project)
+        return "" #200
 
     def POST(self, project):
         global COMMAND, PARAMETERS
@@ -307,7 +311,7 @@ class Project(object):
             f = open(Project.path(project) + '.pid','w')
             f.write(str(pid))
             f.close()
-            return "" #200
+            return self.GET(project) #return 200 -> GET
         else:
             raise web.webapi.InternalError("Unable to launch process")
 

@@ -3,7 +3,7 @@
 
 <xsl:import href="parameters.xsl" />
 
-<xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes"/>
+<xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" cdata-section-elements="script"/>
 
 <xsl:template match="/clam">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -37,9 +37,17 @@
     <script type="text/javascript">
      $(document).ready(function(){
        $("#startprojectbutton").click(function(event){
-         $("#startprojectform").attr("action",$("#projectname").val());
+         $.ajax({ 
+            type: "PUT", 
+            url: "/" + $("#projectname").val() + "/", 
+            dataType: "xml", 
+            success: function(xml) { 
+                document.location = "/" + $("#projectname").val() + "/";
+            }
+         });
+         //$("#startprojectform").attr("action",$("#projectname").val());
        });
-     });     
+     });    
     </script>
   </head>
 </xsl:template>
@@ -180,11 +188,8 @@
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <div id="startproject">
         <h3>Start a new Project</h3>    
-        <form id="startprojectform" method="post" action="">
             Project ID: <input id="projectname" type="projectname" value="" />
-            <!-- TODO: Add javascript thingies -->
             <input id="startprojectbutton" type="submit" value="Start project" />
-        </form>
     </div>
     <div id="index">
     <h3>Projects</h3>
