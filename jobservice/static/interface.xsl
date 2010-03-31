@@ -33,6 +33,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
+    <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
   </head>
 </xsl:template>
 
