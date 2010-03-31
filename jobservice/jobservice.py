@@ -159,7 +159,7 @@ class Project(object):
         if self.pid(project) == 0:
             return False
         try:
-            os.kill(self.pid, 0) #(doesn't really kill, but throws exception when process does not exist)
+            os.kill(self.pid(project), 0) #(doesn't really kill, but throws exception when process does not exist)
             return True
         except:
             if os.path.isfile(Project.path(project) + ".pid"):
@@ -173,7 +173,7 @@ class Project(object):
             return False
         try:
             printlog("Aborting process in project '" + project + "'" )
-            os.kill(self.pid, 15)
+            os.kill(self.pid(project), 15)
             os.path.remove(Project.path(project) + ".pid")
             return True
         except:
@@ -305,17 +305,17 @@ class Project(object):
         else:
             #Start project with specified parameters
             cmd = COMMAND
-            cmd.replace('$PARAMETERS', " ".join(params))
+            cmd = cmd.replace('$PARAMETERS', " ".join(params))
             if 'usecorpus' in postdata and postdata['usecorpus']:
                 corpus = postdata['usecorpus'].replace('..','') #security            
                 #use a preinstalled corpus:
                 if os.path.exists(ROOT + "corpora/" + corpus):
-                    cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+                    cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
                 else:
                     raise web.webapi.NotFound("Corpus " + corpus + " not found") #TODO: Verify custom not-found messages work?
             else:
-                cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
-            cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
+                cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+            cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
@@ -569,7 +569,7 @@ class Uploader:
             #f = open(Project.path(project) + '.upload','w') 
             #f.close()
 
-            printlog("Uploading '" + filename + "'" )
+            printlog("Uploading '" + filename + "' (" + inputformat.name + ", " + inputformat.encoding + ")")
             printdebug("(start copy upload)" )
             #upload file 
             if archive:
