@@ -4,6 +4,8 @@
 - Make sure custom errors works
 - Will setting parameter.value break multiuser support?
 
+- Add ability to extract without subdirs
+
 - Write basic user interface using only XSLT (in progress) [it's a bit more work but I think it's the most elegant solution for a webservice]
     - Fix upload form
 
