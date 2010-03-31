@@ -4,10 +4,11 @@
 
 INPUTDIR=$1
 OUTPUTDIR=$2
-PARAMETERS=${@:$3}
+PARAMETERS=${@:3}
 
 for f in $INPUTDIR*.txt; do
-    filename=basename $f
+    filename=`basename $f`
+    echo "UCTOWRAPPER: ucto $PARAMETERS < $f > ${OUTPUTDIR}$filename.tok"
     ucto $PARAMETERS < $f > ${OUTPUTDIR}$filename.tok
 done
 

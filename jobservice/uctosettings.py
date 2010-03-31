@@ -26,10 +26,10 @@ ROOT = "/home/proycon/work/clamtmproot/"
 URL = "http://localhost:8080"
 
 #List of supported Input formats by the system
-INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['toktxt']) ]
+INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]
 
 #List of delivered Output formats by the system
-OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['txt']), PlainTextFormat('utf-8',['toktxt']) ]
+OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['txt']), PlainTextFormat('utf-8',['tok']) ]
 
 #The system command (Use the variables $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
 COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"

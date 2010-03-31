@@ -62,7 +62,7 @@ class BadRequest(web.webapi.HTTPError):
         HTTPError.__init__(self, status, headers, message)
 
 
-class JobService:
+class JobService(object):
     clam_version = 0.1
 
     urls = (
@@ -70,7 +70,7 @@ class JobService:
     '/([A-Za-z0-9_]*)/', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/download/?', 'Downloader',
-    '/([A-Za-z0-9_]*)/output/(.*)', 'FileHander',
+    '/([A-Za-z0-9_]*)/output/(.*)', 'FileHandler',
     )
 
     def __init__(self):    
@@ -230,6 +230,7 @@ class Project(object):
                 paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,formats, mode, d+"/"+os.path.basename(f)) ]
             else:
                 filename = os.path.basename(f)
+                if filename[0] == '.': continue #skip hidden files
                 format = Format() #unspecified format
                 for fmt in formats:
                     if fmt.match(filename):
@@ -369,7 +370,7 @@ class FileHandler(object):
             raise web.webapi.NotFound()
 
 
-class Downloader:
+class Downloader(object):
         
     def GET(self):
         path = Project.path(project) + "output/" + project + ".tar.gz" 
@@ -402,7 +403,7 @@ class Downloader:
             
             
 
-class Uploader:
+class Uploader(object):
 
     def path(self, project):
         return Project.path(project) + 'input/'

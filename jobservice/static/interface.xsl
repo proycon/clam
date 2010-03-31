@@ -124,7 +124,7 @@
 
 <xsl:template match="/clam/output/path">
     <tr>
-    <th><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute></a></th>
+    <th><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></th>
     <td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>
