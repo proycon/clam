@@ -58,7 +58,7 @@ class JobService:
 
     urls = (
     '/', 'Index',
-    '/([A-Za-z0-9_]*)/?', 'Project',
+    '/([A-Za-z0-9_]*)/', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/download/?', 'Downloader',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHander',
@@ -195,8 +195,7 @@ class Project(object):
 
     def status(self, project):
         global STATUS_READY, STATUS_RUNNING, STATUS_DONE, STATUS_DOWNLOAD, STATUS_UPLOAD
-        pid = self.pid(project)
-        if pid > 0 and self.running(pid):
+        if self.running(project):
             statusfile = Project.path(project) + ".status"
             if os.path.isfile(statusfile):
                 f = open(statusfile)
@@ -535,7 +534,7 @@ class Uploader:
         Project.create(project)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + "/static/interface.xsl\"?>"
+        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + "/static/interface.xsl\"?>\n"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
@@ -578,6 +577,7 @@ class Uploader:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
             if realupload:
                 for line in postdata['upload' + str(i)].file:
+                    line = unicode(line,inputformat.encoding) #TODO: catch encoding errors
                     f.write(line)
             else:
                 f.write(postdata['uploadtext' + str(i)])

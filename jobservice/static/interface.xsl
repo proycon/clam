@@ -36,17 +36,19 @@
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
      $(document).ready(function(){
-       $("#startprojectbutton").click(function(event){
-         $.ajax({ 
-            type: "PUT", 
-            url: "/" + $("#projectname").val() + "/", 
-            dataType: "xml", 
-            complete: function(xml){ 
-                window.location.href = $("#projectname").val() + "/";
-            },
-         });
-         //$("#startprojectform").attr("action",$("#projectname").val());
-       });
+       if ($("#startprojectbutton").length) {
+           $("#startprojectbutton").click(function(event){
+             $.ajax({ 
+                type: "PUT", 
+                url: "/" + $("#projectname").val() + "/", 
+                dataType: "xml", 
+                complete: function(xml){ 
+                    window.location.href = $("#projectname").val() + "/";
+                },
+             });
+             //$("#startprojectform").attr("action",$("#projectname").val());
+           });
+       }
      });    
     </script>
   </head>
@@ -171,7 +173,7 @@
 
 <xsl:template match="file">
     <xsl:choose>
-    <xsl:when test="@validated = yes">
+    <xsl:when test="@validated = 'yes'">
         <li class="ok"><tt><xsl:value-of select="@name" /></tt>: OK</li>    
     </xsl:when>
     <xsl:otherwise>
@@ -195,7 +197,7 @@
     <h3>Projects</h3>
     <xsl:for-each select="project">
             <ul>
-              <li><a><xsl:attribute name="href"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></a></li>
+              <li><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></li>
             </ul>
     </xsl:for-each>
     </div>
