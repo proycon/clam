@@ -34,6 +34,13 @@
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript">
+     $(document).ready(function(){
+       $("#startprojectbutton").click(function(event){
+         $("#startprojectform").attr("action",$("#projectname").val());
+       });
+     });     
+    </script>
   </head>
 </xsl:template>
 
@@ -173,10 +180,10 @@
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <div id="startproject">
         <h3>Start a new Project</h3>    
-        <form id="startprojectform" action="">
-            Project ID: <input type="projectname" />
+        <form id="startprojectform" method="post" action="">
+            Project ID: <input id="projectname" type="projectname" value="" />
             <!-- TODO: Add javascript thingies -->
-            <input type="submit" value="Start project" />
+            <input id="startprojectbutton" type="submit" value="Start project" />
         </form>
     </div>
     <div id="index">

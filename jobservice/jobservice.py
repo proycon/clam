@@ -124,8 +124,7 @@ class Index(object):
                 projects.append(os.path.basename(f))
         render = web.template.render('templates')
         return render.index(SYSTEM_ID, SYSTEM_NAME, URL, projects)
-
-
+        
 
 
 class Project(object):
@@ -133,7 +132,7 @@ class Project(object):
     @staticmethod
     def path(project):
         """Get the path to the project (static method)"""
-        global ROOT
+    global ROOT
         return ROOT + "projects/" + project + "/"
 
     @staticmethod
@@ -292,7 +291,7 @@ class Project(object):
             if os.path.exists(ROOT + "corpora/" + corpus):
                 cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             else:
-                raise web.webapi.NotFound("Corpus " + corpus + " not found")
+                raise web.webapi.NotFound("Corpus " + corpus + " not found") #TODO: Verify custom not-found messages work?
         else:
             cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
         cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
