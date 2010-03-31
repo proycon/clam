@@ -16,3 +16,6 @@ March:
     - Implemented passing input and outputdir to blackbox
     - Implemented selecting a preinstalled corpora
     - Implemented free text submission
+    - Implemented interface in webservice itself (using XSLT)
+    - Implemented parameter validation and feedback
+    - First complete test of the system on ucto

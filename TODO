@@ -1,18 +1,16 @@
 
-- First test round?
 
 - Make sure custom errors works
 - Will setting parameter.value break multiuser support?
 
-- Add ability to extract without subdirs
-
-- Write basic user interface using only XSLT (in progress) [it's a bit more work but I think it's the most elegant solution for a webservice]
-    - Fix upload form
+- Add reset/go back function to run system on same input (but with different params)
 
 - Look into and fix large file upload problem
 - Confine particular formats to subdirectories
 - Automatic encoding conversion for inputformats?
 - Remove uploaded files?
+- Add ability to extract without subdirs
+
 
 - Write separate webinterface (django)
 
