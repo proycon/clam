@@ -70,8 +70,8 @@ class JobService:
         if not ROOT or not os.path.isdir(ROOT):
             print >>sys.stderr,"ERROR: Specified root path " + ROOT + " not found"                 
             sys.exit(1)
-        elif not COMMAND or os.system("which " + COMMAND + "> /dev/null 2> /dev/null") != 0:
-            print >>sys.stderr,"ERROR: Specified command " + COMMAND + " not found"                 
+        elif not COMMAND.split(" ")[0] or os.system("which " + COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
+            print >>sys.stderr,"ERROR: Specified command " + COMMAND.split(" ")[0] + " not found"                 
             sys.exit(1)            
         #elif not INPUTFORMATS:
         #    print >>sys.stderr,"ERROR: No inputformats specified!"
