@@ -55,12 +55,12 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
 </xsl:template>
 
 
 <xsl:template match="/clam/status">
-    <div id="status">
+    <div id="status" class="box">
      <h3>Status</h3>
      <xsl:choose>
       <xsl:when test="@code = 0">
@@ -80,7 +80,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/inputformats">
-        <div id="uploadform">
+        <div id="uploadform" class="box">
             <h3>Upload a file from disk</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
@@ -100,7 +100,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/input">
-    <div id="input">
+    <div id="input" class="box">
         <h3>Input files</h3>
         <table>
             <xsl:apply-templates select="path" />
@@ -109,7 +109,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/output">
-    <div id="output">
+    <div id="output" class="box">
         <h3>Output files</h3>
         <table>
             <xsl:apply-templates select="path" />
@@ -131,7 +131,7 @@
 
 <xsl:template match="/clam/parameters">
     <form method="POST" enctype="multipart/form-data" action="">
-    <div id="parameters">
+    <div id="parameters" class="box">
         <h3>Parameter Selection</h3>
         <table>
         <xsl:apply-templates />
@@ -188,12 +188,12 @@
   <xsl:call-template name="head" />
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
-    <div id="startproject">
+    <div id="startproject" class="box">
         <h3>Start a new Project</h3>    
             Project ID: <input id="projectname" type="projectname" value="" />
             <input id="startprojectbutton" type="submit" value="Start project" />
     </div>
-    <div id="index">
+    <div id="index" class="box">
     <h3>Projects</h3>
     <xsl:for-each select="project">
             <ul>

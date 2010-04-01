@@ -28,7 +28,7 @@ body {
 
 
 
-#status, #parameters, #inputformats, #input, #output, #uploadform, #footer, #upload, #index, #startproject {
+div.box {
     margin: 5px;
     margin-left: auto;
     margin-right: auto;
