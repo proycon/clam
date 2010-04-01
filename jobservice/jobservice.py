@@ -69,7 +69,7 @@ class JobService(object):
     '/', 'Index',
     '/([A-Za-z0-9_]*)/', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-    '/([A-Za-z0-9_]*)/download/?', 'Downloader',
+    '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHandler',
     )
 
@@ -370,9 +370,10 @@ class FileHandler(object):
             raise web.webapi.NotFound()
 
 
-class Downloader(object):
+class OutputInterface(object):
         
     def GET(self):
+        """Get Download package"""
         path = Project.path(project) + "output/" + project + ".tar.gz" 
         if not os.path.isfile(path):
             path = Project.path(project) + "output/" + project + ".tar.bz2" 
@@ -384,6 +385,7 @@ class Downloader(object):
             yield line
 
     def POST(self):
+        """Trigger generation of download package"""
         if not os.path.isfile(Project.path(project) + '.download'):
             postdata = web.input() 
             if 'format' in postdata:
@@ -399,9 +401,16 @@ class Downloader(object):
                 f.close()
             else:
                 raise web.webapi.InternalError("Unable to make download package")                
-        return "" #200            
-            
-            
+        return "" #200  
+
+    def DELETE(self, project):          
+        """Reset system, delete all output files and prepare for a new run"""
+        d = Project.path(project) + "output"
+        if os.path.isdir(d):
+            shutil.rmtree(d)
+            os.mkdir(d)
+        if os.path.exists(Project.path(project) + ".done"):
+            os.unlink(Project.path(project) + ".done")                       
 
 class Uploader(object):
 

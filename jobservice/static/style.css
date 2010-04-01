@@ -102,3 +102,7 @@ input.start {
 input.uploadbutton {
     font-weight: bold;
 }
+input#abortbutton, input#restartbutton {
+    float: right;
+}
+

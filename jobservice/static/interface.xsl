@@ -19,7 +19,7 @@
         <xsl:apply-templates select="parameters"/>  
       </xsl:when>
       <xsl:when test="status/@code = 2">
-        <xsl:apply-templates select="output"/>            
+        <xsl:apply-templates select="output"/>
       </xsl:when>
     </xsl:choose>
     <xsl:call-template name="footer" />
@@ -33,6 +33,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
+    <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
      $(document).ready(function(){
@@ -49,6 +50,30 @@
              //$("#startprojectform").attr("action",$("#projectname").val());
            });
        }
+       if ($("#abortbutton").length) {
+           $("#abortbutton").click(function(event){
+             $.ajax({ 
+                type: "DELETE", 
+                url: "", 
+                dataType: "xml", 
+                complete: function(xml){ 
+                    window.location.href = "/"; /* back to index */
+                },
+             });         
+           });
+       }    
+       if ($("#restartbutton").length) {
+           $("#restartbutton").click(function(event){
+             $.ajax({ 
+                type: "DELETE", 
+                url: "output", 
+                dataType: "xml", 
+                complete: function(xml){ 
+                    window.location.href = ""; /* refresh */
+                },
+             });         
+           });
+       }    
      });    
     </script>
   </head>
@@ -67,10 +92,10 @@
         <div class="ready"><xsl:value-of select="@message"/></div>
       </xsl:when>
       <xsl:when test="@code = 1">
-        <div class="running"><xsl:value-of select="@message"/></div>
+        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" /></div>
       </xsl:when>
       <xsl:when test="@code = 2">
-        <div class="done"><xsl:value-of select="@message"/></div>
+        <div class="done"><xsl:value-of select="@message"/><input id="abortbutton" type="button" /><input id="restartbutton" type="submit" /></div>
       </xsl:when>
       <xsl:otherwise>
         <div class="other"><xsl:value-of select="@message"/></div>
@@ -191,7 +216,7 @@
     <div id="startproject" class="box">
         <h3>Start a new Project</h3>    
             Project ID: <input id="projectname" type="projectname" value="" />
-            <input id="startprojectbutton" type="submit" value="Start project" />
+            <input id="startprojectbutton" type="button" value="Start project" />
     </div>
     <div id="index" class="box">
     <h3>Projects</h3>
