@@ -34,7 +34,6 @@
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
      $(document).ready(function(){
        if ($("#startprojectbutton").length) {
