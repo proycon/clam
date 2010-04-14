@@ -5,7 +5,7 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Jobservice --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompelcp jobservice.py /tmp/sources/clam/jobservice/
+#       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
 #       
@@ -23,6 +23,11 @@ import sys
 import datetime
 from parameters import *
 from formats import *
+
+#Maybe for later: HTTPS support
+#web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
+#web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
+
        
 STATUS_READY = 0
 STATUS_RUNNING = 1
