@@ -1,18 +1,23 @@
 
 
-- Make sure custom errors works
-- Will setting parameter.value break multiuser support?
+- Make sure custom errors works (I think I did this already?)
+- Important! Will setting parameter.value break multiuser support? 
 
 - Add reset/go back function to run system on same input (but with different params)
 
 - Look into and fix large file upload problem
-- Confine particular formats to subdirectories
-- Automatic encoding conversion for inputformats?
-- Remove uploaded files?
-- Add ability to extract without subdirs
 
+
+- Remove uploaded files? 
+
+Extra features:
+    - Confine particular formats to subdirectories
+    - Automatic encoding conversion for inputformats?
+    - Add ability to extract without subdirs
 
 - Write separate webinterface (django)
+
+
 
 Later:
 - Add version data to xml responses 

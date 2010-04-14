@@ -594,14 +594,14 @@ class Uploader(object):
             printlog("Uploading '" + filename + "' (" + inputformat.name + ", " + inputformat.encoding + ")")
             printdebug("(start copy upload)" )
             #upload file 
-            if archive:
-                f = open(Project.path(project) + 'input/' + filename,'wb')
-            else:
-                f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
+            #if archive:
+            f = open(Project.path(project) + 'input/' + filename,'wb')
+            #else:
+            #f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
             if realupload:
                 for line in postdata['upload' + str(i)].file:
-                    line = unicode(line,inputformat.encoding) #TODO: catch encoding errors
-                    f.write(line)
+                    #line = unicode(line,inputformat.encoding) #TODO: catch encoding errors
+                    f.write(line) #encoding unaware, solves big-file upload problem?
             else:
                 f.write(postdata['uploadtext' + str(i)])
             f.close()

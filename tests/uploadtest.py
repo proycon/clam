@@ -3,7 +3,6 @@
 
 import web
 
-basedir = "/var/clam"
 
 urls = ('/upload', 'Upload')
 if __name__ == "__main__":
@@ -27,7 +26,7 @@ class Upload:
         x = web.input(myfile={})
         #web.debug(x['myfile'].filename) # This is the filename
         #web.debug(x['myfile'].value) # This is the file contents
-        f = open('/tmp/tst','w')
+        f = open('/tmp/tst','wb')
         for line in x['myfile'].file:
             f.write(line)
         f.close()
