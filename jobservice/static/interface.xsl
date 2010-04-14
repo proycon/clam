@@ -31,6 +31,9 @@
 <xsl:template name="head">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <xsl:if test="status/@code = 1">
+      <meta http-equiv="refresh" content="10" />            
+    </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
@@ -79,7 +82,7 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">University of Tilburg</a></div>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a></div>
 </xsl:template>
 
 
