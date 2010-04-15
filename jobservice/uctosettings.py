@@ -28,7 +28,8 @@ URL = "http://localhost:8080"
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash is not secure!
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+
 
 #List of supported Input formats by the system
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]

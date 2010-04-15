@@ -138,6 +138,7 @@
 <xsl:template match="/clam/output">
     <div id="output" class="box">
         <h3>Output files</h3>
+        <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
         <table>
             <xsl:apply-templates select="path" />
         </table>

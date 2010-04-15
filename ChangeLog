@@ -21,4 +21,9 @@ March:
     - First complete test of the system on ucto
 
 April:
-    
+    - Fixed custom errors
+    - Look into and fix large file upload problem
+    - View of status 1 (running) now auto-refreshes
+    - Added reset/go back function to run system on same input (but with different params), and abort buttons
+    - Fixed zombie problem
+ 

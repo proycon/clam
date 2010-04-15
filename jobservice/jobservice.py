@@ -392,37 +392,58 @@ class FileHandler(object):
 class OutputInterface(object):
 
     @requirelogin        
-    def GET(self):
-        """Get Download package"""
-        path = Project.path(project) + "output/" + project + ".tar.gz" 
-        if not os.path.isfile(path):
-            path = Project.path(project) + "output/" + project + ".tar.bz2" 
-            if not os.path.isfile(path):            
-                path = Project.path(project) + "output/" + project + ".zip" 
-                if not os.path.isfile(path):            
-                    raise web.webapi.NotFound("No download package ready for download") #No download file
-        for line in open(path,'rb'): #TODO: check for problems with character encoding?
-            yield line
-
-    @requirelogin
-    def POST(self):
-        """Trigger generation of download package"""
-        if not os.path.isfile(Project.path(project) + '.download'):
-            postdata = web.input() 
-            if 'format' in postdata:
-                format = postdata['format']
+    def GET(self, project):
+        """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
+        if os.path.isfile(Project.path(project) + '.download'):
+            #make sure we don't start two compression processes at the same time
+            raise web.forbidden()
+        else:
+            data = web.input() 
+            if 'format' in data:
+                format = data['format']
             else:
                 format = 'zip' #default          
-            cmd = ['tools/make-download-package.sh', project] #call processing chain 
-            process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
-            if process:
-                pid = process.pid
-                f = open(Project.path(project) + '.download','w') 
-                f.write(str(pid))
-                f.close()
-            else:
-                raise web.webapi.InternalError("Unable to make download package")                
-        return "" #200  
+            
+            if format != 'zip' and format != 'tar.gz' and format != 'tar.bz2': #validation, security
+                raise BadRequest('Invalid archive format')
+
+            path = Project.path(project) + "output/" + project + "." + format
+            
+            if not os.path.isfile(path):
+                cmd = ['tools/make-download-package.sh', project, format] 
+                process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
+                if not process:
+                    raise web.webapi.InternalError("Unable to make download package")                
+                else:
+                    pid = process.pid
+                    f = open(Project.path(project) + '.download','w') 
+                    f.write(str(pid))
+                    f.close()
+                    os.waitpid(pid, 0) #wait for process to finish
+                    os.unlink(Project.path(project) + '.download')
+
+            for line in open(path,'rb'):
+                yield line
+               
+    #@requirelogin
+    #def POST(self, project):
+    #    """Trigger generation of download package"""
+    #    if not os.path.isfile(Project.path(project) + '.download'):
+    #        postdata = web.input() 
+    #        if 'format' in postdata:
+    #            format = postdata['format']
+    #        else:
+    #            format = 'zip' #default          
+    #        cmd = ['tools/make-download-package.sh', project] #call processing chain 
+    #        process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
+    #        if process:
+    #            pid = process.pid
+    #            f = open(Project.path(project) + '.download','w') 
+    #            f.write(str(pid))
+    #            f.close()
+    #        else:
+    #            raise web.webapi.InternalError("Unable to make download package")                
+    #    return "" #200  
 
     @requirelogin
     def DELETE(self, project):          
@@ -433,6 +454,8 @@ class OutputInterface(object):
             os.mkdir(d)
         if os.path.exists(Project.path(project) + ".done"):
             os.unlink(Project.path(project) + ".done")                       
+        if os.path.exists(Project.path(project) + ".status"):
+            os.unlink(Project.path(project) + ".status")                       
 
 class Uploader(object):
 

@@ -1,28 +1,18 @@
 
 
-- Important! Fix zombie problem!
-
-- Important! Will setting parameter.value break multiuser support? 
-
-
-
-- Add reset/go back function to run system on same input (but with different params)
-
-
-- Enable some HTTP Caching for /static/
-
-- Remove uploaded files? 
+- Important! Will setting parameter.value break multiuser support due not not being thread-safe? 
+- Add button for downloading all files option, and test download system
 
 Extra features:
     - Confine particular formats to subdirectories
     - Automatic encoding conversion for inputformats?
     - Add ability to extract without subdirs
 
+
 - Write separate webinterface (django)
 
-
-
 Later:
+- Enable some HTTP Caching for /static/
 - Add version data to xml responses 
 - Make XSDs or DTDs for xml responses
 - Write documentation
