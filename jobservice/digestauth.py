@@ -11,13 +11,18 @@ except ImportError:
     from md5 import new as md5
 
 
+def pwhash(user,password):
+    #computes a password hash for a given user and plaintext password
+    global SYSTEM_ID
+    return md5(user + ':' + SYSTEM_ID + ':' + password).hexdigest()
+
 class MalformedAuthenticationHeader(Exception): pass
 
 ## Fundamental utilities
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
-    def __init__(self,  getHA1,  realm="Protected",  tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 180,  tries=3,  domain=[]):
+    def __init__(self,  getHA1,  realm="Protected",  tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 10000,  tries=3,  domain=[]):
         """Creates a decorator specific to a particular web application. 
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user

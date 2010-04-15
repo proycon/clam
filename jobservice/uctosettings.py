@@ -16,6 +16,7 @@
 
 from parameters import *
 from formats import *
+from digestauth import pwhash
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Unicode Tokeniser"
@@ -24,6 +25,10 @@ SYSTEM_DESCRIPTION = "This is a tokeniser"
 #Root directory for CLAM
 ROOT = "/home/proycon/work/clamtmproot/"
 URL = "http://localhost:8080"
+
+#Users and passwords
+#USERS = None #Enable this instead if you want no authentication
+USERS = { 'username': pwhash('secret') } #Using pwhash is not secure!
 
 #List of supported Input formats by the system
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]

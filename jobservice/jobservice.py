@@ -23,6 +23,7 @@ import sys
 import datetime
 from parameters import *
 from formats import *
+import digestauth
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -66,6 +67,8 @@ class BadRequest(web.webapi.HTTPError):
         headers = {'Content-Type': 'text/html'}
         HTTPError.__init__(self, status, headers, message)
 
+# Create bogus decorator
+requirelogin = lambda x: x()
 
 class JobService(object):
     clam_version = 0.1
@@ -129,6 +132,7 @@ class JobService(object):
 
 
 class Index(object):
+    @requirelogin
     def GET(self):
         """Get list of projects"""
         global ROOT, URL, SYSTEM_ID, SYSTEM_NAME
@@ -254,7 +258,7 @@ class Project(object):
         global OUTPUTFORMATS
         return self.dirindex(project,OUTPUTFORMATS,'output')
                     
-
+    @requirelogin
     def GET(self, project):
         """Main Get method: Get project state, parameters, outputindex"""
         global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
@@ -286,11 +290,13 @@ class Project(object):
         render = web.template.render('templates')
         return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
 
+    @requirelogin
     def PUT(self, project):
         """Create an empty project"""
         Project.create(project)
         return "" #200
 
+    @requirelogin
     def POST(self, project):
         global COMMAND, PARAMETERS
         
@@ -345,7 +351,7 @@ class Project(object):
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
-
+    @requirelogin
     def DELETE(self, project):
         global STATUS_RUNNING
         if not self.exists(project):
@@ -359,6 +365,7 @@ class Project(object):
 
 class FileHandler(object):
 
+    @requirelogin
     def GET(self,project, filename):    
         global OUTPUTFORMATS
         path = Project.path(project) + "output/" + filename.replace("..","")
@@ -376,7 +383,8 @@ class FileHandler(object):
 
 
 class OutputInterface(object):
-        
+
+    @requirelogin        
     def GET(self):
         """Get Download package"""
         path = Project.path(project) + "output/" + project + ".tar.gz" 
@@ -389,6 +397,7 @@ class OutputInterface(object):
         for line in open(path,'rb'): #TODO: check for problems with character encoding?
             yield line
 
+    @requirelogin
     def POST(self):
         """Trigger generation of download package"""
         if not os.path.isfile(Project.path(project) + '.download'):
@@ -408,6 +417,7 @@ class OutputInterface(object):
                 raise web.webapi.InternalError("Unable to make download package")                
         return "" #200  
 
+    @requirelogin
     def DELETE(self, project):          
         """Reset system, delete all output files and prepare for a new run"""
         d = Project.path(project) + "output"
@@ -521,11 +531,12 @@ class Uploader(object):
 
         return o
 
-
+    @requirelogin
     def GET(self, project):
         #should use template instead
         return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
+    @requirelogin
     def POST(self, project):
         global INPUTFORMATS, URL
 
@@ -643,7 +654,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION"
+        import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
@@ -652,5 +663,10 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == '-d':
         DEBUG = True
         del sys.argv[1]
+
+    # Create decorator
+    if USERS:
+        requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
+        
 
     JobService() #start
