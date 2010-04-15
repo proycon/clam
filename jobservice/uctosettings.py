@@ -27,8 +27,8 @@ ROOT = "/home/proycon/work/clamtmproot/"
 URL = "http://localhost:8080"
 
 #Users and passwords
-#USERS = None #Enable this instead if you want no authentication
-USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash is not secure!
+USERS = None #Enable this instead if you want no authentication
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash is not secure!
 
 #List of supported Input formats by the system
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]
@@ -36,8 +36,8 @@ INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',[
 #List of delivered Output formats by the system
 OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['txt']), PlainTextFormat('utf-8',['tok']) ]
 
-#The system command (Use the variables $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
-COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+#The system command (Use the variables $STATUSFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
+COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
 
 PARAMETERS =  [ 
     ('Main', [ 

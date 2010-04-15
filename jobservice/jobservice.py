@@ -335,6 +335,7 @@ class Project(object):
             else:
                 cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
+            cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        

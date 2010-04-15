@@ -21,7 +21,7 @@ class MalformedAuthenticationHeader(Exception): pass
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
-    def __init__(self,  getHA1,  realm="Protected",  tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 10000,  tries=3,  domain=[]):
+    def __init__(self,  getHA1,  realm="Protected",  tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
         """Creates a decorator specific to a particular web application. 
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user
