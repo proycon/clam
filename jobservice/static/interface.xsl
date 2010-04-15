@@ -94,7 +94,7 @@
         <div class="ready"><xsl:value-of select="@message"/></div>
       </xsl:when>
       <xsl:when test="@code = 1">
-        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" /></div>
+        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort project" /></div>
       </xsl:when>
       <xsl:when test="@code = 2">
         <div class="done"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>

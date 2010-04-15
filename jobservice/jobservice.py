@@ -174,12 +174,18 @@ class Project(object):
             return 0
 
     def running(self,project):
-        if self.pid(project) == 0:
+        pid = self.pid(project)
+        if pid == 0:
             return False
+        #printdebug("Polling process " + str(pid) + ", still running?" ) 
+        done = False
         try:
-            os.kill(self.pid(project), 0) #(doesn't really kill, but throws exception when process does not exist)
-            return True
-        except:
+            returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
+            if returnedpid == 0:
+                return True
+        except OSError: #no such process
+            done = True            
+        if done or returnedpid == pid:
             if os.path.isfile(Project.path(project) + ".pid"):
                 f = open(Project.path(project) + ".done",'w')
                 f.close()
