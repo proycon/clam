@@ -38,14 +38,24 @@ class Format(object):
     name = "Unspecified Format"
     mask = None
 
-    def __init__(self,encoding = 'utf-8', extensions = [], mask = None):
+    def __init__(self,encoding = 'utf-8', extensions = [], **kwargs = {}):
         if isinstance(extensions,list):
             self.extensions = extensions
         else:
             self.extensions =  [ extensions ]
         self.encoding = encoding
-        if mask:
-            self.mask = re.compile(mask) #in case extensions aren't enough
+        self.subdirectory = '' #Extract all files of this time into this subdirectory
+        self.archivesubdirs = True #Retain subdirectories from archives?
+        for key, value in kwargs.items():
+            if key == 'mask':
+                self.mask = re.compile(value) #in case extensions aren't enough
+            elif key == 'subdirectory':
+                self.subdirectory = value
+            elif key == 'archivesubdirs':
+                self.archivesubdirs = value
+            #elif key == 'numberfiles': #for future use?
+                
+            
 
     def validate(self,filename):
         return True
@@ -87,8 +97,8 @@ class PlainTextFormat(Format):
     
     name = "Plain Text Format (not tokenised)"
 
-    def __init__(self,encoding = 'utf-8', extensions = ['txt'], mask = None):
-        super(PlainTextFormat,self).__init__(encoding, extensions, mask)
+    def __init__(self,encoding = 'utf-8', extensions = ['txt'], **kwargs = {}):
+        super(PlainTextFormat,self).__init__(encoding, extensions, **kwargs)
 
 
                 
@@ -96,8 +106,8 @@ class TokenizedTextFormat(Format):
     
     name = "Plain Text Format (already tokenised)"
 
-    def __init__(self,encoding = 'utf-8', extensions = ['tok.txt'], mask = None):
-        super(TokenizedTextFormat,self).__init__(encoding, extensions, mask)
+    def __init__(self,encoding = 'utf-8', extensions = ['tok.txt'], **kwargs = {}):
+        super(TokenizedTextFormat,self).__init__(encoding, extensions, **kwargs)
 
 
 
@@ -105,7 +115,7 @@ class DCOIFormat(Format):
     
     name = "SoNaR/DCOI format"
 
-    def __init__(self,encoding = 'utf-8', extensions = ['dcoi.xml','sonar.xml'], mask = None):
-        super(DCOIFormat,self).__init__(encoding, extensions, mask)
+    def __init__(self,encoding = 'utf-8', extensions = ['dcoi.xml','sonar.xml'], **kwargs = {}):
+        super(DCOIFormat,self).__init__(encoding, extensions, **kwargs)
 
 

@@ -410,7 +410,8 @@ class OutputInterface(object):
             path = Project.path(project) + "output/" + project + "." + format
             
             if not os.path.isfile(path):
-                cmd = ['tools/make-download-package.sh', project, format] 
+                printlog("Building download archive in " + format + " format")
+                cmd = ['/home/proycon/work/clam/jobservice/tools/make-download-package.sh', project, format] 
                 process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
                 if not process:
                     raise web.webapi.InternalError("Unable to make download package")                
@@ -421,6 +422,8 @@ class OutputInterface(object):
                     f.close()
                     os.waitpid(pid, 0) #wait for process to finish
                     os.unlink(Project.path(project) + '.download')
+
+            #TODO: Set proper headers
 
             for line in open(path,'rb'):
                 yield line
@@ -551,8 +554,16 @@ class Uploader(object):
             
             if self.isarchive(filename):            
                 for subfilename in self.extract(project,filename, inputformat):
-                    printdebug("Extracted from archive: " + subfilename)
-                    o += self.test(project,subfilename, inputformat, depth + 1)
+                    if subfilename[-1] != '/': #only act on files, not directories
+                        printdebug("Extracted from archive: " + subfilename)
+                        if not inputformat.archivesubdirs and os.path.dirname(subfilename) != '':
+                            #we don't want subdirectories, move the files:
+                            #TODO: delete subdirectories
+                            printdebug("Moving extracted file out of subdirectory...")
+                            os.rename(self.path(project) + subfilename, self.path(project) + os.path.basename(subfilename))
+                            o += self.test(project,os.path.basename(subfilename), inputformat, depth + 1)
+                        else:
+                            o += self.test(project,subfilename, inputformat, depth + 1)
                 o += prefix + "</file>\n"    
 
         if remove and os.path.exists(self.path(project) + filename):
@@ -636,6 +647,11 @@ class Uploader(object):
             printdebug("(start copy upload)" )
             #upload file 
             #if archive:
+            if inputformat.subdirectory:
+                if not os.path.isdir(inputformat.subdirectory ):
+                    os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
+                filename = inputformat.subdirectory  + "/" + filename
+    
             f = open(Project.path(project) + 'input/' + filename,'wb')
             #else:
             #f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
@@ -648,7 +664,7 @@ class Uploader(object):
             f.close()
             printdebug("(end copy upload)" )
 
-            #test uploaded files
+            #test uploaded files (this also takes care of extraction)
             output += self.test(project, filename, inputformat)
             
             output += "</upload>\n"
