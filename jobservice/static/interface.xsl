@@ -106,7 +106,7 @@
     </div>
 </xsl:template>
 
-<xsl:template match="/clam/inputforma<?xml-stylesheet type="text/xsl" href="http://localhost:8080/static/interface.xsl"ts">
+<xsl:template match="/clam/inputformats">
         <div id="uploadform" class="box">
             <h3>Upload a file from disk</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
@@ -126,7 +126,7 @@
         </div>
 </xsl:template>
 
-<xsl:template match="/clam/input"><?xml-stylesheet type="text/xsl" href="http://localhost:8080/static/interface.xsl"
+<xsl:template match="/clam/input">
     <div id="input" class="box">
         <h3>Input files</h3>
         <table>
@@ -135,10 +135,10 @@
     </div>
 </xsl:template>
 
-<xsl:template match="/clam/output"><?xml-stylesheet type="text/xsl" href="http://localhost:8080/static/interface.xsl"
+<xsl:template match="/clam/output">
     <div id="output" class="box">
         <h3>Output files</h3>
-        <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a <?xml-stylesheet type="text/xsl" href="http://localhost:8080/static/interface.xsl"href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
+        <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
         <table>
             <xsl:apply-templates select="path" />
         </table>
