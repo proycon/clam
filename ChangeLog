@@ -26,4 +26,6 @@ April:
     - View of status 1 (running) now auto-refreshes
     - Added reset/go back function to run system on same input (but with different params), and abort buttons
     - Fixed zombie problem
- 
+    - Confine particular formats to subdirectories
+    - Add ability to extract without subdirs
+

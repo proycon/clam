@@ -404,7 +404,14 @@ class OutputInterface(object):
             else:
                 format = 'zip' #default          
             
-            if format != 'zip' and format != 'tar.gz' and format != 'tar.bz2': #validation, security
+            #validation, security
+            if format == 'zip':
+                contenttype = 'application/zip'
+            elif format == 'tar.gz':
+                contenttype = 'application/x-gzip'
+            elif format != 'tar.bz2': 
+                contenttype = 'application/x-bz2'
+            else:
                 raise BadRequest('Invalid archive format')
 
             path = Project.path(project) + "output/" + project + "." + format
@@ -423,7 +430,7 @@ class OutputInterface(object):
                     os.waitpid(pid, 0) #wait for process to finish
                     os.unlink(Project.path(project) + '.download')
 
-            #TODO: Set proper headers
+            web.header('Content-type', contenttype)
 
             for line in open(path,'rb'):
                 yield line
