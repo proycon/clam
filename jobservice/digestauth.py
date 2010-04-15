@@ -11,10 +11,9 @@ except ImportError:
     from md5 import new as md5
 
 
-def pwhash(user,password):
+def pwhash(user, realm, password):
     #computes a password hash for a given user and plaintext password
-    global SYSTEM_ID
-    return md5(user + ':' + SYSTEM_ID + ':' + password).hexdigest()
+    return md5(user + ':' + realm + ':' + password).hexdigest()
 
 class MalformedAuthenticationHeader(Exception): pass
 

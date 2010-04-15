@@ -68,7 +68,7 @@ class BadRequest(web.webapi.HTTPError):
         HTTPError.__init__(self, status, headers, message)
 
 # Create bogus decorator
-requirelogin = lambda x: x()
+requirelogin = lambda x: x 
 
 class JobService(object):
     clam_version = 0.1
