@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import web
-assert web.__version__.startswith('0.3')
-import ..digestauth
+import digestauth
 
 # You need a function that takes a username and returns
 # an MD5 password hash of 'username:realm:password.'
@@ -43,7 +42,8 @@ class logout(object):
     def GET(self):
         auth.logout()
         return "You are logged out."
-
-web.application(urls, globals()).run()
+    
+if __name__ == "__main__":
+    web.application(urls, globals()).run()
 
 
