@@ -440,7 +440,7 @@ class OutputInterface(object):
             
             if not os.path.isfile(path):
                 printlog("Building download archive in " + format + " format")
-                cmd = ['/home/proycon/work/clam/jobservice/tools/make-download-package.sh', project, format] 
+                cmd = [ sys.path[0] + '/tools/make-download-package.sh', project, format] 
                 process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
                 if not process:
                     raise web.webapi.InternalError("Unable to make download package")                

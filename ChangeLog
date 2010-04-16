@@ -28,4 +28,5 @@ April:
     - Fixed zombie problem
     - Confine particular formats to subdirectories
     - Add ability to extract without subdirs
-
+    - Implemented downloading all files as archive
+    - Implemented writing configuration file (clam.xml) for the blackbox

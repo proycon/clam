@@ -1,7 +1,11 @@
 
 
+- Test parameters
+- Finish user authentication
+
+- Implement parameter forbid, require
+
 - Important! Will setting parameter.value break multiuser support due not not being thread-safe? 
-- Add button for downloading all files option, and test download system (almost finished)
 
 - Encoding check?
 
