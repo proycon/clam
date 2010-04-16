@@ -23,7 +23,9 @@ import sys
 import datetime
 from parameters import *
 from formats import *
+from copy import copy #shallow copy (use deepcopy for deep)
 import digestauth
+
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -263,13 +265,10 @@ class Project(object):
     def outputindex(self,project, d = ''):        
         global OUTPUTFORMATS
         return self.dirindex(project,OUTPUTFORMATS,'output')
-                    
-    @requirelogin
-    def GET(self, project):
-        """Main Get method: Get project state, parameters, outputindex"""
-        global SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
-        if not self.exists(project):
-            return web.webapi.NotFound()
+
+
+    def response(self, project, parameters, conffile = False):
+        global SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
         statuscode, statusmsg = self.status(project)
         corpora = []
         if statuscode == STATUS_READY:
@@ -287,14 +286,25 @@ class Project(object):
         #check if there are invalid parameters:
         errors = "no"
         errormsg = ""
-        for parametergroup, parameters in PARAMETERS:
-            for parameter in parameters:
+        for parametergroup, parameterlist in parameters:
+            for parameter in parameterlist:
                 if parameter.error:
                     errors = "yes"
                     errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, False )
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, conffile )
+        
+                    
+    @requirelogin
+    def GET(self, project):
+        """Main Get method: Get project state, parameters, outputindex"""
+        global PARAMETERS
+        if not self.exists(project):
+            return web.webapi.NotFound()
+        else:
+            return self.response(project, PARAMETERS)
+
 
     @requirelogin
     def PUT(self, project):
@@ -304,7 +314,7 @@ class Project(object):
 
     @requirelogin
     def POST(self, project):
-        global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
+        global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
 
         Project.create(project)
                     
@@ -312,8 +322,19 @@ class Project(object):
         params = []
         postdata = web.input()
         errors = False
-        for parametergroup, parameters in PARAMETERS:
-            for parameter in parameters:
+
+        #we're going to modify parameter values, this we can't do
+        #on the global variable, that won't be thread-safe, we first
+        #make a (shallow) copy and act on that  
+        parameters = []
+        for parametergroup, parameterlist in PARAMETERS:
+            newparameterlist = []
+            for parameter in parameterlist:
+                newparameterlist.append(copy(parameter))
+            parameters.append( (parametergroup, newparameterlist) ) 
+
+        for parametergroup, parameterlist in parameters:
+            for parameter in parameterlist:
                 if parameter.id in postdata:
                     if parameter.set(postdata[parameter.id]): #may generate an error in parameter.error
                         params.append(parameter.compilearg(parameter.value))
@@ -326,26 +347,12 @@ class Project(object):
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
             #raise BadRequest(unicode(self.GET(project)))
-            return self.GET(project)
+            return self.response(project, parameters)
         else:
             #write clam.xml output file
-            statuscode, statusmsg = self.status(project)
-            corpora = []
-            if statuscode == STATUS_READY:
-                corpora = JobService.corpusindex()
-            else:
-                corpora = []
-            if statuscode == STATUS_DONE:
-                outputpaths = self.outputindex(project)
-            else:
-                outputpaths = []        
-            if statuscode == STATUS_READY:
-                inputpaths = self.inputindex(project)
-            else:
-                inputpaths = [] 
             render = web.template.render('templates')
             f = open(Project.path(project) + "clam.xml",'w')
-            f.write(str(render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, "no", "", PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, True )))
+            f.write(str(self.response(project, parameters, True)))
             f.close()
 
 

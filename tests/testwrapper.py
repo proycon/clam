@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-#import getopt
+import getopt
+import sys
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "bi:f:s:t:c:", ["help", "output="])
+    opts, args = getopt.getopt(sys.argv[1:], "bi:f:s:t:c:")
 except getopt.GetoptError, err:
-    print "help information and exit:
+    print "help information and exit:"
     print str(err) # will print something like "option -a not recognized"
     usage()
     sys.exit(2)
 
-output = None
-DEBUG = False
 for o, a in opts:
     if o == "-b":
         print "Boolean parameter activated"
@@ -29,4 +28,4 @@ for o, a in opts:
     else:
         assert False, "No such option '%s'" % o
 
-
+print "done."

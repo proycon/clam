@@ -14,6 +14,14 @@
 from lxml import etree as ElementTree
 from StringIO import StringIO
 
+#class Validation(object):
+#    def __init__(self, bool: valid, error = None):
+#        self.valid = valid
+#        self.error = error
+#    
+#    def __nonzero__(self):
+#        return self.valid
+    
 
 def parameterfromxml(node):
     if not isinstance(node,ElementTree._Element):
