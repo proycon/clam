@@ -86,6 +86,10 @@ h3 {
     margin-left: 20px; 
     font-size: 90%;   
 }
+#parameters th .error {
+    margin-left: 20px; 
+    color: red;
+}
 
 #startbutton {
     width: 100%;

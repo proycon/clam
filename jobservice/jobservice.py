@@ -324,8 +324,9 @@ class Project(object):
                     errors = True
 
         if errors:
-            #There are parameter errors, return 400 (Bad request) response, but with full XML response so it can be corrected
-            raise BadRequest(unicode(self.GET(project)))
+            #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
+            #raise BadRequest(unicode(self.GET(project)))
+            return self.GET(project)
         else:
             #write clam.xml output file
             statuscode, statusmsg = self.status(project)
