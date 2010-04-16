@@ -294,7 +294,7 @@ class Project(object):
                     errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS )
+        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, False )
 
     @requirelogin
     def PUT(self, project):
@@ -304,8 +304,7 @@ class Project(object):
 
     @requirelogin
     def POST(self, project):
-        global COMMAND, PARAMETERS
-        
+        global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, PARAMETERS, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
 
         Project.create(project)
                     
@@ -328,6 +327,28 @@ class Project(object):
             #There are parameter errors, return 400 (Bad request) response, but with full XML response so it can be corrected
             raise BadRequest(unicode(self.GET(project)))
         else:
+            #write clam.xml output file
+            statuscode, statusmsg = self.status(project)
+            corpora = []
+            if statuscode == STATUS_READY:
+                corpora = JobService.corpusindex()
+            else:
+                corpora = []
+            if statuscode == STATUS_DONE:
+                outputpaths = self.outputindex(project)
+            else:
+                outputpaths = []        
+            if statuscode == STATUS_READY:
+                inputpaths = self.inputindex(project)
+            else:
+                inputpaths = [] 
+            render = web.template.render('templates')
+            f = open(Project.path(project) + "clam.xml",'w')
+            f.write(str(render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, "no", "", PARAMETERS,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, True )))
+            f.close()
+
+
+
             #Start project with specified parameters
             cmd = COMMAND
             cmd = cmd.replace('$PARAMETERS', " ".join(params))
@@ -342,6 +363,7 @@ class Project(object):
                 cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
             cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
+            cmd = cmd.replace('$CONFFILE',Project.path(project) + 'clam.xml')
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        

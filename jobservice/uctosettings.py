@@ -37,7 +37,7 @@ INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',[
 #List of delivered Output formats by the system
 OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['txt']), PlainTextFormat('utf-8',['tok']) ]
 
-#The system command (Use the variables $STATUSFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
+#The system command (Use the variables $STATUSFILE $CONFFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
 COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
 
 PARAMETERS =  [ 
