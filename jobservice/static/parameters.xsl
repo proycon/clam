@@ -194,7 +194,8 @@
             </xsl:if>
             </th>
             <td>
-            <select name="@id">
+            <select>
+                <xsl:attribute name="name"><xsl:value-of select="@id" /></xsl:attribute>
                 <xsl:for-each select="choice">
                     <option><xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute><xsl:if test="@selected = 1"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="."/></option>
                 </xsl:for-each>
