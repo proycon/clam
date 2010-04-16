@@ -65,7 +65,7 @@ class BadRequest(web.webapi.HTTPError):
     def __init__(self, message = "Bad request"):
         status = "400 Bad Request"
         headers = {'Content-Type': 'text/html'}
-        HTTPError.__init__(self, status, headers, message)
+        super(BadRequest,self).__init__(status, headers, message)
 
 # Create bogus decorator
 requirelogin = lambda x: x 

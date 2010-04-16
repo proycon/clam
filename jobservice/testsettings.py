@@ -25,6 +25,8 @@ SYSTEM_DESCRIPTION = "This is a small test for CLAM"
 ROOT = "/home/proycon/work/clamtmproot2/"
 URL = "http://localhost:8080"
 
+USERS = None
+
 #List of supported Input formats by the system
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 
@@ -32,7 +34,7 @@ INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 OUTPUTFORMATS = [ PlainTextFormat('utf-8',['tok']) ]
 
 #The system command (Use the variables $STATUSFILE $CONFFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY)
-COMMAND = "/home/proycon/work/clam/tests/testwrapper.py $INPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/output "
+COMMAND = "/home/proycon/work/clam/tests/testwrapper.py $PARAMETERS > $OUTPUTDIRECTORY/output "
 
 
 PARAMETERS =  [ 

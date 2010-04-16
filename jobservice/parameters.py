@@ -96,8 +96,10 @@ class AbstractParameter(object):
                 xml += ' ' + key + '="' + str(int(v))+ '"'                    
             elif isinstance(v, list):
                 xml += ' ' + key + '="'+",".join(v)+ '"'        
-            else:
+            elif isinstance(v, unicode) or isinstance(v, str)  :
                 xml += ' ' + key + '="'+v+ '"'        
+            else:
+                xml += ' ' + key + '="'+str(v)+ '"'        
         if self.value:
             xml += ' value="'+self.value + '"'
         if self.error:
@@ -160,7 +162,7 @@ class StringParameter(AbstractParameter):
         if value.find(" ") >= 0 or value.find(";") >= 0:            
             value = value.replace('"',r'\"')
             value = '"' + value + '"' #wrap in quotes
-        super(StringParameter,self).compilearg(value)
+        return super(StringParameter,self).compilearg(value)
 
 
 class ChoiceParameter(AbstractParameter):
@@ -205,7 +207,7 @@ class ChoiceParameter(AbstractParameter):
             value = values
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
-        super(ChoiceParameter,self).compilearg(value)
+        return super(ChoiceParameter,self).compilearg(value)
 
     def xml(self):
         xml = "<" + self.__class__.__name__
@@ -235,7 +237,8 @@ class TextParameter(StringParameter): #TextArea based
     def __init__(self, id, paramflag, name, description, **kwargs):
         super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
-        
+    def compilearg(self, value):
+        return super(TextParameter,self).compilearg(value)
 
 class IntegerParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description, **kwargs):
