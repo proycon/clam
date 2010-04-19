@@ -31,3 +31,4 @@ April:
     - Implemented downloading all files as archive
     - Implemented writing configuration file (clam.xml) for the blackbox
     - Made parameter implementation thread-safe
+    - Implemented parameter forbid, require

@@ -342,7 +342,17 @@ class Project(object):
                         errors = True
                 elif parameter.required:
                     #Not all required parameters were filled!
+                    parameter.error = "This option must be set"
                     errors = True
+                elif parameter.restrict or parameter.force:
+                    for _, parameterlist2 in parameters:
+                        for parameter2 in parameterlist2:
+                            if parameter.restrict and parameter2.id in parameter.restrict and parameter2.id in postdata and postdata[parameter2.id]:
+                                parameter.error = parameter2.error = "Settings these options together is forbidden"
+                                errors = True
+                            if parameter.force and parameter2.id in parameter.force and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
+                                parameter2.error = "This option must be set as well"
+                                errors = True
 
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)

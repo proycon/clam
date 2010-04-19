@@ -73,9 +73,9 @@ class AbstractParameter(object):
             elif key == 'force':
                 #if this argument is set, the ones with the following IDs should as well
                 self.force = value
-            elif key == 'restrict':
+            elif key == 'forbid':
                 #if this argument is set, the ones with the following IDs can not
-                self.restrict = value
+                self.forbid = value
             elif key == 'nospace':
                 #no space between option and it's value
                 self.nospace = value
