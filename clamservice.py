@@ -21,9 +21,11 @@ import subprocess
 import glob
 import sys
 import datetime
-from parameters import *
-from formats import *
-import defaultsettings as settings #will be overridden by real settings later
+import clam.common.parameters
+import clam.common.formats
+#from parameters import *
+#from formats import *
+import clam.config.defaults as settings #will be overridden by real settings later
 from copy import copy #shallow copy (use deepcopy for deep)
 import digestauth
 from functools import wraps
@@ -123,7 +125,7 @@ class JobService(object):
             try:
                 for parametergroup, parameters in settings.PARAMETERS:
                     for parameter in parameters:
-                        assert isinstance(parameter,AbstractParameter)
+                        assert isinstance(parameter,clam.common.parameters.AbstractParameter)
             except:
                 print >>sys.stderr,"ERROR: Syntax error in parameter specification"
                 sys.exit(1)            
@@ -482,10 +484,13 @@ class OutputInterface(object):
             #validation, security
             if format == 'zip':
                 contenttype = 'application/zip'
+                command = "zip -r"
             elif format == 'tar.gz':
                 contenttype = 'application/x-gzip'
+                command = "tar -czf"
             elif format != 'tar.bz2': 
                 contenttype = 'application/x-bz2'
+                command = "tar -cjf"
             else:
                 raise BadRequest('Invalid archive format')
 
@@ -493,8 +498,8 @@ class OutputInterface(object):
             
             if not os.path.isfile(path):
                 printlog("Building download archive in " + format + " format")
-                cmd = [ sys.path[0] + '/tools/make-download-package.sh', project, format] 
-                process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
+                cmd = sys.path[0] + command + ' ' + project + '.' + format + ' *'
+                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/')	        			
                 if not process:
                     raise web.webapi.InternalError("Unable to make download package")                
                 else:
