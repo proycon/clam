@@ -15,9 +15,9 @@
 
 # *** DO NOT ALTER THIS FILE, MAKE A COPY INSTEAD! ***
 
-from parameters import *
-from formats import *
-from digestauth import pwhash
+from common.parameters import *
+from common.formats import *
+from common.digestauth import pwhash
 
 #The System ID, a short alphanumeric identifier for internal use only
 SYSTEM_ID = "clam"

@@ -14,9 +14,9 @@
 #
 ###############################################################
 
-from clam.config.parameters import *
-from clam.config.formats import *
-from digestauth import pwhash
+from common.parameters import *
+from common.formats import *
+from common.digestauth import pwhash
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Unicode Tokeniser"

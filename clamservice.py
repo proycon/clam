@@ -3,7 +3,7 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Jobservice --
+# -- CLAM Webservice --
 #       by Maarten van Gompel (proycon)
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
@@ -21,14 +21,13 @@ import subprocess
 import glob
 import sys
 import datetime
-import clam.common.parameters
-import clam.common.formats
-#from parameters import *
-#from formats import *
-import clam.config.defaults as settings #will be overridden by real settings later
 from copy import copy #shallow copy (use deepcopy for deep)
-import digestauth
 from functools import wraps
+
+import common.parameters
+import common.formats
+import common.digestauth
+import config.defaults as settings #will be overridden by real settings later
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -125,7 +124,7 @@ class JobService(object):
             try:
                 for parametergroup, parameters in settings.PARAMETERS:
                     for parameter in parameters:
-                        assert isinstance(parameter,clam.common.parameters.AbstractParameter)
+                        assert isinstance(parameter,common.parameters.AbstractParameter)
             except:
                 print >>sys.stderr,"ERROR: Syntax error in parameter specification"
                 sys.exit(1)            
@@ -781,13 +780,13 @@ if __name__ == "__main__":
         print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule [port]"
         sys.exit(1)
     settingsmodule = sys.argv[1]
-    if not settingsmodule.isalpha():  #security precaution
-        print >> sys.stderr, "ERROR: Invalid service module specified!"
-        sys.exit(1)
-    else:
-        #import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
-        import_string = "import " + settingsmodule + " as settings"
-        exec import_string
+    #if not settingsmodule.isalpha():  #security precaution
+    #    print >> sys.stderr, "ERROR: Invalid service module specified!"
+    #    sys.exit(1)
+    #else:
+    #import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
+    import_string = "import " + settingsmodule + " as settings"
+    exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
     del sys.argv[1]
