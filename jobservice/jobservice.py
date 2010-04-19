@@ -23,9 +23,10 @@ import sys
 import datetime
 from parameters import *
 from formats import *
+import defaultsettings as settings #will be overridden by real settings later
 from copy import copy #shallow copy (use deepcopy for deep)
 import digestauth
-
+from functools import wraps
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -42,16 +43,16 @@ STATUS_DOWNLOAD = 11 #preparing before download
 DEBUG = False
     
 #Empty defaults
-SYSTEM_ID = "clam"
-SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
-SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
-COMMAND = ""
-ROOT = "."
-PARAMETERS = []
-INPUTFORMATS = []
-OUTPUTFORMATS = []
-URL = "http://localhost:8080"
-
+#SYSTEM_ID = "clam"
+#SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
+#SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
+#COMMAND = ""
+#ROOT = "."
+#PARAMETERS = []
+#INPUTFORMATS = []
+#OUTPUTFORMATS = []
+#URL = "http://localhost:8080"
+#USERS = None
 
 def printlog(msg):
     now = datetime.datetime.now()
@@ -70,7 +71,26 @@ class BadRequest(web.webapi.HTTPError):
         super(BadRequest,self).__init__(status, headers, message)
 
 # Create bogus decorator
-requirelogin = lambda x: x 
+#requirelogin = lambda x: x 
+
+TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
+def userdb_lookup(user, realm):
+    global TEMPUSER
+    TEMPUSER = user
+    return settings.USERS[user] #possible KeyError is captured by digest.auth itself!
+
+
+
+def requirelogin(f):
+    global TEMPUSER
+    if settings.USERS:
+        f = digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
+    def wrapper(*args, **kwargs):
+        args = list(args)
+        args.append(TEMPUSER)
+        args = set(args)
+        return f(*args, **kwargs)
+    return wraps(f)(wrapper)
 
 class JobService(object):
     clam_version = 0.1
@@ -84,25 +104,24 @@ class JobService(object):
     )
 
     def __init__(self):    
-        global COMMAND,ROOT, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS
         printlog("Starting CLAM JobService, version " + str(self.clam_version) + " ...")
-        if not ROOT or not os.path.isdir(ROOT):
-            print >>sys.stderr,"ERROR: Specified root path " + ROOT + " not found"                 
+        if not settings.ROOT or not os.path.isdir(settings.ROOT):
+            print >>sys.stderr,"ERROR: Specified root path " + settings.ROOT + " not found"                 
             sys.exit(1)
-        elif not COMMAND.split(" ")[0] or os.system("which " + COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
-            print >>sys.stderr,"ERROR: Specified command " + COMMAND.split(" ")[0] + " not found"                 
+        elif not settings.COMMAND.split(" ")[0] or os.system("which " + settings.COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
+            print >>sys.stderr,"ERROR: Specified command " + settings.COMMAND.split(" ")[0] + " not found"                 
             sys.exit(1)            
-        #elif not INPUTFORMATS:
+        #elif not settings.INPUTFORMATS:
         #    print >>sys.stderr,"ERROR: No inputformats specified!"
         #    sys.exit(1)            
-        #elif not OUTPUTFORMATS:
+        #elif not settings.OUTPUTFORMATS:
         #    print >>sys.stderr,"ERROR: No outputformats specified!"
         #    sys.exit(1)            
-        elif not PARAMETERS:
+        elif not settings.PARAMETERS:
             print >>sys.stderr,"WARNING: No parameters specified in settings module!"
         else:            
             try:
-                for parametergroup, parameters in PARAMETERS:
+                for parametergroup, parameters in settings.PARAMETERS:
                     for parameter in parameters:
                         assert isinstance(parameter,AbstractParameter)
             except:
@@ -116,9 +135,8 @@ class JobService(object):
     @staticmethod
     def corpusindex(): 
             """Get list of pre-installed corpora"""
-            global ROOT
             corpora = []
-            for f in glob.glob(ROOT + "corpora/*"):
+            for f in glob.glob(settings.ROOT + "corpora/*"):
                 if os.path.isdir(f):
                     corpora.append(os.path.basename(f))
             return corpora
@@ -127,23 +145,21 @@ class JobService(object):
     def inputformats(name="inputformat"):
         """Renders a list of input formats"""
         #MAYBE TODO: add selected?
-        global INPUTFORMATS
         render = web.template.render('templates')
-        return render.inputformats(name, [ (format.__class__.__name__, format.name ) for format in INPUTFORMATS ])
+        return render.inputformats(name, [ (format.__class__.__name__, format.name ) for format in settings.INPUTFORMATS ])
     
 
 
 class Index(object):
     @requirelogin
-    def GET(self):
+    def GET(self, user = None):
         """Get list of projects"""
-        global ROOT, URL, SYSTEM_ID, SYSTEM_NAME
         projects = []
-        for f in glob.glob(ROOT + "projects/*"):
+        for f in glob.glob(settings.ROOT + "projects/*"):
             if os.path.isdir(f):
                 projects.append(os.path.basename(f))
         render = web.template.render('templates')
-        return render.index(SYSTEM_ID, SYSTEM_NAME, URL, projects)
+        return render.index(settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.URL, projects)
         
 
 
@@ -152,18 +168,37 @@ class Project(object):
     @staticmethod
     def path(project):
         """Get the path to the project (static method)"""
-        global ROOT
-        return ROOT + "projects/" + project + "/"
+        return settings.ROOT + "projects/" + project + "/"
 
     @staticmethod
-    def create(project):         
+    def create(project, user):         
         """Create project skeleton if it does not already exist (static method)"""
-        global ROOT
-        if not os.path.isdir(ROOT + "projects/" + project):
+        if not os.path.isdir(settings.ROOT + "projects/" + project):
             printlog("Creating project '" + project + "'")
             os.mkdir(ROOT + "projects/" + project)
             os.mkdir(ROOT + "projects/" + project + "/input")
             os.mkdir(ROOT + "projects/" + project + "/output")
+            if not settings.PROJECTS_OPEN:
+                f = codecs.open(settings.ROOT + "projects/" + project + '.users','w','utf-8')                         
+                f.write(user + "\n")
+                f.close()
+
+    @staticmethod
+    def access(project, user):
+        """Checks whether the specified user has access to the project"""
+        userfile = Project.path(project) + ".users"
+        if os.path.isfile(userfile):
+            access = False
+            f = codecs.open(userfile,'r','utf-8')
+            for line in f:
+                line = line.strip()
+                if line and user == line.strip():
+                    access = True
+                    break
+            f.close()
+            return access
+        else:
+            return True #no access file, grant access for all users
 
     def pid(self, project):
         pidfile = Project.path(project) + '.pid'
@@ -257,18 +292,16 @@ class Project(object):
         return paths
 
     def inputindex(self,project):        
-        global INPUTFORMATS
-        return self.dirindex(project,INPUTFORMATS,'input')
+        return self.dirindex(project,settings.INPUTFORMATS,'input')
 
 
 
     def outputindex(self,project, d = ''):        
-        global OUTPUTFORMATS
-        return self.dirindex(project,OUTPUTFORMATS,'output')
+        return self.dirindex(project,settings.OUTPUTFORMATS,'output')
 
 
-    def response(self, project, parameters, conffile = False):
-        global SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
+    def response(self, user, project, parameters, conffile = False):
+        #global SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
         statuscode, statusmsg = self.status(project)
         corpora = []
         if statuscode == STATUS_READY:
@@ -293,30 +326,32 @@ class Project(object):
                     errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(SYSTEM_ID, SYSTEM_NAME, project, URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, OUTPUTFORMATS, INPUTFORMATS, conffile )
+        return render.response(settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, conffile )
         
                     
     @requirelogin
-    def GET(self, project):
+    def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
-        global PARAMETERS
+        if user and not Project.access(project, user):
+            return web.webapi.Unauthorized()
         if not self.exists(project):
             return web.webapi.NotFound()
         else:
-            return self.response(project, PARAMETERS)
+            return self.response(user, project, settings.PARAMETERS)
 
 
     @requirelogin
-    def PUT(self, project):
+    def PUT(self, project, user=None):
         """Create an empty project"""
-        Project.create(project)
+        Project.create(project, user)
         return "" #200
 
     @requirelogin
-    def POST(self, project):
-        global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
-
-        Project.create(project)
+    def POST(self, project, user=None):
+        #global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
+        Project.create(project, user)
+        if user and not Project.access(project, user):
+            return web.webapi.Unauthorized()
                     
         #Generate arguments based on POSTed parameters
         params = []
@@ -327,7 +362,7 @@ class Project(object):
         #on the global variable, that won't be thread-safe, we first
         #make a (shallow) copy and act on that  
         parameters = []
-        for parametergroup, parameterlist in PARAMETERS:
+        for parametergroup, parameterlist in settings.PARAMETERS:
             newparameterlist = []
             for parameter in parameterlist:
                 newparameterlist.append(copy(parameter))
@@ -357,18 +392,18 @@ class Project(object):
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
             #raise BadRequest(unicode(self.GET(project)))
-            return self.response(project, parameters)
+            return self.response(user, project, parameters)
         else:
             #write clam.xml output file
             render = web.template.render('templates')
             f = open(Project.path(project) + "clam.xml",'w')
-            f.write(str(self.response(project, parameters, True)))
+            f.write(str(self.response(user, project, parameters, True)))
             f.close()
 
 
 
             #Start project with specified parameters
-            cmd = COMMAND
+            cmd = settings.COMMAND
             cmd = cmd.replace('$PARAMETERS', " ".join(params))
             if 'usecorpus' in postdata and postdata['usecorpus']:
                 corpus = postdata['usecorpus'].replace('..','') #security            
@@ -382,11 +417,12 @@ class Project(object):
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
             cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
             cmd = cmd.replace('$CONFFILE',Project.path(project) + 'clam.xml')
+            cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #TODO: protect against insertion
-            printlog("Starting " + COMMAND + ": " + repr(cmd) + " ..." )
+            printlog("Starting " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
             if process:
                 pid = process.pid
@@ -394,12 +430,12 @@ class Project(object):
                 f = open(Project.path(project) + '.pid','w')
                 f.write(str(pid))
                 f.close()
-                return self.GET(project) #return 200 -> GET
+                return self.response(user, project, parameters) #return 200 -> GET
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
     @requirelogin
-    def DELETE(self, project):
+    def DELETE(self, project, user=None):
         global STATUS_RUNNING
         if not self.exists(project):
             return web.webapi.NotFound()
@@ -413,8 +449,7 @@ class Project(object):
 class FileHandler(object):
 
     @requirelogin
-    def GET(self,project, filename):    
-        global OUTPUTFORMATS
+    def GET(self, project, filename, user=None):    
         path = Project.path(project) + "output/" + filename.replace("..","")
         
         #TODO: find outputformat?
@@ -432,7 +467,7 @@ class FileHandler(object):
 class OutputInterface(object):
 
     @requirelogin        
-    def GET(self, project):
+    def GET(self, project, user=None):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project) + '.download'):
             #make sure we don't start two compression processes at the same time
@@ -476,7 +511,7 @@ class OutputInterface(object):
                 yield line
                
     #@requirelogin
-    #def POST(self, project):
+    #def POST(self, project, user=None):
     #    """Trigger generation of download package"""
     #    if not os.path.isfile(Project.path(project) + '.download'):
     #        postdata = web.input() 
@@ -496,7 +531,7 @@ class OutputInterface(object):
     #    return "" #200  
 
     @requirelogin
-    def DELETE(self, project):          
+    def DELETE(self, project, user=None):          
         """Reset system, delete all output files and prepare for a new run"""
         d = Project.path(project) + "output"
         if os.path.isdir(d):
@@ -620,14 +655,12 @@ class Uploader(object):
         return o
 
     @requirelogin
-    def GET(self, project):
+    def GET(self, project, user=None):
         #should use template instead
         return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     @requirelogin
-    def POST(self, project):
-        global INPUTFORMATS, URL
-
+    def POST(self, project, user=None):
         #postdata = web.input()
 
         #defaults (max 25 uploads)
@@ -644,7 +677,7 @@ class Uploader(object):
         for i in range(1,int(postdata['uploadcount']) + 1):
             if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
                 inputformat = None
-                for f in INPUTFORMATS:                
+                for f in settings.INPUTFORMATS:                
                     if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                         inputformat = f
             
@@ -656,7 +689,7 @@ class Uploader(object):
         Project.create(project)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + URL + "/static/interface.xsl\"?>\n"
+        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + settings.URL + "/static/interface.xsl\"?>\n"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
@@ -747,7 +780,8 @@ if __name__ == "__main__":
         print >> sys.stderr, "ERROR: Invalid service module specified!"
         sys.exit(1)
     else:
-        import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
+        #import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
+        import_string = "import " + settingsmodule + " as settings"
         exec import_string
     
     #remove first argument (web.py wants port in sys.argv[1]
@@ -758,8 +792,9 @@ if __name__ == "__main__":
         del sys.argv[1]
 
     # Create decorator
-    if USERS:
-        requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
+    #requirelogin = real_requirelogin #fool python :) 
+    #if USERS:
+    #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
         
 
     JobService() #start
