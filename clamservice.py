@@ -24,6 +24,7 @@ import datetime
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
+import common.status 
 import common.parameters
 import common.formats
 import common.digestauth
@@ -33,12 +34,6 @@ import config.defaults as settings #will be overridden by real settings later
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
-       
-STATUS_READY = 0
-STATUS_RUNNING = 1
-STATUS_DONE = 2
-STATUS_UPLOAD = 10 #processing after upload
-STATUS_DOWNLOAD = 11 #preparing before download
 
 VERSION = 0.2
 
@@ -257,24 +252,23 @@ class Project(object):
 
 
     def status(self, project):
-        global STATUS_READY, STATUS_RUNNING, STATUS_DONE, STATUS_DOWNLOAD, STATUS_UPLOAD
         if self.running(project):
             statusfile = Project.path(project) + ".status"
             if os.path.isfile(statusfile):
                 f = open(statusfile)
                 msg = f.read(os.path.getsize(statusfile))
                 f.close()
-                return (STATUS_RUNNING, msg)
+                return (common.status.RUNNING, msg)
             else:
-                return (STATUS_RUNNING, "The system is running") #running
+                return (common.status.RUNNING, "The system is running") #running
         elif self.done(project):
-            return (STATUS_DONE, "Done")
+            return (common.status.DONE, "Done")
         elif self.preparingdownload(project):
-            return (STATUS_DOWNLOAD, "Preparing package for download, please wait...")
+            return (common.status.DOWNLOAD, "Preparing package for download, please wait...")
         elif self.processingupload(project):
-            return (STATUS_UPLOAD, "Processing upload, please wait...")
+            return (common.status.UPLOAD, "Processing upload, please wait...")
         else:
-            return (STATUS_READY, "Ready to start")
+            return (common.status.READY, "Ready to start")
 
 
     def dirindex(self, project, formats, mode = 'output', d = ''):
@@ -306,15 +300,15 @@ class Project(object):
         global VERSION
         statuscode, statusmsg = self.status(project)
         corpora = []
-        if statuscode == STATUS_READY:
+        if statuscode == common.status.READY:
             corpora = JobService.corpusindex()
         else:
             corpora = []
-        if statuscode == STATUS_DONE:
+        if statuscode == common.status.DONE:
             outputpaths = self.outputindex(project)
         else:
             outputpaths = []        
-        if statuscode == STATUS_READY:
+        if statuscode == common.status.READY:
             inputpaths = self.inputindex(project)
         else:
             inputpaths = []      
@@ -349,8 +343,7 @@ class Project(object):
         return "" #200
 
     @requirelogin
-    def POST(self, project, user=None):
-        #global COMMAND, PARAMETERS, SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL  
+    def POST(self, project, user=None):  
         Project.create(project, user)
         if user and not Project.access(project, user):
             return web.webapi.Unauthorized()
@@ -438,11 +431,10 @@ class Project(object):
 
     @requirelogin
     def DELETE(self, project, user=None):
-        global STATUS_RUNNING
         if not self.exists(project):
             return web.webapi.NotFound()
         statuscode, _ = self.status(project)
-        if statuscode == STATUS_RUNNING:
+        if statuscode == common.status.RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )
         shutil.rmtree(Project.path(project))
