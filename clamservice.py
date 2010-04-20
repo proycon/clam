@@ -40,6 +40,7 @@ STATUS_DONE = 2
 STATUS_UPLOAD = 10 #processing after upload
 STATUS_DOWNLOAD = 11 #preparing before download
 
+VERSION = 0.2
 
 DEBUG = False
     
@@ -85,7 +86,7 @@ def userdb_lookup(user, realm):
 def requirelogin(f):
     global TEMPUSER
     if settings.USERS:
-        f = digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
+        f = common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
     def wrapper(*args, **kwargs):
         args = list(args)
         args.append(TEMPUSER)
@@ -94,7 +95,6 @@ def requirelogin(f):
     return wraps(f)(wrapper)
 
 class JobService(object):
-    clam_version = 0.1
 
     urls = (
     '/', 'Index',
@@ -104,8 +104,9 @@ class JobService(object):
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHandler',
     )
 
-    def __init__(self):    
-        printlog("Starting CLAM JobService, version " + str(self.clam_version) + " ...")
+    def __init__(self):
+        global VERSION    
+        printlog("Starting CLAM JobService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             print >>sys.stderr,"ERROR: Specified root path " + settings.ROOT + " not found"                 
             sys.exit(1)
@@ -176,9 +177,9 @@ class Project(object):
         """Create project skeleton if it does not already exist (static method)"""
         if not os.path.isdir(settings.ROOT + "projects/" + project):
             printlog("Creating project '" + project + "'")
-            os.mkdir(ROOT + "projects/" + project)
-            os.mkdir(ROOT + "projects/" + project + "/input")
-            os.mkdir(ROOT + "projects/" + project + "/output")
+            os.mkdir(settings.ROOT + "projects/" + project)
+            os.mkdir(settings.ROOT + "projects/" + project + "/input")
+            os.mkdir(settings.ROOT + "projects/" + project + "/output")
             if not settings.PROJECTS_OPEN:
                 f = codecs.open(settings.ROOT + "projects/" + project + '.users','w','utf-8')                         
                 f.write(user + "\n")
@@ -284,7 +285,7 @@ class Project(object):
             else:
                 filename = os.path.basename(f)
                 if filename[0] == '.': continue #skip hidden files
-                format = Format() #unspecified format
+                format = common.Format() #unspecified format
                 for fmt in formats:
                     if fmt.match(filename):
                         format = fmt
@@ -302,7 +303,7 @@ class Project(object):
 
 
     def response(self, user, project, parameters, conffile = False):
-        #global SYSTEM_ID, SYSTEM_NAME, STATUS_READY, STATUS_DONE, OUTPUTFORMATS, INPUTFORMATS, URL
+        global VERSION
         statuscode, statusmsg = self.status(project)
         corpora = []
         if statuscode == STATUS_READY:
@@ -327,7 +328,7 @@ class Project(object):
                     errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, conffile )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, conffile )
         
                     
     @requirelogin
@@ -409,7 +410,7 @@ class Project(object):
             if 'usecorpus' in postdata and postdata['usecorpus']:
                 corpus = postdata['usecorpus'].replace('..','') #security            
                 #use a preinstalled corpus:
-                if os.path.exists(ROOT + "corpora/" + corpus):
+                if os.path.exists(settings.ROOT + "corpora/" + corpus):
                     cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
                 else:
                     raise web.webapi.NotFound("Corpus " + corpus + " not found")
@@ -719,7 +720,7 @@ class Uploader(object):
     
 
             inputformat = None
-            for f in INPUTFORMATS:                
+            for f in settings.INPUTFORMATS:                
                 if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                     inputformat = f
 
@@ -794,6 +795,11 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == '-d':
         DEBUG = True
         del sys.argv[1]
+
+    #Check version
+    if settings.REQUIRE_VERSION < VERSION:
+        print >> sys.stderr, "Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required"
+        sys.exit(1)      
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 

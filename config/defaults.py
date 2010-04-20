@@ -19,6 +19,8 @@ from common.parameters import *
 from common.formats import *
 from common.digestauth import pwhash
 
+REQUIRE_VERSION = 0.2
+
 #The System ID, a short alphanumeric identifier for internal use only
 SYSTEM_ID = "clam"
 

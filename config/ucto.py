@@ -18,6 +18,8 @@ from common.parameters import *
 from common.formats import *
 from common.digestauth import pwhash
 
+REQUIRE_VERSION = 0.2
+
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Unicode Tokeniser"
 SYSTEM_DESCRIPTION = "This is a tokeniser"
