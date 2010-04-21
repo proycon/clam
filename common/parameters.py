@@ -97,6 +97,7 @@ class AbstractParameter(object):
     def xml(self):
         xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
+        xml += ' flag="'+self.paramflag + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
         for key, v in self.kwargs.items():    
