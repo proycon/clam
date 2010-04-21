@@ -91,7 +91,7 @@
      <h3>Status</h3>
      <xsl:if test="@errors = 'yes'">
       <div class="error">
-            <strong>Error:</strong> <xsl:value-of select="@errormsg"/>
+            <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       </div>
      </xsl:if>     
      <xsl:choose>

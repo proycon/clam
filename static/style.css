@@ -43,7 +43,7 @@ div.box {
     font-weight: bold;
     font-size: 120%;
 }
-#status.error {
+#status .error {
     margin: 2px;
     margin-left: auto;
     margin-right: auto;
@@ -51,8 +51,9 @@ div.box {
     padding: 10px;
     text-align: center;
     background: #5c0202;
-    border: 1px dashed #b81515;
+    border: 3px dashed #b81515;
     color: white;
+    font-size: 120%;
 }
 h3 {
     color: #ac8644;
