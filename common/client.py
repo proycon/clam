@@ -15,6 +15,8 @@
 
 from lxml import etree as ElementTree
 from StringIO import StringIO
+import codecs
+import os.path
 
 import common.status
 import common.parameters
@@ -34,11 +36,19 @@ class CLAMFile(object):
             self.format = format
 
     def open(self):
-        pass #TODO
+        return codecs.open(self.path, 'r', self.format.encoding)
 
     def validate(self):
-        pass #TODO        
+        return self.format.validate(self.path)
 
+
+def getclamdata(filename):
+    f = codecs.open(filename,'r', 'utf-8')
+    xml = f.read(os.path.getsize(filename))
+    f.close()
+    return CLAMData(xml)
+    
+    
 
 class CLAMData(object):    
     def __init__(self, xml):
@@ -58,6 +68,10 @@ class CLAMData(object):
             raise FormatError()
         if int(root.attribs['version']) > VERSION:
             raise Exception("The clam client version is too old!")
+        self.system_id = root.attribs['id']
+        self.system_name = root.attribs['name']        
+        self.project = root.attribs['project']
+        self.user = root.attribs['user']
 
         for node in root:
             if node.tag == 'status':
@@ -100,8 +114,38 @@ class CLAMData(object):
                         self.input.append( CLAMFile(filenode.value, selectedformat) )
                                  
  
+class CLAMAuth(object):
+    def __init__(self, user, password):
+        pass
 
 class CLAMClient(object):
-    def __init__(self,host, port):
+    def __init__(self, host, port):
         pass
     
+    def getproject(self, project, auth = None):
+        """query the project status"""
+        pass
+    
+    def createproject(self,project, auth = None):
+        pass
+
+    def postproject(self, project, parameters, auth = None):
+        pass
+
+    def abortproject(self,project, auth = None):
+        """aborts and deletes a project"""
+        pass
+
+    def downloadarchive(self, project, format = 'zip', auth = None):
+        """download all output as archive"""
+        pass
+
+    def downloadfile(self, project, path, auth = None):
+        """download one output file"""
+        pass
+
+    def uploadfile(self, project, path, format, auth = None):
+        """upload a file"""
+        pass
+
+

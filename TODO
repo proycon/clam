@@ -6,7 +6,7 @@
 Extra features:
     - Automatic encoding conversion for inputformats?
 
-
+- Write client
 - Write separate webinterface (django)
 
 Later:
