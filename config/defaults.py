@@ -68,11 +68,13 @@ COMMAND = ""
 #Example:
 #COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
 
+#The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS = []
 
 #List of supported Input formats by the system
+#New format types should be added to common/formats.py, and can then be used here:
 INPUTFORMATS = []
 
-#List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered)
+#List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered at the same time)
 OUTPUTFORMATS = []
 

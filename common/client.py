@@ -41,6 +41,8 @@ class CLAMFile(object):
     def validate(self):
         return self.format.validate(self.path)
 
+    def __str__(self):
+        return self.path
 
 def getclamdata(filename):
     f = codecs.open(filename,'r', 'utf-8')
@@ -103,7 +105,7 @@ class CLAMData(object):
                         for format in self.inputformats: 
                             if format.name == filenode.attribs['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile(filenode.value, selectedformat) )
+                        self.input.append( CLAMFile('input/' + filenode.value, selectedformat) )
             elif node.tag == 'output': 
                  for filenode in node:
                     if node.tag == 'path':
@@ -111,8 +113,19 @@ class CLAMData(object):
                         for format in self.outputformats: 
                             if format.name == filenode.attribs['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile(filenode.value, selectedformat) )
-                                 
+                        self.input.append( CLAMFile('output/' + filenode.value, selectedformat) )
+
+    def parameter(self, id):                                 
+        """Return the specified parameter"""
+        for parametergroup, parameters in self.parameters:
+            for parameter in paramters:
+                if parameter.id == id:
+                    return parameter
+        raise KeyError
+
+    def __getattr__(self, id):                                 
+        """Return the specified parameter"""
+        return self.parameter[id]
  
 class CLAMAuth(object):
     def __init__(self, user, password):
