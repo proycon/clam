@@ -213,6 +213,7 @@ class Project(object):
             return False
         #printdebug("Polling process " + str(pid) + ", still running?" ) 
         done = False
+        statuscode = 0
         try:
             returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
             if returnedpid == 0:
@@ -222,6 +223,7 @@ class Project(object):
         if done or returnedpid == pid:
             if os.path.isfile(Project.path(project) + ".pid"):
                 f = open(Project.path(project) + ".done",'w')
+                f.write(str(statuscode)) #non-zero exit codes are interpreted as errors!
                 f.close()
                 os.unlink(Project.path(project) + ".pid")
             return False        
@@ -239,6 +241,12 @@ class Project(object):
 
     def done(self,project):
         return os.path.isfile(Project.path(project) + ".done")
+
+    def exitstatus(self, project):
+        f = open(Project.path(project) + ".done")
+        status = int(f.read(1024))
+        f.close()
+        return status
 
     def preparingdownload(self,project):
         return os.path.isfile(Project.path(project) + ".download")
@@ -279,7 +287,7 @@ class Project(object):
             else:
                 filename = os.path.basename(f)
                 if filename[0] == '.': continue #skip hidden files
-                format = common.Format() #unspecified format
+                format = common.formats.Format() #unspecified format
                 for fmt in formats:
                     if fmt.match(filename):
                         format = fmt
@@ -298,7 +306,13 @@ class Project(object):
 
     def response(self, user, project, parameters, conffile = False):
         global VERSION
+
+        #check if there are invalid parameters:
+        errors = "no"
+        errormsg = ""
+
         statuscode, statusmsg = self.status(project)
+
         corpora = []
         if statuscode == common.status.READY:
             corpora = JobService.corpusindex()
@@ -306,20 +320,21 @@ class Project(object):
             corpora = []
         if statuscode == common.status.DONE:
             outputpaths = self.outputindex(project)
+            if self.exitstatus(project) != 0: #non-zero codes indicate errors!
+                errors = "yes"
+                errormsg = "An error occured within the system. Please inspect the error log for details"
         else:
             outputpaths = []        
         if statuscode == common.status.READY:
             inputpaths = self.inputindex(project)
         else:
             inputpaths = []      
-        #check if there are invalid parameters:
-        errors = "no"
-        errormsg = ""
+        
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:
                 if parameter.error:
                     errors = "yes"
-                    errormsg = "One or more parameters are invalid"
+                    if not errormsg: errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, conffile )
@@ -417,6 +432,8 @@ class Project(object):
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #TODO: protect against insertion
+            if settings.COMMAND.find("2>") == -1:
+                cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
             printlog("Starting " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
             if process:
@@ -683,7 +700,7 @@ class Uploader(object):
             else:
                 raise web.forbidden()
 
-        Project.create(project)
+        Project.create(project, user)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + settings.URL + "/static/interface.xsl\"?>\n"

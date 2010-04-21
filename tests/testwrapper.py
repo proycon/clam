@@ -22,7 +22,7 @@
 
 #general python modules:
 import sys
-from os import system #for calling the shell
+import os
 
 #import CLAM-specific modules:
 import common.client
@@ -61,7 +61,9 @@ for inputfile in clamdata.input:
     if isinstance(inputfile.format, common.formats.PlainTextFormat) or isinstance(inputfile.format, common.formats.TokenizedTextFormat): #if the input file is a plain text format
         common.status.writestatus(statusfile, "Processing " + os.path.basename(inputfile) + "...")
         #invoke 'rev' through the shell to reverse the input
-        system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(inputfile))
+        os.system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(inputfile))
 
-common.status.writestatus(statusfile, "Done")        
+common.status.writestatus(statusfile, "Done")       
+
+sys.exit(0) #non-zero exit codes indicate an error! 
 

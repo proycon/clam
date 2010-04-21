@@ -43,7 +43,17 @@ div.box {
     font-weight: bold;
     font-size: 120%;
 }
-
+#status.error {
+    margin: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    padding: 10px;
+    text-align: center;
+    background: #5c0202;
+    border: 1px dashed #b81515;
+    color: white;
+}
 h3 {
     color: #ac8644;
     text-decoration: small-caps;  

@@ -89,6 +89,11 @@
 <xsl:template match="/clam/status">
     <div id="status" class="box">
      <h3>Status</h3>
+     <xsl:if test="@errors = 'yes'">
+      <div class="error">
+            <strong>Error:</strong> <xsl:value-of select="@errormsg"/>
+      </div>
+     </xsl:if>     
      <xsl:choose>
       <xsl:when test="@code = 0">
         <div class="ready"><xsl:value-of select="@message"/></div>
@@ -188,7 +193,8 @@
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
-        <div id="upload">
+        <div id="upload" class="box">
+            <a href="">Return to the project view</a>
             <ul>
               <xsl:apply-templates select="file"/>  
             </ul>
