@@ -1,0 +1,17 @@
+\title{CLAM Documentation}
+
+\begin{document}
+
+
+\section{Introduction} 
+
+The Computational Linguistics Application Mediator (CLAM) allows you to quickly transform your
+Natural Language Processing application into a webservice. CLAM takes a description of your system and wraps itself around it, allowing end-users to upload input files to your application, and start your application with  parameters of their choice. Whilst the application runs, users can monitor its status. When the system is done, the output produced by the application can be downloaded and viewed.
+
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way.
+
+The CLAM webservice is a RESTful webservice. The responses it gives are in the CLAM XML format, but an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice.
+
+This documentation is split into two parts: a section for service developers and a section for those wanting to communicate with an existing service.
+
+\end{document}

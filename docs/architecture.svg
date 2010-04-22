@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47pre4 r22446"
+   sodipodi:docname="architecture.svg">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2875"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="4.4124929"
+     inkscape:cy="560.8122"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1361"
+     inkscape:window-height="749"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Livello 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ccffaa;stroke:#030301;stroke-width:2.51885962;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2840"
+       width="632.43158"
+       height="458.68539"
+       x="46.428947"
+       y="165.41017"
+       rx="13.940552"
+       ry="6.4631109" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834"
+       width="472.7514"
+       height="385.87827"
+       x="121.21831"
+       y="232.11832"
+       rx="13.938873"
+       ry="6.8605781" />
+    <rect
+       style="fill:#c8beb7;stroke:#030301;stroke-width:2.34705591;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2828"
+       width="297.23279"
+       height="295.21249"
+       x="264.53601"
+       y="288.5629"
+       rx="11.392917"
+       ry="6.8663449" />
+    <rect
+       style="fill:#000000;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2818"
+       width="232.33508"
+       height="200.01021"
+       x="300.29013"
+       y="345.35693"
+       rx="13.938873"
+       ry="6.8605781" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="310.39169"
+       y="460.51431"
+       id="text2820"><tspan
+         sodipodi:role="line"
+         id="tspan2822"
+         x="310.39169"
+         y="460.51431">NLP Application(s)</tspan><tspan
+         sodipodi:role="line"
+         x="310.39169"
+         y="490.51431"
+         id="tspan2824" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="244.45692"
+       y="262.42288"
+       id="text2830"><tspan
+         sodipodi:role="line"
+         id="tspan2832"
+         x="244.45692"
+         y="262.42288">CLAM Webservice</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="286.14801"
+       y="323.86893"
+       id="text2836"><tspan
+         sodipodi:role="line"
+         id="tspan2838"
+         x="286.14801"
+         y="323.86893">System wrapper script</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="258.59906"
+       y="201.81375"
+       id="text2842"><tspan
+         sodipodi:role="line"
+         id="tspan2844"
+         x="258.59906"
+         y="201.81375">CLAM Interface</tspan></text>
+    <rect
+       style="fill:#ffb380;stroke:#030301;stroke-width:1.35044682;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2828-2"
+       width="100.2395"
+       height="289.80154"
+       x="149.89046"
+       y="290.32999"
+       rx="3.8421743"
+       ry="6.7404923" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="-557.34485"
+       y="208.73332"
+       id="text2889"
+       transform="matrix(0.0045271,-0.99998975,0.99998975,0.0045271,0,0)"><tspan
+         sodipodi:role="line"
+         id="tspan2891"
+         x="-557.34485"
+         y="208.73332">Service Configuration</tspan></text>
+  </g>
+</svg>
