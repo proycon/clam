@@ -3,15 +3,65 @@
 \begin{document}
 
 
-\section{Introduction} 
+\chapter{Introduction} 
 
-The Computational Linguistics Application Mediator (CLAM) allows you to quickly transform your
-Natural Language Processing application into a webservice. CLAM takes a description of your system and wraps itself around it, allowing end-users to upload input files to your application, and start your application with  parameters of their choice. Whilst the application runs, users can monitor its status. When the system is done, the output produced by the application can be downloaded and viewed.
+The Computational Linguistics Application Mediator (CLAM) allows you to quickly and transparently transform your Natural Language Processing application into a webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around it, allowing end-users to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application. Whilst the application runs, users can monitor its status.
 
-CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way.
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, and the handling and validation of input take can be taken care of by CLAM.
 
-The CLAM webservice is a RESTful webservice. The responses it gives are in the CLAM XML format, but an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice.
+The kind of applications that CLAM is intended for are NLP applications, usually of a kind that do some processing on a text corpus. This corpus or smaller text can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
 
-This documentation is split into two parts: a section for service developers and a section for those wanting to communicate with an existing service.
+The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources. The principal resource in CLAM is called a project. Users can maintain various projects, each representing one specific run of the system, with specific input, output and parameters.
+
+The webservice provides its responses in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice.
+
+This documentation is split into two parts: a section for service providers/developers and a section for service clients, users those wanting to communicate with an existing service in an automated fashion.
+
+\chapter{Documentation for Service Providers}
+
+\section{Technical details}
+
+CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed. Note that the software is designed for UNIX systems only, as any serious work in the field of NLP is UNIX based anyhow. 
+
+Your NLP application should run on the same system. 
+
+
+\subsection{Installation}
+
+The following software is required to run CLAM. These will be available in any modern Linux or BSD distribution:
+
+\begin{itemize}
+\item python 2.5 (or a higher 2.x version)
+\item python-webpy, version 0.3
+\item python-lxml, version 2 or higher
+%\item python-libxslt1
+%\item python-django
+\end{itemize}
+
+Python will run on any TCP port of your choice. For security, it is recommended not to use HTTP port 80. Also make sure the port is open in the firewall, at least for the machines you want to allow access.
+
+\section{Architecture}
+
+CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. A CLAM webservice needs the following three components from the service developer:
+
+\begin{enumerate}
+\item A service configuration file
+\item A wrapper script for your NLP application
+\item An NLP application
+\end{enumerate}
+
+The wrapper script is not stricly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended.
+
+%\section{Resource oriented approach}
+
+%Being a RESTful webservice, CLAM has a resource-oriented approach. 
+
+
+\section{Service configuration}
+
+The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It should contain a 
+
+\chapter{Documentation for Service Clients}
+
 
 \end{document}

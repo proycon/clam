@@ -31,6 +31,13 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2855"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -41,7 +48,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
      inkscape:cx="4.4124929"
-     inkscape:cy="560.8122"
+     inkscape:cy="729.38363"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -58,7 +65,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -166,5 +173,47 @@
          id="tspan2891"
          x="-557.34485"
          y="208.73332">Service Configuration</tspan></text>
+    <rect
+       style="fill:#aaccff;stroke:#030301;stroke-width:2.59500003000000001;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2839"
+       width="212.85715"
+       height="94.285713"
+       x="42.85714"
+       y="19.505039"
+       rx="13.938873"
+       ry="6.8605781" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="147.14285"
+       y="55.219326"
+       id="text2841"><tspan
+         sodipodi:role="line"
+         id="tspan2843"
+         x="147.14285"
+         y="55.219326">End-User</tspan><tspan
+         sodipodi:role="line"
+         x="147.14285"
+         y="85.21933"
+         id="tspan2845">in webbrowser</tspan></text>
+    <rect
+       style="fill:#aaccff;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2839-3"
+       width="212.85715"
+       height="94.285713"
+       x="422.14285"
+       y="19.505039"
+       rx="13.938873"
+       ry="6.8605781" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="533.57147"
+       y="69.505043"
+       id="text2841-5"><tspan
+         sodipodi:role="line"
+         x="533.57147"
+         y="69.505043"
+         id="tspan2845-7">Automated Client</tspan></text>
   </g>
 </svg>
