@@ -176,7 +176,7 @@ class Project(object):
             os.mkdir(settings.ROOT + "projects/" + project + "/input")
             os.mkdir(settings.ROOT + "projects/" + project + "/output")
             if not settings.PROJECTS_OPEN:
-                f = codecs.open(settings.ROOT + "projects/" + project + '.users','w','utf-8')                         
+                f = codecs.open(settings.ROOT + "projects/" + project + '/.users','w','utf-8')                         
                 f.write(user + "\n")
                 f.close()
 
