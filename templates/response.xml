@@ -1,10 +1,10 @@
-$def with (version, system_id,system_name,user, project, url, statuscode,statusmessage, errors, errormsg, parameterdata, corpora, outputpaths, inputpaths,outputformats, inputformats, conffile)
+$def with (version, system_id,system_name,user, project, url, statuscode,statusmessage, errors, errormsg, parameterdata, corpora, outputpaths, inputpaths,outputformats, inputformats, datafile)
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 <clam version="$version" id="$system_id" name="$system_name" project="$project" user="$user">
      $if not conffile:
         <status code="$statuscode" message="$statusmessage" errors="$errors" errormsg="$errormsg" />
-     $if statuscode == 0 or statuscode == 2 or conffile:
+     $if statuscode == 0 or statuscode == 2 or datafile:
         <parameters>
             $for group, parameters in parameterdata:
                 <parametergroup name="$group">
@@ -12,7 +12,7 @@ $def with (version, system_id,system_name,user, project, url, statuscode,statusm
                         $:parameter.xml()
                 </parametergroup>
         </parameters>
-     $if statuscode == 0 or conffile:
+     $if statuscode == 0 or datafile:
         <corpora>
             $for corpus in corpora:
                 <corpus>$corpus</corpus>
@@ -25,7 +25,7 @@ $def with (version, system_id,system_name,user, project, url, statuscode,statusm
             $for path, format, encoding in inputpaths:
                 <path format="$format" encoding="$encoding">$path</path>
         </input>
-     $if statuscode == 2 or conffile:
+     $if statuscode == 2 or datafile:
         <outputformats>
             $for format in outputformats:
                 $:format.xml()

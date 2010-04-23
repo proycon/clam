@@ -51,6 +51,10 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 \end{itemize}
 
+Starting the service is done by launching clamservice.py with the name of your service configuration and optionally a port number (the default is 8080).
+
+\texttt{\$ clamservice.py config.ucto 8080}
+
 \section{Architecture}
 
 CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. A CLAM webservice needs the following three components from the service developer:
@@ -70,7 +74,34 @@ The wrapper script is not stricly mandatory if the NLP application can be direct
 
 \section{Service configuration}
 
-The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected.
+The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforwards nature, knowledge of Python is not required to make your own.
+
+The server configuration files reside in the \texttt{config/} directory. Making a new webservice starts with copying the sample \texttt{defaults.py} and editing your copy.
+
+One of the first things to configure is the root path. All projects will be confined to the \texttt{projects/} directory under this root path, each project having its own subdirectory. Pre-installed corpora should be put in the \texttt{corpora/} directory.
+ 
+\subsection{Command}
+
+Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported and there are some special variables that will be automatically set by CLAM:
+
+\begin{itemize}
+\item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possible in subdirectories).
+\item \texttt{\$OUTPÛTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.
+\item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file consists only of the latest message.
+\item \texttt{\$DATAFILE} - This is the absolute path to the data file that indica
+
+
+\end{itemize}
+
+
+Make sure the actual command is an absolute path or the script is in the user's \textt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory.
+
+%Within this directory, there will be an input/ and output/ directory, the full path is stored in \texttt{\$INPUTDIRECTORY} respectively \texttt{\$OUTPUTDIRECTORY} and can be passed as arguments to your script. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory.
+
+
+
+
+
 
 
 

@@ -308,7 +308,7 @@ class Project(object):
         return self.dirindex(project,settings.OUTPUTFORMATS,'output')
 
 
-    def response(self, user, project, parameters, conffile = False):
+    def response(self, user, project, parameters, datafile = False):
         global VERSION
 
         #check if there are invalid parameters:
@@ -341,7 +341,7 @@ class Project(object):
                     if not errormsg: errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, conffile )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile )
         
                     
     @requirelogin
@@ -430,7 +430,7 @@ class Project(object):
                 cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
             cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
-            cmd = cmd.replace('$CONFFILE',Project.path(project) + 'clam.xml')
+            cmd = cmd.replace('$DATAFILE',Project.path(project) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        

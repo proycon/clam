@@ -18,6 +18,32 @@
   <defs
      id="defs4">
     <marker
+       inkscape:stockid="Arrow1Mstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Mstart"
+       style="overflow:visible">
+      <path
+         id="path3733"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.4) translate(10,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Mstart"
+       style="overflow:visible">
+      <path
+         id="path3751"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.6) translate(0,0)" />
+    </marker>
+    <marker
        inkscape:stockid="Arrow2Mend"
        orient="auto"
        refY="0.0"
@@ -112,6 +138,108 @@
          d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
          transform="scale(-0.6,-0.6)" />
     </marker>
+    <inkscape:perspective
+       id="perspective5975"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mstart-5"
+       style="overflow:visible">
+      <path
+         id="path3751-3"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(0.6,0.6)" />
+    </marker>
+    <inkscape:perspective
+       id="perspective6003"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6224"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6446"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-4-3"
+       style="overflow:visible">
+      <path
+         id="path3754-1-6"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <inkscape:perspective
+       id="perspective6474"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-9"
+       style="overflow:visible">
+      <path
+         id="path3754-9"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <inkscape:perspective
+       id="perspective6502"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6534"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6559"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective6612"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -121,8 +249,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="320.97555"
-     inkscape:cy="766.93259"
+     inkscape:cx="168.66636"
+     inkscape:cy="726.52649"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -189,31 +317,32 @@
        width="297.23279"
        height="295.21249"
        x="264.53601"
-       y="288.5629"
+       y="-583.77539"
        rx="11.392917"
-       ry="6.8663449" />
+       ry="6.8663449"
+       transform="scale(1,-1)" />
     <rect
-       style="fill:#000000;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#000000;stroke:#030301;stroke-width:2.16392851;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2818"
-       width="232.33508"
-       height="200.01021"
-       x="300.29013"
-       y="345.35693"
-       rx="13.938873"
-       ry="6.8605781" />
+       width="232.76614"
+       height="138.82198"
+       x="297.04413"
+       y="356.25305"
+       rx="13.964735"
+       ry="4.7617517" />
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
-       x="310.39169"
-       y="460.51431"
+       x="307.36124"
+       y="437.28079"
        id="text2820"><tspan
          sodipodi:role="line"
          id="tspan2822"
-         x="310.39169"
-         y="460.51431">NLP Application(s)</tspan><tspan
+         x="307.36124"
+         y="437.28079">NLP Application(s)</tspan><tspan
          sodipodi:role="line"
-         x="310.39169"
-         y="490.51431"
+         x="307.36124"
+         y="467.28079"
          id="tspan2824" /></text>
     <text
        xml:space="preserve"
@@ -244,7 +373,7 @@
          sodipodi:role="line"
          id="tspan2844"
          x="299.00516"
-         y="200.8036">CLAM Interface</tspan></text>
+         y="200.8036">CLAM Frontend</tspan></text>
     <rect
        style="fill:#ffb380;stroke:#030301;stroke-width:1.35044682;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2828-2"
@@ -327,35 +456,150 @@
          x="503.05594"
          y="88.676651">CLAM Client API</tspan></text>
     <rect
-       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.50879765;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2891-0"
+       width="152.61923"
+       height="39.482151"
+       x="63.596497"
+       y="179.04221"
+       rx="12.999749"
+       ry="6.8755898" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="68.690331"
+       y="203.32898"
+       id="text2893-9"><tspan
+         sodipodi:role="line"
+         id="tspan2895-7"
+         x="68.690331"
+         y="203.32898">CLAM Client API</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 84.044506,117.49122 c -0.131705,10.78993 -0.263414,21.57987 -0.395101,32.36979 -0.01594,1.30456 0.07952,7.68707 -0.09879,8.09245 -0.253484,0.57633 -0.93248,0.80867 -1.185964,1.38499 -0.21741,0.49431 -0.07087,5.80562 -0.08231,6.74372 -0.01099,0.89916 -0.02197,1.79832 -0.03294,2.69748 -0.0055,0.44959 0.37338,1.33667 -0.01646,1.34875 -0.389842,0.0121 0.02194,-1.79833 0.01646,-1.34875 -0.01097,0.89917 -0.02195,1.79833 -0.03293,2.69749"
+       id="path2950" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.61340046;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend)"
+       d="m 226.8471,114.50329 3.63258,123.21006"
+       id="path4405" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.36592197;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow2Mstart);marker-end:none"
+       d="m 575.2635,106.42041 0.60278,128.25454"
+       id="path4405-6" />
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="583.86816"
+       y="137.16399"
+       id="text5579"><tspan
+         sodipodi:role="line"
+         id="tspan5581"
+         x="583.86816"
+         y="137.16399">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="583.86816"
+         y="150.91399"
+         id="tspan6020">XML</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.36592197;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow2Mstart);marker-end:none"
+       d="M 555.42728,233.83683 555.28134,105.58095"
+       id="path4405-6-9" />
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="520.38483"
+       y="134.02992"
+       id="text5579-0"><tspan
+         sodipodi:role="line"
+         id="tspan5581-1"
+         x="520.38483"
+         y="134.02992">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="261.80603"
+       y="127.20959"
+       id="text5579-9"><tspan
+         sodipodi:role="line"
+         x="261.80603"
+         y="127.20959"
+         id="tspan6020-1">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="261.80603"
+         y="140.95959"
+         id="tspan6589">XML + XSL</tspan><tspan
+         sodipodi:role="line"
+         x="261.80603"
+         y="154.70959"
+         id="tspan6524">= xHTML</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 103.6137,175.91197 c 0.0975,-10.79029 0.19495,-21.5806 0.29241,-32.37088 0.0118,-1.3046 -0.10389,-7.68678 0.0731,-8.09272 0.25165,-0.57713 0.92991,-0.81163 1.18156,-1.38875 0.21584,-0.495 0.0525,-5.80581 0.0609,-6.74395 0.008,-0.89919 0.0163,-1.79838 0.0243,-2.69757 0.004,-0.4496 -0.37762,-1.33548 0.0122,-1.34879 0.3898,-0.0133 -0.0162,1.79839 -0.0122,1.34879 0.008,-0.8992 0.0162,-1.79839 0.0243,-2.69758"
+       id="path2950-7" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.61340046;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend)"
+       d="M 249.66956,240.05357 245.59721,116.85726"
+       id="path4405-8" />
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="192.08522"
+       y="131.1284"
+       id="text5579-9-0"><tspan
+         sodipodi:role="line"
+         x="192.08522"
+         y="131.1284"
+         id="tspan6020-1-8">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="45.080933"
+       y="140.09084"
+       id="text5579-0-6"><tspan
+         sodipodi:role="line"
+         id="tspan5581-1-6"
+         x="45.080933"
+         y="140.09084">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:11px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="120.38468"
+       y="134.15886"
+       id="text5579-99"><tspan
+         sodipodi:role="line"
+         id="tspan5581-5"
+         x="120.38468"
+         y="134.15886">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="120.38468"
+         y="147.90886"
+         id="tspan6020-0">xHTML</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="143.44167"
+       y="147.2655"
+       id="text6579"><tspan
+         sodipodi:role="line"
+         id="tspan6583" /></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2.59500003, 2.59500003;stroke-dashoffset:0"
+       id="rect2891-2"
        width="163.64471"
        height="39.39595"
-       x="63.639599"
-       y="179.08531"
+       x="332.34018"
+       y="518.49658"
        rx="13.938873"
        ry="6.8605781" />
     <text
        xml:space="preserve"
        style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       x="78.791855"
-       y="204.33913"
-       id="text2893-9"><tspan
+       x="347.49243"
+       y="543.75043"
+       id="text2893-3"><tspan
          sodipodi:role="line"
-         id="tspan2895-7"
-         x="78.791855"
-         y="204.33913">CLAM Client API</tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
-       d="m 200.02745,115.6784 c -4.92789,9.59978 -9.85579,19.19957 -14.78366,28.79935 -0.59582,1.16066 -3.35561,6.91645 -3.69593,7.19984 -0.48382,0.40289 -1.19519,0.30818 -1.67901,0.71107 -0.41497,0.34556 -2.6515,5.16525 -3.07993,5.99988 -0.41067,0.79997 -0.82133,1.59996 -1.23198,2.39994 -0.20533,0.4 -0.26164,1.36295 -0.61599,1.19998 -0.35435,-0.16297 0.82131,-1.59997 0.61599,-1.19998 -0.41066,0.79999 -0.82132,1.59997 -1.23198,2.39995"
-       id="path2950" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:4.61340046;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
-       d="M 201.12255,118.13268 260.8057,225.98367"
-       id="path4405" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:4.36592197;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
-       d="m 560.11121,107.43056 0.60278,128.25454"
-       id="path4405-6" />
+         id="tspan2895-1"
+         x="347.49243"
+         y="543.75043">CLAM Client API</tspan></text>
   </g>
 </svg>

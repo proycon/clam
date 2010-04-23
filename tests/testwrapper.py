@@ -30,14 +30,14 @@ import common.status
 import common.parameters
 import common.formats
 
-#this script takes three arguments: $CONFFILE $STATUSFILE $OUTPUTDIRECTORY
-conffile = sys.argv[1]
+#this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
+datafile = sys.argv[1]
 statusfile = sys.argv[2]
 outputdir = sys.argv[3]
 
 
-#Obtain all data from the CLAM system (stored in $CONFFILE (clam.xml))
-clamdata = common.client.getclamdata(conffile)
+#Obtain all data from the CLAM system (stored in $DATAFILE (clam.xml))
+clamdata = common.client.getclamdata(datafile)
 
 #You now have access to all data. A few properties at your disposition now are:
 # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output

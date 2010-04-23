@@ -58,7 +58,7 @@ PROJECTS_PUBLIC = True
 #                        its output files.
 #     $STATUSFILE      - Filename of the .status file where the system 
 #                        should output status messages. 
-#     $CONFFILE        - Filename of the clam.xml file describing the 
+#     $DATAFILE        - Filename of the clam.xml file describing the 
 #                        system and chosen configuration.
 #     $USERNAME        - The username of the currently logged in user
 #                        (set to "anonymous" if there is none)

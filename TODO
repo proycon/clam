@@ -1,8 +1,5 @@
 - fix bugs
-- Make status file check interveral configurable in settings
-- Render parameter groups!
 - Test user authentication
-- Catch errors from the system 
 
 - Encoding check?
 
