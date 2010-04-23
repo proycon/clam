@@ -85,7 +85,7 @@ def requirelogin(f):
     def wrapper(*args, **kwargs):
         args = list(args)
         args.append(TEMPUSER)
-        args = set(args)
+        args = tuple(args)
         return f(*args, **kwargs)
     return wraps(f)(wrapper)
 
@@ -93,7 +93,7 @@ class JobService(object):
 
     urls = (
     '/', 'Index',
-    '/([A-Za-z0-9_]*)/', 'Project',
+    '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
     '/([A-Za-z0-9_]*)/output/(.*)', 'FileHandler',
@@ -170,12 +170,15 @@ class Project(object):
     @staticmethod
     def create(project, user):         
         """Create project skeleton if it does not already exist (static method)"""
+        printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
+        if not project:
+            raise BadRequest('Empty project name!') 
         if not os.path.isdir(settings.ROOT + "projects/" + project):
             printlog("Creating project '" + project + "'")
             os.mkdir(settings.ROOT + "projects/" + project)
             os.mkdir(settings.ROOT + "projects/" + project + "/input")
             os.mkdir(settings.ROOT + "projects/" + project + "/output")
-            if not settings.PROJECTS_OPEN:
+            if not settings.PROJECTS_PUBLIC:
                 f = codecs.open(settings.ROOT + "projects/" + project + '/.users','w','utf-8')                         
                 f.write(user + "\n")
                 f.close()
@@ -256,6 +259,7 @@ class Project(object):
 
     def exists(self, project):
         """Check if the project exists"""
+        printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
         return os.path.isdir(Project.path(project))
 
 
@@ -343,11 +347,11 @@ class Project(object):
     @requirelogin
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
-        if user and not Project.access(project, user):
-            return web.webapi.Unauthorized()
         if not self.exists(project):
             return web.webapi.NotFound()
         else:
+            if user and not Project.access(project, user):
+                return web.webapi.Unauthorized()
             return self.response(user, project, settings.PARAMETERS)
 
 
