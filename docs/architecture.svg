@@ -17,6 +17,32 @@
    sodipodi:docname="architecture.svg">
   <defs
      id="defs4">
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Mend"
+       style="overflow:visible;">
+      <path
+         id="path3754"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.6) rotate(180) translate(0,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path3730"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
     <inkscape:perspective
        sodipodi:type="inkscape:persp3d"
        inkscape:vp_x="0 : 526.18109 : 1"
@@ -59,6 +85,33 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2930"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4601"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-4"
+       style="overflow:visible">
+      <path
+         id="path3754-1"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -68,8 +121,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="245.62624"
-     inkscape:cy="605.30818"
+     inkscape:cx="320.97555"
+     inkscape:cy="766.93259"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -185,13 +238,13 @@
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
-       x="258.59906"
-       y="201.81375"
+       x="299.00516"
+       y="200.8036"
        id="text2842"><tspan
          sodipodi:role="line"
          id="tspan2844"
-         x="258.59906"
-         y="201.81375">CLAM Interface</tspan></text>
+         x="299.00516"
+         y="200.8036">CLAM Interface</tspan></text>
     <rect
        style="fill:#ffb380;stroke:#030301;stroke-width:1.35044682;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2828-2"
@@ -247,12 +300,62 @@
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       x="573.9776"
-       y="69.505043"
+       x="568.92682"
+       y="53.342602"
        id="text2841-5"><tspan
          sodipodi:role="line"
-         x="573.9776"
-         y="69.505043"
+         x="568.92682"
+         y="53.342602"
          id="tspan2845-7">Automated Client</tspan></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2.59500003,2.59500003;stroke-dashoffset:0"
+       id="rect2891"
+       width="163.64471"
+       height="39.39595"
+       x="487.90369"
+       y="63.42284"
+       rx="13.938873"
+       ry="6.8605781" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="503.05594"
+       y="88.676651"
+       id="text2893"><tspan
+         sodipodi:role="line"
+         id="tspan2895"
+         x="503.05594"
+         y="88.676651">CLAM Client API</tspan></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2891-0"
+       width="163.64471"
+       height="39.39595"
+       x="63.639599"
+       y="179.08531"
+       rx="13.938873"
+       ry="6.8605781" />
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="78.791855"
+       y="204.33913"
+       id="text2893-9"><tspan
+         sodipodi:role="line"
+         id="tspan2895-7"
+         x="78.791855"
+         y="204.33913">CLAM Client API</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
+       d="m 200.02745,115.6784 c -4.92789,9.59978 -9.85579,19.19957 -14.78366,28.79935 -0.59582,1.16066 -3.35561,6.91645 -3.69593,7.19984 -0.48382,0.40289 -1.19519,0.30818 -1.67901,0.71107 -0.41497,0.34556 -2.6515,5.16525 -3.07993,5.99988 -0.41067,0.79997 -0.82133,1.59996 -1.23198,2.39994 -0.20533,0.4 -0.26164,1.36295 -0.61599,1.19998 -0.35435,-0.16297 0.82131,-1.59997 0.61599,-1.19998 -0.41066,0.79999 -0.82132,1.59997 -1.23198,2.39995"
+       id="path2950" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.61340046;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
+       d="M 201.12255,118.13268 260.8057,225.98367"
+       id="path4405" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:4.36592197;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Mend)"
+       d="m 560.11121,107.43056 0.60278,128.25454"
+       id="path4405-6" />
   </g>
 </svg>
