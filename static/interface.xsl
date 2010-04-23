@@ -166,9 +166,13 @@
     <form method="POST" enctype="multipart/form-data" action="">
     <div id="parameters" class="box">
         <h3>Parameter Selection</h3>
-        <table>
-        <xsl:apply-templates />
-        </table>
+
+        <xsl:for-each select="parametergroup">
+         <h4><xsl:value-of select="@name" /></h4>
+         <table>
+          <xsl:apply-templates />
+         </table>
+        </xsl:for-each>
 
         <div id="corpusselection">
         <label for="usecorpus">Input source:</label>

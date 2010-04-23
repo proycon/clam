@@ -45,6 +45,7 @@ USERS = None #no user authentication
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = True
 
+
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
 #absolute paths is preferred. The current working directory will be

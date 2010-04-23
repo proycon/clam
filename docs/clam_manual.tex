@@ -23,8 +23,6 @@ This documentation is split into two parts: a section for service providers/deve
 
 CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed. Note that the software is designed for UNIX systems only, as any serious work in the field of NLP is UNIX based anyhow. 
 
-Your NLP application should run on the same system. 
-
 
 \subsection{Installation}
 
@@ -38,7 +36,7 @@ The following software is required to run CLAM. These will be available in any m
 %\item python-django
 \end{itemize}
 
-Python will run on any TCP port of your choice. For security, it is recommended not to use HTTP port 80. Also make sure the port is open in the firewall, at least for the machines you want to allow access.
+Python will run on any TCP port of your choice. It is recommended not to use HTTP port 80. Also make sure the port is open in the firewall, at least for the machines you want to allow access.
 
 To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest to service providers:
 
@@ -72,8 +70,7 @@ The wrapper script is not stricly mandatory if the NLP application can be direct
 
 \section{Service configuration}
 
-The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It should contain a 
-
+The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected.
 
 
 

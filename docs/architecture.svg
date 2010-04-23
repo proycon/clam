@@ -38,6 +38,27 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2859"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2859-8"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2859-6"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -46,17 +67,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="4.4124929"
-     inkscape:cy="729.38363"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="245.62624"
+     inkscape:cy="605.30818"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1361"
-     inkscape:window-height="749"
+     inkscape:window-width="1440"
+     inkscape:window-height="796"
      inkscape:window-x="0"
      inkscape:window-y="24"
-     inkscape:window-maximized="0" />
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -74,14 +95,32 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#ccffaa;stroke:#030301;stroke-width:2.51885962;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#ccffaa;stroke:#030301;stroke-width:2.56806707;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2840"
-       width="632.43158"
-       height="458.68539"
-       x="46.428947"
-       y="165.41017"
-       rx="13.940552"
-       ry="6.4631109" />
+       width="632.38239"
+       height="476.81894"
+       x="46.453552"
+       y="165.43477"
+       rx="13.939467"
+       ry="6.7186217" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834-83"
+       width="472.7514"
+       height="385.87827"
+       x="132.32997"
+       y="243.22998"
+       rx="13.938873"
+       ry="6.8605781" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834-9"
+       width="472.7514"
+       height="385.87827"
+       x="126.26906"
+       y="237.16907"
+       rx="13.938873"
+       ry="6.8605781" />
     <rect
        style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2834"
@@ -195,24 +234,24 @@
          sodipodi:role="line"
          x="147.14285"
          y="85.21933"
-         id="tspan2845">in webbrowser</tspan></text>
+         id="tspan2847">in webbrowser</tspan></text>
     <rect
        style="fill:#aaccff;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2839-3"
        width="212.85715"
        height="94.285713"
-       x="422.14285"
+       x="462.54895"
        y="19.505039"
        rx="13.938873"
        ry="6.8605781" />
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       x="533.57147"
+       x="573.9776"
        y="69.505043"
        id="text2841-5"><tspan
          sodipodi:role="line"
-         x="533.57147"
+         x="573.9776"
          y="69.505043"
          id="tspan2845-7">Automated Client</tspan></text>
   </g>
