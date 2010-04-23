@@ -1,4 +1,5 @@
-- fix bugs
+- fix required parameter behaviour
+- implement guest behaviour for parameters
 - Test user authentication
 
 - Encoding check?
