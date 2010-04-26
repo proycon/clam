@@ -1,5 +1,7 @@
 \documentclass[a4paper,12pt]{report}
 \usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{placeins}
 
 \title{CLAM Documentation}
 \author{Maarten van Gompel}
@@ -63,7 +65,17 @@ Starting the service is done by launching clamservice.py with the name of your s
 
 \section{Architecture}
 
-CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. A CLAM webservice needs the following three components from the service developer:
+CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The scheme in Figure \ref{fig:arch} illustrates the various layers: 
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=130.0mm]{architecture.png}
+\end{center}
+\caption{The CLAM Architecture}
+\label{fig:arch} 
+\end{figure}
+
+A CLAM webservice needs the following three components from the service developer:
 
 \begin{enumerate}
 \item A service configuration file
