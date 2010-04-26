@@ -154,6 +154,7 @@ All parameters can take the following extra named arguments:
 %TODO
 
 \subsection{Inputformats \& Outputformats}
+\label{sec:formats}
 
 CLAM takes care of the handling of input and output formats. When a user uploads a file, he chooses from a list of options to select the desired input format. Each inputformat is associated with a particular extension. CLAM automatically renames the uploaded files so they get the desired extension, releaving the end-user of this burdain. If multiple extensions are defined the first is used. An extension is also associated with each outputformat, the system output files are recognised on the basis of this extension. Your system wrapper can recognise file formats also on the basis of their extension, or by explicitly getting their format from the \texttt{clam.xml} datafile. Moreover, input formats and output formats can also have associated validators, which can check if the file really is in the desired format. And for each inputformat and outputformat, a character encoding needs to be explicitly set.
 
@@ -180,7 +181,18 @@ Yet to be written... %TODO
 
 \section{Wrapper script}
 
+Service providers are encouraged to write a wrapper script that acts as the glue between CLAM and the NLP Application(s). CLAM will execute the wrapper script and the wrapper script will invoke the actual NLP Application(s). Using a wrapper script offers more flexibility than letting CLAM directly invoke the NLP Application, and allows the NLP Application itself to be totally independent of CLAM. 
 
+The wrapper script takes the arguments as selected for \texttt{COMMAND} in the service configuration file. There are some important things to take into account:
+
+\begin{itemize}
+\item All user-controllable input has to be read from the specified input directory. If you do not use the \texttt{clam.xml} data file, then you have to determine the file's format based on its extension. See Section \ref{sec:formats}.
+\item All user-viewable output must be put it the specified output directory. Make sure it has an extension CLAM will recognise.  See Section \ref{sec:formats}.
+\item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. 
+\item The wrapper script is always started with the current working directory set to the selected project directory.
+\end{itemize}
+
+The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie in to the CLAM Client API, which handles things such as reading the \texttt{clam.xml} data file.
 
 \chapter{Documentation for Service Clients}
 
