@@ -791,7 +791,7 @@ class Uploader(object):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule [port]"
+        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule ([port])"
         sys.exit(1)
     settingsmodule = sys.argv[1]
     #if not settingsmodule.isalpha():  #security precaution
@@ -812,7 +812,20 @@ if __name__ == "__main__":
     #Check version
     if settings.REQUIRE_VERSION < VERSION:
         print >> sys.stderr, "Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required"
-        sys.exit(1)      
+        sys.exit(1)   
+
+    if not settings.ROOT[-1] == "/":
+        settings.ROOT += "/" #append slash
+   
+    if not os.path.isdir(settings.ROOT):
+        print >> sys.stderr, "Root directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT)
+    if not os.path.isdir(settings.ROOT + 'corpora'):
+        print >> sys.stderr, "Corpora directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT + 'corpora')
+    if not os.path.isdir(settings.ROOT + 'projects'):
+        print >> sys.stderr, "Projects directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT + 'projects'))
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 
