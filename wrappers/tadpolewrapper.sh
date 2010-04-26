@@ -12,6 +12,6 @@ for f in $INPUTDIR*.txt; do
     filename=`basename $f`
     echo "Processing $filename" > $STATUSFILE
     #note that here the $PARAMETERS are passed just as they were received by CLAM
-    Tadpole --skip=p -t $f $PARAMETERS  > ${OUTPUTDIR}$filename.tok 
+    Tadpole --skip=p -t $f $PARAMETERS  > ${OUTPUTDIR}$filename.tadpole 
 done
 

@@ -497,7 +497,7 @@ class OutputInterface(object):
             #validation, security
             if format == 'zip':
                 contenttype = 'application/zip'
-                command = "/usr/bin/zip -r"
+                command = "/usr/bin/zip -r" #TODO: do not hard-code path
             elif format == 'tar.gz':
                 contenttype = 'application/x-gzip'
                 command = "/bin/tar -czf"
