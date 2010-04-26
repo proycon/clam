@@ -37,6 +37,5 @@ April:
     - Catch errors from the system 
     - Fixed bugs, render parameter groups
     - Started CLAM Documentation
-    - Fixed required parameter behaviour
+    - Lots of fixes
     - Finished UCTO service (may act as example)
-    

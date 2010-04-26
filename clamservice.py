@@ -423,7 +423,7 @@ class Project(object):
                 corpus = postdata['usecorpus'].replace('..','') #security            
                 #use a preinstalled corpus:
                 if os.path.exists(settings.ROOT + "corpora/" + corpus):
-                    cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+                    cmd = cmd.replace('$INPUTDIRECTORY', settings.ROOT + "corpora/" + corpus + "/")
                 else:
                     raise web.webapi.NotFound("Corpus " + corpus + " not found")
             else:
