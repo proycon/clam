@@ -1,7 +1,6 @@
 
 - fix abort button
-- fix output formats, they seem not to be recognised
-
+- fix corpus preselect
 
 - implement guest behaviour for parameters
 - Test user authentication

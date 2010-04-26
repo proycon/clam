@@ -58,7 +58,7 @@
            $("#abortbutton").click(function(event){
              $.ajax({ 
                 type: "DELETE", 
-                url: "", 
+                url: window.location.href, 
                 dataType: "xml", 
                 complete: function(xml){ 
                     window.location.href = "/"; /* back to index */
