@@ -18,9 +18,9 @@ from StringIO import StringIO
 import codecs
 import os.path
 
-import common.status
-import common.parameters
-import common.formats
+import clam.common.status
+import clam.common.parameters
+import clam.common.formats
 
 VERSION = 0.2
 
@@ -54,7 +54,7 @@ def getclamdata(filename):
 
 class CLAMData(object):    
     def __init__(self, xml):
-        self.status = common.status.READY
+        self.status = clam.common.status.READY
         self.parameters = []
         self.inputformats = []
         self.outputformats = []
@@ -84,7 +84,7 @@ class CLAMData(object):
                     if parametergroupnode.tag == 'parametergroup':
                         parameterlist = []
                         for parameternode in parametergroupnode:
-                                parameterlist.append(common.parameters.parameterfromxml(parameternode))
+                                parameterlist.append(clam.common.parameters.parameterfromxml(parameternode))
                         self.parameters.append( (parametergroupnode.attribs['name'], parameterlist) )
             elif node.tag == 'corpora':
                 for corpusnode in node:
@@ -93,11 +93,11 @@ class CLAMData(object):
             elif node.tag == 'inputformats':    
                 for formatnode in node:
                     if formatnode.tag == 'inputformat': #TODO
-                        self.inputformats.append( common.formats.formatfromxml(formatnode) )
+                        self.inputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'outputformats':        
                 for formatnode in node:
                     if formatnode.tag == 'outputformat': #TODO
-                        self.outputformats.append( common.formats.formatfromxml(formatnode) )
+                        self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'input':
                  for filenode in node:
                     if node.tag == 'path':

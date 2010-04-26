@@ -121,7 +121,7 @@
 
 <xsl:template match="ChoiceParameter">
     <xsl:choose>
-        <xsl:when test="@multi = true">
+        <xsl:when test="@multi">
             <tr>
             <xsl:if test="@error"> 
              <xsl:attribute name="class">error</xsl:attribute>
@@ -143,7 +143,7 @@
                     <xsl:attribute name="id"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute>
-                    <xsl:if test="@selected = 1">
+                    <xsl:if test="@selected">
                         <xsl:attribute name="checked">checked</xsl:attribute>     
                     </xsl:if>
                 </xsl:element>
@@ -173,7 +173,7 @@
                     <xsl:attribute name="id"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute>
-                    <xsl:if test="@selected = 1">
+                    <xsl:if test="@selected">
                         <xsl:attribute name="checked">checked</xsl:attribute>     
                     </xsl:if>
                 </xsl:element>

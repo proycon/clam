@@ -25,10 +25,10 @@ import sys
 import os
 
 #import CLAM-specific modules:
-import common.client
-import common.status
-import common.parameters
-import common.formats
+import clam.common.client
+import clam.common.status
+import clam.common.parameters
+import clam.common.formats
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
 datafile = sys.argv[1]

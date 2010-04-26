@@ -14,9 +14,9 @@
 #
 ###############################################################
 
-from common.parameters import *
-from common.formats import *
-from common.digestauth import pwhash
+from clam.common.parameters import *
+from clam.common.formats import *
+from clam.common.digestauth import pwhash
 import sys
 
 REQUIRE_VERSION = 0.2
@@ -81,6 +81,7 @@ PARAMETERS =  [
         StringParameter('string','-s','String','Enter a word'),
         TextParameter('text','-t','String','Text'),
         ChoiceParameter('colourchoice','-c','Choice','Favourite colour',choices=[('red','red'),('green','green'),('blue','blue')]),
+        ChoiceParameter('cities','-C', 'Visited cities', 'What cities have you visited?', choices=[('amsterdam', 'Amsterdam'), ('ny', 'New York'), ('london', 'London'), ('paris','Paris')], multi=True)
     ] )
 ]
 

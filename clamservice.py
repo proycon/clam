@@ -24,11 +24,13 @@ import datetime
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
-import common.status 
-import common.parameters
-import common.formats
-import common.digestauth
-import config.defaults as settings #will be overridden by real settings later
+sys.path.append('./..')
+
+import clam.common.status 
+import clam.common.parameters
+import clam.common.formats
+import clam.common.digestauth
+import clam.config.defaults as settings #will be overridden by real settings later
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -81,7 +83,7 @@ def userdb_lookup(user, realm):
 def requirelogin(f):
     global TEMPUSER
     if settings.USERS:
-        f = common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
+        f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
     def wrapper(*args, **kwargs):
         args = list(args)
         args.append(TEMPUSER)
@@ -116,13 +118,17 @@ class JobService(object):
         #    sys.exit(1)            
         elif not settings.PARAMETERS:
             print >>sys.stderr,"WARNING: No parameters specified in settings module!"
-        else:            
+        else:      
+            lastparameter = None      
             try:
                 for parametergroup, parameters in settings.PARAMETERS:
                     for parameter in parameters:
-                        assert isinstance(parameter,common.parameters.AbstractParameter)
-            except:
-                print >>sys.stderr,"ERROR: Syntax error in parameter specification"
+                        assert isinstance(parameter, clam.common.parameters.AbstractParameter)
+                        lastparameter = parameter
+            except AssertionError:
+                print >>sys.stderr,"ERROR: Syntax error in parameter specification."
+                if lastparameter:            
+                    print >>sys.stderr,"Last part parameter: ", lastparameter.id
                 sys.exit(1)            
             
         self.service = web.application(self.urls, globals())
@@ -270,17 +276,17 @@ class Project(object):
                 f = open(statusfile)
                 msg = f.read(os.path.getsize(statusfile))
                 f.close()
-                return (common.status.RUNNING, msg)
+                return (clam.common.status.RUNNING, msg)
             else:
-                return (common.status.RUNNING, "The system is running") #running
+                return (clam.common.status.RUNNING, "The system is running") #running
         elif self.done(project):
-            return (common.status.DONE, "Done")
+            return (clam.common.status.DONE, "Done")
         elif self.preparingdownload(project):
-            return (common.status.DOWNLOAD, "Preparing package for download, please wait...")
+            return (clam.common.status.DOWNLOAD, "Preparing package for download, please wait...")
         elif self.processingupload(project):
-            return (common.status.UPLOAD, "Processing upload, please wait...")
+            return (clam.common.status.UPLOAD, "Processing upload, please wait...")
         else:
-            return (common.status.READY, "Ready to start")
+            return (clam.common.status.READY, "Ready to start")
 
 
     def dirindex(self, project, formats, mode = 'output', d = ''):
@@ -318,18 +324,18 @@ class Project(object):
         statuscode, statusmsg = self.status(project)
 
         corpora = []
-        if statuscode == common.status.READY:
+        if statuscode == clam.common.status.READY:
             corpora = JobService.corpusindex()
         else:
             corpora = []
-        if statuscode == common.status.DONE:
+        if statuscode == clam.common.status.DONE:
             outputpaths = self.outputindex(project)
             if self.exitstatus(project) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occured within the system. Please inspect the error log for details"
         else:
             outputpaths = []        
-        if statuscode == common.status.READY:
+        if statuscode == clam.common.status.READY:
             inputpaths = self.inputindex(project)
         else:
             inputpaths = []      
@@ -455,7 +461,7 @@ class Project(object):
         if not self.exists(project):
             return web.webapi.NotFound()
         statuscode, _ = self.status(project)
-        if statuscode == common.status.RUNNING:
+        if statuscode == clam.common.status.RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )
         shutil.rmtree(Project.path(project))
