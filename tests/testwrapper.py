@@ -37,12 +37,12 @@ outputdir = sys.argv[3]
 
 
 #Obtain all data from the CLAM system (stored in $DATAFILE (clam.xml))
-clamdata = common.client.getclamdata(datafile)
+clamdata = clam.common.client.getclamdata(datafile)
 
 #You now have access to all data. A few properties at your disposition now are:
 # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output
 
-common.status.writestatus(statusfile, "Starting...")
+clam.common.status.writestatus(statusfile, "Starting...")
 
 #Example: output all selected parameters
 print "PARAMETERS:"
@@ -58,12 +58,12 @@ print "INPUT FILES:"
 #Iterate over all inputfiles:
 for inputfile in clamdata.input: 
     print str(inputfile)
-    if isinstance(inputfile.format, common.formats.PlainTextFormat) or isinstance(inputfile.format, common.formats.TokenizedTextFormat): #if the input file is a plain text format
-        common.status.writestatus(statusfile, "Processing " + os.path.basename(inputfile) + "...")
+    if isinstance(inputfile.format, clam.common.formats.PlainTextFormat) or isinstance(inputfile.format, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
+        clam.common.status.writestatus(statusfile, "Processing " + os.path.basename(inputfile) + "...")
         #invoke 'rev' through the shell to reverse the input
         os.system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(inputfile))
 
-common.status.writestatus(statusfile, "Done")       
+clam.common.status.writestatus(statusfile, "Done")       
 
 sys.exit(0) #non-zero exit codes indicate an error! 
 

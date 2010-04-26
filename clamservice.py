@@ -24,7 +24,8 @@ import datetime
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
-sys.path.append('./..')
+sys.path.append(sys.path[0] + '/..')
+os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 import clam.common.status 
 import clam.common.parameters
@@ -297,7 +298,7 @@ class Project(object):
             else:
                 filename = os.path.basename(f)
                 if filename[0] == '.': continue #skip hidden files
-                format = common.formats.Format() #unspecified format
+                format = clam.common.formats.Format() #unspecified format
                 for fmt in formats:
                     if fmt.match(filename):
                         format = fmt
