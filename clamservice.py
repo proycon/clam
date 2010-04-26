@@ -497,13 +497,13 @@ class OutputInterface(object):
             #validation, security
             if format == 'zip':
                 contenttype = 'application/zip'
-                command = "zip -r"
+                command = "/usr/bin/zip -r"
             elif format == 'tar.gz':
                 contenttype = 'application/x-gzip'
-                command = "tar -czf"
+                command = "/bin/tar -czf"
             elif format != 'tar.bz2': 
                 contenttype = 'application/x-bz2'
-                command = "tar -cjf"
+                command = "/bin/tar -cjf"
             else:
                 raise BadRequest('Invalid archive format')
 
@@ -511,8 +511,10 @@ class OutputInterface(object):
             
             if not os.path.isfile(path):
                 printlog("Building download archive in " + format + " format")
-                cmd = sys.path[0] + command + ' ' + project + '.' + format + ' *'
-                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/')	        			
+                cmd = command + ' ' + project + '.' + format + ' *'
+                printdebug(cmd)
+                printdebug(Project.path(project)+'output/')
+                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/', shell=True)	        			
                 if not process:
                     raise web.webapi.InternalError("Unable to make download package")                
                 else:
