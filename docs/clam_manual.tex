@@ -135,11 +135,30 @@ All parameters can take the following extra named arguments:
 \end{itemize}
 %TODO
 
-
 \subsection{Inputformats \& Outputformats}
 
+CLAM takes care of the handling of input and output formats. When a user uploads a file, he chooses from a list of options to select the desired input format. Each inputformat is associated with a particular extension. CLAM automatically renames the uploaded files so they get the desired extension, releaving the end-user of this burdain. If multiple extensions are defined the first is used. An extension is also associated with each outputformat, the system output files are recognised on the basis of this extension. Your system wrapper can recognise file formats also on the basis of their extension, or by explicitly getting their format from the \texttt{clam.xml} datafile. Moreover, input formats and output formats can also have associated validators, which can check if the file really is in the desired format. And for each inputformat and outputformat, a character encoding needs to be explicitly set.
 
-\subsection{Parameters}
+The inputformats are defined in the service configuration file as a list of classes, where each class corresponds to a particular input format. The outputformats are defined in a similar way. The classes themselves are defined in \texttt{common/formats.py}, where you can add any new types (subclassed from \texttt{Format}).
+
+Defining a format goes as follows, let's take PlainTextFormat as example:
+
+\begin{verbatim}
+INPUTFORMATS = [ PlainTextFormat('utf-8' ['.txt'], subdirectory='texts' ) ]
+\end{verbatim}
+
+The first argument of the class constructor is the encoding, the second is a list of acceptable extensions, of which the first will be used in the rename procedure. Some extra arguments can be provided:
+
+\begin{itemize}
+\item \textbf{\texttt{subdirectory=}} -- Store all files of this format in the specific subdirectory of the input directory. This allows you to separate files of a certain format into distinct directories. 
+\item \textbf{\texttt{archivesubdirs=}} -- Set this to False if you want to extract archives in a flattened fashion, with disregard for any subdirectories therein.
+\end{itemize}
+
+Note that users can upload either single files in the specified format, or an archive (\texttt{zip}, \texttt{tar.gz} or \texttt{tar.bz2}) containing multiple files in the specified format. 
+
+\subsection{Users}
+
+%TODO
 
 \section{Wrapper script}
 
