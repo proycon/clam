@@ -1,7 +1,13 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[english]{babel}
+
 \title{CLAM Documentation}
+\author{Maarten van Gompel}
+
 
 \begin{document}
 
+\maketitle
 
 \chapter{Introduction} 
 
@@ -89,13 +95,13 @@ Central in the configuration file is the command that CLAM will execute. This co
 \item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possible in subdirectories).
 \item \texttt{\$OUTPÛTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.
 \item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file consists only of the latest message.
-\text \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user.
+\item \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user.
 \item \texttt{\$DATAFILE} - This is the absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information. If the system wrapper script is written in Python, the CLAM Client API can be used to read this file, required little effort on the part of the developer.
 \item \texttt{\$USERNAME} - The username of the logged in user.
 \end{itemize}
 
 
-Make sure the actual command is an absolute path or the executable is in the user's \textt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory.
+Make sure the actual command is an absolute path or the executable is in the user's \texttt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory.
 
 
 %Within this directory, there will be an input/ and output/ directory, the full path is stored in \texttt{\$INPUTDIRECTORY} respectively \texttt{\$OUTPUTDIRECTORY} and can be passed as arguments to your script. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory.
@@ -158,12 +164,15 @@ Note that users can upload either single files in the specified format, or an ar
 
 \subsection{Users}
 
-%TODO
+Yet to be written... %TODO
 
 \section{Wrapper script}
 
 
+
 \chapter{Documentation for Service Clients}
+
+Yet to be written... %TODO
 
 
 \end{document}
