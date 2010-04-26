@@ -82,7 +82,7 @@ class Format(object):
 
     def xml(self):
         xml = "<" + self.__class__.__name__
-        xml += ' name="'+self.name + '"'
+        xml += ' name="'+unicode(self.name) + '"'
         xml += ' encoding="'+self.encoding + '"'
         if self.mask:
             xml += ' mask="'+self.mask + '"'
@@ -92,6 +92,17 @@ class Format(object):
         xml += "</" + self.__class__.__name__ + ">"
         return xml
 
+    def str(self):
+        if self.encoding:
+            return self.name + ' ['+self.encoding+']'
+        else:
+            return self.name
+
+    def unicode(self):
+        if self.encoding:
+            return self.name + ' ['+self.encoding+']'
+        else:
+            return self.name
 
 class PlainTextFormat(Format):    
     
@@ -99,7 +110,6 @@ class PlainTextFormat(Format):
 
     def __init__(self,encoding = 'utf-8', extensions = ['txt'], **kwargs ):
         super(PlainTextFormat,self).__init__(encoding, extensions, **kwargs)
-
 
                 
 class TokenizedTextFormat(Format):    
@@ -111,11 +121,32 @@ class TokenizedTextFormat(Format):
 
 
 
+                
+class TadpoleFormat(Format):    
+    
+    name = "Tadpole Output Format"
+
+    def __init__(self,encoding = 'utf-8', extensions = ['tadpole.out'], **kwargs ):
+        super(TadpoleFormat,self).__init__(encoding, extensions, **kwargs)
+
+
+class DCOIFormat(Format):    
+    
+    name = "Log format (not further defined)"
+
+    def __init__(self,encoding = 'utf-8', extensions = ['log'], **kwargs):
+        super(DCOIFormat,self).__init__(encoding, extensions, **kwargs)
+
+
+
+
 class DCOIFormat(Format):    
     
     name = "SoNaR/DCOI format"
 
     def __init__(self,encoding = 'utf-8', extensions = ['dcoi.xml','sonar.xml'], **kwargs):
         super(DCOIFormat,self).__init__(encoding, extensions, **kwargs)
+
+
 
 

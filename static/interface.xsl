@@ -9,20 +9,22 @@
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <xsl:call-template name="head" />
   <body>
-    <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
-    <xsl:apply-templates select="status"/>
-    <xsl:choose>
-      <xsl:when test="status/@code = 0">              
-        <xsl:apply-templates select="input"/>
-        <!-- upload form transformed from input formats -->
-        <xsl:apply-templates select="inputformats"/>             
-        <xsl:apply-templates select="parameters"/>  
-      </xsl:when>
-      <xsl:when test="status/@code = 2">
-        <xsl:apply-templates select="output"/>
-      </xsl:when>
-    </xsl:choose>
-    <xsl:call-template name="footer" />
+    <div id="container">
+        <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
+        <xsl:apply-templates select="status"/>
+        <xsl:choose>
+          <xsl:when test="status/@code = 0">              
+            <xsl:apply-templates select="input"/>
+            <!-- upload form transformed from input formats -->
+            <xsl:apply-templates select="inputformats"/>             
+            <xsl:apply-templates select="parameters"/>  
+          </xsl:when>
+          <xsl:when test="status/@code = 2">
+            <xsl:apply-templates select="output"/>
+          </xsl:when>
+        </xsl:choose>
+        <xsl:call-template name="footer" />
+    </div>
   </body>
   </html>
 </xsl:template>
@@ -112,7 +114,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/inputformats">
-        <div id="uploadform" class="box">
+        <div class="rightbox uploadform">
             <h3>Upload a file from disk</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
@@ -128,6 +130,24 @@
                  <tr><td></td><td><input class="uploadbutton" type="submit" value="Upload file" /></td></tr>
                 </table>
             </form>
+        </div>
+        <div class="leftbox uploadform">
+            <h3>Submit input from browser</h3>
+            <form method="POST" enctype="multipart/form-data" action="upload/">
+                <input type="hidden" name="uploadcount" value="1" />
+                <table>
+                 <tr><td><label for="uploadtext1">Input:</label></td><td><textarea name="uploadtext1"></textarea></td></tr>
+                 <tr><td><label for="uploadfilename1">Desired filename:</label></td><td><input name="uploadfilename1" /></td></tr>
+                 <tr><td><label for="uploadformat1">Format:</label></td><td>
+                    <select name="uploadformat1">
+                    <xsl:for-each select="*">
+                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
+                    </xsl:for-each>
+                    </select>
+                 </td></tr>
+                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Submit" /></td></tr>
+                </table>
+            </form>            
         </div>
 </xsl:template>
 
@@ -198,7 +218,7 @@
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
         <div id="upload" class="box">
-            <a href="">Return to the project view</a>
+            <a href="../">Return to the project view</a>
             <ul>
               <xsl:apply-templates select="file"/>  
             </ul>
@@ -225,21 +245,26 @@
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <xsl:call-template name="head" />
   <body>
-    <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
-    <div id="startproject" class="box">
-        <h3>Start a new Project</h3>    
-            Project ID: <input id="projectname" type="projectname" value="" />
-            <input id="startprojectbutton" type="button" value="Start project" />
+    <div id="container">
+        <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
+        <div id="description" class="box">
+              <xsl:value-of select="description" />   
+        </div>
+        <div id="startproject" class="box">
+            <h3>Start a new Project</h3>    
+                Project ID: <input id="projectname" type="projectname" value="" />
+                <input id="startprojectbutton" type="button" value="Start project" />
+        </div>
+        <div id="index" class="box">
+        <h3>Projects</h3>
+        <xsl:for-each select="projects/project">
+                <ul>
+                  <li><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></li>
+                </ul>
+        </xsl:for-each>
+        </div>
+        <xsl:call-template name="footer" />
     </div>
-    <div id="index" class="box">
-    <h3>Projects</h3>
-    <xsl:for-each select="project">
-            <ul>
-              <li><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></li>
-            </ul>
-    </xsl:for-each>
-    </div>
-    <xsl:call-template name="footer" />
   </body>
   </html>
 </xsl:template>

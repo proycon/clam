@@ -103,7 +103,7 @@ class CLAMData(object):
                     if node.tag == 'path':
                         selectedformat = None
                         for format in self.inputformats: 
-                            if format.name == filenode.attribs['format']: #TODO: verify
+                            if unicode(format) == filenode.attribs['format']: #TODO: verify
                                 selectedformat = format
                         self.input.append( CLAMFile('input/' + filenode.value, selectedformat) )
             elif node.tag == 'output': 
@@ -111,7 +111,7 @@ class CLAMData(object):
                     if node.tag == 'path':
                         selectedformat = None
                         for format in self.outputformats: 
-                            if format.name == filenode.attribs['format']: #TODO: verify
+                            if unicode(format) == filenode.attribs['format']: #TODO: verify
                                 selectedformat = format
                         self.input.append( CLAMFile('output/' + filenode.value, selectedformat) )
 

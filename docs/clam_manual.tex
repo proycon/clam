@@ -133,7 +133,7 @@ The six parameter types are:
 \item \textbf{\texttt{FloatParameter}} - A parameter expecting a float number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range.
 \item \textbf{\texttt{StringParameter}} - A parameter taking a string value. Use \texttt{maxlength=} if you want to restrict the maximum length.
 \item \textbf{\texttt{TextParameter}} - A paremeter taking a multiple lines of text. 
-\item \textbf{\texttt{ChoiceParameter}} - A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice.
+\item \textbf{\texttt{ChoiceParameter}} - A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice. %TODO: describe multi and showall
 \end{itemize}
 
 All parameters can take the following extra named arguments:

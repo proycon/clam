@@ -17,15 +17,16 @@
 from common.parameters import *
 from common.formats import *
 from common.digestauth import pwhash
+from sys import path 
 
 REQUIRE_VERSION = 0.2
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Unicode Tokeniser"
-SYSTEM_DESCRIPTION = "This is a tokeniser"
+SYSTEM_DESCRIPTION = "Ucto is a tokeniser designed for unicode (utf-8) texts. Furthermore, it is also an inspection tool for examining the nature or count of the characters in a text. Support also exists some basic transformations."
 
 #Root directory for CLAM
-ROOT = "/home/proycon/work/clamtmproot/"
+ROOT = path[0] + "/../ucto.clam/"
 PORT = 8080
 URL = "http://localhost:" + str(PORT)
 
@@ -38,28 +39,28 @@ USERS = None #Enable this instead if you want no authentication
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]
 
 #List of delivered Output formats by the system
-OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['txt']), PlainTextFormat('utf-8',['tok']) ]
+OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['tok']) ]
 
 #The system command (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
-COMMAND = "/home/proycon/work/clam/wrappers/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+COMMAND = path[0] +  "/wrappers/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
 
 PARAMETERS =  [ 
-    ('Tokenisation Options', [
+    ('Tokenisation', [
         ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',[('','No language-specific tokenisation'),('nl','Nederlands'),('en','English')], nospace=True), #note that when an empty value is selected,   
         BooleanParameter('sentok','-Ts','Sentence Tokenisation','Compute sentence boundaries'),
         BooleanParameter('crudetok','-TS','Crude tokenisation','Crude non-language-specific tokenisation', forbid=['tok']),
-        BooleanParameter('verbose','-Tv','Verbose output','Verbose output'),
+        BooleanParameter('verbose','-Tv','Verbose tokeniser output','Outputs token types per token, one token per line', require=['tok']),
     ]),
     ('Transformations', [ 
         BooleanParameter('lowercase','-l','Lowercase','Convert text to lowercase',forbid=['uppercase']),
         BooleanParameter('uppercase','-u','Uppercase','Convert text to uppercase',forbid=['lowercase']),
         BooleanParameter('reverse','-r','Reverse words','Reverses all the words in a line'),
-        BooleanParameter('bigrams','-2','List bigrams'),
-        BooleanParameter('trigrams','-3','List trigrams'),
-        BooleanParameter('quadgrams','-4','List quadgrams'),
+        BooleanParameter('bigrams','-2','List bigrams','',forbid=['trigrams','quadgrams']),
+        BooleanParameter('trigrams','-3','List trigrams','',forbid=['bigrams','quadgrams']),
+        BooleanParameter('quadgrams','-4','List quadgrams','',forbid=['bigrams','trigrams']),
     ]),
-    ('Count and display options', [
-        BooleanParameter('info','-i','Unicode Info','Show unicode information'),
+    ('Word and Character Information', [
+        BooleanParameter('info','-i','Unicode Info','Show unicode information per character, one per line'),
         BooleanParameter('countwords','-cw','Count words','Count words'),
     	BooleanParameter('countchars','-cc','Count characters (without spaces and punctuation)'),
     	BooleanParameter('countchars2','-cs','Count characters (with spaces and punctuation)'),

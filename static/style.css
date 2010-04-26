@@ -6,9 +6,7 @@ body {
 
 #header {
     margin: 5px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 75%;
+    width: 97%;
     background: #ceb383;
     border: 1px none #ca9c4d;
     padding: 10px;
@@ -26,17 +24,41 @@ body {
     margin: 1px;
 }
 
+#description {
+    font-style: italic;
+}
 
-
-div.box {
-    margin: 5px;
+#container {
     margin-left: auto;
     margin-right: auto;
     width: 75%;
+    border: 1px none;
+}
+div.box {
+    width: 97%;
+    clear: both;
+    margin: 5px;
     background: #f6f6f6;
     border: 1px solid #ca9c4d;
     padding: 10px;
 }
+div.leftbox {
+    float: left;
+    margin: 5px;
+    width: 45%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+div.rightbox {
+    float: right;
+    margin: 5px;
+    width: 45%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+
 
 #status .ready {
     color: #2f7e35;
@@ -77,9 +99,12 @@ h3 {
 }
 
 #footer {
+    width: 97%;
+    margin: 5px;
     font-family: monospace;
     font-size: 80%;
     text-align: center;
+    padding: 10px;
 }
 
 #parameters table {
@@ -128,4 +153,10 @@ input.uploadbutton {
 input#abortbutton, input#restartbutton {
     float: right;
 }
-
+.uploadform table {
+    width: 100%;
+}
+.uploadform textarea {
+    width: 100%;
+    height: 240px;
+}

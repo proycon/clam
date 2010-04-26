@@ -143,7 +143,7 @@ class JobService(object):
         """Renders a list of input formats"""
         #MAYBE TODO: add selected?
         render = web.template.render('templates')
-        return render.inputformats(name, [ (format.__class__.__name__, format.name ) for format in settings.INPUTFORMATS ])
+        return render.inputformats(name, [ (format.__class__.__name__, unicode(format) ) for format in settings.INPUTFORMATS ])
     
 
 
@@ -156,7 +156,7 @@ class Index(object):
             if os.path.isdir(f):
                 projects.append(os.path.basename(f))
         render = web.template.render('templates')
-        return render.index(settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.URL, projects)
+        return render.index(settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, settings.URL, projects)
         
 
 
@@ -341,7 +341,7 @@ class Project(object):
                     if not errormsg: errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile )
         
                     
     @requirelogin
@@ -727,6 +727,9 @@ class Uploader(object):
                     filename = inputformat.filename(filename) #set proper filename extension
                 realupload = True
             elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)] and 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
+
+                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadfilename' + str(i)] +"\">\n"
+
                 archive = False
                 filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
                 realupload = False
@@ -741,7 +744,7 @@ class Uploader(object):
             #f = open(Project.path(project) + '.upload','w') 
             #f.close()
 
-            printlog("Uploading '" + filename + "' (" + inputformat.name + ", " + inputformat.encoding + ")")
+            printlog("Uploading '" + filename + "' (" + unicode(inputformat) + ", " + inputformat.encoding + ")")
             printdebug("(start copy upload)" )
             #upload file 
             #if archive:

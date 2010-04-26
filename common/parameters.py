@@ -112,7 +112,7 @@ class AbstractParameter(object):
             else:
                 xml += ' ' + key + '="'+str(v)+ '"'        
         if self.value:
-            xml += ' value="'+self.value + '"'
+            xml += ' value="'+unicode(self.value) + '"'
         if self.error:
             xml += ' error="'+self.error + '"'
         xml += " />"
