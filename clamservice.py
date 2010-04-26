@@ -393,13 +393,13 @@ class Project(object):
                     #Not all required parameters were filled!
                     parameter.error = "This option must be set"
                     errors = True
-                elif parameter.forbid or parameter.require:
+                if parameter.id in postdata and postdata[parameter.id] != '' and (parameter.forbid or parameter.require):
                     for _, parameterlist2 in parameters:
                         for parameter2 in parameterlist2:
-                            if parameter.restrict and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id]:
+                            if parameter.forbid and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id] != '':
                                 parameter.error = parameter2.error = "Settings these options together is forbidden"
                                 errors = True
-                            if parameter.force and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
+                            if parameter.require and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
                                 parameter2.error = "This option must be set as well"
                                 errors = True
 
@@ -791,7 +791,7 @@ class Uploader(object):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule ([port])"
+        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule"
         sys.exit(1)
     settingsmodule = sys.argv[1]
     #if not settingsmodule.isalpha():  #security precaution
@@ -816,6 +816,10 @@ if __name__ == "__main__":
 
     if not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
+
+
+    if 'PORT' in dir(settings):
+        sys.argv.append(str(settings.PORT))       
    
     if not os.path.isdir(settings.ROOT):
         print >> sys.stderr, "Root directory does not exist yet, creating..."
@@ -825,7 +829,7 @@ if __name__ == "__main__":
         os.mkdir(settings.ROOT + 'corpora')
     if not os.path.isdir(settings.ROOT + 'projects'):
         print >> sys.stderr, "Projects directory does not exist yet, creating..."
-        os.mkdir(settings.ROOT + 'projects'))
+        os.mkdir(settings.ROOT + 'projects')
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 

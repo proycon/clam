@@ -35,7 +35,8 @@ SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 ROOT = ""
 
 #The URL of the system
-URL = "http://localhost:8080"
+PORT = 8080
+URL = "http://localhost:" + str(PORT)
 
 #Users and passwords
 USERS = None #no user authentication

@@ -101,6 +101,14 @@ h3 {
     margin-left: 20px; 
     color: red;
 }
+#parameters th, #parameters td {
+    width: 49%;
+}
+#parameters h4 {
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
 
 #startbutton {
     width: 100%;

@@ -50,7 +50,7 @@ def parameterfromxml(node):
     pass
 
 class AbstractParameter(object):
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         self.id = id #a unique ID
         self.paramflag = paramflag #the parameter flag passed to the command (include a trailing space!)        
         self.name = name #a representational name
@@ -128,7 +128,7 @@ class AbstractParameter(object):
 
         
 class BooleanParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
         #defaultinstance
@@ -148,7 +148,7 @@ class BooleanParameter(AbstractParameter):
 
 
 class StringParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
@@ -245,14 +245,14 @@ class ChoiceParameter(AbstractParameter):
         return xml
 
 class TextParameter(StringParameter): #TextArea based
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
     def compilearg(self, value):
         return super(TextParameter,self).compilearg(value)
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
         
@@ -282,7 +282,7 @@ class IntegerParameter(AbstractParameter):
 
 
 class FloatParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):
+    def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
                 
         #defaults

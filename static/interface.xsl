@@ -96,10 +96,10 @@
      </xsl:if>     
      <xsl:choose>
       <xsl:when test="@code = 0">
-        <div class="ready"><xsl:value-of select="@message"/></div>
+        <div class="ready"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
       </xsl:when>
       <xsl:when test="@code = 1">
-        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort project" /></div>
+        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
       </xsl:when>
       <xsl:when test="@code = 2">
         <div class="done"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>
