@@ -36,4 +36,6 @@ April:
     - Implemented user authentication
     - Catch errors from the system 
     - Fixed bugs, render parameter groups
+    - Started CLAM Documentation
+    - Fixed required parameter behaviour
 

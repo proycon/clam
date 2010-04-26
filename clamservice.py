@@ -384,7 +384,7 @@ class Project(object):
 
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:
-                if parameter.id in postdata:
+                if parameter.id in postdata and postdata[parameter.id] != '':
                     if parameter.set(postdata[parameter.id]): #may generate an error in parameter.error
                         params.append(parameter.compilearg(parameter.value))
                     else:
@@ -393,13 +393,13 @@ class Project(object):
                     #Not all required parameters were filled!
                     parameter.error = "This option must be set"
                     errors = True
-                elif parameter.restrict or parameter.force:
+                elif parameter.forbid or parameter.require:
                     for _, parameterlist2 in parameters:
                         for parameter2 in parameterlist2:
-                            if parameter.restrict and parameter2.id in parameter.restrict and parameter2.id in postdata and postdata[parameter2.id]:
+                            if parameter.restrict and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id]:
                                 parameter.error = parameter2.error = "Settings these options together is forbidden"
                                 errors = True
-                            if parameter.force and parameter2.id in parameter.force and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
+                            if parameter.force and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
                                 parameter2.error = "This option must be set as well"
                                 errors = True
 

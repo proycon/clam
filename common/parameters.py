@@ -62,6 +62,8 @@ class AbstractParameter(object):
         self.guest = True
         self.required = False
         self.nospace = False
+        self.require = []
+        self.forbid = []
         for key, value in kwargs.items():
             if key == 'guest': 
                 self.guest = value  #Show parameter for guests?
@@ -70,9 +72,9 @@ class AbstractParameter(object):
                 self.set(value)
             elif key == 'required': 
                 self.required = value  #Mandatory parameter?  
-            elif key == 'force':
+            elif key == 'require':
                 #if this argument is set, the ones with the following IDs should as well
-                self.force = value
+                self.require = value
             elif key == 'forbid':
                 #if this argument is set, the ones with the following IDs can not
                 self.forbid = value

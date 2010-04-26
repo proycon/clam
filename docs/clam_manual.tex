@@ -29,7 +29,7 @@ This documentation is split into two parts: a section for service providers/deve
 
 \section{Technical details}
 
-CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed. Note that the software is designed for UNIX systems only, as any serious work in the field of NLP is UNIX based anyhow. 
+CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed. Note that the software is designed for UNIX systems only, but any serious work in the field of NLP is UNIX based anyhow. 
 
 
 \subsection{Installation}
@@ -85,11 +85,6 @@ A CLAM webservice needs the following three components from the service develope
 
 The wrapper script is not stricly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration.
 
-%\section{Resource oriented approach}
-
-%Being a RESTful webservice, CLAM has a resource-oriented approach. 
-
-
 \section{Service configuration}
 
 The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforwards nature, knowledge of Python is not required to make your own.
@@ -113,10 +108,7 @@ Central in the configuration file is the command that CLAM will execute. This co
 \end{itemize}
 
 
-Make sure the actual command is an absolute path or the executable is in the user's \texttt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory.
-
-
-%Within this directory, there will be an input/ and output/ directory, the full path is stored in \texttt{\$INPUTDIRECTORY} respectively \texttt{\$OUTPUTDIRECTORY} and can be passed as arguments to your script. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory.
+Make sure the actual command is an absolute path or the executable is in the user's \texttt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory. Within this directory, there will be an input/ and output/ directory, but use the full path as stored in \texttt{\$INPUTDIRECTORY} and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory.
 
 
 \subsection{Parameters}
@@ -148,7 +140,7 @@ All parameters can take the following extra named arguments:
 
 \begin{itemize}
 \item \textbf{\texttt{required}} - Set to \texttt{True} to make this parameter required rather than optional.
-\item \textbf{\texttt{force}} - Set this to a list of parameter IDs. If this parameter is set, so must all others in this list.
+\item \textbf{\texttt{require}} - Set this to a list of parameter IDs. If this parameter is set, so must all others in this list.
 \item \textbf{\texttt{forbid}} - Set this to a list of parameter IDs. If this parameter is set, none of the others in the list may be set.
 \end{itemize}
 %TODO
@@ -197,6 +189,11 @@ The wrapper script can be written in any language. Python developers will have t
 \chapter{Documentation for Service Clients}
 
 Yet to be written... %TODO
+
+
+%\section{Resource oriented approach}
+
+%Being a RESTful webservice, CLAM has a resource-oriented approach. 
 
 
 \end{document}
