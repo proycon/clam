@@ -162,8 +162,14 @@ class Index(object):
         for f in glob.glob(settings.ROOT + "projects/*"):
             if os.path.isdir(f):
                 projects.append(os.path.basename(f))
+
+        errors = "no"
+        errormsg = ""
+
+        corpora = JobService.corpusindex()
+
         render = web.template.render('templates')
-        return render.index(settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, settings.URL, projects)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, settings.URL, -1 ,"", errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
         
 
 
@@ -348,7 +354,7 @@ class Project(object):
                     if not errormsg: errormsg = "One or more parameters are invalid"
                     break
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         
                     
     @requirelogin

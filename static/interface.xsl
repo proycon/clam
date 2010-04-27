@@ -10,19 +10,26 @@
   <xsl:call-template name="head" />
   <body>
     <div id="container">
-        <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
-        <xsl:apply-templates select="status"/>
         <xsl:choose>
-          <xsl:when test="status/@code = 0">              
-            <xsl:apply-templates select="input"/>
-            <!-- upload form transformed from input formats -->
-            <xsl:apply-templates select="inputformats"/>             
-            <xsl:apply-templates select="parameters"/>  
-          </xsl:when>
-          <xsl:when test="status/@code = 2">
-            <xsl:apply-templates select="output"/>
-          </xsl:when>
-        </xsl:choose>
+         <xsl:when test="@project">
+            <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
+            <xsl:apply-templates select="status"/>
+            <xsl:choose>
+              <xsl:when test="status/@code = 0">              
+                <xsl:apply-templates select="input"/>
+                <!-- upload form transformed from input formats -->
+                <xsl:apply-templates select="inputformats"/>             
+                <xsl:apply-templates select="parameters"/>  
+              </xsl:when>
+              <xsl:when test="status/@code = 2">
+                <xsl:apply-templates select="output"/>
+              </xsl:when>
+            </xsl:choose>
+         </xsl:when>
+         <xsl:otherwise>
+             <xsl:call-template name="clamindex" />
+         </xsl:otherwise>
+        </xsl:choose>    
         <xsl:call-template name="footer" />
     </div>
   </body>
@@ -241,11 +248,7 @@
 </xsl:template>
 
 
-<xsl:template match="/clamindex">
-  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <xsl:call-template name="head" />
-  <body>
-    <div id="container">
+<xsl:template name="clamindex">
         <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
         <div id="description" class="box">
               <xsl:value-of select="description" />   
@@ -263,10 +266,6 @@
                 </ul>
         </xsl:for-each>
         </div>
-        <xsl:call-template name="footer" />
-    </div>
-  </body>
-  </html>
 </xsl:template>
 
 </xsl:stylesheet>
