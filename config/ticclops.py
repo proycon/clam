@@ -15,27 +15,30 @@
 
 # *** DO NOT ALTER THIS FILE, MAKE A COPY INSTEAD! ***
 
-from common.parameters import *
-from common.formats import *
-from common.digestauth import pwhash
+from clam.common.parameters import *
+from clam.common.formats import *
+from clam.common.digestauth import pwhash
 
 REQUIRE_VERSION = 0.2
 
 #The System ID, a short alphanumeric identifier for internal use only
-SYSTEM_ID = "clam"
+SYSTEM_ID = "ticclops"
 
 #System name, the way the system is presented to the world
-SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
+SYSTEM_NAME = "TICCLops"
 
 #An informative description for this system:
-SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
+SYSTEM_DESCRIPTION = "Blah blah, describe system here"
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = ""
+ROOT = "/path/to/ticclops-clam/dir"
 
 #The URL of the system
-URL = "http://localhost:8080"
+PORT = 8080
+URL = "http://localhost:" + str(PORT)
+
+
 
 #Users and passwords
 USERS = None #no user authentication
@@ -74,7 +77,10 @@ PARAMETERS = []
 #List of supported Input formats by the system
 #New format types should be added to common/formats.py, and can then be used here:
 INPUTFORMATS = []
+#Example: INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]
+
 
 #List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered at the same time)
 OUTPUTFORMATS = []
+#Example: OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['tok']) ]
 
