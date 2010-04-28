@@ -15,7 +15,7 @@
 
 The Computational Linguistics Application Mediator (CLAM) allows you to quickly and transparently transform your Natural Language Processing application into a webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around it, allowing end-users to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application. Whilst the application runs, users can monitor its status.
 
-CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, and the handling and validation of input take can be taken care of by CLAM.
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, and the handling and validation of input can be taken care of by CLAM.
 
 The kind of applications that CLAM is intended for are NLP applications, usually of a kind that do some processing on a text corpus. This corpus or smaller text can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
 
@@ -23,7 +23,7 @@ The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET,
 
 The webservice provides its responses in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice.
 
-This documentation is split into two parts: a section for service providers/developers and a section for service clients, users those wanting to communicate with an existing service in an automated fashion.
+This documentation is split into two parts: a section for service providers/developers and a section for service clients, users wanting to communicate with an existing service in an automated fashion.
 
 \chapter{Documentation for Service Providers}
 
@@ -87,7 +87,7 @@ The wrapper script is not stricly mandatory if the NLP application can be direct
 
 \section{Service configuration}
 
-The service configuration consists out of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforwards nature, knowledge of Python is not required to make your own.
+The service configuration consists of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforward nature, knowledge of Python is not required to make your own.
 
 The server configuration files reside in the \texttt{config/} directory. Making a new webservice starts with copying the sample \texttt{defaults.py} and editing your copy.
 
@@ -99,11 +99,11 @@ One of the first things to configure is the root path. All projects will be conf
 Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported and there are some special variables that will be automatically set by CLAM:
 
 \begin{itemize}
-\item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possible in subdirectories).
-\item \texttt{\$OUTPÛTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.
+\item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories).
+\item \texttt{\$OUTPUTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.
 \item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file consists only of the latest message.
 \item \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user.
-\item \texttt{\$DATAFILE} - This is the absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information. If the system wrapper script is written in Python, the CLAM Client API can be used to read this file, required little effort on the part of the developer.
+\item \texttt{\$DATAFILE} - This is the absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information. If the system wrapper script is written in Python, the CLAM Client API can be used to read this file, requiring little effort on the part of the developer.
 \item \texttt{\$USERNAME} - The username of the logged in user.
 \end{itemize}
 
@@ -132,7 +132,7 @@ The six parameter types are:
 \item \textbf{\texttt{IntegerParameter}} - A parameter expecting an integer number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range.
 \item \textbf{\texttt{FloatParameter}} - A parameter expecting a float number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range.
 \item \textbf{\texttt{StringParameter}} - A parameter taking a string value. Use \texttt{maxlength=} if you want to restrict the maximum length.
-\item \textbf{\texttt{TextParameter}} - A parameter taking a multiple lines of text. 
+\item \textbf{\texttt{TextParameter}} - A parameter taking multiple lines of text. 
 \item \textbf{\texttt{ChoiceParameter}} - A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice. If you want the user to be able to select multiple parameters, then you can set the option \texttt{multi=True}. The IDs will be concatenated together in the parameter value, a delimiter (a comma by default) can be specified with \texttt{delimiter=}. If you do not use \texttt{multi=True}, but you do want all options to be visible in one view, then you can set the option \texttt{showall=True}.
 \end{itemize}
 
@@ -149,7 +149,7 @@ All parameters can take the following extra named arguments:
 \subsection{Inputformats \& Outputformats}
 \label{sec:formats}
 
-CLAM takes care of the handling of input and output formats. When a user uploads a file, he chooses from a list of options to select the desired input format. Each inputformat is associated with a particular extension. CLAM automatically renames the uploaded files so they get the desired extension, releaving the end-user of this burdain. If multiple extensions are defined the first is used. An extension is also associated with each outputformat, the system output files are recognised on the basis of this extension. Your system wrapper can recognise file formats also on the basis of their extension, or by explicitly getting their format from the \texttt{clam.xml} datafile. Moreover, input formats and output formats can also have associated validators, which can check if the file really is in the desired format. And for each inputformat and outputformat, a character encoding needs to be explicitly set.
+CLAM takes care of the handling of input and output formats. When a user uploads a file, he chooses from a list of options to select the desired input format. Each inputformat is associated with a particular extension. CLAM automatically renames the uploaded files so they get the desired extension, relieving the end-user of this burden. If multiple extensions are defined the first is used. An extension is also associated with each outputformat, the system output files are recognised on the basis of this extension. Your system wrapper can recognise file formats also on the basis of their extension, or by explicitly getting their format from the \texttt{clam.xml} datafile. Moreover, input formats and output formats can also have associated validators, which can check if the file really is in the desired format. And for each inputformat and outputformat, a character encoding needs to be explicitly set.
 
 The inputformats are defined in the service configuration file as a list of classes, where each class corresponds to a particular input format. The outputformats are defined in a similar way. The classes themselves are defined in \texttt{common/formats.py}, where you can add any new types (subclassed from \texttt{Format}).
 
@@ -180,12 +180,12 @@ The wrapper script takes the arguments as selected for \texttt{COMMAND} in the s
 
 \begin{itemize}
 \item All user-controllable input has to be read from the specified input directory. If you do not use the \texttt{clam.xml} data file, then you have to determine the file's format based on its extension. See Section \ref{sec:formats}.
-\item All user-viewable output must be put it the specified output directory. Make sure it has an extension CLAM will recognise.  See Section \ref{sec:formats}.
+\item All user-viewable output must be put in the specified output directory. Make sure your system outputs files with an extension CLAM will recognise. See \texttt{\$OUTPUTFORMATS} in Section \ref{sec:formats}.
 \item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. 
 \item The wrapper script is always started with the current working directory set to the selected project directory.
 \end{itemize}
 
-The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie in to the CLAM Client API, which handles things such as reading the \texttt{clam.xml} data file.
+The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Client API, which handles things such as reading the \texttt{clam.xml} data file.
 
 \chapter{Documentation for Service Clients}
 
