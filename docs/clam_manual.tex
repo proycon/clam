@@ -85,6 +85,12 @@ A CLAM webservice needs the following three components from the service develope
 
 The wrapper script is not stricly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration.
 
+\framebox[10cm][l]{
+\textbf{Development Notes: }
+ The CLAM Frontend, the green outer layer in Figure \ref{fig:arch} does not exist yet.
+}
+
+
 \section{Service configuration}
 
 The service configuration consists of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforward nature, knowledge of Python is not required to make your own.
@@ -145,6 +151,7 @@ All parameters can take the following extra named arguments:
 \end{itemize}
 %TODO
 
+
 \subsection{Inputformats \& Outputformats}
 \label{sec:formats}
 
@@ -169,7 +176,16 @@ Note that users can upload either single files in the specified format, or an ar
 
 \subsection{Users}
 
-Yet to be written... %TODO
+Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. 
+
+A list of users can be defined in \texttt{USERS} in the service configuration file, this is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, the system ID, and the password. Furthermore there is a setting \texttt{PROJECTS_PUBLIC}, which can be set to \texttt{True} or \texttt{False}, in the former case all projects will be open to all authenticated users, in the latter case projects will only be accessible by their owners.
+
+User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons.
+
+\framebox[10cm][l]{
+\textbf{Development Notes: }
+ Eventually, an option will probably be implemented to read users from a database. HTTPS support may also be added at a later stage.
+}
 
 \section{Wrapper script}
 
@@ -185,6 +201,11 @@ The wrapper script takes the arguments as selected for \texttt{COMMAND} in the s
 \end{itemize}
 
 The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Client API, which handles things such as reading the \texttt{clam.xml} data file.
+
+\framebox[10cm][l]{
+\textbf{Development Notes: }
+ CLAM Client API will be further discussed, possibly in next chapter.
+}
 
 \chapter{Documentation for Service Clients}
 
