@@ -18,6 +18,7 @@ def pwhash(user, realm, password):
 class MalformedAuthenticationHeader(Exception): pass
 
 ## Fundamental utilities
+opaque =  "%032x" % random.getrandbits(128)
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
@@ -40,6 +41,7 @@ class auth(object):
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
         self.opaque = "%032x" % random.getrandbits(128)
+        print "DEBUG generated opaque: " + str(self.opaque)
         self.webpy2 = web.__version__.startswith('0.2')
     g401HTML = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -59,36 +61,45 @@ class auth(object):
             requestHeader = web.ctx.environ.get('HTTP_AUTHORIZATION', None)
             if not requestHeader:
                 # client has failed to include an authentication header; send a 401 response
+                print "DEBUG norequestheader"
                 return self.send401UnauthorizedResponse()
             if requestHeader[0:7] != "Digest ":
                 # client has attempted to use something other than Digest authenication; deny
                 return self.denyBadRequest()
             reqHeaderDict = parseAuthHeader(requestHeader)
             if not self.directiveProper(reqHeaderDict, web.ctx.fullpath):
+                print "DEBUG notdirectiveproper"
                 # Something is wrong with the authentication header
                 if reqHeaderDict.get('opaque',self.opaque) != self.opaque:
                     # Didn't send back the correct "opaque;" probably, our server restarted.  Just send
                     # them another authentication header with the correct opaque field.
+                    print "DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'"                    
                     return self.send401UnauthorizedResponse()
                 else:
                     # Their header had a more fundamental problem.  Something is fishy.  Deny access.
                     return self.denyBadRequest("Authorization Request Header does not conform to RFC 2617 section 3.2.2")
             # if user sent a "logout" nonce, make them type in the password again
             if len(reqHeaderDict.nonce) != 34:
+                print "DEBUG logoutnonce"
                 return self.send401UnauthorizedResponse()
             nonceReaction = self.outstandingNonces.nonceState(reqHeaderDict,  self.nonceSkip)
             if nonceReaction == 2:
                 # Client sent a nonce we've never heard of before
+                print "DEBUG unknownnonce"
                 return self.denyBadRequest()
             if nonceReaction == 3:
                 # Client sent an old nonce.  Give the client a new one, and ask to authenticate again before continuing.
+                print "DEBUG oldnonce"
                 return self.send401UnauthorizedResponse(stale=True)
-            username = reqHeaderDict.username
+            username = reqHeaderDict.username    
+            print "DEBUG user="+username
             status = self.user_status.get(username, (self.tries, 0))
             if status[0] < 1 and time.time() < status[1]:
                 # User got the password wrong within the last (self.lockTime) seconds
+                print "DEBUG wrong pw 1"
                 return self.denyForbidden()
             if status[0] < 1: 
+                print "DEBUG wrong pw 2"
                 # User sent the wrong password, but more than (self.lockTime) seconds have passed, so give
                 # them another try.  However, send a 401 header so user's browser prompts for a password
                 # again.
@@ -104,12 +115,17 @@ class auth(object):
                 self.logIncorrectPassword(username,  reqHeaderDict)
                 return self.send401UnauthorizedResponse()
         return wrapper
+
+
     def logIncorrectPassword(self,  username,  reqHeaderDict):
         pass  # Do your own logging here
+
+
     def directiveProper(self,  reqHeaderDict, reqPath):
         """Verifies that the client's authentication header contained the required fields"""
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
+                print "DEBUG missing", variable
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ['HTTP_USER_AGENT'])
@@ -117,6 +133,8 @@ class auth(object):
             and (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque) \
             and len(reqHeaderDict['nc']) == 8 \
             and (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri'])))
+
+
     def requestDigestValid(self, reqHeaderDict, reqMethod):
         """Checks to see if the client's request properly authenticates"""
         # Ask the application for the hash of A1 corresponding to this username and realm
@@ -133,6 +151,8 @@ class auth(object):
         correctAnswer = H("%s:%s" % (HA1, ":".join([nonce, reqHeaderDict['nc'], reqHeaderDict['cnonce'], qop, H(A2) ])))
         # Compare the correct response to what the client sent
         return reqHeaderDict['response'] == correctAnswer
+
+
     def send401UnauthorizedResponse(self,  stale=False):
         web.ctx.status = "401 Unauthorized"
         nonce = self.outstandingNonces.getNewNonce(self.nonceLife)
@@ -146,6 +166,8 @@ class auth(object):
             print self.unauthHTML
             return None
         return self.unauthHTML
+
+
     def denyBadRequest(self,  info=""):
         """Sent when the authentication header doesn't conform with protocol"""
         web.header("Content-Type","text/html")
@@ -155,6 +177,8 @@ class auth(object):
             print s1
             return None
         return s1
+
+
     def denyForbidden(self):
         """Sent when user has entered an incorrect password too many times"""
         web.ctx.status = "403 Forbidden"
@@ -162,6 +186,8 @@ class auth(object):
             print self.unauthHTML
             return None
         return self.unauthHTML
+
+
     def _getValidAuthHeader(self):
         """returns valid dictionary of authorization header, or None"""
         requestHeader = web.ctx.environ.get('HTTP_AUTHORIZATION', None)
@@ -173,6 +199,8 @@ class auth(object):
         if not self.directiveProper(reqHeaderDict, web.ctx.fullpath):
             raise MalformedAuthenticationHeader()
         return reqHeaderDict
+
+
     def logout(self):
         """Cause user's browser to stop sending correct authentication requests until user re-enters password"""
         try:
@@ -187,6 +215,8 @@ class auth(object):
                                'qop="auth",nonce=%s,opaque=%s' % tuple(map(quoteIt, [nonce, self.opaque])), 
                                 'stale="true"']
             web.header("WWW-Authenticate", "Digest " + ",".join(x for x in challengeList if x))
+
+
     def authUserName(self):
         """Returns the HTTP username, or None if not logged in."""
         reqHeaderDict = self._getValidAuthHeader()
@@ -195,6 +225,8 @@ class auth(object):
 def H(data):
     """Return a hex digest MD5 hash of the argument"""
     return md5(data).hexdigest()
+
+
 def quoteIt(x):
     """Return the argument quoted, suitable for a quoted-string"""
     return '"%s"' % (x.replace("\\","\\\\").replace('"','\\"'))
@@ -223,6 +255,8 @@ class NonceMemory(dict):
                 break
         self[nonce] = (time.time() + lifespan, 1)
         return nonce
+
+
     def nonceState(self, reqHeaderDict,  nonceSkip = 1):
         """ 1 = nonce valid, proceed; 2 = nonce totally invalid;  3 = nonce requires refreshing """
         nonce = reqHeaderDict.get('nonce', None)

@@ -70,19 +70,22 @@ class BadRequest(web.webapi.HTTPError):
         headers = {'Content-Type': 'text/html'}
         super(BadRequest,self).__init__(status, headers, message)
 
-# Create bogus decorator
-#requirelogin = lambda x: x 
-
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
 def userdb_lookup(user, realm):
     global TEMPUSER
     TEMPUSER = user
     return settings.USERS[user] #possible KeyError is captured by digest.auth itself!
 
+#requirelogin = lambda x: x
+#if settings.USERS:
+#    requirelogin = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
+auth = lambda x: x
+
+#auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
 def requirelogin(f):
-    global TEMPUSER
+    global TEMPUSER, auth
     def wrapper(*args, **kwargs):
         printdebug("wrapper:"+ repr(f))        
         args = list(args)
@@ -90,7 +93,7 @@ def requirelogin(f):
         args = tuple(args)
         if settings.USERS:
             #f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
-            return clam.common.digestauth.auth(userdb_lookup, settings.SYSTEM_ID)(f)(*args, **kwargs)
+            return auth(f)(*args, **kwargs)
         else:
             return f(*args, **kwargs)
     return wraps(f)(wrapper)
@@ -856,6 +859,8 @@ if __name__ == "__main__":
     #requirelogin = real_requirelogin #fool python :) 
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
+    if settings.USERS:
+        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
         
 
     JobService() #start
