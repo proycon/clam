@@ -2,8 +2,7 @@
 
 - Disallow empty filename in submit user input
 - Also show parameter in done-mode (status 2)
-
-- Make clear to user that they have to upload files before selecting parameters? Or make interface more flexible
+- make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage
 
 - Test user access to projects
 

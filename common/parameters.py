@@ -92,13 +92,16 @@ class AbstractParameter(object):
         return True
 
     def compilearg(self, value):
-        if self.paramflag[-1] == '=' or self.nospace:
+        """This method compiles the parameter into syntax that can be used on the shell, such as for example: --paramflag=value"""
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
             sep = ''
-        else:
+        elif self.paramflag:
             sep = ' '
         return self.paramflag + sep + value
 
     def xml(self):
+        """This methods renders an XML representation of this parameter, along with 
+        its selected value, and feedback on validation errors"""
         xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' flag="'+self.paramflag + '"'
@@ -121,6 +124,7 @@ class AbstractParameter(object):
         return xml
 
     def set(self, value):
+        """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
         if self.validate(value):
             print "Parameter " + self.id + " successfully set to " + repr(value)
             self.value = value
@@ -130,10 +134,15 @@ class AbstractParameter(object):
             return False
 
     def valuefrompostdata(self, postdata):
-        return postdata[self.id]
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
+        if self.id in postdata and postdata[self.id]:
+            return postdata[self.id]
+        else: 
+            return False
 
 
     def access(self, user):
+        """This method checks if the given user has access to see/set this parameter, based on the denyusers and/or allowusers option."""
         if self.denyusers:
             if user in self.denyusers:
                 return False
@@ -231,6 +240,7 @@ class ChoiceParameter(AbstractParameter):
 
 
     def compilearg(self, values): 
+        """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
         if isinstance(values,list):
             value = self.delimiter.join(values)
         else:
@@ -240,6 +250,8 @@ class ChoiceParameter(AbstractParameter):
         return super(ChoiceParameter,self).compilearg(value)
 
     def xml(self):
+        """This methods renders an XML representation of this parameter, along with 
+        its selected value, and feedback on validation errors"""
         xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
@@ -264,14 +276,22 @@ class ChoiceParameter(AbstractParameter):
         return xml
 
     def valuefrompostdata(self, postdata):
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if self.multi:
+            found = False
             values = []
             for choicekey in [x[0] for x in self.choices]:
-                if postdata[self.id+'['+choicekey+']'] in postdata:
-                    values.append(choicekey)
-            return values
+                if self.id+'['+choicekey+']' in postdata:
+                    found = True
+                    if postdata[self.id+'['+choicekey+']']:
+                        values.append(choicekey)
+            if not found: 
+                return False
+            else:
+                return values
         else:
-            return postdata[self.id]     
+            if self.id in postdata and postdata[self.id]:
+                return postdata[self.id]     
 
 
 class TextParameter(StringParameter): #TextArea based

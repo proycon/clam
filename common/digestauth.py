@@ -18,7 +18,7 @@ def pwhash(user, realm, password):
 class MalformedAuthenticationHeader(Exception): pass
 
 ## Fundamental utilities
-opaque =  "%032x" % random.getrandbits(128)
+
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""

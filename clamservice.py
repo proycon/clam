@@ -21,6 +21,7 @@ import subprocess
 import glob
 import sys
 import datetime
+import random
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -405,8 +406,9 @@ class Project(object):
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:
                 if parameter.access(user):
-                    if parameter.id in postdata and postdata[parameter.id] != '':    
-                        if parameter.set(parameter.valuefrompostdata(postdata)): #may generate an error in parameter.error
+                    postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
+                    if postvalue:
+                        if parameter.set(postvalue): #may generate an error in parameter.error
                             params.append(parameter.compilearg(parameter.value))
                         else:
                             errors = True
@@ -414,7 +416,7 @@ class Project(object):
                         #Not all required parameters were filled!
                         parameter.error = "This option must be set"
                         errors = True
-                    if parameter.id in postdata and postdata[parameter.id] != '' and (parameter.forbid or parameter.require):
+                    if postvalue and (parameter.forbid or parameter.require):
                         for _, parameterlist2 in parameters:
                             for parameter2 in parameterlist2:
                                 if parameter.forbid and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id] != '':
@@ -749,8 +751,12 @@ class Uploader(object):
                     archive = False
                     filename = inputformat.filename(filename) #set proper filename extension
                 realupload = True
-            elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)] and 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
-
+            elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)]:
+                if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
+                    filename = postdata['uploadfilename' + str(i)]
+                else:
+                    #if no filename exists, make a random one
+                    filename =  "%032x" % random.getrandbits(128)
                 output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadfilename' + str(i)] +"\">\n"
 
                 archive = False

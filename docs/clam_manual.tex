@@ -135,7 +135,7 @@ Parameters of six types are predefined, though other types can be added to \text
 
 \begin{enumerate}
 \item \textbf{\texttt{id}} -- An id for internal use only.
-\item \textbf{\texttt{paramflag}} -- The parameter flag, this flag will be added to \texttt{\$PARAMETERS} when the parameter is set. It is customary for parameter flags to consist of a hyphen and a letter or two hyphens and a string. Parameter flags could be for example be formed like: \texttt{-p} ,\texttt{--pages}, \texttt{--pages=}. There will be a space between the parameter flag and its value, unless it ends in a \texttt{=} sign or \texttt{nospace=True} is set. Multi-word string values will automatically be enclosed in quotation marks, for the shell to correctly parse them.
+\item \textbf{\texttt{paramflag}} -- The parameter flag, this flag will be added to \texttt{\$PARAMETERS} when the parameter is set. It is customary for parameter flags to consist of a hyphen and a letter or two hyphens and a string. Parameter flags could be for example be formed like: \texttt{-p} ,\texttt{--pages}, \texttt{--pages=}. There will be a space between the parameter flag and its value, unless it ends in a \texttt{=} sign or \texttt{nospace=True} is set. Multi-word string values will automatically be enclosed in quotation marks, for the shell to correctly parse them. Technically, you are also allowed to specify an empty parameter flag, in which case only the value will be outputted, as if it were an argument.
 \item \textbf{\texttt{name}} -- The name of this parameter, this will be shown to the user in the interface.
 \item \textbf{\texttt{description}} -- A description of this parameter, meant for the end-user.
 \end{enumerate}

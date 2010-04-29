@@ -139,7 +139,7 @@
             </form>
         </div>
         <div class="leftbox uploadform">
-            <h3>Submit input from browser</h3>
+            <h3>Add input from browser</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
@@ -152,7 +152,7 @@
                     </xsl:for-each>
                     </select>
                  </td></tr>
-                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Submit" /></td></tr>
+                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
                 </table>
             </form>            
         </div>
