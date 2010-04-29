@@ -127,6 +127,7 @@ Central in the configuration file is the command that CLAM will execute. This co
 Make sure the actual command is an absolute path or the executable is in the user's \texttt{\$PATH}. Upon launch, the current working directory will be automatically set to the specific project directory. Within this directory, there will be an \texttt{input/} and \texttt{output/} directory, but use the full path as stored in \texttt{\$INPUTDIRECTORY} and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory.
 
 \subsection{Parameters}
+\label{sec:parameters}
 
 The parameters which an NLP application, or rather the wrapper script, can take, are defined in the service configuration. First of all parameters can be subdivided into parameter groups, but these serve only presentational purposes. 
 
@@ -158,6 +159,8 @@ All parameters can take the following extra named arguments:
 \item \textbf{\texttt{required}} - Set to \texttt{True} to make this parameter required rather than optional.
 \item \textbf{\texttt{require}} - Set this to a list of parameter IDs. If this parameter is set, so must all others in this list.
 \item \textbf{\texttt{forbid}} - Set this to a list of parameter IDs. If this parameter is set, none of the others in the list may be set.
+\item \textbf{\texttt{allowusers}} - Allow only the specified lists of usernames to see and set this parameter. If unset, all users will have access. You can decide whether to use this option or \texttt{denyusers}, or to allow access for all.
+\item \textbf{\texttt{denyusers}} - Disallow the specified lists of usernames to see and set this parameter. If unset, no users are blocked from having access. You can decide whether to use this option or \texttt{allowusers}, or to allow access for all.
 \end{itemize}
 %TODO
 
@@ -191,6 +194,8 @@ Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM 
 A list of users can be defined in \texttt{USERS} in the service configuration file, this is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, the system ID, and the password. Furthermore there is a setting \texttt{PROJECTS\_PUBLIC}, which can be set to \texttt{True} or \texttt{False}, in the former case all projects will be open to all authenticated users, in the latter case projects will only be accessible by their owners.
 
 User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons.
+
+The ability to view and set parameteres can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
 
 \begin{devnotes}
 Eventually, an option will probably be implemented to read users from a database. HTTPS support may also be added at a later stage.

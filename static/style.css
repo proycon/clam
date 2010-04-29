@@ -129,6 +129,9 @@ h3 {
 #parameters th, #parameters td {
     width: 49%;
 }
+#parameters td.option {
+    text-align: right;
+}
 #parameters h4 {
     color: #ac8644;
     text-decoration: small-caps;  

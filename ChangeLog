@@ -42,3 +42,5 @@ April:
     - Made Tadpole service
     - Index now produces full CLAM response (index.xml is obsolete)
     - Tested and finished user authentication (HTTP Digest)
+    - Implemented access control lists for parameters
+    - Fixed multiple choice support in ChoiceParameter

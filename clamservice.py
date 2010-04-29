@@ -360,8 +360,6 @@ class Project(object):
                     if not errormsg: errormsg = "One or more parameters are invalid"
                     break
 
-        parameters = [ p for p in parameters if p.access(user) ]
-
         render = web.template.render('templates')
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         

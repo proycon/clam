@@ -1,6 +1,5 @@
 
-- Implement guest behaviour for parameters
-- Fix multiople choice support in ChoiceParameter
+
 - Disallow empty filename in submit user input
 - Also show parameter in done-mode (status 2)
 
