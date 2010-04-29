@@ -205,6 +205,8 @@ class ChoiceParameter(AbstractParameter):
 
         #defaults
         self.delimiter = ","
+        self.showall = False
+        self.multi = False
         if not 'value' in kwargs and not 'default' in kwargs:
             self.value = self.choices[0][0] #no default specified, first choice is default
                 
