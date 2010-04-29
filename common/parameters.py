@@ -55,18 +55,20 @@ class AbstractParameter(object):
         self.paramflag = paramflag #the parameter flag passed to the command (include a trailing space!)        
         self.name = name #a representational name
         self.description = description
-        self.error = None
-
+        self.error = None                    
         self.value = False
         self.kwargs = kwargs #make a copy for XML generation later
-        self.guest = True
         self.required = False
         self.nospace = False
         self.require = []
         self.forbid = []
+        self.allowusers = []
+        self.denyusers = []
         for key, value in kwargs.items():
-            if key == 'guest': 
-                self.guest = value  #Show parameter for guests?
+            if key == 'allowusers': 
+                self.allowusers = value  #Users to allow access to this parameter (If not set, all users have access)
+            elif key == 'denyusers': 
+                self.denyusers = value   #Users to deny access to this parameter (If not set, nobody is denied)
             elif key == 'value' or key == 'default':
                 #set an error message
                 self.set(value)
@@ -129,6 +131,17 @@ class AbstractParameter(object):
 
     def valuefrompostdata(self, postdata):
         return postdata[self.id]
+
+
+    def access(self, user):
+        if self.denyusers:
+            if user in self.denyusers:
+                return False
+        if self.allowusers:
+            if not user in self.allowusers:
+                return False
+        return True
+            
         
 class BooleanParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):

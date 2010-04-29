@@ -359,6 +359,9 @@ class Project(object):
                     errors = "yes"
                     if not errormsg: errormsg = "One or more parameters are invalid"
                     break
+
+        parameters = [ p for p in parameters if p.access(user) ]
+
         render = web.template.render('templates')
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         
@@ -403,24 +406,25 @@ class Project(object):
 
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:
-                if parameter.id in postdata and postdata[parameter.id] != '':    
-                    if parameter.set(parameter.valuefrompostdata(postdata)): #may generate an error in parameter.error
-                        params.append(parameter.compilearg(parameter.value))
-                    else:
+                if parameter.access(user):
+                    if parameter.id in postdata and postdata[parameter.id] != '':    
+                        if parameter.set(parameter.valuefrompostdata(postdata)): #may generate an error in parameter.error
+                            params.append(parameter.compilearg(parameter.value))
+                        else:
+                            errors = True
+                    elif parameter.required:
+                        #Not all required parameters were filled!
+                        parameter.error = "This option must be set"
                         errors = True
-                elif parameter.required:
-                    #Not all required parameters were filled!
-                    parameter.error = "This option must be set"
-                    errors = True
-                if parameter.id in postdata and postdata[parameter.id] != '' and (parameter.forbid or parameter.require):
-                    for _, parameterlist2 in parameters:
-                        for parameter2 in parameterlist2:
-                            if parameter.forbid and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id] != '':
-                                parameter.error = parameter2.error = "Settings these options together is forbidden"
-                                errors = True
-                            if parameter.require and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
-                                parameter2.error = "This option must be set as well"
-                                errors = True
+                    if parameter.id in postdata and postdata[parameter.id] != '' and (parameter.forbid or parameter.require):
+                        for _, parameterlist2 in parameters:
+                            for parameter2 in parameterlist2:
+                                if parameter.forbid and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id] != '':
+                                    parameter.error = parameter2.error = "Settings these options together is forbidden"
+                                    errors = True
+                                if parameter.require and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
+                                    parameter2.error = "This option must be set as well"
+                                    errors = True
 
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
