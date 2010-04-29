@@ -158,7 +158,7 @@ Defining a format goes as follows, let's take PlainTextFormat as example:
 INPUTFORMATS = [ PlainTextFormat('utf-8' ['.txt'], subdirectory='texts' ) ]
 \end{verbatim}
 
-The first argument of the class constructor is the encoding, the second is a list of acceptable extensions, of which the first will be used in the rename procedure. Some extra arguments can be provided:
+The first argument of the class constructor is the encoding, the second is a list of acceptable extensions, of which the first will be used in the rename procedure. You can redeclare instances of the same format with different encodings, but make sure the extensions you specify are unique. Some extra arguments can be provided:
 
 \begin{itemize}
 \item \textbf{\texttt{subdirectory=}} -- Store all files of this format in the specific subdirectory of the input directory. This allows you to separate files of a certain format into distinct directories. 

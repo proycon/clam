@@ -83,13 +83,16 @@ def userdb_lookup(user, realm):
 
 def requirelogin(f):
     global TEMPUSER
-    if settings.USERS:
-        f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
     def wrapper(*args, **kwargs):
+        printdebug("wrapper:"+ repr(f))        
         args = list(args)
         args.append(TEMPUSER)
         args = tuple(args)
-        return f(*args, **kwargs)
+        if settings.USERS:
+            #f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
+            return clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)(*args, **kwargs)
+        else:
+            return f(*args, **kwargs)
     return wraps(f)(wrapper)
 
 class JobService(object):

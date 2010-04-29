@@ -38,7 +38,8 @@ ROOT = "/home/proycon/work/clamtmproot2/"
 URL = "http://localhost:8080"
 
 #Users and passwords
-USERS = None #no user authentication
+#USERS = None #no user authentication
+USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 #Do you want all projects to be public to all users? Otherwise projects are 
