@@ -1,7 +1,8 @@
 
-- implement guest behaviour for parameters
+- Implement guest behaviour for parameters
+- Fix multiople choice support in ChoiceParameter
 
-- Test user authentication
+- Test user access to projects
 
 - Encoding check?
 

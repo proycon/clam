@@ -46,7 +46,7 @@ COMMAND = path[0] +  "/wrappers/tadpolewrapper.sh $STATUSFILE $INPUTDIRECTORY $O
 
 PARAMETERS =  [ 
     ('Components', [
-        BooleanParameter('parser','--skip=p', 'Enable depency parser','Do you want to enable the dependency parser? This slows down things considerably', reverse=True, default=True)
+        ChoiceParameter('parser','--skip=', 'Skip components','Skip selected components. You may especially want to skip the dependency parser if you do not need it, as it takes a lot of resources.', choices=[('p','Dependency Parser'),('m','Morphological Analyser'),('t','Tokeniser')], reverse=True, delimiter='')
     ])
 ]
 

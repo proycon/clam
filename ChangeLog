@@ -39,3 +39,6 @@ April:
     - Started CLAM Documentation
     - Lots of fixes
     - Finished UCTO service (may act as example)
+    - Made Tadpole service
+    - Index now produces full CLAM response (index.xml is obsolete)
+    - Tested and finished user authentication (HTTP Digest)
