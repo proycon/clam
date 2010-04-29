@@ -1,6 +1,10 @@
 
 - Implement guest behaviour for parameters
 - Fix multiople choice support in ChoiceParameter
+- Disallow empty filename in submit user input
+- Also show parameter in done-mode (status 2)
+
+- Make clear to user that they have to upload files before selecting parameters? Or make interface more flexible
 
 - Test user access to projects
 

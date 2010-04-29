@@ -141,8 +141,8 @@
                 <xsl:element name="input">
                     <xsl:attribute name="type">checkbox</xsl:attribute>
                     <xsl:attribute name="id"><xsl:value-of select="../@id"/></xsl:attribute>
-                    <xsl:attribute name="name"><xsl:value-of select="../@id"/></xsl:attribute>
-                    <xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute>
+                    <xsl:attribute name="name"><xsl:value-of select="../@id"/>[<xsl:value-of select="@id"/>]</xsl:attribute>
+                    <xsl:attribute name="value">1</xsl:attribute>
                     <xsl:if test="@selected">
                         <xsl:attribute name="checked">checked</xsl:attribute>     
                     </xsl:if>

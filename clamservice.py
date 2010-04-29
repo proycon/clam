@@ -403,8 +403,8 @@ class Project(object):
 
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:
-                if parameter.id in postdata and postdata[parameter.id] != '':
-                    if parameter.set(postdata[parameter.id]): #may generate an error in parameter.error
+                if parameter.id in postdata and postdata[parameter.id] != '':    
+                    if parameter.set(parameter.valuefrompostdata(postdata)): #may generate an error in parameter.error
                         params.append(parameter.compilearg(parameter.value))
                     else:
                         errors = True

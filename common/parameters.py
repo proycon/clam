@@ -120,12 +120,15 @@ class AbstractParameter(object):
 
     def set(self, value):
         if self.validate(value):
+            print "Parameter " + self.id + " successfully set to " + repr(value)
             self.value = value
             return True
         else:
+            print "Parameter " + self.id + " COULD NOT BE set to " + repr(value)
             return False
-       
 
+    def valuefrompostdata(self, postdata):
+        return postdata[self.id]
         
 class BooleanParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
@@ -177,17 +180,18 @@ class StringParameter(AbstractParameter):
 
 
 class ChoiceParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, choices, **kwargs):
-        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
-
-        #defaults
-        self.delimiter = ","
+    def __init__(self, id, paramflag, name, description, choices, **kwargs):    
         self.choices = [] #list of key,value tuples
         for x in choices:
             if not isinstance(x,tuple) or len(x) != 2:
                 self.choices.append( (x,x) ) #list of two tuples
             else:
                 self.choices.append(x) #list of two tuples
+
+        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
+
+        #defaults
+        self.delimiter = ","
         if not 'value' in kwargs and not 'default' in kwargs:
             self.value = self.choices[0][0] #no default specified, first choice is default
                 
@@ -237,12 +241,23 @@ class ChoiceParameter(AbstractParameter):
              xml += ' error="'+self.error + '"'               
         xml += ">"
         for key, value in self.choices:
-            if self.value == key:
-                xml += " <choice id=\""+key+"\" selected=\"1\">" + value + "</choice>"
+            if self.value == key or (isinstance(self.value ,list) and key in self.value):
+                xml += " <choice id=\""+key+"\" selected=\"1\">" + value + "</choice>"        
             else:
                 xml += " <choice id=\""+key+"\">" + value + "</choice>"
         xml += "</" + self.__class__.__name__ + ">"
         return xml
+
+    def valuefrompostdata(self, postdata):
+        if self.multi:
+            values = []
+            for choicekey in [x[0] for x in self.choices]:
+                if postdata[self.id+'['+choicekey+']'] in postdata:
+                    values.append(choicekey)
+            return values
+        else:
+            return postdata[self.id]     
+
 
 class TextParameter(StringParameter): #TextArea based
     def __init__(self, id, paramflag, name, description = '', **kwargs):
