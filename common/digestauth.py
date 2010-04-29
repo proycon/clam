@@ -46,10 +46,11 @@ class auth(object):
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="REFRESH" content="1; URL=$redirecturl" />
-  <title></title>
+  <!--<meta http-equiv="REFRESH" content="2; URL=$redirecturl" />-->
+  <title>CLAM</title>
 </head>
 <body>
+<p>Authentication required</p>
 </body>
 </html>
 """

@@ -90,7 +90,7 @@ def requirelogin(f):
         args = tuple(args)
         if settings.USERS:
             #f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
-            return clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)(*args, **kwargs)
+            return clam.common.digestauth.auth(userdb_lookup, settings.SYSTEM_ID)(f)(*args, **kwargs)
         else:
             return f(*args, **kwargs)
     return wraps(f)(wrapper)
