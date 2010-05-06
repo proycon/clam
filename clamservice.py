@@ -346,7 +346,7 @@ class Project(object):
             outputpaths = self.outputindex(project)
             if self.exitstatus(project) != 0: #non-zero codes indicate errors!
                 errors = "yes"
-                errormsg = "An error occured within the system. Please inspect the error log for details"
+                errormsg = "An error occurred within the system. Please inspect the error log for details"
         else:
             outputpaths = []        
         if statuscode == clam.common.status.READY:
