@@ -1,8 +1,10 @@
 
 
 - Disallow empty filename in submit user input
-- Also show parameter in done-mode (status 2)
+- Also show parameter in done-mode (status 2) (done?)
 - make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage
+
+- Nicefy documentation 
 
 - Test user access to projects
 
@@ -13,13 +15,14 @@ Extra features:
 
 - Some kind of pagination for many input/output files or projects?
 
-- Write documentation (in progress)
 - Write client (in progress)
 - Write separate webinterface (django) (not started yet)
+
 
 Later:
 - Enable some HTTP Caching for /static/
 - Make XSDs or DTDs for xml responses
+- Write more documentation (in progress)
 
 
 
