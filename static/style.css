@@ -11,6 +11,10 @@ body {
     border: 1px none #ca9c4d;
     padding: 10px;
     text-align: center;
+    border-radius: 12px; /* general CSS3 */
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+
 }
 
 #header h1 {
@@ -23,6 +27,20 @@ body {
     font-size: 100%;
     margin: 1px;
 }
+h2 {
+    font-size: 120%;
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+h3 {
+    margin-left: 5px;
+    font-size: 100%;
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+
 
 #description {
     font-style: italic;
@@ -34,9 +52,13 @@ body {
     width: 75%;
     border: 1px none;
 }
+
+
 div.box {
     width: 97%;
     clear: both;
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
     margin: 5px;
     background: #f6f6f6;
     border: 1px solid #ca9c4d;
@@ -54,6 +76,30 @@ div.rightbox {
     float: right;
     margin: 5px;
     width: 45%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+div#mask {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0.6;
+}
+div#editor {
+    display: none;
+    position: fixed;
+    top: 100px;
+    width: 65%;
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
     background: #f6f6f6;
     border: 1px solid #ca9c4d;
     padding: 10px;
@@ -77,23 +123,30 @@ div.rightbox {
     color: white;
     font-size: 120%;
 }
-h3 {
-    color: #ac8644;
-    text-decoration: small-caps;  
-    border-bottom:  1px solid #ca9c4d;
+#status img.progress {
+    margin: 2px;
+    margin-left: 10px; 
 }
 
-#input table, #output table {
+#input table {
+    text-align: left;
+}
+td.buttons {
+    text-align: right;
+}
+
+
+table.files {
     border: #ca9c4d;
     text-align: left;
     width: 60%;
 }
-#input table th, #output table th {
+table.files th {
     font-family: monospace;
     font-weight: none;    
     width: 60%;
 }
-#input table td, #output table td {
+table.files td {
     width: 20%;
     font-style: italic;
 }
@@ -156,10 +209,17 @@ input.uploadbutton {
 input#abortbutton, input#restartbutton {
     float: right;
 }
-.uploadform table {
+.uploadform table, #inputbox table {
     width: 100%;
 }
-.uploadform textarea {
+#editor textarea {
     width: 100%;
     height: 240px;
+}
+#editor th {
+    width: 15%;
+}
+
+button#openeditor {
+    margin-left: 10%;
 }

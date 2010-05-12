@@ -15,10 +15,11 @@
             <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
             <xsl:apply-templates select="status"/>
             <xsl:choose>
-              <xsl:when test="status/@code = 0">              
-                <xsl:apply-templates select="input"/>
-                <!-- upload form transformed from input formats -->
-                <xsl:apply-templates select="inputformats"/>             
+              <xsl:when test="status/@code = 0">  
+                <div id="input" class="box">            
+                 <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
+                 <xsl:apply-templates select="inputformats"/>             
+                </div>
                 <xsl:apply-templates select="parameters"/>  
               </xsl:when>
               <xsl:when test="status/@code = 2">
@@ -85,6 +86,9 @@
              });         
            });
        }    
+       $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
+       $("#submiteditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return true; })
+       $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; })
      });    
     </script>
   </head>
@@ -93,11 +97,11 @@
 <xsl:template name="footer">
     <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a></div>
 </xsl:template>
-<?xml-stylesheet type="text/xsl" href="http://localhost:8080/static/interface.xsl"?>
+
 
 <xsl:template match="/clam/status">
     <div id="status" class="box">
-     <h3>Status</h3>
+     <h2>Status</h2>
      <xsl:if test="@errors = 'yes'">
       <div class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
@@ -108,7 +112,7 @@
         <div class="ready"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
       </xsl:when>
       <xsl:when test="@code = 1">
-        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
+        <div class="running"><xsl:value-of select="@message"/><br /><img class="progress" src="/static/progress.gif" /><input id="abortbutton" type="button" value="Abort and delete project" /></div>
       </xsl:when>
       <xsl:when test="@code = 2">
         <div class="done"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>
@@ -121,57 +125,58 @@
 </xsl:template>
 
 <xsl:template match="/clam/inputformats">
-        <div class="rightbox uploadform">
+        <div class="uploadform">
             <h3>Upload a file from disk</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
-                 <tr><td><label for="upload1">Upload file:</label></td><td><input type="file" name="upload1" /></td></tr>
-                 <tr><td><label for="uploadformat1">Format:</label></td><td>
+                 <tr><th><label for="upload1">Upload file:</label></th><td><input type="file" name="upload1" /></td></tr>
+                 <tr><th><label for="uploadformat1">Format:</label></th><td>
                     <select name="uploadformat1">
                     <xsl:for-each select="*">
                         <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
                     </xsl:for-each>
                     </select>
                  </td></tr>
-                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Upload file" /></td></tr>
+                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Upload input file" /></td></tr>
                 </table>
             </form>
         </div>
-        <div class="leftbox uploadform">
+        <h3>Add input from browser</h3>
+        You can create new files right from your browser: <button id="openeditor">Open Live Editor</button>
+        <div id="mask"></div>
+        <div id="editor">
             <h3>Add input from browser</h3>
             <form method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
-                 <tr><td><label for="uploadtext1">Input:</label></td><td><textarea name="uploadtext1"></textarea></td></tr>
-                 <tr><td><label for="uploadfilename1">Desired filename:</label></td><td><input name="uploadfilename1" /></td></tr>
-                 <tr><td><label for="uploadformat1">Format:</label></td><td>
+                 <tr><th><label for="uploadtext1">Input:</label></th><td><textarea name="uploadtext1"></textarea></td></tr>
+                 <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input name="uploadfilename1" /></td></tr>
+                 <tr><th><label for="uploadformat1">Format:</label></th><td>
                     <select name="uploadformat1">
                     <xsl:for-each select="*">
                         <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
                     </xsl:for-each>
                     </select>
                  </td></tr>
-                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
+                 <tr><th></th><td class="buttons"><input id="submiteditor" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
                 </table>
             </form>            
         </div>
 </xsl:template>
 
 <xsl:template match="/clam/input">
-    <div id="input" class="box">
-        <h3>Input files</h3>
-        <table>
+        <h2>Input files</h2>
+        <table class="files">
             <xsl:apply-templates select="path" />
         </table>
-    </div>
 </xsl:template>
 
 <xsl:template match="/clam/output">
     <div id="output" class="box">
-        <h3>Output files</h3>
+        <h2>Output files</h2>
         <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
-        <table>
+        <table class="files">
             <xsl:apply-templates select="path" />
         </table>
     </div>
@@ -192,10 +197,10 @@
 <xsl:template match="/clam/parameters">
     <form method="POST" enctype="multipart/form-data" action="">
     <div id="parameters" class="box">
-        <h3>Parameter Selection</h3>
+        <h2>Parameter Selection</h2>
 
         <xsl:for-each select="parametergroup">
-         <h4><xsl:value-of select="@name" /></h4>
+         <h3><xsl:value-of select="@name" /></h3>
          <table>
           <xsl:apply-templates />
          </table>
@@ -259,7 +264,7 @@
                 <input id="startprojectbutton" type="button" value="Start project" />
         </div>
         <div id="index" class="box">
-        <h3>Projects</h3>
+        <h2>Projects</h2>
         <xsl:for-each select="projects/project">
                 <ul>
                   <li><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></li>
