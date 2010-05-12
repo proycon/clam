@@ -101,6 +101,10 @@
 					"bJQueryUI": false,
 					"sPaginationType": "full_numbers"
 				});
+       $('#projects').dataTable( {
+					"bJQueryUI": false,
+					"sPaginationType": "full_numbers"
+				});
      });    
     </script>
   </head>
@@ -298,11 +302,16 @@
         </div>
         <div id="index" class="box">
         <h2>Projects</h2>
-        <xsl:for-each select="projects/project">
-                <ul>
-                  <li><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></li>
-                </ul>
-        </xsl:for-each>
+        <table id="projects">
+          <thead>
+            <tr><th>Project ID</th></tr>
+          </thead>
+          <tbody>
+           <xsl:for-each select="projects/project">
+            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></td></tr>
+           </xsl:for-each>
+          </tbody>
+        </table>
         </div>
 </xsl:template>
 

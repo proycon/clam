@@ -48,4 +48,4 @@ April:
 May:
     - Interface improvements
     - Also show parameter in done-mode (status 2)
-    - Added fancy table with pagination support for input/output files
+    - Added fancy table with pagination support for input/output files and project list

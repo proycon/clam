@@ -135,12 +135,23 @@ td.buttons {
     text-align: right;
 }
 
-table.files {
+table.files, table#projects {
     border: #ca9c4d;
     text-align: left;
     width: 100%;
     clear: both;
 }
+
+table#projects td {
+    padding: 3px;
+    padding-left: 20px;
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+body table.files td:hover, table.files th:hover, table#projects td:hover {
+    background: #eee;
+}
+
 table.files th {
     font-weight: none;    
     width: 60%;
