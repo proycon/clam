@@ -46,7 +46,11 @@
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="/static/style.css" type="text/css" />
+    <!--<link rel="stylesheet" href="/static/humanity/jquery-ui-1.8.1.custom.css" type="text/css" />-->
+    <link rel="stylesheet" href="/static/table.css" type="text/css" />
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
+    <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
+    <script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
     <script type="text/javascript">
      $(document).ready(function(){
        if ($("#startprojectbutton").length) {
@@ -89,6 +93,14 @@
        $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
        $("#submiteditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return true; })
        $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; })
+       $('#inputfiles').dataTable( {
+					"bJQueryUI": false,
+					"sPaginationType": "full_numbers"
+				});
+       $('#outputfiles').dataTable( {
+					"bJQueryUI": false,
+					"sPaginationType": "full_numbers"
+				});
      });    
     </script>
   </head>
@@ -167,8 +179,17 @@
 
 <xsl:template match="/clam/input">
         <h2>Input files</h2>
-        <table class="files">
-            <xsl:apply-templates select="path" />
+        <table id="inputfiles" class="files">
+            <thead>
+                <tr>
+                    <th>Input File</th>
+                    <th>Format</th>
+                    <th>Encoding</th>
+                </tr>
+            </thead>
+            <tbody>
+                <xsl:apply-templates select="path" /> 
+            </tbody>
         </table>
 </xsl:template>
 
@@ -176,21 +197,33 @@
     <div id="output" class="box">
         <h2>Output files</h2>
         <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
-        <table class="files">
-            <xsl:apply-templates select="path" />
+        <table id="outputfiles" class="files">
+            <thead>
+                <tr>
+                    <th>Input File</th>
+                    <th>Format</th>
+                    <th>Encoding</th>
+                </tr>
+            </thead>
+            <tbody>
+                <xsl:apply-templates select="path" />
+            </tbody>
         </table>
     </div>
 </xsl:template>
 
 <xsl:template match="/clam/input/path">
-    <tr><th><xsl:value-of select="."/></th><td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding" /></td></tr>
+    <tr>
+        <td class="file"><xsl:value-of select="."/></td><td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding" /></td>
+    </tr>
 </xsl:template>
 
 
 <xsl:template match="/clam/output/path">
     <tr>
-    <th><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></th>
-    <td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding"/></td>
+        <td class="file"><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>  
+        <td><xsl:value-of select="@format"/></td>
+        <td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>
 

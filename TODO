@@ -1,19 +1,21 @@
 
 
 - Disallow empty filename in submit user input
-- Also show parameter in done-mode (status 2) (done?)
-- make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage
 
-- Nicefy documentation 
+- make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage (in progress)
+
+- Nicefy documentation (in progress)
 
 - Test user access to projects
+
+- Convert project list to datatable
 
 - Encoding check?
 
 Extra features:
     - Automatic encoding conversion for inputformats?
 
-- Some kind of pagination for many input/output files or projects?
+
 
 - Write client (in progress)
 - Write separate webinterface (django) (not started yet)

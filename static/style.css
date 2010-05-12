@@ -135,20 +135,33 @@ td.buttons {
     text-align: right;
 }
 
-
 table.files {
     border: #ca9c4d;
     text-align: left;
-    width: 60%;
+    width: 100%;
+    clear: both;
 }
 table.files th {
-    font-family: monospace;
     font-weight: none;    
     width: 60%;
+    padding: 4px;
 }
 table.files td {
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+    font-family: monospace;
     width: 20%;
     font-style: italic;
+    padding: 4px;
+}
+table.files thead th {
+    background: #cbcbcb;
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+table.files td.file {
+    font-weight: bold;
+    font-style: normal;
 }
 
 #footer {
