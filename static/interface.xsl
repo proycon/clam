@@ -146,7 +146,7 @@
                  <tr><th><label for="uploadformat1">Format:</label></th><td>
                     <select name="uploadformat1">
                     <xsl:for-each select="*">
-                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
+                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
                     </xsl:for-each>
                     </select>
                  </td></tr>
