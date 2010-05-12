@@ -1,6 +1,7 @@
 
 
 - Disallow empty filename in submit user input
+- Validate project IDs upon creation? (already done?)
 
 - make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage (in progress)
 

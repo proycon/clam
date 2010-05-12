@@ -518,15 +518,29 @@ class OutputInterface(object):
                 format = 'zip' #default          
             
             #validation, security
+            contentencoding = None
             if format == 'zip':
                 contenttype = 'application/zip'
-                command = "/usr/bin/zip -r" #TODO: do not hard-code path
+                command = "/usr/bin/zip -r" #TODO: do not hard-code path!
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
             elif format == 'tar.gz':
-                contenttype = 'application/x-gzip'
+                contenttype = 'application/x-tar'
+                contentencoding = 'gzip'
                 command = "/bin/tar -czf"
-            elif format != 'tar.bz2': 
-                contenttype = 'application/x-bz2'
+                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project) + "output/" + project + ".zip")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
+            elif format == 'tar.bz2': 
+                contenttype = 'application/x-bzip2'
                 command = "/bin/tar -cjf"
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project) + "output/" + project + ".zip")
             else:
                 raise BadRequest('Invalid archive format')
 
@@ -548,9 +562,10 @@ class OutputInterface(object):
                     os.waitpid(pid, 0) #wait for process to finish
                     os.unlink(Project.path(project) + '.download')
 
-            web.header('Content-type', contenttype)
-
-            for line in open(path,'rb'):
+            if contentencoding:
+                web.header('Content-Encoding', contentencoding)
+            web.header('Content-Type', contenttype)
+            for line in open(path,'r'):
                 yield line
                
     #@requirelogin
