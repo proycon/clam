@@ -39,7 +39,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = 0.2
+VERSION = '0.2.5'
 
 DEBUG = False
     
@@ -858,7 +858,7 @@ if __name__ == "__main__":
         del sys.argv[1]
 
     #Check version
-    if settings.REQUIRE_VERSION < VERSION:
+    if float(str(settings.REQUIRE_VERSION)[0:3]) < float(str(VERSION)[0:3]):
         print >> sys.stderr, "Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required"
         sys.exit(1)   
 

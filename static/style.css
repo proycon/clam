@@ -21,12 +21,7 @@ body {
     color: white;
     margin: 3px;
 }
-#header h2 {
-    color: white;
-    font-style: italic;
-    font-size: 100%;
-    margin: 1px;
-}
+
 h2 {
     font-size: 120%;
     color: #ac8644;
@@ -41,6 +36,13 @@ h3 {
     border-bottom:  1px solid #ca9c4d;
 }
 
+#header h2 {
+    color: white;
+    font-style: italic;
+    font-size: 100%;
+    margin: 1px;
+    border: none;
+}
 
 #description {
     font-style: italic;
