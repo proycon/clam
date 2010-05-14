@@ -37,8 +37,8 @@ $if statuscode == 0 or datafile or not project:
         </inputformats>
         $if project:
             <input>
-                $for path, format, encoding in inputpaths:
-                    <path format="$format" encoding="$encoding">$path</path>
+                $for path, format, label, encoding in inputpaths:
+                    <path format="$format" label="$label" encoding="$encoding">$path</path>
             </input>
 $if statuscode == 2 or datafile or not project:
         <outputformats>

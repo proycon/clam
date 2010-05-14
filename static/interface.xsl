@@ -183,7 +183,9 @@
 
 <xsl:template match="/clam/input/path">
     <tr>
-        <td class="file"><xsl:value-of select="."/></td><td><xsl:value-of select="@format"/></td><td><xsl:value-of select="@encoding" /></td>
+        <td class="file"><xsl:value-of select="."/></td>
+        <td><xsl:value-of select="@label"/></td>
+        <td><xsl:value-of select="@encoding" /></td>
     </tr>
 </xsl:template>
 
@@ -191,7 +193,7 @@
 <xsl:template match="/clam/output/path">
     <tr>
         <td class="file"><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>  
-        <td><xsl:value-of select="@format"/></td>
+        <td><xsl:value-of select="@label"/></td>
         <td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>

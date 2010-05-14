@@ -316,7 +316,7 @@ class Project(object):
                     if fmt.match(filename):
                         format = fmt
                         break                                
-                paths.append( ( os.path.basename(f), format.__class__.__name__, format.encoding ) )
+                paths.append( ( os.path.basename(f), format.__class__.__name__, format.name, format.encoding ) )
         return paths
 
     def inputindex(self,project):        
@@ -684,7 +684,7 @@ class Uploader(object):
                 o += " archive=\"yes\">"
                 remove = True #archives no longer necessary after extract
             else:
-                o += " format=\""+inputformat.__class__.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
+                o += " format=\""+inputformat.__class__.__name__+"\" formatlabel=\""+inputformat.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
                 if inputformat.validate(self.path(project) + filename):
                     o += " validated=\"yes\" />\n"
                     printlog("Succesfully validated '" + filename + "'" )

@@ -74,7 +74,7 @@ $(document).ready(function(){
             success: function(response){ 
                 $(response).find('file').each(function(){
                     if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                        inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('format'), $(this).attr('encoding') ] );
+                        inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
                     }
                 });
             },
@@ -91,7 +91,7 @@ $(document).ready(function(){
         },  onComplete: function(file, response){
             $(response).find('file').each(function(){
                 if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                    inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('format'), $(this).attr('encoding') ] );
+                    inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
                 }
             });
             //window.alert($(response).text()); //DEBUG
