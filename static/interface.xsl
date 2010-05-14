@@ -51,62 +51,7 @@
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
     <script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
-    <script type="text/javascript">
-     $(document).ready(function(){
-       if ($("#startprojectbutton").length) {
-           $("#startprojectbutton").click(function(event){
-             $.ajax({ 
-                type: "PUT", 
-                url: "/" + $("#projectname").val() + "/", 
-                dataType: "xml", 
-                complete: function(xml){ 
-                    window.location.href = $("#projectname").val() + "/";
-                },
-             });
-             //$("#startprojectform").attr("action",$("#projectname").val());
-           });
-       }
-       if ($("#abortbutton").length) {
-           $("#abortbutton").click(function(event){
-             $.ajax({ 
-                type: "DELETE", 
-                url: window.location.href, 
-                dataType: "xml", 
-                complete: function(xml){ 
-                    window.location.href = "/"; /* back to index */
-                },
-             });         
-           });
-       }    
-       if ($("#restartbutton").length) {
-           $("#restartbutton").click(function(event){
-             $.ajax({ 
-                type: "DELETE", 
-                url: "output", 
-                dataType: "xml", 
-                complete: function(xml){ 
-                    window.location.href = ""; /* refresh */
-                },
-             });         
-           });
-       }    
-       $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
-       $("#submiteditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return true; })
-       $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; })
-       $('#inputfiles').dataTable( {
-					"bJQueryUI": false,
-					"sPaginationType": "full_numbers"
-				});
-       $('#outputfiles').dataTable( {
-					"bJQueryUI": false,
-					"sPaginationType": "full_numbers"
-				});
-       $('#projects').dataTable( {
-					"bJQueryUI": false,
-					"sPaginationType": "full_numbers"
-				});
-     });    
-    </script>
+    <script type="text/javascript" src="/static/clam.js"></script>
   </head>
 </xsl:template>
 
@@ -143,7 +88,7 @@
 <xsl:template match="/clam/inputformats">
         <div class="uploadform">
             <h3>Upload a file from disk</h3>
-            <form method="POST" enctype="multipart/form-data" action="upload/">
+            <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
                  <tr><th><label for="upload1">Upload file:</label></th><td><input type="file" name="upload1" /></td></tr>
@@ -163,7 +108,7 @@
         <div id="mask"></div>
         <div id="editor">
             <h3>Add input from browser</h3>
-            <form method="POST" enctype="multipart/form-data" action="upload/">
+            <form id="editorform" method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
                  <tr><th><label for="uploadtext1">Input:</label></th><td><textarea name="uploadtext1"></textarea></td></tr>
