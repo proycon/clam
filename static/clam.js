@@ -36,15 +36,10 @@ $(document).ready(function(){
          });         
        });
    }    
-   $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
-   $("#uploadform").attr("target","_blank"); //would not be valid xhtml strict
-   $("#editorform").attr("target","_blank");
-   $("#submiteditor").click(function(event){ 
-        $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
-        return true;
-   });
-   $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; });
-   $('#inputfiles').dataTable( {
+
+
+
+   inputfiles = $('#inputfiles').dataTable( {
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
 			});
@@ -56,5 +51,58 @@ $(document).ready(function(){
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
 			});
+
+
+
+
+   $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
+   $("#uploadform").attr("target","_blank"); //would not be valid xhtml strict
+   $("#editorform").attr("target","_blank");
+
+   $("#submiteditor").click(function(event){ 
+        $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
+        var filename = $('#uploadfilename1').val();
+        var d = new Date();    
+        if (!filename) {
+            filename = d.getTime();        
+        }
+        $.ajax({ 
+            type: "POST", 
+            url: "upload/", 
+            dataType: "xml", 
+            data: {'uploadcount':1, 'uploadtext1': $('#uploadtext1').val(), 'uploadformat1': $('#editoruploadformat').val(), 'uploadfilename1': filename }, 
+            success: function(response){ 
+                $(response).find('file').each(function(){
+                    if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
+                        inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('format'), $(this).attr('encoding') ] );
+                    }
+                });
+            },
+        });            
+        return true;
+   });
+   $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; });
+
+
+
+   uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
+            $('#complexupload').hide();
+            $('#uploadprogress').show();           
+        },  onComplete: function(file, response){
+            $(response).find('file').each(function(){
+                if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
+                    inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('format'), $(this).attr('encoding') ] );
+                }
+            });
+            //window.alert($(response).text()); //DEBUG
+            $('#uploadprogress').hide();
+            $('#complexupload').show();
+        }       
+    }); 
+   $('#uploadformat1').change(function(){
+        uploader.setData({'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1} );
+   });
+
+
 });    
 

@@ -247,3 +247,6 @@ input#abortbutton, input#restartbutton {
 button#openeditor {
     margin-left: 10%;
 }
+#uploadprogress {
+    display: none;
+}

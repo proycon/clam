@@ -51,6 +51,7 @@
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
     <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
     <script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/static/ajaxupload.js"></script>
     <script type="text/javascript" src="/static/clam.js"></script>
   </head>
 </xsl:template>
@@ -88,7 +89,9 @@
 <xsl:template match="/clam/inputformats">
         <div class="uploadform">
             <h3>Upload a file from disk</h3>
-            <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
+            <!--
+            <div id="simpleupload">
+             <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
                 <input type="hidden" name="uploadcount" value="1" />
                 <table>
                  <tr><th><label for="upload1">Upload file:</label></th><td><input type="file" name="upload1" /></td></tr>
@@ -99,22 +102,39 @@
                     </xsl:for-each>
                     </select>
                  </td></tr>
-                 <tr><td></td><td><input class="uploadbutton" type="submit" value="Upload input file" /></td></tr>
+                 <tr><td></td><td><input id="uploadbutton" type="submit" value="Upload input file" /></td></tr>
                 </table>
-            </form>
+             </form>
+            </div>
+            -->
+
+            <div id="complexupload">
+                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format for this upload:</em><xsl:text> </xsl:text><select id="uploadformat1">
+                    <xsl:for-each select="*">
+                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+                    </xsl:for-each>
+                    </select><br />
+                <strong>Step 2)</strong><xsl:text> </xsl:text><input id="upload1" class="uploadbutton" type="submit" value="Select and upload a file" />
+            </div>
+            <div id="uploadprogress">
+                    <strong>Upload in progress... Please wait...</strong><br />
+                    <img class="progress" src="/static/progress.gif" />
+            </div>
+        
+
         </div>
         <h3>Add input from browser</h3>
         You can create new files right from your browser: <button id="openeditor">Open Live Editor</button>
         <div id="mask"></div>
         <div id="editor">
             <h3>Add input from browser</h3>
-            <form id="editorform" method="POST" enctype="multipart/form-data" action="upload/">
-                <input type="hidden" name="uploadcount" value="1" />
+            <!--<form id="editorform" method="POST" enctype="multipart/form-data" action="upload/">-->
+            <!--<input type="hidden" name="uploadcount" value="1" />-->
                 <table>
-                 <tr><th><label for="uploadtext1">Input:</label></th><td><textarea name="uploadtext1"></textarea></td></tr>
-                 <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input name="uploadfilename1" /></td></tr>
+                 <tr><th><label for="uploadtext1">Input:</label></th><td><textarea id="uploadtext1"></textarea></td></tr>
+                 <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input id="uploadfilename1" /></td></tr>
                  <tr><th><label for="uploadformat1">Format:</label></th><td>
-                    <select name="uploadformat1">
+                    <select id="editoruploadformat">
                     <xsl:for-each select="*">
                         <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
                     </xsl:for-each>
@@ -122,7 +142,7 @@
                  </td></tr>
                  <tr><th></th><td class="buttons"><input id="submiteditor" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
                 </table>
-            </form>            
+            <!--</form>-->
         </div>
 </xsl:template>
 

@@ -684,6 +684,7 @@ class Uploader(object):
                 o += " archive=\"yes\">"
                 remove = True #archives no longer necessary after extract
             else:
+                o += " format=\""+inputformat.__class__.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
                 if inputformat.validate(self.path(project) + filename):
                     o += " validated=\"yes\" />\n"
                     printlog("Succesfully validated '" + filename + "'" )
@@ -747,7 +748,7 @@ class Uploader(object):
         Project.create(project, user)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + settings.URL + "/static/interface.xsl\"?>\n"
+        #output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + settings.URL + "/static/interface.xsl\"?>\n"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
