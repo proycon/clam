@@ -47,10 +47,9 @@ clamdata = clam.common.client.getclamdata(datafile)
 clam.common.status.write(statusfile, "Starting...")
 
 
-#for i in range(0,100):
-#    time.sleep(1)
-#    clam.common.status.write(statusfile, str(i) + "%\t" + "Running..." )
-
+for i in range(0,100):
+    time.sleep(1)
+    clam.common.status.write(statusfile, str(i) + "%\t" + "Running..." )
 
 
 #Example: output all selected parameters

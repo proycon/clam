@@ -106,7 +106,6 @@ class CLAMData(object):
                     if formatnode.tag == 'outputformat': #TODO
                         self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'input':
-                 print "handling input files"
                  for filenode in node:
                     if filenode.tag == 'path':
                         selectedformat = None
