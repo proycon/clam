@@ -48,11 +48,11 @@ def parameterfromxml(node):
                 if not 'choices' in kwargs: kwargs['choices'] = {}
                 kwargs['choices'][subtag.attrib['id']] = subtag.text
                 if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                    if 'multi' in kwargs and kwargs['multi'] == 1:
-                        if not 'default' in kwargs: kwargs['default'] = []
-                        kwargs['default'].append(subtag.attrib['id'])
+                    if 'multi' in kwargs and kwargs['multi'] == '1':
+                        if not 'value' in kwargs: kwargs['value'] = []
+                        kwargs['value'].append(subtag.attrib['id'])
                     else:
-                        kwargs['default'] = subtag.attrib['id']
+                        kwargs['value'] = subtag.attrib['id']
 
         return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
     else:
@@ -165,13 +165,14 @@ class AbstractParameter(object):
         
 class BooleanParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
-        super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
         #defaultinstance
         self.reverse = False
         for key, value in kwargs.items():
             if key == 'reverse': 
                 self.reverse = value  #Option gets outputted when option is NOT checked
+
+        super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
 
     def compilearg(self, value):
@@ -186,7 +187,6 @@ class BooleanParameter(AbstractParameter):
 class StringParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
         self.maxlength = 0 #unlimited
-        super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
@@ -196,6 +196,9 @@ class StringParameter(AbstractParameter):
                 self.value = value  
             elif key == 'maxlength': 
                 self.maxlength = int(value)
+
+        super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
+
 
     def validate(self,value):
         self.error = None
@@ -223,7 +226,6 @@ class ChoiceParameter(AbstractParameter):
             else:
                 self.choices.append(x) #list of two tuples
 
-        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
         self.delimiter = ","
@@ -239,6 +241,8 @@ class ChoiceParameter(AbstractParameter):
                 self.showall = value #show all options at once (radio instead of a pull down) 
             elif key == 'delimiter': 
                 self.delimiter = value #char
+
+        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
     def validate(self,values):
         self.error = None
@@ -311,9 +315,6 @@ class TextParameter(StringParameter): #TextArea based
     def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
-    #def compilearg(self, value):
-    #    return super(TextParameter,self).compilearg(value)
-
     def compilearg(self, value):
         if value.find(" ") >= 0 or value.find(";") >= 0:            
             value = value.replace('"',r'\"')
@@ -323,10 +324,7 @@ class TextParameter(StringParameter): #TextArea based
 class IntegerParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
         self.minvalue = 0
-        self.maxvalue = 0 #unlimited
-
-        super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
-        
+        self.maxvalue = 0 #unlimited        
         
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
@@ -336,6 +334,9 @@ class IntegerParameter(AbstractParameter):
                 self.minvalue = int(value)
             elif key == 'maxvalue': 
                 self.maxvalue = int(value)
+
+        super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
+
 
     def validate(self, value):
         self.error = None
@@ -356,7 +357,6 @@ class FloatParameter(AbstractParameter):
         self.minvalue = 0.0
         self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
 
-        super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
                 
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
@@ -366,6 +366,8 @@ class FloatParameter(AbstractParameter):
                 self.minvalue = float(value)
             elif key == 'maxvalue': 
                 self.maxvalue = float(value)
+
+        super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
     def validate(self, value):
         self.error = None

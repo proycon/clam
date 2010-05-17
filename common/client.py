@@ -30,7 +30,7 @@ class FormatError(Exception):
          def __str__(self):
              return "Not a valid CLAM XML response"
 
-class CLAMFile(object):
+class CLAMFile:
     def __init__(self, path, format):
             self.path = path
             self.format = format
@@ -125,20 +125,23 @@ class CLAMData(object):
     def parameter(self, id):                                 
         """Return the specified parameter"""
         for parametergroup, parameters in self.parameters:
-            for parameter in paramters:
+            for parameter in parameters:
                 if parameter.id == id:
                     return parameter
         raise KeyError
 
-    def __getattr__(self, id):                                 
+    def __getitem__(self, id):                                 
         """Return the specified parameter"""
-        return self.parameter[id]
+        try:
+            return self.parameter(id)
+        except KeyError:
+            raise
  
-class CLAMAuth(object):
+class CLAMAuth:
     def __init__(self, user, password):
         pass
 
-class CLAMClient(object):
+class CLAMClient:
     def __init__(self, host, port):
         pass
     
