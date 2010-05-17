@@ -45,7 +45,7 @@ class CLAMFile(object):
         return self.path
 
 def getclamdata(filename):
-    f = codecs.open(filename,'r', 'utf-8')
+    f = open(filename,'r')
     xml = f.read(os.path.getsize(filename))
     f.close()
     return CLAMData(xml)
@@ -68,24 +68,31 @@ class CLAMData(object):
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
-        if int(root.attribs['version']) > VERSION:
-            raise Exception("The clam client version is too old!")
-        self.system_id = root.attribs['id']
-        self.system_name = root.attribs['name']        
-        self.project = root.attribs['project']
-        self.user = root.attribs['user']
+        #if float(root.attrib['version'][0:3]) > VERSION[0:3]:
+        #    raise Exception("The clam client version is too old!")
+        self.system_id = root.attrib['id']
+        self.system_name = root.attrib['name']        
+        if 'project' in root.attrib:
+            self.project = root.attrib['project']
+        else:
+            self.project = None
+
+        if 'user' in root.attrib:
+            self.user = root.attrib['user']
+        else:
+            self.user = None
 
         for node in root:
             if node.tag == 'status':
-                self.status = int(node.attribs['code'])
-                self.statusmessage  = node.attribs['message']
+                self.status = int(node.attrib['code'])
+                self.statusmessage  = node.attrib['message']
             elif node.tag == 'parameters':
                 for parametergroupnode in node:
                     if parametergroupnode.tag == 'parametergroup':
                         parameterlist = []
                         for parameternode in parametergroupnode:
                                 parameterlist.append(clam.common.parameters.parameterfromxml(parameternode))
-                        self.parameters.append( (parametergroupnode.attribs['name'], parameterlist) )
+                        self.parameters.append( (parametergroupnode.attrib['name'], parameterlist) )
             elif node.tag == 'corpora':
                 for corpusnode in node:
                     if corpusnode.tag == 'corpus':
@@ -103,7 +110,7 @@ class CLAMData(object):
                     if node.tag == 'path':
                         selectedformat = None
                         for format in self.inputformats: 
-                            if unicode(format) == filenode.attribs['format']: #TODO: verify
+                            if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
                         self.input.append( CLAMFile('input/' + filenode.value, selectedformat) )
             elif node.tag == 'output': 
@@ -111,7 +118,7 @@ class CLAMData(object):
                     if node.tag == 'path':
                         selectedformat = None
                         for format in self.outputformats: 
-                            if unicode(format) == filenode.attribs['format']: #TODO: verify
+                            if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
                         self.input.append( CLAMFile('output/' + filenode.value, selectedformat) )
 

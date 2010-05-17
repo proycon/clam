@@ -74,16 +74,47 @@
         <div class="ready"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
       </xsl:when>
       <xsl:when test="@code = 1">
-        <div class="running"><xsl:value-of select="@message"/><br /><img class="progress" src="/static/progress.gif" /><input id="abortbutton" type="button" value="Abort and delete project" /></div>
+        <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
+        <xsl:choose>
+         <xsl:when test="@completion > 75">
+           <div id="progressbar">
+                <span id="progressvalue"><xsl:attribute name="style">width: <xsl:value-of select="@completion"/>%;</xsl:attribute><xsl:value-of select="@completion"/>%</span>
+           </div>
+         </xsl:when>
+         <xsl:when test="@completion > 0">
+           <div id="progressbar">
+                <span id="progressvalue"><xsl:attribute name="style">width: <xsl:value-of select="@completion"/>%;</xsl:attribute></span><xsl:value-of select="@completion"/>%
+           </div>
+         </xsl:when>
+         <xsl:otherwise>
+           <img class="progress" src="/static/progress.gif" />
+         </xsl:otherwise>
+        </xsl:choose>
+        <xsl:call-template name="log" />
       </xsl:when>
       <xsl:when test="@code = 2">
         <div class="done"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>
+        <xsl:call-template name="log" />
       </xsl:when>
       <xsl:otherwise>
         <div class="other"><xsl:value-of select="@message"/></div>
       </xsl:otherwise>
      </xsl:choose>
     </div>
+</xsl:template>
+
+<xsl:template name="log">
+     <xsl:if test="log">
+        <div id="statuslog">
+            <table>
+                <xsl:apply-templates select="log" />
+            </table>
+        </div>
+     </xsl:if>
+</xsl:template>
+
+<xsl:template match="/clam/status/log">
+    <tr><td class="time"><xsl:value-of select="@time" /></td><td class="message"><xsl:value-of select="." /></td></tr>
 </xsl:template>
 
 <xsl:template match="/clam/inputformats">

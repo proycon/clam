@@ -43,6 +43,17 @@ def parameterfromxml(node):
                 description = value
             else:
                 kwargs[attrib] = value
+        for subtag in node: #parse possible subtags
+            if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
+                if not 'choices' in kwargs: kwargs['choices'] = {}
+                kwargs['choices'][subtag.attrib['id']] = subtag.text
+                if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
+                    if 'multi' in kwargs and kwargs['multi'] == 1:
+                        if not 'default' in kwargs: kwargs['default'] = []
+                        kwargs['default'].append(subtag.attrib['id'])
+                    else:
+                        kwargs['default'] = subtag.attrib['id']
+
         return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
     else:
         raise Exception("No such parameter exists: " + node.tag)
@@ -174,12 +185,12 @@ class BooleanParameter(AbstractParameter):
 
 class StringParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
+        self.maxlength = 0 #unlimited
         super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = ""
-        self.maxlength = 0 #unlimited
         for key, value in kwargs.items():
             if key == 'default': 
                 self.value = value  
@@ -189,7 +200,7 @@ class StringParameter(AbstractParameter):
     def validate(self,value):
         self.error = None
         if self.maxlength > 0 and len(value) > self.maxlength:
-            self.error = "Text too long, maximum of " + str(self.maxlength) + " characters allowed"
+            self.error = "Text too long, exceeding maximum of " + str(self.maxlength) + " characters allowed"
             return False
         else:
             return True            
@@ -202,9 +213,11 @@ class StringParameter(AbstractParameter):
 
 
 class ChoiceParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, choices, **kwargs):    
+    def __init__(self, id, paramflag, name, description, **kwargs):    
+        if not 'choices' in kwargs:
+            raise Exception("No parameter choices specified for parameter " + ID + "!")
         self.choices = [] #list of key,value tuples
-        for x in choices:
+        for x in kwargs['choices']:
             if not isinstance(x,tuple) or len(x) != 2:
                 self.choices.append( (x,x) ) #list of two tuples
             else:
@@ -298,19 +311,26 @@ class TextParameter(StringParameter): #TextArea based
     def __init__(self, id, paramflag, name, description = '', **kwargs):
         super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
+    #def compilearg(self, value):
+    #    return super(TextParameter,self).compilearg(value)
+
     def compilearg(self, value):
+        if value.find(" ") >= 0 or value.find(";") >= 0:            
+            value = value.replace('"',r'\"')
+            value = '"' + value + '"' #wrap in quotes
         return super(TextParameter,self).compilearg(value)
 
 class IntegerParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
+        self.minvalue = 0
+        self.maxvalue = 0 #unlimited
+
         super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
         
         
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0
-        self.minvalue = 0
-        self.maxvalue = 0 #unlimited
         for key, value in kwargs.items():
             if key == 'minvalue': 
                 self.minvalue = int(value)
@@ -333,13 +353,14 @@ class IntegerParameter(AbstractParameter):
 
 class FloatParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
+        self.minvalue = 0.0
+        self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
+
         super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
                 
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0.0
-        self.minvalue = 0.0
-        self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
         for key, value in kwargs.items():
             if key == 'minvalue': 
                 self.minvalue = float(value)

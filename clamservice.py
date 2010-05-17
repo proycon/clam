@@ -22,8 +22,10 @@ import glob
 import sys
 import datetime
 import random
+import re
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
+
 
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
@@ -43,6 +45,7 @@ VERSION = '0.2.5'
 
 DEBUG = False
     
+DATEMATCH = re.compile(r'[\d\.\-\s:]')
 #Empty defaults
 #SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
@@ -176,7 +179,7 @@ class Index(object):
         corpora = JobService.corpusindex()
 
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, settings.URL, -1 ,"", errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, settings.URL, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
         
 
 
@@ -284,23 +287,46 @@ class Project(object):
 
 
     def status(self, project):
+        global DATEMATCH
         if self.running(project):
+            statuslog = []
             statusfile = Project.path(project) + ".status"
             if os.path.isfile(statusfile):
                 f = open(statusfile)
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        message = ""
+                        completion = 0
+                        timestamp = ""
+                        for field in line.split("\t"):
+                            if field[-1] == '%' and field[:-1].isdigit():
+                                completion = field[:-1]
+                            elif DATEMATCH.match(field):
+                                timestamp = field;
+                                if field.isdigit():
+                                    try:
+                                        d = datetime.datetime.fromtimestamp(field)  
+                                        timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
+                                    except:
+                                        pass
+                            else:
+                                message += " " + field   
+                        if message:
+                            statuslog.append( (message.strip(), timestamp, completion) )
                 msg = f.read(os.path.getsize(statusfile))
                 f.close()
-                return (clam.common.status.RUNNING, msg)
+                return (clam.common.status.RUNNING, msg,statuslog)
             else:
-                return (clam.common.status.RUNNING, "The system is running") #running
+                return (clam.common.status.RUNNING, "The system is running", []) #running
         elif self.done(project):
-            return (clam.common.status.DONE, "Done")
-        elif self.preparingdownload(project):
-            return (clam.common.status.DOWNLOAD, "Preparing package for download, please wait...")
-        elif self.processingupload(project):
-            return (clam.common.status.UPLOAD, "Processing upload, please wait...")
+            return (clam.common.status.DONE, "Done", [])
+        #elif self.preparingdownload(project):
+        #    return (clam.common.status.DOWNLOAD, "Preparing package for download, please wait...")
+        #elif self.processingupload(project):
+        #    return (clam.common.status.UPLOAD, "Processing upload, please wait...")
         else:
-            return (clam.common.status.READY, "Ready to start")
+            return (clam.common.status.READY, "Ready to start", [])
 
 
     def dirindex(self, project, formats, mode = 'output', d = ''):
@@ -335,7 +361,11 @@ class Project(object):
         errors = "no"
         errormsg = ""
 
-        statuscode, statusmsg = self.status(project)
+        statuscode, statusmsg, statuslog = self.status(project)
+        completion = 0
+        if statuslog:
+            completion = statuslog[-1][-1]
+        
 
         corpora = []
         if statuscode == clam.common.status.READY:
@@ -362,7 +392,7 @@ class Project(object):
                     break
 
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         
                     
     @requirelogin
@@ -477,7 +507,7 @@ class Project(object):
     def DELETE(self, project, user=None):
         if not self.exists(project):
             return web.webapi.NotFound()
-        statuscode, _ = self.status(project)
+        statuscode, _, _ = self.status(project)
         if statuscode == clam.common.status.RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )

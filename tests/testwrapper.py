@@ -23,6 +23,7 @@
 #general python modules:
 import sys
 import os
+import time
 
 #import CLAM-specific modules:
 import clam.common.client
@@ -42,7 +43,14 @@ clamdata = clam.common.client.getclamdata(datafile)
 #You now have access to all data. A few properties at your disposition now are:
 # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output
 
-clam.common.status.writestatus(statusfile, "Starting...")
+clam.common.status.write(statusfile, "Starting...")
+
+
+for i in range(0,100):
+    time.sleep(1)
+    clam.common.status.write(statusfile, str(i) + "%\t" + "Running..." )
+
+
 
 #Example: output all selected parameters
 print "PARAMETERS:"
@@ -59,11 +67,11 @@ print "INPUT FILES:"
 for inputfile in clamdata.input: 
     print str(inputfile)
     if isinstance(inputfile.format, clam.common.formats.PlainTextFormat) or isinstance(inputfile.format, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
-        clam.common.status.writestatus(statusfile, "Processing " + os.path.basename(inputfile) + "...")
+        clam.common.status.write(statusfile, "Processing " + os.path.basename(inputfile) + "...")
         #invoke 'rev' through the shell to reverse the input
         os.system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(inputfile))
 
-clam.common.status.writestatus(statusfile, "Done")       
+clam.common.status.write(statusfile, "100%\tDone")       
 
 sys.exit(0) #non-zero exit codes indicate an error! 
 

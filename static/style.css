@@ -252,3 +252,39 @@ button#openeditor {
 #uploadprogress {
     display: none;
 }
+
+
+#statuslog {
+    width: 85%;
+    height: 100px;
+    overflow: auto;
+}
+#statuslog table {
+    width: 95%; 
+}
+#statuslog td.time {
+    font-size: 80%;
+    font-family: monospace;
+    color: gray;
+    width: 15%;
+}
+#statuslog td.message {
+    width: 85%;
+    font-style: italic;
+}
+
+#progressbar {
+    width: 75%;
+    height: 35px;
+    border: gray 1px solid;
+    font-weight: bold;
+    font-size: 120%;
+}
+#progressvalue {
+    text-align: right;
+    display: inline-block;
+    height: 35px;
+    background: gray;
+    vertical-align: middle;
+    font-size: 120%;
+}
