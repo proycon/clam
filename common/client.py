@@ -106,21 +106,22 @@ class CLAMData(object):
                     if formatnode.tag == 'outputformat': #TODO
                         self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'input':
+                 print "handling input files"
                  for filenode in node:
-                    if node.tag == 'path':
+                    if filenode.tag == 'path':
                         selectedformat = None
                         for format in self.inputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile('input/' + filenode.value, selectedformat) )
+                        self.input.append( CLAMFile('input/' + filenode.text, selectedformat) )
             elif node.tag == 'output': 
                  for filenode in node:
-                    if node.tag == 'path':
+                    if filenode.tag == 'path':
                         selectedformat = None
                         for format in self.outputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile('output/' + filenode.value, selectedformat) )
+                        self.input.append( CLAMFile('output/' + filenode.text, selectedformat) )
 
     def parameter(self, id):                                 
         """Return the specified parameter"""

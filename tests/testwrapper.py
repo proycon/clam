@@ -57,16 +57,16 @@ clam.common.status.write(statusfile, "Starting...")
 print "PARAMETERS:"
 for parametergroup, parameters in clamdata.parameters:
     for parameter in parameters:
-        print parameter.name + ": " + str(parameter.value)
+        print "\t" + parameter.name + ": " + str(parameter.value)
 
 #Query a specific parameter:
-print "Your favourite colour is " + clamdata['colourchoice'].value
+print "\tYour favourite colour is " + clamdata['colourchoice'].value
 
 print "INPUT FILES:"    
 
 #Iterate over all inputfiles:
 for inputfile in clamdata.input: 
-    print str(inputfile)
+    print "\t" + str(inputfile)
     if isinstance(inputfile.format, clam.common.formats.PlainTextFormat) or isinstance(inputfile.format, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
         clam.common.status.write(statusfile, "Processing " + os.path.basename(inputfile) + "...")
         #invoke 'rev' through the shell to reverse the input
