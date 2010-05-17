@@ -279,6 +279,8 @@ button#openeditor {
     border: gray 1px solid;
     font-weight: bold;
     font-size: 120%;
+    vertical-align: middle;
+    font-weight: bold;
 }
 #progressvalue {
     text-align: right;
@@ -286,5 +288,6 @@ button#openeditor {
     height: 35px;
     background: gray;
     vertical-align: middle;
-    font-size: 120%;
+    color: white;
+    font-weight: bold;
 }

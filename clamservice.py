@@ -45,7 +45,7 @@ VERSION = '0.2.5'
 
 DEBUG = False
     
-DATEMATCH = re.compile(r'[\d\.\-\s:]')
+DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 #Empty defaults
 #SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
@@ -285,48 +285,63 @@ class Project(object):
         printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
         return os.path.isdir(Project.path(project))
 
+    def statuslog(self,project):
+        statuslog = []
+        statusfile = Project.path(project) + ".status"
+        totalcompletion = 0
+        if os.path.isfile(statusfile):
+            prevmsg = None
+            f = open(statusfile)
+            for line in f:
+                line = line.strip()
+                if line:
+                    message = ""
+                    completion = 0
+                    timestamp = ""
+                    for field in line.split("\t"):
+                        if field[-1] == '%' and field[:-1].isdigit():
+                            completion = int(field[:-1])
+                            if completion > 0:
+                                totalcompletion = completion
+                        elif DATEMATCH.match(field):
+                            if field.isdigit():     
+                                  try:
+                                      d = datetime.datetime.fromtimestamp(float(field))  
+                                      timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
+                                  except:
+                                      pass
+                        else:
+                            message += " " + field   
+
+                    if message and (message != prevmsg):
+                        #print "STATUSLOG: t=",timestamp,"c=",completion,"msg=" + message.strip()
+                        statuslog.append( (message.strip(), timestamp, completion) )
+                        prevmsg = message
+            msg = f.read(os.path.getsize(statusfile))
+            f.close()
+            statuslog.reverse()
+        return statuslog, totalcompletion
 
     def status(self, project):
         global DATEMATCH
         if self.running(project):
-            statuslog = []
-            statusfile = Project.path(project) + ".status"
-            if os.path.isfile(statusfile):
-                f = open(statusfile)
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        message = ""
-                        completion = 0
-                        timestamp = ""
-                        for field in line.split("\t"):
-                            if field[-1] == '%' and field[:-1].isdigit():
-                                completion = field[:-1]
-                            elif DATEMATCH.match(field):
-                                timestamp = field;
-                                if field.isdigit():
-                                    try:
-                                        d = datetime.datetime.fromtimestamp(field)  
-                                        timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
-                                    except:
-                                        pass
-                            else:
-                                message += " " + field   
-                        if message:
-                            statuslog.append( (message.strip(), timestamp, completion) )
-                msg = f.read(os.path.getsize(statusfile))
-                f.close()
-                return (clam.common.status.RUNNING, msg,statuslog)
+            statuslog, completion = self.statuslog(project)
+            if statuslog:
+                return (clam.common.status.RUNNING, statuslog[0][0],statuslog, completion)
             else:
-                return (clam.common.status.RUNNING, "The system is running", []) #running
+                return (clam.common.status.RUNNING, "The system is running",  [], 0) #running
         elif self.done(project):
-            return (clam.common.status.DONE, "Done", [])
+            statuslog, completion = self.statuslog(project)
+            if statuslog:
+                return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
+            else:
+                return (clam.common.status.DONE, "Done", statuslog, 100)
         #elif self.preparingdownload(project):
         #    return (clam.common.status.DOWNLOAD, "Preparing package for download, please wait...")
         #elif self.processingupload(project):
         #    return (clam.common.status.UPLOAD, "Processing upload, please wait...")
         else:
-            return (clam.common.status.READY, "Ready to start", [])
+            return (clam.common.status.READY, "Ready to start", [], 0)
 
 
     def dirindex(self, project, formats, mode = 'output', d = ''):
@@ -361,10 +376,7 @@ class Project(object):
         errors = "no"
         errormsg = ""
 
-        statuscode, statusmsg, statuslog = self.status(project)
-        completion = 0
-        if statuslog:
-            completion = statuslog[-1][-1]
+        statuscode, statusmsg, statuslog, completion = self.status(project)
         
 
         corpora = []
@@ -507,7 +519,7 @@ class Project(object):
     def DELETE(self, project, user=None):
         if not self.exists(project):
             return web.webapi.NotFound()
-        statuscode, _, _ = self.status(project)
+        statuscode, _, _, _  = self.status(project)
         if statuscode == clam.common.status.RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )

@@ -13,6 +13,8 @@ def write(statusfile, statusmessage, completion = 0, timestamp = False, encoding
     f = codecs.open(statusfile, 'a', encoding)
     if not timestamp:
         timestamp = int(time.time())
-    f.write(str(completion) + "\t" + str(timestamp) + "\t" + statusmessage + "\n")
+    if isinstance(completion, float) and completion >= 0.0 and completion <= 1.0:
+        completion = int(round(completion * 100))
+    f.write(str(completion) + "%\t" + str(timestamp) + "\t" + statusmessage + "\n")
     f.close()
 
