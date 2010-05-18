@@ -63,7 +63,7 @@ COMMAND = path[0] +  "/wrappers/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTP
 
 PARAMETERS =  [ 
     ('Tokenisation', [
-        ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',[('','No language-specific tokenisation'),('nl','Nederlands'),('en','English')], nospace=True), #note that when an empty value is selected,   
+        ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',choices=[('','No language-specific tokenisation'),('nl','Nederlands'),('en','English')], nospace=True), #note that when an empty value is selected,   
         BooleanParameter('sentok','-Ts','Sentence Tokenisation','Compute sentence boundaries'),
         BooleanParameter('crudetok','-TS','Crude tokenisation','Crude non-language-specific tokenisation', forbid=['tok']),
         BooleanParameter('verbose','-Tv','Verbose tokeniser output','Outputs token types per token, one token per line', require=['tok']),
