@@ -20,6 +20,11 @@ import os.path
 from httplib2 import Http
 from urllib import urlencode
 
+from clam.external.poster.encode import multipart_encode
+from clam.external.poster.streaminghttp import register_openers
+import urllib2
+
+
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
@@ -27,6 +32,9 @@ from clam.common.data import CLAMData, CLAMFile
 
 VERSION = 0.2
 
+
+# Register poster's streaming http handlers with urllib2
+register_openers()
 
 class FormatError(Exception):
          def __init__(self, value):
@@ -134,8 +142,12 @@ class CLAMClient:
         """download one output file"""
         pass
 
-    def upload(self, project, path, format, auth = None):
+    def upload(self, project, file, targetpath, format, auth = None):
         """upload a file (or archive)"""
-        pass
+        # datagen is a generator object that yields the encoded parameters
+        datagen, headers = multipart_encode({"upload1": file})
+
+        # Create the Request object
+        request = urllib2.Request(self.url + project + '/upload/', datagen, headers)
 
 

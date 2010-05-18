@@ -32,7 +32,7 @@ f.write("Dit is een test.")
 f.close()
 
 #upload it
-clamclient.upload('/tmp/tst', PlainTextFormat('utf-8') )
+clamclient.upload('clientest', open('/tmp/tst'), 'tst', PlainTextFormat('utf-8') )
 
 
 
