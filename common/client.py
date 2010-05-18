@@ -134,7 +134,7 @@ class CLAMClient:
         response, content = self.http.request(self.url + project + '/','DELETE') 
         return self._parse(response, content)               
 
-    def downloadarchive(self, project, format = 'zip', auth = None):
+    def downloadarchive(self, project, targetfile, format = 'zip', auth = None):
         """download all output as archive"""
         req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
         CHUNK = 16 * 1024
@@ -157,7 +157,7 @@ class CLAMClient:
     def downloadreadlines(self, project, path, targetfile, auth = None):
         """download and read the lines of one output file"""
         req = urllib2.urlopen(self.url + project + '/output/' + path)
-        for line in read:
+        for line in req.readlines():
             yield line
 
 
