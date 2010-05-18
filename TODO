@@ -3,10 +3,6 @@
 - Disallow empty filename in submit user input (test)
 - Validate project IDs upon creation? (already done?)
 
-- fix bugs with Choiceparameter (clam.xml)
-- test progress bar
-
-- make interface more flexible, regarding uploading/submitting files and selecting parameters in 2nd stage (in progress)
 
 - Nicefy documentation (in progress)
 
