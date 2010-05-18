@@ -159,7 +159,7 @@ class CLAMData(object):
             elif node.tag == 'projects': 
                  self.projects = []
                  for projectnode in node:
-                    if projectnode.tag == 'projects':
+                    if projectnode.tag == 'project':
                         self.projects.append(projectnode.text)
 
     def parameter(self, id):                                 
@@ -201,15 +201,18 @@ class CLAMClient:
         
 
     def _parse(self, response, content):
-        if response['status'] == 200:
-            return CLAMData(content)
-        elif response['status'] == 400:
+        if response['status'] == '200':
+            if content:
+                return CLAMData(content)
+            else:
+                return True
+        elif response['status'] == '400':
             raise BadRequest()
-        elif response['status'] == 401:
+        elif response['status'] == '401':
             raise AuthRequired()
-        elif response['status'] == 403:
+        elif response['status'] == '403':
             raise PermissionDenied()
-        elif response['status'] == 404:
+        elif response['status'] == '404':
             raise NotFound()
                 
     
@@ -226,7 +229,7 @@ class CLAMClient:
     def create(self,project, auth = None):
         """create a new project"""
         response, content = self.http.request(self.url + project + '/','PUT')
-        return self._parse(response, content)               
+        self._parse(response, content)               
 
     def start(self, project, **parameters):
         """start a run"""
