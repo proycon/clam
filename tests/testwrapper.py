@@ -26,7 +26,7 @@ import os
 import time
 
 #import CLAM-specific modules:
-import clam.common.client
+import clam.common.data
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
@@ -39,7 +39,7 @@ outputdir = sys.argv[3]
 
 
 #Obtain all data from the CLAM system (stored in $DATAFILE (clam.xml))
-clamdata = clam.common.client.getclamdata(datafile)
+clamdata = clam.common.data.getclamdata(datafile)
 
 #You now have access to all data. A few properties at your disposition now are:
 # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output
