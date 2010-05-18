@@ -136,11 +136,30 @@ class CLAMClient:
 
     def downloadarchive(self, project, format = 'zip', auth = None):
         """download all output as archive"""
-        pass
+        req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
+        CHUNK = 16 * 1024
+        while True:
+            chunk = req.read(CHUNK)
+            if not chunk: break
+            targetfile.write(chunk)
 
-    def download(self, project, path, auth = None):
+
+    def download(self, project, path, targetfile, auth = None):
         """download one output file"""
-        pass
+        req = urllib2.urlopen(self.url + project + '/output/' + path)
+        CHUNK = 16 * 1024
+        while True:
+            chunk = req.read(CHUNK)
+            if not chunk: break
+            targetfile.write(chunk)
+
+
+    def downloadreadlines(self, project, path, targetfile, auth = None):
+        """download and read the lines of one output file"""
+        req = urllib2.urlopen(self.url + project + '/output/' + path)
+        for line in read:
+            yield line
+
 
     def upload(self, project, file, targetpath, format, auth = None):
         """upload a file (or archive)"""

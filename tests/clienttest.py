@@ -31,8 +31,8 @@ f = open('/tmp/tst','w')
 f.write("Dit is een test.")
 f.close()
 
-#upload it
-clamclient.upload('clientest', open('/tmp/tst'), 'tst', PlainTextFormat('utf-8') )
+#upload it (of course we could better use a StringIO here)
+clamclient.upload('clienttest', open('/tmp/tst'), 'tst', PlainTextFormat('utf-8') )
 
 
 
