@@ -51,5 +51,6 @@ May:
     - Added fancy table with pagination support for input/output files and project list
     - Uploads now proceed through AJAX, major interface improvements
     - fixed bugs with Choiceparameter (clam.xml)
-    - Implemented status log and progress bar
+    - Implemented status log and progress bar 
+    - Split client library and data library, fixes
 

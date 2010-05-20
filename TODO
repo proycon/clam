@@ -1,4 +1,6 @@
+- Finish presentation
 
+- Write client (in progress)
 
 - Disallow empty filename in submit user input (test)
 - Validate project IDs upon creation? (already done?)
@@ -17,7 +19,6 @@ Extra features:
 
 
 
-- Write client (in progress)
 - Write separate webinterface (django) (not started yet)
 
 
