@@ -13,8 +13,19 @@
 #
 ###############################################################
 
+from lxml import etree as ElementTree
+from StringIO import StringIO
 import clam.common.parameters
 import clam.common.formats
+import os.path
+import codecs
+
+
+class FormatError(Exception):
+         def __init__(self, value):
+             self.value = value
+         def __str__(self):
+             return "Not a valid CLAM XML response"
 
 class CLAMFile:
     def __init__(self, path, format):
@@ -133,9 +144,9 @@ class CLAMData(object):
     def parameterdict(self):
         """Return all parameters as id => value dictionary"""
         paramdict = {}
-        for parametergroup, params in parameters:
+        for parametergroup, params in self.parameters:
             for parameter in params:
                 if parameter.value:
                     paramdict[parameter.id] = parameter.value
         return paramdict
-        
+

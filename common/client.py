@@ -13,8 +13,6 @@
 #
 ###############################################################
 
-from lxml import etree as ElementTree
-from StringIO import StringIO
 import codecs
 import os.path
 from httplib2 import Http
@@ -36,11 +34,6 @@ VERSION = 0.2
 # Register poster's streaming http handlers with urllib2
 register_openers()
 
-class FormatError(Exception):
-         def __init__(self, value):
-             self.value = value
-         def __str__(self):
-             return "Not a valid CLAM XML response"
 
 class BadRequest(Exception):
          def __init__(self):
