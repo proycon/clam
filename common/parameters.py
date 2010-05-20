@@ -174,6 +174,12 @@ class BooleanParameter(AbstractParameter):
 
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
+    def set(self, value = True)
+        super(BooleanParameter,self).set(value)
+
+    def unset(self):
+        super(BooleanParameter,self).set(False)
+
 
     def compilearg(self, value):
         if self.reverse: value = not value

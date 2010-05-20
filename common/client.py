@@ -104,7 +104,8 @@ class CLAMClient:
         """query the project status"""
         response, content = self.http.request(self.url + project + '/')
         return self._parse(response, content)                    
-    
+
+
     def create(self,project, auth = None):
         """create a new project"""
         response, content = self.http.request(self.url + project + '/','PUT')
@@ -122,10 +123,15 @@ class CLAMClient:
         response, content = self.http.request(self.url + project + '/','POST', urlencode(parameters)) 
         return self._parse(response, content)                                     
 
+
     def abort(self,project, auth = None):
         """aborts AND deletes a project"""
         response, content = self.http.request(self.url + project + '/','DELETE') 
         return self._parse(response, content)               
+
+    def delete(self, project, auth = None): #alias
+        return self.abort(project, auth)
+
 
     def downloadarchive(self, project, targetfile, format = 'zip', auth = None):
         """download all output as archive"""
@@ -147,7 +153,7 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
-    def downloadreadlines(self, project, path, targetfile, auth = None):
+    def downloadreadlines(self, project, path, auth = None):
         """download and read the lines of one output file"""
         req = urllib2.urlopen(self.url + project + '/output/' + path)
         for line in req.readlines():

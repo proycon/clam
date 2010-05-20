@@ -27,7 +27,7 @@ class FormatError(Exception):
          def __str__(self):
              return "Not a valid CLAM XML response"
 
-class CLAMFile:
+class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?)
     def __init__(self, path, format):
             self.path = path
             self.format = format
@@ -52,6 +52,8 @@ def getclamdata(filename):
 class CLAMData(object):    
     def __init__(self, xml):
         self.status = clam.common.status.READY
+        self.statusmessage = ""
+        self.completion = 0
         self.parameters = []
         self.inputformats = []
         self.outputformats = []
@@ -60,6 +62,8 @@ class CLAMData(object):
         self.output = []
         self.projects = None
         self.parseresponse(xml)
+
+        
 
 
     def parseresponse(self, xml):
@@ -85,6 +89,7 @@ class CLAMData(object):
             if node.tag == 'status':
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
+                self.completion  = node.attrib['completion']
             elif node.tag == 'parameters':
                 for parametergroupnode in node:
                     if parametergroupnode.tag == 'parametergroup':
@@ -141,7 +146,12 @@ class CLAMData(object):
         except KeyError:
             raise
 
-    def parameterdict(self):
+    def __setitem__(self, id):
+        """Set the specified parameter"""
+        #TODO
+        pass
+
+    def passparameters(self):
         """Return all parameters as id => value dictionary"""
         paramdict = {}
         for parametergroup, params in self.parameters:
