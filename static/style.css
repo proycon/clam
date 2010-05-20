@@ -253,6 +253,13 @@ button#openeditor {
     display: none;
 }
 
+#status p {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-style: italic;
+    color: #434343;
+}
 
 #statuslog {
     width: 85%;

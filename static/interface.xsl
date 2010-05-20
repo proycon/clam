@@ -90,6 +90,7 @@
            <img class="progress" src="/static/progress.gif" />
          </xsl:otherwise>
         </xsl:choose>
+        <p>You may safely close your browser or shut down your computer during this process, the system will keep running and be available when you return another time.</p>
         <xsl:call-template name="log" />
       </xsl:when>
       <xsl:when test="@code = 2">
