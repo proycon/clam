@@ -32,14 +32,22 @@ class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?
             self.path = path
             self.format = format
 
-    def open(self):
-        return codecs.open(self.path, 'r', self.format.encoding)
-
-    def validate(self):
-        return self.format.validate(self.path)
-
     def __str__(self):
         return self.path
+
+
+class CLAMInputFile(CLAMFile):
+    def open(self):
+        """open the file for reading, only works within wrapper scripts!"""
+        return codecs.open('input/' + self.path, 'r', self.format.encoding)
+
+    def validate(self):
+        return self.format.validate('input/' + self.path)
+
+    
+class CLAMOutputFile(CLAMFile):
+    pass
+
 
 def getclamdata(filename):
     f = open(filename,'r')
@@ -116,7 +124,7 @@ class CLAMData(object):
                         for format in self.inputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile('input/' + filenode.text, selectedformat) )
+                        self.input.append( CLAMInputFile( filenode.text, selectedformat) )
             elif node.tag == 'output': 
                  for filenode in node:
                     if filenode.tag == 'path':
@@ -124,7 +132,7 @@ class CLAMData(object):
                         for format in self.outputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMFile('output/' + filenode.text, selectedformat) )
+                        self.output.append( CLAMOutputFile( filenode.text, selectedformat) )
             elif node.tag == 'projects': 
                  self.projects = []
                  for projectnode in node:

@@ -9,7 +9,7 @@ os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 
 from clam.common.client import *
 from clam.common.formats import *
-from clam.common.status
+import clam.common.status
 
 clamclient = CLAMClient('http://localhost:8080/')
 
@@ -67,14 +67,14 @@ if data.status == clam.common.status.READY: #should always be the case, since we
         print "STATUS: " + str(data.completion) + '% -- ' + data.statusmessage
     
     #yay, we're done!
-    for outputfile in data.outputfiles:
-        if outputfile 
-
     #List all output files:
-
-    #Download and immediately read the output file
-    clamclient.downloadreadlines(project, 'log' )
-    
+    for outputfile in data.outputfiles:
+        print "\tFILE: " + str(outputfile) + " " + outputfile.format.name
+        print "\tCONTENTS: "
+        #Download and immediately read the output file
+        for line in clamclient.downloadreadlines(project, outputfile):
+            print "\t\t" + line.encode('utf-8')
+        
 
 
 

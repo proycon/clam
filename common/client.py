@@ -133,7 +133,7 @@ class CLAMClient:
         return self.abort(project, auth)
 
 
-    def downloadarchive(self, project, targetfile, format = 'zip', auth = None):
+    def downloadarchive(self, project, format = 'zip', auth = None):
         """download all output as archive"""
         req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
         CHUNK = 16 * 1024
@@ -143,9 +143,10 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
-    def download(self, project, path, targetfile, auth = None):
+    def download(self, project, outputfile, targetfile, auth = None):
         """download one output file"""
-        req = urllib2.urlopen(self.url + project + '/output/' + path)
+        assert instanceof(outputfile, CLAMOutputFile)
+        req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
         CHUNK = 16 * 1024
         while True:
             chunk = req.read(CHUNK)
@@ -153,9 +154,10 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
-    def downloadreadlines(self, project, path, auth = None):
+    def downloadreadlines(self, project, outputfile, auth = None):
         """download and read the lines of one output file"""
-        req = urllib2.urlopen(self.url + project + '/output/' + path)
+        assert instanceof(outputfile, CLAMOutputFile)
+        req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
         for line in req.readlines():
             yield line
 

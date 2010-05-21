@@ -174,7 +174,7 @@ class BooleanParameter(AbstractParameter):
 
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
-    def set(self, value = True)
+    def set(self, value = True):
         super(BooleanParameter,self).set(value)
 
     def unset(self):
