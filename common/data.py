@@ -154,10 +154,14 @@ class CLAMData(object):
         except KeyError:
             raise
 
-    def __setitem__(self, id):
+    def __setitem__(self, id, value):
         """Set the specified parameter"""
-        #TODO
-        pass
+        for parametergroup, parameters in self.parameters:
+            for parameter in parameters:
+                if parameter.id == id:
+                    parameter.set(value)
+                    return True
+        raise KeyError
 
     def passparameters(self):
         """Return all parameters as id => value dictionary"""

@@ -3,6 +3,7 @@
 
 import sys
 import os
+import time
 
 sys.path.append(sys.path[0] + '/../../')
 os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
@@ -56,13 +57,13 @@ if data.status == clam.common.status.READY: #should always be the case, since we
     data['float'] = 0.5
     data['text'] = "This is a very short text."
     data['colourchoice'] = 'green'
-    data['visitedcities'] = ['london','paris','amsterdam']
+    data['cities'] = ['london','paris','amsterdam']
 
 
-    clamclient.start(project, data.passparameters())
+    clamclient.start(project, **data.passparameters())
 
     while data.status != clam.common.status.DONE:
-        os.sleep(5) #wait 5 seconds
+        time.sleep(5) #wait 5 seconds
         data = clamclient.get(project) #get status again
         print "STATUS: " + str(data.completion) + '% -- ' + data.statusmessage
     
