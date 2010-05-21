@@ -48,7 +48,7 @@ clam.common.status.write(statusfile, "Starting...")
 
 
 for i in range(0,100):
-    time.sleep(1)
+    time.sleep(0.2)
     clam.common.status.write(statusfile, "Running...", i )
 
 

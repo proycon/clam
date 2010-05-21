@@ -42,6 +42,7 @@ if data.status == clam.common.status.READY: #should always be the case, since we
     f.close()
 
     #upload it (of course we could better use a StringIO here)
+    print "Uploading file..."
     clamclient.upload(project, open('/tmp/tst'), 'tst', PlainTextFormat('utf-8') )
 
     #print the parameters we have 
@@ -73,8 +74,8 @@ if data.status == clam.common.status.READY: #should always be the case, since we
     
     #yay, we're done!
     #List all output files:
-    for outputfile in data.outputfiles:
-        print "\tFILE: " + str(outputfile) + " " + outputfile.format.name
+    for outputfile in data.output:
+        print "\tFILE: " + str(outputfile) + " (" + outputfile.format.name + ")"
         print "\tCONTENTS: "
         #Download and immediately read the output file
         for line in clamclient.downloadreadlines(project, outputfile):

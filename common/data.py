@@ -125,7 +125,7 @@ class CLAMData(object):
             elif node.tag == 'input':
                  for filenode in node:
                     if filenode.tag == 'path':
-                        selectedformat = None
+                        selectedformat = clam.common.formats.Format()
                         for format in self.inputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
@@ -133,7 +133,7 @@ class CLAMData(object):
             elif node.tag == 'output': 
                  for filenode in node:
                     if filenode.tag == 'path':
-                        selectedformat = None
+                        selectedformat = clam.common.formats.Format()
                         for format in self.outputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format

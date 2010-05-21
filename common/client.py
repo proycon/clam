@@ -26,7 +26,7 @@ import urllib2
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
-from clam.common.data import CLAMData, CLAMFile
+from clam.common.data import CLAMData, CLAMInputFile, CLAMOutputFile
 
 VERSION = 0.2
 
@@ -92,7 +92,6 @@ class CLAMClient:
                 response, content = self.http.request(self.url + url, method)
         except:
             raise NoConnection()
-        print content
         return self._parse(response, content)
 
     def _parse(self, response, content):
@@ -144,7 +143,7 @@ class CLAMClient:
         return self.abort(project, auth)
 
 
-    def downloadarchive(self, project, format = 'zip', auth = None):
+    def downloadarchive(self, project, targetfile, format = 'zip', auth = None):
         """download all output as archive"""
         req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
         CHUNK = 16 * 1024
@@ -156,7 +155,7 @@ class CLAMClient:
 
     def download(self, project, outputfile, targetfile, auth = None):
         """download one output file"""
-        assert instanceof(outputfile, CLAMOutputFile)
+        assert isinstance(outputfile, CLAMOutputFile)
         req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
         CHUNK = 16 * 1024
         while True:
@@ -167,7 +166,7 @@ class CLAMClient:
 
     def downloadreadlines(self, project, outputfile, auth = None):
         """download and read the lines of one output file"""
-        assert instanceof(outputfile, CLAMOutputFile)
+        assert isinstance(outputfile, CLAMOutputFile)
         req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
         for line in req.readlines():
             yield line
