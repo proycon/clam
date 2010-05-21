@@ -299,19 +299,20 @@ class Project(object):
                     completion = 0
                     timestamp = ""
                     for field in line.split("\t"):
-                        if field[-1] == '%' and field[:-1].isdigit():
-                            completion = int(field[:-1])
-                            if completion > 0:
-                                totalcompletion = completion
-                        elif DATEMATCH.match(field):
-                            if field.isdigit():     
-                                  try:
-                                      d = datetime.datetime.fromtimestamp(float(field))  
-                                      timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
-                                  except:
-                                      pass
-                        else:
-                            message += " " + field   
+                        if field:
+                            if field[-1] == '%' and field[:-1].isdigit():
+                                completion = int(field[:-1])
+                                if completion > 0:
+                                    totalcompletion = completion
+                            elif DATEMATCH.match(field):
+                                if field.isdigit():     
+                                      try:
+                                          d = datetime.datetime.fromtimestamp(float(field))  
+                                          timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
+                                      except:
+                                          pass
+                            else:
+                                message += " " + field   
 
                     if message and (message != prevmsg):
                         #print "STATUSLOG: t=",timestamp,"c=",completion,"msg=" + message.strip()
