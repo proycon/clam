@@ -172,12 +172,12 @@ class CLAMClient:
             yield line
 
 
-    def upload(self, project, file, targetpath, format, auth = None):
+    def upload(self, project, file, format, auth = None):
         """upload a file (or archive)"""
         # datagen is a generator object that yields the encoded parameters
-        datagen, headers = multipart_encode({"upload1": file})
+        datagen, headers = multipart_encode({'uploadcount': 1, "upload1": file, 'uploadformat1': format.__class__.__name__})
 
         # Create the Request object
         request = urllib2.Request(self.url + project + '/upload/', datagen, headers)
-
+        return urllib2.urlopen(request).read()
 

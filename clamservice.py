@@ -771,14 +771,16 @@ class Uploader(object):
             kwargs['upload' + str(i)] = {}                            
         postdata = web.input(**kwargs)
         if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
-            raise BadRequest('No valid uploadcount specified') #TODO: verify this works
+            raise BadRequest('No valid uploadcount specified') #TODO: message doesn't show to client
         if int(postdata['uploadcount']) > 25:
-            raise BadRequest('Too many uploads') #TODO: verify this works
+            raise BadRequest('Too many uploads') #TODO: message doesn't show to client
 
         #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
         for i in range(1,int(postdata['uploadcount']) + 1):
             if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
                 inputformat = None
+                if not 'uploadformat' + str(i) in postdata:
+                    raise BadRequest('No upload format specified') #TODO: message doesn't show to client
                 for f in settings.INPUTFORMATS:                
                     if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
                         inputformat = f
@@ -799,7 +801,9 @@ class Uploader(object):
             if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]):
                 output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
-                filename = postdata['upload' + str(i)].filename.lower()
+                printdebug("Selecting client-side file " + postdata['upload' + str(i)].filename + " for upload")
+
+                filename = os.path.basename(postdata['upload' + str(i)].filename.lower())
 
                 #Is the upload an archive?
                 extension = filename.split(".")[-1]

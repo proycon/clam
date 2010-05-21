@@ -43,7 +43,7 @@ if data.status == clam.common.status.READY: #should always be the case, since we
 
     #upload it (of course we could better use a StringIO here)
     print "Uploading file..."
-    clamclient.upload(project, open('/tmp/tst'), 'tst', PlainTextFormat('utf-8') )
+    clamclient.upload(project, open('/tmp/tst'), PlainTextFormat('utf-8') )
 
     #print the parameters we have 
     print "PARAMETERS:"
