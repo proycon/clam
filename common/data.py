@@ -36,6 +36,10 @@ class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?
         return self.path
 
 
+
+        
+
+
 class CLAMInputFile(CLAMFile):
     def open(self):
         """open the file for reading, only works within wrapper scripts!"""
@@ -174,6 +178,9 @@ class CLAMData(object):
         for parametergroup, params in self.parameters:
             for parameter in params:
                 if parameter.value:
-                    paramdict[parameter.id] = parameter.value
+                    if isinstance(parameter.value, list):
+                        paramdict[parameter.id] = ",".join(parameter.value)
+                    else:
+                        paramdict[parameter.id] = parameter.value
         return paramdict
 

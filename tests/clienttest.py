@@ -72,15 +72,18 @@ if data.status == clam.common.status.READY: #should always be the case, since we
         data = clamclient.get(project) #get status again
         print "STATUS: " + str(data.completion) + '% -- ' + data.statusmessage
     
+
+    
     #yay, we're done!
     #List all output files:
+    print "OUTPUT FILES:"
     for outputfile in data.output:
         print "\tFILE: " + str(outputfile) + " (" + outputfile.format.name + ")"
         print "\tCONTENTS: "
         #Download and immediately read the output file
         for line in clamclient.downloadreadlines(project, outputfile):
-            print "\t\t" + line.encode('utf-8')
-        
+            print "\t\t" + line.encode('utf-8'),
+        print
 
 
 

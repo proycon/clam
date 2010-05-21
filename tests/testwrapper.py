@@ -24,6 +24,7 @@
 import sys
 import os
 import time
+import random
 
 #import CLAM-specific modules:
 import clam.common.data
@@ -46,17 +47,22 @@ clamdata = clam.common.data.getclamdata(datafile)
 
 clam.common.status.write(statusfile, "Starting...")
 
+bogus_status_pool = ['Counting stars in the sky', 'Playing with big toe', 'Figuring out the meaning of life','Solving global warming','Drinking coffee', 'Holding a staring contest', 'Flirting with other webservers', 'Tying shoelaces','Hysterically running in circles','Juggling memory bits','Plotting to take over the world' ]
 
-for i in range(0,100):
-    time.sleep(0.2)
-    clam.common.status.write(statusfile, "Running...", i )
+#we fake taking a long time to run, with bogus status messages:
+for i in range(0,10):
+    time.sleep(2)
+    bogus_status = random.choice(bogus_status_pool)
+    bogus_status_pool.remove(bogus_status)
+    clam.common.status.write(statusfile, bogus_status , ((i + 1) * 10)) #last argument represents percentage of completion (0-100)
 
 
 #Example: output all selected parameters
 print "PARAMETERS:"
 for parametergroup, parameters in clamdata.parameters:
     for parameter in parameters:
-        print "\t" + parameter.name + ": " + str(parameter.value)
+        if parameter.value: #check if it is set
+            print "\t" + parameter.name + ": " + str(parameter.value)
 
 #Query a specific parameter:
 print "\tYour favourite colour is " + clamdata['colourchoice'].value

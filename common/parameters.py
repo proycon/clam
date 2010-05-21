@@ -301,21 +301,31 @@ class ChoiceParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.multi:
+        if self.multi: #multi parameters can be passed as  parameterid=choiceid1,choiceid2 or by setting parameterid[choiceid]=1 (or whatever other non-zero value)
             found = False
-            values = []
-            for choicekey in [x[0] for x in self.choices]:
-                if self.id+'['+choicekey+']' in postdata:
-                    found = True
-                    if postdata[self.id+'['+choicekey+']']:
-                        values.append(choicekey)
+            if self.id in postdata and postdata[self.id]:
+                passedvalues = postdata[self.id].split(',')
+                values = []                
+                for choicekey in [x[0] for x in self.choices]:
+                    if choicekey in passedvalues:
+                            found = True
+                            values.append(choicekey)
+            else:
+                values = []
+                for choicekey in [x[0] for x in self.choices]:
+                    if self.id+'['+choicekey+']' in postdata:
+                        found = True
+                        if postdata[self.id+'['+choicekey+']']:
+                            values.append(choicekey)
             if not found: 
                 return False
             else:
                 return values
         else:
             if self.id in postdata and postdata[self.id]:
-                return postdata[self.id]     
+                return postdata[self.id]
+            else:
+                return False
 
 
 class TextParameter(StringParameter): #TextArea based
