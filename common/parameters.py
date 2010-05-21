@@ -175,7 +175,7 @@ class BooleanParameter(AbstractParameter):
         super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
     def set(self, value = True):
-        super(BooleanParameter,self).set(value)
+        return super(BooleanParameter,self).set(value)
 
     def unset(self):
         super(BooleanParameter,self).set(False)
@@ -270,6 +270,7 @@ class ChoiceParameter(AbstractParameter):
             value = values
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
+
         return super(ChoiceParameter,self).compilearg(value)
 
     def xml(self):

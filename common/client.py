@@ -65,7 +65,12 @@ class AuthRequired(Exception):
          def __str__(self):
             return "Authorization Required"
 
- 
+class NoConnection(Exception):
+         def __init__(self):
+            pass
+         def __str__(self):
+            return "Can't establish a connection with the server" 
+
 class CLAMAuth:
     def __init__(self, user, password):
         pass
@@ -77,7 +82,18 @@ class CLAMClient:
         self.http = Http()
         if url[-1] != '/': url += '/'
         self.url = url
-        
+
+
+    def request(self, url, method = 'GET', data = None):
+        try:
+            if data: 
+                response, content = self.http.request(self.url + url, method, data)
+            else:
+                response, content = self.http.request(self.url + url, method)
+        except:
+            raise NoConnection()
+        print content
+        return self._parse(response, content)
 
     def _parse(self, response, content):
         if response['status'] == '200':
@@ -94,22 +110,21 @@ class CLAMClient:
         elif response['status'] == '404':
             raise NotFound()
                 
-    
+   
+
+ 
     def index(self, auth = None):
         """get index of projects"""
-        response, content = self.http.request(self.url)
-        return self._parse(response, content)                    
+        return self.request('')
 
     def get(self, project, auth = None):
         """query the project status"""
-        response, content = self.http.request(self.url + project + '/')
-        return self._parse(response, content)                    
-
+        return self.request(project + '/')
 
     def create(self,project, auth = None):
         """create a new project"""
-        response, content = self.http.request(self.url + project + '/','PUT')
-        self._parse(response, content)               
+        return self.request(project + '/', 'PUT')
+     
 
     def start(self, project, **parameters):
         """start a run"""
@@ -118,18 +133,14 @@ class CLAMClient:
             auth = parameters['auth']
             del parameters['auth']
 
-        assert( isinstance(parameters, dict) )
-
-        response, content = self.http.request(self.url + project + '/','POST', urlencode(parameters)) 
-        return self._parse(response, content)                                     
+        return self.request(project + '/', 'POST', urlencode(parameters))
 
 
-    def abort(self,project, auth = None):
+    def delete(self,project, auth = None):
         """aborts AND deletes a project"""
-        response, content = self.http.request(self.url + project + '/','DELETE') 
-        return self._parse(response, content)               
+        return self.request(project + '/', 'DELETE')
 
-    def delete(self, project, auth = None): #alias
+    def abort(self, project, auth = None): #alias
         return self.abort(project, auth)
 
 

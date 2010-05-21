@@ -60,7 +60,11 @@ if data.status == clam.common.status.READY: #should always be the case, since we
     data['cities'] = ['london','paris','amsterdam']
 
 
-    clamclient.start(project, **data.passparameters())
+    data = clamclient.start(project, **data.passparameters())
+    if data.errors:
+        print >>sys.stderr,"An error occured: " + data.errormsg
+        sys.exit(1)
+    
 
     while data.status != clam.common.status.DONE:
         time.sleep(5) #wait 5 seconds

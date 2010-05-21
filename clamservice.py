@@ -471,6 +471,7 @@ class Project(object):
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
             #raise BadRequest(unicode(self.GET(project)))
+            print "There are parameter errors"
             return self.response(user, project, parameters)
         else:
             #write clam.xml output file

@@ -70,7 +70,8 @@ class CLAMData(object):
         self.output = []
         self.projects = None
         self.parseresponse(xml)
-
+        self.errors = False
+        self.errormsg = ""
         
 
 
@@ -98,6 +99,10 @@ class CLAMData(object):
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
                 self.completion  = node.attrib['completion']
+                if 'errors' in node.attrib:
+                    self.errors = ((node.attrib['errors'] == 'yes') or (node.attrib['errors'] == '1'))
+                if 'errormsg' in node.attrib:
+                    self.errormsg = node.attrib['errormsg']
             elif node.tag == 'parameters':
                 for parametergroupnode in node:
                     if parametergroupnode.tag == 'parametergroup':
