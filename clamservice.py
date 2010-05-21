@@ -390,6 +390,7 @@ class Project(object):
             if self.exitstatus(project) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
+                printlog("Child process failed, exited with non zero-exit code.")
         else:
             outputpaths = []        
         if statuscode == clam.common.status.READY:
@@ -402,6 +403,7 @@ class Project(object):
                 if parameter.error:
                     errors = "yes"
                     if not errormsg: errormsg = "One or more parameters are invalid"
+                    printlog("One or more parameters are invalid")
                     break
 
         render = web.template.render('templates')
@@ -450,29 +452,33 @@ class Project(object):
             for parameter in parameterlist:
                 if parameter.access(user):
                     postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
-                    if postvalue:
+                    if not (isinstance(postvalue,bool) and postvalue == False):
                         if parameter.set(postvalue): #may generate an error in parameter.error
                             params.append(parameter.compilearg(parameter.value))
                         else:
+                            if not parameter.error: parameter.error = "Something went wrong whilst settings this parameter!" #shouldn't happen
+                            printlog("Unable to set " + parameter.id + ": " + parameter.error)
                             errors = True
                     elif parameter.required:
                         #Not all required parameters were filled!
                         parameter.error = "This option must be set"
                         errors = True
-                    if postvalue and (parameter.forbid or parameter.require):
+                    if parameter.value and (parameter.forbid or parameter.require):
                         for _, parameterlist2 in parameters:
                             for parameter2 in parameterlist2:
-                                if parameter.forbid and parameter2.id in parameter.forbid and parameter2.id in postdata and postdata[parameter2.id] != '':
-                                    parameter.error = parameter2.error = "Settings these options together is forbidden"
-                                    errors = True
-                                if parameter.require and parameter2.id in parameter.require and ((not parameter2.id in postdata) or (not postdata[parameter2.id])):
-                                    parameter2.error = "This option must be set as well"
-                                    errors = True
+                                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
+                                        parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
+                                        printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                                        errors = True
+                                    if parameter.require and parameter2.id in parameter.require and not parameter2.value:
+                                        parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
+                                        printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                                        errors = True
 
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
             #raise BadRequest(unicode(self.GET(project)))
-            print "There are parameter errors"
+            printlog("There are errors, not starting.")
             return self.response(user, project, parameters)
         else:
             #write clam.xml output file

@@ -188,6 +188,13 @@ class BooleanParameter(AbstractParameter):
         else:
             return ""
 
+    def valuefrompostdata(self, postdata):
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
+        if self.id in postdata and postdata[self.id] == '1' or postdata[self.id] == 'True' or postdata[self.id] == 'yes' or postdata[self.id] == 'enabled' :
+            return True #postdata[self.id]
+        else: 
+            return False
+
 
 
 class StringParameter(AbstractParameter):
@@ -368,6 +375,13 @@ class IntegerParameter(AbstractParameter):
             self.error = "Number must be a whole number between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False
 
+    def valuefrompostdata(self, postdata):
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
+        if self.id in postdata:
+            return int(postdata[self.id])
+        else: 
+            return False
+
 
 class FloatParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description = '', **kwargs):
@@ -399,4 +413,11 @@ class FloatParameter(AbstractParameter):
             self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False
         
+
+    def valuefrompostdata(self, postdata):
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
+        if self.id in postdata:
+            return float(postdata[self.id])
+        else: 
+            return False
 

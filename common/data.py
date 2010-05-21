@@ -73,9 +73,10 @@ class CLAMData(object):
         self.input = []
         self.output = []
         self.projects = None
-        self.parseresponse(xml)
         self.errors = False
         self.errormsg = ""
+
+        self.parseresponse(xml)
         
 
 

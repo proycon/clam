@@ -18,6 +18,7 @@ import os
 import time
 import glob
 import random
+import codecs
 
 sys.path.append(sys.path[0] + '/../../')
 os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
@@ -61,17 +62,24 @@ if not url or not files:
     print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
     sys.exit(1)    
 
+
+print "Connecting to server..."
+
         
 #create client, connect to server
 clamclient = CLAMClient(url)
+
+print "Creating project..."
    
 #this is the name of our project, it consists in part of randomly generated bits (so multiple clients don't use the same project and can run similtaneously)
 project = "frogclient" + str(random.getrandbits(64))
 clamclient.create(project)
 
 
+print "Uploading Files..."
+
 for f in files:
-    print "Uploading " + f + " to webservice..."
+    print "\tUploading " + f + " to webservice..."
     clamclient.upload(project, open(f), PlainTextFormat('utf-8') )
 
 
@@ -79,13 +87,17 @@ print "Starting Frog..."
 data = clamclient.start(project, noparser=noparser, tok=tok,vtok=vtok, legtok=legtok) #start the process with the specified parameters
 if data.errors:
     print >>sys.stderr,"An error occured: " + data.errormsg
+    for parametergroup, paramlist in data.parameters:
+        for parameter in paramlist:
+            if parameter.error:
+                print >>sys.stderr,"Error in parameter " + parameter.id + ": " + parameter.error
     sys.exit(1)
 
 
 while data.status != clam.common.status.DONE:
-    time.sleep(5) #wait 10 seconds before polling status
+    time.sleep(5) #wait 5 seconds before polling status
     data = clamclient.get(project) #get status again
-    print "FROG IS RUNNING: " + str(data.completion) + '% -- ' + data.statusmessage
+    print "\tFROG IS RUNNING: " + str(data.completion) + '% -- ' + data.statusmessage
 
 
 print "Frog is done."
@@ -93,7 +105,7 @@ print "Frog is done."
 #Download output files to current directory
 for outputfile in data.output:
     print "\tDownloading " + str(outputfile) + " (" + outputfile.format.name + ") ..."
-    clamclient.download(project, outputfile, open(os.path.basename(outputfile)))
+    clamclient.download(project, outputfile, open(os.path.basename(outputfile.path),'w'))
 
 
 #delete our project
