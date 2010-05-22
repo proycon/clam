@@ -27,8 +27,8 @@ SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmat
 
 #Root directory for CLAM
 ROOT = path[0] + "/../frog.clam/"
-PORT = 8080
-URL = "http://localhost:" + str(PORT)
+PORT = 9000
+URL = "http://anaproy.nl:" + str(PORT)
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
