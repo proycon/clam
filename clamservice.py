@@ -109,8 +109,10 @@ class JobService(object):
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
-    '/([A-Za-z0-9_]*)/output/(.*)', 'FileHandler',
+    '/([A-Za-z0-9_]*)/output/(.*)', 'OutputFileHandler',
+    '/([A-Za-z0-9_]*)/output/(.*)', 'InputFileHandler',
     )
+
 
     def __init__(self):
         global VERSION    
@@ -534,11 +536,28 @@ class Project(object):
         shutil.rmtree(Project.path(project))
         return "" #200
 
-class FileHandler(object):
+class OutputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
         path = Project.path(project) + "output/" + filename.replace("..","")
+        
+        #TODO: find outputformat?
+
+        if os.path.isfile(path): 
+            for line in open(path,'r'): #TODO: check for problems with character encoding?
+                yield line
+        elif os.path.isdir(path): 
+            for f in glob.glob(path + "/*"):
+                yield os.path.basename(f)                
+        else:
+            raise web.webapi.NotFound()
+
+class InputFileHandler(object):
+
+    @requirelogin
+    def GET(self, project, filename, user=None):    
+        path = Project.path(project) + "input/" + filename.replace("..","")
         
         #TODO: find outputformat?
 
