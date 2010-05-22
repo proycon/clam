@@ -56,8 +56,7 @@ $(document).ready(function(){
 
 
    $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
-   $("#uploadform").attr("target","_blank"); //would not be valid xhtml strict
-   $("#editorform").attr("target","_blank");
+
 
    $("#submiteditor").click(function(event){ 
         $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 

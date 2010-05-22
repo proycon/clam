@@ -852,14 +852,14 @@ class Uploader(object):
                     os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
                 filename = inputformat.subdirectory  + "/" + filename
     
-            f = open(Project.path(project) + 'input/' + filename,'wb')
-            #else:
-            #f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
+          
             if realupload:
+                f = open(Project.path(project) + 'input/' + filename,'wb')
                 for line in postdata['upload' + str(i)].file:
                     #line = unicode(line,inputformat.encoding) #TODO: catch encoding errors
                     f.write(line) #encoding unaware, solves big-file upload problem?
             else:
+                f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
                 f.write(postdata['uploadtext' + str(i)])
             f.close()
             printdebug("(end copy upload)" )
