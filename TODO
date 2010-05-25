@@ -1,4 +1,8 @@
-- Finish presentation
+- dubbele inputnaam!
+- logo in serviceconfig
+- input van URL
+- Datum in output files
+
 
 - Write client (in progress)
 
@@ -20,6 +24,8 @@ Extra features:
 
 
 - Write separate webinterface (django) (not started yet)
+
+
 
 
 Later:
