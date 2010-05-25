@@ -1,37 +1,42 @@
-- dubbele inputnaam!
-- logo in serviceconfig
-- input van URL
-- Datum in output files
+- dubbele inputnaam! (pre-beta1)
+- input van URL      (pre-beta1)
 
 
-- Write client (in progress)
-
-- Disallow empty filename in submit user input (test)
-- Validate project IDs upon creation? (already done?)
+- Disallow empty filename in submit user input (test) (solveD? TEST)  (pre-beta1)
+- Validate project IDs upon creation? (already done? TEST)  (pre-beta1)
 
 
 - Nicefy documentation (in progress)
+    - Add documention on writing clients
 
-- Test user access to projects 
-- Show only projects that the user has access to
+- Test user access to projects    (pre-beta1)
+- Allow users to configure access  (pre-beta1)
+- Add support for sysadmin users   (pre-beta1)
+- Show only projects that the user has access to  (pre-beta1)
 
 
 - Encoding check?
 
-Extra features:
-    - Automatic encoding conversion for inputformats?
 
 
-
-- Write separate webinterface (django) (not started yet)
-
-
+CLAM Interface (Django) (Eind Augustus af?)
+    - Webservice Database
+    - Chaining
+        - Optional intermediate results
+        - Perhaps for future: Support for non-CLAM webservices?
+    - Visualisation Modules
+        - May be remote system, simply pass output to URL
+    - Authentication
+        Different accounts on different webservices? One combined account in interface?
 
 
 Later:
-- Enable some HTTP Caching for /static/
-- Make XSDs or DTDs for xml responses
-- Write more documentation (in progress)
+    - Enable some HTTP Caching for /static/
+    - Make XSDs or DTDs for xml responses
+    - Write more documentation (in progress)
+    - logo in serviceconfig ?
+    - Automatic encoding conversion for inputformats?
+
 
 
 
