@@ -53,4 +53,6 @@ May:
     - fixed bugs with Choiceparameter (clam.xml)
     - Implemented status log and progress bar 
     - Split client library and data library, fixes
+    - Fix: no double files in list, adding a file with same name overwrites earlier file
+
 

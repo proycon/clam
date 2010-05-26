@@ -215,7 +215,7 @@
 
 <xsl:template match="/clam/input/path">
     <tr>
-        <td class="file"><xsl:value-of select="."/></td>
+        <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
         <td><xsl:value-of select="@label"/></td>
         <td><xsl:value-of select="@encoding" /></td>
     </tr>

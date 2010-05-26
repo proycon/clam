@@ -110,7 +110,7 @@ class JobService(object):
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
     '/([A-Za-z0-9_]*)/output/(.*)', 'OutputFileHandler',
-    '/([A-Za-z0-9_]*)/output/(.*)', 'InputFileHandler',
+    '/([A-Za-z0-9_]*)/input/(.*)', 'InputFileHandler',
     )
 
 

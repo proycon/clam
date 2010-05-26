@@ -73,7 +73,15 @@ $(document).ready(function(){
             success: function(response){ 
                 $(response).find('file').each(function(){
                     if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                        inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
+                        var found = false;
+                        var data = inputfiles.fnGetData();
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
                     }
                 });
             },
@@ -90,7 +98,15 @@ $(document).ready(function(){
         },  onComplete: function(file, response){
             $(response).find('file').each(function(){
                 if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                    inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
+                        var found = false;
+                        var data = inputfiles.fnGetData();
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
                 }
             });
             //window.alert($(response).text()); //DEBUG
