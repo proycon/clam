@@ -1069,7 +1069,7 @@ if __name__ == "__main__":
     if not 'ADMINS' in settingkeys:
         settings.ADMINS = []
     if not 'PROJECTS_PUBLIC' in settingkeys:
-        settings.PROJECT_PUBLIC = True
+        settings.PROJECTS_PUBLIC = True
     if not 'PARAMETERS' in settingkeys:
         settings.PARAMETERS = []
     if not 'OUTPUTFORMATS' in settingkeys:
