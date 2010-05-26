@@ -36,7 +36,7 @@ ROOT = ""
 
 #The URL of the system
 PORT = 8080
-URL = "http://localhost:" + str(PORT)
+HOST = 'localhost'
 
 #Users and passwords
 USERS = None #no user authentication

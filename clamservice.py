@@ -178,7 +178,7 @@ class Index(object):
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
                 project = os.path.basename(f)
-                if not settings.PROJECTS_PUBLIC or (user in settings.ADMINS or user in Project.path(project)):
+                if not settings.PROJECTS_PUBLIC or user in settings.ADMINS or user in Project.path(project):
                     projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
 
         errors = "no"
@@ -187,7 +187,15 @@ class Index(object):
         corpora = CLAMService.corpusindex()
 
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, settings.URL, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
+
+        url = 'http://' + settings.HOST
+        if settings.PORT != 80:
+            url += ':' + str(settings.PORT)
+        if settings.BASEURL:
+            url += settings.BASEURL
+        if url[-1] == '/': url = url[:-1]
+
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
         
 
 
@@ -228,7 +236,7 @@ class Project(object):
             os.mkdir(settings.ROOT + "projects/" + project)
             os.mkdir(settings.ROOT + "projects/" + project + "/input")
             os.mkdir(settings.ROOT + "projects/" + project + "/output")
-            if 'PROJECTS_PUBLIC' in dir(settings) and not settings.PROJECTS_PUBLIC:
+            if not settings.PROJECTS_PUBLIC:
                 f = codecs.open(settings.ROOT + "projects/" + project + '/.users','w','utf-8')                         
                 f.write(user + "\n")
                 f.close()
@@ -434,7 +442,15 @@ class Project(object):
                     break
 
         render = web.template.render('templates')
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, settings.URL, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
+        
+        url = 'http://' + settings.HOST
+        if settings.PORT != 80:
+            url += ':' + str(settings.PORT)
+        if settings.BASEURL:
+            url += settings.BASEURL
+        if url[-1] == '/': url = url[:-1]
+
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         
                     
     @requirelogin
@@ -856,7 +872,6 @@ class Uploader(object):
         Project.create(project, user)
 
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        #output += "<?xml-stylesheet type=\"text/xsl\" href=\"" + settings.URL + "/static/interface.xsl\"?>\n"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
         #we may now assume all upload-data exists:
@@ -1000,8 +1015,6 @@ if __name__ == "__main__":
                 DEBUG = True
             elif option == '-c':
                 fastcgi = True
-            elif option[0] != '-':
-                settingsmodule = option
             elif option == '-p':
                 readport = True
                 continue
@@ -1011,8 +1024,10 @@ if __name__ == "__main__":
                 usage()                
                 sys.exit(0)
             elif option == '-v':
-                print "CLAM Version " + VERSION
+                print "CLAM WebService version " + VERSION
                 sys.exit(0)
+            elif option[0] != '-':
+                settingsmodule = option
             else:
                 print "Unknown option: " + option
                 usage()
@@ -1037,10 +1052,38 @@ if __name__ == "__main__":
     if not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
 
-    if PORT:
-        sys.argv.append(str(PORT)) #port from command line  
-    elif 'PORT' in dir(settings):
-        sys.argv.append(str(settings.PORT))       
+    settingkeys = dir(settings)
+ 
+      
+    errors = False
+    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','INPUTFORMATS']:    
+        if not s in settingkeys:
+            print >> sys.stderr, "ERROR: Service configuration incomplete, missing setting: " + s
+            errors = True
+    if errors:
+        sys.exit(1)
+
+    #Default settings
+    if not 'USER' in settingkeys:
+        settings.USER = None
+    if not 'ADMINS' in settingkeys:
+        settings.ADMINS = []
+    if not 'PROJECTS_PUBLIC' in settingkeys:
+        settings.PROJECT_PUBLIC = True
+    if not 'PARAMETERS' in settingkeys:
+        settings.PARAMETERS = []
+    if not 'OUTPUTFORMATS' in settingkeys:
+        settings.OUTPUTFORMATS = []
+    if not 'PORT' in settingkeys and not PORT:
+        PORT = 80
+    if not 'HOST' in settingkeys:
+        settings.HOST = os.uname()[1]
+    if not 'OUTPUTFORMATS' in settingkeys:
+        settings.OUTPUTFORMATS = []
+    if not 'BASEURL' in settingkeys:
+        settings.BASEURL = ''
+
+        
    
     if not os.path.isdir(settings.ROOT):
         print >> sys.stderr, "Root directory does not exist yet, creating..."
@@ -1051,6 +1094,13 @@ if __name__ == "__main__":
     if not os.path.isdir(settings.ROOT + 'projects'):
         print >> sys.stderr, "Projects directory does not exist yet, creating..."
         os.mkdir(settings.ROOT + 'projects')
+
+
+    if PORT:
+        sys.argv.append(str(PORT)) #port from command line
+        settings.PORT = PORT                       
+    elif 'PORT' in settingkeys:
+        sys.argv.append(str(settings.PORT))
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 
