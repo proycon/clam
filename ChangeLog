@@ -60,5 +60,6 @@ May:
     - Added the option to download input files from an external URL
     - Added time-stamp in project list (pre-beta1)
     - Added support for sysadmin user, users can only access own projects   (pre-beta1)
-    
+    - Tested on nginx (fastcgi) (pre-beta2)
+
     

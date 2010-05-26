@@ -13,7 +13,6 @@
 
 
 - make IE7/8 compatible (pre-beta2)
-- Test on lighthttpd (pre-beta2)
 - Test on apache (pre-beta2)
 - Logo, custom footer in service configuration (pre-beta2)
 - Write more documentation (in progress)
