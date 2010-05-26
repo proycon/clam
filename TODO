@@ -1,22 +1,36 @@
-- make IE compatible? (pre-beta2)
+
+
 
 - Validate project IDs upon creation? (already done? TEST)  (pre-beta1)
 
-- Nicefy documentation (in progress)
+- Test user access to projects    (pre-beta1)
+- Allow users to configure access  (pre-beta1)
+- Add support for sysadmin user   (pre-beta1)
+- Show only projects that the user has access to  (pre-beta1)
+- Move "input source" selector (pre-beta1 or pre-beta2)
+
+* beta1 release for Hans van Halteren
+* announcement for TTNWW?
+
+------------- END MAY -------------------------------------------
+
+
+- make IE7/8 compatible (pre-beta2)
+- Test on lighthttpd (pre-beta2)
+- Test on apache (pre-beta2)
+- Logo, custom footer in service configuration (pre-beta2)
+- Write more documentation (in progress)
     - Add documention on writing clients
+- Add option to disable input, parameters, output, upload methods? (pre-beta3)
+- Make XML Scheme Definition for CLAM XML format
 
-- Test user access to projects    (pre-beta2)
-- Allow users to configure access  (pre-beta2)
-- Add support for sysadmin users   (pre-beta2)
-- Show only projects that the user has access to  (pre-beta2)
+* beta2 release (for Hans van Halteren)
+* release on ILK website? Including live services for for example Frog?
+* second announcement for TTNWW?
 
-- Move "input source" selector
+------------ END JUNE ----------------------------
 
-- Encoding check?
-
-
-
-CLAM Interface (Django) (Eind Augustus af?)
+CLAM Interface (Django)
     - Webservice Database
     - Chaining
         - Optional intermediate results
@@ -26,12 +40,16 @@ CLAM Interface (Django) (Eind Augustus af?)
     - Authentication
         Different accounts on different webservices? One combined account in interface?
 
+* first full release?
 
-Later:
+------------ END AUGUST?  ----------------------------
+
+
+
+
+
+Loose ends:
     - Enable some HTTP Caching for /static/
-    - Make XSDs or DTDs for xml responses
-    - Write more documentation (in progress)
-    - logo in serviceconfig ?
     - Automatic encoding conversion for inputformats?
 
 
