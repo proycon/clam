@@ -172,10 +172,12 @@ class Index(object):
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
-        for f in glob.glob(settings.ROOT + "projects/*"):
+        for f in glob.glob(settings.ROOT + "projects/*"): #TODO: Implement some kind of caching
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
-                projects.append( ( os.path.basename(f),d.strftime("%Y-%m-%d %H:%M:%S")) )
+                project = os.path.basename(f)
+                if not settings.PROJECTS_PUBLIC or (user in settings.ADMINS or user in Project.path(project)):
+                    projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
 
         errors = "no"
         errormsg = ""
@@ -188,6 +190,19 @@ class Index(object):
 
 
 class Project(object):
+
+    @staticmethod
+    def users(project):
+        path = Project.path(project)
+        users = []
+        if os.path.isfile(path + '.users'):
+            f = codecs.open(path + '.users','r','utf-8')
+            for user in f.readlines():
+                if user.strip():
+                    users.append(user.strip())
+            f.close()
+        return users
+    
 
     @staticmethod
     def validate(project):

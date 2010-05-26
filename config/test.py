@@ -38,13 +38,15 @@ ROOT = "/home/proycon/work/clamtmproot2/"
 URL = "http://localhost:8080"
 
 #Users and passwords
-USERS = None #no user authentication
-#USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
+#USERS = None #no user authentication
+USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
+
+ADMINS = ['admin'] #Define which of the above users are admins
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
-PROJECTS_PUBLIC = True
+PROJECTS_PUBLIC = False
 
 #List of supported Input formats by the system
 #New format types should be added to common/formats.py, and can then be used here:

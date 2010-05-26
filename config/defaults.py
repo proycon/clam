@@ -42,10 +42,11 @@ URL = "http://localhost:" + str(PORT)
 USERS = None #no user authentication
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
+ADMINS = []
+
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = True
-
 
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
