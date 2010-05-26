@@ -81,15 +81,51 @@ $(document).ready(function(){
                                 break;
                             }
                         }
-                        if (!found) inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
+                        if (!found) inputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
                     }
                 });
             },
+            error: function(response, errortype){
+                alert("An error occured while attempting to upload the text: " + errortype );
+            }            
         });            
         return true;
    });
    $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; });
 
+
+   $('#uploadurlsubmit').click(function(event){
+            $('#urlupload').hide();
+            $('#urluploadprogress').show();     
+            $.ajax({ 
+                type: "POST", 
+                url: "upload/", 
+                dataType: "xml", 
+                data: {'uploadcount':1, 'uploadurl1': $('#uploadurl').val(), 'uploadformat1': $('#uploadformaturl').val() }, 
+                success: function(response){ 
+                    $(response).find('file').each(function(){
+                        if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
+                            var found = false;
+                            var data = inputfiles.fnGetData();
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) inputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] );
+                        }
+                    });
+                    $('#urluploadprogress').hide();                     
+                    $('#urlupload').show();
+                },
+                error: function(response, errortype){
+                    alert("An error occured while attempting to fetch this file. Please verify the URL is correct and up: " + errortype);
+                    $('#urluploadprogress').hide();                     
+                    $('#urlupload').show();
+                }                
+            });              
+    });
 
 
    uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
@@ -106,7 +142,7 @@ $(document).ready(function(){
                                 break;
                             }
                         }
-                        if (!found) inputfiles.fnAddData( [ $(this).attr('name'), $(this).attr('formatlabel'), $(this).attr('encoding') ] );
+                        if (!found) inputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
                 }
             });
             //window.alert($(response).text()); //DEBUG

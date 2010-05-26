@@ -23,6 +23,7 @@ import sys
 import datetime
 import random
 import re
+import urllib2
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -796,7 +797,7 @@ class Uploader(object):
 
     @requirelogin
     def GET(self, project, user=None):
-        #should use template instead
+        #Crude upload form
         return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     @requirelogin
@@ -836,7 +837,7 @@ class Uploader(object):
 
         #we may now assume all upload-data exists:
         for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]):
+            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]) and (not 'uploadurl'+str(i) in postdata or not postdata['uploadurl' + str(i)]):
                 output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
                 printdebug("Selecting client-side file " + postdata['upload' + str(i)].filename + " for upload")
@@ -852,6 +853,7 @@ class Uploader(object):
                     archive = False
                     filename = inputformat.filename(filename) #set proper filename extension
                 realupload = True
+                wget = False
             elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)]:
                 if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
                     filename = postdata['uploadfilename' + str(i)]
@@ -863,7 +865,23 @@ class Uploader(object):
                 archive = False
                 filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
                 realupload = False
-    
+                wget = False
+            elif 'uploadurl'+str(i) in postdata and postdata['uploadurl' + str(i)]:
+                if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
+                    #explicit filename passed
+                    filename = postdata['uploadfilename' + str(i)]
+                else:
+                    #get filename from URL:
+                    filename = os.path.basename(postdata['uploadurl' + str(i)])
+                    if not filename:
+                        filename =  "%032x" % random.getrandbits(128)  #make a random one
+
+                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadurl' + str(i)] +"\">\n"
+
+                wget = True
+                realupload = False
+                filename = inputformat.filename(filename) #set proper filename extension
+
 
             inputformat = None
             for f in settings.INPUTFORMATS:                
@@ -883,11 +901,20 @@ class Uploader(object):
                     os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
                 filename = inputformat.subdirectory  + "/" + filename
     
-          
-            if realupload:
+            if wget:
+                try:
+                    req = urllib2.urlopen(postdata['uploadurl' + str(i)])
+                except:
+                    raise web.webapi.NotFound()
+                CHUNK = 16 * 1024
+                f = open(Project.path(project) + 'input/' + filename,'wb')
+                while True:
+                    chunk = req.read(CHUNK)
+                    if not chunk: break
+                    f.write(chunk)
+            elif realupload:
                 f = open(Project.path(project) + 'input/' + filename,'wb')
                 for line in postdata['upload' + str(i)].file:
-                    #line = unicode(line,inputformat.encoding) #TODO: catch encoding errors
                     f.write(line) #encoding unaware, solves big-file upload problem?
             else:
                 f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)

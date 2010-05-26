@@ -1,22 +1,16 @@
 - make IE compatible? (pre-beta2)
 
-- view input files   (pre-beta1)
-- delete input files (pre-beta1)
-- input van URL      (pre-beta1)
-
-
-- Disallow empty filename in submit user input (test) (solveD? TEST)  (pre-beta1)
 - Validate project IDs upon creation? (already done? TEST)  (pre-beta1)
-
 
 - Nicefy documentation (in progress)
     - Add documention on writing clients
 
-- Test user access to projects    (pre-beta1)
-- Allow users to configure access  (pre-beta1)
-- Add support for sysadmin users   (pre-beta1)
-- Show only projects that the user has access to  (pre-beta1)
+- Test user access to projects    (pre-beta2)
+- Allow users to configure access  (pre-beta2)
+- Add support for sysadmin users   (pre-beta2)
+- Show only projects that the user has access to  (pre-beta2)
 
+- Move "input source" selector
 
 - Encoding check?
 

@@ -121,6 +121,7 @@
 <xsl:template match="/clam/inputformats">
         <div class="uploadform">
             <h3>Upload a file from disk</h3>
+            <p>Use this to upload files from your computer to the system.</p>
             <!--
             <div id="simpleupload">
              <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
@@ -155,8 +156,24 @@
         
 
         </div>
+        <h3>Grab a file from the web</h3>
+        <div id="urlupload">
+            <p>Retrieves an input file from another location on the web.</p>
+            <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format:</em><xsl:text> </xsl:text><select id="uploadformaturl">
+                        <xsl:for-each select="*">
+                            <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+                        </xsl:for-each>
+            </select><br />
+            <strong>Step 2)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="uploadurl" value="http://" /><br />
+            <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadurlsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
+        </div>
+        <div id="urluploadprogress">
+                    <strong>Downloadin progress... Please wait...</strong><br />
+                    <img class="progress" src="/static/progress.gif" />
+        </div>    
+
         <h3>Add input from browser</h3>
-        You can create new files right from your browser: <button id="openeditor">Open Live Editor</button>
+        <p>You can create new files right from your browser: <button id="openeditor">Open Live Editor</button></p>
         <div id="mask"></div>
         <div id="editor">
             <h3>Add input from browser</h3>
@@ -220,7 +237,7 @@
         <td><xsl:value-of select="@label"/></td>
         <td><xsl:value-of select="@encoding" /></td>
         <td class="actions"><img src="/static/delete.png" title="Delete this file">
-            <xsl:attribute name="onclick">deleteinputfile("<xsl:value-of select="."/>");</xsl:attribute>
+            <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="."/>');</xsl:attribute>
         </img></td>
     </tr>
 </xsl:template>
