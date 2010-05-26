@@ -186,6 +186,7 @@
                     <th>Input File</th>
                     <th>Format</th>
                     <th>Encoding</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -218,6 +219,9 @@
         <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
         <td><xsl:value-of select="@label"/></td>
         <td><xsl:value-of select="@encoding" /></td>
+        <td class="actions"><img src="/static/delete.png" title="Delete this file">
+            <xsl:attribute name="onclick">deleteinputfile("<xsl:value-of select="."/>");</xsl:attribute>
+        </img></td>
     </tr>
 </xsl:template>
 

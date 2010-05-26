@@ -545,7 +545,7 @@ class OutputFileHandler(object):
         #TODO: find outputformat?
 
         if os.path.isfile(path): 
-            for line in open(path,'r'): #TODO: check for problems with character encoding?
+            for line in open(path,'r'): 
                 yield line
         elif os.path.isdir(path): 
             for f in glob.glob(path + "/*"):
@@ -559,10 +559,9 @@ class InputFileHandler(object):
     def GET(self, project, filename, user=None):    
         path = Project.path(project) + "input/" + filename.replace("..","")
         
-        #TODO: find outputformat?
-
+       
         if os.path.isfile(path): 
-            for line in open(path,'r'): #TODO: check for problems with character encoding?
+            for line in open(path,'r'): 
                 yield line
         elif os.path.isdir(path): 
             for f in glob.glob(path + "/*"):
@@ -570,6 +569,19 @@ class InputFileHandler(object):
         else:
             raise web.webapi.NotFound()
 
+    @requirelogin
+    def DELETE(self, project, filename, user=None):    
+        if len(filename.replace("..","")) == 0:
+            raise BadRequest('No file specified') #TODO: message won't show
+
+        path = Project.path(project) + "input/" + filename.replace("..","")
+        
+        if os.path.isfile(path): 
+            os.unlink(path)
+        elif os.path.isdir(path): 
+            shutil.rmtree(path)
+        else:
+            raise web.webapi.NotFound()
 
 class OutputInterface(object):
 
@@ -611,7 +623,7 @@ class OutputInterface(object):
                 if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
                     os.unlink(Project.path(project) + "output/" + project + ".zip")
             else:
-                raise BadRequest('Invalid archive format')
+                raise BadRequest('Invalid archive format') #TODO: message won't show
 
             path = Project.path(project) + "output/" + project + "." + format
             

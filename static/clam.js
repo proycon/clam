@@ -121,3 +121,20 @@ $(document).ready(function(){
 
 });    
 
+
+function deleteinputfile(filename) {   
+    var found = -1;
+    var data = inputfiles.fnGetData();
+    for (var i = 0; i < data.length; i++) {
+        if (data[i][0].match('>' + filename + '<') != null) {
+            found = i;
+            break;
+        }
+    }   
+    if (found >= 0) inputfiles.fnDeleteRow(found);
+    $.ajax({ 
+        type: "DELETE", 
+        url: "input/" + filename, 
+        dataType: "xml"
+    });    
+}

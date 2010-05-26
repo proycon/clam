@@ -176,6 +176,12 @@ table.files td.file {
     font-weight: bold;
     font-style: normal;
 }
+table.files td.actions {
+    width: 5%;
+    background: #eee;
+    text-align: center;
+}
+
 
 #footer {
     width: 97%;
