@@ -3,10 +3,7 @@
 
 - Validate project IDs upon creation? (already done? TEST)  (pre-beta1)
 
-- Test user access to projects    (pre-beta1)
 - Allow users to configure access  (pre-beta1)
-- Add support for sysadmin user   (pre-beta1)
-- Show only projects that the user has access to  (pre-beta1)
 - Move "input source" selector (pre-beta1 or pre-beta2)
 
 * beta1 release for Hans van Halteren
