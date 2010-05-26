@@ -324,11 +324,11 @@
         <h2>Projects</h2>
         <table id="projects">
           <thead>
-            <tr><th>Project ID</th></tr>
+            <tr><th>Project ID</th><th>Last changed</th></tr>
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></td></tr>
+            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
            </xsl:for-each>
           </tbody>
         </table>

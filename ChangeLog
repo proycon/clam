@@ -58,5 +58,5 @@ May:
     - Input files now viewable and deletetable
     - Fix: no double files in list, adding a file with same name overwrites earlier file
     - Added the option to download input files from an external URL
-
+    - Added time-stamp in project list (pre-beta1)
 

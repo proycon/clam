@@ -174,7 +174,8 @@ class Index(object):
         projects = []
         for f in glob.glob(settings.ROOT + "projects/*"):
             if os.path.isdir(f):
-                projects.append(os.path.basename(f))
+                d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
+                projects.append( ( os.path.basename(f),d.strftime("%Y-%m-%d %H:%M:%S")) )
 
         errors = "no"
         errormsg = ""
@@ -189,6 +190,10 @@ class Index(object):
 class Project(object):
 
     @staticmethod
+    def validate(project):
+        return re.match(r'^\w+$',project, re.UNICODE)
+
+    @staticmethod
     def path(project):
         """Get the path to the project (static method)"""
         return settings.ROOT + "projects/" + project + "/"
@@ -196,9 +201,11 @@ class Project(object):
     @staticmethod
     def create(project, user):         
         """Create project skeleton if it does not already exist (static method)"""
+        if not Project.validate(project):
+            raise BadRequest('Invalid project ID') #TODO: message won't show
         printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
         if not project:
-            raise BadRequest('Empty project name!') 
+            raise BadRequest('Empty project name!') #TODO: message won't show
         if not os.path.isdir(settings.ROOT + "projects/" + project):
             printlog("Creating project '" + project + "'")
             os.mkdir(settings.ROOT + "projects/" + project)
