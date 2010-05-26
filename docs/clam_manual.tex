@@ -26,7 +26,7 @@
 
 The Computational Linguistics Application Mediator (CLAM) allows you to quickly and transparently transform your Natural Language Processing application into a webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around the system, allowing end-users to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application. Whilst the application runs, users can monitor its status.
 
-CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, and the handling and validation of input can be taken care of by CLAM.
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
 
 CLAM is entirely written in Python and is available as open-source, it is set up in a modular fashion and as such is easily extendable. 
 
@@ -42,6 +42,11 @@ This documentation is split into two parts: a section for service providers/deve
 Note that at this stage, CLAM is still under heavy development. As such, this documentation is not complete yet, but is also a work in progress.
 \end{devnotes}
 
+
+
+
+
+
 \chapter{Documentation for Service Providers}
 
 \section{Technical details}
@@ -55,7 +60,7 @@ The following software is required to run CLAM. These will be available in any m
 
 \begin{itemize}
 \item python 2.5 (or a higher 2.x version)
-\item python-webpy, version 0.3
+\item python-webpy, version 0.33 or higher
 \item python-lxml, version 2 or higher
 %\item python-libxslt1
 %\item python-django

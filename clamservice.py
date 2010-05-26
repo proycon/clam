@@ -115,7 +115,7 @@ class CLAMService(object):
     )
 
 
-    def __init__(self):
+    def __init__(self, fcgi = False):
         global VERSION    
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
@@ -147,6 +147,8 @@ class CLAMService(object):
             
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
+        if fcgi:
+            web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
         self.service.run()
 
     @staticmethod
@@ -971,25 +973,61 @@ class Uploader(object):
         return output #200
 
 
+
+def usage():
+        print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
+        print >> sys.stderr, "Options:"
+        print >> sys.stderr, "\t-d        - Enable debug mode"
+        print >> sys.stderr, "\t-c        - Run in FastCGI mode"
+        print >> sys.stderr, "\t-p [port] - Port"
+        print >> sys.stderr, "\t-h        - This help message"
+        print >> sys.stderr, "\t-v        - Version information"
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Syntax: clamservice.py mysettingsmodule"
+        usage()
         sys.exit(1)
-    settingsmodule = sys.argv[1]
-    #if not settingsmodule.isalpha():  #security precaution
-    #    print >> sys.stderr, "ERROR: Invalid service module specified!"
-    #    sys.exit(1)
-    #else:
-    #import_string = "from " + settingsmodule + " import COMMAND, ROOT, URL, PARAMETERS, INPUTFORMATS, OUTPUTFORMATS, SYSTEM_ID, SYSTEM_NAME, SYSTEM_DESCRIPTION, USERS"
-    import_string = "import " + settingsmodule + " as settings"
-    exec import_string
-    
-    #remove first argument (web.py wants port in sys.argv[1]
-    del sys.argv[1]
 
-    if len(sys.argv) >= 2 and sys.argv[1] == '-d':
-        DEBUG = True
-        del sys.argv[1]
+    settingsmodule = None
+    fastcgi = False
+    readport = False
+    PORT = None
+    
+    if len(sys.argv) >= 2:
+        for option in sys.argv[1:]:
+            if option == '-d':
+                DEBUG = True
+            elif option == '-c':
+                fastcgi = True
+            elif option[0] != '-':
+                settingsmodule = option
+            elif option == '-p':
+                readport = True
+                continue
+            elif readport and option.isdigit():
+                PORT = int(option)
+            elif option == '-h':
+                usage()                
+                sys.exit(0)
+            elif option == '-v':
+                print "CLAM Version " + VERSION
+                sys.exit(0)
+            else:
+                print "Unknown option: " + option
+                usage()
+                sys.exit(1)
+            readport = False
+
+    if not settingsmodule:  #security precaution
+        print >> sys.stderr, "ERROR: No settings module specified"
+        sys.exit(1)
+    
+
+    import_string = "import " + settingsmodule + " as settings"
+    exec import_string   
+                   
+    sys.argv = sys.argv[:1] #remove command line options for web.py
 
     #Check version
     if float(str(settings.REQUIRE_VERSION)[0:3]) < float(str(VERSION)[0:3]):
@@ -999,8 +1037,9 @@ if __name__ == "__main__":
     if not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
 
-
-    if 'PORT' in dir(settings):
+    if PORT:
+        sys.argv.append(str(PORT)) #port from command line  
+    elif 'PORT' in dir(settings):
         sys.argv.append(str(settings.PORT))       
    
     if not os.path.isdir(settings.ROOT):
@@ -1021,4 +1060,4 @@ if __name__ == "__main__":
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
         
 
-    CLAMService() #start
+    CLAMService(fastcgi) #start
