@@ -103,7 +103,7 @@ def requirelogin(f):
             return f(*args, **kwargs)
     return wraps(f)(wrapper)
 
-class JobService(object):
+class CLAMService(object):
 
     urls = (
     '/', 'Index',
@@ -117,7 +117,7 @@ class JobService(object):
 
     def __init__(self):
         global VERSION    
-        printlog("Starting CLAM JobService, version " + str(VERSION) + " ...")
+        printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             print >>sys.stderr,"ERROR: Specified root path " + settings.ROOT + " not found"                 
             sys.exit(1)
@@ -182,7 +182,7 @@ class Index(object):
         errors = "no"
         errormsg = ""
 
-        corpora = JobService.corpusindex()
+        corpora = CLAMService.corpusindex()
 
         render = web.template.render('templates')
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, settings.URL, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
@@ -407,7 +407,7 @@ class Project(object):
 
         corpora = []
         if statuscode == clam.common.status.READY:
-            corpora = JobService.corpusindex()
+            corpora = CLAMService.corpusindex()
         else:
             corpora = []
         if statuscode == clam.common.status.DONE:
@@ -820,7 +820,7 @@ class Uploader(object):
     @requirelogin
     def GET(self, project, user=None):
         #Crude upload form
-        return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(JobService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
+        return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     @requirelogin
     def POST(self, project, user=None):
@@ -973,7 +973,7 @@ class Uploader(object):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Syntax: jobservice.py mysettingsmodule"
+        print >> sys.stderr, "Syntax: clamservice.py mysettingsmodule"
         sys.exit(1)
     settingsmodule = sys.argv[1]
     #if not settingsmodule.isalpha():  #security precaution
@@ -1021,4 +1021,4 @@ if __name__ == "__main__":
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
         
 
-    JobService() #start
+    CLAMService() #start
