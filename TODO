@@ -1,8 +1,6 @@
 
 
 
-- Validate project IDs upon creation? (already done? TEST)  (pre-beta1)
-
 - Allow users to configure access  (pre-beta1)
 - Move "input source" selector (pre-beta1 or pre-beta2)
 
@@ -20,7 +18,7 @@
 - Add option to disable input, parameters, output, upload methods? (pre-beta3)
 - Make XML Scheme Definition for CLAM XML format
 
-* beta2 release (for Hans van Halteren)
+* beta2 release (for Hans van Halteren, Rogier Kraf)
 * release on ILK website? Including live services for for example Frog?
 * second announcement for TTNWW?
 

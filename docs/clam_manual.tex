@@ -66,7 +66,7 @@ The following software is required to run CLAM. These will be available in any m
 %\item python-django
 \end{itemize}
 
-Each CLAM webservice will run on any TCP port of your choice. It is recommended not to use HTTP port 80. Also make sure the port is open in the firewall, at least for the machines you want to allow access.
+Each CLAM webservice can run standalone on any TCP port of your choice (make sure the port is open in your firewall), or you can plug it into an already existing webserver (Apache, nginx, lighttpd). For production environments, this latter option is recommend.
 
 To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest to service providers:
 
@@ -81,9 +81,26 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 \end{itemize}
 
-Starting the service is done by launching clamservice.py with the name of your service configuration (ucto in the example below).
+Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (ucto in the example below).
 
 \texttt{\$ ./clamservice.py clam.config.ucto}
+
+
+Setting up the service to be used with an already existing webserver, requires some additional work. This is explained below for Apache and nginx:
+
+\subsection{Using CLAM with Apache}
+
+\begin{devnotes}
+Instructions for Apache will follow later. The system is not tested using this webserver yet.
+\end{devnotes}
+
+\subsection{Using CLAM with nginx}
+
+With nginx, CLAM can be set up over fastcgi. 
+
+\begin{devnotes}
+Verified to work, but instructions still to be written.
+\end{devnotes}
 
 \section{Architecture}
 
