@@ -1,20 +1,17 @@
 
-
-
-- Allow users to configure access  (pre-beta1)
-- Move "input source" selector (pre-beta1 or pre-beta2)
-
 * beta1 release for Hans van Halteren
 * announcement for TTNWW?
 
 ------------- END MAY -------------------------------------------
 
 
+- Allow users to configure access  (pre-beta2)
+- Move "input source" selector (pre-beta1 or pre-beta2)
 - make IE7/8 compatible (pre-beta2)
 - Test on apache (pre-beta2)
 - Logo, custom footer in service configuration (pre-beta2)
 - Write more documentation (in progress)
-    - Add documention on writing clients
+    - Add documention on writing clients (pre-beta3?)
 - Add option to disable input, parameters, output, upload methods? (pre-beta3)
 - Make XML Scheme Definition for CLAM XML format
 
