@@ -1,9 +1,13 @@
 
+
+
 * beta1 release 
 * announcement for TTNWW?
 
 ------------- END MAY -------------------------------------------
 
+
+- FIX 'select upload file' bug
 
 - Allow users to configure access  (pre-beta2)
 - Move "input source" selector (pre-beta1 or pre-beta2)
