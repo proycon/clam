@@ -14,6 +14,7 @@
     - Add documention on writing clients (pre-beta3?)
 - Add option to disable input, parameters, output, upload methods? (pre-beta3)
 - Make XML Scheme Definition for CLAM XML format
+- Validation function for simple formats (pre-beta2)
 
 * beta2 release
 * release on ILK website? Including live services for for example Frog?
