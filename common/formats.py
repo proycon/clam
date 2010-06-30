@@ -148,5 +148,12 @@ class DCOIFormat(Format):
         super(DCOIFormat,self).__init__(encoding, extensions, **kwargs)
 
 
+class KBXMLFormat(Format):    
+    
+    name = "Koninklijke Bibliotheek XML-formaat"
+
+    def __init__(self,encoding = 'utf-8', extensions = ['xml'], **kwargs ):
+        super(KBXMLFormat,self).__init__(encoding, extensions, **kwargs)
+
 
 
