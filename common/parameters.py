@@ -108,7 +108,7 @@ class AbstractParameter(object):
             sep = ''
         elif self.paramflag:
             sep = ' '
-        return self.paramflag + sep + value
+        return self.paramflag + sep + str(value)
 
     def xml(self):
         """This methods renders an XML representation of this parameter, along with 

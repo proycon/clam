@@ -637,8 +637,8 @@ class OutputInterface(object):
             if 'format' in data:
                 format = data['format']
             else:
-                format = 'zip' #default          
-            
+                format = 'zip' #default
+
             #validation, security
             contentencoding = None
             if format == 'zip':
