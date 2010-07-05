@@ -35,7 +35,8 @@ SYSTEM_DESCRIPTION = "This is a small demo for CLAM. It does not really do anyth
 ROOT = "/home/proycon/work/clamtmproot2/"
 
 #The URL of the system
-URL = "http://localhost:8080"
+#URL = "http://localhost:8080"
+PORT= 8080
 
 #Users and passwords
 #USERS = None #no user authentication
@@ -73,7 +74,7 @@ OUTPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/tests/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
+COMMAND = sys.path[0] + "/tests/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
 
 #The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS =  [ 

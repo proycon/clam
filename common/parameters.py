@@ -278,7 +278,15 @@ class ChoiceParameter(AbstractParameter):
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
 
-        return super(ChoiceParameter,self).compilearg(value)
+        #for some odd, reason this procudes an error, as if we're not an instance of choiceparameter
+        #return super(ChoiceParameter,self).compilearg(value)
+
+        #workaround:
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
+            sep = ''
+        elif self.paramflag:
+            sep = ' '
+        return self.paramflag + sep + str(value)
 
     def xml(self):
         """This methods renders an XML representation of this parameter, along with 
