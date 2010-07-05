@@ -231,7 +231,7 @@ class StringParameter(AbstractParameter):
 class ChoiceParameter(AbstractParameter):
     def __init__(self, id, paramflag, name, description, **kwargs):    
         if not 'choices' in kwargs:
-            raise Exception("No parameter choices specified for parameter " + ID + "!")
+            raise Exception("No parameter choices specified for parameter " + id + "!")
         self.choices = [] #list of key,value tuples
         for x in kwargs['choices']:
             if not isinstance(x,tuple) or len(x) != 2:
@@ -377,7 +377,7 @@ class IntegerParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata:
+        if self.id in postdata and postdata[self.id].isdigit():
             return int(postdata[self.id])
         else: 
             return False
@@ -416,7 +416,7 @@ class FloatParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata:
+        if self.id in postdata and postdata[self.id] != "":
             return float(postdata[self.id])
         else: 
             return False
