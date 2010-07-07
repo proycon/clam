@@ -17,7 +17,8 @@
 from clam.common.parameters import *
 from clam.common.formats import *
 from clam.common.digestauth import pwhash
-from sys import path 
+from sys import path
+from os import uname
 
 REQUIRE_VERSION = 0.2
 
@@ -26,7 +27,12 @@ SYSTEM_NAME = "Frog"
 SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilbug University. It will be the successor of Tadpole but is still under heavy development. "
 
 #Root directory for CLAM
-ROOT = path[0] + "/../frog.clam/"
+host = uname()[1]
+if host == 'aurora': #proycon's laptop
+    CLAMDIR = "/home/proycon/work/"
+    ROOT = "/home/proycon/work/frog.clam/"
+else:
+    raise Exception("Help! I don't know where I'm running from! Configure me!")
 PORT = 9000
 URL = "http://anaproy.nl:" + str(PORT)
 
@@ -42,7 +48,7 @@ INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 OUTPUTFORMATS = [ TadpoleFormat('utf-8',['frogged']) ]
 
 #The system command (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
-COMMAND = path[0] +  "/wrappers/frogwrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+COMMAND = CLAMDIR +  "/wrappers/frogwrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
 
 PARAMETERS =  [ 
     ('Components', [       

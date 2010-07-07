@@ -47,6 +47,8 @@ VERSION = '0.2.8'
 DEBUG = False
     
 DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
+
+LOG = sys.stdout
 #Empty defaults
 #SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
@@ -60,13 +62,25 @@ DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 #USERS = None
 
 def printlog(msg):
+    global LOG
     now = datetime.datetime.now()
-    print "------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg 
+    if LOG: LOG.write("------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
 
 def printdebug(msg):
     global DEBUG
     if DEBUG: printlog("DEBUG: " + msg)
-        
+
+def error(msg):
+    if __name__ == '__main__':
+        print >>sys.stderr, "ERROR: " + msg
+        sys.exit(1)
+    else:
+        raise Exception(msg) #Raise python errors if we were not directly invoked
+
+def warning(msg):
+    print >>sys.stderr, "WARNING: " + msg
+
+
 
 class BadRequest(web.webapi.HTTPError):
     """`400 Bad Request` error."""
@@ -116,22 +130,14 @@ class CLAMService(object):
 
 
     def __init__(self, mode = 'standalone'):
-        global VERSION    
+        global VERSION
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
-            print >>sys.stderr,"ERROR: Specified root path " + settings.ROOT + " not found"                 
-            sys.exit(1)
+            error("Specified root path " + settings.ROOT + " not found")
         elif not settings.COMMAND.split(" ")[0] or os.system("which " + settings.COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
-            print >>sys.stderr,"ERROR: Specified command " + settings.COMMAND.split(" ")[0] + " not found"                 
-            sys.exit(1)            
-        #elif not settings.INPUTFORMATS:
-        #    print >>sys.stderr,"ERROR: No inputformats specified!"
-        #    sys.exit(1)            
-        #elif not settings.OUTPUTFORMATS:
-        #    print >>sys.stderr,"ERROR: No outputformats specified!"
-        #    sys.exit(1)            
+            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
         elif not settings.PARAMETERS:
-            print >>sys.stderr,"WARNING: No parameters specified in settings module!"
+            warning("No parameters specified in settings module!")
         else:      
             lastparameter = None      
             try:
@@ -140,13 +146,14 @@ class CLAMService(object):
                         assert isinstance(parameter, clam.common.parameters.AbstractParameter)
                         lastparameter = parameter
             except AssertionError:
-                print >>sys.stderr,"ERROR: Syntax error in parameter specification."
+                msg = "Syntax error in parameter specification."
                 if lastparameter:            
-                    print >>sys.stderr,"Last part parameter: ", lastparameter.id
-                sys.exit(1)            
-            
+                     msg += "Last part parameter: ", lastparameter.id
+                error(msg)
+
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
+        self.mode = mode
         if mode == 'fastcgi':
             web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
             self.service.run()
@@ -154,6 +161,7 @@ class CLAMService(object):
             self.service.wsgifunc()
         elif mode == 'standalone' or mode == 'cherrypy' or not mode:
             #standalone mode
+            self.mode = 'standalone'
             self.service.run()
         else:
             raise Exception("Unknown mode: " + mode + ", specify 'fastcgi', 'wsgi' or 'standalone'")
@@ -1011,11 +1019,14 @@ def usage():
 
 
 def set_defaults(HOST = None, PORT = None):
+    global LOG
+
     #Default settings
-    if not settings.ROOT[-1] == "/":
+    settingkeys = dir(settings)
+
+    if 'ROOT' in settingkeys and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
 
-    settingkeys = dir(settings)
     if not 'USER' in settingkeys:
         settings.USER = None
     if not 'ADMINS' in settingkeys:
@@ -1035,23 +1046,23 @@ def set_defaults(HOST = None, PORT = None):
     if not 'BASEURL' in settingkeys:
         settings.BASEURL = ''    
 
-    errors = False
+    if 'LOG' in settingkeys: #set LOG
+        LOG = open(settings.LOG,'a')
+
     for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','INPUTFORMATS']:    
         if not s in settingkeys:
-            print >> sys.stderr, "ERROR: Service configuration incomplete, missing setting: " + s
-            errors = True
-    if errors:
-        sys.exit(1)
+            error("ERROR: Service configuration incomplete, missing setting: " + s)
+
 
 def test_dirs():
     if not os.path.isdir(settings.ROOT):
-        print >> sys.stderr, "Root directory does not exist yet, creating..."
+        warning("Root directory does not exist yet, creating...")
         os.mkdir(settings.ROOT)
     if not os.path.isdir(settings.ROOT + 'corpora'):
-        print >> sys.stderr, "Corpora directory does not exist yet, creating..."
+        warning("Corpora directory does not exist yet, creating...")
         os.mkdir(settings.ROOT + 'corpora')
     if not os.path.isdir(settings.ROOT + 'projects'):
-        print >> sys.stderr, "Projects directory does not exist yet, creating..."
+        warning("Projects directory does not exist yet, creating...")
         os.mkdir(settings.ROOT + 'projects')
 
 
@@ -1096,8 +1107,7 @@ if __name__ == "__main__":
             readport = False
 
     if not settingsmodule:  #security precaution
-        print >> sys.stderr, "ERROR: No settings module specified"
-        sys.exit(1)
+        error("No settings module specified")
 
 
     import_string = "import " + settingsmodule + " as settings"
@@ -1107,8 +1117,7 @@ if __name__ == "__main__":
 
     #Check version
     if float(str(settings.REQUIRE_VERSION)[0:3]) < float(str(VERSION)[0:3]):
-        print >> sys.stderr, "Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required"
-        sys.exit(1)   
+        error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
 
 
     set_defaults(HOST,PORT)
@@ -1132,20 +1141,28 @@ if __name__ == "__main__":
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
-        
+
 
     CLAMService('fastcgi' if fastcgi else '') #start
 
 def run_wsgi(settingsmodule):
+    global LOG
     """Run CLAM in WSGI mode"""
-    import_string = "import " + settingsmodule + " as settings"
-    exec import_string
+    #import_string = "import " + settingsmodule + " as settings"
+    #exec import_string
+
+
+    globals()['settings'] = settingsmodule
 
     set_defaults(None,None)
+    if LOG == sys.stdout:
+        #there is no stdout in WSGI mode, and the user didn't configure a log, discard output
+        LOG = None
     test_dirs()
 
     if settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
     CLAMService('wsgi')
+
 

@@ -16,9 +16,11 @@
 import os
 import sys
 
-sys.path.append(sys.path[0] + '/../..')
-os.environ['PYTHONPATH'] = sys.path[0] + '/../..'
 
+sys.path.append('/home/proycon/work')
+os.environ['PYTHONPATH'] = '/home/proycon/work' #sys.path[0] + '/../..'
+
+import clam.config.frog
 import clam.clamservice
-clam.clamservice.run_wsgi('clam.config.frog')
+clam.clamservice.run_wsgi(clam.config.frog)
 
