@@ -27,9 +27,9 @@ import urllib2
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
-
-sys.path.append(sys.path[0] + '/..')
-os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+if __name__ == "__main__":
+    sys.path.append(sys.path[0] + '/..')
+    os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 import clam.common.status 
 import clam.common.parameters
@@ -42,7 +42,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.2.7'
+VERSION = '0.2.8'
 
 DEBUG = False
     
@@ -115,7 +115,7 @@ class CLAMService(object):
     )
 
 
-    def __init__(self, fcgi = False):
+    def __init__(self, mode = 'standalone'):
         global VERSION    
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
@@ -147,9 +147,16 @@ class CLAMService(object):
             
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
-        if fcgi:
+        if mode == 'fastcgi':
             web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
-        self.service.run()
+            self.service.run()
+        elif mode == 'wsgi':
+            self.service.wsgifunc()
+        elif mode == 'standalone' or mode == 'cherrypy' or not mode:
+            #standalone mode
+            self.service.run()
+        else:
+            raise Exception("Unknown mode: " + mode + ", specify 'fastcgi', 'wsgi' or 'standalone'")
 
     @staticmethod
     def corpusindex(): 
@@ -994,11 +1001,58 @@ class Uploader(object):
 def usage():
         print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
         print >> sys.stderr, "Options:"
-        print >> sys.stderr, "\t-d        - Enable debug mode"
-        print >> sys.stderr, "\t-c        - Run in FastCGI mode"
-        print >> sys.stderr, "\t-p [port] - Port"
-        print >> sys.stderr, "\t-h        - This help message"
-        print >> sys.stderr, "\t-v        - Version information"
+        print >> sys.stderr, "\t-d            - Enable debug mode"
+        print >> sys.stderr, "\t-c            - Run in FastCGI mode"
+        print >> sys.stderr, "\t-H [hostname] - Hostname"
+        print >> sys.stderr, "\t-p [port]     - Port"
+        print >> sys.stderr, "\t-h            - This help message"
+        print >> sys.stderr, "\t-v            - Version information"
+        print >> sys.stderr, "(Note: Do not invoke clamservice directly if you want to run in WSGI mode)"
+
+
+def set_defaults(HOST = None, PORT = None):
+    #Default settings
+    if not settings.ROOT[-1] == "/":
+        settings.ROOT += "/" #append slash
+
+    settingkeys = dir(settings)
+    if not 'USER' in settingkeys:
+        settings.USER = None
+    if not 'ADMINS' in settingkeys:
+        settings.ADMINS = []
+    if not 'PROJECTS_PUBLIC' in settingkeys:
+        settings.PROJECTS_PUBLIC = True
+    if not 'PARAMETERS' in settingkeys:
+        settings.PARAMETERS = []
+    if not 'OUTPUTFORMATS' in settingkeys:
+        settings.OUTPUTFORMATS = []
+    if not 'PORT' in settingkeys and not PORT:
+        settings.PORT = 80
+    if not 'HOST' in settingkeys and not HOST:
+        settings.HOST = os.uname()[1]
+    if not 'OUTPUTFORMATS' in settingkeys:
+        settings.OUTPUTFORMATS = []
+    if not 'BASEURL' in settingkeys:
+        settings.BASEURL = ''    
+
+    errors = False
+    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','INPUTFORMATS']:    
+        if not s in settingkeys:
+            print >> sys.stderr, "ERROR: Service configuration incomplete, missing setting: " + s
+            errors = True
+    if errors:
+        sys.exit(1)
+
+def test_dirs():
+    if not os.path.isdir(settings.ROOT):
+        print >> sys.stderr, "Root directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT)
+    if not os.path.isdir(settings.ROOT + 'corpora'):
+        print >> sys.stderr, "Corpora directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT + 'corpora')
+    if not os.path.isdir(settings.ROOT + 'projects'):
+        print >> sys.stderr, "Projects directory does not exist yet, creating..."
+        os.mkdir(settings.ROOT + 'projects')
 
 
 if __name__ == "__main__":
@@ -1044,11 +1098,11 @@ if __name__ == "__main__":
     if not settingsmodule:  #security precaution
         print >> sys.stderr, "ERROR: No settings module specified"
         sys.exit(1)
-    
+
 
     import_string = "import " + settingsmodule + " as settings"
-    exec import_string   
-                   
+    exec import_string
+
     sys.argv = sys.argv[:1] #remove command line options for web.py
 
     #Check version
@@ -1056,61 +1110,21 @@ if __name__ == "__main__":
         print >> sys.stderr, "Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required"
         sys.exit(1)   
 
-    if not settings.ROOT[-1] == "/":
-        settings.ROOT += "/" #append slash
 
-    settingkeys = dir(settings)
- 
-      
-    errors = False
-    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','INPUTFORMATS']:    
-        if not s in settingkeys:
-            print >> sys.stderr, "ERROR: Service configuration incomplete, missing setting: " + s
-            errors = True
-    if errors:
-        sys.exit(1)
+    set_defaults(HOST,PORT)
+    PORT = settings.PORT
+    if HOST:
+        settings.HOST = HOST
+    test_dirs()
 
-    #Default settings
-    if not 'USER' in settingkeys:
-        settings.USER = None
-    if not 'ADMINS' in settingkeys:
-        settings.ADMINS = []
-    if not 'PROJECTS_PUBLIC' in settingkeys:
-        settings.PROJECTS_PUBLIC = True
-    if not 'PARAMETERS' in settingkeys:
-        settings.PARAMETERS = []
-    if not 'OUTPUTFORMATS' in settingkeys:
-        settings.OUTPUTFORMATS = []
-    if not 'PORT' in settingkeys and not PORT:
-        PORT = 80
-    if not 'HOST' in settingkeys and not HOST:
-        settings.HOST = os.uname()[1]
-    if not 'OUTPUTFORMATS' in settingkeys:
-        settings.OUTPUTFORMATS = []
-    if not 'BASEURL' in settingkeys:
-        settings.BASEURL = ''
-
-        
-   
-    if not os.path.isdir(settings.ROOT):
-        print >> sys.stderr, "Root directory does not exist yet, creating..."
-        os.mkdir(settings.ROOT)
-    if not os.path.isdir(settings.ROOT + 'corpora'):
-        print >> sys.stderr, "Corpora directory does not exist yet, creating..."
-        os.mkdir(settings.ROOT + 'corpora')
-    if not os.path.isdir(settings.ROOT + 'projects'):
-        print >> sys.stderr, "Projects directory does not exist yet, creating..."
-        os.mkdir(settings.ROOT + 'projects')
 
 
     if PORT:
         sys.argv.append(str(PORT)) #port from command line
         settings.PORT = PORT                       
-    elif 'PORT' in settingkeys:
+    elif 'PORT' in dir(settings):
         sys.argv.append(str(settings.PORT))
 
-    if HOST:
-        settings.HOST = HOST
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 
@@ -1120,4 +1134,18 @@ if __name__ == "__main__":
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
         
 
-    CLAMService(fastcgi) #start
+    CLAMService('fastcgi' if fastcgi else '') #start
+
+def run_wsgi(settingsmodule):
+    """Run CLAM in WSGI mode"""
+    import_string = "import " + settingsmodule + " as settings"
+    exec import_string
+
+    set_defaults(None,None)
+    test_dirs()
+
+    if settings.USERS:
+        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
+
+    CLAMService('wsgi')
+

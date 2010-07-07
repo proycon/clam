@@ -284,7 +284,7 @@
         }
         
         if ( ! button || button.nodeType !== 1){            
-            return false;
+            return false; //added to fix IE bug
             throw new Error("Please make sure that you're passing a valid element"); 
         }
                 

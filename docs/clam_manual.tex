@@ -81,14 +81,21 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 \end{itemize}
 
-Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (ucto in the example below).
+Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (test in the example below).
 
-\texttt{\$ ./clamservice.py clam.config.ucto}
+\texttt{\$ ./clamservice.py clam.config.test}
 
 
 Setting up the service to be used with an already existing webserver, requires some additional work. This is explained below for Apache and nginx:
 
 \subsection{Using CLAM with Apache}
+
+In order to run CLAM in Apache 2, you first need to install the mod_wsgi packafge for Apache. This offers an interface between Apache and Python. In Debian and Ubuntu, this package is available a  \texttt{libapache2-mod-wsgi}.
+
+
+
+
+
 
 \begin{devnotes}
 Instructions for Apache will follow later. The system is not tested using this webserver yet.
