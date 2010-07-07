@@ -21,6 +21,9 @@ from clam.common.digestauth import pwhash
 
 REQUIRE_VERSION = 0.2
 
+#========================== META INFORMATION ===================================
+
+
 #The System ID, a short alphanumeric identifier for internal use only
 SYSTEM_ID = "clam"
 
@@ -30,13 +33,24 @@ SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
 #An informative description for this system:
 SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 
+
+#========================== SERVER ADMINISTRATION ===================================
+
+
 #The root directory for CLAM, all project files, (input & output) and
-#pre-installed corpora will be stored here. Set to an absolute path:
+#pre-installed corpora will be stored here. The directories will be
+#made if they do not exist yet. Set to an absolute path.
 ROOT = ""
 
-#The URL of the system
-PORT = 8080
+#The port the webserver (either built-in or a parent server) runs on:
+PORT = 80
+#The host the webserver (either built-in or a parent server) runs on, note
+#that clients are forced to use the very same hostname, so make sure it's
+#accessible as-such.
 HOST = 'localhost'
+
+#If CLAM runs in an existing webserver, it can be configured to run at certain deeper URL, rather than at the root of the server (don't worry about leading/trailing slashes). In a stand-alone webserver, CLAM will always run in the root.
+#URLPREFIX = ''
 
 #Users and passwords
 USERS = None #no user authentication
@@ -44,13 +58,17 @@ USERS = None #no user authentication
 
 ADMINS = []
 
+
+#========================== SERVICE CONFIGURATION ===================================
+
+
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = True
 
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
-#absolute paths is preferred. The current working directory will be
+#absolute paths is always preferred. The current working directory will be
 #set to the project directory.
 #
 #You can make use of the following special variables, 
@@ -78,6 +96,13 @@ PARAMETERS = []
 #New format types should be added to common/formats.py, and can then be used here:
 INPUTFORMATS = []
 
+#Example:
+#INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
+
 #List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered at the same time)
 OUTPUTFORMATS = []
+
+#Example:
+#OUTPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
+
 

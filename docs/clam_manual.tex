@@ -90,8 +90,12 @@ Setting up the service to be used with an already existing webserver, requires s
 
 \subsection{Using CLAM with Apache}
 
-In order to run CLAM in Apache 2, you first need to install the mod_wsgi packafge for Apache. This offers an interface between Apache and Python. In Debian and Ubuntu, this package is available a  \texttt{libapache2-mod-wsgi}.
+In order to run CLAM in Apache 2, you have to install and configure several files. We will be using the WSGI, an interface between Apache and Python. Follow the instructions:
 
+\begin{enumerate}
+\item Install \texttt{mod_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
+\item 
+\end{enumerate}
 
 
 
@@ -143,7 +147,16 @@ The service configuration consists of a description of your NLP application, or 
 The server configuration files reside in the \texttt{config/} directory. Making a new webservice starts with copying the sample \texttt{defaults.py} and editing your copy.
 
 One of the first things to configure is the root path. All projects will be confined to the \texttt{projects/} directory under this root path, each project having its own subdirectory. When your NLP application or wrapper script is launched, the current working directory will be set to this project directory. Pre-installed corpora should be put in the \texttt{corpora/} directory. 
- 
+
+
+\subsection{Server Administration}
+\label{sec:sadmin}
+
+The hostname and port of the webserver can be configured in the service configuration file. Note that the hostname has to match exactly with what the end-users will use, an attempt will be made to detect this automatically if no hostname is specified. CLAM comes with a built-in webserver, which will be used when it's invoked directly from the command-line (unless FastCGI mode is enabled).
+
+When CLAM runs in an existing webserver without its own virtual host, it is often configured at a different URL rather than the webserver root. In this case the value of \texttt{URLPREFIX} should be configured accordingly.
+
+
 \subsection{Command}
 \label{sec:command}
 

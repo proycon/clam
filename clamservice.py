@@ -158,7 +158,7 @@ class CLAMService(object):
             web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
             self.service.run()
         elif mode == 'wsgi':
-            self.service.wsgifunc()
+            self.application = self.service.wsgifunc()
         elif mode == 'standalone' or mode == 'cherrypy' or not mode:
             #standalone mode
             self.mode = 'standalone'
@@ -206,8 +206,10 @@ class Index(object):
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
             url += ':' + str(settings.PORT)
-        if settings.BASEURL:
-            url += settings.BASEURL
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url += '/'
+            url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
@@ -461,8 +463,10 @@ class Project(object):
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
             url += ':' + str(settings.PORT)
-        if settings.BASEURL:
-            url += settings.BASEURL
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url += '/'
+            url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
@@ -1043,8 +1047,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.HOST = os.uname()[1]
     if not 'OUTPUTFORMATS' in settingkeys:
         settings.OUTPUTFORMATS = []
-    if not 'BASEURL' in settingkeys:
-        settings.BASEURL = ''    
+    if not 'URLPREFIX' in settingkeys:
+        settings.URLPREFIX = ''    
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
@@ -1142,6 +1146,8 @@ if __name__ == "__main__":
     if settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
+    if not fastcgi:
+        settings.URLPREFIX = '' #standalone server always runs at the root
 
     CLAMService('fastcgi' if fastcgi else '') #start
 
@@ -1163,6 +1169,7 @@ def run_wsgi(settingsmodule):
     if settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
-    CLAMService('wsgi')
+    service = CLAMService('wsgi')
+    return service.application
 
 

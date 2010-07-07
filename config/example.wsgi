@@ -21,6 +21,8 @@ import sys
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
+
+
 import clam.clamservice
-clam.clamservice.run_wsgi('clam.config.yourapp') #change this!
+application = clam.clamservice.run_wsgi('clam.config.yourapp') #change this!
 
