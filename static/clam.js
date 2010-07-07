@@ -84,7 +84,7 @@ $(document).ready(function(){
                 });
             },
             error: function(response, errortype){
-                alert("An error occured while attempting to upload the text: " + errortype );
+                alert("An error occured while attempting to upload the text: " + errortype + "\n" + response);
             }            
         });            
         return true;
