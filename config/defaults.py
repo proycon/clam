@@ -15,9 +15,9 @@
 
 # *** DO NOT ALTER THIS FILE, MAKE A COPY INSTEAD! ***
 
-from common.parameters import *
-from common.formats import *
-from common.digestauth import pwhash
+from clam.common.parameters import *
+from clam.common.formats import *
+from clam.common.digestauth import pwhash
 
 REQUIRE_VERSION = 0.2
 

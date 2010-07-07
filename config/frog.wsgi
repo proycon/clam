@@ -8,8 +8,6 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
-#       Copy and adapt this script for your particular service!
 #
 #       Licensed under GPLv3
 #
@@ -18,8 +16,8 @@
 import os
 import sys
 
-sys.path.append(sys.path[0] + '/..')
-os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+sys.path.append(sys.path[0] + '/../..')
+os.environ['PYTHONPATH'] = sys.path[0] + '/../..'
 
 import clam.clamservice
 clam.clamservice.run_wsgi('clam.config.frog')
