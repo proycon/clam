@@ -6,9 +6,6 @@
 
 ------------- END MAY -------------------------------------------
 
-
-- FIX 'select upload file' bug
-
 - Allow users to configure access  (pre-beta2)
 - Move "input source" selector (pre-beta1 or pre-beta2)
 - make IE7/8 compatible (pre-beta2)
@@ -45,7 +42,7 @@ CLAM Interface (Django)
 
 
 Loose ends:
-    - Enable some HTTP Caching for /static/
+    - Enable some HTTP Caching for /static/ in built-in webserver?
     - Automatic encoding conversion for inputformats?
 
 

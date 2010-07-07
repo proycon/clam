@@ -1006,8 +1006,8 @@ if __name__ == "__main__":
 
     settingsmodule = None
     fastcgi = False
-    readport = False
-    PORT = None
+    readport = readhost = False
+    PORT = HOST = None
     
     if len(sys.argv) >= 2:
         for option in sys.argv[1:]:
@@ -1015,11 +1015,16 @@ if __name__ == "__main__":
                 DEBUG = True
             elif option == '-c':
                 fastcgi = True
+            elif option == '-H':
+                readhost = True
+                continue
             elif option == '-p':
                 readport = True
                 continue
             elif readport and option.isdigit():
                 PORT = int(option)
+            elif readhost:
+                HOST = option
             elif option == '-h':
                 usage()                
                 sys.exit(0)
@@ -1076,7 +1081,7 @@ if __name__ == "__main__":
         settings.OUTPUTFORMATS = []
     if not 'PORT' in settingkeys and not PORT:
         PORT = 80
-    if not 'HOST' in settingkeys:
+    if not 'HOST' in settingkeys and not HOST:
         settings.HOST = os.uname()[1]
     if not 'OUTPUTFORMATS' in settingkeys:
         settings.OUTPUTFORMATS = []
@@ -1101,6 +1106,9 @@ if __name__ == "__main__":
         settings.PORT = PORT                       
     elif 'PORT' in settingkeys:
         sys.argv.append(str(settings.PORT))
+
+    if HOST:
+        settings.HOST = HOST
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 
