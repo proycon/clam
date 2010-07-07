@@ -126,32 +126,33 @@ $(document).ready(function(){
     });
 
 
-   uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
-            $('#complexupload').hide();
-            $('#uploadprogress').show();           
-        },  onComplete: function(file, response){
-            $(response).find('file').each(function(){
-                if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                        var found = false;
-                        var data = tableinputfiles.fnGetData();
-                        for (var i = 0; i < data.length; i++) {
-                            if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
-                                found = true;
-                                break;
+   if ($('#uploadformat1')) {
+       uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
+                $('#complexupload').hide();
+                $('#uploadprogress').show();           
+            },  onComplete: function(file, response){
+                $(response).find('file').each(function(){
+                    if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
+                            var found = false;
+                            var data = tableinputfiles.fnGetData();
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                                    found = true;
+                                    break;
+                                }
                             }
-                        }
-                        if (!found) tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
-                }
-            });
-            //window.alert($(response).text()); //DEBUG
-            $('#uploadprogress').hide();
-            $('#complexupload').show();
-        }       
-    }); 
-   $('#uploadformat1').change(function(){
-        uploader.setData({'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1} );
-   });
-
+                            if (!found) tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
+                    }
+                });
+                //window.alert($(response).text()); //DEBUG
+                $('#uploadprogress').hide();
+                $('#complexupload').show();
+            }       
+        }); 
+       $('#uploadformat1').change(function(){
+            uploader.setData({'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1} );
+       });
+   }
 
 });    
 
