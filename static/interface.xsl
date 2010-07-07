@@ -45,14 +45,14 @@
       <meta http-equiv="refresh" content="10" />            
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="/static/style.css" type="text/css" />
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/style.css" type="text/css"></link>
     <!--<link rel="stylesheet" href="/static/humanity/jquery-ui-1.8.1.custom.css" type="text/css" />-->
-    <link rel="stylesheet" href="/static/table.css" type="text/css" />
-    <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.4.2.min.js"></script>
     <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
-    <script type="text/javascript" src="/static/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="/static/ajaxupload.js"></script>
-    <script type="text/javascript" src="/static/clam.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
   </head>
 </xsl:template>
 
@@ -87,7 +87,7 @@
            </div>
          </xsl:when>
          <xsl:otherwise>
-           <img class="progress" src="/static/progress.gif" />
+           <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
          </xsl:otherwise>
         </xsl:choose>
         <p>You may safely close your browser or shut down your computer during this process, the system will keep running and be available when you return another time.</p>
@@ -151,7 +151,7 @@
             </div>
             <div id="uploadprogress">
                     <strong>Upload in progress... Please wait...</strong><br />
-                    <img class="progress" src="/static/progress.gif" />
+                    <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
             </div>
         
 
@@ -169,7 +169,7 @@
         </div>
         <div id="urluploadprogress">
                     <strong>Downloadin progress... Please wait...</strong><br />
-                    <img class="progress" src="/static/progress.gif" />
+                    <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
         </div>    
 
         <h3>Add input from browser</h3>
@@ -236,7 +236,7 @@
         <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
         <td><xsl:value-of select="@label"/></td>
         <td><xsl:value-of select="@encoding" /></td>
-        <td class="actions"><img src="/static/delete.png" title="Delete this file">
+        <td class="actions"><img src="{/clam/@baseurl}/static/delete.png" title="Delete this file">
             <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="."/>');</xsl:attribute>
         </img></td>
     </tr>

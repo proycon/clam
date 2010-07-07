@@ -2,13 +2,13 @@ $def with (version, system_id,system_name, system_description, user, project, ur
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 $if project and user:
-    <clam version="$version" id="$system_id" name="$system_name" project="$project" user="$user">
+    <clam version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
 $elif project:
-    <clam version="$version" id="$system_id" name="$system_name" project="$project">
+    <clam version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
 $elif user:
-    <clam version="$version" id="$system_id" name="$system_name" user="$user">
+    <clam version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
 $else:
-    <clam version="$version" id="$system_id" name="$system_name">
+    <clam version="$version" id="$system_id" name="$system_name" baseurl="$url">
  <description>$system_description</description>
 $if not project:
         <projects>
