@@ -212,6 +212,7 @@ class Index(object):
             url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
+        web.header('Content-Type', "text/xml; charset=UTF-8")
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
         
 
@@ -469,6 +470,7 @@ class Project(object):
             url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
+        web.header('Content-Type', "text/xml; charset=UTF-8")
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
         
                     
