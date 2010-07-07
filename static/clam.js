@@ -37,13 +37,11 @@ $(document).ready(function(){
        });
    }    
 
-
-
-   inputfiles = $('#inputfiles').dataTable( {
-				"bJQueryUI": false,
-				"sPaginationType": "full_numbers"
-			});
-
+   tableinputfiles = $('#inputfiles').dataTable( {
+                                "bJQueryUI": false,
+                                "sPaginationType": "full_numbers"
+                         });
+   
    $('#outputfiles').dataTable( {
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
@@ -74,14 +72,14 @@ $(document).ready(function(){
                 $(response).find('file').each(function(){
                     if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
                         var found = false;
-                        var data = inputfiles.fnGetData();
+                        var data = tableinputfiles.fnGetData();
                         for (var i = 0; i < data.length; i++) {
                             if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
                                 found = true;
                                 break;
                             }
                         }
-                        if (!found) inputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
+                        if (!found) tableinputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
                     }
                 });
             },
@@ -106,14 +104,14 @@ $(document).ready(function(){
                     $(response).find('file').each(function(){
                         if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
                             var found = false;
-                            var data = inputfiles.fnGetData();
+                            var data = tableinputfiles.fnGetData();
                             for (var i = 0; i < data.length; i++) {
                                 if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
                                     found = true;
                                     break;
                                 }
                             }
-                            if (!found) inputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] );
+                            if (!found) tableinputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] );
                         }
                     });
                     $('#urluploadprogress').hide();                     
@@ -135,14 +133,14 @@ $(document).ready(function(){
             $(response).find('file').each(function(){
                 if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
                         var found = false;
-                        var data = inputfiles.fnGetData();
+                        var data = tableinputfiles.fnGetData();
                         for (var i = 0; i < data.length; i++) {
                             if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
                                 found = true;
                                 break;
                             }
                         }
-                        if (!found) inputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
+                        if (!found) tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
                 }
             });
             //window.alert($(response).text()); //DEBUG
@@ -160,14 +158,14 @@ $(document).ready(function(){
 
 function deleteinputfile(filename) {   
     var found = -1;
-    var data = inputfiles.fnGetData();
+    var data = tableinputfiles.fnGetData();
     for (var i = 0; i < data.length; i++) {
         if (data[i][0].match('>' + filename + '<') != null) {
             found = i;
             break;
         }
     }   
-    if (found >= 0) inputfiles.fnDeleteRow(found);
+    if (found >= 0) tableinputfiles.fnDeleteRow(found);
     $.ajax({ 
         type: "DELETE", 
         url: "input/" + filename, 
