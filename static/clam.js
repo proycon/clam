@@ -43,6 +43,7 @@ $(document).ready(function(){
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
 			});
+
    $('#outputfiles').dataTable( {
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
@@ -51,7 +52,6 @@ $(document).ready(function(){
 				"bJQueryUI": false,
 				"sPaginationType": "full_numbers"
 			});
-
 
 
 

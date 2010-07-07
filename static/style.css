@@ -199,6 +199,7 @@ table.files td.actions {
 
 #parameters table th, #parameters table  td {
   border-bottom:  1px solid #e1e1e1;
+  text-align: left;
 }
 
 #parameters th .description {
@@ -213,6 +214,7 @@ table.files td.actions {
 }
 #parameters th, #parameters td {
     width: 49%;
+    text-align: left;
 }
 #parameters td.option {
     text-align: right;
@@ -243,6 +245,7 @@ input#abortbutton, input#restartbutton {
 }
 .uploadform table, #inputbox table {
     width: 100%;
+    text-align: left;
 }
 #editor textarea {
     width: 100%;
@@ -274,6 +277,7 @@ button#openeditor {
 }
 #statuslog table {
     width: 95%; 
+    text-align: left;
 }
 #statuslog td.time {
     font-size: 80%;
