@@ -42,7 +42,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.2.6'
+VERSION = '0.2.7'
 
 DEBUG = False
     
@@ -871,6 +871,8 @@ class Uploader(object):
 
         Project.create(project, user)
 
+
+        web.header('Content-Type', "text/xml; charset=UTF-8")
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
