@@ -283,7 +283,8 @@
             button = document.getElementById(button);
         }
         
-        if ( ! button || button.nodeType !== 1){
+        if ( ! button || button.nodeType !== 1){            
+            return false;
             throw new Error("Please make sure that you're passing a valid element"); 
         }
                 
