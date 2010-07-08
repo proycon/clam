@@ -144,9 +144,7 @@
 
             <div id="complexupload">
                 <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format for this upload:</em><xsl:text> </xsl:text><select id="uploadformat1">
-                    <xsl:for-each select="*">
-                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-                    </xsl:for-each>
+                    <xsl:call-template name="inputformats" />
                     </select><br />
                 <strong>Step 2)</strong><xsl:text> </xsl:text><input id="upload1" class="uploadbutton" type="submit" value="Select and upload a file" />
             </div>
@@ -161,9 +159,7 @@
         <div id="urlupload">
             <p>Retrieves an input file from another location on the web.</p>
             <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format:</em><xsl:text> </xsl:text><select id="uploadformaturl">
-                        <xsl:for-each select="*">
-                            <option><xsl:attribute name="value"><xsl:value-of select="name()" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-                        </xsl:for-each>
+                    <xsl:call-template name="inputformats" />
             </select><br />
             <strong>Step 2)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="uploadurl" value="http://" /><br />
             <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadurlsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
@@ -185,9 +181,7 @@
                  <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input id="uploadfilename1" /></td></tr>
                  <tr><th><label for="uploadformat1">Format:</label></th><td>
                     <select id="editoruploadformat">
-                    <xsl:for-each select="*">
-                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /></option>
-                    </xsl:for-each>
+                    <xsl:call-template name="inputformats" />
                     </select>
                  </td></tr>
                  <tr><th></th><td class="buttons"><input id="submiteditor" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
@@ -196,6 +190,19 @@
         </div>
         </div>
 </xsl:template>
+
+<xsl:template name="inputformats">
+    <xsl:for-each select="/clam/inputformats/*">
+        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="outputformats">
+    <xsl:for-each select="/clam/outputformats/*">
+        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+    </xsl:for-each>
+</xsl:template>
+
 
 <xsl:template match="/clam/input">
         <h2>Input</h2>
