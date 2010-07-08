@@ -181,6 +181,15 @@ table.files td.actions {
     background: #eee;
     text-align: center;
 }
+table.files ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+table.files li {
+    margin: 0px;
+    padding: 0px;
+}
 
 
 #footer {

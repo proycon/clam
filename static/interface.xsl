@@ -279,9 +279,12 @@
         <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
         <td><xsl:value-of select="@encoding"/></td>
         <td>
+            <ul>
             <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
-                <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a>
+                <li><a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a></li>
             </xsl:for-each>
+            <li><a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="@name" />Download</a></li>
+            </ul>
         </td>
     </tr>
 </xsl:template>
