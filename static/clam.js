@@ -173,3 +173,16 @@ function deleteinputfile(filename) {
         dataType: "xml"
     });    
 }
+
+function setinputsource(tempelement) {
+    var src = tempelement.value;
+    $('#usecorpus').val(src);
+    if (src == '') {
+        $('#inputfilesarea').show();
+        $('#uploadarea').show();
+    } else {
+        $('#inputfilesarea').hide();
+        $('#uploadarea').hide();
+    }
+}
+

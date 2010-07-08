@@ -119,6 +119,7 @@
 </xsl:template>
 
 <xsl:template match="/clam/inputformats">
+        <div id="uploadarea">
         <div class="uploadform">
             <h3>Upload a file from disk</h3>
             <p>Use this to upload files from your computer to the system.</p>
@@ -193,10 +194,26 @@
                 </table>
             <!--</form>-->
         </div>
+        </div>
 </xsl:template>
 
 <xsl:template match="/clam/input">
-        <h2>Input files</h2>
+        <h2>Input</h2>
+        
+        <xsl:if test="/clam/corpora/corpus">
+            <div id="corpusselection">
+            <label>Input source: </label>
+            <select onchange="setinputsource(this);">
+                <option value="" selected="selected">Use uploaded files</option>
+                <xsl:for-each select="/clam/corpora/corpus">
+                    <option><xsl:attribute name="value"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></option>
+                </xsl:for-each>
+            </select>
+            </div>
+        </xsl:if>
+
+        <div id="inputfilesarea">
+        <h3>Input files</h3>
         <table id="inputfiles" class="files">
             <thead>
                 <tr>
@@ -210,6 +227,7 @@
                 <xsl:apply-templates select="path" /> 
             </tbody>
         </table>
+        </div>
 </xsl:template>
 
 <xsl:template match="/clam/output">
@@ -263,15 +281,9 @@
          </table>
         </xsl:for-each>
 
-        <div id="corpusselection">
-        <label for="usecorpus">Input source:</label>
-        <select name="usecorpus">
-            <option value="" selected="selected">Use uploaded files</option>
-            <xsl:for-each select="../corpora/corpus">
-                <option><xsl:attribute name="value"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></option>
-            </xsl:for-each>
-        </select>
-        </div>
+        <input id="usecorpus" name="usecorpus" type="hidden" value="" />
+
+
         <div id="startbutton">
             <input type="submit" class="start" value="Start" />
         </div>
