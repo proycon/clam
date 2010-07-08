@@ -2,6 +2,7 @@
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{placeins}
+\usepackage{hyperref}
 
 \title{CLAM Documentation}
 \author{Maarten van Gompel}
@@ -21,6 +22,7 @@
 \begin{document}
 
 \maketitle
+\tableofcontents
 
 \chapter{Introduction} 
 
@@ -92,42 +94,97 @@ Setting up the service to be used with an already existing webserver, requires s
 In order to run CLAM in Apache, you have to install and configure several files. We will be using WSGI, an interface between Apache and Python. Follow the instructions:
 
 \begin{enumerate}
-\item Install \texttt{mod_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
+\item Install \texttt{mod\_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
 \item Next we need to write a simple WSGI-script, which is a Python script that will be invoked by the webserver. Copy \texttt{clam/config/example.wsgi} to something like  \texttt{clam/config/yourservice.wsgi} and adapt the script. If CLAM is not installed in a standard location where Python can find it, make sure to explicitly specify its parent directory according to the instructions in the example.
 \item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port and optionally a URL prefix to use if the service isn't assigned a virtualhost of its own.
 \item Configure Apache to let it know about WSGI and your service. I assume the reader is acquianted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
 
 \begin{verbatim}
-        WSGIScriptAlias /yourservice /path/to/clam/config/yourservice.wsgi/
-        WSGIDaemonProcess yourservice user=proycon group=users home=/path/to/clam threads=2 maximum-requests=10000
-        WSGIProcessGroup yourservice
+ WSGIScriptAlias /yourservice /path/to/clam/config/yourservice.wsgi/
+ WSGIDaemonProcess yourservice user=proycon group=users \
+     home=/path/to/clam threads=15 maximum-requests=10000
+ WSGIProcessGroup yourservice
 
-        Alias /yourservice/static /path/to/clam/static/
-        <Directory /path/to/clam/static/>
-            Order deny,allow
-            Allow from all
-        </Directory>
+ Alias /yourservice/static /path/to/clam/static/
+ <Directory /path/to/clam/static/>
+    Order deny,allow
+    Allow from all
+ </Directory>
 \end{verbatim}
 
-Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access.
+The WSGIDaemonProcess directive goes on online, but was wrapped here for presentational purpouses. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. 
 
 \item Restart Apache
 \end{enumerate}
 
-Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives#WSGIDaemonProcess}, important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes and maximum-requests can also be configured to optimise performance and system resources according to your needs.
+Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}, important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes and maximum-requests can also be configured to optimise performance and system resources according to your needs.
 
 
 \subsection{Using CLAM with nginx}
 
-With nginx, CLAM can be set up over fastcgi. 
+With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With Apache we already explored a WSGI option above, so we will now take a look at FastCGI:
 
-\begin{devnotes}
-Verified to work, but instructions still to be written.
-\end{devnotes}
+\begin{enumerate}
+\item Nginx misses a mime-type we need. Add the following line to \texttt{/etc/nginx/mime.types}:
+\begin{verbatim}
+  text/xsl                              xsl;
+\end{verbatim}
+
+\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port and optionally a URL prefix to use if the service isn't assigned a virtualhost of its own.
+
+\item Make a script \texttt{start\_yourservice.sh} which will start the daemon for FastCGI. Change \texttt{UID} and \texttt{GID} with user ID/group ID you intend to use. Note that the IP and port can be set to anything you like, as long as you use the same consistently throughout the configuration.
+\begin{verbatim}
+ #!/bin/bash
+ spawn-fcgi -u UID -g GID -d /path/to/clam \
+   -a 127.0.0.1 -p 9002 -- /path/to/clam/clamservice.py
+\end{verbatim}
+
+\item Make a script \texttt{stop\_yourservice.sh} as a convenient shortcut to stop the service again:
+\begin{verbatim}
+ #!/bin/bash
+ kill `pgrep -f "python /path/to/clam/clamservice.py"`
+\end{verbatim}
+
+\item Add and adapt the following configuration to a server in \texttt{/etc/nginx/sites-enabled}. Note that in this example, we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may if course configure a \texttt{URLPREFIX} when desired, take care to update the below \texttt{location} and directives accordingly then:
+\begin{verbatim}
+ root /path/to/clam;
+
+ location / {
+    fastcgi_param REQUEST_METHOD $request_method;
+    fastcgi_param QUERY_STRING $query_string;
+    fastcgi_param CONTENT_TYPE $content_type;
+    fastcgi_param CONTENT_LENGTH $content_length;
+    fastcgi_param GATEWAY_INTERFACE CGI/1.1;
+    fastcgi_param SERVER_SOFTWARE nginx/$nginx_version;
+    fastcgi_param REMOTE_ADDR $remote_addr;
+    fastcgi_param REMOTE_PORT $remote_port;
+    fastcgi_param SERVER_ADDR $server_addr;
+    fastcgi_param SERVER_PORT $server_port;
+    fastcgi_param SERVER_NAME $server_name;
+    fastcgi_param SERVER_PROTOCOL $server_protocol;
+    fastcgi_param SCRIPT_FILENAME $fastcgi_script_name;
+    fastcgi_param PATH_INFO $fastcgi_script_name;
+    fastcgi_pass 127.0.0.1:9002;
+ }
+
+ location /static/ {
+    root /path/to/clam;
+    if (-f $request_filename) {
+       rewrite ^/static/(.*)$  /static/$1 break;
+    }
+ }
+\end{verbatim}
+\item Launch \texttt{start\_yourservice.sh}  and (re)start nginx.
+\end{enumerate}
+
+
+\subsection{Using CLAM with other webservers}
+
+You are not limited to using either Apache with WSGI or nginx with FastCGI, multiple options are possible, despite the fact we tested only these two. It should also be possible to get CLAM working on other unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 \section{Architecture}
 
-CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The scheme in Figure \ref{fig:arch} illustrates the various layers: 
+CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The scheme in Figure~\ref{fig:arch} illustrates the various layers:
 
 \begin{figure}[h]
 \begin{center}
@@ -145,7 +202,7 @@ A CLAM webservice needs the following three components from the service develope
 \item An NLP application
 \end{enumerate}
 
-The wrapper script is not stricly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration.
+The wrapper script is not strictly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration.
 
 \begin{devnotes}
 The CLAM Frontend, the green outer layer in Figure \ref{fig:arch} does not exist yet.

@@ -1,27 +1,28 @@
 
 
-
 * beta1 release 
 * announcement for TTNWW?
 
 ------------- END MAY -------------------------------------------
 
-- Allow users to configure access  (pre-beta2)
-- Move "input source" selector (pre-beta1 or pre-beta2)
-- make IE7/8 compatible (pre-beta2)
-- Test on apache (pre-beta2)
-- Logo, custom footer in service configuration (pre-beta2)
-- Write more documentation (in progress)
-    - Add documention on writing clients (pre-beta3?)
-- Add option to disable input, parameters, output, upload methods? (pre-beta3)
-- Make XML Scheme Definition for CLAM XML format
-- Validation function for simple formats (pre-beta2)
-
 * beta2 release
+* github
+
+------------ BEGIN JULY (was: end june) ----------------------------
+
+- Allow users to configure access  (pre-beta3)
+- Add option to disable input, parameters, output, upload methods? (pre-beta3)
+- Validation function for simple formats (pre-beta3)
+- Make XML Scheme Definition for CLAM XML format (pre-beta3)
+- Logo, custom footer in service configuration (pre-beta3)
+- Write more documentation (in progress) (DONE for apache/nginx integration)
+    - Add documention on writing clients (pre-beta3?)
+
+* beta3 release
 * release on ILK website? Including live services for for example Frog?
 * second announcement for TTNWW?
 
------------- END JUNE ----------------------------
+------------ BEGIN AUGUST ----------------------------
 
 CLAM Interface (Django)
     - Webservice Database
@@ -35,7 +36,7 @@ CLAM Interface (Django)
 
 * first full release?
 
------------- END AUGUST?  ----------------------------
+------------ END SEPTEMBER?  ----------------------------
 
 
 

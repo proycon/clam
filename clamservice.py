@@ -42,7 +42,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.2.8'
+VERSION = '0.2.9'
 
 DEBUG = False
     
