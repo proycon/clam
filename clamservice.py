@@ -24,6 +24,7 @@ import datetime
 import random
 import re
 import urllib2
+import getopt
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -35,6 +36,7 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 import clam.common.digestauth
+import clam.common.data
 import clam.config.defaults as settings #will be overridden by real settings later
 
 #Maybe for later: HTTPS support
@@ -42,7 +44,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.2.9'
+VERSION = '0.3.0'
 
 DEBUG = False
     
@@ -126,6 +128,7 @@ class CLAMService(object):
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
     '/([A-Za-z0-9_]*)/output/(.*)', 'OutputFileHandler',
     '/([A-Za-z0-9_]*)/input/(.*)', 'InputFileHandler',
+    '/([A-Za-z0-9_]*)/output/(.*)/(.*)', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
 
 
@@ -615,6 +618,37 @@ class OutputFileHandler(object):
         else:
             raise web.webapi.NotFound()
 
+class ViewerHandler(object):
+
+    def view(project, filename, viewer_id):
+        format = clam.common.formats.Format() #unspecified format
+        for fmt in settings.OUTPUTFORMATS:
+            if fmt.match(filename):
+                format = fmt
+                break
+        viewer = None
+        for i,v in enumerate(format.viewers):
+            if (viewer_id == v.id or viewer_id.tolower() == v.__class__.__name__.tolower() or (i == 0 and viewer_id == 'view') or (viewer_id == 'view' + str(i + 1))):
+                viewer = v
+                break
+
+        if viewer and os.path.exists(Project.path(project)):
+            file = clam.common.data.CLAMOutputFile(Project.path(project) + '/' + filename.replace('..',''), format)
+        else:
+            raise web.webapi.NotFound()
+
+        data = web.input() #both for GET and POST
+        return viewer.view(file, **data)
+
+
+    @requirelogin
+    def GET(self, project, filename, viewer_id, user=None):
+        return self.view(project, filename, viewer_id)
+
+    @requirelogin
+    def POST(self, project, filename, viewer_id, user=None):
+        return self.view(project, filename, viewer_id)
+
 class InputFileHandler(object):
 
     @requirelogin
@@ -654,7 +688,7 @@ class OutputInterface(object):
             #make sure we don't start two compression processes at the same time
             raise web.forbidden()
         else:
-            data = web.input() 
+            data = web.input()
             if 'format' in data:
                 format = data['format']
             else:
@@ -1079,67 +1113,81 @@ if __name__ == "__main__":
 
     settingsmodule = None
     fastcgi = False
-    readport = readhost = False
     PORT = HOST = None
-    
-    if len(sys.argv) >= 2:
-        for option in sys.argv[1:]:
-            if option == '-d':
-                DEBUG = True
-            elif option == '-c':
-                fastcgi = True
-            elif option == '-H':
-                readhost = True
-                continue
-            elif option == '-p':
-                readport = True
-                continue
-            elif readport and option.isdigit():
-                PORT = int(option)
-            elif readhost:
-                HOST = option
-            elif option == '-h':
-                usage()                
-                sys.exit(0)
-            elif option == '-v':
-                print "CLAM WebService version " + VERSION
-                sys.exit(0)
-            elif option[0] != '-':
-                settingsmodule = option
-            else:
-                print "Unknown option: " + option
-                usage()
-                sys.exit(1)
-            readport = False
 
-    if not settingsmodule:  #security precaution
-        error("No settings module specified")
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:v")
+    except getopt.GetoptError, err:
+        # print help information and exit:
+        print str(err)
+        usage()
+        sys.exit(2)
+
+    if (len(args) == 1):
+        settingsmodule = args[0]
+    elif (len(args) > 1):
+        print >>sys.stderr, "ERROR: Too many arguments specified"
+        usage()
+        sys.exit(2)
+    else:
+        print >>sys.stderr, "ERROR: No settings module specified!"
+        usage()
+        sys.exit(2)
+
+
+    for o, a in opts:
+        if o == '-d':
+            DEBUG = True
+        elif o == '-c':
+            fastcgi = True
+        elif o == '-H':
+            HOST = a
+        elif o == '-p':
+            PORT = int(a)
+        elif o == '-h':
+            usage()
+            sys.exit(0)
+        elif o == '-v':
+            print "CLAM WebService version " + str(VERSION)
+        else:
+            usage()
+            print "ERROR: Unknown option: ", o
+            sys.exit(2)
+    
 
 
     import_string = "import " + settingsmodule + " as settings"
     exec import_string
 
-    sys.argv = sys.argv[:1] #remove command line options for web.py
-
     #Check version
-    if float(str(settings.REQUIRE_VERSION)[0:3]) < float(str(VERSION)[0:3]):
+    req = str(settings.REQUIRE_VERSION).split('.')
+    ver = str(VERSION).split('.')
+
+    uptodate = True
+    for i in range(0,len(req)):
+        if i < len(ver):
+            if req[i] > ver[i]:
+                uptodate = False
+                break
+            elif ver[i] > req[i]:
+                break
+    if not uptodate:
         error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
 
 
     set_defaults(HOST,PORT)
-    PORT = settings.PORT
     if HOST:
         settings.HOST = HOST
     test_dirs()
 
-
-
+    #fake command line options for web.py
+    sys.argv = []
     if PORT:
         sys.argv.append(str(PORT)) #port from command line
         settings.PORT = PORT                       
     elif 'PORT' in dir(settings):
         sys.argv.append(str(settings.PORT))
-
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :) 

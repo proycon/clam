@@ -10,11 +10,13 @@
 #
 ###############################################################
 
+
 import re
 from lxml import etree as ElementTree
 from StringIO import StringIO
+from clam.common.viewers import AbstractViewer
 
-def formatfromxml(node):
+def formatfromxml(node): #TODO: Add viewers
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() #verify this works? (may need .root?) 
     if node.tag in globals():
@@ -35,6 +37,27 @@ def formatfromxml(node):
 
 class Format(object):
 
+    """This is the base Format class. Inherit from this class to create new format definitions.
+    The class should have a 'name' member, containing the name the users will see. Upon instantiation,
+    Multiple extensions may be associated with the format, but first will be the extension that will be
+    automatically assigned when the user uploads a file in this format. In addition, an encoding will
+    have to be specified.
+
+    There are several keyword arguments:
+            mask : a regular expression for recognising file, in case extensions aren't enough. Files matching 
+                   this mask will be considered to be in this format
+            subdirectory = ''        If not empty, confines all uploaded files of
+                                     this format to a specific subdirectory.
+                                     (Only makes sense for INPUT formats)
+            archivesubdirs = True    If set to False, all subdirectories in an uploaded archive will
+                                     be squashed, extracting all its files to the base output directory.
+                                     (Only makes sense for INPUT formats)
+            viewers = []             A list of Viewer-derived instances, association particular 
+                                     Viewers or Visualisation Modules with this format.
+
+    Note that there are methods you may want to overrule in your inherited format!
+    """
+
     name = "Unspecified Format"
     mask = None
 
@@ -46,6 +69,7 @@ class Format(object):
         self.encoding = encoding
         self.subdirectory = '' #Extract all files of this time into this subdirectory
         self.archivesubdirs = True #Retain subdirectories from archives?
+        self.viewers = []
         for key, value in kwargs.items():
             if key == 'mask':
                 self.mask = re.compile(value) #in case extensions aren't enough
@@ -53,15 +77,26 @@ class Format(object):
                 self.subdirectory = value
             elif key == 'archivesubdirs':
                 self.archivesubdirs = value
+            elif key == 'viewer':
+                assert isinstance(value, AbstractViewer)
+                self.viewers.append(value)
+            elif key == 'viewers':
+                for x in value:
+                    assert isinstance(x, AbstractViewer)
+                self.viewers = value #TODO: implement
             #elif key == 'numberfiles': #for future use?
                 
             
 
     def validate(self,filename):
+        """This is a validation function for this format, it is passed the filename of 
+        the file to be validated, and should return True if the file is indeed a valid
+        file in this format, and False otherwise. Overload this method in your own class,
+        as by default it always returns True."""
         return True
 
     def match(self,filename):
-        """Does this file match the defined extensions/mask?""" 
+        """Checks if the specified file match the defined extensions/mask? There's usually no need to overload this in inherited classes.""" 
         for extension in self.extensions:
             if filename[ -1 * len(extension) - 1:] == '.' + extension:
                 return True
@@ -71,7 +106,7 @@ class Format(object):
             return False
         
     def filename(self,filename):
-        """Rename this file so it matches the defined extension"""
+        """Rename this file so it matches the defined extension, return the new filename. There's usually no need to overload this in inherited classes."""
         if not self.match(filename):
             for ext in self.extensions[0].split("."):
                 if filename[-1 * len(ext):] == ext:
@@ -81,11 +116,14 @@ class Format(object):
             return filename
 
     def xml(self):
+        """Returns an XML representation of the Format definition"""
         xml = "<" + self.__class__.__name__
         xml += ' name="'+unicode(self.name) + '"'
         xml += ' encoding="'+self.encoding + '"'
         if self.mask:
             xml += ' mask="'+self.mask + '"'
+        if self.viewers:
+            xml += ' viewers="'+','.join(self.viewers) + '"'
         xml += '>'
         for extension in self.extensions:
             xml += " <extension>" + extension + "</extension>"     
@@ -93,12 +131,14 @@ class Format(object):
         return xml
 
     def str(self):
+        """Returns a string representation of this format"""
         if self.encoding:
             return self.name + ' ['+self.encoding+']'
         else:
             return self.name
 
     def unicode(self):
+        """Returns a string representation of this format"""
         if self.encoding:
             return self.name + ' ['+self.encoding+']'
         else:

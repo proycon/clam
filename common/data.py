@@ -22,10 +22,11 @@ import codecs
 
 
 class FormatError(Exception):
-         def __init__(self, value):
-             self.value = value
-         def __str__(self):
-             return "Not a valid CLAM XML response"
+     """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
+     def __init__(self, value):
+         self.value = value
+     def __str__(self):
+         return "Not a valid CLAM XML response"
 
 class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?)
     def __init__(self, path, format):
@@ -35,9 +36,6 @@ class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?
     def __str__(self):
         return self.path
 
-
-
-        
 
 
 class CLAMInputFile(CLAMFile):
@@ -50,10 +48,17 @@ class CLAMInputFile(CLAMFile):
 
     
 class CLAMOutputFile(CLAMFile):
-    pass
+    def open(self):
+        """open the file for reading, only works within wrapper scripts!"""
+        return codecs.open('output/' + self.path, 'r', self.format.encoding)
+
+    def validate(self):
+        return self.format.validate('output/' + self.path)
 
 
 def getclamdata(filename):
+    """This function reads the CLAM Data from an XML file. Use this to read
+    the clam.xml file from your system wrapper. It returns a CLAMData instance."""
     f = open(filename,'r')
     xml = f.read(os.path.getsize(filename))
     f.close()
@@ -62,7 +67,28 @@ def getclamdata(filename):
     
 
 class CLAMData(object):    
+    """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
+    XML responses. Its member variables are: 
+
+        status          - Contains any of clam.common.status.*
+        statusmessage   - The latest status message (string)
+        completion      - An integer between 0 and 100 indicating
+                          the percentage towards completion.
+        parameters      - List of parameters (but use the methods instead)
+        inputformats    - List of all input formats
+        outputformats   - List of all output formats
+        corpora         - List of pre-installed corpora
+        input           - List of input files  ([ CLAMInputFile ])
+        output          - List of output files ([ CLAMOutputFile ])
+        projects        - List of projects ([ string ])
+        errors          - Boolean indicating whether there are errors in parameter specification
+        errormsh        - String containing an error message
+
+    Note that depending on the current status of the project, not all may be available.
+    """
+
     def __init__(self, xml):
+        """Pass an xml string containing the full response. It will be automatically parsed."""
         self.status = clam.common.status.READY
         self.statusmessage = ""
         self.completion = 0
@@ -81,7 +107,8 @@ class CLAMData(object):
 
 
     def parseresponse(self, xml):
-        global VERSION
+        """The parser, there's usually no need to call this directly"""
+        global VERSIONs
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
@@ -174,7 +201,7 @@ class CLAMData(object):
         raise KeyError
 
     def passparameters(self):
-        """Return all parameters as id => value dictionary"""
+        """Return all parameters as {id: value} dictionary"""
         paramdict = {}
         for parametergroup, params in self.parameters:
             for parameter in params:
