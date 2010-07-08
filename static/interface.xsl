@@ -275,16 +275,24 @@
         <xsl:variable name="href">output/<xsl:value-of select="."/></xsl:variable>
         <xsl:variable name="format" select="@format" />
 
-        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="."/></a></td>  
+        <td class="file">
+        <xsl:choose>
+        <xsl:when test="/clam/outputformats/*[name() = $format]/viewers">
+            <a><xsl:attribute name="href"><xsl:value-of select="$href" />/view</xsl:attribute><xsl:value-of select="."/></a>
+        </xsl:when>
+        <xsl:otherwise>
+            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="."/></a>
+        </xsl:otherwise>
+        </xsl:choose>
+        </td>
+
         <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
         <td><xsl:value-of select="@encoding"/></td>
         <td>
-            <ul>
             <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
-                <li><a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a></li>
+                <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a> |
             </xsl:for-each>
-            <li><a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="@name" />Download</a></li>
-            </ul>
+            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="@name" />Download</a>
         </td>
     </tr>
 </xsl:template>

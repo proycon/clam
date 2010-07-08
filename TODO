@@ -11,19 +11,22 @@
 ------------ BEGIN JULY (was: end june) ----------------------------
 
 - Validation function for simple formats (pre-beta3)
+- Support for viewers (pre-beta3?) (in progress!)
+    - Suppport for more complex, combined, viewers?
+
 - Allow users to configure access  (pre-beta3)
 - Add option to disable input, parameters, output, upload methods? (pre-beta3)
 - Make XML Scheme Definition for CLAM XML format (pre-beta3)
 - Logo, custom footer in service configuration (pre-beta3)
 - Write more documentation (in progress) (DONE for apache/nginx integration)
     - Add documention on writing clients (pre-beta3?)
-- Support for viewers (pre-beta3?)
 
 * beta3 release
 * release on ILK website? Including live services for for example Frog?
 * second announcement for TTNWW?
 
 ------------ BEGIN AUGUST ----------------------------
+
 
 CLAM Interface (Django)
     - Webservice Database
