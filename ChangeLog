@@ -68,7 +68,7 @@ June:
 July:
     - bugfixes
     - (0.2.7) Made compatible with Internet Explorer 8
-    - (0.2.8) Made ready for Apache using mod_wsgi (proper support for URLPREFIX)
+    - (0.2.8) Made ready for Apache using mod_wsgi (proper support for WSGI and URLPREFIX)
     - bugfixes
     - (0.2.9) Input source selector moved to top, and made more interactive
     - Wrote documentation for integration in Apache (WSGI) and Nginx (FastCGI)
