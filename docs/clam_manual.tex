@@ -81,29 +81,41 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 \end{itemize}
 
-Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (test in the example below).
+Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (test in the example below). This standalone mode is intended primarily for development purposes and not recommended for production use.
 
 \texttt{\$ ./clamservice.py clam.config.test}
 
-
 Setting up the service to be used with an already existing webserver, requires some additional work. This is explained below for Apache and nginx:
 
-\subsection{Using CLAM with Apache}
+\subsection{Using CLAM with Apache 2}
 
-In order to run CLAM in Apache 2, you have to install and configure several files. We will be using the WSGI, an interface between Apache and Python. Follow the instructions:
+In order to run CLAM in Apache, you have to install and configure several files. We will be using WSGI, an interface between Apache and Python. Follow the instructions:
 
 \begin{enumerate}
 \item Install \texttt{mod_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
-\item 
+\item Next we need to write a simple WSGI-script, which is a Python script that will be invoked by the webserver. Copy \texttt{clam/config/example.wsgi} to something like  \texttt{clam/config/yourservice.wsgi} and adapt the script. If CLAM is not installed in a standard location where Python can find it, make sure to explicitly specify its parent directory according to the instructions in the example.
+\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port and optionally a URL prefix to use if the service isn't assigned a virtualhost of its own.
+\item Configure Apache to let it know about WSGI and your service. I assume the reader is acquianted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
+
+\begin{verbatim}
+        WSGIScriptAlias /yourservice /path/to/clam/config/yourservice.wsgi/
+        WSGIDaemonProcess yourservice user=proycon group=users home=/path/to/clam threads=2 maximum-requests=10000
+        WSGIProcessGroup yourservice
+
+        Alias /yourservice/static /path/to/clam/static/
+        <Directory /path/to/clam/static/>
+            Order deny,allow
+            Allow from all
+        </Directory>
+\end{verbatim}
+
+Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access.
+
+\item Restart Apache
 \end{enumerate}
 
+Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives#WSGIDaemonProcess}, important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes and maximum-requests can also be configured to optimise performance and system resources according to your needs.
 
-
-
-
-\begin{devnotes}
-Instructions for Apache will follow later. The system is not tested using this webserver yet.
-\end{devnotes}
 
 \subsection{Using CLAM with nginx}
 
@@ -141,6 +153,7 @@ The CLAM Frontend, the green outer layer in Figure \ref{fig:arch} does not exist
 
 
 \section{Service configuration}
+\label{sec:serviceconfig}
 
 The service configuration consists of a description of your NLP application, or rather, the wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected. The service configuration is itself a Python script. But due to its straightforward nature, knowledge of Python is not required to make your own.
 
