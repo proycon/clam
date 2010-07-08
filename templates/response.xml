@@ -19,7 +19,7 @@ $if not datafile and project:
         <status code="$statuscode" message="$statusmessage" completion="$completion" errors="$errors" errormsg="$errormsg">
         $if statuscode == 1 or statuscode == 2:
             $for message, time, completion2 in statuslog:
-                <log time="$time" completion="$completion2">$message</log>
+                      <log time="$time" completion="$completion2">$message</log>
         </status>
 $if statuscode == 0 or statuscode == 2 or not project:
         <parameters>
@@ -42,7 +42,7 @@ $if statuscode == 0 or datafile or not project:
         $if project:
             <input>
                 $for path, format, label, encoding in inputpaths:
-                    <path format="$format" label="$label" encoding="$encoding">$path</path>
+                    <path format="$format" encoding="$encoding">$path</path>
             </input>
 $if statuscode == 2 or datafile or not project:
         <outputformats>
@@ -52,6 +52,6 @@ $if statuscode == 2 or datafile or not project:
         $if project:
             <output>
                 $for path, format, label, encoding in outputpaths:
-                    <path format="$format" label="$label" encoding="$encoding">$path</path>
+                    <path format="$format" encoding="$encoding">$path</path>
             </output>
  </clam>

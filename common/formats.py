@@ -18,7 +18,7 @@ from clam.common.viewers import AbstractViewer
 
 def formatfromxml(node): #TODO: Add viewers
     if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() #verify this works? (may need .root?) 
+        node = ElementTree.parse(StringIO(node)).getroot()
     if node.tag in globals():
         encoding = 'utf-8'
         extensions = []

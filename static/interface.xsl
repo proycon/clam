@@ -162,7 +162,7 @@
             <p>Retrieves an input file from another location on the web.</p>
             <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format:</em><xsl:text> </xsl:text><select id="uploadformaturl">
                         <xsl:for-each select="*">
-                            <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+                            <option><xsl:attribute name="value"><xsl:value-of select="name()" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
                         </xsl:for-each>
             </select><br />
             <strong>Step 2)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="uploadurl" value="http://" /><br />
@@ -252,7 +252,8 @@
 <xsl:template match="/clam/input/path">
     <tr>
         <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
-        <td><xsl:value-of select="@label"/></td>
+        <xsl:variable name="format" select="@format" />
+        <td><xsl:value-of select="/clam/inputformats/*[name() = $format]/@name"/></td>
         <td><xsl:value-of select="@encoding" /></td>
         <td class="actions"><img src="{/clam/@baseurl}/static/delete.png" title="Delete this file">
             <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="."/>');</xsl:attribute>
@@ -264,7 +265,8 @@
 <xsl:template match="/clam/output/path">
     <tr>
         <td class="file"><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>  
-        <td><xsl:value-of select="@label"/></td>
+        <xsl:variable name="format" select="@format" />
+        <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
         <td><xsl:value-of select="@encoding"/></td>
     </tr>
 </xsl:template>

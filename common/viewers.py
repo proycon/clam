@@ -28,7 +28,7 @@ class AbstractViewer(object):
                 self.embed = value
 
     def url(self, file):
-        """Returns the URL to view this resource, the link may be an external service/website. If necessary, the file can be 'pushed' to the service from here. file is a CLAMOutputFile instance"""
+        """Returns the URL to view this resource, the link is usually an external service/website. If necessary, the file can be 'pushed' to the service from here. file is a CLAMOutputFile instance"""
         return False
 
     def view(self, file, **kwargs):
