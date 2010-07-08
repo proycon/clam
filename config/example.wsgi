@@ -15,14 +15,17 @@
 #
 ###############################################################
 
-import os
-import sys
-
-sys.path.append(sys.path[0] + '/..')
-os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 
+#** If CLAM is not by default in your PYTHONPATH, you need specify the directory that contains the subdirectory 'clam' here (and uncomment all five lines): **
 
+#import os
+#import sys
+#CLAMDIR = '/home/proycon/work'
+#sys.path.append(CLAMDIR)
+#os.environ['PYTHONPATH'] = CLAMDIR
+
+import clam.config.yourapp #** import your configuration module here! **
 import clam.clamservice
-application = clam.clamservice.run_wsgi('clam.config.yourapp') #change this!
+application = clam.clamservice.run_wsgi(clam.config.yourapp) #** pass your module to CLAM **
 
