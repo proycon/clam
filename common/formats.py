@@ -122,11 +122,14 @@ class Format(object):
         xml += ' encoding="'+self.encoding + '"'
         if self.mask:
             xml += ' mask="'+self.mask + '"'
-        if self.viewers:
-            xml += ' viewers="'+','.join(self.viewers) + '"'
         xml += '>'
         for extension in self.extensions:
             xml += " <extension>" + extension + "</extension>"     
+        if self.viewers:
+            xml += "<viewers>"
+            for viewer in self.viewers:
+                xml += "<" + viewer.__class__.__name__ + " id=\""+viewer.id+"\" name=\""+viewer.name+"\" />"
+            xml += "</viewers>"
         xml += "</" + self.__class__.__name__ + ">"
         return xml
 

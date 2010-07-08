@@ -247,6 +247,7 @@
                     <th>Input File</th>
                     <th>Format</th>
                     <th>Encoding</th>
+                    <th>Viewers</th>
                 </tr>
             </thead>
             <tbody>
@@ -271,10 +272,17 @@
 
 <xsl:template match="/clam/output/path">
     <tr>
-        <td class="file"><a><xsl:attribute name="href">output/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>  
+        <xsl:variable name="href">output/<xsl:value-of select="."/></xsl:variable>
         <xsl:variable name="format" select="@format" />
+
+        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="."/></a></td>  
         <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
         <td><xsl:value-of select="@encoding"/></td>
+        <td>
+            <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
+                <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a>
+            </xsl:for-each>
+        </td>
     </tr>
 </xsl:template>
 
