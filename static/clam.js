@@ -3,7 +3,7 @@ $(document).ready(function(){
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
             type: "PUT", 
-            url: "/" + $("#projectname").val() + "/", 
+            url: $("#projectname").val() + "/", 
             dataType: "xml", 
             complete: function(xml){ 
                 window.location.href = $("#projectname").val() + "/";
@@ -19,7 +19,7 @@ $(document).ready(function(){
             url: window.location.href, 
             dataType: "xml", 
             complete: function(xml){ 
-                window.location.href = "/"; /* back to index */
+                window.location.href = "/"; /* back to index - TODO: FIX, doesn't work with urlprefix! */
             },
          });         
        });
