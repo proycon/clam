@@ -158,7 +158,7 @@ class CLAMService(object):
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
         self.mode = mode
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT)) +'/'
+        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/')
         if mode == 'fastcgi':
             web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
             self.service.run()
