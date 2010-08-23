@@ -1,0 +1,15 @@
+$def with (file, delimiter)
+<html>
+<head>
+<title>$file.filename</title>
+</head>
+<body>
+<table>
+$for line in file.readlines():
+    <tr>
+    $for field in line.strip('\n\t ').split(delimiter):
+        <td>$field</td>
+    </tr>
+</table>
+</body>
+</html>

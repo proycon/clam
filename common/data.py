@@ -32,6 +32,7 @@ class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?
     def __init__(self, path, format):
             self.path = path
             self.format = format
+            self.filename = os.path.basename(self.path)
 
     def __str__(self):
         return self.path

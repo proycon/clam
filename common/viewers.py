@@ -50,6 +50,11 @@ class AbstractViewer(object):
 class FrogViewer(AbstractViewer):
     name = "Frog Viewer"
 
+    def view(self,file,**kwargs):
+        render = web.template.render('templates')
+        return render.crudetableviewer( file, "\t")
+
+
 
 class SoNaRViewer(AbstractViewer):
     name = "SoNaR Viewer"

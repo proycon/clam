@@ -16,6 +16,7 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.viewers import *
 from clam.common.digestauth import pwhash
 from sys import path
 from os import uname
@@ -46,7 +47,7 @@ USERS = None #Enable this instead if you want no authentication
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 
 #List of delivered Output formats by the system
-OUTPUTFORMATS = [ TadpoleFormat('utf-8',['frogged']) ]
+OUTPUTFORMATS = [ TadpoleFormat('utf-8',['frogged'], viewer=FrogViewer() ) ]
 
 #The system command (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
 COMMAND = CLAMDIR +  "/wrappers/frogwrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
@@ -59,4 +60,3 @@ PARAMETERS =  [
         BooleanParameter('noparser','--skip=p', 'Disable dependency parser', 'Disables the dependency parser, strongly recommended for faster results and lower memory consumption.')
     ])
 ]
-
