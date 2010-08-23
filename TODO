@@ -11,7 +11,7 @@
 ------------ BEGIN JULY (was: end june) ----------------------------
 
 - Validation function for simple formats (pre-beta3)
-- Support for viewers (pre-beta3?) (in progress!)
+- Support for viewers (done, test more extensively)
     - Suppport for more complex, combined, viewers?
 
 - Allow users to configure access  (pre-beta3)
@@ -25,7 +25,7 @@
 * release on ILK website? Including live services for for example Frog?
 * second announcement for TTNWW?
 
------------- BEGIN AUGUST ----------------------------
+------------ BEGIN SEPTEMBER ----------------------------
 
 
 CLAM Interface (Django)
@@ -40,7 +40,7 @@ CLAM Interface (Django)
 
 * first full release?
 
------------- END SEPTEMBER?  ----------------------------
+------------ END OCTOBER  ----------------------------
 
 
 

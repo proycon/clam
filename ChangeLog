@@ -72,6 +72,12 @@ July:
     - bugfixes
     - (0.2.9) Input source selector moved to top, and made more interactive
     - Wrote documentation for integration in Apache (WSGI) and Nginx (FastCGI)
+    - (0.3.0) Started viewer support
 
+August:
+    - (0.3.2) CLAMInputFile/CLAMOutputFile now work both locally and remote, in a transparent fashion
+    - (0.3.2) Wrote viewers for Frog (using a crude table viewer), and SoNaR (using XSL)
+    - (0.3.2) Finished viewer support
+    
 
     
