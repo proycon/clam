@@ -630,7 +630,7 @@ class ViewerHandler(object):
                 break
         viewer = None
         for i,v in enumerate(format.viewers):
-            if (viewer_id == v.id or viewer_id.tolower() == v.__class__.__name__.tolower() or (i == 0 and viewer_id == 'view') or (viewer_id == 'view' + str(i + 1))):
+            if (viewer_id == v.id or viewer_id.lower() == v.__class__.__name__.lower() or (i == 0 and viewer_id == 'view') or (viewer_id == 'view' + str(i + 1))):
                 viewer = v
                 break
 
