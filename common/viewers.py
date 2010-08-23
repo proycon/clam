@@ -19,7 +19,7 @@ from lxml import etree
 
 class AbstractViewer(object):
 
-    id = __name__ #you may insert another meaningful ID here, no spaces or special chars!
+    id = 'abstractviewer' #you may insert another meaningful ID here, no spaces or special chars!
     name = "Unspecified Viewer" 
 
     def __init__(self, **kwargs):
@@ -48,6 +48,7 @@ class AbstractViewer(object):
 
 
 class FrogViewer(AbstractViewer):
+    id = 'frogviewer'
     name = "Frog Viewer"
 
     def view(self,file,**kwargs):
@@ -57,6 +58,7 @@ class FrogViewer(AbstractViewer):
 
 
 class SoNaRViewer(AbstractViewer):
+    id = 'sonarviewer'
     name = "SoNaR Viewer"
 
     def view(self, file, **kwargs):

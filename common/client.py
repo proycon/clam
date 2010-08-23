@@ -163,15 +163,6 @@ class CLAMClient:
             if not chunk: break
             targetfile.write(chunk)
 
-
-    def downloadreadlines(self, project, outputfile, auth = None):
-        """download and read the lines of one output file"""
-        assert isinstance(outputfile, CLAMOutputFile)
-        req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
-        for line in req.readlines():
-            yield line
-
-
     def upload(self, project, file, format, auth = None):
         """upload a file (or archive)"""
         # datagen is a generator object that yields the encoded parameters

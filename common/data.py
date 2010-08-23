@@ -17,6 +17,7 @@ from lxml import etree as ElementTree
 from StringIO import StringIO
 import clam.common.parameters
 import clam.common.formats
+import urllib2
 import os.path
 import codecs
 
@@ -28,30 +29,47 @@ class FormatError(Exception):
      def __str__(self):
          return "Not a valid CLAM XML response"
 
-class CLAMFile: #TODO: adapt for client versus server! (inputfile vs outputfile?)
-    def __init__(self, path, format):
-            self.path = path
+class CLAMFile:
+    def __init__(self, projectpath, filename, format):
+            self.remote = (projectpath[0:7] == 'http://' or projectpath[0:7] == 'https://')
+            self.projectpath = projectpath
+            self.filename = filename
             self.format = format
-            self.filename = os.path.basename(self.path)
 
     def __str__(self):
         return self.path
 
+    def readlines(self):
+        """Loads all in memory"""
+        return list(iter(self))
+
 
 
 class CLAMInputFile(CLAMFile):
-    def open(self):
-        """open the file for reading, only works within wrapper scripts!"""
-        return codecs.open('input/' + self.path, 'r', self.format.encoding)
+    def __iter__(self):
+        """Read the lines of the file, one by one"""
+        if not self.remote:
+            for line in codecs.open(self.projectpath + '/input/' + self.filename, 'r', self.format.encoding).readlines():
+                yield line
+        else:
+            req = urllib2.urlopen(self.projectpath + '/input/' + self.filename)
+            for line in req.readlines():
+                yield line
 
     def validate(self):
-        return self.format.validate('input/' + self.path)
+        return self.format.validate('output/' + self.path)
 
     
 class CLAMOutputFile(CLAMFile):
-    def open(self):
-        """open the file for reading, only works within wrapper scripts!"""
-        return codecs.open('output/' + self.path, 'r', self.format.encoding)
+    def __iter__(self):
+        """Read the lines of the file, one by one"""
+        if not self.remote:
+            for line in codecs.open(self.projectpath + '/output/' + self.filename, 'r', self.format.encoding).readlines():
+                yield line
+        else:
+            req = urllib2.urlopen(self.projectpath + '/input/' + self.filename)
+            for line in req.readlines():
+                yield line
 
     def validate(self):
         return self.format.validate('output/' + self.path)
@@ -90,6 +108,8 @@ class CLAMData(object):
 
     def __init__(self, xml):
         """Pass an xml string containing the full response. It will be automatically parsed."""
+        self.baseurl = ''
+        self.projecturl = ''
         self.status = clam.common.status.READY
         self.statusmessage = ""
         self.completion = 0
@@ -121,6 +141,11 @@ class CLAMData(object):
             self.project = root.attrib['project']
         else:
             self.project = None
+        if 'baseurl' in root.attrib:
+            self.baseurl = root.attrib['baseurl']
+            if self.project:
+                self.projecturl = root.attrib['baseurl'] + '/' + self.project + '/'
+
 
         if 'user' in root.attrib:
             self.user = root.attrib['user']
@@ -162,7 +187,7 @@ class CLAMData(object):
                         for format in self.inputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.input.append( CLAMInputFile( filenode.text, selectedformat) )
+                        self.input.append( CLAMInputFile( self.projecturl, filenode.text, selectedformat) )
             elif node.tag == 'output': 
                  for filenode in node:
                     if filenode.tag == 'path':
@@ -170,8 +195,8 @@ class CLAMData(object):
                         for format in self.outputformats: 
                             if unicode(format) == filenode.attrib['format']: #TODO: verify
                                 selectedformat = format
-                        self.output.append( CLAMOutputFile( filenode.text, selectedformat) )
-            elif node.tag == 'projects': 
+                        self.output.append( CLAMOutputFile( self.projecturl, filenode.text, selectedformat) )
+            elif node.tag == 'projects':
                  self.projects = []
                  for projectnode in node:
                     if projectnode.tag == 'project':

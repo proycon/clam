@@ -126,9 +126,9 @@ class CLAMService(object):
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
-    '/([A-Za-z0-9_]*)/output/(.*)', 'OutputFileHandler',
-    '/([A-Za-z0-9_]*)/input/(.*)', 'InputFileHandler',
-    '/([A-Za-z0-9_]*)/output/(.*)/(.*)', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
+    '/([A-Za-z0-9_]*)/output/([^/]*)/?', 'OutputFileHandler',
+    '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
+    '/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
 
 
@@ -622,7 +622,7 @@ class OutputFileHandler(object):
 
 class ViewerHandler(object):
 
-    def view(project, filename, viewer_id):
+    def view(self, project, filename, viewer_id):
         format = clam.common.formats.Format() #unspecified format
         for fmt in settings.OUTPUTFORMATS:
             if fmt.match(filename):
@@ -635,8 +635,9 @@ class ViewerHandler(object):
                 break
 
         if viewer and os.path.exists(Project.path(project)):
-            file = clam.common.data.CLAMOutputFile(Project.path(project) + '/' + filename.replace('..',''), format)
+            file = clam.common.data.CLAMOutputFile(Project.path(project), filename.replace('..',''), format)
         else:
+            print "Viewer not found: ", project,filename,viewer_id
             raise web.webapi.NotFound()
 
         data = web.input() #both for GET and POST
