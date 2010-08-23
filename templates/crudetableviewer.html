@@ -5,7 +5,7 @@ $def with (file, delimiter)
 </head>
 <body>
 <table>
-$for line in file.open().readlines():
+$for line in file:
     <tr>
     $for field in line.strip('\n\t ').split(delimiter):
         <td>$field</td>

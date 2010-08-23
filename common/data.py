@@ -174,11 +174,11 @@ class CLAMData(object):
                         self.corpora.append(corpusnode.value)
             elif node.tag == 'inputformats':    
                 for formatnode in node:
-                    if formatnode.tag == 'inputformat': #TODO
+                    if formatnode.tag == 'inputformat': 
                         self.inputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'outputformats':        
                 for formatnode in node:
-                    if formatnode.tag == 'outputformat': #TODO
+                    if formatnode.tag == 'outputformat': 
                         self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'input':
                  for filenode in node:
