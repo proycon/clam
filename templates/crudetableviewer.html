@@ -1,15 +1,57 @@
 $def with (file, delimiter)
 <html>
 <head>
+<meta http-equiv="content-type" content="text/html; charset=$file.format.encoding" />
 <title>$file.filename</title>
+<style type="text/css">
+    body {
+        background: #e6dcca;
+        font-family: sans-serif;
+        font-size: 12px;
+    }
+    
+    h1 {
+        margin: 5px;
+        width: 97%;
+        background: #ceb383;
+        border: 1px none #ca9c4d;
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-size: 150%;
+        font-weight: bold;
+    }
+
+    table {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        border-spacing: 2px;
+    }
+    table tr {
+        min-height: 10px;
+    }
+    table td {
+        font-family: sans-serif;
+        font-size: 12px;
+        background: white;
+        border: 1px solid #ca9c4d;
+
+    }
+</style>
 </head>
+
 <body>
-<table>
-$for line in file:
-    <tr>
-    $for field in line.strip('\n\t ').split(delimiter):
-        <td>$field</td>
-    </tr>
-</table>
+<div id="viewer">
+    <h1>$file.filename.encode(file.format.encoding)</h1>
+
+    <table>
+    $for line in file:
+        <tr>
+        $for field in line.strip('\n\t ').split(delimiter):
+            <td>$field.encode(file.format.encoding)</td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>
