@@ -15,6 +15,8 @@ import web
 import urllib2
 from urllib import urlencode
 
+from lxml import etree
+
 class AbstractViewer(object):
 
     id = __name__ #you may insert another meaningful ID here, no spaces or special chars!
@@ -43,5 +45,24 @@ class AbstractViewer(object):
             else:
                 #redirect
                 raise web.seeother(url)
+
+
+class FrogViewer(AbstractViewer):
+    name = "Frog Viewer"
+
+
+class SoNaRViewer(AbstractViewer):
+    name = "SoNaR Viewer"
+
+    def view(self, file, **kwargs):
+        xslfile = "static/sonar.xsl"
+        xslt_doc = etree.parse(xslfile)
+        transform = etree.XSLT(xslt_doc)
+
+        f = file.open()
+        xml_doc = etree.parse(f.readlines())
+
+        return str(transform(xml_doc))
+
 
 
