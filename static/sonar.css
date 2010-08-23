@@ -1,0 +1,79 @@
+body {
+    font-family: serif; 
+    font-size: 1em; 
+    background: #b7c8c7; 
+}
+#metadata {
+    font-family: sans-serif;
+    font-size: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    background: #b4d4d1; /*#FCFFD0;*/
+    border: 1px solid #628f8b;
+    width: 40%;
+    max-width:800px;
+    padding: 5px;
+}
+#metadata table {
+    text-align: left;
+}
+#text {
+    border: 1px solid #628f8b;
+    width: 60%; 
+    max-width: 1024px;
+    background: white;
+    padding: 20px;
+    padding-right: 100px; 
+    margin-top: 5px;
+    margin-left: auto; 
+    margin-right: auto; 
+    color: #222;
+}
+.sentence {
+    display: inline;
+}
+.word { 
+    display: inline; 
+    color: black; 
+    position: relative; 
+    text-decoration: none; 
+    z-index: 24; 
+}
+.word>.attributes { display: none;  }
+.word:hover { 
+    text-decoration: underline; 
+    z-index: 25
+}
+.word:hover>.attributes { 
+    display: block; 
+    position: absolute;
+    width: 320px; 
+    left: 2em; 
+    top: 2em;
+    background: #b4d4d1; /*#FCFFD0;*/
+    opacity: 0.9; filter: alpha(opacity = 90); 
+    border: 1px solid #628f8b; 
+    padding: 5px; 
+    text-decoration: none; 
+}
+.attributes dt {
+    color: #254643;
+    font-weight: bold;
+}
+.attributes dd {
+    color: black;
+    font-family: monospace;
+}
+.attributes .wordid {
+    display: inline-block:
+    width: 100%;
+    font-size: 75%;
+    color: #555;
+    font-family: monospace;
+    text-align: center;
+}
+
+
+
