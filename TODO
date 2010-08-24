@@ -10,7 +10,8 @@
 
 ------------ BEGIN JULY (was: end june) ----------------------------
 
-- Add language-specific field in format classes
+- Add webservice-bypass, running CLAM directly as a command line tool
+- Add language property in format classes?
 - Validation function for simple formats (pre-beta3)
 - Support for viewers (done, test more extensively)
     - Suppport for more complex, combined, viewers?
@@ -29,7 +30,7 @@
 ------------ BEGIN SEPTEMBER ----------------------------
 
 
-CLAM Interface (Django)
+- Start Cataplana
     - Webservice Database
     - Chaining
         - Optional intermediate results
@@ -48,7 +49,6 @@ CLAM Interface (Django)
 
 
 Loose ends:
-    - Enable some HTTP Caching for /static/ in built-in webserver?
     - Automatic encoding conversion for inputformats?
 
 
