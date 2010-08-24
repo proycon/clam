@@ -58,5 +58,6 @@ PARAMETERS =  [
         BooleanParameter('vtok','--vtok', 'Tokenise only (verbosely)', 'Like the previous option, but explicitly show types assigned to the tokens.', forbid=['tok']),
         BooleanParameter('legtok','-l', 'Use legacy tokeniser', 'Use legacy TPtokenizer instead of the new one', forbid=['vtok']),
         BooleanParameter('noparser','--skip=p', 'Disable dependency parser', 'Disables the dependency parser, strongly recommended for faster results and lower memory consumption.')
+
     ])
 ]

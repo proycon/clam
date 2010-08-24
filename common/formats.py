@@ -173,15 +173,6 @@ class TadpoleFormat(Format):
         super(TadpoleFormat,self).__init__(encoding, extensions, **kwargs)
 
 
-class DCOIFormat(Format):    
-    
-    name = "Log format (not further defined)"
-
-    def __init__(self,encoding = 'utf-8', extensions = ['log'], **kwargs):
-        super(DCOIFormat,self).__init__(encoding, extensions, **kwargs)
-
-
-
 
 class DCOIFormat(Format):    
     
@@ -197,6 +188,4 @@ class KBXMLFormat(Format):
 
     def __init__(self,encoding = 'utf-8', extensions = ['xml'], **kwargs ):
         super(KBXMLFormat,self).__init__(encoding, extensions, **kwargs)
-
-
 

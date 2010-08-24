@@ -10,6 +10,7 @@
 
 ------------ BEGIN JULY (was: end june) ----------------------------
 
+- Add language-specific field in format classes
 - Validation function for simple formats (pre-beta3)
 - Support for viewers (done, test more extensively)
     - Suppport for more complex, combined, viewers?
