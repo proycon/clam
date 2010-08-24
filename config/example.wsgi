@@ -21,9 +21,9 @@
 
 #import os
 #import sys
-#CLAMDIR = '/home/proycon/work'
-#sys.path.append(CLAMDIR)
-#os.environ['PYTHONPATH'] = CLAMDIR
+#CLAMPARENTDIR = '/home/proycon/work' #The directory that holds the 'clam' directory
+#sys.path.append(CLAMPARENTDIR)
+#os.environ['PYTHONPATH'] = CLAMPARENTDIR
 
 import clam.config.yourapp #** import your configuration module here! **
 import clam.clamservice
