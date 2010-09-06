@@ -13,6 +13,7 @@
 - Add webservice-bypass, running CLAM directly as a command line tool
 - Add language property in format classes?
 - Validation function for simple formats (pre-beta3)
+- Remember parameter selection when 'restarting' a project
 - Support for viewers (done, test more extensively)
     - Suppport for more complex, combined, viewers?
 
