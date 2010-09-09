@@ -36,6 +36,11 @@ $(document).ready(function(){
          });         
        });
    }    
+   if ($("#indexbutton").length) {
+       $("#indexbutton").click(function(event){
+            window.location.href = "../"; /* refresh */
+       });
+   }  
 
    tableinputfiles = $('#inputfiles').dataTable( {
                                 "bJQueryUI": false,
