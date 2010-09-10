@@ -13,8 +13,11 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47pre4 r22446"
-   sodipodi:docname="architecture.svg">
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="architecture.svg"
+   inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4">
     <marker
@@ -240,6 +243,46 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2910"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-4-9"
+       style="overflow:visible">
+      <path
+         id="path3754-1-7"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <inkscape:perspective
+       id="perspective2938"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-4-2"
+       style="overflow:visible">
+      <path
+         id="path3754-1-5"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -254,8 +297,8 @@
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1440"
-     inkscape:window-height="796"
+     inkscape:window-width="1920"
+     inkscape:window-height="976"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1" />
@@ -267,7 +310,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -367,13 +410,13 @@
     <text
        xml:space="preserve"
        style="font-size:24px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
-       x="299.00516"
-       y="200.8036"
+       x="291.93408"
+       y="202.82391"
        id="text2842"><tspan
          sodipodi:role="line"
          id="tspan2844"
-         x="299.00516"
-         y="200.8036">CLAM Frontend</tspan></text>
+         x="291.93408"
+         y="202.82391">Workflow Interface</tspan></text>
     <rect
        style="fill:#ffb380;stroke:#030301;stroke-width:1.35044682;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2828-2"
@@ -601,5 +644,13 @@
          id="tspan2895-1"
          x="347.49243"
          y="543.75043">CLAM Client API</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.07141328;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 176.5221,236.47334 c 0.0518,-5.44573 0.10359,-10.89146 0.15538,-16.33718 0.006,-0.65842 -0.0552,-3.87943 0.0388,-4.0843 0.13372,-0.29127 0.49412,-0.40962 0.62784,-0.70089 0.11469,-0.24982 0.0279,-2.93012 0.0324,-3.40358 0.004,-0.45381 0.009,-0.90762 0.0129,-1.36143 0.002,-0.22691 -0.20065,-0.674 0.006,-0.68072 0.20713,-0.007 -0.009,0.90762 -0.006,0.68072 0.004,-0.45382 0.009,-0.90763 0.0129,-1.36144"
+       id="path2950-7-8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.86723697;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 164.37801,210.49141 c -0.063,4.91266 -0.12607,9.82533 -0.1891,14.73799 -0.008,0.59397 0.038,3.49993 -0.0473,3.6845 -0.12132,0.2624 -0.44629,0.36819 -0.56761,0.63059 -0.10406,0.22506 -0.0339,2.6433 -0.0394,3.07042 -0.005,0.40939 -0.0105,0.81877 -0.0158,1.22816 -0.003,0.2047 0.1787,0.60859 -0.008,0.61409 -0.18658,0.006 0.0105,-0.81878 0.008,-0.61409 -0.005,0.4094 -0.0105,0.81878 -0.0157,1.22817"
+       id="path2950-3" />
   </g>
 </svg>
