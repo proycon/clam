@@ -94,7 +94,7 @@
         <xsl:call-template name="log" />
       </xsl:when>
       <xsl:when test="@code = 2">
-        <div class="done"><xsl:value-of select="@message"/><input id="indexbutton" type="button" value="Return to projects" title="Leaves the project intact and returns you to the project list"/><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>
+        <div class="done"><xsl:value-of select="@message"/><input id="indexbutton" type="button" value="Return to projects" title="Leaves the project intact and returns you to the project list"/><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" /></div>
         <xsl:call-template name="log" />
       </xsl:when>
       <xsl:otherwise>

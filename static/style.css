@@ -249,7 +249,7 @@ input.start {
 input.uploadbutton {
     font-weight: bold;
 }
-input#abortbutton, input#restartbutton {
+input#abortbutton, input#restartbutton, input#indexbutton {
     float: right;
 }
 .uploadform table, #inputbox table {
