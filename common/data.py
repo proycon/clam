@@ -31,13 +31,11 @@ class FormatError(Exception):
 
 class CLAMFile:
     def __init__(self, projectpath, filename, format):
-            self.remote = (projectpath[0:7] == 'http://' or projectpath[0:7] == 'https://')
+            self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
             self.projectpath = projectpath
             self.filename = filename
             self.format = format
 
-    def __str__(self):
-        return self.path
 
     def readlines(self):
         """Loads all in memory"""
@@ -49,30 +47,35 @@ class CLAMInputFile(CLAMFile):
     def __iter__(self):
         """Read the lines of the file, one by one"""
         if not self.remote:
-            for line in codecs.open(self.projectpath + '/input/' + self.filename, 'r', self.format.encoding).readlines():
+            for line in codecs.open(self.projectpath + 'input/' + self.filename, 'r', self.format.encoding).readlines():
                 yield line
         else:
-            req = urllib2.urlopen(self.projectpath + '/input/' + self.filename)
+            req = urllib2.urlopen(self.projectpath + 'input/' + self.filename)
             for line in req.readlines():
                 yield line
 
     def validate(self):
         return self.format.validate('output/' + self.path)
+
+
 
     
 class CLAMOutputFile(CLAMFile):
     def __iter__(self):
         """Read the lines of the file, one by one"""
         if not self.remote:
-            for line in codecs.open(self.projectpath + '/output/' + self.filename, 'r', self.format.encoding).readlines():
+            for line in codecs.open(self.projectpath + 'output/' + self.filename, 'r', self.format.encoding).readlines():
                 yield line
         else:
-            req = urllib2.urlopen(self.projectpath + '/input/' + self.filename)
+            req = urllib2.urlopen(self.projectpath + 'output/' + self.filename)
             for line in req.readlines():
                 yield line
 
     def validate(self):
         return self.format.validate('output/' + self.path)
+
+    def __str__(self):
+        return self.projectpath + 'output/' + self.filename
 
 
 def getclamdata(filename):

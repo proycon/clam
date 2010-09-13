@@ -81,7 +81,7 @@ if data.status == clam.common.status.READY: #should always be the case, since we
         print "\tFILE: " + str(outputfile) + " (" + outputfile.format.name + ")"
         print "\tCONTENTS: "
         #Download and immediately read the output file
-        for line in clamclient.downloadreadlines(project, outputfile):
+        for line in outputfile:
             print "\t\t" + line.encode('utf-8'),
         print
 
