@@ -70,12 +70,16 @@ print "\tYour favourite colour is " + clamdata['colourchoice'].value
 print "INPUT FILES:"    
 
 #Iterate over all inputfiles:
-for inputfile in clamdata.input: 
+for inputfile in clamdata.input:
     print "\t" + str(inputfile)
     if isinstance(inputfile.format, clam.common.formats.PlainTextFormat) or isinstance(inputfile.format, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
-        clam.common.status.write(statusfile, "Processing " + os.path.basename(inputfile) + "...")
+        print "\tProcessing " + str(inputfile)
+        clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
         #invoke 'rev' through the shell to reverse the input
-        os.system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(inputfile))
+        os.system("rev " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)))
+    else:
+        print "\tSkipping " + str(inputfile)
+        clam.common.status.write(statusfile, "Skipping " + os.path.basename(str(inputfile)) + ", invalid format")
 
 clam.common.status.write(statusfile, "Done",100)       
 

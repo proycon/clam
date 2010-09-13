@@ -28,7 +28,7 @@ import clam.common.parameters
 import clam.common.formats
 from clam.common.data import CLAMData, CLAMInputFile, CLAMOutputFile
 
-VERSION = 0.2
+VERSION = 0.3
 
 
 # Register poster's streaming http handlers with urllib2

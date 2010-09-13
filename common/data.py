@@ -58,6 +58,9 @@ class CLAMInputFile(CLAMFile):
         return self.format.validate('output/' + self.path)
 
 
+    def __str__(self):
+        return self.projectpath + 'input/' + self.filename
+
 
     
 class CLAMOutputFile(CLAMFile):
@@ -84,7 +87,7 @@ def getclamdata(filename):
     f = open(filename,'r')
     xml = f.read(os.path.getsize(filename))
     f.close()
-    return CLAMData(xml)
+    return CLAMData(xml, True)
     
     
 
@@ -109,7 +112,7 @@ class CLAMData(object):
     Note that depending on the current status of the project, not all may be available.
     """
 
-    def __init__(self, xml):
+    def __init__(self, xml, localroot = False):
         """Pass an xml string containing the full response. It will be automatically parsed."""
         self.baseurl = ''
         self.projecturl = ''
@@ -126,13 +129,13 @@ class CLAMData(object):
         self.errors = False
         self.errormsg = ""
 
-        self.parseresponse(xml)
+        self.parseresponse(xml, localroot)
         
 
 
-    def parseresponse(self, xml):
+    def parseresponse(self, xml, localroot = False):
         """The parser, there's usually no need to call this directly"""
-        global VERSIONs
+        global VERSION
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
@@ -147,7 +150,16 @@ class CLAMData(object):
         if 'baseurl' in root.attrib:
             self.baseurl = root.attrib['baseurl']
             if self.project:
-                self.projecturl = root.attrib['baseurl'] + '/' + self.project + '/'
+                if localroot == True: #implicit, assume CWD
+                    self.remote = False
+                    self.projecturl = '' #relative directory (assume CWD is project directory, as is the case when wrapper scripts are called)
+                elif localroot: #explicit
+                    self.remote = False 
+                    self.projecturl = localroot + '/' + self.project + '/' #explicit directory
+                else:
+                    self.remote = True #no directory: remote URL
+                    self.projecturl = self.baseurl + '/' + self.project + '/'
+
 
 
         if 'user' in root.attrib:
@@ -177,18 +189,16 @@ class CLAMData(object):
                         self.corpora.append(corpusnode.value)
             elif node.tag == 'inputformats':    
                 for formatnode in node:
-                    if formatnode.tag == 'inputformat': 
-                        self.inputformats.append( clam.common.formats.formatfromxml(formatnode) )
+                    self.inputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'outputformats':        
                 for formatnode in node:
-                    if formatnode.tag == 'outputformat': 
-                        self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
+                    self.outputformats.append( clam.common.formats.formatfromxml(formatnode) )
             elif node.tag == 'input':
                  for filenode in node:
                     if filenode.tag == 'path':
                         selectedformat = clam.common.formats.Format()
                         for format in self.inputformats: 
-                            if unicode(format) == filenode.attrib['format']: #TODO: verify
+                            if format.__class__.__name__ == filenode.attrib['format']:
                                 selectedformat = format
                         self.input.append( CLAMInputFile( self.projecturl, filenode.text, selectedformat) )
             elif node.tag == 'output': 
@@ -196,7 +206,7 @@ class CLAMData(object):
                     if filenode.tag == 'path':
                         selectedformat = clam.common.formats.Format()
                         for format in self.outputformats: 
-                            if unicode(format) == filenode.attrib['format']: #TODO: verify
+                            if format.__class__.__name__ == filenode.attrib['format']:
                                 selectedformat = format
                         self.output.append( CLAMOutputFile( self.projecturl, filenode.text, selectedformat) )
             elif node.tag == 'projects':

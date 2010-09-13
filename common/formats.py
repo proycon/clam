@@ -26,12 +26,10 @@ def formatfromxml(node): #TODO: Add viewers
         for attrib, value in node.attrib.items():
             if attrib == 'encoding':
                 encoding = value
-            elif attrib == 'mask':
-                mask = value
         for extensionnode in node:
             if extensionnode.tag == 'extension':
-                extensions.append(extensionnode.value)            
-        return globals()[node.tag](encoding, extensions, mask) #return format instance
+                extensions.append(extensionnode.text)
+        return globals()[node.tag](encoding, extensions) #return format instance
     else:
         raise Exception("No such format exists: " + node.tag)
 
