@@ -44,7 +44,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.3.4'
+VERSION = '0.3.4.1'
 
 DEBUG = False
     
@@ -153,7 +153,6 @@ class CLAMService(object):
                 if lastparameter:            
                      msg += "Last part parameter: ", lastparameter.id
                 error(msg)
-
 
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
@@ -1185,7 +1184,7 @@ if __name__ == "__main__":
     test_dirs()
 
     #fake command line options for web.py
-    sys.argv = []
+    sys.argv = [ sys.argv[0] ] 
     if PORT:
         sys.argv.append(str(PORT)) #port from command line
         settings.PORT = PORT                       

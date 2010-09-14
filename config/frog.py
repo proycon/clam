@@ -32,7 +32,7 @@ host = uname()[1]
 if host == 'aurora': #proycon's laptop
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/frog.clam/"
-    PORT = 80
+    PORT = 8000
     URLPREFIX = 'frog'
 else:
     raise Exception("Help! I don't know where I'm running from! Configure me!")
