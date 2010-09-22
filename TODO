@@ -10,17 +10,20 @@
 
 ------------ BEGIN JULY (was: end june) ----------------------------
 
-- Add webservice-bypass, running CLAM directly as a command line tool
-- Add language property in format classes?
+- Revise format classes (add language field)
+- Add profilers
 - Validation function for simple formats (pre-beta3)
 - Remember parameter selection when 'restarting' a project
 - Support for viewers (done, test more extensively)
-    - Suppport for more complex, combined, viewers?
+    - Support for more complex, combined, viewers?
 
 - Allow users to configure access  (pre-beta3)
 - Add option to disable input, parameters, output, upload methods? (pre-beta3)
+
 - Make XML Scheme Definition for CLAM XML format (pre-beta3)
+
 - Logo, custom footer in service configuration (pre-beta3)
+
 - Write more documentation (in progress) (DONE for apache/nginx integration)
     - Add documention on writing clients (pre-beta3?)
 
@@ -28,22 +31,29 @@
 * release on ILK website? Including live services for for example Frog?
 * second announcement for TTNWW?
 
------------- BEGIN SEPTEMBER ----------------------------
+------------ ? ----------------------------
 
 
-- Start Cataplana
-    - Webservice Database
-    - Chaining
-        - Optional intermediate results
-        - Perhaps for future: Support for non-CLAM webservices?
-    - Visualisation Modules
-        - May be remote system, simply pass output to URL
-    - Authentication
-        Different accounts on different webservices? One combined account in interface?
 
-* first full release?
 
------------- END OCTOBER  ----------------------------
+
+
+
+
+
+
+
+on hold indefinitely:
+
+    - Start Cataplana
+        - Webservice Database
+        - Chaining
+            - Optional intermediate results
+            - Perhaps for future: Support for non-CLAM webservices?
+        - Visualisation Modules
+            - May be remote system, simply pass output to URL
+        - Authentication
+            Different accounts on different webservices? One combined account in interface?
 
 
 
