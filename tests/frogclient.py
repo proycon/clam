@@ -29,10 +29,8 @@ import clam.common.status
 
 
 url = None
-noparser = False
-tok = False
-vtok = False
-legtok = False
+skip = []
+tok = 'no'
 parameters = {}
 
 files = []
@@ -42,13 +40,11 @@ for arg in sys.argv[1:]:
         url = arg
     elif arg[0] == '-':
         if arg == '-P':
-            noparser = True
+            skip = ['p']
         elif arg == '-t':
-            tok = True
+            tok = 'tok'
         elif arg == '-v':
-            vtok = True
-        elif arg == '-l':
-            legtok = True
+            tok = 'vtok'
     elif os.path.isfile(arg):
         files.append(arg)
     elif os.path.isdir(arg):
@@ -56,7 +52,10 @@ for arg in sys.argv[1:]:
     else:
         print >>sys.stderr, "Unknown argument, or file/directory does not exist: " + arg
         print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
-        sys.exit(1)
+        print >>sys.stderr, "Options: -t\tTokenise only"
+        print >>sys.stderr, "         -v\tTokenise only (verbosely)"
+        print >>sys.stderr, "         -P\tDisable parser"
+        sys.exit(2)
 
 if not url or not files:
     print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
@@ -84,7 +83,7 @@ for f in files:
 
 
 print "Starting Frog..."
-data = clamclient.start(project, noparser=noparser, tok=tok,vtok=vtok, legtok=legtok) #start the process with the specified parameters
+data = clamclient.start(project, tok=tok,skip=skip) #start the process with the specified parameters
 if data.errors:
     print >>sys.stderr,"An error occured: " + data.errormsg
     for parametergroup, paramlist in data.parameters:
@@ -105,7 +104,10 @@ print "Frog is done."
 #Download output files to current directory
 for outputfile in data.output:
     print "\tDownloading " + str(outputfile) + " (" + outputfile.format.name + ") ..."
-    clamclient.download(project, outputfile, open(os.path.basename(outputfile.path),'w'))
+    f = codecs.open(os.path.basename(str(outputfile)),'w','utf-8')
+    for line in outputfile:
+        f.write(line)
+    f.close()
 
 
 #delete our project
