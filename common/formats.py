@@ -171,7 +171,6 @@ class TadpoleFormat(Format):
         super(TadpoleFormat,self).__init__(encoding, extensions, **kwargs)
 
 
-
 class DCOIFormat(Format):    
     
     name = "SoNaR/DCOI format"

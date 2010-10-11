@@ -31,7 +31,7 @@ SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmat
 # ================ Root directory for CLAM ===============
 host = uname()[1]
 if host == 'aurora': #proycon's laptop
-    CLAMDIR = "/home/proycon/work/clam"
+    CLAMDIR = "/home/proycon/work/demo/clam"
     ROOT = "/home/proycon/work/frog.clam/"
     PORT = 8000
     URLPREFIX = 'frog'
@@ -49,18 +49,18 @@ USERS = None #Enable this instead if you want no authentication
 INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
 
 #========== List of delivered Output formats by the system ====================
-OUTPUTFORMATS = [ TadpoleFormat('utf-8',['frogged'], viewer=FrogViewer() ) ]
+OUTPUTFORMATS = [ TadpoleFormat('utf-8',['frogged'], viewer= FrogViewer() ) ]
 
 #========== The system command =======================
 #   (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
-COMMAND = CLAMDIR +  "/wrappers/frogwrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+COMMAND = CLAMDIR +  "/wrappers/frogwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 
 #========== Parameters =======================
 PARAMETERS =  [ 
     ('Components', [       
-        ChoiceParameter('tok','--tok', 'Tokeniser only?', 'Use Frog as a standalone tokeniser?', choices=[('no','No'), ('tok','Yes'),('vtok','Yes (verbosely)')]),
-        ChoiceParameter('Skip','--skip=', 'Skip modules', 'Modules to disable:', choices=[('t', 'Tokeniser'), ('m', 'Multi-Word-Unit Detection'), ('p', 'Parser')], multi=True),
+        ChoiceParameter('tok','--tok', 'Tokenise only?', 'Use Frog as a standalone tokeniser?', choices=[('no','No'), ('tok','Yes'),('vtok','Yes (verbosely)')]),
+        ChoiceParameter('skip','--skip=', 'Skip modules', 'Modules to disable:', choices=[('t', 'Tokeniser'), ('m', 'Multi-Word-Unit Detection'), ('p', 'Parser')], multi=True),
         BooleanParameter('nopar','--nopar', 'Disable paragraph detection', 'Disables paragraph detection')
     ])
 ]
