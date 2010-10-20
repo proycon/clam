@@ -314,7 +314,7 @@ def ParameterCondition(object):
              return True
 
     def evaluate(self, parameters):
-        #Returns an False or whatever
+        #Returns False or whatever it evaluates to 
         if self.match(parameters):
             if isinstance(self.then, ParameterCondition):
                 #recursive parametercondition
@@ -330,5 +330,23 @@ def ParameterCondition(object):
         return False
 
     def xml(self):
-        #TODO
-        pass
+        xml = "<parametercondition>\n\t<if>\n"
+        for key, value, evalf, operator in self.conditions:
+            xml += "\t\t<" + operator + " parameter=\"" + key + "\">" + value + "</" + operator + ">"
+        xml += "\t</if>\n\t<then>\n"
+        xml += self.then.xml() #TODO LATER: add pretty indentation 
+        xml += "\t</then>\n"
+        if self.otherwise:
+            xml += "\t<else>\n"
+            xml += self.otherwise.xml() #TODO LATER: add pretty indentation 
+            xml += "\t</else>"
+        xml += "</parametercondition>"
+        return xml
+
+
+
+
+
+
+
+
