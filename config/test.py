@@ -32,7 +32,7 @@ SYSTEM_DESCRIPTION = "This is a small demo for CLAM. It does not really do anyth
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/home/proycon/work/clamtmproot2/"
+ROOT = sys.path[0] + "/clamtestroot/"
 
 #The URL of the system
 #URL = "http://localhost:8080"

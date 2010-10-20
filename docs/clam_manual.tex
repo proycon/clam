@@ -34,9 +34,10 @@ CLAM is entirely written in Python and is available as open-source, it is set up
 
 The kind of applications that CLAM is intended for are NLP applications, usually of a kind that do some processing on a text corpus. This corpus or smaller text can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
 
-The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources. The principal resource in CLAM is called a project. Users can maintain various projects, each representing one specific run of the system, with specific input, output and parameters.
+The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources. The principal resource in CLAM is called a \emph{project}. Various users can maintain various projects, each representing one specific run of the system, with particular input data, output data and a set of configured parameters.
 
-The webservice provides its responses in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice.
+The webservice provides its responses in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice. The webservice is thus usable also as a stand-alone web-application.
+
 
 This documentation is split into two parts: a section for service providers/developers and a section for service clients, users wanting to communicate with an existing service in an automated fashion.
 
@@ -339,6 +340,9 @@ CLAM Client API will be further discussed, possibly in next chapter.
 \end{devnotes}
 
 \chapter{Documentation for Service Clients}
+
+Being a RESTful webservice, automated clients can communicate with CLAM. 
+
 
 \begin{devnotes}
 Yet to be written... %TODO
