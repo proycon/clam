@@ -203,10 +203,35 @@ class FormatTemplate(object):
 
         #TODO
 
-    def xml(self):
+
+    def xml(self, maintag = "InputTemplate")
         """Produce Template XML"""
+        xml = "<" + maintag + " format=\"" + self.formatclass.__name__ + "\""
+        if self.formatclass.mimetype:
+            xml +=" mimetype=\""+self.formatclass.mimetype+"\""
+        if self.formatclass.schema:
+            xml +=" schema=\""+self.formatclass.schema+"\""
+        if self.unique:
+            xml +=" unique=\"yes\""
+        xml += ">\n"
+        for key, value, evalf, operator in self.metafields:
+            if isinstance(value, list):
+                xml += "\t<metaselect id=\"" + key + "\""
+                if operator:
+                    xml += " operator=\"" + operator + "\"
+                xml += ">"
+                for option in value:
+                    xml += "<option>" + value + "</option>"
+                xml += "</metaselect>\n"
+            else:
+                xml += "\t<meta id=\"" + key + "\""
+                if operator:
+                    xml += " operator=\"" + operator + "\"
+                xml += ">"
+                xml += "</meta>\n"
 
-
+        xml += "</" + maintag + ">\n"
+        return xml
 
         
 
@@ -214,10 +239,17 @@ class InputTemplate(FormatTemplate):
     def __init__(self, formatclass, label, **kwargs)
         super(InputTemplate,self).__init__(formatclass, label, **kwargs)
 
+    def xml(self):
+        return super(InputTemplate,self).xml('InputTemplate')
+
+
 class OutputTemplate(object):
     def __init__(self, formatclass, label, **kwargs)
         super(OutputTemplate,self).__init__(formatclass, label, **kwargs)
         assert self.suitableforoutput == True
+
+    def xml(self):
+        return super(InputTemplate,self).xml('OutputTemplate')
 
 
 
