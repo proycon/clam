@@ -17,6 +17,7 @@ from lxml import etree as ElementTree
 from StringIO import StringIO
 import clam.common.parameters
 import clam.common.formats
+import clam.common.metadata
 import urllib2
 import os.path
 import codecs
@@ -30,32 +31,45 @@ class FormatError(Exception):
          return "Not a valid CLAM XML response"
 
 class CLAMFile:
-    def __init__(self, projectpath, filename, format):
+    def __init__(self, projectpath, filename, loadmetadata = True):
             self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
             self.projectpath = projectpath
             self.filename = filename
-            self.format = format
+            if loadmetadata:
+                if not self.remote:
+                    f =  codecs.open(self.projectpath + 'input/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
+                else:
+                    f = urllib2.urlopen(self.projectpath + 'input/.' + self.filename + '.METADATA')
+                 xml = f.readline()
+                 f.close()
 
+                #parse metadata
+                self.metadata = clam.comon.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
+            else:
+                self.metadata = None
 
     def readlines(self):
         """Loads all in memory"""
         return list(iter(self))
 
 
-
 class CLAMInputFile(CLAMFile):
     def __iter__(self):
         """Read the lines of the file, one by one"""
         if not self.remote:
-            for line in codecs.open(self.projectpath + 'input/' + self.filename, 'r', self.format.encoding).readlines():
-                yield line
+            if 'encoding' in self.metadata:
+                for line in codecs.open(self.projectpath + 'input/' + self.filename, 'r', self.metadata['encoding']).readlines():
+                    yield line
+            else:
+                for line in open(self.projectpath + 'input/' + self.filename, 'r').readlines():
+                    yield line
         else:
             req = urllib2.urlopen(self.projectpath + 'input/' + self.filename)
             for line in req.readlines():
                 yield line
 
     def validate(self):
-        return self.format.validate('output/' + self.path)
+        return self.metadata().validate('output/' + self.path)
 
 
     def __str__(self):
@@ -67,15 +81,19 @@ class CLAMOutputFile(CLAMFile):
     def __iter__(self):
         """Read the lines of the file, one by one"""
         if not self.remote:
-            for line in codecs.open(self.projectpath + 'output/' + self.filename, 'r', self.format.encoding).readlines():
-                yield line
+            if 'encoding' in self.metadata:
+                for line in codecs.open(self.projectpath + 'output/' + self.filename, 'r', self.metadata['encoding']).readlines():
+                    yield line
+            else:
+                for line in open(self.projectpath + 'output/' + self.filename, 'r').readlines():
+                    yield line
         else:
             req = urllib2.urlopen(self.projectpath + 'output/' + self.filename)
             for line in req.readlines():
                 yield line
 
     def validate(self):
-        return self.format.validate('output/' + self.path)
+        return self.metadata.validate('output/' + self.path)
 
     def __str__(self):
         return self.projectpath + 'output/' + self.filename
