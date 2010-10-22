@@ -25,8 +25,8 @@ def profiler(inputfiles,parameters):
 
 class Profile(object):
     def __init__(self, input, output, parameters, **kwargs):
-        if isinstance(input, InputTemplate):
             input = [input]
+        if isinstance(input, InputTemplate):
         assert all([ isinstance(InputTemplate) for x in input])
         self.input = input
 
@@ -46,7 +46,7 @@ class Profile(object):
                 raise SyntaxError("Unknown parameter to profile: " + key)
 
     def match(self, inputfiles, parameters):
-        """Check if the profile matches inputdata *and* produces output given the set parameters"""
+        """Check if the profile matches inputdata *and* produces output given the set parameters. Return boolean"""
 
         #check if profile matches inputdata
         for inputtemplate in self.input:
@@ -60,11 +60,20 @@ class Profile(object):
                 match = True
         return match
 
-\
+
     def generate(self, inputfiles, parameters):
         """Generate output metadata on the basis of input files and parameters"""
+        raise NotImplementedError #TODO: implement
 
         if self.match(self, inputfiles, parameters):
+
+            #loop over inputfiles
+            #   see if inputfile matches inputtemplates
+            #    see if any outputtemplates become active (may be parameter dependent)
+            #     generate outputmetadata based on outputtemplats
+
+            #TODO !!!!!!
+
             for inputfile in inputfiles:
                 #load inputfile metadata
                 
@@ -76,13 +85,25 @@ class Profile(object):
                 if outputtemplate and outputtemplate.match(parameters):
                     outputtemplate.generate(inputdata, parameters)
 
-
-        #loop over inputfiles
-        #   see if inputfile matches inputtemplates
-        #    see if any outputtemplates become active (may be parameter dependent)
-        #     generate outputmetadata based on outputtemplats
-
+    def xml(self):
+        """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
+        xml = "<profile"
+        if self.multi:
+            xml += "  multi=\"yes\""
+        else:
+            xml += "  multi=\"no\""
+        xml += ">\n<input>\n"
+        for inputtemplate in self.input:
+            xml += inputtemplate.xml()
+        xml += "</input>\n"
+        xml += "<output>\n"
+        for outputtemplate in self.input:
+            xml += outputtemplate.xml() #works for ParameterCondition as well!
+        xml += "<output>\n"
+        xml += "</profile>\n"
+        return xml
         
+
 
 class IncompleteError(Exception):
     pass
@@ -134,7 +155,7 @@ class CLAMMetaData(object):
 
 
     def xml(self):
-        """Render an XML representation of the metadata"""
+        """Render an XML representation of the metadata""" #(independent of web.py for support in CLAM API)
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
         xml += "<CLAMMetaData format=\"" + self.__class__.__name__ + "\"
         if self.mimetype:
