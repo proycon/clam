@@ -217,7 +217,7 @@ class Index(object):
         if url[-1] == '/': url = url[:-1]
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.OUTPUTFORMATS, settings.INPUTFORMATS, None, projects )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects )
         
 
 
@@ -431,7 +431,7 @@ class Project(object):
                     yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
 
 
-    def outputindex(self,project, d = ''):        
+    def outputindex(self,project, d = ''):
         prefix = Project.path(project) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
