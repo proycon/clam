@@ -58,8 +58,6 @@ LOG = sys.stdout
 #COMMAND = ""
 #ROOT = "."
 #PARAMETERS = []
-#INPUTFORMATS = []
-#OUTPUTFORMATS = []
 #URL = "http://localhost:8080"
 #USERS = None
 
@@ -178,14 +176,6 @@ class CLAMService(object):
                 if os.path.isdir(f):
                     corpora.append(os.path.basename(f))
             return corpora
-
-    @staticmethod
-    def inputformats(name="inputformat"):
-        """Renders a list of input formats"""
-        #MAYBE TODO: add selected?
-        render = web.template.render('templates')
-        return render.inputformats(name, [ (format.__class__.__name__, unicode(format) ) for format in settings.INPUTFORMATS ])
-    
 
 
 class Index(object):
@@ -490,7 +480,7 @@ class Project(object):
         if url[-1] == '/': url = url[:-1]
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.OUTPUTFORMATS, settings.INPUTFORMATS, datafile, None )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.PROFILES, datafile, None )
         
                     
     @requirelogin
@@ -866,10 +856,7 @@ class Uploader(object):
     def test(self,project, filename, inputformat, depth = 0):
         printdebug("Testing " + filename)
         o = ""       
-        #inputformat = None
-        #for f in INPUTFORMATS:
-        #    if f.__class__.name == format_id:
-        #        inputformat = f
+
 
         if depth > 3: #security against archive-bombs
             if os.path.exists(self.path(project) + filename):
@@ -918,7 +905,9 @@ class Uploader(object):
     @requirelogin
     def GET(self, project, user=None):
         #Crude upload form
-        return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
+
+        #TODO: revise for new profiles and inputtemplates
+        #return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
 
     @requirelogin
     def POST(self, project, user=None):
@@ -1098,23 +1087,19 @@ def set_defaults(HOST = None, PORT = None):
         settings.ADMINS = []
     if not 'PROJECTS_PUBLIC' in settingkeys:
         settings.PROJECTS_PUBLIC = True
-    if not 'PARAMETERS' in settingkeys:
-        settings.PARAMETERS = []
-    if not 'OUTPUTFORMATS' in settingkeys:
-        settings.OUTPUTFORMATS = []
+    if not 'PROFILES' in settingkeys:
+        settings.PROFILES = []
     if not 'PORT' in settingkeys and not PORT:
         settings.PORT = 80
     if not 'HOST' in settingkeys and not HOST:
         settings.HOST = os.uname()[1]
-    if not 'OUTPUTFORMATS' in settingkeys:
-        settings.OUTPUTFORMATS = []
     if not 'URLPREFIX' in settingkeys:
         settings.URLPREFIX = ''    
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
 
-    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','INPUTFORMATS']:    
+    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:    
         if not s in settingkeys:
             error("ERROR: Service configuration incomplete, missing setting: " + s)
 
