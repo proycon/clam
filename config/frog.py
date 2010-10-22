@@ -24,11 +24,12 @@ from os import uname
 
 REQUIRE_VERSION = 0.4
 
+#============== General meta configuration =================
 SYSTEM_ID = "frog"
 SYSTEM_NAME = "Frog"
-SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilbug University. It will be the successor of Tadpole but is still under heavy development. "
+SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It will be the successor of Tadpole but is still under heavy development. "
 
-#Root directory for CLAM
+# ================ Root directory for CLAM ===============
 host = uname()[1]
 if host == 'aurora': #proycon's laptop
     CLAMDIR = "/home/proycon/work/clam"
