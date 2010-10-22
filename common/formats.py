@@ -255,7 +255,6 @@ class TadpoleFormat(Format):
         super(TadpoleFormat,self).__init__(**kwargs)
 
 
-
 class DCOIFormat(Format):    
     
     name = "DCOI format"

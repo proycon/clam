@@ -32,7 +32,7 @@ SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmat
 # ================ Root directory for CLAM ===============
 host = uname()[1]
 if host == 'aurora': #proycon's laptop
-    CLAMDIR = "/home/proycon/work/clam"
+    CLAMDIR = "/home/proycon/work/demo/clam"
     ROOT = "/home/proycon/work/frog.clam/"
     PORT = 8000
     URLPREFIX = 'frog'
