@@ -424,14 +424,22 @@ class Project(object):
         prefix = Project.path(project) + 'input/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
-                yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+                if os.path.isdir(f):
+                    for result in self.inputindex(project, f[len(prefix):]):
+                        yield result
+                else:   
+                    yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
 
 
     def outputindex(self,project, d = ''):        
         prefix = Project.path(project) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
-                yield  clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+                if os.path.isdir(f):
+                    for result in self.outputindex(project, f[len(prefix):]):
+                        yield result
+                else:   
+                    yield clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
 
 
     def response(self, user, project, parameters, datafile = False):
