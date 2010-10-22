@@ -243,8 +243,16 @@ class FormatTemplate(object):
 
     def __eq__(self, other):
         if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename  and other.unique == self.unique and other.outputtemplate == self.outputtemplate and other.inputtemplate == self.inputtemplate:
-            return other.metafields == self.metafields
-        return False
+            for key, value, evalf, operator in other.metafields:
+                found = False
+                for key2, value2, evalf, operator2 in other.metafields:
+                    if key2 == key and value2 == value and operator2 == operator:
+                        found = True
+                if not found:
+                    return False
+            return True
+        else:
+            return False
 
 
     def generate(self, inputdata, parameters):
