@@ -11,17 +11,18 @@
 ##############################################################
 
 
-class Profiler(object):
-    """The profiler looks at the state of input files and parameters and generates metadata for the output files"""
 
-    def checkprofiles(self, parameters):
-        """Returns all matching profiles"""
-        raise NotImplementedError #TODO: implement  
 
-    def execute(self, parameters):
-        raise NotImplementedError #TODO: implement
+def profiler(inputfiles,parameters):
+    """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
+    matched = []
+    for profile in PROFILES:
+        if profile.match(inputfiles, parameters):
+            matched.append(profile)
+    for profile in matched:
+        profile.generate(inputfile,parameters)
+    return matched
 
-    
 
 class Profile(object):
     def __init__(self, input, output, parameters, **kwargs):
@@ -45,7 +46,12 @@ class Profile(object):
             else:
                 raise SyntaxError("Unknown parameter to profile: " + key)
 
-            
+    def match(self, inputfiles, parameters):
+        """Check if the profile matches inputdata *and* produces output given the set parameters"""
+        #TODO
+
+    def generate(self, inputfiles, parameters):
+        """Generate output metadata on the basis of input files and parameters"""
 
 class IncompleteError(Exception):
     pass
@@ -198,9 +204,21 @@ class FormatTemplate(object):
     def generate(self, inputdata, parameters):
         """Convert the template into instantiated metadata (both input and output).
 
-            inputdata is a dictionary-compatible structure, for outputtemplates it's the metadata of the primary (first) inputfile, for inputtemplate it is a dictionary with post data containing the user's choices for the multiple-choice meta fields.
+            inputdata is a dictionary-compatible structure, for outputtemplates it's the metadata from the inputfile referenced using the inherit= parameter
         """
+        
+    
+        for key, value, evalf, operator in self.metafields:
+            if isinstance(value, list): #inputtemplate only
+                if key in inputdata:
+                    if operator == 'not':
+                else:
+                    if operator == 'not':
 
+
+        metadata = self.formatclass(**data)
+
+                
         #TODO
 
 
