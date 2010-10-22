@@ -323,8 +323,8 @@ Profile:
 
     
 
-    - metadata for input files generated on upload
-    - metadata for output files generated on start
+    - metadata for input files generated on upload (through inputtemplate + user choices)
+    - metadata for output files generated on start (through profiler -> profile -> outputtemplate)
 
 
 profile multi

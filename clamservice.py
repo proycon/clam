@@ -543,11 +543,19 @@ class Project(object):
                                         printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                         errors = True
 
+        #Run profiler
+        matchedprofiles = clam.common.metadata.profiler() #TODO
+
+
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
             #raise BadRequest(unicode(self.GET(project)))
             printlog("There are errors, not starting.")
             return self.response(user, project, parameters)
+        elif not matchedprofiles:
+            #TODO
+            printlog("No profiles matching, not starting.")
+            #TODO: return response
         else:
             #write clam.xml output file
             render = web.template.render('templates')

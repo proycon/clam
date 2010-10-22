@@ -19,8 +19,7 @@ def profiler(inputfiles,parameters):
     for profile in PROFILES:
         if profile.match(inputfiles, parameters):
             matched.append(profile)
-    for profile in matched:
-        profile.generate(inputfile,parameters)
+            profile.generate(inputfiles,parameters)
     return matched
 
 
@@ -48,10 +47,42 @@ class Profile(object):
 
     def match(self, inputfiles, parameters):
         """Check if the profile matches inputdata *and* produces output given the set parameters"""
-        #TODO
 
+        #check if profile matches inputdata
+        for inputtemplate in self.input:
+            if not inputtemplate.match(inputfiles):
+                return False
+
+        #check if output is produced
+        match = False
+        for outputtemplate in self.output:
+            if outputtemplate.match(parameters):
+                match = True
+        return match
+
+\
     def generate(self, inputfiles, parameters):
         """Generate output metadata on the basis of input files and parameters"""
+
+        if self.match(self, inputfiles, parameters):
+            for inputfile in inputfiles:
+                #load inputfile metadata
+                
+
+
+            for outputtemplate in self.output:
+                if isinstance(outputtemplate, ParameterCondition):
+                    outputtemplate = outputtemplate.evaluate(parameters)
+                if outputtemplate and outputtemplate.match(parameters):
+                    outputtemplate.generate(inputdata, parameters)
+
+
+        #loop over inputfiles
+        #   see if inputfile matches inputtemplates
+        #    see if any outputtemplates become active (may be parameter dependent)
+        #     generate outputmetadata based on outputtemplats
+
+        
 
 class IncompleteError(Exception):
     pass
@@ -188,17 +219,6 @@ class FormatTemplate(object):
 
 
 
-    def match(self, metadata):
-        """Does the specified metadata match this template?"""
-        assert isinstance(metadata, self.formatclass)
-        for key, value, evalf, operator in metafields:
-            if key in metadata:
-                if not evalf(metadata[key]):
-                    return False
-            else:
-                if operator != 'not':
-                    return False
-        return True
 
 
     def generate(self, inputdata, parameters):
@@ -260,6 +280,18 @@ class InputTemplate(FormatTemplate):
     def xml(self):
         return super(InputTemplate,self).xml('InputTemplate')
 
+    def match(self, metadata):
+        """Does the specified metadata match this template?"""
+        assert isinstance(metadata, self.formatclass)
+        for key, value, evalf, operator in metafields:
+            if key in metadata:
+                if not evalf(metadata[key]):
+                    return False
+            else:
+                if operator != 'not':
+                    return False
+        return True
+
 
 class OutputTemplate(object):
     def __init__(self, formatclass, label, **kwargs)
@@ -269,6 +301,9 @@ class OutputTemplate(object):
     def xml(self):
         return super(InputTemplate,self).xml('OutputTemplate')
 
+
+    def match(self, parameters):
+        
 
 
 def ParameterCondition(object):
