@@ -11,7 +11,8 @@
 ##############################################################
 
 
-
+import json
+from lxml import etree as ElementTree
 
 def profiler(inputfiles,parameters):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
@@ -25,9 +26,10 @@ def profiler(inputfiles,parameters):
 
 class Profile(object):
     def __init__(self, input, output, parameters, **kwargs):
+        if not isinstance(input, list):
             input = [input]
         if isinstance(input, InputTemplate):
-        assert all([ isinstance(InputTemplate) for x in input])
+           assert all([ isinstance(InputTemplate) for x in input])
         self.input = input
 
         if isinstance(output, OutputTemplate) or isinstance(output, ParameterCondition):
@@ -39,9 +41,9 @@ class Profile(object):
 
         for key, value in kwargs.items():
             if key == 'unique':
-                self.multi = False
+                self.multi = not value
             elif key == 'multi':
-                self.multi = True
+                self.multi = value
             else:
                 raise SyntaxError("Unknown parameter to profile: " + key)
 
@@ -265,7 +267,7 @@ class FormatTemplate(object):
 
     def xml(self, maintag = "InputTemplate")
         """Produce Template XML"""
-        xml = "<" + maintag + " format=\"" + self.formatclass.__name__ + "\""
+        xml = "<" + maintag + " format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
@@ -292,6 +294,14 @@ class FormatTemplate(object):
         xml += "</" + maintag + ">\n"
         return xml
 
+    def json(self):
+        """Produce a JSON representation for the web interface"""
+        d = { 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
+        if self.unique:
+            d['unique'] = True
+        for key, value, evalf, operator in self.metafields:
+            d['metafields'].append( { 'key':key, 'value':value, 'operator:', operator )
+        return json.dumps(d)
         
 
 class InputTemplate(FormatTemplate):
