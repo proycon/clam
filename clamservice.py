@@ -402,9 +402,11 @@ class Project(object):
             return (clam.common.status.READY, "Ready to start", [], 0)
 
 
-    def dirindex(self, project, formats, mode = 'output', d = ''):
-        paths = []            
+    def dirindex(self, project, formats, mode = 'output', d = ''): #OBSOLETE!!!!!
         for f in glob.glob(Project.path(project) + mode + "/" + d + "/*"):
+            yield CLAMFile(Project.path(project), )
+
+
             if os.path.isdir(f):
                 paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,formats, mode, d+"/"+os.path.basename(f)) ]
             else:
@@ -418,13 +420,18 @@ class Project(object):
                 paths.append( ( os.path.basename(f), format.__class__.__name__, format.name, format.encoding ) )
         return paths
 
-    def inputindex(self,project):        
-        return self.dirindex(project,settings.INPUTFORMATS,'input')
-
+    def inputindex(self,project, d = ''):
+        prefix = Project.path(project) + 'input/'
+        for f in glob.glob(prefix + d + "/*"):
+            if os.path.basename(f)[0] != '.': #always skip all hidden files
+                yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
 
 
     def outputindex(self,project, d = ''):        
-        return self.dirindex(project,settings.OUTPUTFORMATS,'output')
+        prefix = Project.path(project) + 'output/'
+        for f in glob.glob(prefix + d + "/*"):
+            if os.path.basename(f)[0] != '.': #always skip all hidden files
+                yield  clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
 
 
     def response(self, user, project, parameters, datafile = False):
