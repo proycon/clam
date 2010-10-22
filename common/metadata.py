@@ -241,7 +241,10 @@ class FormatTemplate(object):
                            self.metafields.append( (key,value,lambda x: x == value, '') )
 
 
-
+    def __eq__(self, other):
+        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename  and other.unique == self.unique and other.outputtemplate == self.outputtemplate and other.inputtemplate == self.inputtemplate:
+            return other.metafields == self.metafields
+        return False
 
 
     def generate(self, inputdata, parameters):
