@@ -44,7 +44,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.3.4.1'
+VERSION = '0.5.prealpha'
 
 DEBUG = False
     
@@ -121,6 +121,7 @@ class CLAMService(object):
 
     urls = (
     '/', 'Index',
+    '/data.js', 'InterfaceData', #provides Javascript data for the web interface
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
@@ -136,9 +137,11 @@ class CLAMService(object):
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             error("Specified root path " + settings.ROOT + " not found")
         elif not settings.COMMAND.split(" ")[0] or os.system("which " + settings.COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
-            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
+            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found or without execute permission")
+        elif not settings.PROFILES:
+            error("No profiles were defined in settings module!")
         elif not settings.PARAMETERS:
-            warning("No parameters specified in settings module!")
+            warning("No parameters defined in settings module!")
         else:      
             lastparameter = None      
             try:
@@ -792,6 +795,22 @@ class OutputInterface(object):
         if os.path.exists(Project.path(project) + ".status"):
             os.unlink(Project.path(project) + ".status")                       
 
+
+class InterfaceData(object):
+    """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
+
+    @requirelogin
+    def GET(self, project, user=None):
+        web.header('Content-Type', 'application/javascript')
+        inputtemplates = []
+        for profile in settings.PROFILES:
+            for inputtemplate in profile.input:
+                if not inputtemplate in inputtemplates: #no duplicates
+                    inputtemplates.append( inputtemplate.json() )
+        return "inputtemplates = [ " + ",".join([ t.json() for t in inputtemplates ]) + " ];"
+
+        
+
 class Uploader(object):
 
     def path(self, project):
@@ -908,6 +927,7 @@ class Uploader(object):
 
         #TODO: revise for new profiles and inputtemplates
         #return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
+        pass
 
     @requirelogin
     def POST(self, project, user=None):
@@ -1113,7 +1133,9 @@ def test_dirs():
         os.mkdir(settings.ROOT + 'corpora')
     if not os.path.isdir(settings.ROOT + 'projects'):
         warning("Projects directory does not exist yet, creating...")
-        os.mkdir(settings.ROOT + 'projects')
+        os.mkdir(settings.ROOT + 'projects')    
+    elif not settings.PARAMETERS:
+            warning("No parameters specified in settings module!")
 
 
 if __name__ == "__main__":

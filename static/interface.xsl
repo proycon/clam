@@ -53,6 +53,7 @@
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
   </head>
 </xsl:template>
 
