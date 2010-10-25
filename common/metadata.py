@@ -315,24 +315,70 @@ class FormatTemplate(object):
         return json.dumps(d)
         
 
-class InputTemplate(FormatTemplate):
-    def __init__(self, formatclass, label, **kwargs)
-        super(InputTemplate,self).__init__(formatclass, label, **kwargs)
+class InputTemplate(object):
+    def __init__(self, formatclass, label, *args, **kwargs)
+        assert (formatclass is CLAMMetaData)
+        self.formatclass = formatclass
+        self.label = label
+
+        self.parameters = []
+        
+        self.unique = True #may mark input/output as unique, even though profile may be in multi mode
+
+        self.filename = None
+        self.extension = None
+
+        for key, value in kwargs.items():
+            if key == 'unique':   
+                self.unique = True
+                self.unique = bool(value)
+            elif key == 'filename':
+                self.filename = value # use $N to insert a number in multi mode
+            elif key == 'extension':
+                self.extension = value
+
+        for parameter in args:
+            assert isinstance(parameter, AbstractParameter)
+            self.parameters.append(parameter)
+
 
     def xml(self):
-        return super(InputTemplate,self).xml('InputTemplate')
+        """Produce Template XML"""
+        xml = "<InputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        if self.formatclass.mimetype:
+            xml +=" mimetype=\""+self.formatclass.mimetype+"\""
+        if self.formatclass.schema:
+            xml +=" schema=\""+self.formatclass.schema+"\""
+        if self.unique:
+            xml +=" unique=\"yes\""
+        xml += ">\n"
+        for parameter in self.parameters:
+            xml += parameter.xml()
+        xml += "</InputTemplate>\n"
+        return xml
 
     def match(self, metadata):
         """Does the specified metadata match this template?"""
         assert isinstance(metadata, self.formatclass)
-        for key, value, evalf, operator in metafields:
-            if key in metadata:
-                if not evalf(metadata[key]):
+        for parameter in self.parameters:
+            if parameter.id in metadata:
+                if not parameter.validate(metadata[parameter.id]):
                     return False
-            else:
-                if operator != 'not':
-                    return False
+            elif parameter.required:
+                #a required parameter was not found
+                return False
         return True
+
+    def json(self):
+        """Produce a JSON representation for the web interface"""
+        d = { 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
+        if self.unique:
+            d['unique'] = True
+        d['parameters'] = {}
+        for parameter in self.parameters:
+            d['parameters'][parameter.id] = parameter.json()
+        return json.dumps(d)
+        
 
 
 class OutputTemplate(object):
