@@ -313,6 +313,22 @@ class FormatTemplate(object):
         for key, value, evalf, operator in self.metafields:
             d['metafields'].append( { 'key':key, 'value':value, 'operator:', operator )
         return json.dumps(d)
+
+    def generate(self, inputdata, parameters):
+        """Convert the template into instantiated metadata (both input and output).
+
+           inputdata is a dictionary-compatible structure, such as the relevant postdata
+        """
+        
+        for key, value, evalf, operator in self.metafields:
+            if isinstance(value, list): #inputtemplate only
+                if key in inputdata:
+                    if operator == 'not':
+                else:
+                    if operator == 'not':
+
+
+        metadata = self.formatclass(**data)
         
 
 class InputTemplate(object):

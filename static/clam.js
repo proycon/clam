@@ -191,3 +191,17 @@ function setinputsource(tempelement) {
     }
 }
 
+function inputtemplate(label, div) {
+    for (var i = 0; i < inputtemplates.length; i++) {
+        if (inputtemplates[i].label == label) {
+            //TODO: Generate inputtemplate form
+            form = '<table class="inputtemplate">'
+            for (var j = 0; j < inputtemplates[i].metafields.length; j++) {
+                form += '<tr><th>' + ' </th></tr>'
+            }
+            form += '</table>'
+            div.innerHTML = div
+        }
+    }
+}
+
