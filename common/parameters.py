@@ -61,9 +61,9 @@ def parameterfromxml(node):
     pass
 
 class AbstractParameter(object):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.id = id #a unique ID
-        self.paramflag = paramflag #the parameter flag passed to the command (include a trailing space!)        
+        self.paramflag = None #the parameter flag passed to the command (include a trailing space!) #CHECK: space still necessary?
         self.name = name #a representational name
         self.description = description
         self.error = None                    
@@ -97,6 +97,8 @@ class AbstractParameter(object):
             elif key == 'error':
                 #set an error message (if you also set a value, make sure this is set AFTER the value is set)
                 self.error = value
+            elif key == 'flag' or key == 'option' or key == 'paramflag':
+                self.paramflag = value
 
     def validate(self,value):
         self.error = None #reset error
@@ -115,7 +117,8 @@ class AbstractParameter(object):
         its selected value, and feedback on validation errors"""
         xml = "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
-        xml += ' flag="'+self.paramflag + '"'
+        if self.paramflag:
+            xml += ' flag="'+self.paramflag + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
         for key, v in self.kwargs.items():    
@@ -164,7 +167,7 @@ class AbstractParameter(object):
             
         
 class BooleanParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         
         #defaultinstance
         self.reverse = False
@@ -172,7 +175,7 @@ class BooleanParameter(AbstractParameter):
             if key == 'reverse': 
                 self.reverse = value  #Option gets outputted when option is NOT checked
 
-        super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(BooleanParameter,self).__init__(id,name,description, **kwargs)
 
     def set(self, value = True):
         return super(BooleanParameter,self).set(value)
@@ -198,7 +201,7 @@ class BooleanParameter(AbstractParameter):
 
 
 class StringParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.maxlength = 0 #unlimited
 
         #defaults
@@ -210,7 +213,7 @@ class StringParameter(AbstractParameter):
             elif key == 'maxlength': 
                 self.maxlength = int(value)
 
-        super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(StringParameter,self).__init__(id,name,description, **kwargs)
 
 
     def validate(self,value):
@@ -229,7 +232,7 @@ class StringParameter(AbstractParameter):
 
 
 class ChoiceParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):    
+    def __init__(self, id, name, description, **kwargs):    
         if not 'choices' in kwargs:
             raise Exception("No parameter choices specified for parameter " + id + "!")
         self.choices = [] #list of key,value tuples
@@ -255,7 +258,7 @@ class ChoiceParameter(AbstractParameter):
             elif key == 'delimiter': 
                 self.delimiter = value #char
 
-        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(ChoiceParameter,self).__init__(id,name,description, **kwargs)
 
     def validate(self,values):
         self.error = None
@@ -392,7 +395,7 @@ class IntegerParameter(AbstractParameter):
 
 
 class FloatParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0.0
         self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
 
@@ -406,7 +409,7 @@ class FloatParameter(AbstractParameter):
             elif key == 'maxvalue': 
                 self.maxvalue = float(value)
 
-        super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(FloatParameter,self).__init__(id,name,description, **kwargs)
 
     def validate(self, value):
         self.error = None
