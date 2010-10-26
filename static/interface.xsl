@@ -57,7 +57,14 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a></div>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
+
+<span class="extracredits">
+<strong>CLAM</strong> is funded under CLARIN-NL projects <strong><em>TICCLops</em></strong> <sub>(09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, coordinated by Antal van de Bosch and Martin Reynaert.
+</span>
+</div>
+
+
 </xsl:template>
 
 

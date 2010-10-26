@@ -200,6 +200,11 @@ table.files li {
     text-align: center;
     padding: 10px;
 }
+#footer .extracredits {
+    margin-top: 10px;
+    display: block;
+    
+}
 
 #parameters table {
     width: 90%;
