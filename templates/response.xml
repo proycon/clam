@@ -13,7 +13,7 @@ $else:
 $if not project:
         <projects>
         $for p, time in projects:
-                <project href="$baseurl/$p" time="$time">$p</project>
+                <project href="$url/$p" time="$time">$p</project>
         </projects>
 $if not datafile and project:
         <status code="$statuscode" message="$statusmessage" completion="$completion" errors="$errors" errormsg="$errormsg">
