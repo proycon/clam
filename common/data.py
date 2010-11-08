@@ -69,7 +69,7 @@ class CLAMInputFile(CLAMFile):
                 yield line
 
     def validate(self):
-        return self.metadata().validate('output/' + self.path)
+        return self.metadata.validate('output/' + self.path)
 
 
     def __str__(self):
