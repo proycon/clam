@@ -181,7 +181,7 @@ def profilefromxml():
     raise NotImplementedError #TODO: implement
     
 
-class FormatTemplate(object):
+class FormatTemplate(object): #OBSOLETE?
     def __init__(self, formatclass, label, **kwargs)
         assert (formatclass is CLAMMetaData)
         self.formatclass = formatclass
@@ -346,7 +346,6 @@ class InputTemplate(object):
 
         for key, value in kwargs.items():
             if key == 'unique':   
-                self.unique = True
                 self.unique = bool(value)
             elif key == 'filename':
                 self.filename = value # use $N to insert a number in multi mode
@@ -394,20 +393,83 @@ class InputTemplate(object):
         for parameter in self.parameters:
             d['parameters'][parameter.id] = parameter.json()
         return json.dumps(d)
-        
+
+    def __eq__(self, other):
+        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename:
+            for p in self.parameters:
+                found = False
+                for p2 in other.parameters:
+                    if p == p2:
+                        found = True
+                if not found:
+                    return False
+            return True
+        else:
+            return False
+
 
 
 class OutputTemplate(object):
-    def __init__(self, formatclass, label, **kwargs)
-        super(OutputTemplate,self).__init__(formatclass, label, **kwargs)
-        assert self.suitableforoutput == True
+    def __init__(self, formatclass, label, *args, **kwargs)
+        assert (formatclass is CLAMMetaData)
+        self.formatclass = formatclass
+        self.label = label
+
+        self.metafields = []
+        
+        self.unique = True #may mark input/output as unique, even though profile may be in multi mode
+
+        self.filename = None
+        self.extension = None
+
+        for key, value in kwargs.items():
+            if key == 'unique':   
+                self.unique = bool(value)
+            elif key == 'filename':
+                self.filename = value # use $N to insert a number in multi mode
+            elif key == 'extension':
+                self.extension = value
+
+        for metafield in args:
+            #TODO
+            self.metafields()
 
     def xml(self):
-        return super(InputTemplate,self).xml('OutputTemplate')
+        """Produce Template XML"""
+        xml = "<OutputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        if self.formatclass.mimetype:
+            xml +=" mimetype=\""+self.formatclass.mimetype+"\""
+        if self.formatclass.schema:
+            xml +=" schema=\""+self.formatclass.schema+"\""
+        if self.unique:
+            xml +=" unique=\"yes\""
+        xml += ">\n"
 
+        xml += "</OutputTemplate>\n"
+        return xml
+
+
+    def __eq__(self, other):
+        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename:
+            for m in self.metafields:
+                found = False
+                for m2 in other.metafields:
+                    if m == m2:
+                        found = True
+                if not found:
+                    return False
+            return True
+        else:
+            return False
 
     def match(self, parameters):
-        
+        #TODO
+
+    def json(self):
+        #TODO
+
+    def generate(self):
+        #TODO
 
 
 def ParameterCondition(object):
