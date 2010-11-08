@@ -435,10 +435,15 @@ class OutputTemplate(object):
         for key, value in kwargs.items():
             if key == 'unique':   
                 self.unique = bool(value)
+            elif key == 'multi':   
+                self.unique = not bool(value)
             elif key == 'filename':
                 self.filename = value # use $N to insert a number in multi mode
             elif key == 'extension':
                 self.extension = value
+
+        if not self.unique and not '#' in self.filename:
+            raise Exception("OutputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
         for metafield in args:
             #TODO
