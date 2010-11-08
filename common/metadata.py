@@ -396,17 +396,7 @@ class InputTemplate(object):
         return json.dumps(d)
 
     def __eq__(self, other):
-        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename:
-            for p in self.parameters:
-                found = False
-                for p2 in other.parameters:
-                    if p == p2:
-                        found = True
-                if not found:
-                    return False
-            return True
-        else:
-            return False
+        return other.id == self.id
 
 
 
@@ -452,17 +442,7 @@ class OutputTemplate(object):
 
 
     def __eq__(self, other):
-        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename:
-            for m in self.metafields:
-                found = False
-                for m2 in other.metafields:
-                    if m == m2:
-                        found = True
-                if not found:
-                    return False
-            return True
-        else:
-            return False
+        return other.id == self.id
 
     def match(self, parameters):
         #TODO
