@@ -353,6 +353,9 @@ class InputTemplate(object):
             elif key == 'extension':
                 self.extension = value
 
+        if not self.unique and not '#' in self.filename:
+            raise Exception("InputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
+
         for parameter in args:
             assert isinstance(parameter, AbstractParameter)
             self.parameters.append(parameter)
