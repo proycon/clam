@@ -92,7 +92,7 @@ class Profile(object):
         xml = "<profile"
         if self.multi:
             xml += "  multi=\"yes\""
-        else:
+        else:   
             xml += "  multi=\"no\""
         xml += ">\n<input>\n"
         for inputtemplate in self.input:
@@ -129,7 +129,7 @@ class CLAMMetaData(object):
         if attributes:
             for key, value in attributes.items():
                 if value and (not isinstance(value,list) or not False in value):
-                    if not key in self:
+                    self.label = label        if not key in self:
                         raise IncompleteError("Required attribute " + key +  " not specified")
             
 
@@ -332,9 +332,10 @@ class FormatTemplate(object): #OBSOLETE?
         
 
 class InputTemplate(object):
-    def __init__(self, formatclass, label, *args, **kwargs)
+    def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (formatclass is CLAMMetaData)
         self.formatclass = formatclass
+        self.id = id
         self.label = label
 
         self.parameters = []
@@ -410,8 +411,9 @@ class InputTemplate(object):
 
 
 class OutputTemplate(object):
-    def __init__(self, formatclass, label, *args, **kwargs)
+    def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (formatclass is CLAMMetaData)
+        self.id = id
         self.formatclass = formatclass
         self.label = label
 
