@@ -819,10 +819,19 @@ class InterfaceData(object):
             for inputtemplate in profile.input:
                 if not inputtemplate in inputtemplates: #no duplicates
                     inputtemplates.append( inputtemplate.json() )
-        return "inputtemplates = [ " + ",".join([ t.json() for t in inputtemplates ]) + " ];"
+
+        url = 'http://' + settings.HOST
+        if settings.PORT != 80:
+            url += ':' + str(settings.PORT)
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url += '/'
+            url += settings.URLPREFIX
+        if url[-1] == '/': url = url[:-1]
+
+        return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join([ t.json() for t in inputtemplates ]) + " ];"
 
         
-
 class Uploader(object): #OBSOLETE!
 
     def path(self, project):

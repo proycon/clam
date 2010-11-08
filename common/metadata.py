@@ -387,12 +387,17 @@ class InputTemplate(object):
 
     def json(self):
         """Produce a JSON representation for the web interface"""
-        d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
+        d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema }
         if self.unique:
             d['unique'] = True
-        d['parameters'] = {}
+        #d['parameters'] = {}
+
+        #The actual parameters are included as XML, and transformed by clam.js using XSLT (parameter.xsl) to generate the forms
+        parametersxml = ''
         for parameter in self.parameters:
-            d['parameters'][parameter.id] = parameter.json()
+            #d['parameters'][parameter.id] = parameter.json()
+            parameterxml = parameter.xml()
+        d['parametersxml'] = parameterxml
         return json.dumps(d)
 
     def __eq__(self, other):

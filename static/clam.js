@@ -1,4 +1,31 @@
+
+
 $(document).ready(function(){
+
+   //Download parameters.xsl so it's available to javascript for file-parameters
+   $.ajax({ 
+        type: "GET", 
+        url: baseurl + "/static/parameters.xsl, 
+        dataType: "xml", 
+        complete: function(xml){ 
+            parametersxsl = xml;
+        },
+   });
+    
+   //Create lists of all possible inputtemplates (aggregated over all profiles)
+   var inputtemplates_options = "";
+   for (var i = 0; i < inputtemplate.length; i++) {
+        inputtemplate_options += '<option value="">Select a filetype...</option><option value="' + inputtemplate.id + '">' + inputtemplate.label + '</option>';
+   }
+   $(".inputtemplates").html(inputtemplate_options);
+
+   //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
+   $("#uploadfile").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters');};
+   $("#urluploadfile").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');};
+   $("#editoruploadfile").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');};
+
+
+   //Create a new project
    if ($("#startprojectbutton").length) {
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
@@ -12,6 +39,8 @@ $(document).ready(function(){
          //$("#startprojectform").attr("action",$("#projectname").val());
        });
    }
+
+   //Abort and delete a project
    if ($("#abortbutton").length) {
        $("#abortbutton").click(function(event){
          $.ajax({ 
@@ -24,6 +53,8 @@ $(document).ready(function(){
          });         
        });
    }    
+
+   //Restart a project (deleting only its output)
    if ($("#restartbutton").length) {
        $("#restartbutton").click(function(event){
          $.ajax({ 
@@ -36,12 +67,16 @@ $(document).ready(function(){
          });         
        });
    }    
+
+   //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(event){
             window.location.href = "../"; /* refresh */
        });
    }  
 
+
+   //Tables for input files and output files
    tableinputfiles = $('#inputfiles').dataTable( {
                                 "bJQueryUI": false,
                                 "sPaginationType": "full_numbers"
@@ -57,11 +92,12 @@ $(document).ready(function(){
 			});
 
 
-
+   //Open in-browser editor
    $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
 
 
-   $("#submiteditor").click(function(event){ 
+   //Submit data through in-browser editor
+   $("#editorsubmit").click(function(event){ 
         $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
         var filename = $('#uploadfilename1').val();
         var d = new Date();    
@@ -96,16 +132,16 @@ $(document).ready(function(){
    });
    $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; });
 
-
-   $('#uploadurlsubmit').click(function(event){
+   //Download and add from URL
+   $('#urluploadsubmit').click(function(event){
             $('#urlupload').hide();
             $('#urluploadprogress').show();     
             $.ajax({ 
                 type: "POST", 
                 url: "upload/", 
                 dataType: "xml", 
-                data: {'uploadcount':1, 'uploadurl1': $('#uploadurl').val(), 'uploadformat1': $('#uploadformaturl').val() }, 
-                success: function(response){ 
+                data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
+                success: function(response){
                     $(response).find('file').each(function(){
                         if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
                             var found = false;
@@ -130,10 +166,10 @@ $(document).ready(function(){
             });              
     });
 
-
-   if ($('#uploadformat1')) {
+   //Upload through browser
+   if ($('#uploadinputtemplate')) {
        uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
-                $('#complexupload').hide();
+                $('#clientupload').hide();
                 $('#uploadprogress').show();           
             },  onComplete: function(file, response){
                 $(response).find('file').each(function(){
@@ -151,7 +187,7 @@ $(document).ready(function(){
                 });
                 //window.alert($(response).text()); //DEBUG
                 $('#uploadprogress').hide();
-                $('#complexupload').show();
+                $('#clientupload').show();
             }       
         }); 
        $('#uploadformat1').change(function(){
@@ -160,6 +196,51 @@ $(document).ready(function(){
    }
 
 });    
+
+function displayResult()
+{
+xml=loadXMLDoc("cdcatalog.xml");
+xsl=loadXMLDoc("cdcatalog.xsl");
+// code for IE
+if (window.ActiveXObject)
+  {
+  ex=xml.transformNode(xsl);
+  document.getElementById("example").innerHTML=ex;
+  }
+// code for Mozilla, Firefox, Opera, etc.
+else if (document.implementation && document.implementation.createDocument)
+  {
+  xsltProcessor=new XSLTProcessor();
+  xsltProcessor.importStylesheet(xsl);
+  resultDocument = xsltProcessor.transformToFragment(xml,document);
+  document.getElementById("example").appendChild(resultDocument);
+  }
+}
+
+function renderfileparameters(id, target) {
+    inputtemplate = null;
+    for (var i = 0; i <= inputtemplates.length; i++) {
+        if (inputtemplates[i].id == id) {
+            inputtemplate = inputtemplates[i];
+            break;
+        }
+    }
+    if (inputtemplate) {
+        if (document.implementation && document.implementation.createDocument)
+            //For decent browsers (Firefox, Opera, Chromium, etc...)    
+            xsltProcessor=new XSLTProcessor();
+            xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start
+            result = xsltProcessor.transformToFragment(inputtemplate.parametersxml,document);
+        } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
+            result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
+        } else {
+            result = "<strong>Error: Unable to render parameter form!</strong>";
+        }
+        $(target).html(result);
+    } else {
+        $(target).html("<strong>Error: Selected input template is invalid!</strong>");
+    }
+}
 
 
 function deleteinputfile(filename) {   
