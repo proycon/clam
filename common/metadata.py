@@ -394,6 +394,10 @@ class InputTemplate(object):
         d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema }
         if self.unique:
             d['unique'] = True
+        if self.filename:
+            d['filename'] = self.filename
+        if self.extension:
+            d['extension'] = self.extension
         #d['parameters'] = {}
 
         #The actual parameters are included as XML, and transformed by clam.js using XSLT (parameter.xsl) to generate the forms
