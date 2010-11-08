@@ -349,7 +349,7 @@ class InputTemplate(object):
             if key == 'unique':   
                 self.unique = bool(value)
             elif key == 'filename':
-                self.filename = value # use $N to insert a number in multi mode
+                self.filename = value # use '#' to insert a number in multi mode (will happen server-side!)
             elif key == 'extension':
                 self.extension = value
 
@@ -365,6 +365,10 @@ class InputTemplate(object):
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
             xml +=" schema=\""+self.formatclass.schema+"\""
+        if self.filename:
+            xml +=" filename=\""+self.filename+"\""
+        if self.extension:
+            xml +=" extension=\""+self.extension+"\""
         if self.unique:
             xml +=" unique=\"yes\""
         xml += ">\n"
