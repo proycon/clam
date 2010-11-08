@@ -392,7 +392,7 @@ class Project(object):
         #elif self.processingupload(project):
         #    return (clam.common.status.UPLOAD, "Processing upload, please wait...")
         else:
-            return (clam.common.status.READY, "Ready to start", [], 0)
+            return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
 
     def dirindex(self, project, formats, mode = 'output', d = ''): #OBSOLETE!!!!!
@@ -697,6 +697,18 @@ class InputFileHandler(object):
         else:
             raise web.webapi.NotFound()
 
+    @requirelogin
+    def POST(self, project, filename, user=None):
+        Project.create(project, user)
+
+        path = Project.path(project) + "input/" + filename.replace("..","")
+
+        #if the file already exists, it will be simply overwritten (without warning)
+        
+        #TODO: Write new uploader with new metadata!
+
+
+
 class OutputInterface(object):
 
     @requirelogin        
@@ -811,7 +823,7 @@ class InterfaceData(object):
 
         
 
-class Uploader(object):
+class Uploader(object): #OBSOLETE!
 
     def path(self, project):
         return Project.path(project) + 'input/'
@@ -928,6 +940,9 @@ class Uploader(object):
         #TODO: revise for new profiles and inputtemplates
         #return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
         pass
+
+    @requirelogin
+
 
     @requirelogin
     def POST(self, project, user=None):
