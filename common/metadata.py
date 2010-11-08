@@ -348,6 +348,8 @@ class InputTemplate(object):
         for key, value in kwargs.items():
             if key == 'unique':   
                 self.unique = bool(value)
+            elif key == 'multi':   
+                self.unique = not bool(value)
             elif key == 'filename':
                 self.filename = value # use '#' to insert a number in multi mode (will happen server-side!)
             elif key == 'extension':
