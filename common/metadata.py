@@ -387,7 +387,7 @@ class InputTemplate(object):
 
     def json(self):
         """Produce a JSON representation for the web interface"""
-        d = { 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
+        d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
         if self.unique:
             d['unique'] = True
         d['parameters'] = {}
