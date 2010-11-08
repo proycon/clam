@@ -413,23 +413,25 @@ class Project(object):
                 paths.append( ( os.path.basename(f), format.__class__.__name__, format.name, format.encoding ) )
         return paths
 
-    def inputindex(self,project, d = ''):
+    @staticmethod
+    def inputindex(project, d = ''):
         prefix = Project.path(project) + 'input/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
-                    for result in self.inputindex(project, f[len(prefix):]):
+                    for result in Project.inputindex(project, f[len(prefix):]):
                         yield result
                 else:   
                     yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
 
 
-    def outputindex(self,project, d = ''):
+    @staticmethod
+    def outputindex(project, d = ''):
         prefix = Project.path(project) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
-                    for result in self.outputindex(project, f[len(prefix):]):
+                    for result in Project.outputindex(project, f[len(prefix):]):
                         yield result
                 else:   
                     yield clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
@@ -451,7 +453,7 @@ class Project(object):
         else:
             corpora = []
         if statuscode == clam.common.status.DONE:
-            outputpaths = self.outputindex(project)
+            outputpaths = Project.outputindex(project)
             if self.exitstatus(project) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
@@ -459,7 +461,7 @@ class Project(object):
         else:
             outputpaths = []        
         if statuscode == clam.common.status.READY:
-            inputpaths = self.inputindex(project)
+            inputpaths = Project.inputindex(project)
         else:
             inputpaths = []      
         
@@ -699,9 +701,60 @@ class InputFileHandler(object):
 
     @requirelogin
     def POST(self, project, filename, user=None):
+        postdata = web.input(**kwargs)
+
+        if 'inputtemplate' in postdata:
+            for profile in settings.PROFILES:
+                for t in profile.input:
+                    if t.id == postdata['inputtemplate']:
+                        inputtemplate = None
+            if not inputtemplate:
+                #Inputtemplate not found, send 404 - Bad Request
+                printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
+                raise BadRequest
+
+
+            #TODO: See if other files use this inputtemplate:
+            for inputfile in Project.inputindex(project):
+                if inputfile.metadata.id  #TODO: finish
+                #yields CLAMInputFile
+
+                #if inputfile is same inputtemplate
+                    if inputtemplate.unique:
+                        raise web.forbidden() #inputtemplate is unique and file already exists
+
+            
+            if inputtemplate.unique
+
+        else:
+            printlog("No inputtemplate specified!")
+            raise BadRequest
+
+        if not filename:
+            if inputtemplate.filename:
+                filename = inputdata.filename
+            elif inputtemplate.extension
+                filename = postdata['upload' + str(i)].filename
+
+        if inputtemplate.filename:
+            if '#' in inputtemplate.filename:
+                
+            else:
+                if filename != inputdata.filename:
+                    raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
+
+        #Simple security
+        filename = filename.replace("..","")
+
+        if '#' in filename:
+            #TODO: Resolve numbers
+
+        #Create the project (no effect if already exists)
         Project.create(project, user)
 
         path = Project.path(project) + "input/" + filename.replace("..","")
+
+
 
         #if the file already exists, it will be simply overwritten (without warning)
         

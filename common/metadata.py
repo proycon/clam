@@ -433,9 +433,9 @@ class OutputTemplate(object):
         self.extension = None
 
         for key, value in kwargs.items():
-            if key == 'unique':   
+            if key == 'unique':
                 self.unique = bool(value)
-            elif key == 'multi':   
+            elif key == 'multi':
                 self.unique = not bool(value)
             elif key == 'filename':
                 self.filename = value # use $N to insert a number in multi mode

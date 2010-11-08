@@ -5,7 +5,7 @@ $(document).ready(function(){
    //Download parameters.xsl so it's available to javascript for file-parameters
    $.ajax({ 
         type: "GET", 
-        url: baseurl + "/static/parameters.xsl, 
+        url: baseurl + "/static/parameters.xsl",
         dataType: "xml", 
         complete: function(xml){ 
             parametersxsl = xml;
@@ -168,7 +168,9 @@ $(document).ready(function(){
 
    //Upload through browser
    if ($('#uploadinputtemplate')) {
-       uploader = new AjaxUpload('upload1', {action: 'upload/', name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1 } , onSubmit: function(){
+
+       filename = $('#uploadfile').val().match(/[\/|\\]([^\\\/]+)$/); //VERIFY!
+       uploader = new AjaxUpload('uploadfile', {action: 'output/' + filename, name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val()} , onSubmit: function(){
                 $('#clientupload').hide();
                 $('#uploadprogress').show();           
             },  onComplete: function(file, response){
@@ -217,14 +219,17 @@ else if (document.implementation && document.implementation.createDocument)
   }
 }
 
-function renderfileparameters(id, target) {
-    inputtemplate = null;
+function getinputtemplate(id) {
     for (var i = 0; i <= inputtemplates.length; i++) {
         if (inputtemplates[i].id == id) {
-            inputtemplate = inputtemplates[i];
-            break;
+           return inputtemplates[i]
         }
     }
+    return null;
+}
+
+function renderfileparameters(id, target) {
+    inputtemplate = getinputtemplate(id);
     if (inputtemplate) {
         if (document.implementation && document.implementation.createDocument)
             //For decent browsers (Firefox, Opera, Chromium, etc...)    
