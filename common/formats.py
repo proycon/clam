@@ -46,53 +46,6 @@ def formatfromxml(node): #TODO: Add viewers
     else:
         raise Exception("No such format exists: " + node.tag)
 
-
-class AbstractProfiler(object):
-    def __init__(self, **kwargs):
-        if 'paramconditions' in kwargs:
-            self.paramconditions = kwargs['paramconditions']
-        else:
-            self.paramconditions = lambda params: True
-
-    def profile(self, inputfiles, parameters):
-        """Compute a profile: a list of (filename, Format) tuples describing all files that will be outputted given a set of inputfiles (also a list of (filename, Format) tuples), and all set parameters (a dictionary of parameter IDs and associated values)""" 
-        return []
-
-
-class OneToOneProfiler(AbstractProfiler):
-    def __init__(self,inputformat, outputformat, **kwargs ):
-        assert isinstance(inputformat, Format)
-        if not inputformat.extension:
-            raise ValueError("Input format must have an extension defined")
-        self.inputformat = inputformat
-        assert isinstance(outputformat, Format) and outputformat.extension
-        if not outputformat.extension:
-            raise ValueError("Input format must have an extension defined")
-        self.outputformat = outputformat
-        super(OneToOneProfiler,self).__init__(**kwargs)
-
-    def profile(self, inputfiles, parameters):
-        profile = []
-        if self.paramconditions(parameters):
-            for inputfilename, inputformat in inputfiles:
-                if inputformat == self.inputformat:
-                    if inputfilename.endswith('.' + inputformat.extension):
-                        outputfilename = inputfilename[-len(inputformat.extension):] + outputformat.extension
-                        profile.append(outputfilename, self.outputformat)
-        return profile
-
-class NoneToOneProfiler(AbstractProfiler):
-    def __init__(self, filename, format):
-        self.filename = filename
-        assert isinstance(format, Format)
-        self.format = format
-
-    def profile(self, inputfiles, parameters):
-        return [(self.filename, self.format)]
-
-
-
-
 class Format(object):
     """This is the base Format class. Inherit from this class to create new format definitions.
     The class should have a 'name' member, containing the name the users will see. Upon instantiation,
