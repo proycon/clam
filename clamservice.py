@@ -731,6 +731,9 @@ class InputFileHandler(object):
 
     @requirelogin
     def POST(self, project, filename, user=None): #upload a new file
+        #TODO: add support for uploading metadata files
+        #TODO: re-add support for archives
+            
         postdata = web.input(**kwargs)
         inputtemplate = None
         
@@ -762,8 +765,11 @@ class InputFileHandler(object):
             
             
         #See if other previously uploaded input files use this inputtemplate
-        if not inputtemplate.unique:
+        if inputtemplate.unique:
+            nextseq = 0 #unique
+        else:
             nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
+            
         for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
             if inputtemplate.unique:
                 raise web.forbidden() #inputtemplate is unique but file already exists (it will have to be explicitly deleted by the client first)
@@ -802,28 +808,33 @@ class InputFileHandler(object):
         
         if 'file' in postdata:
             printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
-            output += "<upload source=\""+postdata['file'].filename +"\">\n"
+            output += "<upload source=\""+postdata['file'].filename +"\" filename=\""+filename+"\">\n"
             
         elif 'url' in postdata:
             #Download from URL
             printlog("Adding web-based URL " + postdata['url'].filename + " to input files")
-            output += "<upload source=\""+postdata['url'] +"\">\n"
+            output += "<upload source=\""+postdata['url'] +"\" filename=\""+filename+"\">\n"
 
         elif 'contents' in postdata:
             #In message
             printlog("Adding file " + filename + " with explicitly provided contents to input files")
-            output += "<upload source=\""+filename +"\">\n"
+            output += "<upload source=\""+filename +"\" filename=\""+filename+"\">\n"
 
           
         #============================ Generate metadata ========================================
         printdebug('(Generating and validating metadata)')
-        metadata = inputtemplate.generate(postdata)
+        metadata_valid, metadata, parameters = inputtemplate.generate(postdata,user)
         
-        #TODO: validate metadata
-        metadata_valid = inputtemplate.validate(metadata)
-        
-        #============================ Transfer file ========================================
         if metadata_valid:
+            output += "<parameters errors=\"no\">"
+        else:
+            output += "<parameters errors=\"yes\">"
+        for parameter in parameters:
+            output += parameter.xml()
+        output += "</parameters>"
+            
+        if metadata_valid:
+            #============================ Transfer file ========================================
             printdebug('(Start file transfer)')
             if 'file' in postdata:
                 #Upload file from client to server
@@ -852,16 +863,17 @@ class InputFileHandler(object):
             
         printdebug('(File transfer completed)')
         
-
+        valid = inputtemplate.formatclass.validate(metadata)        
         
-        #Validate uploaded file
-        errors = inputtemplate.formatclass.validate(metadata)
-        
-        if not errors:
-            #TODO: Save metadata if file validates    
-            #TODO: Create symbolic link for inputtemplates
+        if valid:
+            output += "<valid>yes</valid>"            
+            #Save metadata if file validates    
+            metadata.save()
+            #Create symbolic link for inputtemplates
+            os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + filename + '.INPUTTEMPLATE.' + inputtemplate.id + '.' + str(nextseq))
         else:
-            #TODO: Remove file
+            output += "<valid>no</valid>"
+            os.unlink(Project.path(project) + 'input/' + filename)
         
         
         output += "</upload>\n"       
