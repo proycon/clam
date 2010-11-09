@@ -121,15 +121,26 @@ class CLAMMetaData(object):
 
     mimetype = "" #No mimetype by default
     schema = ""
+    
+    self.input = False
+    self.output = False
 
     def __init__(self, **kwargs):
         self.data = {}
         for key, value in kwargs.items():
-            self[key] = value
+            if key == 'input':
+                self.input = True
+                self.systemid, self.systemname, self.systemurl, self.project, self.templateid,self.templatelabel = value
+            elif key == 'output':
+                self.output = True
+                self.systemid, self.systemname, self.systemurl, self.project, self.templateid,self.templatelabel = value
+            else:
+                self[key] = value
         if attributes:
             for key, value in attributes.items():
                 if value and (not isinstance(value,list) or not False in value):
-                    self.label = label        if not key in self:
+                    self.label = label  
+                    if not key in self:
                         raise IncompleteError("Required attribute " + key +  " not specified")
             
 
@@ -165,8 +176,17 @@ class CLAMMetaData(object):
         if self.schema:
              xml += " schema=\""+self.__class__.schema+"\""
         xml += ">\n"
+        
+        #TODO: Add origin path
+        #xml += "\t<origin>"
+        #xml += "\t\t<clamservice systemid=\""+ self.systemid +"\" systemname=\""+ self.systemname + "\" systemurl=\""+ self.systemurl +"\"   template=\""+ template.id +"\" label=\""+template.label+"\">"
+        #xml += "\t\t" + self.origin.metadata.xml()
+        #xml += "\t\t</clamservice>"
+        #xml += "\t</origin>"    
+            
         for key, value in self.data.items():
         xml += "\t<meta id=\""+key+"\">"+str(value)+"</meta>"
+        
         xml += "</CLAMMetaData>"
         return xml
 
@@ -334,6 +354,7 @@ class FormatTemplate(object): #OBSOLETE?
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (formatclass is CLAMMetaData)
+        assert (not '/' in id and not '.' in id)
         self.formatclass = formatclass
         self.id = id
         self.label = label
@@ -421,6 +442,7 @@ class InputTemplate(object):
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (formatclass is CLAMMetaData)
+        assert (not '/' in id and not '.' in id)
         self.id = id
         self.formatclass = formatclass
         self.label = label
