@@ -128,11 +128,8 @@ class CLAMMetaData(object):
     def __init__(self, **kwargs):
         self.data = {}
         for key, value in kwargs.items():
-            if key == 'input':
+            if key == 'origin': #TODO: add origin
                 self.input = True
-                self.systemid, self.systemname, self.systemurl, self.project, self.templateid,self.templatelabel = value
-            elif key == 'output':
-                self.output = True
                 self.systemid, self.systemname, self.systemurl, self.project, self.templateid,self.templatelabel = value
             else:
                 self[key] = value
