@@ -437,7 +437,7 @@ class Project(object):
                     yield clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
 
     @staticmethod
-    def inputindexbytemplate(self, project, inputtemplate):
+    def inputindexbytemplate(project, inputtemplate):
         """Retrieve sorted index for the specified input template"""
         prefix = Project.path(project) + 'input/'
         for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
@@ -450,7 +450,7 @@ class Project(object):
             
             
     @staticmethod
-    def outputindexbytemplate(self, project, outputtemplate):
+    def outputindexbytemplate(project, outputtemplate):
         """Retrieve sorted index for the specified input template"""
         prefix = Project.path(project) + 'output/'
         for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
@@ -1184,10 +1184,15 @@ class Uploader(object): #OBSOLETE!
             
         return output #200
 
-def globsymlinks(pattern):
+def globsymlinks(pattern, recursion=True):
     for f in glob.glob(pattern):
         if os.path.islink(f):
             yield f, os.path.dirname(f) + '/' + os.readlink(f)
+    if recursion:
+        for d in os.path.listdir(os.path.dirname(pattern)):
+            if os.path.isdir(d):
+                for linkf,realf in globsymlinks(d,recursion):
+                    yield linkf,realf
 
 def usage():
         print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
