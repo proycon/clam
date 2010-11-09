@@ -187,6 +187,10 @@ class CLAMMetaData(object):
         xml += "</CLAMMetaData>"
         return xml
 
+    def save(self, filename):
+        f = codecs.open(filename,'w','utf-8')
+        f.write(self.xml())
+        f.close()
 
 class CMDIMetaData(CLAMMetaData):
     #TODO: implement
@@ -423,19 +427,12 @@ class InputTemplate(object):
     def __eq__(self, other):
         return other.id == self.id
 
-    def match(self, metadata):
-        """Does the specified metadata match this template?"""
+    def match(self, metadata, user = None):
+        """Does the specified metadata match this template? returns (success,metadata,parameters)"""
         assert isinstance(metadata, self.formatclass)
-        for parameter in self.parameters:
-            if parameter.id in metadata:
-                if not parameter.validate(metadata[parameter.id]):
-                    return False
-            elif parameter.required:
-                #a required parameter was not found
-                return False
-        return True
+        return self.generate(metadata,user)
 
-    def generate(self, inputdata, user):
+    def generate(self, inputdata, user = None):
         """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
         
         metadata = self.formatclass(**data)
