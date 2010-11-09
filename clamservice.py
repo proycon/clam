@@ -732,30 +732,45 @@ class InputFileHandler(object):
     @requirelogin
     def POST(self, project, filename, user=None): #upload a new file
         postdata = web.input(**kwargs)
-
+        inputtemplate = None
+        
         if 'inputtemplate' in postdata:
+            #An input template must always be provided            
             for profile in settings.PROFILES:
                 for t in profile.input:
                     if t.id == postdata['inputtemplate']:
-                        inputtemplate = None
+                        inputtemplate = t
             if not inputtemplate:
                 #Inputtemplate not found, send 404 - Bad Request
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-                raise BadRequest
-
-            #See if other files use this inputtemplate:
-            if not inputtemplate.unique:
-                nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
-            for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
-                if inputtemplate.unique:
-                    raise web.forbidden() #inputtemplate is unique and file already exists (it will have to be explicitly deleted by the client first)
-                else:
-                    if seq >= nextseq:
-                        nextseq = 1
-
+                raise BadRequest                
         else:
-            printlog("No inputtemplate specified!")
-            raise BadRequest
+            #Check if the specified filename can be uniquely associated with an inputtemplate
+            for profile in settings.PROFILES:
+                for t in profile.input:
+                    if t.filename == filename:
+                        if inputtemplate:
+                            #we found another one, not unique!! reset and break
+                            inputtemplate = None
+                            break
+                        else:
+                            #good, we found one, don't break cause we want to make sure there is only one
+                            inputtemplate = t                        
+            if not inputtemplate:
+                printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
+                raise BadRequest
+            
+            
+        #See if other previously uploaded input files use this inputtemplate
+        if not inputtemplate.unique:
+            nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
+        for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
+            if inputtemplate.unique:
+                raise web.forbidden() #inputtemplate is unique but file already exists (it will have to be explicitly deleted by the client first)
+            else:
+                if seq >= nextseq:
+                    nextseq = seq + 1 #next available sequence number
+            
 
         if not filename:
             if inputtemplate.filename:
@@ -764,35 +779,95 @@ class InputFileHandler(object):
                 filename = postdata['upload' + str(i)].filename
 
         if inputtemplate.filename:
-            if '#' in inputtemplate.filename:
-                
-            else:
-                if filename != inputdata.filename:
-                    raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
+            if filename != inputdata.filename:
+                raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
+            #TODO LATER: add support for calling this with an actual number instead of #
 
-        #Simple security
+        #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
 
-        if '#' in filename:
-            #TODO: Resolve numbers
-
-        #Create a symbolic link in the input
-        if inputtemplate.unique:
-            
-        else:
-
         #Create the project (no effect if already exists)
-        Project.create(project, user)
+        Project.create(project, user)        
 
-        path = Project.path(project) + "input/" + filename.replace("..","")
-
-
-
-        #if the file already exists, it will be simply overwritten (without warning)
+        if not inputtemplate.unique:
+            if '#' in filename: #resolve number in filename
+                filename = filename.replace('#',str(nextseq))
         
-        #TODO: Write new uploader with new metadata!
 
+        
+        
+        web.header('Content-Type', "text/xml; charset=UTF-8")
+        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        output += "<clamupload>\n"
+        
+        if 'file' in postdata:
+            printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
+            output += "<upload source=\""+postdata['file'].filename +"\">\n"
+            
+        elif 'url' in postdata:
+            #Download from URL
+            printlog("Adding web-based URL " + postdata['url'].filename + " to input files")
+            output += "<upload source=\""+postdata['url'] +"\">\n"
 
+        elif 'contents' in postdata:
+            #In message
+            printlog("Adding file " + filename + " with explicitly provided contents to input files")
+            output += "<upload source=\""+filename +"\">\n"
+
+          
+        #============================ Generate metadata ========================================
+        printdebug('(Generating and validating metadata)')
+        metadata = inputtemplate.generate(postdata)
+        
+        #TODO: validate metadata
+        metadata_valid = inputtemplate.validate(metadata)
+        
+        #============================ Transfer file ========================================
+        if metadata_valid:
+            printdebug('(Start file transfer)')
+            if 'file' in postdata:
+                #Upload file from client to server
+                f = open(Project.path(project) + 'input/' + filename,'wb')
+                for line in postdata['file'].file:
+                    f.write(line) #encoding unaware, seems to solve big-file upload problem
+                f.close()            
+            elif 'url' in postdata:
+                #Download file from 3rd party server to CLAM server
+                try:
+                    req = urllib2.urlopen(postdata['uploadurl' + str(i)])
+                except:
+                    raise web.webapi.NotFound()
+                CHUNK = 16 * 1024
+                f = open(Project.path(project) + 'input/' + filename,'wb')
+                while True:
+                    chunk = req.read(CHUNK)
+                    if not chunk: break
+                    f.write(chunk)     
+                f.close()                                  
+            elif 'contents' in postdata:            
+                f = codecs.open(Project.path(project) + 'input/' + filename,'wb')
+                f.write(postdata['uploadtext' + str(i)])
+                f.close()
+            
+            
+        printdebug('(File transfer completed)')
+        
+
+        
+        #Validate uploaded file
+        errors = inputtemplate.formatclass.validate(metadata)
+        
+        if not errors:
+            #TODO: Save metadata if file validates    
+            #TODO: Create symbolic link for inputtemplates
+        else:
+            #TODO: Remove file
+        
+        
+        output += "</upload>\n"       
+
+        output += "</clamupload>"
+        return output #200
 
 class OutputInterface(object):
 

@@ -411,7 +411,7 @@ class InputTemplate(object):
                 #a required parameter was not found
                 return False
         return True
-
+            
     def json(self):
         """Produce a JSON representation for the web interface"""
         d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema }
@@ -434,6 +434,12 @@ class InputTemplate(object):
     def __eq__(self, other):
         return other.id == self.id
 
+    def generate(self, inputdata):
+        """Convert the template into instantiated metadata. inputdata is a dictionary-compatible structure, such as the relevant postdata"""
+            
+        #TODO: Generate metadata        
+
+        metadata = self.formatclass(**data)
 
 
 class OutputTemplate(object):
