@@ -400,17 +400,6 @@ class InputTemplate(object):
         xml += "</InputTemplate>\n"
         return xml
 
-    def match(self, metadata):
-        """Does the specified metadata match this template?"""
-        assert isinstance(metadata, self.formatclass)
-        for parameter in self.parameters:
-            if parameter.id in metadata:
-                if not parameter.validate(metadata[parameter.id]):
-                    return False
-            elif parameter.required:
-                #a required parameter was not found
-                return False
-        return True
             
     def json(self):
         """Produce a JSON representation for the web interface"""
@@ -434,12 +423,70 @@ class InputTemplate(object):
     def __eq__(self, other):
         return other.id == self.id
 
-    def generate(self, inputdata):
-        """Convert the template into instantiated metadata. inputdata is a dictionary-compatible structure, such as the relevant postdata"""
-            
-        #TODO: Generate metadata        
+    def match(self, metadata):
+        """Does the specified metadata match this template?"""
+        assert isinstance(metadata, self.formatclass)
+        for parameter in self.parameters:
+            if parameter.id in metadata:
+                if not parameter.validate(metadata[parameter.id]):
+                    return False
+            elif parameter.required:
+                #a required parameter was not found
+                return False
+        return True
 
+    def generate(self, inputdata, user):
+        """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
+        
         metadata = self.formatclass(**data)
+        errors = []
+        
+        #we're going to modify parameter values, this we can't do
+        #on the inputtemplate variable, that won't be thread-safe, we first
+        #make a (shallow) copy and act on that          
+        for parameter in self.parameters:
+            parameters.append(copy(parameter))
+        
+        
+        for parameter in parameters:
+            if parameter.access(user):
+                postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
+                if not (isinstance(postvalue,bool) and postvalue == False):
+                    if parameter.set(postvalue): #may generate an error in parameter.error
+                        params.append(parameter.compilearg(parameter.value))
+                    else:
+                        if not parameter.error: parameter.error = "Something mysterious went wrong whilst settings this parameter!" #shouldn't happen
+                        printlog("Unable to set " + parameter.id + ": " + parameter.error)
+                        errors = True
+                elif parameter.required:
+                    #Not all required parameters were filled!
+                    parameter.error = "This option must be set"
+                    errors = True
+                if parameter.value and (parameter.forbid or parameter.require):
+                    for parameter2 in parameters:
+                            if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
+                                parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
+                                printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                                errors = True
+                            if parameter.require and parameter2.id in parameter.require and not parameter2.value:
+                                parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
+                                printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                                errors = True
+        
+        #scan errors and set metadata
+        success = True
+        for parameter in parameters:
+            if parameter.error:
+                success = False
+            else:
+                metadata[parameter.id] = parameter.value
+ 
+        if not success:
+            metadata = None
+            
+        return success, metadata, parameters
+    
+        
 
 
 class OutputTemplate(object):
