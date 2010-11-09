@@ -36,17 +36,22 @@ class CLAMFile:
             self.projectpath = projectpath
             self.filename = filename
             if loadmetadata:
-                if not self.remote:
-                    f =  codecs.open(self.projectpath + 'input/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
-                else:
-                    f = urllib2.urlopen(self.projectpath + 'input/.' + self.filename + '.METADATA')
-                 xml = f.readline()
-                 f.close()
-
-                #parse metadata
-                self.metadata = clam.comon.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
+                self.loadmetadata(self)
             else:
                 self.metadata = None
+
+                
+    def loadmetadata(self):
+            if not self.remote:
+                f =  codecs.open(self.projectpath + 'input/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
+            else:
+                f = urllib2.urlopen(self.projectpath + 'input/.' + self.filename + '.METADATA')
+             xml = f.readline()
+             f.close()
+
+            #parse metadata
+            self.metadata = clam.comon.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
+     
 
     def readlines(self):
         """Loads all in memory"""

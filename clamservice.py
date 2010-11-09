@@ -743,17 +743,15 @@ class InputFileHandler(object):
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
                 raise BadRequest
 
-            #TODO: See if other files use this inputtemplate:
-            for inputfile in Project.inputindex(project):
-                if inputfile.metadata.id  #TODO: finish
-                #yields CLAMInputFile
-
-                #if inputfile is same inputtemplate
-                    if inputtemplate.unique:
-                        raise web.forbidden() #inputtemplate is unique and file already exists
-
-            
-            if inputtemplate.unique
+            #See if other files use this inputtemplate:
+            if not inputtemplate.unique:
+                nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
+            for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
+                if inputtemplate.unique:
+                    raise web.forbidden() #inputtemplate is unique and file already exists (it will have to be explicitly deleted by the client first)
+                else:
+                    if seq >= nextseq:
+                        nextseq = 1
 
         else:
             printlog("No inputtemplate specified!")
@@ -777,6 +775,11 @@ class InputFileHandler(object):
 
         if '#' in filename:
             #TODO: Resolve numbers
+
+        #Create a symbolic link in the input
+        if inputtemplate.unique:
+            
+        else:
 
         #Create the project (no effect if already exists)
         Project.create(project, user)
@@ -1191,7 +1194,7 @@ def globsymlinks(pattern, recursion=True):
     if recursion:
         for d in os.path.listdir(os.path.dirname(pattern)):
             if os.path.isdir(d):
-                for linkf,realf in globsymlinks(d,recursion):
+                for linkf,realf in globsymlinks(d + '/' + os.path.basename(pattern),recursion):
                     yield linkf,realf
 
 def usage():
