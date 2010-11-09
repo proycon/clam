@@ -436,6 +436,32 @@ class Project(object):
                 else:   
                     yield clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
 
+    @staticmethod
+    def inputindexbytemplate(self, project, inputtemplate):
+        """Retrieve sorted index for the specified input template"""
+        prefix = Project.path(project) + 'input/'
+        for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
+            seq = int(linkf.split('.')[-1])
+            index.append( (seq,f) )
+            
+        #yield CLAMFile objects in proper sequence
+        for seq, f in sorted(index):
+            yield seq, clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+            
+            
+    @staticmethod
+    def outputindexbytemplate(self, project, outputtemplate):
+        """Retrieve sorted index for the specified input template"""
+        prefix = Project.path(project) + 'output/'
+        for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
+            seq = int(linkf.split('.')[-1])
+            index.append( (seq,f) )
+            
+        #yield CLAMFile objects in proper sequence
+        for seq, f in sorted(index):
+            yield seq, clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+                        
+
 
     def response(self, user, project, parameters, datafile = False):
         global VERSION
@@ -701,11 +727,6 @@ class InputFileHandler(object):
         else:
             raise web.webapi.NotFound()
 
-    def inputtemplateindex(self, project, inputtemplate):
-        """Show index per input template"""
-        
-        for file in glob.glob(Project.path(project) + '/input/.*.INPUTTEMPLATE.' + inputtemplate.id + ".*"):
-            
         
 
     @requirelogin
