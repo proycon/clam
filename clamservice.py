@@ -691,6 +691,8 @@ class InputFileHandler(object):
             raise BadRequest('No file specified') #TODO: message won't show
 
         path = Project.path(project) + "input/" + filename.replace("..","")
+
+        #TODO: delete metadata as well!
         
         if os.path.isfile(path): 
             os.unlink(path)
@@ -699,8 +701,15 @@ class InputFileHandler(object):
         else:
             raise web.webapi.NotFound()
 
+    def inputtemplateindex(self, project, inputtemplate):
+        """Show index per input template"""
+        
+        for file in glob.glob(Project.path(project) + '/input/.*.INPUTTEMPLATE.' + inputtemplate.id + ".*"):
+            
+        
+
     @requirelogin
-    def POST(self, project, filename, user=None):
+    def POST(self, project, filename, user=None): #upload a new file
         postdata = web.input(**kwargs)
 
         if 'inputtemplate' in postdata:
@@ -712,7 +721,6 @@ class InputFileHandler(object):
                 #Inputtemplate not found, send 404 - Bad Request
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
                 raise BadRequest
-
 
             #TODO: See if other files use this inputtemplate:
             for inputfile in Project.inputindex(project):
@@ -1155,7 +1163,10 @@ class Uploader(object): #OBSOLETE!
             
         return output #200
 
-
+def globsymlinks(pattern):
+    for f in glob.glob(pattern):
+        if os.path.islink(f):
+            yield f, os.path.dirname(f) + '/' + os.readlink(f)
 
 def usage():
         print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
