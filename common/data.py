@@ -52,7 +52,7 @@ class CLAMFile:
              f.close()
 
             #parse metadata
-            self.metadata = clam.comon.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
+            self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
         """Read the lines of the file, one by one"""

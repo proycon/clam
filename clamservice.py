@@ -823,9 +823,10 @@ class InputFileHandler(object):
           
         #============================ Generate metadata ========================================
         printdebug('(Generating and validating metadata)')
-        metadata_valid, metadata, parameters = inputtemplate.generate(postdata,user)
+        errors, parameters = inputtemplate.validate(postdata, user)
         
-        if metadata_valid:
+        
+        if not errors:
             output += "<parameters errors=\"no\">"
         else:
             output += "<parameters errors=\"yes\">"
@@ -863,17 +864,41 @@ class InputFileHandler(object):
             
         printdebug('(File transfer completed)')
         
-        valid = inputtemplate.formatclass.validate(metadata)        
+        #Create a file object
+        file = CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
         
-        if valid:
-            output += "<valid>yes</valid>"            
-            #Save metadata if file validates    
-            metadata.save()
-            #Create symbolic link for inputtemplates
-            os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + filename + '.INPUTTEMPLATE.' + inputtemplate.id + '.' + str(nextseq))
+        try:
+            #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+            validmeta, metadata, parameters = inputtemplate.generate(file, user, (errors, parameters ))
+            if validmeta:
+                #And we tie it to the CLAMFile object
+                file.metadata = metadata
+            
+        except ValueError, KeyError:
+            validmeta = False
+            
+        if not validmeta:    
+            output += "<validmeta>no</validmeta>" 
         else:
-            output += "<valid>no</valid>"
-            os.unlink(Project.path(project) + 'input/' + filename)
+            output += "<validmeta>yes</validmeta>"     
+                    
+            #Now we validate the file itself
+            valid = file.validate()        
+            
+            if valid:                       
+                output += "<valid>yes</valid>"                
+                                
+                #Great! Everything ok, save metadata
+                metadata.save(Project.path(project) + 'input/.' + filename + '.METADATA')
+                
+                #And create symbolic link for inputtemplates
+                os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + filename + '.INPUTTEMPLATE.' + inputtemplate.id + '.' + str(nextseq))
+            else:
+                #Too bad, everything worked out but the file itself doesn't validate.
+                output += "<valid>no</valid>"
+            
+                #remove upload
+                os.unlink(Project.path(project) + 'input/' + filename)
         
         
         output += "</upload>\n"       
