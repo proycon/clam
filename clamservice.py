@@ -867,6 +867,8 @@ class InputFileHandler(object):
         #Create a file object
         file = CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
         
+        #============== Generate metadata ==============
+
         try:
             #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
             validmeta, metadata, parameters = inputtemplate.generate(file, user, (errors, parameters ))
@@ -878,11 +880,9 @@ class InputFileHandler(object):
             validmeta = False
             
         if not validmeta:    
-            output += "<validmeta>no</validmeta>" 
-        else:
-            output += "<validmeta>yes</validmeta>"     
-                    
-            #Now we validate the file itself
+            output += "<metadataerror />" #This usually indicates an error in service configuration!
+        else:                    
+            #====================== Validate the file itself ====================
             valid = file.validate()        
             
             if valid:                       
