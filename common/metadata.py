@@ -346,12 +346,13 @@ class InputTemplate(object):
         return errors, parameters
 
 
-    def generate(self, file, inputdata, user = None):
-        """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
+    def generate(self, file, inputdata, user = None, validatedata = None):
+        """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error. Validatedata is a (errors,parameters) tuple that can be passed if you did validation in a prior stage, if not specified, it will be done automatically."""
         
         metadata = {}
         
-        errors,parameters = self.validate(inputdata,user)
+        if not validatedata:
+            errors,parameters = self.validate(inputdata,user)
         
         #scan errors and set metadata
         success = True
