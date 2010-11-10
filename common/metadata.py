@@ -285,7 +285,7 @@ class InputTemplate(object):
     def generate(self, inputdata, user = None):
         """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
         
-        metadata = self.formatclass(**data)
+        metadata = self.formatclass()
         errors = []
         
         #we're going to modify parameter values, this we can't do
