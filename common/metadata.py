@@ -107,10 +107,6 @@ class Profile(object):
         
 
 
-class IncompleteError(Exception):
-    pass
-
-
 
 def getmetadata(xmldata):
     """Read metadata from XML"""
@@ -138,9 +134,8 @@ class CLAMMetaData(object):
             if not allowcustomattributes:
                 for key, value in kwargs.items():
                     if not key in attributes:
-                        raise ValueError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes.")
-                            
-            
+                        raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes.")
+                                        
             for key, valuerange in attributes.items():
                 if isinstance(valuerange,list):
                     if not key in self and not False in valuerange :
@@ -299,7 +294,7 @@ class InputTemplate(object):
     def generate(self, inputdata, user = None):
         """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
         
-        metadata = self.formatclass()
+        metadata = {}
         errors = []
         
         #we're going to modify parameter values, this we can't do
@@ -344,7 +339,12 @@ class InputTemplate(object):
  
         if not success:
             metadata = None
-            
+        else:
+            try:
+                metadata = self.formatclass(**metadata)
+            except ValueError, KeyError:
+                raise                
+                
         return success, metadata, parameters
     
         
