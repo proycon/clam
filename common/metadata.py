@@ -14,6 +14,8 @@
 import json
 from lxml import etree as ElementTree
 
+from clam.common.data import CLAMFile
+
 def profiler(inputfiles,parameters):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
     matched = []
@@ -122,8 +124,10 @@ class CLAMMetaData(object):
     self.input = False
     self.output = False
 
-    def __init__(self, **kwargs):
+    def __init__(self, file, **kwargs):
+        assert isinstance(file, CLAMFile)
         self.data = {}
+        self.loadinlinemetadata()
         for key, value in kwargs.items():
             if key == 'origin': #TODO: add origin
                 self.input = True
@@ -200,6 +204,20 @@ class CLAMMetaData(object):
         f = codecs.open(filename,'w','utf-8')
         f.write(self.xml())
         f.close()
+        
+    def validate(self):
+        #Should be overridden by subclasses
+        return True
+        
+    def loadinlinemetadata(self):
+        #Read inline metadata, can be overridden by subclasses
+        pass
+        
+    def saveinlinemetadata(self):
+        #Save inline metadata, can be overridden by subclasses
+        pass
+        
+        
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement

@@ -31,39 +31,39 @@ class ExampleFormat(CLAMMetaData):
     #If your format is XML-based, specify a scheme:
     #scheme = None
     
+    #NOTE: Never override the constructor with different arguments!
+    
+    def validate(self):
+        #Add your validation method here, should return True or False
+        return True
+        
+    def loadinlinemetadata(self):
+        #If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file
+        pass
+        
+    def saveinlinemetadata(self):
+        #If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file
+        pass
+           
 
 class PlainText(CLAMMetaData):
     attributes = {'encoding':True,'language':False }
     mimetype = "text/plain"
-
-    def __init__(self, **kwargs):
-        super(PlainTextFormat,self).__init__(**kwargs)
-            
                 
 class TadpoleFormat(CLAMMetaData):    
-    attributes = {'encoding':True,'language':False } #attributes with True are always required!
-    
-    name = "Tadpole Output Format"
+    attributes = {'encoding':True,'language':False }    
+    name = "Tadpole Columned Output Format"
     mimetype = 'text/plain'
 
-    def __init__(self, **kwargs ):
-        super(TadpoleFormat,self).__init__(**kwargs)
-
-
 class DCOIFormat(CLAMMetaData):    
-    
     name = "DCOI format"
     mimetype = 'text/xml'
-
-    def __init__(self, **kwargs):
-        super(DCOIFormat,self).__init__(**kwargs)
+    scheme = '' #TODO
 
 
 class KBXMLFormat(CLAMMetaDatas):
-    
     name = "Koninklijke Bibliotheek XML-formaat"
     mimetype = 'text/xml'
+    scheme = '' #TODO
 
-    def __init__(self, **kwargs ):
-        super(KBXMLFormat,self).__init__(encoding, extensions, **kwargs)
 
