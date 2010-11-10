@@ -193,7 +193,7 @@ class CLAMMetaData(object):
         f.close()
 
 class CMDIMetaData(CLAMMetaData):
-    #TODO: implement
+    #TODO LATER: implement
 
 
 
@@ -202,159 +202,9 @@ def profilefromxml():
     raise NotImplementedError #TODO: implement
     
 
-class FormatTemplate(object): #OBSOLETE?
-    def __init__(self, formatclass, label, **kwargs)
-        assert (formatclass is CLAMMetaData)
-        self.formatclass = formatclass
-        self.label = label
-
-        self.inputtemplate = True
-        self.outputtemplate = True #are the meta values non-ambiguous, and usable deterministically for output templates?
-
-        self.metafields = []
-        
-        self.unique = True #may mark input/output as unique, even though profile may be in multi mode
-
-        self.filename = None
-        self.extension = None
-
-
-        for key, value in kwargs.items():
-            if key == 'unique':   
-                self.unique = True
-                self.unique = bool(value)
-            elif key == 'filename':
-                self.filename = value # use $N to insert a number in multi mode
-            elif key == 'extension':
-                self.extension = value
-            else:
-                if isinstance(value, list):
-                    #value is list of values
-                    if key[:-4] == '_not':
-                           self.outputtemplate = False
-                           self.metafields.append( (key[:-4],value,lambda x: not x in value, 'not') )
-                    else:
-                           self.outputtemplate = False
-                           self.metafields.append( (key,value,lambda x: x in value,'') )
-                else:
-                    #value is single value
-                    if key[:-4] == '_not':
-                           self.metafields.append( (key[:-4],value,lambda x: x != value, 'not') )
-                    elif key[:-5] == '_copy': #copy from input metadata
-                           self.inputtemplate = False
-                           self.metafields.append( (key[:-5],value,lambda x: True: 'copy') ) 
-                    elif key[:-14] == '_fromparameter': #copy from parameter specificaton
-                           self.inputtemplate = False
-                           self.metafields.append( (key[:-14],value,lambda x: True: 'fromparameter') ) 
-                    elif key[:-12] == '_greaterthan':
-                           self.outputtemplate = False
-                           self.metafields.append( (key[:-12],value,lambda x: x > value, 'greaterthan') )
-                    elif key[:-17] == '_greaterequalthan':
-                           self.outputtemplate = False
-                           self.metafields.append( (key[:-17],value,lambda x: x >= value, 'greaterequalthan') )
-                    elif key[:-10] == '_lessthan':
-                           self.outputtemplate = False
-                           self.metafields.append( (key[:-10],value,lambda x: x < value, 'lessthan') )
-                    elif key[:-15] == '_lessequalthan':
-                           self.outputtemplate = False
-                           self.metafields.append( (key[:-15],value,lambda x: x <= value, 'lessequalthan') )
-                    else:
-                           self.metafields.append( (key,value,lambda x: x == value, '') )
-
-
-    def __eq__(self, other):
-        if other.formatclass == self.formatclass and other.label == self.label and other.extension == self.extension and other.filename == self.filename  and other.unique == self.unique and other.outputtemplate == self.outputtemplate and other.inputtemplate == self.inputtemplate:
-            for key, value, evalf, operator in other.metafields:
-                found = False
-                for key2, value2, evalf, operator2 in other.metafields:
-                    if key2 == key and value2 == value and operator2 == operator:
-                        found = True
-                if not found:
-                    return False
-            return True
-        else:
-            return False
-
-
-    def generate(self, inputdata, parameters):
-        """Convert the template into instantiated metadata (both input and output).
-
-            inputdata is a dictionary-compatible structure, for outputtemplates it's the metadata from the inputfile referenced using the inherit= parameter
-        """
-        
-    
-        for key, value, evalf, operator in self.metafields:
-            if isinstance(value, list): #inputtemplate only
-                if key in inputdata:
-                    if operator == 'not':
-                else:
-                    if operator == 'not':
-
-
-        metadata = self.formatclass(**data)
-
-                
-        #TODO
-
-
-    def xml(self, maintag = "InputTemplate")
-        """Produce Template XML"""
-        xml = "<" + maintag + " format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
-        if self.formatclass.mimetype:
-            xml +=" mimetype=\""+self.formatclass.mimetype+"\""
-        if self.formatclass.schema:
-            xml +=" schema=\""+self.formatclass.schema+"\""
-        if self.unique:
-            xml +=" unique=\"yes\""
-        xml += ">\n"
-        for key, value, evalf, operator in self.metafields:
-            if isinstance(value, list):
-                xml += "\t<metaselect id=\"" + key + "\""
-                if operator:
-                    xml += " operator=\"" + operator + "\"
-                xml += ">"
-                for option in value:
-                    xml += "<option>" + value + "</option>"
-                xml += "</metaselect>\n"
-            else:
-                xml += "\t<meta id=\"" + key + "\""
-                if operator:
-                    xml += " operator=\"" + operator + "\"
-                xml += ">"
-                xml += "</meta>\n"
-
-        xml += "</" + maintag + ">\n"
-        return xml
-
-    def json(self):
-        """Produce a JSON representation for the web interface"""
-        d = { 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema, 'metafields': [] }
-        if self.unique:
-            d['unique'] = True
-        for key, value, evalf, operator in self.metafields:
-            d['metafields'].append( { 'key':key, 'value':value, 'operator:', operator )
-        return json.dumps(d)
-
-    def generate(self, inputdata, parameters):
-        """Convert the template into instantiated metadata (both input and output).
-
-           inputdata is a dictionary-compatible structure, such as the relevant postdata
-        """
-        
-        for key, value, evalf, operator in self.metafields:
-            if isinstance(value, list): #inputtemplate only
-                if key in inputdata:
-                    if operator == 'not':
-                else:
-                    if operator == 'not':
-
-
-        metadata = self.formatclass(**data)
-        
-
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
-        assert (formatclass is CLAMMetaData)
+        assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.formatclass = formatclass
         self.id = id
@@ -488,7 +338,7 @@ class InputTemplate(object):
 
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
-        assert (formatclass is CLAMMetaData)
+        assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.id = id
         self.formatclass = formatclass
