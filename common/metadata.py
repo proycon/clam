@@ -309,11 +309,8 @@ class InputTemplate(object):
         assert isinstance(metadata, self.formatclass)
         return self.generate(metadata,user)
 
-    def generate(self, inputdata, user = None):
-        """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
-        
-        metadata = {}
-        errors = []
+    def validate(self, inputdata, user = None):
+        errors = False
         
         #we're going to modify parameter values, this we can't do
         #on the inputtemplate variable, that won't be thread-safe, we first
@@ -346,6 +343,15 @@ class InputTemplate(object):
                                 parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
                                 printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                 errors = True
+        return errors, parameters
+
+
+    def generate(self, file, inputdata, user = None):
+        """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error"""
+        
+        metadata = {}
+        
+        errors,parameters = self.validate(inputdata,user)
         
         #scan errors and set metadata
         success = True
@@ -359,7 +365,7 @@ class InputTemplate(object):
             metadata = None
         else:
             try:
-                metadata = self.formatclass(**metadata)
+                metadata = self.formatclass(file, **metadata)
             except ValueError, KeyError:
                 raise                
                 

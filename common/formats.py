@@ -28,6 +28,7 @@ class ExampleFormat(CLAMMetaData):
     #Specify a mimetype for your format
     mimetype = "text/plain"
     
+    
     #If your format is XML-based, specify a scheme:
     #scheme = None
     
