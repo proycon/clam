@@ -111,6 +111,7 @@ class IncompleteError(Exception):
     pass
 
 
+
 def getmetadata(xmldata):
     """Read metadata from XML"""
     raise NotImplementedError #TODO: implement
@@ -134,12 +135,25 @@ class CLAMMetaData(object):
             else:
                 self[key] = value
         if attributes:
-            for key, value in attributes.items():
-                if value and (not isinstance(value,list) or not False in value):
-                    self.label = label  
+            if not allowcustomattributes:
+                for key, value in kwargs.items():
+                    if not key in attributes:
+                        raise ValueError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes.")
+                            
+            
+            for key, valuerange in attributes.items():
+                if isinstance(valuerange,list):
+                    if not key in self and not False in valuerange :
+                        raise ValueError("Required attribute " + key +  " not specified")
+                    elif self[key] not in valuerange:
+                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(attributes[key])
+                elif valuerange is False: #Any value is allowed, and this attribute is not required
+                    pass #nothing to do
+                elif valuerange is True: #Any value is allowed, this attribute is *required*    
                     if not key in self:
                         raise IncompleteError("Required attribute " + key +  " not specified")
-            
+                elif valuerange: #value is a single specific unconfigurable value 
+                    self[key] = valuerange
 
     def __getitem__(self, key):
         return self.data[key]
