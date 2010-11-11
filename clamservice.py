@@ -419,6 +419,7 @@ class Project(object):
     @staticmethod
     def inputindexbytemplate(project, inputtemplate):
         """Retrieve sorted index for the specified input template"""
+        index = []
         prefix = Project.path(project) + 'input/'
         for linkf, f in clam.common.util.globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
@@ -432,8 +433,9 @@ class Project(object):
     @staticmethod
     def outputindexbytemplate(project, outputtemplate):
         """Retrieve sorted index for the specified input template"""
+        index = []
         prefix = Project.path(project) + 'output/'
-        for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
+        for linkf, f in clam.common.util.globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
@@ -722,7 +724,7 @@ class InputFileHandler(object):
         #TODO LATER: add support for uploading metadata files
         #TODO LATER: re-add support for archives
             
-        postdata = web.input(**kwargs)
+        postdata = web.input()
         inputtemplate = None
         
         if 'inputtemplate' in postdata:
@@ -769,13 +771,13 @@ class InputFileHandler(object):
         if not filename:
             if inputtemplate.filename:
                 filename = inputtemplate.filename
-            elif inputtemplate.extension
+            elif inputtemplate.extension:
                 filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) + '.' + inputtemplate.extension
             else:
                 filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
                 
         if inputtemplate.filename:
-            if filename != inputdata.filename:
+            if filename != inputtemplate.filename:
                 raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
             #TODO LATER: add support for calling this with an actual number instead of #
         if inputtemplate.extension:
@@ -832,7 +834,7 @@ class InputFileHandler(object):
             output += parameter.xml()
         output += "</parameters>"
             
-        if metadata_valid:
+        if not errors:
             #============================ Transfer file ========================================
             printdebug('(Start file transfer)')
             if 'file' in postdata:
@@ -892,8 +894,8 @@ class InputFileHandler(object):
                 
                 #And create symbolic link for inputtemplates
                 linkfilename = os.path.dirname(filename) 
-                if metafilename: linkfilename += '/'
-                linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' inputtemplate.id + '.' + str(nextseq)
+                if linkfilename: linkfilename += '/'
+                linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
                 os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
             else:
                 #Too bad, everything worked out but the file itself doesn't validate.
