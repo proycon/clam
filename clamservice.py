@@ -846,7 +846,7 @@ class InputFileHandler(object):
             elif 'url' in postdata:
                 #Download file from 3rd party server to CLAM server
                 try:
-                    req = urllib2.urlopen(postdata['uploadurl' + str(i)])
+                    req = urllib2.urlopen(postdata['url'])
                 except:
                     raise web.webapi.NotFound()
                 CHUNK = 16 * 1024
@@ -856,9 +856,10 @@ class InputFileHandler(object):
                     if not chunk: break
                     f.write(chunk)     
                 f.close()                                  
-            elif 'contents' in postdata:            
+            elif 'contents' in postdata:  
+                #Contents passed in POST message itself
                 f = codecs.open(Project.path(project) + 'input/' + filename,'wb')
-                f.write(postdata['uploadtext' + str(i)])
+                f.write(postdata['contents'])
                 f.close()
             
             
