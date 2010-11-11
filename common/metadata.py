@@ -16,8 +16,13 @@ from lxml import etree as ElementTree
 
 from clam.common.data import CLAMFile
 
+
+
+
 def profiler(inputfiles,parameters):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
+    #We use the INPUTTEMPLATE symbolic links to quickly match the input side of profiles
+
     matched = []
     for profile in PROFILES:
         if profile.match(inputfiles, parameters):
@@ -252,7 +257,10 @@ class InputTemplate(object):
             elif key == 'filename':
                 self.filename = value # use '#' to insert a number in multi mode (will happen server-side!)
             elif key == 'extension':
-                self.extension = value
+                if value[0] == '.': #without dot
+                    self.extension = value[1:]        
+                else:
+                    self.extension = value
 
         if not self.unique and not '#' in self.filename:
             raise Exception("InputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
@@ -308,7 +316,21 @@ class InputTemplate(object):
         """Does the specified metadata match this template? returns (success,metadata,parameters)"""
         assert isinstance(metadata, self.formatclass)
         return self.generate(metadata,user)
+        
+    def matchingfiles(self, inputpath):
+        """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results."""
+        results = []
+        for linkf,realf in clam.common.util.globsymlinks(inputpath + '/.*.INPUTTEMPLATE.' + self.id + '.*'):
+            seqnr = int(linkf.split('.')[-1])
+            results.append( (seqnr, realf) )
+        results = sorted(results)
+        if self.unique and len(results) != 1: 
+            return []
+        else:
+            return results
 
+                
+                
     def validate(self, inputdata, user = None):
         errors = False
         

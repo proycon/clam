@@ -30,7 +30,7 @@ class ExampleFormat(CLAMMetaData):
     
     
     #If your format is XML-based, specify a scheme:
-    #scheme = None
+    scheme = None
     
     #NOTE: Never override the constructor with different arguments!
     

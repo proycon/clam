@@ -99,8 +99,15 @@ $(document).ready(function(){
    //Submit data through in-browser editor
    $("#editorsubmit").click(function(event){ 
         $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
-        //TODO: Validate filename against inputtemplate!     
         var filename = $('#editorfilename').val();
+        var filename = getuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
+        if (!filename) {
+             //alert already produced by getuploadfilename()
+             return false;
+        }
+        
+        
+        
         var d = new Date();    
         if (!filename) {
             filename = d.getTime();        
@@ -123,9 +130,15 @@ $(document).ready(function(){
 
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
+            var filename = getuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
+            if (!filename) {
+               //alert already produced by getuploadfilename()
+               return false;
+            }
+
             $('#urlupload').hide();
             $('#urluploadprogress').show();
-            //TODO: Determine filename using inputtemplate!     
+            
             $.ajax({ 
                 type: "POST", 
                 url: "input/" + filename, 
@@ -146,8 +159,11 @@ $(document).ready(function(){
 
    //Upload through browser
    $('#uploadbutton').click(function(){
-       //TODO: Extract filename (check if inputtemplate specified filename/extension first!)
-       filename = $('#uploadfile').val().match(/[\/|\\]([^\\\/]+)$/); //VERIFY!
+       var filename = getuploadfilename($('#uploadfile').val(),$('#uploadinputtemplate').val());
+       if (!filename) {
+           //alert already produced by getuploadfilename()
+           return false;
+       }
        
        uploader = new AjaxUpload('uploadfile', {action: 'input/' + filename, name: 'uploadfile', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
             onSubmit: function(){
@@ -167,7 +183,10 @@ $(document).ready(function(){
 function processuploadresponse(response) {
       $(response).find('upload').each(function(){       //for each uploaded file
         var children = $(this).children();
-        metadataerror = parametererrors = false;
+        var inputtemplate = $(this).attr('inputtemplate');
+        var metadataerror = false;
+        var parametererrors = false;
+        var valid = false;
         for (var i = 0; i < children.length; i++) {
             if ($(children[i]).is('parameters')) { //see if parameters validate
                 if ($(children[i]).attr('errors') == 'no') {
@@ -204,10 +223,14 @@ function processuploadresponse(response) {
                 tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('templatelabel'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
             }
             
-            
-        } else {
-            //bad!
-            //TODO: propagate error feedback to interface
+         //TODO: Make errors nicer, instead of alerts, propagate to interface
+        } else if (metadataerror) {
+            alert("A metadata error occured, contact the service provider");
+        } else if (parametererrors) {
+            alert("There were parameter errors");
+            //TODO: Specify what parameter errors occured
+        } else if (!valid) {
+            alert("The file you uploaded did not validate, it's probably not of the type you specified");
         }
     
     });  
@@ -223,10 +246,27 @@ function getinputtemplate(id) {
     return null;
 }
 
-function getfilename(, filenamefield = null) {
-    if (filenamefield) {
-        
+function getuploadfilename(sourcefilename, inputtemplate_id) {
+    var inputtemplate = getinputtemplate(inputtemplate_id)
+    if (!inputtemplate) {
+        alert('Select a valid input type first!');
+        return false;
     }
+    var filename = sourcefilename.match(/[\/|\\]([^\\\/]+)$/); //os.path.basename
+    
+    if (inputtemplate.filename) {
+        //inputtemplate forces a filename:
+        filename = inputtemplate.filename;
+    } else if (inputtemplate.extension) {
+        //inputtemplate forces an extension:
+        var l = inputtemplate.extension.length;
+        var tmp = filename.substr(filename.length - l, l);
+        //if the desired extension is not provided yet (server will take care of case mismatch), add it:
+        if !(filename.substr(filename.length - l - 1, l+1).toLowerCase() == '.' + inputtemplate.extension.toLowerCase()) {
+            filename = filename + '.' + inputtemplate.extension
+        }
+    }
+    return filename;
 }
 
 
@@ -277,20 +317,6 @@ function setinputsource(tempelement) {
     } else {
         $('#inputfilesarea').hide();
         $('#uploadarea').hide();
-    }
-}
-
-function inputtemplate(label, div) {
-    for (var i = 0; i < inputtemplates.length; i++) {
-        if (inputtemplates[i].label == label) {
-            //TODO: Generate inputtemplate form
-            form = '<table class="inputtemplate">'
-            for (var j = 0; j < inputtemplates[i].metafields.length; j++) {
-                form += '<tr><th>' + ' </th></tr>'
-            }
-            form += '</table>'
-            div.innerHTML = div
-        }
     }
 }
 

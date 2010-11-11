@@ -132,7 +132,7 @@ def getclamdata(filename):
     
     
 
-class CLAMData(object):    
+class CLAMData(object): #TODO: Adapt CLAMData for new metadata
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
     XML responses. Its member variables are: 
 

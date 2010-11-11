@@ -559,8 +559,9 @@ class Project(object):
                                         printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                         errors = True
 
-        #Run profiler
-        matchedprofiles = clam.common.metadata.profiler() #TODO
+
+        #TOOD: Run profiler
+        matchedprofiles = clam.common.metadata.profiler()
 
 
         if errors:
@@ -769,13 +770,21 @@ class InputFileHandler(object):
             if inputtemplate.filename:
                 filename = inputtemplate.filename
             elif inputtemplate.extension
-                filename = postdata['upload' + str(i)].filename
-
+                filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) + '.' + inputtemplate.extension
+            else:
+                filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
+                
         if inputtemplate.filename:
             if filename != inputdata.filename:
                 raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
             #TODO LATER: add support for calling this with an actual number instead of #
-
+        if inputtemplate.extension:
+            if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
+                #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
+                filename = filename[:-len(inputtemplate.extension)] + '.' + inputtemplate.extension
+            else:
+                raise web.forbidden() #extension mismatch, raise 403
+            
         #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
 
@@ -1262,24 +1271,7 @@ class Uploader(object): #OBSOLETE!
             output += "</upload>\n"
 
         output += "</clamupload>"
-
-        #remove trigger
-        #os.unlink(Project.path(project) + '.upload')
-
-        #servicemodule = os.basename(sys.argv[0])[:-3]
-    
-
-        #cmd = ['upload.py', servicemodule, project] + args
-        #process = subprocess.Popen(cmd, cwd=Project.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #if process:                
-        #    f = open(Project.path(project) + '.upload','w') #TODO: check for problems with character encoding?
-        #    f.write(str(process.pid))
-        #    f.close()                                
-        #    out, err = subprocess.communicate() # waits for process to finish
-        #    #TODO: display output                	
-        #else:
-        #    raise web.webapi.InternalError("Unable to process upload package")                
-            
+         
         return output #200
 
 
