@@ -37,7 +37,9 @@ import clam.common.parameters
 import clam.common.formats
 import clam.common.digestauth
 import clam.common.data
+import clam.common.util
 import clam.config.defaults as settings #will be overridden by real settings later
+
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -418,7 +420,7 @@ class Project(object):
     def inputindexbytemplate(project, inputtemplate):
         """Retrieve sorted index for the specified input template"""
         prefix = Project.path(project) + 'input/'
-        for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
+        for linkf, f in clam.common.util.globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
@@ -677,6 +679,7 @@ class InputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
+        """Download an input file"""
         path = Project.path(project) + "input/" + filename.replace("..","")
         
        
@@ -691,26 +694,32 @@ class InputFileHandler(object):
 
     @requirelogin
     def DELETE(self, project, filename, user=None):    
-        if len(filename.replace("..","")) == 0:
-            raise BadRequest('No file specified') #TODO: message won't show
-
-        path = Project.path(project) + "input/" + filename.replace("..","")
-
-        #TODO: delete metadata as well!
+        """Delete an input file"""
         
-        if os.path.isfile(path): 
-            os.unlink(path)
-        elif os.path.isdir(path): 
-            shutil.rmtree(path)
+        filename = filename.replace("..","") #Simple security
+        
+        if len(filename) == 0:
+            #Deleting all input files
+            shutil.rmtree(Project.path(project) + 'input')
+            os.mkdir(Project.path(project) + 'input') #re-add new input directory
+        elif os.path.isdir(Project.path(project) + filename): 
+            #Deleting specified directory
+            shutil.rmtree(Project.path(project) + filename)
         else:
-            raise web.webapi.NotFound()
-
+            try:
+                file = clam.common.data.CLAMInputFile(Project.path(project), filename)
+            except:
+                raise web.webapi.NotFound()
+                
+            file.delete()            
         
 
     @requirelogin
-    def POST(self, project, filename, user=None): #upload a new file
-        #TODO: add support for uploading metadata files
-        #TODO: re-add support for archives
+    def POST(self, project, filename, user=None): 
+        """Add a new input file, this invokes the actual uploader"""
+
+        #TODO LATER: add support for uploading metadata files
+        #TODO LATER: re-add support for archives
             
         postdata = web.input(**kwargs)
         inputtemplate = None
@@ -758,7 +767,7 @@ class InputFileHandler(object):
 
         if not filename:
             if inputtemplate.filename:
-                filename = inputdata.filename
+                filename = inputtemplate.filename
             elif inputtemplate.extension
                 filename = postdata['upload' + str(i)].filename
 
@@ -786,17 +795,19 @@ class InputFileHandler(object):
         
         if 'file' in postdata:
             printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
-            output += "<upload source=\""+postdata['file'].filename +"\" filename=\""+filename+"\">\n"
-            
+            sourcefile = postdata['file'].filename
         elif 'url' in postdata:
             #Download from URL
             printlog("Adding web-based URL " + postdata['url'].filename + " to input files")
-            output += "<upload source=\""+postdata['url'] +"\" filename=\""+filename+"\">\n"
-
+            sourcefile = postdata['url']    
         elif 'contents' in postdata:
             #In message
             printlog("Adding file " + filename + " with explicitly provided contents to input files")
-            output += "<upload source=\""+filename +"\" filename=\""+filename+"\">\n"
+            sourcefile = "editor"
+        else:
+            raise BadRequest
+            
+        output += "<upload source=\""+filename +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
 
           
         #============================ Generate metadata ========================================
@@ -844,7 +855,7 @@ class InputFileHandler(object):
         printdebug('(File transfer completed)')
         
         #Create a file object
-        file = CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+        file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
         
         #============== Generate metadata ==============
 
@@ -868,10 +879,13 @@ class InputFileHandler(object):
                 output += "<valid>yes</valid>"                
                                 
                 #Great! Everything ok, save metadata
-                metadata.save(Project.path(project) + 'input/.' + filename + '.METADATA')
+                metadata.save(Project.path(project) + 'input/' + file.metadatafilename())
                 
                 #And create symbolic link for inputtemplates
-                os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + filename + '.INPUTTEMPLATE.' + inputtemplate.id + '.' + str(nextseq))
+                linkfilename = os.path.dirname(filename) 
+                if metafilename: linkfilename += '/'
+                linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' inputtemplate.id + '.' + str(nextseq)
+                os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
             else:
                 #Too bad, everything worked out but the file itself doesn't validate.
                 output += "<valid>no</valid>"
@@ -1268,15 +1282,7 @@ class Uploader(object): #OBSOLETE!
             
         return output #200
 
-def globsymlinks(pattern, recursion=True):
-    for f in glob.glob(pattern):
-        if os.path.islink(f):
-            yield f, os.path.dirname(f) + '/' + os.readlink(f)
-    if recursion:
-        for d in os.path.listdir(os.path.dirname(pattern)):
-            if os.path.isdir(d):
-                for linkf,realf in globsymlinks(d + '/' + os.path.basename(pattern),recursion):
-                    yield linkf,realf
+
 
 def usage():
         print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
