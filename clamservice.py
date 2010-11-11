@@ -186,7 +186,7 @@ class Index(object):
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
-        for f in glob.glob(settings.ROOT + "projects/*"): #TODO: Implement some kind of caching
+        for f in glob.glob(settings.ROOT + "projects/*"): #TODO LATER: Implement some kind of caching
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
                 project = os.path.basename(f)
@@ -387,31 +387,9 @@ class Project(object):
                 return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
             else:
                 return (clam.common.status.DONE, "Done", statuslog, 100)
-        #elif self.preparingdownload(project):
-        #    return (clam.common.status.DOWNLOAD, "Preparing package for download, please wait...")
-        #elif self.processingupload(project):
-        #    return (clam.common.status.UPLOAD, "Processing upload, please wait...")
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
-
-    def dirindex(self, project, formats, mode = 'output', d = ''): #OBSOLETE!!!!!
-        for f in glob.glob(Project.path(project) + mode + "/" + d + "/*"):
-            yield CLAMFile(Project.path(project), )
-
-
-            if os.path.isdir(f):
-                paths = paths + [ (d + "/" + x[0],x[1],x[2]) for x in self.dirindex(project,formats, mode, d+"/"+os.path.basename(f)) ]
-            else:
-                filename = os.path.basename(f)
-                if filename[0] == '.': continue #skip hidden files
-                format = clam.common.formats.Format() #unspecified format
-                for fmt in formats:
-                    if fmt.match(filename):
-                        format = fmt
-                        break                                
-                paths.append( ( os.path.basename(f), format.__class__.__name__, format.name, format.encoding ) )
-        return paths
 
     @staticmethod
     def inputindex(project, d = ''):
@@ -1139,16 +1117,6 @@ class Uploader(object): #OBSOLETE!
            os.unlink(self.path(project) + filename)
 
         return o
-
-    @requirelogin
-    def GET(self, project, user=None):
-        #Crude upload form
-
-        #TODO: revise for new profiles and inputtemplates
-        #return '<html><head></head><body><form method="POST" enctype="multipart/form-data" action=""><input type="hidden" name="uploadcount" value="1"><input type="file" name="upload1" /><br />' + str(CLAMService.inputformats('uploadformat1')) + '<br/><input type="submit" /></form></body></html>'
-        pass
-
-    @requirelogin
 
 
     @requirelogin
