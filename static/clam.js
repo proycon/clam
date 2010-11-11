@@ -165,21 +165,51 @@ $(document).ready(function(){
 });  //ready
 
 function processuploadresponse(response) {
-    //TODO: adapt to new format
-      $(response).find('upload').each(function(){
-        if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                var found = false;
-                var data = tableinputfiles.fnGetData();
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
-                        found = true;
-                        break;
-                    }
+      $(response).find('upload').each(function(){       //for each uploaded file
+        var children = $(this).children();
+        metadataerror = parametererrors = false;
+        for (var i = 0; i < children.length; i++) {
+            if ($(children[i]).is('parameters')) { //see if parameters validate
+                if ($(children[i]).attr('errors') == 'no') {
+                    parametererrors = false;
+                } else {
+                    parametererrors = true;
                 }
-                if (!found) {
-                    tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
-                }
+            } else if ($(children[i]).is('metadataerror')) { //see if there is no metadata error
+                metadataerror = true;
+            } else if ($(children[i]).is('valid')) {
+                if ($(children[i]).val() == "yes") {
+                    valid = true;
+                } else {
+                    valid = false;
+                }                
+            }
         }
+          
+        if ((valid) && (!parametererrors) && (!metadataerror)) {
+            //good! 
+            
+            //Check if file already exists in input table
+            var found = false;
+            var data = tableinputfiles.fnGetData();
+            for (var i = 0; i < data.length; i++) {
+                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            //Add this file to the input table if it doesn't exist yet
+            if (!found) {
+                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('templatelabel'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
+            }
+            
+            
+        } else {
+            //bad!
+            //TODO: propagate error feedback to interface
+        }
+    
     });  
 }
 
@@ -192,6 +222,14 @@ function getinputtemplate(id) {
     }
     return null;
 }
+
+function getfilename(, filenamefield = null) {
+    if (filenamefield) {
+        
+    }
+}
+
+
 
 function renderfileparameters(id, target) {
     inputtemplate = getinputtemplate(id);
