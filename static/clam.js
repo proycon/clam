@@ -20,9 +20,9 @@ $(document).ready(function(){
    $(".inputtemplates").html(inputtemplate_options);
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
-   $("#uploadfile").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters');};
-   $("#urluploadfile").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');};
-   $("#editoruploadfile").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');};
+   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters');};
+   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');};
+   $("#editorinputtemplate").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');};
 
 
    //Create a new project
@@ -99,30 +99,19 @@ $(document).ready(function(){
    //Submit data through in-browser editor
    $("#editorsubmit").click(function(event){ 
         $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
-        var filename = $('#uploadfilename1').val();
+        //TODO: Validate filename against inputtemplate!     
+        var filename = $('#editorfilename').val();
         var d = new Date();    
         if (!filename) {
             filename = d.getTime();        
         }
         $.ajax({ 
             type: "POST", 
-            url: "upload/", 
+            url: "input/" + filename, 
             dataType: "xml", 
-            data: {'uploadcount':1, 'uploadtext1': $('#uploadtext1').val(), 'uploadformat1': $('#editoruploadformat').val(), 'uploadfilename1': filename }, 
+            data: {'contents': $('#editorcontents').val(), 'inputtemplate': $('#editorinputtemplate').val(), 'uploadeditorfilename': filename }, 
             success: function(response){ 
-                $(response).find('file').each(function(){
-                    if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                        var found = false;
-                        var data = tableinputfiles.fnGetData();
-                        for (var i = 0; i < data.length; i++) {
-                            if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found) tableinputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
-                    }
-                });
+                processuploadresponse(response);
             },
             error: function(response, errortype){
                 alert("An error occured while attempting to upload the text: " + errortype + "\n" + response);
@@ -135,26 +124,15 @@ $(document).ready(function(){
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
             $('#urlupload').hide();
-            $('#urluploadprogress').show();     
+            $('#urluploadprogress').show();
+            //TODO: Determine filename using inputtemplate!     
             $.ajax({ 
                 type: "POST", 
-                url: "upload/", 
+                url: "input/" + filename, 
                 dataType: "xml", 
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
                 success: function(response){
-                    $(response).find('file').each(function(){
-                        if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                            var found = false;
-                            var data = tableinputfiles.fnGetData();
-                            for (var i = 0; i < data.length; i++) {
-                                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found) tableinputfiles.fnAddData( [ '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] );
-                        }
-                    });
+                    processuploadresponse(response);
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
                 },
@@ -167,57 +145,44 @@ $(document).ready(function(){
     });
 
    //Upload through browser
-   if ($('#uploadinputtemplate')) {
-
+   $('#uploadbutton').click(function(){
+       //TODO: Extract filename (check if inputtemplate specified filename/extension first!)
        filename = $('#uploadfile').val().match(/[\/|\\]([^\\\/]+)$/); //VERIFY!
-       uploader = new AjaxUpload('uploadfile', {action: 'output/' + filename, name: 'upload1', data: {'uploadformat1': $('#uploadformat1').val()} , onSubmit: function(){
+       
+       uploader = new AjaxUpload('uploadfile', {action: 'input/' + filename, name: 'uploadfile', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
+            onSubmit: function(){
                 $('#clientupload').hide();
                 $('#uploadprogress').show();           
             },  onComplete: function(file, response){
-                $(response).find('file').each(function(){
-                    if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
-                            var found = false;
-                            var data = tableinputfiles.fnGetData();
-                            for (var i = 0; i < data.length; i++) {
-                                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found) tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('name') + '">' + $(this).attr('name') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('name') + '\');" />' ] )
-                    }
-                });
-                //window.alert($(response).text()); //DEBUG
+                processuploadresponse(response);
                 $('#uploadprogress').hide();
                 $('#clientupload').show();
             }       
         }); 
-       $('#uploadformat1').change(function(){
-            uploader.setData({'uploadformat1': $('#uploadformat1').val() , 'uploadcount': 1} );
-       });
-   }
+   });
 
-});    
 
-function displayResult()
-{
-xml=loadXMLDoc("cdcatalog.xml");
-xsl=loadXMLDoc("cdcatalog.xsl");
-// code for IE
-if (window.ActiveXObject)
-  {
-  ex=xml.transformNode(xsl);
-  document.getElementById("example").innerHTML=ex;
-  }
-// code for Mozilla, Firefox, Opera, etc.
-else if (document.implementation && document.implementation.createDocument)
-  {
-  xsltProcessor=new XSLTProcessor();
-  xsltProcessor.importStylesheet(xsl);
-  resultDocument = xsltProcessor.transformToFragment(xml,document);
-  document.getElementById("example").appendChild(resultDocument);
-  }
+});  //ready
+
+function processuploadresponse(response) {
+    //TODO: adapt to new format
+      $(response).find('upload').each(function(){
+        if (($(this).attr('archive') != 'yes') && ($(this).attr('validated') == 'yes')) {
+                var found = false;
+                var data = tableinputfiles.fnGetData();
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('formatlabel'), $(this).attr('encoding'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
+                }
+        }
+    });  
 }
+
 
 function getinputtemplate(id) {
     for (var i = 0; i <= inputtemplates.length; i++) {

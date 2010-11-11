@@ -150,7 +150,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             -->
 
             <div id="clientupload">
-                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what kind of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
+                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
                 <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="uploadparameters"><em>Select a type first</em></div> <!-- TODO -->
                 <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadfile" class="uploadbutton" type="submit" value="Select and upload a file" />
             </div>
@@ -180,16 +180,16 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         <div id="editor">
             <h3>Add input from browser</h3>
                 <table>
-                 <tr><th><label for="uploadtext1">Input:</label></th><td><textarea id="uploadtext1"></textarea></td></tr>
-                 <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input id="uploadfilename1" /></td></tr>
+                 <tr><th><label for="editorcontents">Input:</label></th><td><textarea id="editorcontents"></textarea></td></tr>
                  <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
                     <select id="editoruploadformat" class="inputtemplates">
                     <xsl:call-template name="inputformats" />
                     </select>
                  </td></tr>
-                 <tr><th><label for="editorinputtemplate">Parameters:</label></th><td>
+                 <tr><th><label for="editorparameters">Parameters:</label></th><td>
                     <div id="editorparameters"><em>Select a type first</em></div>
                  </td></tr>
+                 <tr><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
                  <tr><th></th><td class="buttons"><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
                 </table>
         </div>
