@@ -18,6 +18,7 @@ from StringIO import StringIO
 import clam.common.parameters
 import clam.common.formats
 import clam.common.metadata
+import clam.common.util
 import urllib2
 import os.path
 import codecs
@@ -33,21 +34,31 @@ class FormatError(Exception):
 class CLAMFile:
     basedir = ''
     
-    def __init__(self, projectpath, filename, loadmetadata = True):
+    def __init__(self, projectpath, filename, loadmetadata = True, serviceid = None, user = None, password = None):
+            """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
             self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
             self.projectpath = projectpath
             self.filename = filename
             if loadmetadata:
                 self.loadmetadata(self)
             else:
-                self.metadata = None
+                self.metadata = None                    
+            if self.remote:
+                if serviceid and user and password:
+                    # Create an OpenerDirector with support for Digest HTTP Authentication...
+                    auth_handler = urllib2.HTTPDigestAuthHandler()
+                    auth_handler.add_password(realm=serviceid,uri=self.projectpath,user=self.user,passwd=self.password) #VERIFY (unsure about projectpath not being too much)
+                    self.opener = urllib2.build_opener(auth_handler)
+                else:
+                    self.opener = urllib2.build_opener()
+
 
                 
     def loadmetadata(self):
             if not self.remote:
                 f =  codecs.open(self.projectpath + basedir '/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
             else:
-                f = urllib2.urlopen(self.projectpath + basedir + '/.' + self.filename + '.METADATA')
+                f = self.opener(self.projectpath + basedir + '/.' + self.filename + '.METADATA')
              xml = f.readline()
              f.close()
 
@@ -64,15 +75,27 @@ class CLAMFile:
                 for line in open(self.projectpath + basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:
-            req = urllib2.urlopen(self.projectpath + basedir '/' + self.filename)
+            req = self.opener(self.projectpath + basedir '/' + self.filename)
             for line in req.readlines():
                 yield line
-
-     
+            req.close()
+    
+    def delete(self):
+        """Delete this file"""
+        if not self.remote:
+            os.unlink(self.projectpath + basedir + '/' + self.filename)
+            #also remove any .*.INPUTTEMPLATE.* links that pointed to this file
+            for linkf,realf in clam.common.util.globsymlinks(self.projectpath + basedir + '/.*.INPUTTEMPLATE.*'):
+                    if realf == self.projectpath + basedir + '/' + self.filename:
+                        os.unlink(linkf)
+        else:
+            #TODO: Send HTTP DELETE
+         
 
     def readlines(self):
         """Loads all in memory"""
         return list(iter(self))
+        
 
     def validate(self):
         return self.metadata.validate()
