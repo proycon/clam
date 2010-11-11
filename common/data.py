@@ -55,7 +55,10 @@ class CLAMFile:
                 xml = f.readlines()
                 f.close()
             else:
-                httpcode, xml = self.http.request(self.projectpath + basedir + '/.' + self.filename + '.METADATA')
+                metafilename = os.path.dirname(self.filename) 
+                if metafilename: metafilename += '/'
+                metafilename = '.' + os.path.basename(self.filename) + '.METADATA'
+                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + metafilename)
             
             #parse metadata
             self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
