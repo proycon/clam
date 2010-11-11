@@ -15,12 +15,13 @@
 
 import codecs
 import os.path
-from httplib2 import Http
+import httplib2
 from urllib import urlencode
+
 
 from clam.external.poster.encode import multipart_encode
 from clam.external.poster.streaminghttp import register_openers
-import urllib2
+
 
 
 import clam.common.status
@@ -71,18 +72,15 @@ class NoConnection(Exception):
          def __str__(self):
             return "Can't establish a connection with the server" 
 
-class CLAMAuth:
-    def __init__(self, user, password):
-        pass
-
 
 
 class CLAMClient:
-    def __init__(self, url):
-        self.http = Http()
+    def __init__(self, url, user=None, password=None):
+        self.http = httplib2.Http()
         if url[-1] != '/': url += '/'
         self.url = url
-
+        if user and password:
+            self.http.add_credentials(user, password)
 
     def request(self, url, method = 'GET', data = None):
         try:
@@ -112,15 +110,15 @@ class CLAMClient:
    
 
  
-    def index(self, auth = None):
+    def index(self):
         """get index of projects"""
         return self.request('')
 
-    def get(self, project, auth = None):
+    def get(self, project):
         """query the project status"""
         return self.request(project + '/')
 
-    def create(self,project, auth = None):
+    def create(self,project):
         """create a new project"""
         return self.request(project + '/', 'PUT')
      
@@ -135,17 +133,18 @@ class CLAMClient:
         return self.request(project + '/', 'POST', urlencode(parameters))
 
 
-    def delete(self,project, auth = None):
+    def delete(self,project)
         """aborts AND deletes a project"""
         return self.request(project + '/', 'DELETE')
 
-    def abort(self, project, auth = None): #alias
-        return self.abort(project, auth)
+    def abort(self, project): #alias
+        return self.abort(project)
 
 
-    def downloadarchive(self, project, targetfile, format = 'zip', auth = None):
+    def downloadarchive(self, project, targetfile, format = 'zip'):
         """download all output as archive"""
-        req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
+        #TODO: Redo
+        req = urllib2.urlopen(self.url + project + '/output/?format=' + format) #TODO: Auth support
         CHUNK = 16 * 1024
         while True:
             chunk = req.read(CHUNK)
@@ -153,20 +152,11 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
-    def download(self, project, outputfile, targetfile, auth = None):
-        """download one output file"""
-        assert isinstance(outputfile, CLAMOutputFile)
-        req = urllib2.urlopen(self.url + project + '/output/' + outputfile.path)
-        CHUNK = 16 * 1024
-        while True:
-            chunk = req.read(CHUNK)
-            if not chunk: break
-            targetfile.write(chunk)
-
-    def upload(self, project, file, format, auth = None):
+    def upload(self, project, file, format):
         """upload a file (or archive)"""
+        #TODO: Adapt for new metadata scheme and httplib2
         # datagen is a generator object that yields the encoded parameters
-        datagen, headers = multipart_encode({'uploadcount': 1, "upload1": file, 'uploadformat1': format.__class__.__name__})
+        datagen, headers = multipart_encode({"file": file, 'uploadformat1': format.__class__.__name__})
 
         # Create the Request object
         request = urllib2.Request(self.url + project + '/upload/', datagen, headers)

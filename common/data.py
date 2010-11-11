@@ -49,16 +49,20 @@ class CLAMFile:
                     self.http.add_credentials(user, password)
                 self.http = httplib2.Http()
                 
+    def metafilename(self):
+            """Returns the filename for the meta file (not full path)"""
+            metafilename = os.path.dirname(self.filename) 
+            if metafilename: metafilename += '/'
+            metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
+            return metafilename
+                
     def loadmetadata(self):
             if not self.remote:
-                f =  codecs.open(self.projectpath + basedir '/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
+                f =  codecs.open(self.projectpath + basedir '/' + self.metafilename() +, 'r', 'utf-8').readlines():
                 xml = f.readlines()
                 f.close()
             else:
-                metafilename = os.path.dirname(self.filename) 
-                if metafilename: metafilename += '/'
-                metafilename = '.' + os.path.basename(self.filename) + '.METADATA'
-                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + metafilename)
+                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + self.metafilename()
             
             #parse metadata
             self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
