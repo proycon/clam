@@ -20,6 +20,7 @@ import clam.common.formats
 import clam.common.metadata
 import clam.common.util
 import urllib2
+import httplib2
 import os.path
 import codecs
 
@@ -34,7 +35,7 @@ class FormatError(Exception):
 class CLAMFile:
     basedir = ''
     
-    def __init__(self, projectpath, filename, loadmetadata = True, serviceid = None, user = None, password = None):
+    def __init__(self, projectpath, filename, loadmetadata = True, user = None, password = None):
             """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
             self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
             self.projectpath = projectpath
@@ -43,30 +44,24 @@ class CLAMFile:
                 self.loadmetadata(self)
             else:
                 self.metadata = None                    
-            if self.remote:
-                if serviceid and user and password:
-                    # Create an OpenerDirector with support for Digest HTTP Authentication...
-                    auth_handler = urllib2.HTTPDigestAuthHandler()
-                    auth_handler.add_password(realm=serviceid,uri=self.projectpath,user=self.user,passwd=self.password) #VERIFY (unsure about projectpath not being too much)
-                    self.opener = urllib2.build_opener(auth_handler)
-                else:
-                    self.opener = urllib2.build_opener()
-
-
+            if self.remote:                
+                if user and password:
+                    self.http.add_credentials(user, password)
+                self.http = httplib2.Http()
                 
     def loadmetadata(self):
             if not self.remote:
                 f =  codecs.open(self.projectpath + basedir '/.' + self.filename + '.METADATA', 'r', 'utf-8').readlines():
+                xml = f.readlines()
+                f.close()
             else:
-                f = self.opener(self.projectpath + basedir + '/.' + self.filename + '.METADATA')
-             xml = f.readline()
-             f.close()
-
+                httpcode, xml = self.http.request(self.projectpath + basedir + '/.' + self.filename + '.METADATA')
+            
             #parse metadata
             self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
-        """Read the lines of the file, one by one"""
+        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
         if not self.remote:
             if 'encoding' in self.metadata:
                 for line in codecs.open(self.projectpath + basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
@@ -75,10 +70,12 @@ class CLAMFile:
                 for line in open(self.projectpath + basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:
-            req = self.opener(self.projectpath + basedir '/' + self.filename)
-            for line in req.readlines():
-                yield line
-            req.close()
+            return self.readlines()
+        
+            #req = self.opener(self.projectpath + basedir '/' + self.filename) #urllib2
+            #for line in req.readlines():
+            #    yield line
+            #req.close()
     
     def delete(self):
         """Delete this file"""
@@ -89,7 +86,7 @@ class CLAMFile:
                     if realf == self.projectpath + basedir + '/' + self.filename:
                         os.unlink(linkf)
         else:
-            #TODO: Send HTTP DELETE
+            httpcode, content = self.http.request(self.projectpath + basedir + '/' + self.filename,'DELETE')
          
 
     def readlines(self):
