@@ -75,6 +75,7 @@ class CLAMFile:
         else:
             return self.readlines()
         
+            #TODO LATER: Re-add streaming support with urllib2? (But mind the digest authentication!)
             #req = self.opener(self.projectpath + basedir '/' + self.filename) #urllib2
             #for line in req.readlines():
             #    yield line
@@ -94,7 +95,14 @@ class CLAMFile:
 
     def readlines(self):
         """Loads all in memory"""
-        return list(iter(self))
+        if not self.remote:
+            if 'encoding' in self.metadata:
+               return codecs.open(self.projectpath + basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
+            else:
+               return open(self.projectpath + basedir + '/' + self.filename, 'r').readlines():
+        else:
+            httpcode, content = self.http.request(self.projectpath + basedir + '/' + self.filename)
+            return content
         
 
     def validate(self):
