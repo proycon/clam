@@ -396,11 +396,34 @@ class InputTemplate(object):
                 
         return success, metadata, parameters
     
-        
+class AbstractMetaField(object): #for OutputTemplate only
+    def __init__(self,key,value=None):
+        self.key = key
+        self.value = value
+
+    def xml(self, operator='set'):
+        xml += "\t<meta id=\"" + key + "\"";
+        if operator != 'set':
+            xml += " operator=\"" + operator + "\""
+        if not value:
+            xml += " />"
+        else:
+            xml += ">" + value + "</meta>"        
+
+class SetMetaField(AbstractMetaField): 
+    pass
+
+class UnsetMetaField(AbstractMetaField):
+    def xml(self):
+        super(UnsetMetaField,self).xml('unset')
+
+class CopyMetaField(AbstractMetaField):
+    def xml(self):
+        super(UnsetMetaField,self).xml('copy')
 
 
 class OutputTemplate(object):
-    def __init__(self, id, formatclass, label, **kwargs)
+    def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.id = id
@@ -408,13 +431,17 @@ class OutputTemplate(object):
         self.label = label
 
         self.metafields = []
+        for metafield in args:
+            assert (isinstance(metafield, AbstractMetaField) or isinstance(metafield,ParameterCondition))
+            self.metafields.append(metafield)
+            
         
         self.unique = True #may mark input/output as unique, even though profile may be in multi mode
 
         self.filename = None
         self.extension = None
         
-        self.defaultcopy = None
+        self.defaultcopy = None #copy metadata from
 
         for key, value in kwargs.items():
             if key == 'unique':
@@ -425,23 +452,14 @@ class OutputTemplate(object):
                 self.filename = value # use $N to insert a number in multi mode
             elif key == 'extension':
                 self.extension = value
-            else:
-                if key[-6:] == '_unset':
-                    self.metafields.append( (key,value, 'unset') )
-                elif key[-6:] == '_copyfrom':
-                    self.metafields.append( (key,value, 'copy') )
-                elif key == 'copyfrom' or key == 'default':
-                    self.defaultcopy = value
-                else:
-                    self.metafields.append( (key,value, 'set') )
+            elif key == 'copy' or key == 'default':
+                self.defaultcopy = value                
                     
 
         if not self.unique and not '#' in self.filename:
             raise Exception("OutputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
-        for metafield in args:
-            #TODO
-            self.metafields()
+        
 
     def xml(self):
         """Produce Template XML"""
@@ -453,14 +471,8 @@ class OutputTemplate(object):
         if self.unique:
             xml +=" unique=\"yes\""
         xml += ">\n"
-        for key, value, operator in self.metafields:
-            xml += "\t<meta id=\"" + key + "\"";
-            if operator != 'set':
-                xml += " operator=\"" + operator + "\""
-            if not value:
-                xml += " />"
-            else:
-                xml += ">" + value + "</meta>"
+        for metafield in self.metafields:
+            xml += metafield.xml()
         xml += "</OutputTemplate>\n"
         return xml
 
