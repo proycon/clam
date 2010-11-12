@@ -54,27 +54,27 @@ class Profile(object):
             else:
                 raise SyntaxError("Unknown parameter to profile: " + key)
 
-    def match(self, inputfiles, parameters):
-        """Check if the profile matches inputdata *and* produces output given the set parameters. Return boolean"""
+    def match(self, inputdir, parameters):
+        """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
 
         #check if profile matches inputdata
         for inputtemplate in self.input:
-            if not inputtemplate.match(inputfiles):
+            if not inputtemplate.matchfiles(inputdir):
                 return False
-
+        
         #check if output is produced
-        match = False
         for outputtemplate in self.output:
-            if outputtemplate.match(parameters):
-                match = True
-        return match
+            if not outputtemplate.match(parameters):
+                return False
+        
+        return True
 
 
-    def generate(self, inputfiles, parameters):
+    def generate(self, inputdir, parameters):
         """Generate output metadata on the basis of input files and parameters"""
         raise NotImplementedError #TODO: implement
 
-        if self.match(self, inputfiles, parameters):
+        if self.match(inputdir, parameters):
 
             #loop over inputfiles
             #   see if inputfile matches inputtemplates
@@ -93,6 +93,7 @@ class Profile(object):
                     outputtemplate = outputtemplate.evaluate(parameters)
                 if outputtemplate and outputtemplate.match(parameters):
                     outputtemplate.generate(inputdata, parameters)
+
 
     def xml(self):
         """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
@@ -118,6 +119,7 @@ class Profile(object):
 def getmetadata(xmldata):
     """Read metadata from XML"""
     raise NotImplementedError #TODO: implement
+
 
 class CLAMMetaData(object):
     """A simple hash structure to hold arbitrary metadata"""
@@ -398,7 +400,7 @@ class InputTemplate(object):
 
 
 class OutputTemplate(object):
-    def __init__(self, id, formatclass, label, *args, **kwargs)
+    def __init__(self, id, formatclass, label, **kwargs)
         assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.id = id
@@ -411,6 +413,8 @@ class OutputTemplate(object):
 
         self.filename = None
         self.extension = None
+        
+        self.defaultcopy = None
 
         for key, value in kwargs.items():
             if key == 'unique':
@@ -421,6 +425,16 @@ class OutputTemplate(object):
                 self.filename = value # use $N to insert a number in multi mode
             elif key == 'extension':
                 self.extension = value
+            else:
+                if key[-6:] == '_unset':
+                    self.metafields.append( (key,value, 'unset') )
+                elif key[-6:] == '_copyfrom':
+                    self.metafields.append( (key,value, 'copy') )
+                elif key == 'copyfrom' or key == 'default':
+                    self.defaultcopy = value
+                else:
+                    self.metafields.append( (key,value, 'set') )
+                    
 
         if not self.unique and not '#' in self.filename:
             raise Exception("OutputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
@@ -439,7 +453,14 @@ class OutputTemplate(object):
         if self.unique:
             xml +=" unique=\"yes\""
         xml += ">\n"
-
+        for key, value, operator in self.metafields:
+            xml += "\t<meta id=\"" + key + "\"";
+            if operator != 'set':
+                xml += " operator=\"" + operator + "\""
+            if not value:
+                xml += " />"
+            else:
+                xml += ">" + value + "</meta>"
         xml += "</OutputTemplate>\n"
         return xml
 
