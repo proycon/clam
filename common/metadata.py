@@ -17,14 +17,20 @@ from lxml import etree as ElementTree
 from clam.common.data import CLAMFile
 
 
+def checkprofile(profiles):
+    """Check profile integrity"""
+    for profile in profiles:
+        #TODO
+        
 
 
-def profiler(inputfiles,parameters):
+
+def profiler(profiles, inputfiles,parameters):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
     #We use the INPUTTEMPLATE symbolic links to quickly match the input side of profiles
 
     matched = []
-    for profile in PROFILES:
+    for profile in profiles:
         if profile.match(inputfiles, parameters):
             matched.append(profile)
             profile.generate(inputfiles,parameters)
@@ -75,12 +81,17 @@ class Profile(object):
         
         if self.match(inputdir, parameters): #Does the profile match?
         
+            #gather input files that match
+            inputfiles = inputtemplate.matchfiles(inputdir)
+            
+        
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition) and outputtemplate.match(parameters):
                     outputtemplate = outputtemplate.evaluate(parameters)
                 
+                #generate output files
+                
                 if isinstance(outputtemplate, AbstractMetaField):                    
-                    #TODO: Write generate and pass inputfiles
                     outputtemplate.generate(inputdir, parameters)
                 else:
                     raise TypeError        
@@ -427,24 +438,41 @@ class OutputTemplate(object):
             self.metafields.append(metafield)
             
         
-        self.unique = True #may mark input/output as unique, even though profile may be in multi mode
+        self.unique = True #mark input/output as unique, as opposed to multiple files
 
         self.filename = None
         self.extension = None
         
-        self.defaultcopy = None #copy metadata from
+        self.removeextensions = [] #Remove extensions
+        
+        self.parent = None #copy metadata from
+        self.copymetadata = True #copy metadata from parent (if set)
+        self.copyfilename = True #copy filename form parent (if set)
 
         for key, value in kwargs.items():
             if key == 'unique':
                 self.unique = bool(value)
-            elif key == 'multi':
+            elif key == 'multi': #alias
                 self.unique = not bool(value)
             elif key == 'filename':
-                self.filename = value # use $N to insert a number in multi mode
+                self.filename = value # use # to insert a number in multi mode
+            elif key == 'removeextension':
+                #remove the following extension(s) (prior to adding the extension specified)
+                if not isinstance(value,list):
+                    self.removeextensions = [value]
+                else:
+                    self.removeextensions = value
             elif key == 'extension':
-                self.extension = value
-            elif key == 'copy' or key == 'default':
-                self.defaultcopy = value                
+                self.extension = value #Add the following extension
+            elif key == 'parent':
+                self.parent = value #The ID of an inputtemplate
+            elif key == 'copymetadata'
+                self.copymetadata = bool(value) #True by default
+            elif key == 'copyfilename'
+                self.copyfilename = bool(value) #True by default
+                
+            
+                
                     
 
         if not self.unique and not '#' in self.filename:
