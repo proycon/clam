@@ -32,7 +32,7 @@ def profiler(inputfiles,parameters):
 
 
 class Profile(object):
-    def __init__(self, input, output, parameters, **kwargs):
+    def __init__(self, input, output, parameters): #, **kwargs):
         if not isinstance(input, list):
             input = [input]
         if isinstance(input, InputTemplate):
@@ -44,15 +44,15 @@ class Profile(object):
         assert all([ isinstance(OutputTemplate) or isinstance(ParameterCondition)  for x in output])
         self.output = output
 
-        self.multi = False
+        #self.multi = False
 
-        for key, value in kwargs.items():
-            if key == 'unique':
-                self.multi = not value
-            elif key == 'multi':
-                self.multi = value
-            else:
-                raise SyntaxError("Unknown parameter to profile: " + key)
+        #for key, value in kwargs.items():
+        #    if key == 'unique':
+        #        self.multi = not value
+        #    elif key == 'multi':
+        #        self.multi = value
+        #    else:
+        #    raise SyntaxError("Unknown parameter to profile: " + key)
 
     def match(self, inputdir, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
@@ -72,36 +72,27 @@ class Profile(object):
 
     def generate(self, inputdir, parameters):
         """Generate output metadata on the basis of input files and parameters"""
-        raise NotImplementedError #TODO: implement
-
-        if self.match(inputdir, parameters):
-
-            #loop over inputfiles
-            #   see if inputfile matches inputtemplates
-            #    see if any outputtemplates become active (may be parameter dependent)
-            #     generate outputmetadata based on outputtemplats
-
-            #TODO !!!!!!
-
-            for inputfile in inputfiles:
-                #load inputfile metadata
-                
-
-
+        
+        if self.match(inputdir, parameters): #Does the profile match?
+        
             for outputtemplate in self.output:
-                if isinstance(outputtemplate, ParameterCondition):
+                if isinstance(outputtemplate, ParameterCondition) and outputtemplate.match(parameters):
                     outputtemplate = outputtemplate.evaluate(parameters)
-                if outputtemplate and outputtemplate.match(parameters):
-                    outputtemplate.generate(inputdata, parameters)
+                
+                if isinstance(outputtemplate, AbstractMetaField):                    
+                    #TODO: Write generate and pass inputfiles
+                    outputtemplate.generate(inputdir, parameters)
+                else:
+                    raise TypeError        
 
 
     def xml(self):
         """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
         xml = "<profile"
-        if self.multi:
-            xml += "  multi=\"yes\""
-        else:   
-            xml += "  multi=\"no\""
+        #if self.multi:
+        #    xml += "  multi=\"yes\""
+        #else:   
+        #    xml += "  multi=\"no\""
         xml += ">\n<input>\n"
         for inputtemplate in self.input:
             xml += inputtemplate.xml()
