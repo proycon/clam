@@ -420,20 +420,31 @@ class AbstractMetaField(object): #for OutputTemplate only
         if not value:
             xml += " />"
         else:
-            xml += ">" + value + "</meta>"        
+            xml += ">" + value + "</meta>" 
+            
+    def resolve(self, data):
+        raise Exception("Always override this method in inherited classes!")
 
 class SetMetaField(AbstractMetaField): 
-    pass
-
+    def resolve(self, data):
+        data[self.key] = value
+        
 class UnsetMetaField(AbstractMetaField):
     def xml(self):
         super(UnsetMetaField,self).xml('unset')
+        
+    def resolve(self, data):
+        if self.key in data and (not value or (value and data[self.key] == value)):
+            del data[self.key]
 
 class CopyMetaField(AbstractMetaField):
     def xml(self):
         super(UnsetMetaField,self).xml('copy')
-
-
+    
+    def resolve(self, data):
+        #TODO: Write resolve method for CopyMetaField
+        raise NotImplemented
+        
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (issubclass(formatclass, CLAMMetaData))
