@@ -19,8 +19,18 @@ from clam.common.data import CLAMFile
 
 def checkprofile(profiles):
     """Check profile integrity"""
+    
     for profile in profiles:
-        #TODO
+        for outputtemplate in outputtemplates:
+            if isinstance(outputtemplate, ParameterCondition):
+                outputtemplate.then
+                
+                outputtemplate = outputtemplate.then
+            
+    
+    for profile in profiles:
+        if any([ not inputtemplate.unique for inputtemplate in profile.input):
+            
         
 
 
@@ -322,11 +332,11 @@ class InputTemplate(object):
         return self.generate(metadata,user)
         
     def matchingfiles(self, inputpath):
-        """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results."""
+        """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results (seqnr, filename, inputtemplate)."""
         results = []
         for linkf,realf in clam.common.util.globsymlinks(inputpath + '/.*.INPUTTEMPLATE.' + self.id + '.*'):
             seqnr = int(linkf.split('.')[-1])
-            results.append( (seqnr, realf) )
+            results.append( (seqnr, realf, self) )
         results = sorted(results)
         if self.unique and len(results) != 1: 
             return []
@@ -446,8 +456,7 @@ class OutputTemplate(object):
         self.removeextensions = [] #Remove extensions
         
         self.parent = None #copy metadata from
-        self.copymetadata = True #copy metadata from parent (if set)
-        self.copyfilename = True #copy filename form parent (if set)
+        self.copymetadata = False #copy metadata from parent (if set)
 
         for key, value in kwargs.items():
             if key == 'unique':
@@ -458,7 +467,11 @@ class OutputTemplate(object):
                 self.filename = value # use # to insert a number in multi mode
             elif key == 'removeextension':
                 #remove the following extension(s) (prior to adding the extension specified)
-                if not isinstance(value,list):
+                if value is True:
+                    self.removeextensions = True #will remove all (only 1 level though)
+                elif value is False:
+                    pass
+                elif not isinstance(value,list):
                     self.removeextensions = [value]
                 else:
                     self.removeextensions = value
@@ -468,8 +481,7 @@ class OutputTemplate(object):
                 self.parent = value #The ID of an inputtemplate
             elif key == 'copymetadata'
                 self.copymetadata = bool(value) #True by default
-            elif key == 'copyfilename'
-                self.copyfilename = bool(value) #True by default
+
                 
             
                 
@@ -498,14 +510,77 @@ class OutputTemplate(object):
 
     def __eq__(self, other):
         return other.id == self.id
+                
+    def _getparent(self, profile):
+        assert (self.parent)
+        for inputtemplate in profile.input:
+            if inputtemplate == self.parent:
+                return inputtemplate
+        raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
- 
+    def generate(self, profile, parameters, inputdir):
+        """Yields (outputfilename, metadata) tuples"""
+        
+        #Get input files
+        inputfiles = []
+        parent = None
+        if self.parent:
+            #copy filename from parent
+            parent = self._getparent(profile)
+            
+            #get input files for the parent InputTemplate
+            inputfiles = parent.matchingfiles(inputdir)
+            if not inputfiles:
+                raise Exception("OutputTemplate '"+self.id + "' has parent '" + self.parent + "', but no matching input files were found!")
+        
+        
+        
+        #Do we specify a full filename?
+        for seqnr, inputfilename, inputtemplate in inputfiles:
+            if self.filename:
+                filename = self.filename
+            elif parent:
+                filename = os.path.basename(inputfiles[0][1])
+            else:
+                raise Exception("OutputTemplate '"+self.id + "' has no parent nor filename defined!")
+        
+            #resolve # in filename
+            if not self.unique:
+                filename.replace('#',str(seqnr))
 
-    def json(self):
-        #TODO
-
-    def generate(self):
-        #TODO
+        
+            if self.removeextensions:
+                #Remove unwanted extensions
+                if removeextensions is True:
+                    #Remove any extension
+                    raw = filename.split('.')[:-1]
+                    if raw:
+                        filename = '.'.join(raw)
+                elif isinstance(removeextensions, list):
+                    #Remove specified extension
+                    for ext in self.removeextensions:  
+                        if filename[-len(ext) - 1:] == '.' + ext:
+                            filename = filename[:-len(ext) - 1]
+                                
+            if self.extension and not self.filename:
+                filename += '.' + self.extension
+                
+            #Now we create the actual metadata
+            data = {}
+            for metafield in self.metafields:
+                if isinstance(metafield, ParameterCondition):
+                    metafield = metafield.evaluate(parameters)
+                    if not metafield:
+                        continue
+                assert(isinstance(metafield, AbstractMetaField))
+                metafield.resolve(data)
+                    
+            yield filename, CLAMMetaData(filename, **data)
+    
+        
+            
+            
+            
 
 
 def ParameterCondition(object):
