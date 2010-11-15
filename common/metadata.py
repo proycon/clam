@@ -64,7 +64,7 @@ class Profile(object):
         
         #check if output is produced
         for outputtemplate in self.output:
-            if not outputtemplate.match(parameters):
+            if isinstance(outputtemplate, ParameterCondition) and not outputtemplate.match(parameters):
                 return False
         
         return True
@@ -480,8 +480,7 @@ class OutputTemplate(object):
     def __eq__(self, other):
         return other.id == self.id
 
-    def match(self, parameters):
-        #TODO
+ 
 
     def json(self):
         #TODO
