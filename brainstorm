@@ -1,4 +1,81 @@
 
+profile (one-to-one unique)
+    input
+        inputtemplate filename=A unique=True
+    output
+        outputtemplate filename=B unique=True
+
+profile (one-to-one multi)
+    input
+        inputtemplate filename=X# multi=True
+    output
+        outputtemplate filename=Y# multi=True
+        
+        
+profile (one-to-many unique)
+    input
+        inputtemplate filename=A unique=True
+    output
+        outputtemplate filename=B unique=True
+        outputtemplate filename=C unique=True
+        
+profile (one-to-many multi)
+    input
+        inputtemplate filename=X# multi=True
+    output
+        outputtemplate filename=Y# multi=True
+        outputtemplate filename=Z# multi=True        
+        
+profile (many-to-one unique)
+    input
+        inputtemplate filename=A unique=True
+        inputtemplate filename=B unique=True
+    output
+        outputtemplate filename=C unique=True
+
+profile (many-to-one multi)
+    input
+        inputtemplate filename=X# multi=True
+        inputtemplate filename=Y# multi=True
+    output
+        outputtemplate filename=Z# multi=True
+        
+profile (mixed)
+    input
+        inputtemplate filename=X# multi=True
+        inputtemplate filename=A unique=True
+    output
+        outputtemplate filename=Y# multi=True
+        
+profile (mixed)
+    input
+        inputtemplate filename=X# multi=True
+    output
+        outputtemplate filename=Y# multi=True
+        outputtemplate filename=A unique=True
+        
+                
+        
+profile (swap)
+    input
+        inputtemplate id=1 filename=X# multi=True
+        inputtemplate id=2 filename=Y# multi=True
+    output
+        outputtemplate filename=YY# multi=True parent=1
+        outputtemplate filename=XX# multi=True parent=2
+
+
+                
+        
+profile (unconditional output)
+    input
+    output
+        outputtemplate filename=X unique=True
+
+
+
+########################################################################################################################
+
 
 
 user:
@@ -44,6 +121,11 @@ Format constructor parameters:
     - byextension=   
     - byfilename=    
     - allowarchive   #allow archives, automaticall
+
+
+
+
+
 
 
 

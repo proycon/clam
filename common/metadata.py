@@ -17,22 +17,6 @@ from lxml import etree as ElementTree
 from clam.common.data import CLAMFile
 
 
-def checkprofile(profiles):
-    """Check profile integrity"""
-    
-    for profile in profiles:
-        for outputtemplate in outputtemplates:
-            if isinstance(outputtemplate, ParameterCondition):
-                outputtemplate.then
-                
-                outputtemplate = outputtemplate.then
-            
-    
-    for profile in profiles:
-        if any([ not inputtemplate.unique for inputtemplate in profile.input):
-            
-        
-
 
 
 def profiler(profiles, inputfiles,parameters):
@@ -60,51 +44,62 @@ class Profile(object):
         assert all([ isinstance(OutputTemplate) or isinstance(ParameterCondition)  for x in output])
         self.output = output
 
-        #self.multi = False
+        #Check for orphan OutputTemplates. OutputTemplates must have a parent (unless there is no input, then outputtemplates with filename, unique=True and copymetadata=False are parentless)
+        for o in self.output:
+            if isinstance(o, ParameterCondition):
+                for o in o.allpossibilities():
+                    parent = o._findparent(self.input)
+                    if parent:
+                        o.parent = parent
+                        if not o.parent and (self.input or not o.unique or not o.filename):
+                            raise Exception("Outputtemplate " + o.id + " has no parent defined, and none could be found automatically!")
+            elif not o.parent:
+                o.parent  = o._findparent(self.input)
+                if not o.parent and (self.input or not o.unique or not o.filename):
+                    raise Exception("Outputtemplate " + o.id + " has no parent defined, and none could be found automatically!")
 
-        #for key, value in kwargs.items():
-        #    if key == 'unique':
-        #        self.multi = not value
-        #    elif key == 'multi':
-        #        self.multi = value
-        #    else:
-        #    raise SyntaxError("Unknown parameter to profile: " + key)
-
-    def match(self, inputdir, parameters):
+    def match(self, projectpath, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
 
-        #check if profile matches inputdata
+        #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
-            if not inputtemplate.matchfiles(inputdir):
+            if not inputtemplate.matchfiles(projectpath):
                 return False
         
         #check if output is produced
+        if not self.output: return False
         for outputtemplate in self.output:
             if isinstance(outputtemplate, ParameterCondition) and not outputtemplate.match(parameters):
                 return False
         
         return True
 
+    def matchingfiles(self, projectpath):
+        """Return a list of all inputfiles matching the profile (filenames)"""
+        l = []
+        for inputtemplate in self.input:
+            l += inputtemplate.matchfiles(projectpath)
+        return l
 
-    def generate(self, inputdir, parameters):
-        """Generate output metadata on the basis of input files and parameters"""
+    def generate(self, projectpath, parameters):
+        """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
         
-        if self.match(inputdir, parameters): #Does the profile match?
         
-            #gather input files that match
-            inputfiles = inputtemplate.matchfiles(inputdir)
-            
+        if self.match(projectpath, parameters): #Does the profile match?
+        
+            #gather all input files that match
+            inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
+                                    
         
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition) and outputtemplate.match(parameters):
-                    outputtemplate = outputtemplate.evaluate(parameters)
-                
+                    outputtemplate = outputtemplate.evaluate(parameters)                
                 #generate output files
-                
-                if isinstance(outputtemplate, AbstractMetaField):                    
-                    outputtemplate.generate(inputdir, parameters)
-                else:
-                    raise TypeError        
+                if outputtemplate:
+                    if isinstance(outputtemplate, AbstractMetaField):                    
+                        outputtemplate.generate(inputdir, parameters, projectpath, inputfiles)
+                    else:
+                        raise TypeError
 
 
     def xml(self):
@@ -331,12 +326,18 @@ class InputTemplate(object):
         assert isinstance(metadata, self.formatclass)
         return self.generate(metadata,user)
         
-    def matchingfiles(self, inputpath):
+    def matchingfiles(self, projectpath):
         """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results (seqnr, filename, inputtemplate)."""
         results = []
+        
+        if projectpath[-1] == '/':
+             inputpath = projectpath + 'input/'
+        else:
+             inputpath = projectpath + '/input/'
+             
         for linkf,realf in clam.common.util.globsymlinks(inputpath + '/.*.INPUTTEMPLATE.' + self.id + '.*'):
             seqnr = int(linkf.split('.')[-1])
-            results.append( (seqnr, realf, self) )
+            results.append( (seqnr, realf[len(inputpath):], self) )
         results = sorted(results)
         if self.unique and len(results) != 1: 
             return []
@@ -422,28 +423,51 @@ class AbstractMetaField(object): #for OutputTemplate only
         else:
             xml += ">" + value + "</meta>" 
             
-    def resolve(self, data):
-        raise Exception("Always override this method in inherited classes!")
+    def resolve(self, data, parameters, parentfile, relevantinputfiles):
+        #in most cases we're only interested in 'data'
+        raise Exception("Always override this method in inherited classes! Return True if data is modified, False otherwise")
 
 class SetMetaField(AbstractMetaField): 
-    def resolve(self, data):
+    def resolve(self, data, parameters, parentfile, relevantinputfiles):
         data[self.key] = value
+        return True
         
 class UnsetMetaField(AbstractMetaField):
     def xml(self):
         super(UnsetMetaField,self).xml('unset')
         
-    def resolve(self, data):
+    def resolve(self, data, parameters, parentfile, relevantinputfiles):
         if self.key in data and (not value or (value and data[self.key] == value)):
             del data[self.key]
+            return True
+        return False
 
 class CopyMetaField(AbstractMetaField):
+    """In CopyMetaField, the value is in the form of templateid.keyid, denoting where to copy from. If not keyid but only a templateid is
+    specified, the keyid of the metafield itself will be assumed."""
+    
     def xml(self):
         super(UnsetMetaField,self).xml('copy')
     
-    def resolve(self, data):
-        #TODO: Write resolve method for CopyMetaField
-        raise NotImplemented
+    def resolve(self, data, parameters, parentfile, relevantinputfiles):
+        raw = self.value.split('.')
+        if len(raw) == 1:
+            copytemplate = raw[0]
+            copykey = self.key
+        elif len(raw) == 2:
+            copytemplate = raw[0]
+            copykey = raw[1]
+        else:
+            raise Exception("Can't parse CopyMetaField value " + self.value)
+        
+        #find relevant inputfile
+        edited = False
+        for inputtemplate, f in relevantinputfiles:
+            if inputtemplate.id == copytemplate:
+                if copykey in f.metadata:
+                    data[self.key] = f.metadata[copykey]                    
+                    edited = True
+        return edited
         
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
@@ -493,10 +517,6 @@ class OutputTemplate(object):
             elif key == 'copymetadata'
                 self.copymetadata = bool(value) #True by default
 
-                
-            
-                
-                    
 
         if not self.unique and not '#' in self.filename:
             raise Exception("OutputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
@@ -521,15 +541,42 @@ class OutputTemplate(object):
 
     def __eq__(self, other):
         return other.id == self.id
+    
+    def _findparent(self, inputtemplates):
+        """Find the most suitable parent, that is: the first matching unique/multi inputtemplate"""
+        for inputtemplate in inputtemplates:
+            if self.unique == inputtemplate.unique:
+                return inputtemplate.id
+        return None
                 
     def _getparent(self, profile):
+        """Resolve a parent ID"""
         assert (self.parent)
         for inputtemplate in profile.input:
             if inputtemplate == self.parent:
                 return inputtemplate
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
-    def generate(self, profile, parameters, inputdir):
+    def generatemetadata(self,filename, parameters, parentfile, relevantinputfiles):
+        """Generate metadata, given a filename, parameters and a dictionary of inputdata (necessary in case we copy from it)"""
+        data = {}
+        
+        if self.copymetadata:
+            #Copy parent metadata  
+            for key, value in parentfile.metadata.items():
+                data[key] = value
+        
+        for metafield in self.metafields:
+            if isinstance(metafield, ParameterCondition):
+                metafield = metafield.evaluate(parameters)
+                if not metafield:
+                    continue
+            assert(isinstance(metafield, AbstractMetaField))
+            metafield.resolve(data, parameters, parentfile, relevantinputfiles)        
+        return self.formatclass(filename, **data)
+
+
+    def generate(self, profile, parameters, projectpath, inputfiles):
         """Yields (outputfilename, metadata) tuples"""
         
         #Get input files
@@ -540,53 +587,59 @@ class OutputTemplate(object):
             parent = self._getparent(profile)
             
             #get input files for the parent InputTemplate
-            inputfiles = parent.matchingfiles(inputdir)
-            if not inputfiles:
+            parentinputfiles = parent.matchingfiles(projectpath)
+            if not parentinputfiles:
                 raise Exception("OutputTemplate '"+self.id + "' has parent '" + self.parent + "', but no matching input files were found!")
-        
-        
-        
-        #Do we specify a full filename?
-        for seqnr, inputfilename, inputtemplate in inputfiles:
-            if self.filename:
-                filename = self.filename
-            elif parent:
-                filename = os.path.basename(inputfiles[0][1])
-            else:
-                raise Exception("OutputTemplate '"+self.id + "' has no parent nor filename defined!")
-        
-            #resolve # in filename
-            if not self.unique:
-                filename.replace('#',str(seqnr))
-
-        
-            if self.removeextensions:
-                #Remove unwanted extensions
-                if removeextensions is True:
-                    #Remove any extension
-                    raw = filename.split('.')[:-1]
-                    if raw:
-                        filename = '.'.join(raw)
-                elif isinstance(removeextensions, list):
-                    #Remove specified extension
-                    for ext in self.removeextensions:  
-                        if filename[-len(ext) - 1:] == '.' + ext:
-                            filename = filename[:-len(ext) - 1]
-                                
-            if self.extension and not self.filename:
-                filename += '.' + self.extension
                 
-            #Now we create the actual metadata
-            data = {}
-            for metafield in self.metafields:
-                if isinstance(metafield, ParameterCondition):
-                    metafield = metafield.evaluate(parameters)
-                    if not metafield:
-                        continue
-                assert(isinstance(metafield, AbstractMetaField))
-                metafield.resolve(data)
+            #Do we specify a full filename?
+            for seqnr, inputfilename, inputtemplate in parentinputfiles:
+                if self.filename:
+                    filename = self.filename
+                elif parent:
+                    filename = inputfilename
+                    parentfile = CLAMInputFile(projectpath, inputfilename)
+                else:
+                    raise Exception("OutputTemplate '"+self.id + "' has no parent nor filename defined!")
+            
+                #Make actual CLAMInputFile objects of ALL relevant input files, that is: all unique=True files and all unique=False files with the same sequence number
+                relevantinputfiles = []
+                for seqnr2, inputfilename2, inputtemplate2 in inputfiles:
+                    if seqnr2 == 0 or seqnr2 == seqnr:
+                        relevantinputfiles.append( (inputtemplate2, CLAMInputFile(projectpath, inputfilename2)) )
+                        
+                #resolve # in filename
+                if not self.unique:
+                    filename.replace('#',str(seqnr))
+            
+                if self.removeextensions:
+                    #Remove unwanted extensions
+                    if removeextensions is True:
+                        #Remove any extension
+                        raw = filename.split('.')[:-1]
+                        if raw:
+                            filename = '.'.join(raw)
+                    elif isinstance(removeextensions, list):
+                        #Remove specified extension
+                        for ext in self.removeextensions:  
+                            if filename[-len(ext) - 1:] == '.' + ext:
+                                filename = filename[:-len(ext) - 1]
+                                    
+                if self.extension and not self.filename:
+                    filename += '.' + self.extension   
                     
-            yield filename, CLAMMetaData(filename, **data)
+                #Now we create the actual metadata
+                yield filename, self.generatemetadata(self.filename, parameters, parentfile, relevantinputfiles)
+                
+        elif self.unique and self.filename:
+            #outputtemplate has no parent, specified a filename and is unique, this implies it is not dependent on input files:
+
+            yield filename, self.generatemetadata(self.filename, parameters, None, [])
+            
+        else:
+            raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
+
+                            
+        
     
         
             
@@ -654,8 +707,23 @@ def ParameterCondition(object):
          else:
              return True
 
+    def allpossibilities(self):
+        """Returns all possible outputtemplates that may occur (recusrively applied)"""
+        l = []
+        if isinstance(self.then, ParameterCondition):
+            #recursive parametercondition
+            l += self.then.allpossibilities()
+        else:
+            l.append(self.then)
+        if self.otherwise:
+            if isinstance(self.otherwise, ParameterCondition):
+                l += self.otherwise.allpossibilities()
+            else:
+                l.append(self.otherwise)
+        return l
+
     def evaluate(self, parameters):
-        #Returns False or whatever it evaluates to 
+        """Returns False if there's no match, or whatever the ParameterCondition evaluates to (recursively applied!)"""
         if self.match(parameters):
             if isinstance(self.then, ParameterCondition):
                 #recursive parametercondition
