@@ -3,8 +3,9 @@
 \usepackage{graphicx}
 \usepackage{placeins}
 \usepackage{hyperref}
+\usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.2.9}
+\title{CLAM Documentation \\ \small version 0.5-pre-alpha}
 \author{Maarten van Gompel \\ Induction of Linguistic Knowledge Research Group \\ Tilburg University }
 
 
@@ -36,8 +37,7 @@ The kind of applications that CLAM is intended for are NLP applications, usually
 
 The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources. The principal resource in CLAM is called a \emph{project}. Various users can maintain various projects, each representing one specific run of the system, with particular input data, output data and a set of configured parameters.
 
-The webservice provides its responses in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice. The webservice is thus usable also as a stand-alone web-application.
-
+In addition to using HTTP Error Codes for error responses, the webservice generally responds in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus allowing both machines and people to directly communicate with the webservice. The webservice is thus usable also as a stand-alone web-application.
 
 This documentation is split into two parts: a section for service providers/developers and a section for service clients, users wanting to communicate with an existing service in an automated fashion.
 
@@ -46,16 +46,13 @@ Note that at this stage, CLAM is still under heavy development. As such, this do
 \end{devnotes}
 
 
-
-
-
-
 \chapter{Documentation for Service Providers}
 
 \section{Technical details}
 
-CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed. Note that the software is designed for UNIX systems only, but any serious work in the field of NLP is UNIX based anyhow. 
+CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver (supported are: Apache, nginx or lighthttpd).
 
+ Note that the software is designed for UNIX systems only, but any serious work in the field of NLP is UNIX based anyhow. 
 
 \subsection{Installation}
 
@@ -69,7 +66,7 @@ The following software is required to run CLAM. These will be available in any m
 %\item python-django
 \end{itemize}
 
-Each CLAM webservice can run standalone on any TCP port of your choice (make sure the port is open in your firewall), or you can plug it into an already existing webserver (Apache, nginx, lighttpd). For production environments, this latter option is recommend.
+Each CLAM webservice can run standalone on any TCP port of your choice (make sure the port is open in your firewall), or you can plug it into an already existing webserver (Apache, nginx, lighttpd). For production environments, this latter option is strongly recommend.
 
 To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest to service providers:
 
@@ -339,6 +336,7 @@ The wrapper script can be written in any language. Python developers will have t
 CLAM Client API will be further discussed, possibly in next chapter.
 \end{devnotes}
 
+
 \chapter{Documentation for Service Clients}
 
 Being a RESTful webservice, automated clients can communicate with CLAM. 
@@ -349,9 +347,129 @@ Yet to be written... %TODO
 \end{devnotes}
 
 
-%\section{Resource oriented approach}
+\appendix
+\chapter{RESTful specification}
 
-%Being a RESTful webservice, CLAM has a resource-oriented approach. 
+This appendix provides a full specification of the RESTful interface to CLAM:
 
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/} \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Get index of all projects}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised} \\ 
+\hline
+\end{supertabular}
+
+\medskip
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get a project}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & This returns the current state of the project in CLAM XML format, depending on the state this contains a specification of all accepted parameters, all input files, all output files. Note that errors in parameter validation are encoded in the CLAM XML response, the system will still return a 200 response. \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Create new empty project}} \\
+\hline
+\textbf{Method} & \texttt{PUT} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{201 - Created}, \texttt{401 - Unauthorised}, \texttt{403 - Forbidden} \emph{(Invalid project ID)},  \texttt{403 - Forbidden} \emph{(No project name)} \\ 
+\textbf{Description} & This is necessary before attempting to upload any files, it initialises an empty new project \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
+\hline
+\textbf{Method} & \texttt{POST} \\
+\textbf{Querystring} & \texttt{usecorpus$=[corpus_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service), the parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
+\textbf{Description} & This starts running a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string, the input files are provided in seperate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely can't invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Delete a project}} \\
+\hline
+\textbf{Method} & \texttt{DELETE} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK}, \texttt{401 - Unauthorised},  \texttt{404 - Not Found}\\ 
+\textbf{Description} & Deletes a project, any running processes will be aborted. \\ 
+\hline
+\end{supertabular}
+
+\medskip
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/input/[filename]} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get an input file}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Retrieves the specified input file \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Delete an input file}} \\
+\hline
+\textbf{Method} & \texttt{DELETE} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Deletes the specified input file \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Add/upload a new input file}} \\
+\hline
+\textbf{Method} & \texttt{POST} \\
+\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$ \linebreak \texttt{contents$=[text-content]$}} \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & This method adds a new input file. Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \\
+\hline  
+\end{supertabular}
+
+\medskip
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/output/[filename]} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get an output file}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Retrieves the specified output file \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Delete an output file}} \\
+\hline
+\textbf{Method} & \texttt{DELETE} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Deletes the specified output file \\
+\hline
+\end{supertabular}
+
+\medskip
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/output/} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Retrieve all output files as an archive}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Delete all output files}} \\
+\hline
+\textbf{Method} & \texttt{DELETE} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised} \\ 
+\textbf{Description} & Deletes all output files and resets the project for another run \\
+\hline
+\end{supertabular}
 
 \end{document}
