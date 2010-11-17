@@ -120,6 +120,15 @@ def requirelogin(f):
     return wraps(f)(wrapper)
 
 class CLAMService(object):
+    """CLAMService is the actual service object, the RESTful specification is as follows:
+    
+    
+    URL: http://[host:port]/
+    METHOD: GET
+    
+    
+    [project]
+    """
 
     urls = (
     '/', 'Index',
@@ -131,7 +140,6 @@ class CLAMService(object):
     '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
     '/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
-
 
     def __init__(self, mode = 'standalone'):
         global VERSION
@@ -244,10 +252,10 @@ class Project(object):
     def create(project, user):         
         """Create project skeleton if it does not already exist (static method)"""
         if not Project.validate(project):
-            raise BadRequest('Invalid project ID') #TODO: message won't show
+            raise web.webapi.Forbidden('Invalid project ID')
         printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
         if not project:
-            raise BadRequest('Empty project name!') #TODO: message won't show
+            raise web.webapi.Forbidden('No project name') 
         if not os.path.isdir(settings.ROOT + "projects/" + project):
             printlog("Creating project '" + project + "'")
             os.mkdir(settings.ROOT + "projects/" + project)
@@ -257,6 +265,9 @@ class Project(object):
                 f = codecs.open(settings.ROOT + "projects/" + project + '/.users','w','utf-8')                         
                 f.write(user + "\n")
                 f.close()
+        else:
+            #project already exists, pass silently
+            pass
 
     @staticmethod
     def access(project, user):
@@ -500,24 +511,24 @@ class Project(object):
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
         if not self.exists(project):
-            return web.webapi.NotFound()
+            return web.webapi.notfound("Project " + project + " was not found") #404
         else:
             if user and not Project.access(project, user):
-                return web.webapi.Unauthorized()
-            return self.response(user, project, settings.PARAMETERS)
+                return web.webapi.unauthorized("Access denied to project " + project + " for user " + user) #401
+            return self.response(user, project, settings.PARAMETERS) #200
 
 
     @requirelogin
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
-        return "" #200
+        return web.webapi.created("Project " + project + " has been created", {'Location': project + '/'}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
         Project.create(project, user)
         if user and not Project.access(project, user):
-            return web.webapi.Unauthorized()
+            return web.webapi.unauthorized("Access denied to project " + project + " for user " + user) #401
                     
         #Generate arguments based on POSTed parameters
         params = []
@@ -565,14 +576,13 @@ class Project(object):
             matchedprofiles = clam.common.metadata.profiler(settings.PROFILES, Project.path(project), parameters)
 
         if errors:
-            #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)
-            #raise BadRequest(unicode(self.GET(project)))
-            printlog("There are errors, not starting.")
-            return self.response(user, project, parameters)
+            #There are parameter errors, return 403 response with errors marked
+            printlog("There are parameter errors, not starting.")
+            return web.webapi.forbidden(unicode(self.response(user, project, parameters)))
         elif not matchedprofiles:
-            #TODO
+            #TODO: Return error response if no profiles match. Returns 403 response with error message.
             printlog("No profiles matching, not starting.")
-            #TODO: return response
+            return web.webapi.forbidden(unicode(self.response(user, project, parameters)))
         else:
             #write clam.xml output file
             render = web.template.render('templates')
@@ -612,20 +622,20 @@ class Project(object):
                 f = open(Project.path(project) + '.pid','w')
                 f.write(str(pid))
                 f.close()
-                return self.response(user, project, parameters) #return 200 -> GET
+                return web.webapi.accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
     @requirelogin
     def DELETE(self, project, user=None):
         if not self.exists(project):
-            return web.webapi.NotFound()
+            return web.webapi.notfound("No such project: " + project)
         statuscode, _, _, _  = self.status(project)
         if statuscode == clam.common.status.RUNNING:
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )
         shutil.rmtree(Project.path(project))
-        return "" #200
+        return "Project deleted: " + project #200
 
 class OutputFileHandler(object):
 
@@ -734,7 +744,7 @@ class InputFileHandler(object):
             if not inputtemplate:
                 #Inputtemplate not found, send 404 - Bad Request
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-                raise BadRequest                
+                raise web.webapi.notfound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
         else:
             #Check if the specified filename can be uniquely associated with an inputtemplate
             for profile in settings.PROFILES:
@@ -749,7 +759,8 @@ class InputFileHandler(object):
                             inputtemplate = t                        
             if not inputtemplate:
                 printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
-                raise BadRequest
+                raise web.webapi.notfound("No inputtemplate specified nor auto-detected for this filename!")
+                
             
             
         #See if other previously uploaded input files use this inputtemplate
@@ -760,7 +771,7 @@ class InputFileHandler(object):
             
         for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
             if inputtemplate.unique:
-                raise web.forbidden() #inputtemplate is unique but file already exists (it will have to be explicitly deleted by the client first)
+                raise web.webapi.forbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
             else:
                 if seq >= nextseq:
                     nextseq = seq + 1 #next available sequence number
@@ -776,14 +787,14 @@ class InputFileHandler(object):
                 
         if inputtemplate.filename:
             if filename != inputtemplate.filename:
-                raise web.forbidden() #filename must equal inputdata filename, raise 403 otherwise
+                return web.webapi.forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
             #TODO LATER: add support for calling this with an actual number instead of #
         if inputtemplate.extension:
             if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                 filename = filename[:-len(inputtemplate.extension)] + '.' + inputtemplate.extension
             else:
-                raise web.forbidden() #extension mismatch, raise 403
+                raise web.webapi.forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
             
         #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
@@ -814,7 +825,7 @@ class InputFileHandler(object):
             printlog("Adding file " + filename + " with explicitly provided contents to input files")
             sourcefile = "editor"
         else:
-            raise BadRequest
+            raise web.webapi.Forbidden("No file, url or contents specified!")
             
         output += "<upload source=\""+filename +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
 
@@ -948,7 +959,7 @@ class OutputInterface(object):
                 if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
                     os.unlink(Project.path(project) + "output/" + project + ".zip")
             else:
-                raise BadRequest('Invalid archive format') #TODO: message won't show
+                raise web.webapi.Forbidden('Invalid archive format') #TODO: message won't show
 
             path = Project.path(project) + "output/" + project + "." + format
             
@@ -1143,7 +1154,7 @@ class Uploader(object): #OBSOLETE!
 
 
     @requirelogin
-    def POST(self, project, user=None):
+    def POST(self, project, user=None): #OBSOLETE!
         #postdata = web.input()
 
         #defaults (max 25 uploads)
