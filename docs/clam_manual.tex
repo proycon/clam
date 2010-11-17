@@ -424,8 +424,8 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \hline
 \textbf{Method} & \texttt{POST} \\
 \textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$ \linebreak \texttt{contents$=[text-content]$}} \\
-\textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & This method adds a new input file. Reponse is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \\
 \hline  
 \end{supertabular}
 
