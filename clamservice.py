@@ -120,15 +120,7 @@ def requirelogin(f):
     return wraps(f)(wrapper)
 
 class CLAMService(object):
-    """CLAMService is the actual service object, the RESTful specification is as follows:
-    
-    
-    URL: http://[host:port]/
-    METHOD: GET
-    
-    
-    [project]
-    """
+    """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
     '/', 'Index',
