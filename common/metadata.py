@@ -135,12 +135,13 @@ class RawXMLProvenanceData(object):
     
 class CLAMProvenanceData(object):
     
-    def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles):
+    def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None):
         self.serviceid = serviceid
         self.servicename = servicename
         self.serviceurl = serviceurl
         self.outputtemplate_id = outputtemplate_id
         self.outputtemplate_label = outputtemplate_label
+        self.parameters = parameters    
             
         assert isinstance(inputfiles, list) and all([ isinstance(x,CLAMInputFile) for x in inputfiles ])
         self.inputfiles = inputfiles #list of CLAMMetaData objects of all input files
@@ -150,7 +151,12 @@ class CLAMProvenanceData(object):
         for inputfile in self.inputfiles:
             xml += "\t<inputfile name=\"" + inputfile.filename + "\">"
             xml += inputfile.metadata.xml()
-            xml += "\t</inputfile>"
+            xml += "\t</inputfile>"            
+            if self.parameters:
+                xml += "<parameters>"
+                for parameter in self.parameters:
+                    xml += parameter.xml()
+                xml += "</parameters>"
         xml += "</provenance>"
         return xml
 
