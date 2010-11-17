@@ -14,7 +14,7 @@
 import json
 from lxml import etree as ElementTree
 
-from clam.common.data import CLAMFile
+from clam.common.data import CLAMFile, CLAMInputFile
 
 
 
@@ -127,6 +127,33 @@ def getmetadata(xmldata):
     raise NotImplementedError #TODO: implement
 
 
+class RawXMLProvenanceData(object):
+    def __init__(self, xml):
+        self.xml = xml
+    def xml(self):
+        return self.xml
+    
+class CLAMProvenanceData(object):
+    
+    def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles):
+        self.serviceid = serviceid
+        self.servicename = servicename
+        self.serviceurl = serviceurl
+        self.outputtemplate_id = outputtemplate_id
+        self.outputtemplate_label = outputtemplate_label
+            
+        assert isinstance(inputfiles, list) and all([ isinstance(x,CLAMInputFile) for x in inputfiles ])
+        self.inputfiles = inputfiles #list of CLAMMetaData objects of all input files
+        
+    def xml(self):
+        xml += "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\">"
+        for inputfile in self.inputfiles:
+            xml += "\t<inputfile name=\"" + inputfile.filename + "\">"
+            xml += inputfile.metadata.xml()
+            xml += "\t</inputfile>"
+        xml += "</provenance>"
+        return xml
+
 class CLAMMetaData(object):
     """A simple hash structure to hold arbitrary metadata"""
     attributes = None #if None, all attributes are allowed! Otherwise it should be a dictionary with keys corresponding to the various attributes and a list of values corresponding to the *maximally* possible settings (include False as element if not setting the attribute is valid), if no list of values are defined, set True if the attrbute is required or False if not. If only one value is specified (either in a list or not), then it will be 'fixed' metadata
@@ -134,6 +161,7 @@ class CLAMMetaData(object):
     mimetype = "" #No mimetype by default
     schema = ""
     
+    self.provenance = None
     self.input = False
     self.output = False
 
@@ -142,9 +170,10 @@ class CLAMMetaData(object):
         self.data = {}
         self.loadinlinemetadata()
         for key, value in kwargs.items():
-            if key == 'origin': #TODO: add origin
+            if key == 'provenance':
                 self.input = True
-                self.systemid, self.systemname, self.systemurl, self.project, self.templateid,self.templatelabel = value
+                assert (isinstance(value, CLAMProvenanceData))
+                self.provenance = value
             else:
                 self[key] = value
         if attributes:
@@ -199,16 +228,12 @@ class CLAMMetaData(object):
         if self.schema:
              xml += " schema=\""+self.__class__.schema+"\""
         xml += ">\n"
-        
-        #TODO: Add origin path
-        #xml += "\t<origin>"
-        #xml += "\t\t<clamservice systemid=\""+ self.systemid +"\" systemname=\""+ self.systemname + "\" systemurl=\""+ self.systemurl +"\"   template=\""+ template.id +"\" label=\""+template.label+"\">"
-        #xml += "\t\t" + self.origin.metadata.xml()
-        #xml += "\t\t</clamservice>"
-        #xml += "\t</origin>"    
-            
+
         for key, value in self.data.items():
-        xml += "\t<meta id=\""+key+"\">"+str(value)+"</meta>"
+            xml += "\t<meta id=\""+key+"\">"+str(value)+"</meta>"
+
+        if self.provenance:        
+            xml += self.provenance.xml()
         
         xml += "</CLAMMetaData>"
         return xml
