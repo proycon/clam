@@ -544,8 +544,15 @@ class OutputTemplate(object):
                 self.extension = value #Add the following extension
             elif key == 'parent':
                 self.parent = value #The ID of an inputtemplate
-            elif key == 'copymetadata'
+            elif key == 'copymetadata':
                 self.copymetadata = bool(value) #True by default
+            elif key == 'viewers' or key == 'viewer':
+                if isinstance(value, AbstractViewer):
+                    self.viewers = [value]
+                elif isinstance(value, list) and all([isinstance(x, AbstractViewer) for x in value]):
+                    self.viewers = value
+                else:
+                    raise Exception("Invalid viewer specified!")
 
 
         if not self.unique and not '#' in self.filename:
