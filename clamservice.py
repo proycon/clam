@@ -561,10 +561,8 @@ class Project(object):
                                         printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                         errors = True
 
-
-        #TOOD: Run profiler
-        matchedprofiles = clam.common.metadata.profiler()
-
+        if not errors: #We don't even bother running the profiler if there are errors
+            matchedprofiles = clam.common.metadata.profiler(settings.PROFILES, Project.path(project), parameters)
 
         if errors:
             #There are parameter errors, return 200 response with errors marked, (tried 400 bad request, but XSL stylesheets don't render with 400)

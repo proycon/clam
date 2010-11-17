@@ -19,15 +19,14 @@ from clam.common.data import CLAMFile
 
 
 
-def profiler(profiles, inputfiles,parameters):
+def profiler(profiles, projectpath,parameters):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
-    #We use the INPUTTEMPLATE symbolic links to quickly match the input side of profiles
 
     matched = []
     for profile in profiles:
-        if profile.match(inputfiles, parameters):
+        if profile.match(projectpath, parameters):
             matched.append(profile)
-            profile.generate(inputfiles,parameters)
+            profile.generate(projectpath,parameters)
     return matched
 
 
