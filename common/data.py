@@ -68,7 +68,7 @@ class CLAMFile:
                 raise Exception("Can't download metadata!")
             
             #parse metadata
-            self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
+            self.metadata = clam.common.formats.getmetadatafromxml(self, xml) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""

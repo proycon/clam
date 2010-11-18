@@ -10,7 +10,36 @@
 #
 ###############################################################
 
-from clam.common.metadata import CLAMMetaData
+from lxml import etree as ElementTree
+from clam.common.metadata import CLAMMetaData, RawXMLProvenanceData
+
+
+def getmetadatafromxml(file, node):
+    """Read metadata from XML."""
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)).getroot() 
+    if node.tag == 'CLAMMetaData':
+        format = node.attrib['format']
+        
+        formatclass = None
+        for cls in dir():
+            if isinstance(cls, CLAMMetaData) and cls.__name__ == format:
+                formatclass = cls
+        if not formatclass:
+            raise Exception("Format class " + format + " not found!")
+            
+        data = {}
+        for subnode in node:
+            if subnode.tag == 'meta':
+                key = subnode.attrib['id']
+                value = subnode.text
+                data[key] = value
+            elif subnode.tag == 'provenance':
+                data['provenance'] = RawXMLProvenanceData(subnode)
+        return formatclass(file, **data)
+    else:    
+        raise Exception("Invalid CLAM Metadata!")
+
 
 class ExampleFormat(CLAMMetaData):
 

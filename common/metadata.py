@@ -15,7 +15,7 @@ import json
 from lxml import etree as ElementTree
 
 from clam.common.data import CLAMFile, CLAMInputFile
-
+import clam.formats
 
 
 
@@ -122,16 +122,17 @@ class Profile(object):
 
 
 
-def getmetadata(xmldata):
-    """Read metadata from XML"""
-    raise NotImplementedError #TODO: implement
 
 
 class RawXMLProvenanceData(object):
     def __init__(self, xml):
         self.xml = xml
+    
     def xml(self):
-        return self.xml
+        if isinstance(self.xml, ElementTree._Element):
+            return ElementTree.tostring(self.xml, pretty_print = True)
+        else:
+            return self.xml
     
 class CLAMProvenanceData(object):
     
