@@ -451,6 +451,34 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \hline
 \end{supertabular}
 
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/output/[filename]/metadata} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get the metadat for an output file}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Retrieves the metadata for the specified output file \\ 
+\hline
+\end{supertabular}
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/[project]/input/[filename]/metadata} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get the metadat for an input file}} \\
+\hline
+\textbf{Method} & \texttt{GET} \\
+\textbf{Querystring} & -  \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Retrieves the metadata for the specified input file \\ 
+\hline
+\end{supertabular}
+
+
 \medskip
 
 \begin{supertabular}{|l|p{10cm}|}
