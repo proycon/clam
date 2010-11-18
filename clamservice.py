@@ -634,9 +634,18 @@ class OutputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
+
+        if os.path.basename(filename.rstrip('/')).lower() == 'metadata':
+            #this is a request for metadata? using filename/metadata ?
+            filename = filename.rstrip('/')[:-9]
+            metafilename = os.path.dirname(filename) 
+            if metafilename: metafilename += '/'
+            metafilename += '.' + os.path.basename(filename) + '.METADATA'
+            filename = metafilename        
+
         path = Project.path(project) + "output/" + filename.replace("..","")
         
-        #TODO: find outputformat?
+        #TODO: find output mime-type?
 
         if os.path.isfile(path): 
             for line in open(path,'r'): 
@@ -684,9 +693,18 @@ class InputFileHandler(object):
     @requirelogin
     def GET(self, project, filename, user=None):    
         """Download an input file"""
-        path = Project.path(project) + "input/" + filename.replace("..","")
         
-       
+        if os.path.basename(filename.rstrip('/')).lower() == 'metadata':
+            #this is a request for metadata? using filename/metadata ?
+            filename = filename.rstrip('/')[:-9]
+            metafilename = os.path.dirname(filename) 
+            if metafilename: metafilename += '/'
+            metafilename += '.' + os.path.basename(filename) + '.METADATA'
+            filename = metafilename
+ 
+         path = Project.path(project) + "input/" + filename.replace("..","")
+
+        
         if os.path.isfile(path): 
             for line in open(path,'r'): 
                 yield line
