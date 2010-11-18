@@ -31,22 +31,26 @@ def profiler(profiles, projectpath,parameters):
 
 
 class Profile(object):
-    def __init__(self, input, output, parameters): #, **kwargs):
-        if not isinstance(input, list):
-            input = [input]
-        if isinstance(input, InputTemplate):
-           assert all([ isinstance(InputTemplate) for x in input])
-        self.input = input
-
-        if isinstance(output, OutputTemplate) or isinstance(output, ParameterCondition):
-            output = [output]
-        assert all([ isinstance(OutputTemplate) or isinstance(ParameterCondition)  for x in output])
-        self.output = output
-
+    def __init__(self, *args): #input, output, parameters): #, **kwargs):
+    
+        self.input = []
+        self.output = []
+    
+        for arg in args:
+            if isinstance(arg, InputTemplate):    
+                self.input.append(InputTemplate)
+            elif isinstance(arg, OutputTemplate):    
+                self.output.append(OutputTemplate)
+            elif isinstance(arg, ParameterCondition):
+                self.output.append(ParameterCondition)
+                
+    
         #Check for orphan OutputTemplates. OutputTemplates must have a parent (unless there is no input, then outputtemplates with filename, unique=True and copymetadata=False are parentless)
         for o in self.output:
             if isinstance(o, ParameterCondition):
                 for o in o.allpossibilities():
+                    if not isinstance(o, OutputTemplate):
+                        raise Exception("ParameterConditions in profiles must always evaluate to OutputTemplate!")
                     parent = o._findparent(self.input)
                     if parent:
                         o.parent = parent
