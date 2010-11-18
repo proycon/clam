@@ -448,12 +448,14 @@ class Project(object):
                         
 
 
-    def response(self, user, project, parameters, datafile = False):
+    def response(self, user, project, parameters, errormsg = "", datafile = False):
         global VERSION
 
         #check if there are invalid parameters:
-        errors = "no"
-        errormsg = ""
+        if not errormsg:
+            errors = "no"
+        else:
+            errors = "yes"
 
         statuscode, statusmsg, statuslog, completion = self.status(project)
         
@@ -572,14 +574,13 @@ class Project(object):
             printlog("There are parameter errors, not starting.")
             return web.webapi.forbidden(unicode(self.response(user, project, parameters)))
         elif not matchedprofiles:
-            #TODO: Return error response if no profiles match. Returns 403 response with error message.
             printlog("No profiles matching, not starting.")
-            return web.webapi.forbidden(unicode(self.response(user, project, parameters)))
+            return web.webapi.forbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
         else:
             #write clam.xml output file
             render = web.template.render('templates')
             f = open(Project.path(project) + "clam.xml",'w')
-            f.write(str(self.response(user, project, parameters, True)))
+            f.write(str(self.response(user, project, parameters, "",True)))
             f.close()
 
 
