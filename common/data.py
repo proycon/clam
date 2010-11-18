@@ -50,7 +50,7 @@ class CLAMFile:
                 self.http = httplib2.Http()
                 
     def metafilename(self):
-            """Returns the filename for the meta file (not full path)"""
+            """Returns the filename for the meta file (not full path). Only used for local files."""
             metafilename = os.path.dirname(self.filename) 
             if metafilename: metafilename += '/'
             metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
@@ -58,11 +58,14 @@ class CLAMFile:
                 
     def loadmetadata(self):
             if not self.remote:
-                f =  codecs.open(self.projectpath + basedir '/' + self.metafilename() +, 'r', 'utf-8').readlines():
+                f =  codecs.open(self.projectpath + basedir '/' + self.meta filename() +, 'r', 'utf-8').readlines():
                 xml = f.readlines()
                 f.close()
             else:
-                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + self.metafilename()
+                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + self.filename + '/metadata')
+                
+            if httpcode != 200: #TODO: Verify
+                raise Exception("Can't download metadata!")
             
             #parse metadata
             self.metadata = clam.common.metadata.getmetadata(xml) #returns CLAMMetaData object (or child thereof)
