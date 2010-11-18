@@ -504,6 +504,14 @@ class CopyMetaField(AbstractMetaField):
                     edited = True
         return edited
         
+class ParameterMetaField(AbstractMetaField):
+    def resolve(self, data, parameters, parentfile, relevantinputfiles): #TODO: Verify
+        if self.value in parameters:
+            data[self.key] = parameters[self.value]
+            return True
+        else:
+            return False
+        
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs)
         assert (issubclass(formatclass, CLAMMetaData))

@@ -14,7 +14,7 @@ from lxml import etree as ElementTree
 from clam.common.metadata import CLAMMetaData, RawXMLProvenanceData
 
 
-def getmetadatafromxml(file, node):
+def getmetadatafromxml(formats, file, node):
     """Read metadata from XML."""
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() 

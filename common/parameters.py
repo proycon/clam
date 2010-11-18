@@ -368,7 +368,7 @@ class IntegerParameter(AbstractParameter):
             if key == 'minvalue': 
                 self.minvalue = int(value)
             elif key == 'maxvalue': 
-                self.maxvalue = int(value)
+                self.maxvalue = int(value)                
 
         super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
 
