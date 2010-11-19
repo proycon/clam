@@ -12,13 +12,15 @@
 #
 ###############################################################
 
+import glob
+import os
 
 def globsymlinks(pattern, recursion=True):
     for f in glob.glob(pattern):
         if os.path.islink(f):
             yield f, os.path.dirname(f) + '/' + os.readlink(f)
     if recursion:
-        for d in os.path.listdir(os.path.dirname(pattern)):
+        for d in os.listdir(os.path.dirname(pattern)):
             if os.path.isdir(d):
                 for linkf,realf in globsymlinks(d + '/' + os.path.basename(pattern),recursion):
                     yield linkf,realf                

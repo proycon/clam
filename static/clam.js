@@ -31,10 +31,13 @@ $(document).ready(function(){
          $.ajax({ 
             type: "PUT", 
             url: $("#projectname").val() + "/", 
-            dataType: "xml", 
+            dataType: "text", 
             success: function(response){ 
                 window.location.href = $("#projectname").val() + "/";
             },
+            error: function(response){
+                alert("Unable to create project");   
+            }
          });
          //$("#startprojectform").attr("action",$("#projectname").val());
        });
@@ -46,10 +49,13 @@ $(document).ready(function(){
          $.ajax({ 
             type: "DELETE", 
             url: window.location.href, 
-            dataType: "xml", 
+            dataType: "text", 
             success: function(response){ 
                 window.location.href = "/"; /* back to index - TODO: FIX, doesn't work with urlprefix! */
             },
+            error: function(response){
+                alert("Unable to delete project");   
+            }
          });         
        });
    }    
@@ -59,11 +65,14 @@ $(document).ready(function(){
        $("#restartbutton").click(function(event){
          $.ajax({ 
             type: "DELETE", 
-            url: "output", 
-            dataType: "xml", 
+            url: "/output/" , 
+            dataType: "text", 
             success: function(xml){ 
                 window.location.href = ""; /* refresh */
             },
+            error: function(response){
+                alert("Unable to create project");   
+            }
          });         
        });
    }    
@@ -158,24 +167,30 @@ $(document).ready(function(){
     });
 
    //Upload through browser
-   $('#uploadbutton').click(function(){
-       var filename = getuploadfilename($('#uploadfile').val(),$('#uploadinputtemplate').val());
-       if (!filename) {
-           //alert already produced by getuploadfilename()
-           return false;
-       }
-       
-       uploader = new AjaxUpload('uploadfile', {action: 'input/' + filename, name: 'uploadfile', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
+   if ($('#uploadbutton')) {    
+       uploader = new AjaxUpload('uploadbutton', {action: 'input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
+            onChange: function(filename,extension){
+                 var inputtemplate_id = $('#uploadinputtemplate').val();
+                 var filename = validateuploadfilename(filename,inputtemplate_id);
+                 if (!filename) {
+                    return false;
+                 } else {
+                     uploader._settings.action = 'input/' + filename
+                     uploader._settings.data.inputtemplate = inputtemplate_id;
+                 }
+            },
             onSubmit: function(){
                 $('#clientupload').hide();
                 $('#uploadprogress').show();           
-            },  onComplete: function(file, response){
+            },  
+            onComplete: function(file, response){
                 processuploadresponse(response);
                 $('#uploadprogress').hide();
                 $('#clientupload').show();
             }       
         }); 
-   });
+   }
+
 
 
 });  //ready
@@ -246,13 +261,13 @@ function getinputtemplate(id) {
     return null;
 }
 
-function getuploadfilename(sourcefilename, inputtemplate_id) {
+function validateuploadfilename(filename, inputtemplate_id) {
     var inputtemplate = getinputtemplate(inputtemplate_id)
-    if (!inputtemplate) {
+    if (inputtemplate == null) {
         alert('Select a valid input type first!');
         return false;
     }
-    var filename = sourcefilename.match(/[\/|\\]([^\\\/]+)$/); //os.path.basename
+    //var filename = sourcefilename.match(/[\/|\\]([^\\\/]+)$/); //os.path.basename
     
     if (inputtemplate.filename) {
         //inputtemplate forces a filename:
@@ -268,6 +283,7 @@ function getuploadfilename(sourcefilename, inputtemplate_id) {
     }
     return filename;
 }
+
 
 
 
