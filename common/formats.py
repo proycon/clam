@@ -76,7 +76,7 @@ class ExampleFormat(CLAMMetaData):
         pass
            
 
-class PlainText(CLAMMetaData):
+class PlainTextFormat(CLAMMetaData):
     attributes = {'encoding':True,'language':False }
     mimetype = "text/plain"
                 

@@ -42,13 +42,12 @@ class Profile(object):
     
         for arg in args:
             if isinstance(arg, InputTemplate):    
-                self.input.append(InputTemplate)
+                self.input.append(arg)
             elif isinstance(arg, OutputTemplate):    
-                self.output.append(OutputTemplate)
+                self.output.append(arg)
             elif isinstance(arg, ParameterCondition):
-                self.output.append(ParameterCondition)
-                
-    
+                self.output.append(arg)
+                    
         #Check for orphan OutputTemplates. OutputTemplates must have a parent (unless there is no input, then outputtemplates with filename, unique=True and copymetadata=False are parentless)
         for o in self.output:
             if isinstance(o, ParameterCondition):
@@ -58,12 +57,12 @@ class Profile(object):
                     parent = o._findparent(self.input)
                     if parent:
                         o.parent = parent
-                        if not o.parent and (self.input or not o.unique or not o.filename):
-                            raise Exception("Outputtemplate " + o.id + " has no parent defined, and none could be found automatically!")
+                        if not o.parent and (not (o.filename and o.unique)):
+                            raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
             elif not o.parent:
-                o.parent  = o._findparent(self.input)
-                if not o.parent and (self.input or not o.unique or not o.filename):
-                    raise Exception("Outputtemplate " + o.id + " has no parent defined, and none could be found automatically!")
+                    o.parent = o._findparent(self.input)
+                    if not o.parent and (not (o.filename and o.unique)):
+                        raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
 
     def match(self, projectpath, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
@@ -314,8 +313,8 @@ class InputTemplate(object):
                 else:
                     self.extension = value
 
-        if not self.unique and not '#' in self.filename:
-            raise Exception("InputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
+        if not self.unique and (self.filename and not '#' in self.filename):
+            raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
         for parameter in args:
             assert isinstance(parameter, clam.common.parameters.AbstractParameter)
@@ -544,7 +543,7 @@ class OutputTemplate(object):
         
         self.removeextensions = [] #Remove extensions
         
-        self.parent = None #copy metadata from
+        self.parent = None
         self.copymetadata = False #copy metadata from parent (if set)
 
         for key, value in kwargs.items():
@@ -567,6 +566,7 @@ class OutputTemplate(object):
             elif key == 'extension':
                 self.extension = value #Add the following extension
             elif key == 'parent':
+                if isinstance(value, InputTemplate): value = value.id
                 self.parent = value #The ID of an inputtemplate
             elif key == 'copymetadata':
                 self.copymetadata = bool(value) #True by default
@@ -579,8 +579,8 @@ class OutputTemplate(object):
                     raise Exception("Invalid viewer specified!")
 
 
-        if not self.unique and not '#' in self.filename:
-            raise Exception("OutputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
+        if not self.unique and (self.filename and not '#' in self.filename):
+            raise Exception("OutputTemplate configuration error in outputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
         
 
@@ -705,10 +705,10 @@ class OutputTemplate(object):
         
             
             
-            
+                
 
 
-def ParameterCondition(object):
+class ParameterCondition(object):
     def __init__(self, **kwargs):
         if not 'then' in kwargs:
             assert Exception("No 'then=' specified!")

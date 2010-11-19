@@ -347,8 +347,8 @@ class ChoiceParameter(AbstractParameter):
 
 
 class TextParameter(StringParameter): #TextArea based
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
-        super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
+    def __init__(self, id, name, description = '', **kwargs):
+        super(TextParameter,self).__init__(id,name,description, **kwargs)
 
     def compilearg(self, value):
         if value.find(" ") >= 0 or value.find(";") >= 0:            
@@ -357,7 +357,7 @@ class TextParameter(StringParameter): #TextArea based
         return super(TextParameter,self).compilearg(value)
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0
         self.maxvalue = 0 #unlimited        
         
@@ -370,7 +370,7 @@ class IntegerParameter(AbstractParameter):
             elif key == 'maxvalue': 
                 self.maxvalue = int(value)                
 
-        super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(IntegerParameter,self).__init__(id,name,description, **kwargs)
 
 
     def validate(self, value):

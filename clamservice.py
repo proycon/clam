@@ -1374,18 +1374,6 @@ if __name__ == "__main__":
         usage()
         sys.exit(2)
 
-    if (len(args) == 1):
-        settingsmodule = args[0]
-    elif (len(args) > 1):
-        print >>sys.stderr, "ERROR: Too many arguments specified"
-        usage()
-        sys.exit(2)
-    else:
-        print >>sys.stderr, "ERROR: No settings module specified!"
-        usage()
-        sys.exit(2)
-
-
     for o, a in opts:
         if o == '-d':
             DEBUG = True
@@ -1400,10 +1388,25 @@ if __name__ == "__main__":
             sys.exit(0)
         elif o == '-v':
             print "CLAM WebService version " + str(VERSION)
+            sys.exit(0)
         else:
             usage()
             print "ERROR: Unknown option: ", o
             sys.exit(2)
+
+    if (len(args) == 1):
+        settingsmodule = args[0]
+    elif (len(args) > 1):
+        print >>sys.stderr, "ERROR: Too many arguments specified"
+        usage()
+        sys.exit(2)
+    else:
+        print >>sys.stderr, "ERROR: No settings module specified!"
+        usage()
+        sys.exit(2)
+
+
+
     
 
 

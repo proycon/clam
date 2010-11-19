@@ -64,17 +64,17 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
-        InputTemplate(id='textinput', formatclass=PlainTextFormat,label="Plain-text document",  
+        InputTemplate('textinput', PlainTextFormat,"Plain-text document",  
             ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 Unicode'), ('latin1','Latin 1')]),  
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             extension='.txt',
             multi=True
         ),
-        OutputTemplate(id='statsbydoc',formatclass=PlainTextFormat,label='Document Statistics',
+        OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
             extension='.stats',
             multi=True
         ),
-        OutputTemplate(id='freqlistbydoc', formatclass=PlainTextFormat,label='Document Frequency list ', 
+        OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
             CopyMetaField('textinput.language'), 
             extension='.freqlist',
             multi=True
@@ -88,7 +88,7 @@ PROFILES = [
             unique=True
         ), 
         ParameterCondition(createlexicon=True, 
-            then=OutputTemplate(id='lexicon', formatclass=PlainTextFormat, label='Lexicon',
+            then= OutputTemplate(id='lexicon', formatclass=PlainTextFormat, label='Lexicon',
                 filename='overall.lexikon',
                 unique=True
             )            

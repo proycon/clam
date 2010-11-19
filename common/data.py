@@ -81,7 +81,8 @@ class CLAMFile:
                 for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:
-            return self.readlines()
+            for line in self.readlines():
+                yield line
         
             #TODO LATER: Re-add streaming support with urllib2? (But mind the digest authentication!)
             #req = self.opener(self.projectpath + basedir '/' + self.filename) #urllib2
