@@ -13,20 +13,20 @@ $(document).ready(function(){
    });
     
    //Create lists of all possible inputtemplates (aggregated over all profiles)
-   var inputtemplates_options = "";
-   for (var i = 0; i < inputtemplate.length; i++) {
-        inputtemplate_options += '<option value="">Select a filetype...</option><option value="' + inputtemplate.id + '">' + inputtemplate.label + '</option>';
+   var inputtemplate_options = "";
+   for (var i = 0; i < inputtemplates.length; i++) {
+        inputtemplate_options += '<option value="">Select a filetype...</option><option value="' + inputtemplates[i].id + '">' + inputtemplates[i].label + '</option>';
    }
    $(".inputtemplates").html(inputtemplate_options);
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
-   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters');};
-   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');};
-   $("#editorinputtemplate").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');};
+   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters'); });
+   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');});
+   $("#editorinputtemplate").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');});
 
 
    //Create a new project
-   if ($("#startprojectbutton").length) {
+       if ($("#startprojectbutton").length) {
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
             type: "PUT", 
@@ -262,7 +262,7 @@ function getuploadfilename(sourcefilename, inputtemplate_id) {
         var l = inputtemplate.extension.length;
         var tmp = filename.substr(filename.length - l, l);
         //if the desired extension is not provided yet (server will take care of case mismatch), add it:
-        if !(filename.substr(filename.length - l - 1, l+1).toLowerCase() == '.' + inputtemplate.extension.toLowerCase()) {
+        if (!(filename.substr(filename.length - l - 1, l+1).toLowerCase() == '.' + inputtemplate.extension.toLowerCase())) {
             filename = filename + '.' + inputtemplate.extension
         }
     }
@@ -274,7 +274,7 @@ function getuploadfilename(sourcefilename, inputtemplate_id) {
 function renderfileparameters(id, target) {
     inputtemplate = getinputtemplate(id);
     if (inputtemplate) {
-        if (document.implementation && document.implementation.createDocument)
+        if (document.implementation && document.implementation.createDocument) {
             //For decent browsers (Firefox, Opera, Chromium, etc...)    
             xsltProcessor=new XSLTProcessor();
             xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start
