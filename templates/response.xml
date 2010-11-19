@@ -41,13 +41,13 @@ $if statuscode == 0 or datafile or not project:
         </profiles>
         $if project:
             <input>
-                $for path, format, label, encoding in inputpaths:
-                    <path format="$format" encoding="$encoding">$path</path>
+                $for inputfile in inputpaths:
+                    <path format="">$inputfile.filename</path>
             </input>
 $if statuscode == 2 or datafile or not project:
         $if project:
             <output>
-                $for path, format, label, encoding in outputpaths:
-                    <path format="$format" encoding="$encoding">$path</path>
+                $for outputfile in outputpaths:
+                    <path format="">$outputfile.filename</path>
             </output>
  </clam>

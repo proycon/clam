@@ -229,11 +229,13 @@ class CLAMMetaData(object):
     def __setitem__(self, key, value):
         if self.attributes != None and not key in self.attributes:
             raise KeyError
+        elif self.attributes and key in self.attributes:
+            maxvalues = self.attributes[key]
+            if isinstance(maxvalues, list):
+                if not value in maxvalues:
+                    raise ValueError
+            
         assert not isinstance(value, list)
-        maxvalues = self.data[key]
-        if isinstance(maxvalues, list):
-            if not value in maxvalues:
-                raise ValueError
         self.data[key] = value
 
 

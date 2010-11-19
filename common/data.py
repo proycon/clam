@@ -40,10 +40,13 @@ class CLAMFile:
             self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
             self.projectpath = projectpath
             self.filename = filename
+            self.metadata = None
             if loadmetadata:
-                self.loadmetadata()
-            else:
-                self.metadata = None                    
+                try:
+                    self.loadmetadata()
+                except IOError:
+                    pass
+
             if self.remote:                
                 self.http = httplib2.Http()
                 if user and password:
@@ -59,14 +62,22 @@ class CLAMFile:
                 
     def loadmetadata(self):
             if not self.remote:
-                f = codecs.open(self.projectpath + self.basedir + '/' + self.metafilename(), 'r', 'utf-8')
-                xml = f.readlines()
-                f.close()
+                metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+                if os.path.exists(metafile):
+                    f = codecs.open(metafile, 'r', 'utf-8')
+                    xml = f.readlines()
+                    f.close()
+                else:
+                    raise IOError(2, "No metadata found!")
             else:
-                httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
+                try:
+                    httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
+                except:
+                    raise IOError(2, "Can't download metadata!")
+
                 
             if httpcode != 200: #TODO: Verify
-                raise Exception("Can't download metadata!")
+                    raise IOError(2, "Can't download metadata!")
             
             #parse metadata
             self.metadata = clam.common.formats.getmetadatafromxml(self, xml) #returns CLAMMetaData object (or child thereof)
@@ -74,7 +85,7 @@ class CLAMFile:
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
         if not self.remote:
-            if 'encoding' in self.metadata:
+            if self.metadata and 'encoding' in self.metadata:
                 for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
                     yield line
             else:
@@ -105,7 +116,7 @@ class CLAMFile:
     def readlines(self):
         """Loads all in memory"""
         if not self.remote:
-            if 'encoding' in self.metadata:
+            if self.metadata and 'encoding' in self.metadata:
                return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
             else:
                return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
@@ -115,7 +126,10 @@ class CLAMFile:
         
 
     def validate(self):
-        return self.metadata.validate()
+        if self.metadata:
+            return self.metadata.validate()
+        else:
+            return False
 
 
     def __str__(self):
