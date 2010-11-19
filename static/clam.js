@@ -196,6 +196,8 @@ $(document).ready(function(){
 });  //ready
 
 function processuploadresponse(response) {
+      //Processes CLAM Upload XML
+      
       $(response).find('upload').each(function(){       //for each uploaded file
         var children = $(this).children();
         var inputtemplate = $(this).attr('inputtemplate');
@@ -235,7 +237,7 @@ function processuploadresponse(response) {
             
             //Add this file to the input table if it doesn't exist yet
             if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('templatelabel'), '<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
+                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('templatelabel'), ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
             }
             
          //TODO: Make errors nicer, instead of alerts, propagate to interface

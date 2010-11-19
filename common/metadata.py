@@ -183,7 +183,6 @@ class CLAMMetaData(object):
         self.provenance = None
 
         self.inputtemplate = None
-        self.inputtemplatelabel = None
 
         self.data = {}
         self.loadinlinemetadata()
@@ -194,11 +193,8 @@ class CLAMMetaData(object):
             elif key == 'inputtemplate':
                 if isinstance(value, InputTemplate):
                     self.inputtemplate = value.id
-                    self.inputtemplatelabel = value.label
                 else:
                     self.inputtemplate = value                    
-            elif key == 'inputtemplatelabel':                
-                    self.inputtemplatelabel = value
             else:
                 self[key] = value
         if self.attributes:
@@ -256,8 +252,6 @@ class CLAMMetaData(object):
              xml += " schema=\""+self.schema+"\""
         if self.inputtemplate:
             xml += " inputtemplate=\""+self.inputtemplate+"\""
-        if self.inputtemplate_label:
-            xml += " inputtemplatelabel=\""+self.inputtemplatelabel+"\""            
         xml += ">\n"
 
         for key, value in self.data.items():
@@ -285,8 +279,6 @@ class CLAMMetaData(object):
     def saveinlinemetadata(self):
         #Save inline metadata, can be overridden by subclasses
         pass
-        
-        
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement
@@ -595,7 +587,6 @@ class OutputTemplate(object):
         if not self.unique and (self.filename and not '#' in self.filename):
             raise Exception("OutputTemplate configuration error in outputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
-        
 
     def xml(self):
         """Produce Template XML"""

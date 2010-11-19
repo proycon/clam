@@ -42,12 +42,18 @@ $if statuscode == 0 or datafile or not project:
         $if project:
             <input>
                 $for inputfile in inputpaths:
-                    <path format="">$inputfile.filename</path>
+                    $if inputfile.metadata and inputfile.metadata.inputtemplate:
+                        <path template="$inputfile.metadata.inputtemplate">$inputfile.filename</path>
+                    $else:
+                        <path>$inputfile.filename</path>
             </input>
 $if statuscode == 2 or datafile or not project:
         $if project:
             <output>
                 $for outputfile in outputpaths:
-                    <path format="">$outputfile.filename</path>
+                     $if outputfile.metadata and outputfile.metadata.provenance:
+                        <path template="$outputfile.metadata.provenance.outputtemplate_id">$outputfile.filename</path>
+                     $else:
+                        <path>$outputfile.filename</path>
             </output>
  </clam>

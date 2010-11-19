@@ -235,8 +235,8 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             <thead>
                 <tr>
                     <th>Input File</th>
+                    <th>Template</th>
                     <th>Format</th>
-                    <th>Encoding</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -254,9 +254,9 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         <table id="outputfiles" class="files">
             <thead>
                 <tr>
-                    <th>Input File</th>
+                    <th>Output File</th>
+                    <th>Template</th>
                     <th>Format</th>
-                    <th>Encoding</th>
                     <th>Viewers</th>
                 </tr>
             </thead>
@@ -270,9 +270,9 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 <xsl:template match="/clam/input/path">
     <tr>
         <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
-        <xsl:variable name="format" select="@format" />
-        <td><xsl:value-of select="/clam/inputformats/*[name() = $format]/@name"/></td>
-        <td><xsl:value-of select="@encoding" /></td>
+        <xsl:variable name="template" select="@template" />
+        <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@id"/></td>
+        <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
         <td class="actions"><img src="{/clam/@baseurl}/static/delete.png" title="Delete this file">
             <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="."/>');</xsl:attribute>
         </img></td>
@@ -283,10 +283,10 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 <xsl:template match="/clam/output/path">
     <tr>
         <xsl:variable name="href">output/<xsl:value-of select="."/></xsl:variable>
-        <xsl:variable name="format" select="@format" />
+        
 
         <td class="file">
-        <xsl:choose>
+        <xsl:choose> <!-- TODO: Readd viewer support -->
         <xsl:when test="/clam/outputformats/*[name() = $format]/viewers">
             <a><xsl:attribute name="href"><xsl:value-of select="$href" />/view</xsl:attribute><xsl:value-of select="."/></a>
         </xsl:when>
@@ -296,9 +296,11 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         </xsl:choose>
         </td>
 
-        <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
-        <td><xsl:value-of select="@encoding"/></td>
-        <td>
+        <xsl:variable name="template" select="@template" />
+        <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@id"/></td>
+        <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@format"/></td>
+        
+        <td> <!--TODO: Readd viewer support -->
             <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
                 <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a> |
             </xsl:for-each>

@@ -22,10 +22,11 @@ def getmetadatafromxml(file, node):
         format = node.attrib['format']
         
         formatclass = None
-        for cls in dir(): #TODO support for custom formats?
-            if isinstance(cls, CLAMMetaData) and cls.__name__ == format:
+        for name, cls in globals().items(): #TODO support for custom formats?
+            if name == format and issubclass(cls, CLAMMetaData):
                 formatclass = cls
         if not formatclass:
+            d = globals()
             raise Exception("Format class " + format + " not found!")
             
         data = {}
