@@ -120,9 +120,9 @@ class Profile(object):
             xml += inputtemplate.xml()
         xml += "</input>\n"
         xml += "<output>\n"
-        for outputtemplate in self.input:
+        for outputtemplate in self.output:
             xml += outputtemplate.xml() #works for ParameterCondition as well!
-        xml += "<output>\n"
+        xml += "</output>\n"
         xml += "</profile>\n"
         return xml
         
@@ -457,13 +457,14 @@ class AbstractMetaField(object): #for OutputTemplate only
         self.value = value
 
     def xml(self, operator='set'):
-        xml += "\t<meta id=\"" + self.key + "\"";
+        xml = "\t<meta id=\"" + self.key + "\"";
         if operator != 'set':
             xml += " operator=\"" + operator + "\""
         if not self.value:
             xml += " />"
         else:
             xml += ">" + self.value + "</meta>" 
+        return xml
             
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         #in most cases we're only interested in 'data'
@@ -476,7 +477,7 @@ class SetMetaField(AbstractMetaField):
         
 class UnsetMetaField(AbstractMetaField):
     def xml(self):
-        super(UnsetMetaField,self).xml('unset')
+        return super(UnsetMetaField,self).xml('unset')
         
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         if self.key in data and (not self.value or (self.value and data[self.key] == self.value)):
@@ -489,7 +490,7 @@ class CopyMetaField(AbstractMetaField):
     specified, the keyid of the metafield itself will be assumed."""
     
     def xml(self):
-        super(CopyMetaField,self).xml('copy')
+        return super(CopyMetaField,self).xml('copy')
     
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         raw = self.value.split('.')
@@ -513,7 +514,7 @@ class CopyMetaField(AbstractMetaField):
         
 class ParameterMetaField(AbstractMetaField):
     def xml(self):
-        super(ParameterMetaField,self).xml('parameter')
+        return super(ParameterMetaField,self).xml('parameter')
     
     def resolve(self, data, parameters, parentfile, relevantinputfiles): #TODO: Verify
         if self.value in parameters:
@@ -802,7 +803,7 @@ class ParameterCondition(object):
     def xml(self):
         xml = "<parametercondition>\n\t<if>\n"
         for key, value, evalf, operator in self.conditions:
-            xml += "\t\t<" + operator + " parameter=\"" + key + "\">" + value + "</" + operator + ">"
+            xml += "\t\t<" + operator + " parameter=\"" + key + "\">" + str(value) + "</" + operator + ">"
         xml += "\t</if>\n\t<then>\n"
         xml += self.then.xml() #TODO LATER: add pretty indentation 
         xml += "\t</then>\n"

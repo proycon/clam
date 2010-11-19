@@ -1050,7 +1050,7 @@ class InterfaceData(object):
             url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
-        return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join([ t.json() for t in inputtemplates ]) + " ];"
+        return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
         
 #class Uploader(object): #OBSOLETE!

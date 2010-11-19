@@ -36,7 +36,7 @@ $if statuscode == 0 or datafile or not project:
                 <corpus>$corpus</corpus>
         </corpora> 
         <profiles>
-            $for format in profiles:
+            $for profile in profiles:
                 $:profile.xml()
         </profiles>
         $if project:
