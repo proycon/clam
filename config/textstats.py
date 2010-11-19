@@ -25,19 +25,19 @@ REQUIRE_VERSION = 0.5
 # ======== GENERAL INFORMATION ===========
 
 #The System ID, a short alphanumeric identifier for internal use only
-SYSTEM_ID = "clamtest2"
+SYSTEM_ID = "textstats"
 
 #System name, the way the system is presented to the world
-SYSTEM_NAME = "CLAM Demo - Text Statistics"
+SYSTEM_NAME = "Text Statistics (CLAM Demo)"
 
 #An informative description for this system:
-SYSTEM_DESCRIPTION = "This is a small demo for CLAM. It computes several statistics for plaintext files."
+SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext files. It is a demo for CLAM."
 
 # ======== LOCATION ===========
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = sys.path[0] + "/clamtestroot2/"
+ROOT = sys.path[0] + "/textstats/"
 
 #The URL of the system
 PORT= 8080
@@ -116,7 +116,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/tests/test2.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
+COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
 
 # ======== PARAMETER DEFINITIONS ===========
 
