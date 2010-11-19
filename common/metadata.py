@@ -12,10 +12,14 @@
 
 
 import json
+import codecs
 from lxml import etree as ElementTree
 
 from clam.common.data import CLAMFile, CLAMInputFile
-import clam.formats
+from clam.common.viewers import AbstractViewer
+import clam.common.formats
+import clam.common.parameters
+from copy import copy
 
 
 
@@ -100,7 +104,7 @@ class Profile(object):
                 #generate output files
                 if outputtemplate:
                     if isinstance(outputtemplate, AbstractMetaField):                    
-                        outputtemplate.generate(inputdir, parameters, projectpath, inputfiles)
+                        outputtemplate.generate(self, parameters, projectpath, inputfiles)
                     else:
                         raise TypeError
 
@@ -129,14 +133,14 @@ class Profile(object):
 
 
 class RawXMLProvenanceData(object):
-    def __init__(self, xml):
-        self.xml = xml
+    def __init__(self, data):
+        self.data = data
     
     def xml(self):
-        if isinstance(self.xml, ElementTree._Element):
-            return ElementTree.tostring(self.xml, pretty_print = True)
+        if isinstance(self.data, ElementTree._Element):
+            return ElementTree.tostring(self.data, pretty_print = True)
         else:
-            return self.xml
+            return self.data
     
 class CLAMProvenanceData(object):
     
@@ -168,16 +172,20 @@ class CLAMProvenanceData(object):
 class CLAMMetaData(object):
     """A simple hash structure to hold arbitrary metadata"""
     attributes = None #if None, all attributes are allowed! Otherwise it should be a dictionary with keys corresponding to the various attributes and a list of values corresponding to the *maximally* possible settings (include False as element if not setting the attribute is valid), if no list of values are defined, set True if the attrbute is required or False if not. If only one value is specified (either in a list or not), then it will be 'fixed' metadata
+    allowcustomattributes = True
 
     mimetype = "" #No mimetype by default
     schema = ""
     
-    self.provenance = None
-    self.input = False
-    self.output = False
 
     def __init__(self, file, **kwargs):
         assert isinstance(file, CLAMFile)
+
+        self.provenance = None
+        self.input = False
+        self.output = False
+
+
         self.data = {}
         self.loadinlinemetadata()
         for key, value in kwargs.items():
@@ -187,30 +195,30 @@ class CLAMMetaData(object):
                 self.provenance = value
             else:
                 self[key] = value
-        if attributes:
-            if not allowcustomattributes:
+        if self.attributes:
+            if not self.allowcustomattributes:
                 for key, value in kwargs.items():
-                    if not key in attributes:
+                    if not key in self.attributes:
                         raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes.")
                                         
-            for key, valuerange in attributes.items():
+            for key, valuerange in self.attributes.items():
                 if isinstance(valuerange,list):
                     if not key in self and not False in valuerange :
                         raise ValueError("Required attribute " + key +  " not specified")
                     elif self[key] not in valuerange:
-                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(attributes[key])
+                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key]))
                 elif valuerange is False: #Any value is allowed, and this attribute is not required
                     pass #nothing to do
                 elif valuerange is True: #Any value is allowed, this attribute is *required*    
                     if not key in self:
-                        raise IncompleteError("Required attribute " + key +  " not specified")
+                        raise ValueError("Required attribute " + key +  " not specified")
                 elif valuerange: #value is a single specific unconfigurable value 
                     self[key] = valuerange
 
     def __getitem__(self, key):
         return self.data[key]
 
-    def __contains__(self, key)
+    def __contains__(self, key):
         return key in self.data
 
     def items(self):
@@ -220,7 +228,7 @@ class CLAMMetaData(object):
         return self.data
 
     def __setitem__(self, key, value):
-        if attributes != None and not key in attributes:
+        if self.attributes != None and not key in self.attributes:
             raise KeyError
         assert not isinstance(value, list)
         maxvalues = self.data[key]
@@ -233,7 +241,7 @@ class CLAMMetaData(object):
     def xml(self):
         """Render an XML representation of the metadata""" #(independent of web.py for support in CLAM API)
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-        xml += "<CLAMMetaData format=\"" + self.__class__.__name__ + "\"
+        xml += "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
              xml += " mimetype=\""+self.__class__.mimetype+"\""
         if self.schema:
@@ -270,7 +278,7 @@ class CLAMMetaData(object):
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement
-
+    pass
 
 
 def profilefromxml():
@@ -279,7 +287,7 @@ def profilefromxml():
     
 
 class InputTemplate(object):
-    def __init__(self, id, formatclass, label, *args, **kwargs)
+    def __init__(self, id, formatclass, label, *args, **kwargs):
         assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.formatclass = formatclass
@@ -310,7 +318,7 @@ class InputTemplate(object):
             raise Exception("InputTemplate configuration error, filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
         for parameter in args:
-            assert isinstance(parameter, AbstractParameter)
+            assert isinstance(parameter, clam.common.parameters.AbstractParameter)
             self.parameters.append(parameter)
 
 
@@ -381,12 +389,14 @@ class InputTemplate(object):
 
                 
                 
-    def validate(self, inputdata, user = None):
+    def validate(self, postdata, user = None):
         errors = False
+        
         
         #we're going to modify parameter values, this we can't do
         #on the inputtemplate variable, that won't be thread-safe, we first
         #make a (shallow) copy and act on that          
+        parameters = []
         for parameter in self.parameters:
             parameters.append(copy(parameter))
         
@@ -395,11 +405,9 @@ class InputTemplate(object):
             if parameter.access(user):
                 postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
                 if not (isinstance(postvalue,bool) and postvalue == False):
-                    if parameter.set(postvalue): #may generate an error in parameter.error
-                        params.append(parameter.compilearg(parameter.value))
-                    else:
+                    if not parameter.set(postvalue): #may generate an error in parameter.error                    
                         if not parameter.error: parameter.error = "Something mysterious went wrong whilst settings this parameter!" #shouldn't happen
-                        printlog("Unable to set " + parameter.id + ": " + parameter.error)
+                        #printlog("Unable to set " + parameter.id + ": " + parameter.error)
                         errors = True
                 elif parameter.required:
                     #Not all required parameters were filled!
@@ -409,11 +417,11 @@ class InputTemplate(object):
                     for parameter2 in parameters:
                             if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
                                 parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                                printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                                #printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
                                 errors = True
                             if parameter.require and parameter2.id in parameter.require and not parameter2.value:
                                 parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                                printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                                #printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                 errors = True
         return errors, parameters
 
@@ -450,13 +458,13 @@ class AbstractMetaField(object): #for OutputTemplate only
         self.value = value
 
     def xml(self, operator='set'):
-        xml += "\t<meta id=\"" + key + "\"";
+        xml += "\t<meta id=\"" + self.key + "\"";
         if operator != 'set':
             xml += " operator=\"" + operator + "\""
-        if not value:
+        if not self.value:
             xml += " />"
         else:
-            xml += ">" + value + "</meta>" 
+            xml += ">" + self.value + "</meta>" 
             
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         #in most cases we're only interested in 'data'
@@ -464,7 +472,7 @@ class AbstractMetaField(object): #for OutputTemplate only
 
 class SetMetaField(AbstractMetaField): 
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
-        data[self.key] = value
+        data[self.key] = self.value
         return True
         
 class UnsetMetaField(AbstractMetaField):
@@ -472,7 +480,7 @@ class UnsetMetaField(AbstractMetaField):
         super(UnsetMetaField,self).xml('unset')
         
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
-        if self.key in data and (not value or (value and data[self.key] == value)):
+        if self.key in data and (not self.value or (self.value and data[self.key] == self.value)):
             del data[self.key]
             return True
         return False
@@ -482,7 +490,7 @@ class CopyMetaField(AbstractMetaField):
     specified, the keyid of the metafield itself will be assumed."""
     
     def xml(self):
-        super(UnsetMetaField,self).xml('copy')
+        super(CopyMetaField,self).xml('copy')
     
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         raw = self.value.split('.')
@@ -505,6 +513,9 @@ class CopyMetaField(AbstractMetaField):
         return edited
         
 class ParameterMetaField(AbstractMetaField):
+    def xml(self):
+        super(ParameterMetaField,self).xml('parameter')
+    
     def resolve(self, data, parameters, parentfile, relevantinputfiles): #TODO: Verify
         if self.value in parameters:
             data[self.key] = parameters[self.value]
@@ -513,7 +524,7 @@ class ParameterMetaField(AbstractMetaField):
             return False
         
 class OutputTemplate(object):
-    def __init__(self, id, formatclass, label, *args, **kwargs)
+    def __init__(self, id, formatclass, label, *args, **kwargs):
         assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
         self.id = id
@@ -663,12 +674,12 @@ class OutputTemplate(object):
             
                 if self.removeextensions:
                     #Remove unwanted extensions
-                    if removeextensions is True:
+                    if self.removeextensions is True:
                         #Remove any extension
                         raw = filename.split('.')[:-1]
                         if raw:
                             filename = '.'.join(raw)
-                    elif isinstance(removeextensions, list):
+                    elif isinstance(self.removeextensions, list):
                         #Remove specified extension
                         for ext in self.removeextensions:  
                             if filename[-len(ext) - 1:] == '.' + ext:
@@ -709,7 +720,7 @@ def ParameterCondition(object):
         self.disjunction = False
 
         for key, value in kwargs.items():
-            if key == 'then'
+            if key == 'then':
                 if not isinstance(value, OutputTemplate) and not isinstance(value, InputTemplate) and not isinstance(value, ParameterCondition):
                     assert Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")
                 else:
@@ -752,10 +763,10 @@ def ParameterCondition(object):
             else:
                 if not self.disjunction: #conjunction
                     return False
-         if self.disjunction:
-             return False
-         else:
-             return True
+        if self.disjunction:
+            return False
+        else:
+            return True
 
     def allpossibilities(self):
         """Returns all possible outputtemplates that may occur (recusrively applied)"""

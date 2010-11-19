@@ -41,13 +41,14 @@ class CLAMFile:
             self.projectpath = projectpath
             self.filename = filename
             if loadmetadata:
-                self.loadmetadata(self)
+                self.loadmetadata()
             else:
                 self.metadata = None                    
             if self.remote:                
+                self.http = httplib2.Http()
                 if user and password:
                     self.http.add_credentials(user, password)
-                self.http = httplib2.Http()
+                
                 
     def metafilename(self):
             """Returns the filename for the meta file (not full path). Only used for local files."""
@@ -58,11 +59,11 @@ class CLAMFile:
                 
     def loadmetadata(self):
             if not self.remote:
-                f =  codecs.open(self.projectpath + basedir '/' + self.meta filename() +, 'r', 'utf-8').readlines():
+                f = codecs.open(self.projectpath + self.basedir + '/' + self.metafilename(), 'r', 'utf-8')
                 xml = f.readlines()
                 f.close()
             else:
-                httpcode, xml = self.http.request(self.projectpath + basedir + '/' + self.filename + '/metadata')
+                httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
                 
             if httpcode != 200: #TODO: Verify
                 raise Exception("Can't download metadata!")
@@ -74,10 +75,10 @@ class CLAMFile:
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
         if not self.remote:
             if 'encoding' in self.metadata:
-                for line in codecs.open(self.projectpath + basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
+                for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
                     yield line
             else:
-                for line in open(self.projectpath + basedir + '/' + self.filename, 'r').readlines():
+                for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:
             return self.readlines()
@@ -91,24 +92,24 @@ class CLAMFile:
     def delete(self):
         """Delete this file"""
         if not self.remote:
-            os.unlink(self.projectpath + basedir + '/' + self.filename)
+            os.unlink(self.projectpath + self.basedir + '/' + self.filename)
             #also remove any .*.INPUTTEMPLATE.* links that pointed to this file
-            for linkf,realf in clam.common.util.globsymlinks(self.projectpath + basedir + '/.*.INPUTTEMPLATE.*'):
-                    if realf == self.projectpath + basedir + '/' + self.filename:
+            for linkf,realf in clam.common.util.globsymlinks(self.projectpath + self.basedir + '/.*.INPUTTEMPLATE.*'):
+                    if realf == self.projectpath + self.basedir + '/' + self.filename:
                         os.unlink(linkf)
         else:
-            httpcode, content = self.http.request(self.projectpath + basedir + '/' + self.filename,'DELETE')
+            httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename,'DELETE')
          
 
     def readlines(self):
         """Loads all in memory"""
         if not self.remote:
             if 'encoding' in self.metadata:
-               return codecs.open(self.projectpath + basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
+               return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
             else:
-               return open(self.projectpath + basedir + '/' + self.filename, 'r').readlines():
+               return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
         else:
-            httpcode, content = self.http.request(self.projectpath + basedir + '/' + self.filename)
+            httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename)
             return content
         
 
@@ -117,7 +118,7 @@ class CLAMFile:
 
 
     def __str__(self):
-        return self.projectpath + basedir + '/' + self.filename
+        return self.projectpath + self.basedir + '/' + self.filename
 
 class CLAMInputFile(CLAMFile):
     basedir = "input"

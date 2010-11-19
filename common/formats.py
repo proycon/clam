@@ -12,7 +12,7 @@
 
 from lxml import etree as ElementTree
 from clam.common.metadata import CLAMMetaData, RawXMLProvenanceData
-
+from StringIO import StringIO
 
 def getmetadatafromxml(formats, file, node):
     """Read metadata from XML."""
@@ -91,7 +91,7 @@ class DCOIFormat(CLAMMetaData):
     scheme = '' #TODO
 
 
-class KBXMLFormat(CLAMMetaDatas):
+class KBXMLFormat(CLAMMetaData):
     name = "Koninklijke Bibliotheek XML-formaat"
     mimetype = 'text/xml'
     scheme = '' #TODO

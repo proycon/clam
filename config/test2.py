@@ -64,9 +64,9 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
-        InputTemplate(id='textinput', formatclass=PlainTextFormat,label="Plain-text input file",  
-            ChoiceParameter(id='encoding','Encoding','The character encoding of the file', choices=[('utf-8','UTF-8 Unicode'), ('latin1','Latin 1')]),  
-            ChoiceParameter(id='language','Language','The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+        InputTemplate(id='textinput', formatclass=PlainTextFormat,label="Plain-text document",  
+            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 Unicode'), ('latin1','Latin 1')]),  
+            ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             extension='.txt',
             multi=True
         ),

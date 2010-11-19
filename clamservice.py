@@ -702,7 +702,7 @@ class InputFileHandler(object):
             metafilename += '.' + os.path.basename(filename) + '.METADATA'
             filename = metafilename
  
-         path = Project.path(project) + "input/" + filename.replace("..","")
+        path = Project.path(project) + "input/" + filename.replace("..","")
 
         
         if os.path.isfile(path): 
@@ -1053,248 +1053,248 @@ class InterfaceData(object):
         return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join([ t.json() for t in inputtemplates ]) + " ];"
 
         
-class Uploader(object): #OBSOLETE!
+#class Uploader(object): #OBSOLETE!
 
-    def path(self, project):
-        return Project.path(project) + 'input/'
+    #def path(self, project):
+        #return Project.path(project) + 'input/'
 
-    def isarchive(self,filename):
-        return (filename[-3:] == '.gz' or filename[-4:] == '.bz2' or filename[-4:] == '.zip')
+    #def isarchive(self,filename):
+        #return (filename[-3:] == '.gz' or filename[-4:] == '.bz2' or filename[-4:] == '.zip')
 
-    def extract(self,project,filename, format):
-        namelist = None
-        subfiles = []
-        if filename[-7:].lower() == '.tar.gz':
-            cmd = 'tar -xvzf'
-            namelist = 'tar'
-        elif filename[-7:].lower() == '.tar.bz2':
-            cmd = 'tar -xvjf'
-            namelist = 'tar'
-        elif filename[-3:].lower() == '.gz':
-            cmd = 'gunzip'
-            subfiles = [filename[-3:]]  #one subfile only
-        elif filename[-4:].lower() == '.bz2':
-            cmd = 'bunzip2'
-            subfiles = [filename[-3:]] #one subfile only
-        elif filename[-4:].lower() == '.tar':
-            cmd = 'tar -xvf'
-            namelist = 'tar'
-        elif filename[-4:].lower() == '.zip':
-            cmd = 'unzip -u'
-            namelist = 'zip'
-        else:
-            raise Exception("Invalid archive format") #invalid archive, shouldn't happend
+    #def extract(self,project,filename, format):
+        #namelist = None
+        #subfiles = []
+        #if filename[-7:].lower() == '.tar.gz':
+            #cmd = 'tar -xvzf'
+            #namelist = 'tar'
+        #elif filename[-7:].lower() == '.tar.bz2':
+            #cmd = 'tar -xvjf'
+            #namelist = 'tar'
+        #elif filename[-3:].lower() == '.gz':
+            #cmd = 'gunzip'
+            #subfiles = [filename[-3:]]  #one subfile only
+        #elif filename[-4:].lower() == '.bz2':
+            #cmd = 'bunzip2'
+            #subfiles = [filename[-3:]] #one subfile only
+        #elif filename[-4:].lower() == '.tar':
+            #cmd = 'tar -xvf'
+            #namelist = 'tar'
+        #elif filename[-4:].lower() == '.zip':
+            #cmd = 'unzip -u'
+            #namelist = 'zip'
+        #else:
+            #raise Exception("Invalid archive format") #invalid archive, shouldn't happend
 
-        printlog("Extracting '" + filename + "'" )            
-        try:
-            process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        except:
-            raise web.webapi.InternalError("Unable to extract file: " + cmd + " " + filename + ", cwd="+ self.path(project))       
-        out, err = process.communicate() #waits for process to end 
+        #printlog("Extracting '" + filename + "'" )            
+        #try:
+            #process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        #except:
+            #raise web.webapi.InternalError("Unable to extract file: " + cmd + " " + filename + ", cwd="+ self.path(project))       
+        #out, err = process.communicate() #waits for process to end 
 
-        if namelist:
-            firstline = True
-            for line in out.split("\n"):    
-                line = line.strip()        
-                if line:
-                    subfile = None
-                    if namelist == 'tar':
-                        subfile = line
-                    elif namelist == 'zip' and not firstline: #firstline contains archive name itself, skip it
-                        colon = line.find(":")
-                        if colon:
-                            subfile =  line[colon + 1:].strip()
-                    if subfile and os.path.exists(self.path(project) + subfile):
-                        newsubfile = format.filename(subfile)
-                        os.rename(self.path(project) + subfile, self.path(project) + newsubfile)
-                        subfiles.append(newsubfile)
-                firstline = False
+        #if namelist:
+            #firstline = True
+            #for line in out.split("\n"):    
+                #line = line.strip()        
+                #if line:
+                    #subfile = None
+                    #if namelist == 'tar':
+                        #subfile = line
+                    #elif namelist == 'zip' and not firstline: #firstline contains archive name itself, skip it
+                        #colon = line.find(":")
+                        #if colon:
+                            #subfile =  line[colon + 1:].strip()
+                    #if subfile and os.path.exists(self.path(project) + subfile):
+                        #newsubfile = format.filename(subfile)
+                        #os.rename(self.path(project) + subfile, self.path(project) + newsubfile)
+                        #subfiles.append(newsubfile)
+                #firstline = False
 
-        return [ subfile for subfile in subfiles ] #return only the files that actually exist
+        #return [ subfile for subfile in subfiles ] #return only the files that actually exist
         
 
 
-    def test(self,project, filename, inputformat, depth = 0):
-        printdebug("Testing " + filename)
-        o = ""       
+    #def test(self,project, filename, inputformat, depth = 0):
+        #printdebug("Testing " + filename)
+        #o = ""       
 
 
-        if depth > 3: #security against archive-bombs
-            if os.path.exists(self.path(project) + filename):
-                os.unlink(self.path(project) + filename)
-            return ""
+        #if depth > 3: #security against archive-bombs
+            #if os.path.exists(self.path(project) + filename):
+                #os.unlink(self.path(project) + filename)
+            #return ""
 
-        prefix = (depth + 1) * "\t"
-        remove = False
-        o += prefix + "<file name=\""+filename+"\""
-        if not os.path.exists(self.path(project) + filename):
-            o += " uploaded=\"no\" />\n"
-        else:
-            if self.isarchive(filename):
-                o += " archive=\"yes\">"
-                remove = True #archives no longer necessary after extract
-            else:
-                o += " format=\""+inputformat.__class__.__name__+"\" formatlabel=\""+inputformat.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
-                if inputformat.validate(self.path(project) + filename):
-                    o += " validated=\"yes\" />\n"
-                    printlog("Succesfully validated '" + filename + "'" )
-                else:
-                    o += " validated=\"no\" />\n"
-                    printlog("File did not validate '" + filename + "'" )
-                    remove = True #remove files that don't validate
+        #prefix = (depth + 1) * "\t"
+        #remove = False
+        #o += prefix + "<file name=\""+filename+"\""
+        #if not os.path.exists(self.path(project) + filename):
+            #o += " uploaded=\"no\" />\n"
+        #else:
+            #if self.isarchive(filename):
+                #o += " archive=\"yes\">"
+                #remove = True #archives no longer necessary after extract
+            #else:
+                #o += " format=\""+inputformat.__class__.__name__+"\" formatlabel=\""+inputformat.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
+                #if inputformat.validate(self.path(project) + filename):
+                    #o += " validated=\"yes\" />\n"
+                    #printlog("Succesfully validated '" + filename + "'" )
+                #else:
+                    #o += " validated=\"no\" />\n"
+                    #printlog("File did not validate '" + filename + "'" )
+                    #remove = True #remove files that don't validate
             
-            if self.isarchive(filename):            
-                for subfilename in self.extract(project,filename, inputformat):
-                    if subfilename[-1] != '/': #only act on files, not directories
-                        printdebug("Extracted from archive: " + subfilename)
-                        if not inputformat.archivesubdirs and os.path.dirname(subfilename) != '':
-                            #we don't want subdirectories, move the files:
-                            #TODO: delete subdirectories
-                            printdebug("Moving extracted file out of subdirectory...")
-                            os.rename(self.path(project) + subfilename, self.path(project) + os.path.basename(subfilename))
-                            o += self.test(project,os.path.basename(subfilename), inputformat, depth + 1)
-                        else:
-                            o += self.test(project,subfilename, inputformat, depth + 1)
-                o += prefix + "</file>\n"    
+            #if self.isarchive(filename):            
+                #for subfilename in self.extract(project,filename, inputformat):
+                    #if subfilename[-1] != '/': #only act on files, not directories
+                        #printdebug("Extracted from archive: " + subfilename)
+                        #if not inputformat.archivesubdirs and os.path.dirname(subfilename) != '':
+                            ##we don't want subdirectories, move the files:
+                            ##TODO: delete subdirectories
+                            #printdebug("Moving extracted file out of subdirectory...")
+                            #os.rename(self.path(project) + subfilename, self.path(project) + os.path.basename(subfilename))
+                            #o += self.test(project,os.path.basename(subfilename), inputformat, depth + 1)
+                        #else:
+                            #o += self.test(project,subfilename, inputformat, depth + 1)
+                #o += prefix + "</file>\n"    
 
-        if remove and os.path.exists(self.path(project) + filename):
-           printdebug("Removing '" + filename + "'" )
-           os.unlink(self.path(project) + filename)
+        #if remove and os.path.exists(self.path(project) + filename):
+           #printdebug("Removing '" + filename + "'" )
+           #os.unlink(self.path(project) + filename)
 
-        return o
+        #return o
 
 
-    @requirelogin
-    def POST(self, project, user=None): #OBSOLETE!
-        #postdata = web.input()
+    #@requirelogin
+    #def POST(self, project, user=None): #OBSOLETE!
+        ##postdata = web.input()
 
-        #defaults (max 25 uploads)
-        kwargs = {}
-        for i in range(1,26):    
-            kwargs['upload' + str(i)] = {}                            
-        postdata = web.input(**kwargs)
-        if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
-            raise BadRequest('No valid uploadcount specified') #TODO: message doesn't show to client
-        if int(postdata['uploadcount']) > 25:
-            raise BadRequest('Too many uploads') #TODO: message doesn't show to client
+        ##defaults (max 25 uploads)
+        #kwargs = {}
+        #for i in range(1,26):    
+            #kwargs['upload' + str(i)] = {}                            
+        #postdata = web.input(**kwargs)
+        #if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
+            #raise BadRequest('No valid uploadcount specified') #TODO: message doesn't show to client
+        #if int(postdata['uploadcount']) > 25:
+            #raise BadRequest('Too many uploads') #TODO: message doesn't show to client
 
-        #Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
-        for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
-                inputformat = None
-                if not 'uploadformat' + str(i) in postdata:
-                    raise BadRequest('No upload format specified') #TODO: message doesn't show to client
-                for f in settings.INPUTFORMATS:                
-                    if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
-                        inputformat = f
+        ##Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
+        #for i in range(1,int(postdata['uploadcount']) + 1):
+            #if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
+                #inputformat = None
+                #if not 'uploadformat' + str(i) in postdata:
+                    #raise BadRequest('No upload format specified') #TODO: message doesn't show to client
+                #for f in settings.INPUTFORMATS:                
+                    #if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
+                        #inputformat = f
             
-                if not inputformat:
-                    raise web.forbidden() 
-            else:
-                raise web.forbidden()
+                #if not inputformat:
+                    #raise web.forbidden() 
+            #else:
+                #raise web.forbidden()
 
-        Project.create(project, user)
-
-
-        web.header('Content-Type', "text/xml; charset=UTF-8")
-        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
-
-        #we may now assume all upload-data exists:
-        for i in range(1,int(postdata['uploadcount']) + 1):
-            if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]) and (not 'uploadurl'+str(i) in postdata or not postdata['uploadurl' + str(i)]):
-                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
-
-                printdebug("Selecting client-side file " + postdata['upload' + str(i)].filename + " for upload")
-
-                filename = os.path.basename(postdata['upload' + str(i)].filename.lower())
-
-                #Is the upload an archive?
-                extension = filename.split(".")[-1]
-                if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
-                    archive = True
-                else:                
-                    #upload not an archive:
-                    archive = False
-                    filename = inputformat.filename(filename) #set proper filename extension
-                realupload = True
-                wget = False
-            elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)]:
-                if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
-                    filename = postdata['uploadfilename' + str(i)]
-                else:
-                    #if no filename exists, make a random one
-                    filename =  "%032x" % random.getrandbits(128)
-                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadfilename' + str(i)] +"\">\n"
-
-                archive = False
-                filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
-                realupload = False
-                wget = False
-            elif 'uploadurl'+str(i) in postdata and postdata['uploadurl' + str(i)]:
-                if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
-                    #explicit filename passed
-                    filename = postdata['uploadfilename' + str(i)]
-                else:
-                    #get filename from URL:
-                    filename = os.path.basename(postdata['uploadurl' + str(i)])
-                    if not filename:
-                        filename =  "%032x" % random.getrandbits(128)  #make a random one
-
-                output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadurl' + str(i)] +"\">\n"
-
-                wget = True
-                realupload = False
-                filename = inputformat.filename(filename) #set proper filename extension
+        #Project.create(project, user)
 
 
-            inputformat = None
-            for f in settings.INPUTFORMATS:                
-                if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
-                    inputformat = f
+        #web.header('Content-Type', "text/xml; charset=UTF-8")
+        #output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        #output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
 
-            #write trigger so the system knows uploads are in progress
-            #f = open(Project.path(project) + '.upload','w') 
-            #f.close()
+        ##we may now assume all upload-data exists:
+        #for i in range(1,int(postdata['uploadcount']) + 1):
+            #if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]) and (not 'uploadurl'+str(i) in postdata or not postdata['uploadurl' + str(i)]):
+                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
 
-            printlog("Uploading '" + filename + "' (" + unicode(inputformat) + ", " + inputformat.encoding + ")")
-            printdebug("(start copy upload)" )
-            #upload file 
-            #if archive:
-            if inputformat.subdirectory:
-                if not os.path.isdir(inputformat.subdirectory ):
-                    os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
-                filename = inputformat.subdirectory  + "/" + filename
+                #printdebug("Selecting client-side file " + postdata['upload' + str(i)].filename + " for upload")
+
+                #filename = os.path.basename(postdata['upload' + str(i)].filename.lower())
+
+                ##Is the upload an archive?
+                #extension = filename.split(".")[-1]
+                #if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
+                    #archive = True
+                #else:                
+                    ##upload not an archive:
+                    #archive = False
+                    #filename = inputformat.filename(filename) #set proper filename extension
+                #realupload = True
+                #wget = False
+            #elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)]:
+                #if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
+                    #filename = postdata['uploadfilename' + str(i)]
+                #else:
+                    ##if no filename exists, make a random one
+                    #filename =  "%032x" % random.getrandbits(128)
+                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadfilename' + str(i)] +"\">\n"
+
+                #archive = False
+                #filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
+                #realupload = False
+                #wget = False
+            #elif 'uploadurl'+str(i) in postdata and postdata['uploadurl' + str(i)]:
+                #if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
+                    ##explicit filename passed
+                    #filename = postdata['uploadfilename' + str(i)]
+                #else:
+                    ##get filename from URL:
+                    #filename = os.path.basename(postdata['uploadurl' + str(i)])
+                    #if not filename:
+                        #filename =  "%032x" % random.getrandbits(128)  #make a random one
+
+                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadurl' + str(i)] +"\">\n"
+
+                #wget = True
+                #realupload = False
+                #filename = inputformat.filename(filename) #set proper filename extension
+
+
+            #inputformat = None
+            #for f in settings.INPUTFORMATS:                
+                #if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
+                    #inputformat = f
+
+            ##write trigger so the system knows uploads are in progress
+            ##f = open(Project.path(project) + '.upload','w') 
+            ##f.close()
+
+            #printlog("Uploading '" + filename + "' (" + unicode(inputformat) + ", " + inputformat.encoding + ")")
+            #printdebug("(start copy upload)" )
+            ##upload file 
+            ##if archive:
+            #if inputformat.subdirectory:
+                #if not os.path.isdir(inputformat.subdirectory ):
+                    #os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
+                #filename = inputformat.subdirectory  + "/" + filename
     
-            if wget:
-                try:
-                    req = urllib2.urlopen(postdata['uploadurl' + str(i)])
-                except:
-                    raise web.webapi.NotFound()
-                CHUNK = 16 * 1024
-                f = open(Project.path(project) + 'input/' + filename,'wb')
-                while True:
-                    chunk = req.read(CHUNK)
-                    if not chunk: break
-                    f.write(chunk)
-            elif realupload:
-                f = open(Project.path(project) + 'input/' + filename,'wb')
-                for line in postdata['upload' + str(i)].file:
-                    f.write(line) #encoding unaware, solves big-file upload problem?
-            else:
-                f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
-                f.write(postdata['uploadtext' + str(i)])
-            f.close()
-            printdebug("(end copy upload)" )
+            #if wget:
+                #try:
+                    #req = urllib2.urlopen(postdata['uploadurl' + str(i)])
+                #except:
+                    #raise web.webapi.NotFound()
+                #CHUNK = 16 * 1024
+                #f = open(Project.path(project) + 'input/' + filename,'wb')
+                #while True:
+                    #chunk = req.read(CHUNK)
+                    #if not chunk: break
+                    #f.write(chunk)
+            #elif realupload:
+                #f = open(Project.path(project) + 'input/' + filename,'wb')
+                #for line in postdata['upload' + str(i)].file:
+                    #f.write(line) #encoding unaware, solves big-file upload problem?
+            #else:
+                #f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
+                #f.write(postdata['uploadtext' + str(i)])
+            #f.close()
+            #printdebug("(end copy upload)" )
 
-            #test uploaded files (this also takes care of extraction)
-            output += self.test(project, filename, inputformat)
+            ##test uploaded files (this also takes care of extraction)
+            #output += self.test(project, filename, inputformat)
             
-            output += "</upload>\n"
+            #output += "</upload>\n"
 
-        output += "</clamupload>"
+        #output += "</clamupload>"
          
-        return output #200
+        #return output #200
 
 
 
