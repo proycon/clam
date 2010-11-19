@@ -742,8 +742,8 @@ class InputFileHandler(object):
 
         #TODO LATER: add support for uploading metadata files
         #TODO LATER: re-add support for archives
-            
-        postdata = web.input()
+        
+        postdata = web.input(file={})
         inputtemplate = None
         
         if 'inputtemplate' in postdata:
