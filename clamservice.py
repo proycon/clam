@@ -910,7 +910,7 @@ class InputFileHandler(object):
                 output += "<valid>yes</valid>"                
                                 
                 #Great! Everything ok, save metadata
-                metadata.save(Project.path(project) + 'input/' + file.metadatafilename())
+                metadata.save(Project.path(project) + 'input/' + file.metafilename())
                 
                 #And create symbolic link for inputtemplates
                 linkfilename = os.path.dirname(filename) 

@@ -14,7 +14,7 @@ from lxml import etree as ElementTree
 from clam.common.metadata import CLAMMetaData, RawXMLProvenanceData
 from StringIO import StringIO
 
-def getmetadatafromxml(formats, file, node):
+def getmetadatafromxml(file, node):
     """Read metadata from XML."""
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() 
@@ -22,7 +22,7 @@ def getmetadatafromxml(formats, file, node):
         format = node.attrib['format']
         
         formatclass = None
-        for cls in dir():
+        for cls in dir(): #TODO support for custom formats?
             if isinstance(cls, CLAMMetaData) and cls.__name__ == format:
                 formatclass = cls
         if not formatclass:
@@ -34,6 +34,10 @@ def getmetadatafromxml(formats, file, node):
                 key = subnode.attrib['id']
                 value = subnode.text
                 data[key] = value
+            elif subnode.tag == 'inputtemplate':
+                data['inputtemplate'] = inputtemplate
+            elif subnode.tag == 'inputtemplatelabel':
+                data['inputtemplatelabel'] = inputtemplatelabel
             elif subnode.tag == 'provenance':
                 data['provenance'] = RawXMLProvenanceData(subnode)
         return formatclass(file, **data)

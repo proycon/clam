@@ -181,17 +181,24 @@ class CLAMMetaData(object):
         assert isinstance(file, CLAMFile)
 
         self.provenance = None
-        self.input = False
-        self.output = False
 
+        self.inputtemplate = None
+        self.inputtemplatelabel = None
 
         self.data = {}
         self.loadinlinemetadata()
         for key, value in kwargs.items():
             if key == 'provenance':
-                self.input = True
                 assert (isinstance(value, CLAMProvenanceData))
                 self.provenance = value
+            elif key == 'inputtemplate':
+                if isinstance(value, InputTemplate):
+                    self.inputtemplate = value.id
+                    self.inputtemplatelabel = value.label
+                else:
+                    self.inputtemplate = value                    
+            elif key == 'inputtemplatelabel':                
+                    self.inputtemplatelabel = value
             else:
                 self[key] = value
         if self.attributes:
@@ -244,9 +251,13 @@ class CLAMMetaData(object):
         xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
         xml += "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
-             xml += " mimetype=\""+self.__class__.mimetype+"\""
+             xml += " mimetype=\""+self.mimetype+"\""
         if self.schema:
-             xml += " schema=\""+self.__class__.schema+"\""
+             xml += " schema=\""+self.schema+"\""
+        if self.inputtemplate:
+            xml += " inputtemplate=\""+self.inputtemplate+"\""
+        if self.inputtemplate_label:
+            xml += " inputtemplatelabel=\""+self.inputtemplatelabel+"\""            
         xml += ">\n"
 
         for key, value in self.data.items():

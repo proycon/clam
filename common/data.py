@@ -64,8 +64,8 @@ class CLAMFile:
             if not self.remote:
                 metafile = self.projectpath + self.basedir + '/' + self.metafilename()
                 if os.path.exists(metafile):
-                    f = codecs.open(metafile, 'r', 'utf-8')
-                    xml = f.readlines()
+                    f = open(metafile, 'r')
+                    xml = "".join(f.readlines())
                     f.close()
                 else:
                     raise IOError(2, "No metadata found!")
@@ -74,10 +74,9 @@ class CLAMFile:
                     httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
                 except:
                     raise IOError(2, "Can't download metadata!")
-
                 
-            if httpcode != 200: #TODO: Verify
-                    raise IOError(2, "Can't download metadata!")
+                if httpcode != 200: #TODO: Verify
+                        raise IOError(2, "Can't download metadata!")
             
             #parse metadata
             self.metadata = clam.common.formats.getmetadatafromxml(self, xml) #returns CLAMMetaData object (or child thereof)
