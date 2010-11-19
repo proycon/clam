@@ -7,7 +7,7 @@ $(document).ready(function(){
         type: "GET", 
         url: baseurl + "/static/parameters.xsl",
         dataType: "xml", 
-        complete: function(xml){ 
+        success: function(xml){ 
             parametersxsl = xml;
         },
    });
@@ -32,7 +32,7 @@ $(document).ready(function(){
             type: "PUT", 
             url: $("#projectname").val() + "/", 
             dataType: "xml", 
-            complete: function(xml){ 
+            success: function(response){ 
                 window.location.href = $("#projectname").val() + "/";
             },
          });
@@ -47,7 +47,7 @@ $(document).ready(function(){
             type: "DELETE", 
             url: window.location.href, 
             dataType: "xml", 
-            complete: function(xml){ 
+            success: function(response){ 
                 window.location.href = "/"; /* back to index - TODO: FIX, doesn't work with urlprefix! */
             },
          });         
@@ -61,7 +61,7 @@ $(document).ready(function(){
             type: "DELETE", 
             url: "output", 
             dataType: "xml", 
-            complete: function(xml){ 
+            success: function(xml){ 
                 window.location.href = ""; /* refresh */
             },
          });         
@@ -272,21 +272,31 @@ function getuploadfilename(sourcefilename, inputtemplate_id) {
 
 
 function renderfileparameters(id, target) {
-    inputtemplate = getinputtemplate(id);
-    if (inputtemplate) {
-        if (document.implementation && document.implementation.createDocument) {
-            //For decent browsers (Firefox, Opera, Chromium, etc...)    
-            xsltProcessor=new XSLTProcessor();
-            xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start
-            result = xsltProcessor.transformToFragment(inputtemplate.parametersxml,document);
-        } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
-            result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
-        } else {
-            result = "<strong>Error: Unable to render parameter form!</strong>";
-        }
-        $(target).html(result);
+    if (id == "") {
+        $(target).html("");
     } else {
-        $(target).html("<strong>Error: Selected input template is invalid!</strong>");
+        inputtemplate = getinputtemplate(id);
+        if (inputtemplate) {
+            if (document.implementation && document.implementation.createDocument) {
+                //For decent browsers (Firefox, Opera, Chromium, etc...)    
+                xsltProcessor=new XSLTProcessor();
+                xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
+                var xmldoc = $(inputtemplate.parametersxml)[0];
+                //var s = (new XMLSerializer()).serializeToString(xmldoc);
+                //alert(s);
+                
+                result = xsltProcessor.transformToFragment(xmldoc, document);
+                //var s = (new XMLSerializer()).serializeToString(result);
+                //alert(s);
+            } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
+                result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
+            } else {
+                result = "<strong>Error: Unable to render parameter form!</strong>";
+            }
+            $(target).html(result);
+        } else {
+            $(target).html("<strong>Error: Selected input template is invalid!</strong>");
+        }
     }
 }
 

@@ -355,9 +355,8 @@ class InputTemplate(object):
         #The actual parameters are included as XML, and transformed by clam.js using XSLT (parameter.xsl) to generate the forms
         parametersxml = ''
         for parameter in self.parameters:
-            #d['parameters'][parameter.id] = parameter.json()
-            parameterxml = parameter.xml()
-        d['parametersxml'] = parameterxml
+            parametersxml += parameter.xml()
+        d['parametersxml'] = '<?xml version="1.0" encoding="utf-8" ?><parameters>' + parametersxml + '</parameters>'
         return json.dumps(d)
 
     def __eq__(self, other):

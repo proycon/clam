@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:template match="BooleanParameter">
+<xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" cdata-section-elements="script"/>
+
+<xsl:template match="/parameters"> <!-- Will only match when stylesheet is used standalone outside of interface.xsl -->
+    <table>
+     <xsl:apply-templates />
+    </table>
+</xsl:template>
+
+<xsl:template match="BooleanParameter|booleanparameter"> <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
@@ -27,7 +35,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template match="StringParameter">
+<xsl:template match="StringParameter|stringparameter">
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
@@ -50,7 +58,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template match="TextParameter">
+<xsl:template match="TextParameter|textparameter">
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
@@ -72,7 +80,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template match="IntegerParameter">
+<xsl:template match="IntegerParameter|integerparameter">
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
@@ -96,7 +104,7 @@
 </xsl:template>
 
 
-<xsl:template match="FloatParameter">
+<xsl:template match="FloatParameter|floatparameter">
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
@@ -119,7 +127,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template match="ChoiceParameter">
+<xsl:template match="ChoiceParameter|choiceparameter">
     <xsl:choose>
         <xsl:when test="@multi">
             <tr>

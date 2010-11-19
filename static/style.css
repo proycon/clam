@@ -201,34 +201,34 @@ table.files li {
     padding: 10px;
 }
 
-#parameters table {
+.parameters table {
     width: 90%;
     text-align: left;
 }
 
-#parameters table th, #parameters table  td {
+.parameters table th, #parameters table  td {
   border-bottom:  1px solid #e1e1e1;
   text-align: left;
 }
 
-#parameters th .description {
+.parameters th .description {
     font-weight: normal;
     font-style: italic;
     margin-left: 20px; 
     font-size: 90%;   
 }
-#parameters th .error {
+.parameters th .error {
     margin-left: 20px; 
     color: red;
 }
-#parameters th, #parameters td {
+.parameters th, .parameters td {
     width: 49%;
     text-align: left;
 }
-#parameters td.option {
+.parameters td.option {
     text-align: right;
 }
-#parameters h4 {
+.parameters h4 {
     color: #ac8644;
     text-decoration: small-caps;  
     border-bottom:  1px solid #ca9c4d;
