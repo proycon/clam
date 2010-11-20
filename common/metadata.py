@@ -569,7 +569,10 @@ class OutputTemplate(object):
                 else:
                     self.removeextensions = value
             elif key == 'extension':
-                self.extension = value #Add the following extension
+                if value[0] == '.':
+                    self.extension = value[1:]
+                else:
+                    self.extension = value #Add the following extension
             elif key == 'parent':
                 if isinstance(value, InputTemplate): value = value.id
                 self.parent = value #The ID of an inputtemplate

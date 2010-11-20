@@ -803,12 +803,14 @@ class InputFileHandler(object):
         if inputtemplate.extension:
             if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
-                filename = filename[:-len(inputtemplate.extension)] + '.' + inputtemplate.extension
+                filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
                 raise web.webapi.forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
             
+
         #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
+
 
         #Create the project (no effect if already exists)
         Project.create(project, user)        
@@ -838,7 +840,7 @@ class InputFileHandler(object):
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
             
-        output += "<upload source=\""+filename +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
+        output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
 
           
         #============================ Generate metadata ========================================
@@ -856,7 +858,7 @@ class InputFileHandler(object):
             
         if not errors:
             #============================ Transfer file ========================================
-            printdebug('(Start file transfer)')
+            printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
             if 'file' in postdata:
                 #Upload file from client to server
                 f = open(Project.path(project) + 'input/' + filename,'wb')
