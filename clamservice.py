@@ -893,6 +893,8 @@ class InputFileHandler(object):
             if validmeta:
                 #And we tie it to the CLAMFile object
                 file.metadata = metadata
+                #Add inputtemplate ID to metadata
+                metadata.inputtemplate = inputtemplate.id
             
         except ValueError, KeyError:
             validmeta = False

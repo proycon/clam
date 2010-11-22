@@ -116,14 +116,14 @@ class Profile(object):
         #else:   
         #    xml += "  multi=\"no\""
         xml += ">\n"
-        xml += indent + "<input>\n"
+        xml += indent + " <input>\n"
         for inputtemplate in self.input:
             xml += inputtemplate.xml(indent +"\t") + "\n"
-        xml += indent + "</input>\n"
-        xml += indent + "<output>\n"
+        xml += indent + " </input>\n"
+        xml += indent + " <output>\n"
         for outputtemplate in self.output:
             xml += outputtemplate.xml(indent +"\t") + "\n" #works for ParameterCondition as well!
-        xml += indent + "</output>\n"
+        xml += indent + " </output>\n"
         xml += indent + "</profile>"
         return xml
         
@@ -160,18 +160,18 @@ class CLAMProvenanceData(object):
             self.inputfiles = inputfiles
         
         
-    def xml(self):
-        xml += "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\">"
+    def xml(self, indent = ""):
+        xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\">"
         for filename, metadata in self.inputfiles:
-            xml += "\t<inputfile name=\"" + filename + "\">"
-            xml += metadata.xml()
-            xml += "\t</inputfile>"            
+            xml += indent + " <inputfile name=\"" + filename + "\">"
+            xml += metadata.xml(indent + " ") + "\n"
+            xml += indent +  " </inputfile>\n"            
         if self.parameters:
-            xml += "<parameters>"
+            xml += indent + " <parameters>\n"
             for parameter in self.parameters:
-                xml += parameter.xml()
-            xml += "</parameters>"
-        xml += "</provenance>"
+                xml += parameter.xml(indent +"  ") + "\n"
+            xml += indent + " </parameters>\n"
+        xml += indent + "</provenance>"
         return xml
 
 
@@ -253,10 +253,13 @@ class CLAMMetaData(object):
         self.data[key] = value
 
 
-    def xml(self):
+    def xml(self, indent = ""):
         """Render an XML representation of the metadata""" #(independent of web.py for support in CLAM API)
-        xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-        xml += "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
+        if not indent:
+            xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        else:
+            xml = ""
+        xml += indent + "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
              xml += " mimetype=\""+self.mimetype+"\""
         if self.schema:
@@ -266,12 +269,12 @@ class CLAMMetaData(object):
         xml += ">\n"
 
         for key, value in self.data.items():
-            xml += "\t<meta id=\""+key+"\">"+str(value)+"</meta>"
+            xml += indent + "  <meta id=\""+key+"\">"+str(value)+"</meta>\n"
 
         if self.provenance:        
-            xml += self.provenance.xml()
+            xml += self.provenance.xml(indent + "  ")
         
-        xml += "</CLAMMetaData>"
+        xml += indent +  "</CLAMMetaData>"
         return xml
 
     def save(self, filename):
