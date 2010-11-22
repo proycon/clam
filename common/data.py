@@ -127,7 +127,7 @@ class CLAMFile:
     def readlines(self):
         """Loads all in memory"""
         if not self.remote:
-                if self.metadata and 'encoding' in self.metadata:
+            if self.metadata and 'encoding' in self.metadata:
                return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
             else:
                return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()

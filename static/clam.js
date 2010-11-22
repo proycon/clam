@@ -1,6 +1,9 @@
 
 
 $(document).ready(function(){
+   if (inputtemplates == undefined) {
+        alert("System error: data.js not properly loaded?");
+   }
 
    //Download parameters.xsl so it's available to javascript for file-parameters
    $.ajax({ 
@@ -22,7 +25,15 @@ $(document).ready(function(){
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
    $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters'); });
    $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');});
-   $("#editorinputtemplate").change(function(event){renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');});
+   $("#editorinputtemplate").change(function(event){
+        renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');
+        var inputtemplate = getinputtemplate('#editorinputtemplate');
+        if (inputtemplate != null) {
+            if (inputtemplate.filename) {
+                $('#editorfilename').val(inputtemplate.filename);
+            }
+        }
+    });
 
 
    //Create a new project
@@ -108,24 +119,20 @@ $(document).ready(function(){
    //Submit data through in-browser editor
    $("#editorsubmit").click(function(event){ 
         $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
-        var filename = $('#editorfilename').val();
-        var filename = getuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
+        var filename = validateuploadfilename($('#editorfilename').val(), $('#editorinputtemplate').val());
         if (!filename) {
              //alert already produced by getuploadfilename()
              return false;
         }
         
-        
-        
-        var d = new Date();    
-        if (!filename) {
-            filename = d.getTime();        
-        }
+
+        var data = {'contents': $('#editorcontents').val(), 'inputtemplate': $('#editorinputtemplate').val() };
+        addformdata('#editorparameters', data );
         $.ajax({ 
             type: "POST", 
             url: "input/" + filename, 
             dataType: "xml", 
-            data: {'contents': $('#editorcontents').val(), 'inputtemplate': $('#editorinputtemplate').val(), 'uploadeditorfilename': filename }, 
+            data: data, 
             success: function(response){ 
                 processuploadresponse(response);
             },
@@ -139,7 +146,7 @@ $(document).ready(function(){
 
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
-            var filename = getuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
+            var filename = validateuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
             if (!filename) {
                //alert already produced by getuploadfilename()
                return false;
@@ -266,7 +273,7 @@ function processuploadresponse(response) {
 
 
 function getinputtemplate(id) {
-    for (var i = 0; i <= inputtemplates.length; i++) {
+    for (var i = 0; i < inputtemplates.length; i++) {
         if (inputtemplates[i].id == id) {
            return inputtemplates[i]
         }

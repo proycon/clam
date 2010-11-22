@@ -183,8 +183,9 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             <div id="editor">
                 <h3>Add input from browser</h3>
                     <table>
-                     <tr><th><label for="editorcontents">Input:</label></th><td><textarea id="editorcontents"></textarea></td></tr>
+                     <tr><th><label for="editorcontents">Input:</label></th><td><textarea id="editorcontents"></textarea></td></tr>                     
                      <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
+                      <select id="editorinputtemplate" class="inputtemplates"></select>
                      </td></tr>
                      <tr><th><label for="editorparameters">Parameters:</label></th><td>
                         <div id="editorparameters" class="parameters"><em>Select a type first</em></div>

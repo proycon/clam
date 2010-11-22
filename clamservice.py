@@ -821,14 +821,14 @@ class InputFileHandler(object):
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         output += "<clamupload>\n"
         
-        if 'file' in postdata:
+        if 'file' in postdata and postdata['file']:
             printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
             sourcefile = postdata['file'].filename
-        elif 'url' in postdata:
+        elif 'url' in postdata and postdata['url']:
             #Download from URL
-            printlog("Adding web-based URL " + postdata['url'].filename + " to input files")
+            printlog("Adding web-based URL " + postdata['url'] + " to input files")
             sourcefile = postdata['url']    
-        elif 'contents' in postdata:
+        elif 'contents' in postdata and postdata['contents']:
             #In message
             printlog("Adding file " + filename + " with explicitly provided contents to input files")
             sourcefile = "editor"
@@ -854,13 +854,13 @@ class InputFileHandler(object):
         if not errors:
             #============================ Transfer file ========================================
             printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
-            if 'file' in postdata:
+            if 'file' in postdata and postdata['file']:
                 #Upload file from client to server
                 f = open(Project.path(project) + 'input/' + filename,'wb')
                 for line in postdata['file'].file:
                     f.write(line) #encoding unaware, seems to solve big-file upload problem
                 f.close()            
-            elif 'url' in postdata:
+            elif 'url' in postdata and postdata['url']:
                 #Download file from 3rd party server to CLAM server
                 try:
                     req = urllib2.urlopen(postdata['url'])
@@ -873,7 +873,7 @@ class InputFileHandler(object):
                     if not chunk: break
                     f.write(chunk)     
                 f.close()                                  
-            elif 'contents' in postdata:  
+            elif 'contents' in postdata and postdata['contents']:  
                 #Contents passed in POST message itself
                 f = codecs.open(Project.path(project) + 'input/' + filename,'wb')
                 f.write(postdata['contents'])
