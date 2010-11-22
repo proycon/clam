@@ -728,7 +728,8 @@ class InputFileHandler(object):
             success = file.delete()            
             if not success:
                 raise web.webapi.NotFound()
-        
+            else:
+                return "Deleted" #200
 
     @requirelogin
     def POST(self, project, filename, user=None): 
