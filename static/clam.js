@@ -76,13 +76,13 @@ $(document).ready(function(){
        $("#restartbutton").click(function(event){
          $.ajax({ 
             type: "DELETE", 
-            url: "/output/" , 
+            url: "output/" , 
             dataType: "text", 
             success: function(xml){ 
                 window.location.href = ""; /* refresh */
             },
             error: function(response){
-                alert("Unable to create project");   
+                alert("Unable to delete output files");   
             }
          });         
        });

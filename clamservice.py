@@ -1024,11 +1024,13 @@ class OutputInterface(object):
         if os.path.isdir(d):
             shutil.rmtree(d)
             os.mkdir(d)
+        else:
+            raise web.webapi.NotFound()
         if os.path.exists(Project.path(project) + ".done"):
             os.unlink(Project.path(project) + ".done")                       
         if os.path.exists(Project.path(project) + ".status"):
-            os.unlink(Project.path(project) + ".status")                       
-
+            os.unlink(Project.path(project) + ".status")
+        return "Deleted" 
 
 class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""

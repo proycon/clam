@@ -23,11 +23,10 @@ import json
 from copy import copy
 
 import clam.common.parameters
-import clam.common.formats
 import clam.common.status
 import clam.common.util
 import clam.common.viewers
-
+#clam.common.formats is deliberately imported _at the end_ 
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
@@ -1184,7 +1183,7 @@ def parameterfromxml(node):
                     else:
                         kwargs['value'] = subtag.attrib['id']
 
-        return vars(clam.common.parameters)[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
+        return vars(clam.common.parameters)[node.tag](id, name, description, **kwargs) #return parameter instance
     else:
         raise Exception("No such parameter exists: " + node.tag)
 
@@ -1198,9 +1197,8 @@ def getmetadatafromxml(file, node):
         format = node.attrib['format']
         
         formatclass = None
-        for name, cls in globals().items(): #TODO support for custom formats?
-            if name == format and issubclass(cls, CLAMMetaData):
-                formatclass = cls
+        if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
+            formatclass = vars(clam.common.formats)[format]
         if not formatclass:
             d = globals()
             raise Exception("Format class " + format + " not found!")
@@ -1251,3 +1249,5 @@ def getprovenancedatafromxml(node):
             return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters)
         else:
             raise NotImplementedError
+
+import clam.common.formats #yes, this is deliberately placed at the end!
