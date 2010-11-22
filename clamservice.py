@@ -37,7 +37,7 @@ import clam.common.parameters
 import clam.common.formats
 import clam.common.digestauth
 import clam.common.data
-import clam.common.util
+from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug
 import clam.config.defaults as settings #will be overridden by real settings later
 
 
@@ -52,7 +52,7 @@ DEBUG = False
     
 DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 
-LOG = sys.stdout
+setlog(sys.stdout)
 #Empty defaults
 #SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
@@ -63,14 +63,6 @@ LOG = sys.stdout
 #URL = "http://localhost:8080"
 #USERS = None
 
-def printlog(msg):
-    global LOG
-    now = datetime.datetime.now()
-    if LOG: LOG.write("------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
-
-def printdebug(msg):
-    global DEBUG
-    if DEBUG: printlog("DEBUG: " + msg)
 
 def error(msg):
     if __name__ == '__main__':
@@ -424,7 +416,7 @@ class Project(object):
         """Retrieve sorted index for the specified input template"""
         index = []
         prefix = Project.path(project) + 'input/'
-        for linkf, f in clam.common.util.globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
+        for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
@@ -438,7 +430,7 @@ class Project(object):
         """Retrieve sorted index for the specified input template"""
         index = []
         prefix = Project.path(project) + 'output/'
-        for linkf, f in clam.common.util.globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
+        for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
@@ -1379,6 +1371,7 @@ if __name__ == "__main__":
     for o, a in opts:
         if o == '-d':
             DEBUG = True
+            setdebug(True)
         elif o == '-c':
             fastcgi = True
         elif o == '-H':

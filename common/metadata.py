@@ -19,8 +19,8 @@ from clam.common.data import CLAMFile, CLAMInputFile
 from clam.common.viewers import AbstractViewer
 import clam.common.formats
 import clam.common.parameters
+from clam.common.util import globsymlinks, setlog, printlog, printdebug
 from copy import copy
-
 
 
 def profiler(profiles, projectpath,parameters):
@@ -418,8 +418,10 @@ class InputTemplate(object):
             if parameter.access(user):
                 postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
                 if not (isinstance(postvalue,bool) and postvalue == False):
+                    printdebug("InputTemplate.validate(): Setting " + parameter.id + " to: " + postvalue)
                     if not parameter.set(postvalue): #may generate an error in parameter.error                    
                         if not parameter.error: parameter.error = "Something mysterious went wrong whilst settings this parameter!" #shouldn't happen
+                        printdebug("InputTemplate.validate(): Unable to set " + parameter.id + ": " + parameter.error)
                         #printlog("Unable to set " + parameter.id + ": " + parameter.error)
                         errors = True
                 elif parameter.required:
@@ -430,11 +432,11 @@ class InputTemplate(object):
                     for parameter2 in parameters:
                             if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
                                 parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                                #printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                                printdebug("InputTemplate.validate(): Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
                                 errors = True
                             if parameter.require and parameter2.id in parameter.require and not parameter2.value:
                                 parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                                #printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                                printdebug("InputTemplate.validate(): Setting " + parameter.id + " requires you also set " + parameter2.id )
                                 errors = True
         return errors, parameters
 

@@ -177,6 +177,7 @@ $(document).ready(function(){
                  } else {
                      uploader._settings.action = 'input/' + filename
                      uploader._settings.data.inputtemplate = inputtemplate_id;
+                     addformdata( '#uploadparameters', uploader._settings.data );
                  }
             },
             onSubmit: function(){
@@ -194,6 +195,16 @@ $(document).ready(function(){
 
 
 });  //ready
+
+
+function addformdata(parent, data) {
+    var fields = $(parent).find(':input');    
+    $(fields).each(function(){ //also works on textarea, select, button!
+        if (this.name != undefined) {
+            data[this.name] = $(this).val();
+        }
+    });
+}
 
 function processuploadresponse(response) {
       //Processes CLAM Upload XML
