@@ -248,7 +248,7 @@ function processuploadresponse(response) {
             
             //Add this file to the input table if it doesn't exist yet
             if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('target') + '">' + $(this).attr('target') + '</a>', $(this).attr('templatelabel'), ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
+                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' +$(this).attr('target') + '\');" />' ] )
             }
             
          //TODO: Make errors nicer, instead of alerts, propagate to interface
