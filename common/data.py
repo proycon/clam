@@ -104,9 +104,15 @@ class CLAMFile:
         """Delete this file"""
         if not self.remote:
             os.unlink(self.projectpath + self.basedir + '/' + self.filename)
-            #also remove any .*.INPUTTEMPLATE.* links that pointed to this file
+            
+            #Remove metadata
+            metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+            if os.path.exists(metafile):
+                os.unlink(metafile)
+            
+            #also remove any .*.INPUTTEMPLATE.* links that pointed to this file: simply remove all dead links
             for linkf,realf in clam.common.util.globsymlinks(self.projectpath + self.basedir + '/.*.INPUTTEMPLATE.*'):
-                    if realf == self.projectpath + self.basedir + '/' + self.filename:
+                    if not os.path.exists(realf):
                         os.unlink(linkf)
         else:
             httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename,'DELETE')

@@ -225,7 +225,7 @@ function processuploadresponse(response) {
             } else if ($(children[i]).is('metadataerror')) { //see if there is no metadata error
                 metadataerror = true;
             } else if ($(children[i]).is('valid')) {
-                if ($(children[i]).val() == "yes") {
+                if ($(children[i]).text() == "yes") {
                     valid = true;
                 } else {
                     valid = false;
