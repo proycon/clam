@@ -71,24 +71,29 @@ PROFILES = [
             multi=True
         ),
         OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
+            MetaField('encoding','ascii'),
             extension='.stats',
             multi=True
         ),
         OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
             CopyMetaField('textinput.language'), 
+            CopyMetaField('textinput.encoding'), 
             extension='.freqlist',
             multi=True
         ),
         OutputTemplate(id='overallstats', formatclass=PlainTextFormat, label='Overall Statistics',
+            MetaField('encoding','utf-8'),
             filename='overall.stats',
             unique=True
         ), 
         OutputTemplate(id='overallfreqlist', formatclass=PlainTextFormat, label='Overall Frequency List',
+            MetaField('encoding','utf-8'),
             filename='overall.freqlist',
             unique=True
         ), 
         ParameterCondition(createlexicon=True, 
             then= OutputTemplate(id='lexicon', formatclass=PlainTextFormat, label='Lexicon',
+                MetaField('encoding','utf-8'),
                 filename='overall.lexikon',
                 unique=True
             )            
@@ -124,7 +129,7 @@ COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIR
 PARAMETERS =  [ 
     ('Main', [ 
         BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a seperate overall lexicon?'),
-        IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of one or higher',minvalue=0, maxvalue=99999999),
+        IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),
     ] )
 ]
 
