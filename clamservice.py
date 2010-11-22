@@ -76,12 +76,6 @@ def warning(msg):
 
 
 
-class BadRequest(web.webapi.HTTPError):
-    """`400 Bad Request` error."""
-    def __init__(self, message = "Bad request"):
-        status = "400 Bad Request"
-        headers = {'Content-Type': 'text/html'}
-        super(BadRequest,self).__init__(status, headers, message)
 
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
 def userdb_lookup(user, realm):
@@ -111,12 +105,20 @@ def requirelogin(f):
             return f(*args, **kwargs)
     return wraps(f)(wrapper)
 
+
+class TestInterface(object):
+    @requirelogin
+    def GET(self, user = None):
+        raise web.webapi.Forbidden('Test error response')
+            
+
 class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
     '/', 'Index',
     '/data.js', 'InterfaceData', #provides Javascript data for the web interface
+    #'/t/', 'TestInterface',
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
     '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
@@ -497,10 +499,10 @@ class Project(object):
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
         if not self.exists(project):
-            return web.webapi.notfound("Project " + project + " was not found") #404
+            raise web.webapi.NotFound("Project " + project + " was not found") #404
         else:
             if user and not Project.access(project, user):
-                return web.webapi.unauthorized("Access denied to project " + project + " for user " + user) #401
+                raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
             return self.response(user, project, settings.PARAMETERS) #200
 
 
@@ -508,13 +510,13 @@ class Project(object):
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
-        return web.webapi.created("Project " + project + " has been created", {'Location': project + '/'}) #201
+        raise web.webapi.Created("Project " + project + " has been created", {'Location': project + '/'}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
         Project.create(project, user)
         if user and not Project.access(project, user):
-            return web.webapi.unauthorized("Access denied to project " + project + " for user " + user) #401
+            raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
                     
         #Generate arguments based on POSTed parameters
         params = []
@@ -564,10 +566,10 @@ class Project(object):
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            return web.webapi.forbidden(unicode(self.response(user, project, parameters)))
+            raise web.webapi.Forbidden(unicode(self.response(user, project, parameters)))
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            return web.webapi.forbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
+            raise web.webapi.Forbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
         else:
             #write clam.xml output file
             render = web.template.render('templates')
@@ -607,14 +609,14 @@ class Project(object):
                 f = open(Project.path(project) + '.pid','w')
                 f.write(str(pid))
                 f.close()
-                return web.webapi.accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
+                raise web.webapi.Accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
     @requirelogin
     def DELETE(self, project, user=None):
         if not self.exists(project):
-            return web.webapi.notfound("No such project: " + project)
+            raise web.webapi.NotFound("No such project: " + project)
         statuscode, _, _, _  = self.status(project)
         if statuscode == clam.common.status.RUNNING:
             self.abort(project)   
@@ -666,7 +668,7 @@ class ViewerHandler(object):
             file = clam.common.data.CLAMOutputFile(Project.path(project), filename.replace('..',''), format)
         else:
             print "Viewer not found: ", project,filename,viewer_id
-            raise web.webapi.NotFound()
+            raise web.webapi.NotFound("Viewer not found")
 
         data = web.input() #both for GET and POST
         return viewer.view(file, **data)
@@ -765,7 +767,7 @@ class InputFileHandler(object):
                             inputtemplate = t                        
             if not inputtemplate:
                 printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
-                raise web.webapi.notfound("No inputtemplate specified nor auto-detected for this filename!")
+                raise web.webapi.NotFound("No inputtemplate specified nor auto-detected for this filename!")
                 
             
             
@@ -777,7 +779,7 @@ class InputFileHandler(object):
             
         for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
             if inputtemplate.unique:
-                raise web.webapi.forbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
+                raise web.webapi.Forbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
             else:
                 if seq >= nextseq:
                     nextseq = seq + 1 #next available sequence number
@@ -793,14 +795,14 @@ class InputFileHandler(object):
                 
         if inputtemplate.filename:
             if filename != inputtemplate.filename:
-                return web.webapi.forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+                raise web.webapi.Forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
             #TODO LATER: add support for calling this with an actual number instead of #
         if inputtemplate.extension:
             if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                 filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
-                raise web.webapi.forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
+                raise web.webapi.Forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
             
 
         #Very simple security, prevent breaking out the input dir
