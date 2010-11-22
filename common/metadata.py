@@ -73,18 +73,19 @@ class Profile(object):
                 return False
         
         #check if output is produced
+        outputproduced = False
         if not self.output: return False
         for outputtemplate in self.output:
-            if isinstance(outputtemplate, ParameterCondition) and not outputtemplate.match(parameters):
-                return False
-        
-        return True
+            if not isinstance(outputtemplate, ParameterCondition) or outputtemplate.match(parameters):
+                outputproduced = True
+            
+        return outputproduced
 
     def matchingfiles(self, projectpath):
         """Return a list of all inputfiles matching the profile (filenames)"""
         l = []
         for inputtemplate in self.input:
-            l += inputtemplate.matchfiles(projectpath)
+            l += inputtemplate.matchingfiles(projectpath)
         return l
 
     def generate(self, projectpath, parameters):
@@ -98,14 +99,17 @@ class Profile(object):
                                     
         
             for outputtemplate in self.output:
-                if isinstance(outputtemplate, ParameterCondition) and outputtemplate.match(parameters):
-                    outputtemplate = outputtemplate.evaluate(parameters)                
+                if isinstance(outputtemplate, ParameterCondition):
+                    if outputtemplate.match(parameters):
+                        outputtemplate = outputtemplate.evaluate(parameters)                
+                    else:
+                        continue
                 #generate output files
                 if outputtemplate:
-                    if isinstance(outputtemplate, AbstractMetaField):                    
+                    if isinstance(outputtemplate, OutputTemplate):                    
                         outputtemplate.generate(self, parameters, projectpath, inputfiles)
                     else:
-                        raise TypeError
+                        raise TypeError("OutputTemplate expected, but got something else")
 
 
     def xml(self, indent = ""):
