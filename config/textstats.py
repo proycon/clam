@@ -71,7 +71,7 @@ PROFILES = [
             multi=True
         ),
         OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
-            MetaField('encoding','ascii'),
+            SetMetaField('encoding','ascii'),
             extension='.stats',
             multi=True
         ),
@@ -81,19 +81,19 @@ PROFILES = [
             extension='.freqlist',
             multi=True
         ),
-        OutputTemplate(id='overallstats', formatclass=PlainTextFormat, label='Overall Statistics',
-            MetaField('encoding','utf-8'),
+        OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
+            SetMetaField('encoding','utf-8'),
             filename='overall.stats',
             unique=True
         ), 
-        OutputTemplate(id='overallfreqlist', formatclass=PlainTextFormat, label='Overall Frequency List',
-            MetaField('encoding','utf-8'),
+        OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
+            SetMetaField('encoding','utf-8'),
             filename='overall.freqlist',
             unique=True
         ), 
         ParameterCondition(createlexicon=True, 
-            then= OutputTemplate(id='lexicon', formatclass=PlainTextFormat, label='Lexicon',
-                MetaField('encoding','utf-8'),
+            then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
+                SetMetaField('encoding','utf-8'),
                 filename='overall.lexikon',
                 unique=True
             )            

@@ -112,10 +112,10 @@ class AbstractParameter(object):
             sep = ' '
         return self.paramflag + sep + str(value)
 
-    def xml(self):
+    def xml(self, indent = ""):
         """This methods renders an XML representation of this parameter, along with 
         its selected value, and feedback on validation errors"""
-        xml = "<" + self.__class__.__name__
+        xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'
@@ -291,10 +291,10 @@ class ChoiceParameter(AbstractParameter):
             sep = ' '
         return self.paramflag + sep + str(value)
 
-    def xml(self):
+    def xml(self, indent = ""):
         """This methods renders an XML representation of this parameter, along with 
         its selected value, and feedback on validation errors"""
-        xml = "<" + self.__class__.__name__
+        xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'

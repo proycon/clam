@@ -69,7 +69,7 @@ class Profile(object):
 
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
-            if not inputtemplate.matchfiles(projectpath):
+            if not inputtemplate.matchingfiles(projectpath):
                 return False
         
         #check if output is produced
@@ -108,22 +108,23 @@ class Profile(object):
                         raise TypeError
 
 
-    def xml(self):
+    def xml(self, indent = ""):
         """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
-        xml = "<profile"
+        xml = "\n" + indent + "<profile"
         #if self.multi:
         #    xml += "  multi=\"yes\""
         #else:   
         #    xml += "  multi=\"no\""
-        xml += ">\n<input>\n"
+        xml += ">\n"
+        xml += indent + "<input>\n"
         for inputtemplate in self.input:
-            xml += inputtemplate.xml()
-        xml += "</input>\n"
-        xml += "<output>\n"
+            xml += inputtemplate.xml(indent +"\t") + "\n"
+        xml += indent + "</input>\n"
+        xml += indent + "<output>\n"
         for outputtemplate in self.output:
-            xml += outputtemplate.xml() #works for ParameterCondition as well!
-        xml += "</output>\n"
-        xml += "</profile>\n"
+            xml += outputtemplate.xml(indent +"\t") + "\n" #works for ParameterCondition as well!
+        xml += indent + "</output>\n"
+        xml += indent + "</profile>"
         return xml
         
 
@@ -336,9 +337,9 @@ class InputTemplate(object):
             self.parameters.append(parameter)
 
 
-    def xml(self):
+    def xml(self, indent = ""):
         """Produce Template XML"""
-        xml = "<InputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        xml = indent + "<InputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
@@ -351,8 +352,8 @@ class InputTemplate(object):
             xml +=" unique=\"yes\""
         xml += ">\n"
         for parameter in self.parameters:
-            xml += parameter.xml()
-        xml += "</InputTemplate>\n"
+            xml += parameter.xml(indent+"\t") + "\n"
+        xml += indent + "</InputTemplate>"
         return xml
 
             
@@ -476,8 +477,8 @@ class AbstractMetaField(object): #for OutputTemplate only
         self.key = key
         self.value = value
 
-    def xml(self, operator='set'):
-        xml = "\t<meta id=\"" + self.key + "\"";
+    def xml(self, operator='set', indent = ""):
+        xml = indent + "<meta id=\"" + self.key + "\"";
         if operator != 'set':
             xml += " operator=\"" + operator + "\""
         if not self.value:
@@ -495,9 +496,12 @@ class SetMetaField(AbstractMetaField):
         data[self.key] = self.value
         return True
         
+    def xml(self, indent=""):
+        return super(SetMetaField,self).xml('set', indent)
+        
 class UnsetMetaField(AbstractMetaField):
-    def xml(self):
-        return super(UnsetMetaField,self).xml('unset')
+    def xml(self, indent = ""):
+        return super(UnsetMetaField,self).xml('unset', indent)
         
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         if self.key in data and (not self.value or (self.value and data[self.key] == self.value)):
@@ -509,8 +513,8 @@ class CopyMetaField(AbstractMetaField):
     """In CopyMetaField, the value is in the form of templateid.keyid, denoting where to copy from. If not keyid but only a templateid is
     specified, the keyid of the metafield itself will be assumed."""
     
-    def xml(self):
-        return super(CopyMetaField,self).xml('copy')
+    def xml(self, indent = ""):
+        return super(CopyMetaField,self).xml('copy', indent)
     
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         raw = self.value.split('.')
@@ -533,8 +537,8 @@ class CopyMetaField(AbstractMetaField):
         return edited
         
 class ParameterMetaField(AbstractMetaField):
-    def xml(self):
-        return super(ParameterMetaField,self).xml('parameter')
+    def xml(self, indent=""):
+        return super(ParameterMetaField,self).xml('parameter', indent)
     
     def resolve(self, data, parameters, parentfile, relevantinputfiles): #TODO: Verify
         if self.value in parameters:
@@ -607,9 +611,9 @@ class OutputTemplate(object):
             raise Exception("OutputTemplate configuration error in outputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
 
-    def xml(self):
+    def xml(self, indent = ""):
         """Produce Template XML"""
-        xml = "<OutputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        xml = indent + "<OutputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
@@ -618,8 +622,8 @@ class OutputTemplate(object):
             xml +=" unique=\"yes\""
         xml += ">\n"
         for metafield in self.metafields:
-            xml += metafield.xml()
-        xml += "</OutputTemplate>\n"
+            xml += metafield.xml(indent + "\t") + "\n"
+        xml += indent + "</OutputTemplate>"
         return xml
 
 
@@ -822,18 +826,18 @@ class ParameterCondition(object):
                 return self.otherwise
         return False
 
-    def xml(self):
-        xml = "<parametercondition>\n\t<if>\n"
+    def xml(self, indent = ""):
+        xml = indent + "<parametercondition>\n" + indent + " <if>\n"
         for key, value, evalf, operator in self.conditions:
-            xml += "\t\t<" + operator + " parameter=\"" + key + "\">" + str(value) + "</" + operator + ">"
-        xml += "\t</if>\n\t<then>\n"
-        xml += self.then.xml() #TODO LATER: add pretty indentation 
-        xml += "\t</then>\n"
+            xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + str(value) + "</" + operator + ">\n"
+        xml += indent + " </if>\n" + indent + " <then>\n"
+        xml += self.then.xml(indent + "\t") #TODO LATER: add pretty indentation 
+        xml += indent + " </then>\n"
         if self.otherwise:
-            xml += "\t<else>\n"
-            xml += self.otherwise.xml() #TODO LATER: add pretty indentation 
-            xml += "\t</else>"
-        xml += "</parametercondition>"
+            xml += indent + " <else>\n"
+            xml += self.otherwise.xml(indent + " \t") #TODO LATER: add pretty indentation 
+            xml += indent + " </else>"
+        xml += indent + "</parametercondition>"
         return xml
 
 

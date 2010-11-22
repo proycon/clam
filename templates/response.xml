@@ -27,7 +27,7 @@ $if statuscode == 0 or statuscode == 2 or not project:
                 <parametergroup name="$group">
                     $for parameter in parameters:
                        $if parameter.access(user):
-                         $:parameter.xml()
+                         $:parameter.xml("")
                 </parametergroup>
         </parameters>
 $if statuscode == 0 or datafile or not project:
@@ -37,7 +37,7 @@ $if statuscode == 0 or datafile or not project:
         </corpora> 
         <profiles>
             $for profile in profiles:
-                $:profile.xml()
+                $:profile.xml("\t")
         </profiles>
         $if project:
             <input>
