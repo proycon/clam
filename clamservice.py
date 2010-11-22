@@ -886,7 +886,7 @@ class InputFileHandler(object):
 
         try:
             #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
-            validmeta, metadata, parameters = inputtemplate.generate(file, user, (errors, parameters ))
+            validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
             if validmeta:
                 #And we tie it to the CLAMFile object
                 file.metadata = metadata

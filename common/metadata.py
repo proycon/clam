@@ -441,17 +441,21 @@ class InputTemplate(object):
         return errors, parameters
 
 
-    def generate(self, file, inputdata, user = None, validatedata = None):
+    def generate(self, file, validatedata = None,  inputdata=None, user = None):
         """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error. Validatedata is a (errors,parameters) tuple that can be passed if you did validation in a prior stage, if not specified, it will be done automatically."""
         
         metadata = {}
         
         if not validatedata:
+            assert inputdata
             errors,parameters = self.validate(inputdata,user)
-        
+        else:
+            errors, parameters = validatedata
+                
         #scan errors and set metadata
         success = True
         for parameter in parameters:
+            assert isinstance(parameter, clam.common.parameters.AbstractParameter)
             if parameter.error:
                 success = False
             else:
