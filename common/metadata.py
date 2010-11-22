@@ -151,22 +151,30 @@ class CLAMProvenanceData(object):
         self.outputtemplate_label = outputtemplate_label
         self.parameters = parameters    
             
-        assert isinstance(inputfiles, list) and all([ isinstance(x,CLAMInputFile) for x in inputfiles ])
-        self.inputfiles = inputfiles #list of CLAMMetaData objects of all input files
+        assert isinstance(inputfiles, list)
+        if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
+            self.inputfiles = [ (x.filename, x.metadata) for x in inputfiles ] #list of (filename, CLAMMetaData) objects of all input files
+        else:
+            assert all([ len(x) == 2 and isinstance(x, CLAMMetaData) for x in inputfiles ]):
+                self.inputfiles = inputfiles
+        
         
     def xml(self):
         xml += "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\">"
-        for inputfile in self.inputfiles:
-            xml += "\t<inputfile name=\"" + inputfile.filename + "\">"
-            xml += inputfile.metadata.xml()
+        for filename, metadata in self.inputfiles:
+            xml += "\t<inputfile name=\"" + filename + "\">"
+            xml += metadata.xml()
             xml += "\t</inputfile>"            
-            if self.parameters:
-                xml += "<parameters>"
-                for parameter in self.parameters:
-                    xml += parameter.xml()
-                xml += "</parameters>"
+        if self.parameters:
+            xml += "<parameters>"
+            for parameter in self.parameters:
+                xml += parameter.xml()
+            xml += "</parameters>"
         xml += "</provenance>"
         return xml
+
+
+
 
 class CLAMMetaData(object):
     """A simple hash structure to hold arbitrary metadata"""
@@ -178,7 +186,9 @@ class CLAMMetaData(object):
     
 
     def __init__(self, file, **kwargs):
-        assert isinstance(file, CLAMFile)
+        assert isinstance(file, CLAMFile) or file is None
+
+        self.file = file #will be used for reading inline metadata, can be None if no file is associated
 
         self.provenance = None
 
