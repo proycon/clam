@@ -155,8 +155,8 @@ class CLAMProvenanceData(object):
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
             self.inputfiles = [ (x.filename, x.metadata) for x in inputfiles ] #list of (filename, CLAMMetaData) objects of all input files
         else:
-            assert all([ len(x) == 2 and isinstance(x, CLAMMetaData) for x in inputfiles ]):
-                self.inputfiles = inputfiles
+            assert all([ len(x) == 2 and isinstance(x, CLAMMetaData) for x in inputfiles ])
+            self.inputfiles = inputfiles
         
         
     def xml(self):
