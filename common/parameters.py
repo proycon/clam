@@ -11,55 +11,6 @@
 ###############################################################
 
 
-from lxml import etree as ElementTree
-from StringIO import StringIO
-
-#class Validation(object):
-#    def __init__(self, bool: valid, error = None):
-#        self.valid = valid
-#        self.error = error
-#    
-#    def __nonzero__(self):
-#        return self.valid
-    
-
-def parameterfromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag in globals():
-        id = ''
-        paramflag = ''
-        name = ''
-        description = ''
-        kwargs = {}
-        for attrib, value in node.attrib.items():
-            if attrib == 'id':
-                id = value
-            elif attrib == 'paramflag':
-                paramflag = value       
-            elif attrib == 'name':
-                name = value
-            elif attrib == 'description':
-                description = value
-            else:
-                kwargs[attrib] = value
-        for subtag in node: #parse possible subtags
-            if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
-                if not 'choices' in kwargs: kwargs['choices'] = {}
-                kwargs['choices'][subtag.attrib['id']] = subtag.text
-                if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                    if 'multi' in kwargs and kwargs['multi'] == '1':
-                        if not 'value' in kwargs: kwargs['value'] = []
-                        kwargs['value'].append(subtag.attrib['id'])
-                    else:
-                        kwargs['value'] = subtag.attrib['id']
-
-        return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
-    else:
-        raise Exception("No such parameter exists: " + node.tag)
-
-    pass
-
 class AbstractParameter(object):
     def __init__(self, id, name, description = '', **kwargs):
         self.id = id #a unique ID

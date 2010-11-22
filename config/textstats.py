@@ -16,7 +16,7 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
-from clam.common.metadata import *
+from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 

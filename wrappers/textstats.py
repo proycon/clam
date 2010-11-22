@@ -30,7 +30,7 @@ import re
 import clam.common.data
 import clam.common.status
 import clam.common.parameters
-import clam.common.formats
+
 
 
 #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)

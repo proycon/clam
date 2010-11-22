@@ -10,76 +10,9 @@
 #
 ###############################################################
 
-from lxml import etree as ElementTree
-from clam.common.metadata import CLAMMetaData, CLAMProvenanceData, RawXMLProvenanceData
-from clam.common.parameters import parameterfromxml
-from StringIO import StringIO
 
-###############################################################################################################################################
-#            Parser functions for metadata and provenance data
-###############################################################################################################################################
+from clam.common.data import CLAMMetaData
 
-def getmetadatafromxml(file, node):
-    """Read metadata from XML."""
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag == 'CLAMMetaData':
-        format = node.attrib['format']
-        
-        formatclass = None
-        for name, cls in globals().items(): #TODO support for custom formats?
-            if name == format and issubclass(cls, CLAMMetaData):
-                formatclass = cls
-        if not formatclass:
-            d = globals()
-            raise Exception("Format class " + format + " not found!")
-        
-        data = {}    
-        if 'inputtemplate' in node.attrib:
-            data['inputtemplate'] = node.attrib['inputtemplate']
-        if 'inputtemplatelabel' in node.attrib:
-            data['inputtemplatelabel'] = node.attrib['inputtemplatelabel']
-
-            
-        
-        for subnode in node:
-            if subnode.tag == 'meta':
-                key = subnode.attrib['id']
-                value = subnode.text
-                data[key] = value
-            elif subnode.tag == 'provenance':                
-                data['provenance'] = getprovenancedatafromxml(subnode)
-        return formatclass(file, **data)
-    else:    
-        raise Exception("Invalid CLAM Metadata!")
-
-def getprovenancedatafromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag == 'provenance':
-        if node.attrib['type'] == 'clam':
-            serviceid = node.attrib['id']
-            servicename = node.attrib['name']
-            serviceurl = node.attrib['url']
-            outputtemplate = node.attrib['outputtemplate']
-            outputtemplatelabel = node.attrib['outputtemplatelabel']
-            inputfiles = []
-            parameters = []
-            for subnode in node:
-                if subnode.tag == 'inputfile':
-                    filename = node.attrib['name']
-                    for subsubnode in subnode:
-                        if subsubnode.tag == 'CLAMMetaData':
-                            metadata = getmetadatafromxml(None, subsubnode)
-                            break
-                    inputfiles.append( (filename, metadata) )
-                elif subnode.tag == 'parameters':
-                    for subsubnode in subnode:
-                        parameter = parameterfromxml(subsubnode)
-                        parameter.append(parameter)
-            return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters)
-        else:
-            raise NotImplementedError
 
 ###############################################################################################################################################
 #       Format Definitions

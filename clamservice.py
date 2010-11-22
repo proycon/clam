@@ -561,7 +561,7 @@ class Project(object):
                                         errors = True
 
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles = clam.common.metadata.profiler(settings.PROFILES, Project.path(project), parameters)
+            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
