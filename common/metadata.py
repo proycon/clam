@@ -342,7 +342,7 @@ class InputTemplate(object):
 
     def xml(self, indent = ""):
         """Produce Template XML"""
-        xml = indent + "<InputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        xml = indent + "<InputTemplate id=\""+self.id+"\" format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
@@ -616,7 +616,7 @@ class OutputTemplate(object):
 
     def xml(self, indent = ""):
         """Produce Template XML"""
-        xml = indent + "<OutputTemplate format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        xml = indent + "<OutputTemplate id=\"" + self.id + "\" format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
@@ -834,11 +834,11 @@ class ParameterCondition(object):
         for key, value, evalf, operator in self.conditions:
             xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + str(value) + "</" + operator + ">\n"
         xml += indent + " </if>\n" + indent + " <then>\n"
-        xml += self.then.xml(indent + "\t") #TODO LATER: add pretty indentation 
+        xml += self.then.xml(indent + "\t") + "\n"
         xml += indent + " </then>\n"
         if self.otherwise:
             xml += indent + " <else>\n"
-            xml += self.otherwise.xml(indent + " \t") #TODO LATER: add pretty indentation 
+            xml += self.otherwise.xml(indent + " \t") + "\n"
             xml += indent + " </else>"
         xml += indent + "</parametercondition>"
         return xml
