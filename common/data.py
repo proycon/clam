@@ -103,7 +103,10 @@ class CLAMFile:
     def delete(self):
         """Delete this file"""
         if not self.remote:
-            os.unlink(self.projectpath + self.basedir + '/' + self.filename)
+            if not os.path.exists(self.projectpath + self.basedir + '/' + self.filename):
+                return False
+            else:
+                os.unlink(self.projectpath + self.basedir + '/' + self.filename)
             
             #Remove metadata
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
@@ -114,14 +117,17 @@ class CLAMFile:
             for linkf,realf in clam.common.util.globsymlinks(self.projectpath + self.basedir + '/.*.INPUTTEMPLATE.*'):
                     if not os.path.exists(realf):
                         os.unlink(linkf)
+            
+            return True
         else:
             httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename,'DELETE')
+            return True
          
 
     def readlines(self):
         """Loads all in memory"""
         if not self.remote:
-            if self.metadata and 'encoding' in self.metadata:
+                if self.metadata and 'encoding' in self.metadata:
                return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
             else:
                return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()

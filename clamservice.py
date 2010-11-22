@@ -725,7 +725,9 @@ class InputFileHandler(object):
             except:
                 raise web.webapi.NotFound()
                 
-            file.delete()            
+            success = file.delete()            
+            if not success:
+                raise web.webapi.NotFound()
         
 
     @requirelogin
