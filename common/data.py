@@ -265,25 +265,13 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                  #TODO: Invoke parser
                  pass
             elif node.tag == 'input':
-                 #TODO: Adapt for new formats
-                 #for filenode in node:
-                 #    if filenode.tag == 'path':
-                 #        selectedformat = clam.common.formats.Format()
-                 #        for format in self.inputformats: 
-                 #            if format.__class__.__name__ == filenode.attrib['format']:
-                 #                selectedformat = format
-                 #        self.input.append( CLAMInputFile( self.projecturl, filenode.text, selectedformat) )
-                 pass
+                 for filenode in node:
+                     if filenode.tag == 'path':
+                         self.input.append( CLAMInputFile( self.projecturl, filenode.text ) )
             elif node.tag == 'output': 
-                 #TODO: Adapt for new formats
-                 #for filenode in node:
-                 #   if filenode.tag == 'path':
-                 #       selectedformat = clam.common.formats.Format()
-                 #       for format in self.outputformats: 
-                 #           if format.__class__.__name__ == filenode.attrib['format']:
-                 #               selectedformat = format
-                 #       self.output.append( CLAMOutputFile( self.projecturl, filenode.text, selectedformat) )
-                 pass
+                 for filenode in node:
+                     if filenode.tag == 'path':
+                         self.input.append( CLAMOutputFile( self.projecturl, filenode.text ) )
             elif node.tag == 'projects':
                  self.projects = []
                  for projectnode in node:
