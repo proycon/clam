@@ -605,13 +605,13 @@ def profilefromxml(node):
         for node in node:
             if node.tag == 'input':
                 for subnode in node:
-                    if subnode.tag == 'InputTemplate':
+                    if subnode.tag.lower() == 'inputtemplate':
                         args.append(inputtemplatefromxml(subnode))
             elif node.tag == 'output':
                 for subnode in node:
-                    if subnode.tag == 'OutputTemplate':
+                    if subnode.tag.lower() == 'outputtemplate':
                         args.append(outputtemplatefromxml(subnode))
-                    elif subnode.tag == 'ParameterCondition':
+                    elif subnode.tag.lower() == 'parametercondition':
                         args.append(parameterconditionfromxml(subnode))    
     return Profile(*args)
     
@@ -619,7 +619,7 @@ def profilefromxml(node):
 def inputtemplatefromxml(node):
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag == 'InputTemplate')
+    assert(node.tag.lower() == 'inputtemplate')
    
     id = node.attrib['id']
     format = node.attrib['format']
@@ -650,7 +650,7 @@ def inputtemplatefromxml(node):
 def outputtemplatefromxml(node):
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag == 'OutputTemplate')
+    assert(node.tag.lower() == 'outputtemplate')
     
     id = node.attrib['id']
     format = node.attrib['format']
@@ -684,7 +684,7 @@ def outputtemplatefromxml(node):
 def parameterconditionfromxml(node):
     if not isinstance(node,ElementTree._Element):
         node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag == 'ParameterCondition')
+    assert(node.tag.lower() == 'parametercondition')
 
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
