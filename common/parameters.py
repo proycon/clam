@@ -122,7 +122,7 @@ class AbstractParameter(object):
     def fromxml(node):
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
-        if node.tag in dir(clam.common.parameters):
+        if node.tag in globals():
             id = ''
             paramflag = ''
             name = ''
@@ -150,7 +150,7 @@ class AbstractParameter(object):
                         else:
                             kwargs['value'] = subtag.attrib['id']
 
-            return vars(clam.common.parameters)[node.tag](id, name, description, **kwargs) #return parameter instance
+            return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
         else:
             raise Exception("No such parameter exists: " + node.tag)
             

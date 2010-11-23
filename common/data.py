@@ -347,8 +347,10 @@ class Profile(object):
         for o in self.output:
             if isinstance(o, ParameterCondition):
                 for o in o.allpossibilities():
+                    if not o:
+                       continue 
                     if not isinstance(o, OutputTemplate):
-                        raise Exception("ParameterConditions in profiles must always evaluate to OutputTemplate!")
+                        raise Exception("ParameterConditions in profiles must always evaluate to OutputTemplate, not " + o.__class__.__name__ + "!")
                     parent = o._findparent(self.input)
                     if parent:
                         o.parent = parent
@@ -915,7 +917,8 @@ class AbstractMetaField(object): #for OutputTemplate only
     def fromxml(node):
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
-        assert(node.tag.lower() == 'meta')
+        if node.tag.lower() != 'meta':
+            raise Exception("Expected meta tag but got '" + node.tag + "' instead")
        
         key = node.attrib['id']        
         if node.text:
@@ -1345,13 +1348,12 @@ class ParameterCondition(object):
                     kwargs[parameter + '_' + operator] = value
             elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
                 #interpret statements:        
-                subnode = node.children()[0] #TODO LATER: Support for multiple statements?
-                if subnode.tag == 'parametercondition':
-                    parsedobj = ParameterCondition.fromxml(subnode)
-                else:                
-                    #assume metafield?
-                    parsedobj = AbstractMetaField.fromxml(subnode)                
-                kwargs[node.tag] = parsedobj
+                for subnode in node: #TODO LATER: Support for multiple statement in then=, else= ?
+                    if subnode.tag == 'parametercondition':
+                        kwargs[node.tag] = ParameterCondition.fromxml(subnode)
+                    elif subnode.tag == 'meta':                
+                        #assume metafield?
+                        kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
         return ParameterCondition(**kwargs)
 
 

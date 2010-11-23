@@ -57,10 +57,22 @@ def calcstats(filename, encoding):
         characters += len(line)        
     f.close()
     
-    overallstats += localstats
-    overallfreqlist += localfreqlist    
+    stats = {'lines': lines, 'words': words, 'characters': characters}
     
-    return {'lines': lines, 'words': words, 'characters': characters}, freqlist
+    for key, value in stats.items():
+        if key in overallstats:
+            overallstats[key] += value
+        else:
+            overallstats[key] = value
+            
+    for key, value in freqlist.items():
+        if key in overallfreqlist:
+            overallfreqlist[key] += value
+        else:
+            overallfreqlist[key] = value            
+    
+    
+    return stats, freqlist
     
 
 def dicttotext(d, sort=False, max = 0):
@@ -71,7 +83,7 @@ def dicttotext(d, sort=False, max = 0):
         f = lambda x: x
 
     output = ""
-    for i, key, value in enumerate(f(d.items())):
+    for i, (key, value) in enumerate(f(d.items())):
         output += key + "\t" + str(value) + "\n"
         if max != 0 and i >= max:
             break
