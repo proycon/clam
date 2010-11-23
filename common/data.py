@@ -271,7 +271,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
             elif node.tag == 'output': 
                  for filenode in node:
                      if filenode.tag == 'path':
-                         self.input.append( CLAMOutputFile( self.projecturl, filenode.text ) )
+                         self.output.append( CLAMOutputFile( self.projecturl, filenode.text ) )
             elif node.tag == 'projects':
                  self.projects = []
                  for projectnode in node:
