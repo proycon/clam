@@ -82,7 +82,7 @@ class CLAMFile:
                         raise IOError(2, "Can't download metadata!")
             
             #parse metadata
-            self.metadata = getmetadatafromxml(self, xml) #returns CLAMMetaData object (or child thereof)
+            self.metadata = CLAMMetaData.fromxml(self, xml) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
@@ -253,8 +253,11 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                 for parametergroupnode in node:
                     if parametergroupnode.tag == 'parametergroup':
                         parameterlist = []
-                        for parameternode in parametergroupnode:
-                                parameterlist.append(parameterfromxml(parameternode))
+                        for parameternode in parametergroupnode:        
+                            if parameternode.tag in vars(clam.common.parameters):
+                                parameterlist.append(vars(clam.common.parameters)[parameternode.tag].fromxml(parameternode))
+                            else:
+                                raise Exception("Expected parameter class '" + parameternode.tag + "', but not defined!")
                         self.parameters.append( (parametergroupnode.attrib['name'], parameterlist) )
             elif node.tag == 'corpora':
                 for corpusnode in node:
@@ -263,7 +266,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
             elif node.tag == 'profiles':        
                 for subnode in node:
                     if subnode.tag == 'profile':
-                        self.profiles.append(profilefromxml(subnode))
+                        self.profiles.append(Profile.fromxml(subnode))
             elif node.tag == 'input':
                  for filenode in node:
                      if filenode.tag == 'path':
@@ -423,8 +426,27 @@ class Profile(object):
         xml += indent + "</profile>"
         return xml
         
-
-
+    @staticmethod
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+            
+        args = []   
+            
+        if node.tag == 'profile':
+            for node in node:
+                if node.tag == 'input':
+                    for subnode in node:
+                        if subnode.tag.lower() == 'inputtemplate':
+                            args.append(InputTemplate.fromxml(subnode))
+                elif node.tag == 'output':
+                    for subnode in node:
+                        if subnode.tag.lower() == 'outputtemplate':
+                            args.append(OutputTemplate.fromxml(subnode))
+                        elif subnode.tag.lower() == 'parametercondition':
+                            args.append(ParameterCondition.fromxml(subnode))    
+        return Profile(*args)
+    
 
 
 
@@ -469,6 +491,38 @@ class CLAMProvenanceData(object):
             xml += indent + " </parameters>\n"
         xml += indent + "</provenance>"
         return xml
+
+    @staticmethod
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        if node.tag == 'provenance':
+            if node.attrib['type'] == 'clam':
+                serviceid = node.attrib['id']
+                servicename = node.attrib['name']
+                serviceurl = node.attrib['url']
+                outputtemplate = node.attrib['outputtemplate']
+                outputtemplatelabel = node.attrib['outputtemplatelabel']
+                inputfiles = []
+                parameters = []
+                for subnode in node:
+                    if subnode.tag == 'inputfile':
+                        filename = node.attrib['name']
+                        for subsubnode in subnode:
+                            if subsubnode.tag == 'CLAMMetaData':
+                                metadata = CLAMMetaData.fromxml(None, subsubnode)
+                                break
+                        inputfiles.append( (filename, metadata) )
+                    elif subnode.tag == 'parameters':
+                        for subsubnode in subnode:
+                            if subsubnode.tag in vars(clam.common.parameters):
+                                parameters.append(vars(clam.common.parameters)[subsubnode.tag].fromxml(subsubnode))
+                            else:
+                                raise Exception("Expected parameter class '" + subsubnode.tag + "', but not defined!")
+                return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters)
+            else:
+                raise NotImplementedError
+            
 
 
 
@@ -588,103 +642,53 @@ class CLAMMetaData(object):
     def saveinlinemetadata(self):
         #Save inline metadata, can be overridden by subclasses
         pass
+    
+    @staticmethod    
+    def fromxml(file,node):
+        """Read metadata from XML."""
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        if node.tag == 'CLAMMetaData':
+            format = node.attrib['format']
+            
+            formatclass = None
+            if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
+                formatclass = vars(clam.common.formats)[format]
+            if not formatclass:
+                d = globals()
+                raise Exception("Format class " + format + " not found!")
+            
+            data = {}    
+            if 'inputtemplate' in node.attrib:
+                data['inputtemplate'] = node.attrib['inputtemplate']
+            if 'inputtemplatelabel' in node.attrib:
+                data['inputtemplatelabel'] = node.attrib['inputtemplatelabel']
+
+                
+            
+            for subnode in node:
+                if subnode.tag == 'meta':
+                    key = subnode.attrib['id']
+                    value = subnode.text
+                    data[key] = value
+                elif subnode.tag == 'provenance':                
+                    data['provenance'] = CLAMProvenanceData.fromxml(subnode)
+            return formatclass(file, **data)
+        else:    
+            raise Exception("Invalid CLAM Metadata!")        
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement
     pass
 
 
-def profilefromxml(node):
-    """Produce profile from xml"""
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-        
-    args = []   
-        
-    if node.tag == 'profile':
-        for node in node:
-            if node.tag == 'input':
-                for subnode in node:
-                    if subnode.tag.lower() == 'inputtemplate':
-                        args.append(inputtemplatefromxml(subnode))
-            elif node.tag == 'output':
-                for subnode in node:
-                    if subnode.tag.lower() == 'outputtemplate':
-                        args.append(outputtemplatefromxml(subnode))
-                    elif subnode.tag.lower() == 'parametercondition':
-                        args.append(parameterconditionfromxml(subnode))    
-    return Profile(*args)
-    
 
-def inputtemplatefromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag.lower() == 'inputtemplate')
-   
-    id = node.attrib['id']
-    format = node.attrib['format']
-    label = node.attrib['label']
-    kwargs = {}
-    if 'filename' in node.attrib:
-        kwargs['filename'] = node.attrib['filename']
-    if 'extension' in node.attrib:
-        kwargs['extension'] = node.attrib['extension']
-    if 'unique' in node.attrib:
-        kwargs['unique'] = node.attrib['unique']
-    if 'multi' in node.attrib:
-        kwargs['multi'] = node.attrib['multi']
-        
-    #find formatclass
-    if format in vars(clam.common.formats):
-        formatcls = vars(clam.common.formats)[format]
-    else:
-        raise Exception("Specified format not defined!")
 
-    args = []
-    for subnode in node:
-        args.append(parameterfromxml(subnode))
-                        
-    return InputTemplate(id,formatcls,label, *args, **kwargs)     
     
     
-def outputtemplatefromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag.lower() == 'outputtemplate')
+
+
     
-    id = node.attrib['id']
-    format = node.attrib['format']
-    label = node.attrib['label']
-    kwargs = {}
-    if 'filename' in node.attrib:
-        kwargs['filename'] = node.attrib['filename']
-    if 'extension' in node.attrib:
-        kwargs['extension'] = node.attrib['extension']
-    if 'unique' in node.attrib:
-        kwargs['unique'] = node.attrib['unique']
-    if 'multi' in node.attrib:
-        kwargs['multi'] = node.attrib['multi']
-        
-    #find formatclass
-    if format in vars(clam.common.formats):
-        formatcls = vars(clam.common.formats)[format]
-    else:
-        raise Exception("Specified format not defined!")
-
-    args = []
-    for subnode in node:
-        if subnode.tag == 'parametercondition':
-            args.append(parameterconditionfromxml(subnode))
-        else:            
-            args.append(metafieldfromxml(subnode))        
-        
-    return OutputTemplate(id,formatcls,label, *args, **kwargs)     
-
-
-def parameterconditionfromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    assert(node.tag.lower() == 'parametercondition')
 
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
@@ -696,7 +700,7 @@ class InputTemplate(object):
 
         self.parameters = []
         
-        self.unique = True #may mark input/output as unique, even though profile may be in multi mode
+        self.unique = True #may mark input/output as unique
 
         self.filename = None
         self.extension = None
@@ -740,6 +744,41 @@ class InputTemplate(object):
             xml += parameter.xml(indent+"\t") + "\n"
         xml += indent + "</InputTemplate>"
         return xml
+
+    @staticmethod
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        assert(node.tag.lower() == 'inputtemplate')
+       
+        id = node.attrib['id']
+        format = node.attrib['format']
+        label = node.attrib['label']
+        kwargs = {}
+        if 'filename' in node.attrib:
+            kwargs['filename'] = node.attrib['filename']
+        if 'extension' in node.attrib:
+            kwargs['extension'] = node.attrib['extension']
+        if 'unique' in node.attrib:
+            kwargs['unique'] = node.attrib['unique']
+        if 'multi' in node.attrib:
+            kwargs['multi'] = node.attrib['multi']
+            
+        #find formatclass
+        if format in vars(clam.common.formats):
+            formatcls = vars(clam.common.formats)[format]
+        else:
+            raise Exception("Expected format class '" + format+ "', but not defined!")
+
+        args = []
+        for subnode in node:
+            if subnode.tag in vars(clam.common.parameters):
+                args.append(vars(clam.common.parameters)[subnode.tag].fromxml(subnode))
+            else:
+                raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
+                            
+        return InputTemplate(id,formatcls,label, *args, **kwargs)     
+
 
             
     def json(self):
@@ -871,10 +910,36 @@ class AbstractMetaField(object): #for OutputTemplate only
         else:
             xml += ">" + self.value + "</meta>" 
         return xml
+
+    @staticmethod
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        assert(node.tag.lower() == 'meta')
+       
+        key = node.attrib['id']        
+        if node.text:
+            value = node.text
+        else:
+            value = None
+        operator = 'set'
+        if 'operator' in node.attrib:
+            operator= node.attrib['operator']
+        if operator == 'set':
+            cls = SetMetaField
+        elif operator == 'unset':
+            cls = UnsetMetaField
+        elif operator == 'copy':
+            cls = CopyMetaField
+        elif operator == 'parameter':
+            cls = ParameterMetaField
+        return cls(key, value)
+        
             
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         #in most cases we're only interested in 'data'
         raise Exception("Always override this method in inherited classes! Return True if data is modified, False otherwise")
+    
 
 class SetMetaField(AbstractMetaField): 
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
@@ -1010,6 +1075,43 @@ class OutputTemplate(object):
             xml += metafield.xml(indent + "\t") + "\n"
         xml += indent + "</OutputTemplate>"
         return xml
+    
+    @staticmethod    
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        assert(node.tag.lower() == 'outputtemplate')
+        
+        id = node.attrib['id']
+        format = node.attrib['format']
+        label = node.attrib['label']
+        kwargs = {}
+        if 'filename' in node.attrib:
+            kwargs['filename'] = node.attrib['filename']
+        if 'extension' in node.attrib:
+            kwargs['extension'] = node.attrib['extension']
+        if 'unique' in node.attrib:
+            kwargs['unique'] = node.attrib['unique']
+        if 'multi' in node.attrib:
+            kwargs['multi'] = node.attrib['multi']
+            
+        #find formatclass
+        if format in vars(clam.common.formats):
+            formatcls = vars(clam.common.formats)[format]
+        else:
+            raise Exception("Specified format not defined!")
+
+        args = []
+        for subnode in node:
+            if subnode.tag == 'parametercondition':
+                args.append(ParameterCondition.fromxml(subnode))
+            else:            
+                args.append(AbstractMetaField.fromxml(subnode))        
+            
+        return OutputTemplate(id,formatcls,label, *args, **kwargs)     
+
+
+            
 
 
     def __eq__(self, other):
@@ -1225,104 +1327,40 @@ class ParameterCondition(object):
         xml += indent + "</parametercondition>"
         return xml
 
-
-
-def parameterfromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag in dir(clam.common.parameters):
-        id = ''
-        paramflag = ''
-        name = ''
-        description = ''
+    @staticmethod
+    def fromxml(node):        
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        assert(node.tag.lower() == 'parametercondition')
+        
         kwargs = {}
-        for attrib, value in node.attrib.items():
-            if attrib == 'id':
-                id = value
-            elif attrib == 'paramflag':
-                paramflag = value       
-            elif attrib == 'name':
-                name = value
-            elif attrib == 'description':
-                description = value
-            else:
-                kwargs[attrib] = value
-        for subtag in node: #parse possible subtags
-            if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
-                if not 'choices' in kwargs: kwargs['choices'] = {}
-                kwargs['choices'][subtag.attrib['id']] = subtag.text
-                if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                    if 'multi' in kwargs and kwargs['multi'] == '1':
-                        if not 'value' in kwargs: kwargs['value'] = []
-                        kwargs['value'].append(subtag.attrib['id'])
-                    else:
-                        kwargs['value'] = subtag.attrib['id']
-
-        return vars(clam.common.parameters)[node.tag](id, name, description, **kwargs) #return parameter instance
-    else:
-        raise Exception("No such parameter exists: " + node.tag)
-
-    pass
-
-def getmetadatafromxml(file, node):
-    """Read metadata from XML."""
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag == 'CLAMMetaData':
-        format = node.attrib['format']
         
-        formatclass = None
-        if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
-            formatclass = vars(clam.common.formats)[format]
-        if not formatclass:
-            d = globals()
-            raise Exception("Format class " + format + " not found!")
-        
-        data = {}    
-        if 'inputtemplate' in node.attrib:
-            data['inputtemplate'] = node.attrib['inputtemplate']
-        if 'inputtemplatelabel' in node.attrib:
-            data['inputtemplatelabel'] = node.attrib['inputtemplatelabel']
+        for node in node:
+            if node.tag == 'if':
+                #interpret conditions:
+                for subnode in node:
+                    operator = subnode.tag
+                    parameter = subnode.attrib['parameter']
+                    value = subnode.text
+                    kwargs[parameter + '_' + operator] = value
+            elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
+                #interpret statements:        
+                subnode = node.children()[0] #TODO LATER: Support for multiple statements?
+                if subnode.tag == 'parametercondition':
+                    parsedobj = ParameterCondition.fromxml(subnode)
+                else:                
+                    #assume metafield?
+                    parsedobj = AbstractMetaField.fromxml(subnode)                
+                kwargs[node.tag] = parsedobj
+        return ParameterCondition(**kwargs)
 
-            
-        
-        for subnode in node:
-            if subnode.tag == 'meta':
-                key = subnode.attrib['id']
-                value = subnode.text
-                data[key] = value
-            elif subnode.tag == 'provenance':                
-                data['provenance'] = getprovenancedatafromxml(subnode)
-        return formatclass(file, **data)
-    else:    
-        raise Exception("Invalid CLAM Metadata!")
 
-def getprovenancedatafromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag == 'provenance':
-        if node.attrib['type'] == 'clam':
-            serviceid = node.attrib['id']
-            servicename = node.attrib['name']
-            serviceurl = node.attrib['url']
-            outputtemplate = node.attrib['outputtemplate']
-            outputtemplatelabel = node.attrib['outputtemplatelabel']
-            inputfiles = []
-            parameters = []
-            for subnode in node:
-                if subnode.tag == 'inputfile':
-                    filename = node.attrib['name']
-                    for subsubnode in subnode:
-                        if subsubnode.tag == 'CLAMMetaData':
-                            metadata = getmetadatafromxml(None, subsubnode)
-                            break
-                    inputfiles.append( (filename, metadata) )
-                elif subnode.tag == 'parameters':
-                    for subsubnode in subnode:
-                        parameter = parameterfromxml(subsubnode)
-                        parameter.append(parameter)
-            return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters)
-        else:
-            raise NotImplementedError
+
+
+
+
+
+
+
 
 import clam.common.formats #yes, this is deliberately placed at the end!
