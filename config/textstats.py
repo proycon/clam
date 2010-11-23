@@ -37,7 +37,7 @@ SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext 
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = sys.path[0] + "/textstats/"
+ROOT = "/home/proycon/work/clam.textstats/"
 
 #The URL of the system
 PORT= 8080
@@ -76,8 +76,8 @@ PROFILES = [
             multi=True
         ),
         OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
-            CopyMetaField('textinput.language'), 
-            CopyMetaField('textinput.encoding'), 
+            CopyMetaField('language','textinput.language'), 
+            CopyMetaField('encoding','textinput.encoding'), 
             extension='.freqlist',
             multi=True
         ),
@@ -128,7 +128,7 @@ COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIR
 #The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS =  [ 
     ('Main', [ 
-        BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a seperate overall lexicon?'),
+        BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
         IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),
     ] )
 ]

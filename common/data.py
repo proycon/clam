@@ -304,6 +304,13 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                     parameter.set(value)
                     return True
         raise KeyError
+        
+    def __contains__(self, id):
+        for parametergroup, parameters in self.parameters:
+            for parameter in parameters:
+                if parameter.id == id:
+                    return True
+        return False
 
     def passparameters(self):
         """Return all parameters as {id: value} dictionary"""
@@ -363,7 +370,17 @@ class Profile(object):
 
     def match(self, projectpath, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
-
+                
+        #Make dictionary of parameters
+        d = {}
+        for x in parameters:
+            if isinstance(x,tuple) and len(x) == 2:
+                for parameter in x[1]:  
+                    d[parameter.id] = parameter
+            elif isinstance(x, clam.common.parameters.AbstractParameter):
+                d[x.id] = x
+        parameters = d
+        
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
             if not inputtemplate.matchingfiles(projectpath):
@@ -387,14 +404,12 @@ class Profile(object):
 
     def generate(self, projectpath, parameters):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
-        
-        
+                
         if self.match(projectpath, parameters): #Does the profile match?
         
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
-                                    
-        
+                                        
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
                     if outputtemplate.match(parameters):
@@ -404,9 +419,15 @@ class Profile(object):
                 #generate output files
                 if outputtemplate:
                     if isinstance(outputtemplate, OutputTemplate):                    
-                        outputtemplate.generate(self, parameters, projectpath, inputfiles)
+                        for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles):
+                            clam.common.util.printdebug("DEBUG: outputfile=" + outputfilename)
+                            #TODO: Write to METADATA file
+                            #f = codecs.open(outputfilename,'w','utf-8')
+                            #f.write(metadata.xml())
+                            #f.close()
+                            pass
                     else:
-                        raise TypeError("OutputTemplate expected, but got something else")
+                        raise TypeError("OutputTemplate expected, but got " + outputtemplate.__class__.__name__)
 
 
     def xml(self, indent = ""):
@@ -564,19 +585,19 @@ class CLAMMetaData(object):
             if not self.allowcustomattributes:
                 for key, value in kwargs.items():
                     if not key in self.attributes:
-                        raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes.")
+                        raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes. (format: " + self.__class__.__name__ + ", file: " + str(file) + ")")
                                         
             for key, valuerange in self.attributes.items():
                 if isinstance(valuerange,list):
                     if not key in self and not False in valuerange :
-                        raise ValueError("Required attribute " + key +  " not specified")
+                        raise ValueError("Required metadata attribute " + key +  " not specified")
                     elif self[key] not in valuerange:
-                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key]))
+                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key])) + " (format: " + self.__class__.__name__ + ", file: " + str(file) + ")"
                 elif valuerange is False: #Any value is allowed, and this attribute is not required
                     pass #nothing to do
                 elif valuerange is True: #Any value is allowed, this attribute is *required*    
                     if not key in self:
-                        raise ValueError("Required attribute " + key +  " not specified")
+                        raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
                 elif valuerange: #value is a single specific unconfigurable value 
                     self[key] = valuerange
 
@@ -802,7 +823,10 @@ class InputTemplate(object):
         return json.dumps(d)
 
     def __eq__(self, other):
-        return other.id == self.id
+        if isinstance(other, str):
+            return self.id == other
+        else: #object
+            return other.id == self.id
 
     def match(self, metadata, user = None):
         """Does the specified metadata match this template? returns (success,metadata,parameters)"""
@@ -812,7 +836,7 @@ class InputTemplate(object):
     def matchingfiles(self, projectpath):
         """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results (seqnr, filename, inputtemplate)."""
         results = []
-        
+                
         if projectpath[-1] == '/':
              inputpath = projectpath + 'input/'
         else:
@@ -984,7 +1008,7 @@ class CopyMetaField(AbstractMetaField):
         edited = False
         for inputtemplate, f in relevantinputfiles:
             if inputtemplate.id == copytemplate:
-                if copykey in f.metadata:
+                if f.metadata and copykey in f.metadata:
                     data[self.key] = f.metadata[copykey]                    
                     edited = True
         return edited
@@ -1115,8 +1139,6 @@ class OutputTemplate(object):
 
 
             
-
-
     def __eq__(self, other):
         return other.id == self.id
     
@@ -1135,31 +1157,8 @@ class OutputTemplate(object):
                 return inputtemplate
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
-    def generatemetadata(self,filename, parameters, parentfile, relevantinputfiles):
-        """Generate metadata, given a filename, parameters and a dictionary of inputdata (necessary in case we copy from it)"""
-        data = {}
-        
-        if self.copymetadata:
-            #Copy parent metadata  
-            for key, value in parentfile.metadata.items():
-                data[key] = value
-        
-        for metafield in self.metafields:
-            if isinstance(metafield, ParameterCondition):
-                metafield = metafield.evaluate(parameters)
-                if not metafield:
-                    continue
-            assert(isinstance(metafield, AbstractMetaField))
-            metafield.resolve(data, parameters, parentfile, relevantinputfiles)        
-        return self.formatclass(filename, **data)
-
-
-    def generate(self, profile, parameters, projectpath, inputfiles):
+    def generate(self, profile, parameters, projectpath, inputfiles): 
         """Yields (outputfilename, metadata) tuples"""
-        
-        #Get input files
-        inputfiles = []
-        parent = None
         if self.parent:
             #copy filename from parent
             parent = self._getparent(profile)
@@ -1171,6 +1170,7 @@ class OutputTemplate(object):
                 
             #Do we specify a full filename?
             for seqnr, inputfilename, inputtemplate in parentinputfiles:
+                
                 if self.filename:
                     filename = self.filename
                 elif parent:
@@ -1206,23 +1206,38 @@ class OutputTemplate(object):
                     filename += '.' + self.extension   
                     
                 #Now we create the actual metadata
-                yield filename, self.generatemetadata(self.filename, parameters, parentfile, relevantinputfiles)
+                yield filename, self.generatemetadata(parameters, parentfile, relevantinputfiles)
                 
         elif self.unique and self.filename:
-            #outputtemplate has no parent, specified a filename and is unique, this implies it is not dependent on input files:
+            #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
 
-            yield filename, self.generatemetadata(self.filename, parameters, None, [])
+            yield self.filename, self.generatemetadata(parameters, None, [])
             
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
-                            
+
+    def generatemetadata(self, parameters, parentfile, relevantinputfiles):
+        """Generate metadata, given a filename, parameters and a dictionary of inputdata (necessary in case we copy from it)"""
+        data = {}
         
-    
+        if self.copymetadata:
+            #Copy parent metadata  
+            for key, value in parentfile.metadata.items():
+                data[key] = value
         
-            
-            
-                
+        for metafield in self.metafields:
+            if isinstance(metafield, ParameterCondition):
+                metafield = metafield.evaluate(parameters)
+                if not metafield:
+                    continue
+            assert(isinstance(metafield, AbstractMetaField))
+            metafield.resolve(data, parameters, parentfile, relevantinputfiles)        
+        return self.formatclass(None, **data)
+
+
+
+
 
 
 class ParameterCondition(object):

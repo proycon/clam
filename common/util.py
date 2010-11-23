@@ -23,7 +23,7 @@ DEBUG = False
 def globsymlinks(pattern, recursion=True):
     for f in glob.glob(pattern):
         if os.path.islink(f):
-            yield f, os.path.dirname(f) + '/' + os.readlink(f)
+            yield f, os.readlink(f)
     if recursion:
         for d in os.listdir(os.path.dirname(pattern)):
             if os.path.isdir(d):

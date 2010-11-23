@@ -541,7 +541,7 @@ class Project(object):
                         if parameter.set(postvalue): #may generate an error in parameter.error
                             params.append(parameter.compilearg(parameter.value))
                         else:
-                            if not parameter.error: parameter.error = "Something went wrong whilst settings this parameter!" #shouldn't happen
+                            if not parameter.error: parameter.error = "Something went wrong whilst setting this parameter!" #shouldn't happen
                             printlog("Unable to set " + parameter.id + ": " + parameter.error)
                             errors = True
                     elif parameter.required:
@@ -823,7 +823,7 @@ class InputFileHandler(object):
         output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         output += "<clamupload>\n"
         
-        if 'file' in postdata and postdata['file']:
+        if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
             printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
             sourcefile = postdata['file'].filename
         elif 'url' in postdata and postdata['url']:
@@ -856,7 +856,7 @@ class InputFileHandler(object):
         if not errors:
             #============================ Transfer file ========================================
             printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
-            if 'file' in postdata and postdata['file']:
+            if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
                 #Upload file from client to server
                 f = open(Project.path(project) + 'input/' + filename,'wb')
                 for line in postdata['file'].file:
