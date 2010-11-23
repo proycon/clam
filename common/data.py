@@ -617,13 +617,74 @@ def profilefromxml(node):
     
 
 def inputtemplatefromxml(node):
-    pass
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)).getroot() 
+    assert(node.tag == 'InputTemplate')
+   
+    id = node.attrib['id']
+    format = node.attrib['format']
+    label = node.attrib['label']
+    kwargs = {}
+    if 'filename' in node.attrib:
+        kwargs['filename'] = node.attrib['filename']
+    if 'extension' in node.attrib:
+        kwargs['extension'] = node.attrib['extension']
+    if 'unique' in node.attrib:
+        kwargs['unique'] = node.attrib['unique']
+    if 'multi' in node.attrib:
+        kwargs['multi'] = node.attrib['multi']
+        
+    #find formatclass
+    if format in vars(clam.common.formats):
+        formatcls = vars(clam.common.formats)[format]
+    else:
+        raise Exception("Specified format not defined!")
+
+    args = []
+    for subnode in node:
+        args.append(parameterfromxml(subnode))
+                        
+    return InputTemplate(id,formatcls,label, *args, **kwargs)     
+    
     
 def outputtemplatefromxml(node):
-    pass
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)).getroot() 
+    assert(node.tag == 'OutputTemplate')
+    
+    id = node.attrib['id']
+    format = node.attrib['format']
+    label = node.attrib['label']
+    kwargs = {}
+    if 'filename' in node.attrib:
+        kwargs['filename'] = node.attrib['filename']
+    if 'extension' in node.attrib:
+        kwargs['extension'] = node.attrib['extension']
+    if 'unique' in node.attrib:
+        kwargs['unique'] = node.attrib['unique']
+    if 'multi' in node.attrib:
+        kwargs['multi'] = node.attrib['multi']
+        
+    #find formatclass
+    if format in vars(clam.common.formats):
+        formatcls = vars(clam.common.formats)[format]
+    else:
+        raise Exception("Specified format not defined!")
+
+    args = []
+    for subnode in node:
+        if subnode.tag == 'parametercondition':
+            args.append(parameterconditionfromxml(subnode))
+        else:            
+            args.append(metafieldfromxml(subnode))        
+        
+    return OutputTemplate(id,formatcls,label, *args, **kwargs)     
+
 
 def parameterconditionfromxml(node):
-    pass
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)).getroot() 
+    assert(node.tag == 'ParameterCondition')
 
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
