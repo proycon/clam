@@ -194,8 +194,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         self.statusmessage = ""
         self.completion = 0
         self.parameters = []
-        self.inputformats = []
-        self.outputformats = []
+        self.profiles = []
         self.corpora = []
         self.input = []
         self.output = []
@@ -262,8 +261,9 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                     if corpusnode.tag == 'corpus':
                         self.corpora.append(corpusnode.value)
             elif node.tag == 'profiles':        
-                 #TODO: Invoke parser
-                 pass
+                for subnode in node:
+                    if subnode.tag == 'profile':
+                        self.profiles.append(profilefromxml(subnode))
             elif node.tag == 'input':
                  for filenode in node:
                      if filenode.tag == 'path':
