@@ -594,10 +594,36 @@ class CMDIMetaData(CLAMMetaData):
     pass
 
 
-def profilefromxml():
+def profilefromxml(node):
     """Produce profile from xml"""
-    raise NotImplementedError #TODO: implement
+    if not isinstance(node,ElementTree._Element):
+        node = ElementTree.parse(StringIO(node)).getroot() 
+        
+    args = []   
+        
+    if node.tag == 'profile':
+        for node in node:
+            if node.tag == 'input':
+                for subnode in node:
+                    if subnode.tag == 'InputTemplate':
+                        args.append(inputtemplatefromxml(subnode))
+            elif node.tag == 'output':
+                for subnode in node:
+                    if subnode.tag == 'OutputTemplate':
+                        args.append(outputtemplatefromxml(subnode))
+                    elif subnode.tag == 'ParameterCondition':
+                        args.append(parameterconditionfromxml(subnode))    
+    return Profile(*args)
     
+
+def inputtemplatefromxml(node):
+    pass
+    
+def outputtemplatefromxml(node):
+    pass
+
+def parameterconditionfromxml(node):
+    pass
 
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
