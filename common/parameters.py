@@ -10,6 +10,8 @@
 #
 ###############################################################
 
+from lxml import etree as ElementTree
+from StringIO import StringIO
 
 class AbstractParameter(object):
     def __init__(self, id, name, description = '', **kwargs):
