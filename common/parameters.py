@@ -188,6 +188,15 @@ class BooleanParameter(AbstractParameter):
             return False
 
 
+class StaticParameter(AbstractParameter):
+    """This is a parameter that can't be changed (it's a bit of a contradiction, I admit). But useful for some metadata specifications."""
+
+    def __init__(self, id, name, description = '', **kwargs):    
+        if not 'value' in kwargs:
+            raise ValueError("Static parameter expects value= !")
+        super(StaticParameter,self).__init__(id,name,description, **kwargs)
+        
+
 
 class StringParameter(AbstractParameter):
     def __init__(self, id, name, description = '', **kwargs):
