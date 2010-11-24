@@ -116,15 +116,14 @@ class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
-    '/', 'Index',
-    '/data.js', 'InterfaceData', #provides Javascript data for the web interface
-    #'/t/', 'TestInterface',
-    '/([A-Za-z0-9_]*)/?', 'Project',
-    '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-    '/([A-Za-z0-9_]*)/output/?()', 'OutputFileHandler',
-    '/([A-Za-z0-9_]*)/output/([^/]*)/?', 'OutputFileHandler',
-    '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
-    '/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
+        '/', 'Index',
+        '/data.js', 'InterfaceData', #provides Javascript data for the web interface
+        #'/t/', 'TestInterface',
+        '/([A-Za-z0-9_]*)/?', 'Project',
+        '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+        '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
+        '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
+        #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
 
     def __init__(self, mode = 'standalone'):
@@ -643,48 +642,39 @@ class OutputFileHandler(object):
         
         if filename.strip('/') == "":
             #this is a request for everything
-            return self.getarchive(project)
+            for line in self.getarchive(project):
+                yield line
         elif len(raw) >= 2 and raw[-1].lower() == 'metadata':
             #this is a request for metadata
             filename = "/".join(raw[:-1])
             viewer = 'metadata'
         elif len(raw) >= 2:
+            #this may be a viewer request, check and set viewer=
+            #TODO: Re-implement viewer support!
+            raise NotImplementedError
             
-        
-            
-            
-        
-    
         try:
-            outputfile = CLAMOutputFile(Project.path(project), outputfile)
+            outputfile = clam.common.data.CLAMOutputFile(Project.path(project), filename)
         except:
             raise web.webapi.NotFound()
             
         if viewer:
             if viewer == 'metadata':
-                #Return metadata
+                if outputfile.metadata:
+                    web.header('Content-Type', 'text/xml')
+                    for line in outputfile.metadata.xml().split("\n"):
+                        yield line                    
+                else:
+                    raise web.webapi.NotFound("No metadata found!")
             else:
+                #TODO: Re-implement viewer support!
+                raise NotImplementedError                
         else:
-            
-            
-            filename = filename.rstrip('/')[:-9]
-            metafilename = os.path.dirname(filename) 
-            if metafilename: metafilename += '/'
-            metafilename += '.' + os.path.basename(filename) + '.METADATA'
-            filename = metafilename        
-
-        path = Project.path(project) + "output/" + filename.replace("..","")
-        
-        #TODO: find output mime-type?
-
-        if os.path.isfile(path): 
-            for line in open(path,'r'): 
+            if outputfile.metadata and outputfile.metadata.mimetype:
+                web.header('Content-Type', outputfile.metadata.mimetype)
+            for line in outputfile:
                 yield line
-        elif os.path.isdir(path): 
-            for f in glob.glob(path + "/*"):
-                yield os.path.basename(f)                
-        else:
-            raise web.webapi.NotFound()
+            
             
     def DELETE(self, project, filename, user=None):    
         """Delete an output file"""
@@ -693,7 +683,7 @@ class OutputFileHandler(object):
         
         if len(filename) == 0:
             #Deleting all output files and resetting
-            reset()
+            self.reset(project)
             return "Deleted" #200
         elif os.path.isdir(Project.path(project) + filename): 
             #Deleting specified directory
