@@ -1,19 +1,19 @@
 $def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, corpora, outputpaths, inputpaths,profiles, datafile, projects)
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 $if project and user:
-    <clam version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
+    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
 $elif project:
-    <clam version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
+    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
 $elif user:
-    <clam version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
+    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
 $else:
-    <clam version="$version" id="$system_id" name="$system_name" baseurl="$url">
+    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url">
  <description>$system_description</description>
 $if not project:
         <projects>
         $for p, time in projects:
-                <project href="$url/$p" time="$time">$p</project>
+                <project xlink:type="simple" xlink:href="$url/$p" time="$time">$p</project>
         </projects>
 $if not datafile and project:
         <status code="$statuscode" message="$statusmessage" completion="$completion" errors="$errors" errormsg="$errormsg">
@@ -43,17 +43,31 @@ $if statuscode == 0 or datafile or not project:
             <input>
                 $for inputfile in inputpaths:
                     $if inputfile.metadata and inputfile.metadata.inputtemplate:
-                        <path template="$inputfile.metadata.inputtemplate">$inputfile.filename</path>
+                      <file xlink:type="simple" xlink:href="$url/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
                     $else:
-                        <path>$inputfile.filename</path>
+                      <file xlink:type="simple" xlink:href="$url/input/$inputfile.filename">
+                    <name>$inputfile.filename</name>
+                    </file>
             </input>
 $if statuscode == 2 or datafile or not project:
         $if project:
             <output>
                 $for outputfile in outputpaths:
                      $if outputfile.metadata and outputfile.metadata.provenance:
-                        <path template="$outputfile.metadata.provenance.outputtemplate_id">$outputfile.filename</path>
+                        <file xlink:type="simple" xlink:href="$url/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
                      $else:
-                        <path>$outputfile.filename</path>
+                        <file xlink:type="simple" xlink:href="$url/output/$outputfile.filename">
+                     <name>$outputfile.filename</name>
+                     $if outputfile.viewers:
+                        <viewers>
+                        $for viewer in outputfile.viewers:
+                            <viewer xlink:type="simple" xlink:href="$url/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
+                        </viewers>
+                     $if outputfile.converters:
+                        <converters>
+                        $for converter in outputfile.converters:
+                            <converter xlink:type="simple" xlink:href="$url/output/$outputfile.filename/$converter.id">$converter.label</converter>
+                        </converters>
+                     </file>
             </output>
  </clam>

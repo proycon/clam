@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink">
 
 <xsl:import href="parameters.xsl" />
 
@@ -242,7 +242,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select="path" /> 
+                <xsl:apply-templates select="file" /> 
             </tbody>
         </table>
         </div>
@@ -262,15 +262,15 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select="path" />
+                <xsl:apply-templates select="file" />
             </tbody>
         </table>
     </div>
 </xsl:template>
 
-<xsl:template match="/clam/input/path">
+<xsl:template match="/clam/input/file">
     <tr>
-        <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
+        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
         <xsl:variable name="template" select="@template" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
@@ -281,18 +281,16 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 </xsl:template>
 
 
-<xsl:template match="/clam/output/path">
+<xsl:template match="/clam/output/file">
     <tr>
-        <xsl:variable name="href">output/<xsl:value-of select="."/></xsl:variable>
         
-
         <td class="file">
-        <xsl:choose> <!-- TODO: Readd viewer support -->
-        <xsl:when test="/clam/outputformats/*[name() = $format]/viewers">
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" />/view</xsl:attribute><xsl:value-of select="."/></a>
+        <xsl:choose>
+        <xsl:when test="./viewers/viewer[1]">
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="."/></a>
         </xsl:when>
         <xsl:otherwise>
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="."/></a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:otherwise>
         </xsl:choose>
         </td>
@@ -302,10 +300,13 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@format"/></td>
         
         <td> <!--TODO: Readd viewer support -->
-            <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
-                <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a> |
+            <xsl:for-each select="./viewers/viewer">
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a> |
             </xsl:for-each>
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="@name" />Download</a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
+            <xsl:if test="@template">
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a>                
+            </xsl:if>
         </td>
     </tr>
 </xsl:template>

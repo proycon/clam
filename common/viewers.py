@@ -34,7 +34,7 @@ class AbstractViewer(object):
         return False
 
     def view(self, file, **kwargs):
-        """Returns the view itself, in xhtml (it's recommended to use web.py's template system!). file is a CLAMOutputFile instance. This always issues a GET to the remote service."""
+        """Returns the view itself, in xhtml (it's recommended to use web.py's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
         url = self.url(file) + urlencode(kwargs)
         if url: #is the resource external?
             if self.embedded:
@@ -45,6 +45,9 @@ class AbstractViewer(object):
             else:
                 #redirect
                 raise web.seeother(url)
+
+
+
 
 
 class FrogViewer(AbstractViewer):

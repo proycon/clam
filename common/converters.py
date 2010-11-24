@@ -19,8 +19,9 @@ class AbstractConverter(object):
     
     label = "(ERROR: label not overriden from AbstractConverter!)" #Override this with a sensible name
     
-    def __init__(self, **kwargs):        
+    def __init__(self, id, **kwargs):        
         if 'label' in kwargs:
+            self.id = id
             self.label = kwargs['label']
             
     def convertfrom(self,fromfilepath, tofilepath, metadata):        
@@ -43,7 +44,7 @@ class CharEncodingConverter(AbstractConverter):
     
     label = "CharEncodingConverter" #to be overriden in instance creation
     
-    def __init__(self, **kwargs):
+    def __init__(self, id,  **kwargs):
         if not 'label' in kwargs:
             raise Exception("No label specified for EncodingConvertor!")
         

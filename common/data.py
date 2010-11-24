@@ -39,22 +39,34 @@ class CLAMFile:
     basedir = ''
     
     def __init__(self, projectpath, filename, loadmetadata = True, user = None, password = None):
-            """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
-            self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
-            self.projectpath = projectpath
-            self.filename = filename
-            self.metadata = None
-            if loadmetadata:
-                try:
-                    self.loadmetadata()
-                except IOError:
-                    pass
+        """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
+        self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
+        self.projectpath = projectpath
+        self.filename = filename
+        self.metadata = None
+        if loadmetadata:
+            try:
+                self.loadmetadata()
+            except IOError:
+                pass
 
-            if self.remote:                
-                self.http = httplib2.Http()
-                if user and password:
-                    self.http.add_credentials(user, password)
+        if self.remote:                
+            self.http = httplib2.Http()
+            if user and password:
+                self.http.add_credentials(user, password)
                 
+        self.viewers = []
+        self.convertors = []
+                
+    def attachviewers(self, template):
+        assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
+        for viewer in template.viewers:
+            #TODO
+            
+    def attachconverters(self, template):
+        assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
+        for converter in template.converters:
+            #TODO
                 
     def metafilename(self):
             """Returns the filename for the meta file (not full path). Only used for local files."""
@@ -64,25 +76,25 @@ class CLAMFile:
             return metafilename
                 
     def loadmetadata(self):
-            if not self.remote:
-                metafile = self.projectpath + self.basedir + '/' + self.metafilename()
-                if os.path.exists(metafile):
-                    f = open(metafile, 'r')
-                    xml = "".join(f.readlines())
-                    f.close()
-                else:
-                    raise IOError(2, "No metadata found!")
+        if not self.remote:
+            metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+            if os.path.exists(metafile):
+                f = open(metafile, 'r')
+                xml = "".join(f.readlines())
+                f.close()
             else:
-                try:
-                    httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
-                except:
-                    raise IOError(2, "Can't download metadata!")
-                
-                if httpcode != 200: #TODO: Verify
-                        raise IOError(2, "Can't download metadata!")
+                raise IOError(2, "No metadata found!")
+        else:
+            try:
+                httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
+            except:
+                raise IOError(2, "Can't download metadata!")
             
-            #parse metadata
-            self.metadata = CLAMMetaData.fromxml(self, xml) #returns CLAMMetaData object (or child thereof)
+            if httpcode != 200: #TODO: Verify
+                    raise IOError(2, "Can't download metadata!")
+        
+        #parse metadata
+        self.metadata = CLAMMetaData.fromxml(self, xml) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
@@ -736,6 +748,8 @@ class InputTemplate(object):
         self.label = label
 
         self.parameters = []
+        self.converters = []
+        self.viewers = [] #TODO Later: Support viewers in InputTemplates?
         
         self.unique = True #may mark input/output as unique
 
@@ -758,9 +772,13 @@ class InputTemplate(object):
         if not self.unique and (self.filename and not '#' in self.filename):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
-        for parameter in args:
-            assert isinstance(parameter, clam.common.parameters.AbstractParameter)
-            self.parameters.append(parameter)
+        for arg in args:
+            if isinstance(arg, clam.common.parameters.AbstractParameter)
+                self.parameters.append(arg)
+            elif isinstance(
+                self.converters.append(arg)
+            elif:
+                raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting instance derived from AbstractParameter.")
 
 
     def xml(self, indent = ""):
@@ -1046,10 +1064,19 @@ class OutputTemplate(object):
         self.formatclass = formatclass
         self.label = label
 
+        self.viewers = []
+        self.converters = []
+
         self.metafields = []
-        for metafield in args:
-            assert (isinstance(metafield, AbstractMetaField) or isinstance(metafield,ParameterCondition))
-            self.metafields.append(metafield)
+        for arg in args:
+            if isinstance(arg, AbstractMetaField) or isinstance(arg,ParameterCondition):
+                self.metafields.append(arg)
+            elif isinstance(arg, clam.common.converters.AbstractConverter):
+                self.converters.append(arg)
+            elif isinstance(arg, clam.common.viewers.AbstractViewer:
+                self.viewers.append(arg)
+            else:
+                raise ValueError("Unexpected argument for OutputTemplate " + id + ", expecting MetaField, ParameterCondition, Viewer or Converter")
             
         
         self.unique = True #mark input/output as unique, as opposed to multiple files
@@ -1114,6 +1141,7 @@ class OutputTemplate(object):
         xml += ">\n"
         for metafield in self.metafields:
             xml += metafield.xml(indent + "\t") + "\n"
+
         xml += indent + "</OutputTemplate>"
         return xml
     
