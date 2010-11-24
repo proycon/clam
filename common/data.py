@@ -370,17 +370,7 @@ class Profile(object):
 
     def match(self, projectpath, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
-                
-        #Make dictionary of parameters
-        d = {}
-        for x in parameters:
-            if isinstance(x,tuple) and len(x) == 2:
-                for parameter in x[1]:  
-                    d[parameter.id] = parameter
-            elif isinstance(x, clam.common.parameters.AbstractParameter):
-                d[x.id] = x
-        parameters = d
-        
+                        
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
             if not inputtemplate.matchingfiles(projectpath):
@@ -404,11 +394,25 @@ class Profile(object):
 
     def generate(self, projectpath, parameters, serviceid, servicename,serviceurl):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
+
+        #Make dictionary of parameters
+        d = {}
+        for x in parameters:
+            if isinstance(x,tuple) and len(x) == 2:
+                for parameter in x[1]:  
+                    d[parameter.id] = parameter
+            elif isinstance(x, clam.common.parameters.AbstractParameter):
+                d[x.id] = x
+        parameters = d
                 
         if self.match(projectpath, parameters): #Does the profile match?
         
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
+
+            inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
+            for seqnr, filename, inputtemplate in inputfiles:
+                inputfiles_full.append(CLAMInputFile(projectpath, filename))
                                         
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
@@ -419,7 +423,7 @@ class Profile(object):
                 #generate output files
                 if outputtemplate:
                     #generate provenance data
-                    provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label, parameters)
+                    provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)
                     
                     if isinstance(outputtemplate, OutputTemplate):                    
                         for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
@@ -495,13 +499,18 @@ class CLAMProvenanceData(object):
         self.serviceurl = serviceurl
         self.outputtemplate_id = outputtemplate_id
         self.outputtemplate_label = outputtemplate_label
-        self.parameters = parameters    
+        if isinstance(parameters, dict):
+            assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters.values()])
+            self.parameters = parameters    
+        else:
+            assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters])
+            self.parameters = parameters  
             
         assert isinstance(inputfiles, list)
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
             self.inputfiles = [ (x.filename, x.metadata) for x in inputfiles ] #list of (filename, CLAMMetaData) objects of all input files
         else:
-            assert all([ len(x) == 2 and isinstance(x, CLAMMetaData) for x in inputfiles ])
+            assert (all([ isinstance(x, tuple) and len(x) == 2 and isinstance(x[1], CLAMMetaData) for x in inputfiles ]))
             self.inputfiles = inputfiles
         
         
@@ -513,7 +522,7 @@ class CLAMProvenanceData(object):
             xml += indent +  " </inputfile>\n"            
         if self.parameters:
             xml += indent + " <parameters>\n"
-            for parameter in self.parameters:
+            for parameter in self.parameters: #TODO Later: make ordered?
                 xml += parameter.xml(indent +"  ") + "\n"
             xml += indent + " </parameters>\n"
         xml += indent + "</provenance>"
@@ -535,6 +544,7 @@ class CLAMProvenanceData(object):
                 for subnode in node:
                     if subnode.tag == 'inputfile':
                         filename = node.attrib['name']
+                        metadata = None
                         for subsubnode in subnode:
                             if subsubnode.tag == 'CLAMMetaData':
                                 metadata = CLAMMetaData.fromxml(None, subsubnode)
