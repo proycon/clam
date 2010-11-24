@@ -325,14 +325,14 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         return paramdict
 
 
-def profiler(profiles, projectpath,parameters):
+def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
 
     matched = []
     for profile in profiles:
         if profile.match(projectpath, parameters):
             matched.append(profile)
-            profile.generate(projectpath,parameters)
+            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)
     return matched
 
 
@@ -402,7 +402,7 @@ class Profile(object):
             l += inputtemplate.matchingfiles(projectpath)
         return l
 
-    def generate(self, projectpath, parameters):
+    def generate(self, projectpath, parameters, serviceid, servicename,serviceurl):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
                 
         if self.match(projectpath, parameters): #Does the profile match?
@@ -418,8 +418,11 @@ class Profile(object):
                         continue
                 #generate output files
                 if outputtemplate:
+                    #generate provenance data
+                    provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label, parameters)
+                    
                     if isinstance(outputtemplate, OutputTemplate):                    
-                        for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles):
+                        for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
                             clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)                            
                             metafilename = os.path.dirname(outputfilename) 
                             if metafilename: metafilename += '/'
@@ -1158,7 +1161,7 @@ class OutputTemplate(object):
                 return inputtemplate
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
-    def generate(self, profile, parameters, projectpath, inputfiles): 
+    def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None): 
         """Yields (outputfilename, metadata) tuples"""
         if self.parent:
             #copy filename from parent
@@ -1207,19 +1210,21 @@ class OutputTemplate(object):
                     filename += '.' + self.extension   
                     
                 #Now we create the actual metadata
-                yield filename, self.generatemetadata(parameters, parentfile, relevantinputfiles)
+                yield filename, self.generatemetadata(parameters, parentfile, relevantinputfiles, provenancedata)
                 
         elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
 
-            yield self.filename, self.generatemetadata(parameters, None, [])
+            yield self.filename, self.generatemetadata(parameters, None, [], provenancedata)
             
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
 
-    def generatemetadata(self, parameters, parentfile, relevantinputfiles):
+    def generatemetadata(self, parameters, parentfile, relevantinputfiles, provenancedata = None):
         """Generate metadata, given a filename, parameters and a dictionary of inputdata (necessary in case we copy from it)"""
+        assert isinstance(provenancedata,CLAMProvenanceData) or provenancedata == None
+
         data = {}
         
         if self.copymetadata:
@@ -1234,6 +1239,10 @@ class OutputTemplate(object):
                     continue
             assert(isinstance(metafield, AbstractMetaField))
             metafield.resolve(data, parameters, parentfile, relevantinputfiles)        
+
+        if provenancedata:
+            data['provenance'] = provenancedata
+
         return self.formatclass(None, **data)
 
 

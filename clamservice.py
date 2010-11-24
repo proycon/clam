@@ -559,9 +559,18 @@ class Project(object):
                                         parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
                                         printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                                         errors = True
+                                        
+        url = 'http://' + settings.HOST
+        if settings.PORT != 80:
+            url += ':' + str(settings.PORT)
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url += '/'
+            url += settings.URLPREFIX
+        if url[-1] == '/': url = url[:-1]                                        
 
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters)
+            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
