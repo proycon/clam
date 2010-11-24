@@ -449,5 +449,20 @@ Encoding: utf-8   (non configurable)
 Language: [                  v]
 
 
+###############################################
 
 
+
+InputTemplate('textinput', PlainTextFormat,"Plain-text document",  
+    StaticParameter(id='encoding',name='Encoding',description='',value='utf-8''),  
+    EncodingConvertor(PlainTextFormat,'Convert from Latin-1', targetencoding='utf-8', sourceencoding='iso-8859-1'),
+    extension='.txt',
+    multi=True
+),
+
+OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
+    SetMetaField('encoding','utf-8'),    
+    TextViewer(),
+    filename='overall.freqlist',
+    unique=True
+), 

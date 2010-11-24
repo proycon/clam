@@ -121,7 +121,7 @@ class CLAMService(object):
     #'/t/', 'TestInterface',
     '/([A-Za-z0-9_]*)/?', 'Project',
     '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-    '/([A-Za-z0-9_]*)/output/?', 'OutputInterface',
+    '/([A-Za-z0-9_]*)/output/?()', 'OutputFileHandler',
     '/([A-Za-z0-9_]*)/output/([^/]*)/?', 'OutputFileHandler',
     '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
     '/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
@@ -639,16 +639,32 @@ class OutputFileHandler(object):
     def GET(self, project, filename, user=None):    
         raw = filename.split('/')
 
-        if len(raw) >= 2 and raw[-1].lower() == 'metadata':
-            #this is a request for metadata
-            outputfilename = "/".join(raw[:-1])
-        elif filename.strip('/') == "":
-            return self.getarchive(project)
+        viewer = None
+        
+        if filename.strip('/') == "":
             #this is a request for everything
-        else:
-            outputfilename
+            return self.getarchive(project)
+        elif len(raw) >= 2 and raw[-1].lower() == 'metadata':
+            #this is a request for metadata
+            filename = "/".join(raw[:-1])
+            viewer = 'metadata'
+        elif len(raw) >= 2:
+            
+        
+            
+            
+        
     
-        outputfile = 
+        try:
+            outputfile = CLAMOutputFile(Project.path(project), outputfile)
+        except:
+            raise web.webapi.NotFound()
+            
+        if viewer:
+            if viewer == 'metadata':
+                #Return metadata
+            else:
+        else:
             
             
             filename = filename.rstrip('/')[:-9]
