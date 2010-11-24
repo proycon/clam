@@ -637,9 +637,20 @@ class OutputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
+        raw = filename.split('/')
 
-        if os.path.basename(filename.rstrip('/')).lower() == 'metadata':
-            #this is a request for metadata? using filename/metadata ?
+        if len(raw) >= 2 and raw[-1].lower() == 'metadata':
+            #this is a request for metadata
+            outputfilename = "/".join(raw[:-1])
+        elif filename.strip('/') == "":
+            return self.getarchive(project)
+            #this is a request for everything
+        else:
+            outputfilename
+    
+        outputfile = 
+            
+            
             filename = filename.rstrip('/')[:-9]
             metafilename = os.path.dirname(filename) 
             if metafilename: metafilename += '/'
@@ -658,6 +669,109 @@ class OutputFileHandler(object):
                 yield os.path.basename(f)                
         else:
             raise web.webapi.NotFound()
+            
+    def DELETE(self, project, filename, user=None):    
+        """Delete an output file"""
+        
+        filename = filename.replace("..","") #Simple security
+        
+        if len(filename) == 0:
+            #Deleting all output files and resetting
+            reset()
+            return "Deleted" #200
+        elif os.path.isdir(Project.path(project) + filename): 
+            #Deleting specified directory
+            shutil.rmtree(Project.path(project) + filename)
+            return "Deleted" #200
+        else:
+            try:
+                file = clam.common.data.CLAMOutputFile(Project.path(project), filename)
+            except:
+                raise web.webapi.NotFound()
+                
+            success = file.delete()            
+            if not success:
+                raise web.webapi.NotFound()
+            else:
+                return "Deleted" #200    
+
+
+    def reset(self, project):
+        """Reset system, delete all output files and prepare for a new run"""
+        d = Project.path(project) + "output"
+        if os.path.isdir(d):
+            shutil.rmtree(d)
+            os.mkdir(d)
+        else:
+            raise web.webapi.NotFound()
+        if os.path.exists(Project.path(project) + ".done"):
+            os.unlink(Project.path(project) + ".done")                       
+        if os.path.exists(Project.path(project) + ".status"):
+            os.unlink(Project)        
+
+    def getarchive(self, project):
+        """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
+        if os.path.isfile(Project.path(project) + '.download'):
+            #make sure we don't start two compression processes at the same time
+            raise web.forbidden()
+        else:
+            data = web.input()
+            if 'format' in data:
+                format = data['format']
+            else:
+                format = 'zip' #default
+
+            #validation, security
+            contentencoding = None
+            if format == 'zip':
+                contenttype = 'application/zip'
+                command = "/usr/bin/zip -r" #TODO: do not hard-code path!
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
+            elif format == 'tar.gz':
+                contenttype = 'application/x-tar'
+                contentencoding = 'gzip'
+                command = "/bin/tar -czf"
+                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project) + "output/" + project + ".zip")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
+            elif format == 'tar.bz2': 
+                contenttype = 'application/x-bzip2'
+                command = "/bin/tar -cjf"
+                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project) + "output/" + project + ".zip")
+            else:
+                raise web.webapi.Forbidden('Invalid archive format') #TODO: message won't show
+
+            path = Project.path(project) + "output/" + project + "." + format
+            
+            if not os.path.isfile(path):
+                printlog("Building download archive in " + format + " format")
+                cmd = command + ' ' + project + '.' + format + ' *'
+                printdebug(cmd)
+                printdebug(Project.path(project)+'output/')
+                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/', shell=True)	        			
+                if not process:
+                    raise web.webapi.InternalError("Unable to make download package")                
+                else:
+                    pid = process.pid
+                    f = open(Project.path(project) + '.download','w') 
+                    f.write(str(pid))
+                    f.close()
+                    os.waitpid(pid, 0) #wait for process to finish
+                    os.unlink(Project.path(project) + '.download')
+
+            if contentencoding:
+                web.header('Content-Encoding', contentencoding)
+            web.header('Content-Type', contenttype)
+            for line in open(path,'r'):
+                yield line
+        
 
 class ViewerHandler(object):
 
@@ -727,9 +841,11 @@ class InputFileHandler(object):
             #Deleting all input files
             shutil.rmtree(Project.path(project) + 'input')
             os.mkdir(Project.path(project) + 'input') #re-add new input directory
+            return "Deleted" #200
         elif os.path.isdir(Project.path(project) + filename): 
             #Deleting specified directory
             shutil.rmtree(Project.path(project) + filename)
+            return "Deleted" #200
         else:
             try:
                 file = clam.common.data.CLAMInputFile(Project.path(project), filename)
@@ -940,106 +1056,6 @@ class InputFileHandler(object):
         output += "</clamupload>"
         return output #200
 
-class OutputInterface(object):
-
-    @requirelogin        
-    def GET(self, project, user=None):
-        """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
-        if os.path.isfile(Project.path(project) + '.download'):
-            #make sure we don't start two compression processes at the same time
-            raise web.forbidden()
-        else:
-            data = web.input()
-            if 'format' in data:
-                format = data['format']
-            else:
-                format = 'zip' #default
-
-            #validation, security
-            contentencoding = None
-            if format == 'zip':
-                contenttype = 'application/zip'
-                command = "/usr/bin/zip -r" #TODO: do not hard-code path!
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.gz':
-                contenttype = 'application/x-tar'
-                contentencoding = 'gzip'
-                command = "/bin/tar -czf"
-                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project) + "output/" + project + ".zip")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.bz2': 
-                contenttype = 'application/x-bzip2'
-                command = "/bin/tar -cjf"
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project) + "output/" + project + ".zip")
-            else:
-                raise web.webapi.Forbidden('Invalid archive format') #TODO: message won't show
-
-            path = Project.path(project) + "output/" + project + "." + format
-            
-            if not os.path.isfile(path):
-                printlog("Building download archive in " + format + " format")
-                cmd = command + ' ' + project + '.' + format + ' *'
-                printdebug(cmd)
-                printdebug(Project.path(project)+'output/')
-                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/', shell=True)	        			
-                if not process:
-                    raise web.webapi.InternalError("Unable to make download package")                
-                else:
-                    pid = process.pid
-                    f = open(Project.path(project) + '.download','w') 
-                    f.write(str(pid))
-                    f.close()
-                    os.waitpid(pid, 0) #wait for process to finish
-                    os.unlink(Project.path(project) + '.download')
-
-            if contentencoding:
-                web.header('Content-Encoding', contentencoding)
-            web.header('Content-Type', contenttype)
-            for line in open(path,'r'):
-                yield line
-               
-    #@requirelogin
-    #def POST(self, project, user=None):
-    #    """Trigger generation of download package"""
-    #    if not os.path.isfile(Project.path(project) + '.download'):
-    #        postdata = web.input() 
-    #        if 'format' in postdata:
-    #            format = postdata['format']
-    #        else:
-    #            format = 'zip' #default          
-    #        cmd = ['tools/make-download-package.sh', project] #call processing chain 
-    #        process = subprocess.Popen(cmd, cwd=Project.path(project))	        			
-    #        if process:
-    #            pid = process.pid
-    #            f = open(Project.path(project) + '.download','w') 
-    #            f.write(str(pid))
-    #            f.close()
-    #        else:
-    #            raise web.webapi.InternalError("Unable to make download package")                
-    #    return "" #200  
-
-    @requirelogin
-    def DELETE(self, project, user=None):          
-        """Reset system, delete all output files and prepare for a new run"""
-        d = Project.path(project) + "output"
-        if os.path.isdir(d):
-            shutil.rmtree(d)
-            os.mkdir(d)
-        else:
-            raise web.webapi.NotFound()
-        if os.path.exists(Project.path(project) + ".done"):
-            os.unlink(Project.path(project) + ".done")                       
-        if os.path.exists(Project.path(project) + ".status"):
-            os.unlink(Project.path(project) + ".status")
-        return "Deleted" 
 
 class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
