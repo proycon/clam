@@ -420,12 +420,13 @@ class Profile(object):
                 if outputtemplate:
                     if isinstance(outputtemplate, OutputTemplate):                    
                         for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles):
-                            clam.common.util.printdebug("DEBUG: outputfile=" + outputfilename)
-                            #TODO: Write to METADATA file
-                            #f = codecs.open(outputfilename,'w','utf-8')
-                            #f.write(metadata.xml())
-                            #f.close()
-                            pass
+                            clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)                            
+                            metafilename = os.path.dirname(outputfilename) 
+                            if metafilename: metafilename += '/'
+                            metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'                                                        
+                            f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
+                            f.write(metadata.xml())
+                            f.close()
                     else:
                         raise TypeError("OutputTemplate expected, but got " + outputtemplate.__class__.__name__)
 
