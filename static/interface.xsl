@@ -198,22 +198,6 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 </xsl:template>
 
 
-
-<!-- OBSOLETE
-<xsl:template name="inputformats"> 
-    <xsl:for-each select="/clam/inputformats/*">
-        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-    </xsl:for-each>
-</xsl:template>
-
-<xsl:template name="outputformats">
-    <xsl:for-each select="/clam/outputformats/*">
-        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-    </xsl:for-each>
-</xsl:template>
--->
-
-
 <xsl:template match="/clam/input">
         <h2>Input</h2>
         
@@ -269,7 +253,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 
 <xsl:template match="/clam/input/file">
     <tr>
-        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
+        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
         <xsl:variable name="template" select="@template" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
@@ -298,13 +282,14 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@format"/></td>
         
-        <td> <!--TODO: Readd viewer support -->
+        <td>
             <xsl:for-each select="./viewers/viewer">
-                <a><xsl:attribute name="href"><xsl:value-of select="@href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a> |
+                <a><xsl:attribute name="href"><xsl:value-of select="@href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a><xml:text> | </xml:text>
             </xsl:for-each>
-            <a><xsl:attribute name="href"><xsl:value-of select="@href" /></xsl:attribute>Download</a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
             <xsl:if test="@template">
-                <a><xsl:attribute name="href"><xsl:value-of select="@href" />/metadata</xsl:attribute>Metadata</a>                
+                <xml:text> | </xml:text>
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a>                
             </xsl:if>
         </td>
     </tr>
@@ -381,7 +366,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
+            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
            </xsl:for-each>
           </tbody>
         </table>

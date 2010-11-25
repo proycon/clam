@@ -43,9 +43,9 @@ $if statuscode == 0 or datafile or not project:
             <input>
                 $for inputfile in inputpaths:
                     $if inputfile.metadata and inputfile.metadata.inputtemplate:
-                      <file xlink:type="simple" xlink:href="$url/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
+                      <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
                     $else:
-                      <file xlink:type="simple" xlink:href="$url/input/$inputfile.filename">
+                      <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename">
                     <name>$inputfile.filename</name>
                     </file>
             </input>
@@ -54,19 +54,19 @@ $if statuscode == 2 or datafile or not project:
             <output>
                 $for outputfile in outputpaths:
                      $if outputfile.metadata and outputfile.metadata.provenance:
-                        <file xlink:type="simple" xlink:href="$url/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
+                        <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
                      $else:
-                        <file xlink:type="simple" xlink:href="$url/output/$outputfile.filename">
+                        <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename">
                      <name>$outputfile.filename</name>
                      $if outputfile.viewers:
                         <viewers>
                         $for viewer in outputfile.viewers:
-                            <viewer xlink:type="simple" xlink:href="$url/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
+                            <viewer xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
                         </viewers>
                      $if outputfile.converters:
                         <converters>
                         $for converter in outputfile.converters:
-                            <converter xlink:type="simple" xlink:href="$url/output/$outputfile.filename/$converter.id">$converter.label</converter>
+                            <converter xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$converter.id">$converter.label</converter>
                         </converters>
                      </file>
             </output>

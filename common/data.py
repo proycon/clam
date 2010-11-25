@@ -281,12 +281,16 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                         self.profiles.append(Profile.fromxml(subnode))
             elif node.tag == 'input':
                  for filenode in node:
-                     if filenode.tag == 'path':
-                         self.input.append( CLAMInputFile( self.projecturl, filenode.text ) )
+                     if filenode.tag == 'file':
+                         for n in filenode:
+                            if n.tag == 'name':
+                                self.input.append( CLAMInputFile( self.projecturl, n.text ) )
             elif node.tag == 'output': 
                  for filenode in node:
-                     if filenode.tag == 'path':
-                         self.output.append( CLAMOutputFile( self.projecturl, filenode.text ) )
+                     if filenode.tag == 'file':
+                        for n in filenode:
+                            if n.tag == 'name':
+                                self.output.append( CLAMOutputFile( self.projecturl, n.text ) )
             elif node.tag == 'projects':
                  self.projects = []
                  for projectnode in node:
@@ -534,7 +538,7 @@ class CLAMProvenanceData(object):
             xml += indent +  " </inputfile>\n"            
         if self.parameters:
             xml += indent + " <parameters>\n"
-            for parameter in self.parameters: #TODO Later: make ordered?
+            for parameter in self.parameters.values(): #TODO Later: make ordered?
                 xml += parameter.xml(indent +"  ") + "\n"
             xml += indent + " </parameters>\n"
         xml += indent + "</provenance>"
