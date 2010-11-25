@@ -46,9 +46,6 @@ class AbstractViewer(object):
                 #redirect
                 raise web.seeother(url)
 
-    def generator(self):
-        if isgenerator
-
 
 
 
