@@ -16,6 +16,8 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.converters import *
+from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
@@ -67,6 +69,7 @@ PROFILES = [
         InputTemplate('textinput', PlainTextFormat,"Plain-text document",  
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+            CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             extension='.txt',
             multi=True
         ),

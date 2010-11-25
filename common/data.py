@@ -836,7 +836,7 @@ class InputTemplate(object):
         for parameter in self.parameters:
             xml += parameter.xml(indent+"\t") + "\n"
         if self.converters:
-            for converter in converters:
+            for converter in self.converters:
                 xml += indent + "\t<converter id=\""+converter.id+"\">"+converter.label+"</converter>"
         xml += indent + "</InputTemplate>"
         return xml
@@ -897,6 +897,7 @@ class InputTemplate(object):
         for parameter in self.parameters:
             parametersxml += parameter.xml()
         d['parametersxml'] = '<?xml version="1.0" encoding="utf-8" ?><parameters>' + parametersxml + '</parameters>'
+        d['converters'] = [ {'id':x.id, 'label':x.label} for x in self.converters ]
         return json.dumps(d)
 
     def __eq__(self, other):

@@ -58,11 +58,11 @@ class CharEncodingConverter(AbstractConverter):
         else:
             raise Exception("No charset specified for EncodingConvertor!")
 
-        super(EncodingConvertor,self).__init__(**kwargs)
+        super(CharEncodingConverter,self).__init__(id, **kwargs)
       
     def convertforinput(self,filepath, metadata=None):
         """Convert from target format into one of the source formats. Relevant if converters are used in InputTemplates. Metadata already is metadata for the to-be-generated file."""
-        super(EncodingConvertor,self).__init_( **kwargs)
+        super(CharEncodingConverter,self).convertforinput(filepath, metadata)
         
         os.copy(filepath, filepath + '.convertsource')
         
@@ -80,7 +80,7 @@ class CharEncodingConverter(AbstractConverter):
         
     def convertforoutput(self,outputfile):
         """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Outputfile is a CLAMOutputFile instance."""    
-        super(EncodingConvertor,self).__init_( **kwargs)
+        super(CharEncodingConverter,self).convertforoutput(outputfile)
         
         web.header('Content-Type', 'text/plain; charset=' + self.charset)
         for line in outputfile:
