@@ -713,7 +713,7 @@ class OutputFileHandler(object):
         if os.path.exists(Project.path(project) + ".done"):
             os.unlink(Project.path(project) + ".done")                       
         if os.path.exists(Project.path(project) + ".status"):
-            os.unlink(Project)        
+            os.unlink(Project.path(project) + ".status")        
 
     def getarchive(self, project):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""

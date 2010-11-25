@@ -56,7 +56,7 @@ class CLAMFile:
                 self.http.add_credentials(user, password)
                 
         self.viewers = []
-        self.convertors = []
+        self.converters = []
                 
     def attachviewers(self, template):
         assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
