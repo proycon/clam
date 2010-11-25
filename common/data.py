@@ -566,7 +566,11 @@ class CLAMProvenanceData(object):
             xml += indent +  " </inputfile>\n"            
         if self.parameters:
             xml += indent + " <parameters>\n"
-            for parameter in self.parameters.values(): #TODO Later: make ordered?
+            if isinstance(self.parameters, dict):
+                parameters = self.parameters.values()
+            elif isinstance(self.parameters, list):
+                parameters = self.parameters
+            for parameter in parameters: #TODO Later: make ordered?
                 xml += parameter.xml(indent +"  ") + "\n"
             xml += indent + " </parameters>\n"
         xml += indent + "</provenance>"
@@ -831,6 +835,9 @@ class InputTemplate(object):
         xml += ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+"\t") + "\n"
+        if self.converters:
+            for converter in converters:
+                xml += indent + "\t<converter id=\""+converter.id+"\">"+converter.label+"</converter>"
         xml += indent + "</InputTemplate>"
         return xml
 
@@ -863,6 +870,10 @@ class InputTemplate(object):
         for subnode in node:
             if subnode.tag in vars(clam.common.parameters):
                 args.append(vars(clam.common.parameters)[subnode.tag].fromxml(subnode))
+            elif subnode.tag == 'converter':
+                pass #TODO: Reading converters from XML is not implemented (and not necessary at this stage)
+            elif subnode.tag == 'viewer':
+                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
             else:
                 raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
                             
@@ -1208,6 +1219,10 @@ class OutputTemplate(object):
         for subnode in node:
             if subnode.tag == 'parametercondition':
                 args.append(ParameterCondition.fromxml(subnode))
+            elif subnode.tag == 'converter':
+                pass #TODO: Reading converters from XML is not implemented (and not necessary at this stage)
+            elif subnode.tag == 'viewer':
+                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)                
             else:            
                 args.append(AbstractMetaField.fromxml(subnode))        
             

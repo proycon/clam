@@ -398,7 +398,9 @@ class Project(object):
                     for result in Project.inputindex(project, f[len(prefix):]):
                         yield result
                 else:   
-                    yield clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+                    file = clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+                    file.attachviewers(settings.PROFILES) #attaches converters as well
+                    yield file
 
 
     @staticmethod
@@ -410,7 +412,9 @@ class Project(object):
                     for result in Project.outputindex(project, f[len(prefix):]):
                         yield result
                 else:   
-                    yield clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+                    file = clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+                    file.attachviewers(settings.PROFILES) #attaches converters as well
+                    yield file
 
     @staticmethod
     def inputindexbytemplate(project, inputtemplate):
@@ -639,6 +643,7 @@ class OutputFileHandler(object):
         raw = filename.split('/')
 
         viewer = None
+        requestid = None
         
         if filename.strip('/') == "":
             #this is a request for everything
@@ -646,7 +651,7 @@ class OutputFileHandler(object):
                 yield line
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
-            if os.path.isfile(Project.path(project), "/".join(raw[:-1])):
+            if os.path.isfile(Project.path(project) + 'output/' +  "/".join(raw[:-1])):
                 filename = "/".join(raw[:-1])
                 requestid = raw[-1].lower()                        
 
@@ -680,15 +685,20 @@ class OutputFileHandler(object):
                         if c.id == requestid:
                             converter = c
                     if converter:
-                        #TODO: Implement converter
+                        for line in converter.convertforoutput(outputfile):
+                            yield line
                     else:
                         raise web.webapi.NotFound("No such viewer or converter:" + requestid)
         else:
+            #normal request - return file contents
             if outputfile.metadata:
                 for header, value in outputfile.metadata.httpheaders():
                     web.header(header, value)
-            for line in outputfile:
-                yield line
+            try:
+                for line in outputfile:
+                    yield line
+            except IOError: 
+                raise web.webapi.NotFound()
             
             
     def DELETE(self, project, filename, user=None):    
@@ -793,38 +803,6 @@ class OutputFileHandler(object):
             for line in open(path,'r'):
                 yield line
         
-
-class ViewerHandler(object):
-
-    def view(self, project, filename, viewer_id):
-        format = clam.common.formats.Format() #unspecified format
-        for fmt in settings.OUTPUTFORMATS:
-            if fmt.match(filename):
-                format = fmt
-                break
-        viewer = None
-        for i,v in enumerate(format.viewers):
-            if (viewer_id == v.id or viewer_id.lower() == v.__class__.__name__.lower() or (i == 0 and viewer_id == 'view') or (viewer_id == 'view' + str(i + 1))):
-                viewer = v
-                break
-
-        if viewer and os.path.exists(Project.path(project)):
-            file = clam.common.data.CLAMOutputFile(Project.path(project), filename.replace('..',''), format)
-        else:
-            print "Viewer not found: ", project,filename,viewer_id
-            raise web.webapi.NotFound("Viewer not found")
-
-        data = web.input() #both for GET and POST
-        return viewer.view(file, **data)
-
-
-    @requirelogin
-    def GET(self, project, filename, viewer_id, user=None):
-        return self.view(project, filename, viewer_id)
-
-    @requirelogin
-    def POST(self, project, filename, viewer_id, user=None):
-        return self.view(project, filename, viewer_id)
 
 class InputFileHandler(object):
 

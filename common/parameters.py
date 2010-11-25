@@ -75,14 +75,15 @@ class AbstractParameter(object):
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
         for key, v in self.kwargs.items():    
-            if isinstance(v, bool):
-                xml += ' ' + key + '="' + str(int(v))+ '"'                    
-            elif isinstance(v, list):
-                xml += ' ' + key + '="'+",".join(v)+ '"'        
-            elif isinstance(v, unicode) or isinstance(v, str)  :
-                xml += ' ' + key + '="'+v+ '"'        
-            else:
-                xml += ' ' + key + '="'+str(v)+ '"'        
+            if not key in ['value','error','name','description']:
+                if isinstance(v, bool):
+                    xml += ' ' + key + '="' + str(int(v))+ '"'                    
+                elif isinstance(v, list):
+                    xml += ' ' + key + '="'+",".join(v)+ '"'        
+                elif isinstance(v, unicode) or isinstance(v, str)  :
+                    xml += ' ' + key + '="'+v+ '"'        
+                else:
+                    xml += ' ' + key + '="'+str(v)+ '"'        
         if self.value:
             xml += ' value="'+unicode(self.value) + '"'
         if self.error:

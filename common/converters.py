@@ -33,9 +33,9 @@ class AbstractConverter(object):
             raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + metadata.__class__.__name__ + "!")
         return False #Return True on success, False on failure
         
-    def convertforoutput(self,sourcefile, targetfilepath):
+    def convertforoutput(self,outputfile):
         """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Sourcefile is a CLAMOutputFile instance."""    
-        assert isinstance(metadata, CLAMMetaData) #metadata of the destination file (file to be generated here)        
+        assert isinstance(outputfile, CLAMMetaData) #metadata of the destination file (file to be generated here)        
         if not metadata.__class__ in self.acceptfrom:
             raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + metadata.__class__.__name__ + "!")
         return [] #Return converted contents (must be an iterable) or raise an exception on error
@@ -78,12 +78,12 @@ class CharEncodingConverter(AbstractConverter):
         os.unlink(filepath + '.convertsource')
         
         
-    def convertforoutput(self,sourcefile):
-        """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Sourcefile is a CLAMOutputFile instance."""    
+    def convertforoutput(self,outputfile):
+        """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Outputfile is a CLAMOutputFile instance."""    
         super(EncodingConvertor,self).__init_( **kwargs)
         
         web.header('Content-Type', 'text/plain; charset=' + self.charset)
-        for line in sourcefile:
+        for line in outputfile:
             yield line.encode(self.charset)
         
         
