@@ -9,7 +9,24 @@
     </table>
 </xsl:template>
 
-<xsl:template match="BooleanParameter"> <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
+
+<xsl:template match="StaticParameter|staticparameter">  <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
+    <tr>
+    <xsl:if test="@error"> 
+         <xsl:attribute name="class">error</xsl:attribute>
+    </xsl:if>
+    <th class="parameter">
+    <xsl:value-of select="@name"/>
+    <div class="description"><xsl:value-of select="@description"/></div>
+    <xsl:if test="@error"> 
+         <div class="error"><xsl:value-of select="@error"/></div>
+    </xsl:if>
+    </th>
+    <td><xsl:value-of select="@value"/></td>
+    </tr>
+</xsl:template>
+
+<xsl:template match="BooleanParameter|booleanparameter">
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
