@@ -61,12 +61,12 @@ class CLAMFile:
     def attachviewers(self, template):
         assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
         for viewer in template.viewers:
-            #TODO
+            raise NotImplementedError #TODO: Implement attaching viewers!!
             
     def attachconverters(self, template):
         assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
         for converter in template.converters:
-            #TODO
+            raise NotImplementedError #TODO: Implement attaching convertors!!
                 
     def metafilename(self):
             """Returns the filename for the meta file (not full path). Only used for local files."""
@@ -657,7 +657,7 @@ class CLAMMetaData(object):
             xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
         else:
             xml = ""
-        xml += indent + "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
+        xml += indent + "<CLAMMetaData xmlns=\"http://ilk.uvt.nl/clam\" format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
              xml += " mimetype=\""+self.mimetype+"\""
         if self.schema:
@@ -773,11 +773,13 @@ class InputTemplate(object):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
 
         for arg in args:
-            if isinstance(arg, clam.common.parameters.AbstractParameter)
+            if isinstance(arg, clam.common.parameters.AbstractParameter):
                 self.parameters.append(arg)
-            elif isinstance(
+            elif isinstance(arg, clam.common.converters.AbstractConverter):
                 self.converters.append(arg)
-            elif:
+            elif isinstance(arg, clam.common.viewers.AbstractViewer):
+                self.viewers.append(arg)
+            else:
                 raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting instance derived from AbstractParameter.")
 
 
@@ -1073,7 +1075,7 @@ class OutputTemplate(object):
                 self.metafields.append(arg)
             elif isinstance(arg, clam.common.converters.AbstractConverter):
                 self.converters.append(arg)
-            elif isinstance(arg, clam.common.viewers.AbstractViewer:
+            elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
             else:
                 raise ValueError("Unexpected argument for OutputTemplate " + id + ", expecting MetaField, ParameterCondition, Viewer or Converter")
