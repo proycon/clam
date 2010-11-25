@@ -71,11 +71,15 @@ class CharEncodingConverter(AbstractConverter):
             ftarget = codecs.open(filepath,'w',metadata['encoding'])
             for line in fsource:
                 ftarget.write(line + "\n")
+            success = True
         except:
             ftarget.close()
             fsource.fclose()
-        
-        os.unlink(filepath + '.convertsource')
+            success = False
+        finally:
+            os.unlink(filepath + '.convertsource')
+            
+        return success 
         
         
     def convertforoutput(self,outputfile):

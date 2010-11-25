@@ -928,6 +928,9 @@ class InputFileHandler(object):
             else:
                 raise web.webapi.Forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
             
+            
+        if 'converter' in postdata and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
+                raise web.webapi.Forbidden("Invalid converter specified: " + postdata['converter']) #403
 
         #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
@@ -1008,6 +1011,9 @@ class InputFileHandler(object):
             
         printdebug('(File transfer completed)')
         
+        
+            
+        
         #Create a file object
         file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
         
@@ -1028,26 +1034,41 @@ class InputFileHandler(object):
         if not validmeta:    
             output += "<metadataerror />" #This usually indicates an error in service configuration!
         else:                    
+            #=========== Convert the uploaded file (if requested) ==============
+            conversionerror = False
+            if 'converter' in postdata and postdata['converter']:
+                for c in inputtemplate.converters:
+                    if c.id == postdata['converter']:
+                        converter = c
+                        break
+                    if converter: #(should always be found, error already provided earlier if not)
+                        success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                        if not success:
+                            conversionerror = True
+                            output += "<conversionerror />" 
+            
+        
             #====================== Validate the file itself ====================
-            valid = file.validate()        
-            
-            if valid:                       
-                output += "<valid>yes</valid>"                
-                                
-                #Great! Everything ok, save metadata
-                metadata.save(Project.path(project) + 'input/' + file.metafilename())
+            if not conversionerror:
+                valid = file.validate()        
                 
-                #And create symbolic link for inputtemplates
-                linkfilename = os.path.dirname(filename) 
-                if linkfilename: linkfilename += '/'
-                linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
-                os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
-            else:
-                #Too bad, everything worked out but the file itself doesn't validate.
-                output += "<valid>no</valid>"
-            
-                #remove upload
-                os.unlink(Project.path(project) + 'input/' + filename)
+                if valid:                       
+                    output += "<valid>yes</valid>"                
+                                    
+                    #Great! Everything ok, save metadata
+                    metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                    
+                    #And create symbolic link for inputtemplates
+                    linkfilename = os.path.dirname(filename) 
+                    if linkfilename: linkfilename += '/'
+                    linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
+                    os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
+                else:
+                    #Too bad, everything worked out but the file itself doesn't validate.
+                    output += "<valid>no</valid>"
+                
+                    #remove upload
+                    os.unlink(Project.path(project) + 'input/' + filename)
         
         
         output += "</upload>\n"       

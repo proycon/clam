@@ -220,6 +220,7 @@ function processuploadresponse(response) {
         var children = $(this).children();
         var inputtemplate = $(this).attr('inputtemplate');
         var metadataerror = false;
+        var conversionerror = false;
         var parametererrors = false;
         var valid = false;
         for (var i = 0; i < children.length; i++) {
@@ -231,6 +232,8 @@ function processuploadresponse(response) {
                 }
             } else if ($(children[i]).is('metadataerror')) { //see if there is no metadata error
                 metadataerror = true;
+            } else if ($(children[i]).is('conversionerror')) { //see if there is no conversion error
+                conversionerror = true;
             } else if ($(children[i]).is('valid')) {
                 if ($(children[i]).text() == "yes") {
                     valid = true;
@@ -261,6 +264,8 @@ function processuploadresponse(response) {
          //TODO: Make errors nicer, instead of alerts, propagate to interface
         } else if (metadataerror) {
             alert("A metadata error occured, contact the service provider");
+        } else if (conversionerror) {
+            alert("The file you uploaded could not be converted with the specified converter");
         } else if (parametererrors) {
             alert("There were parameter errors");
             //TODO: Specify what parameter errors occured
