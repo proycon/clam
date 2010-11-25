@@ -58,15 +58,51 @@ class CLAMFile:
         self.viewers = []
         self.converters = []
                 
-    def attachviewers(self, template):
-        assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
-        for viewer in template.viewers:
-            raise NotImplementedError #TODO: Implement attaching viewers!!
-            
-    def attachconverters(self, template):
-        assert isinstance(template, OutputTemplate) or isinstance(template, InputTemplate) 
-        for converter in template.converters:
-            raise NotImplementedError #TODO: Implement attaching convertors!!
+    def attachviewers(self, profiles):
+        """Attach viewers to file, automatically scan all profiles for outputtemplate or inputtemplate"""
+        if self.metadata:
+            template = None
+            for profile in profiles:
+                if isinstance(self, CLAMInputFile):
+                    for t in profile.input:
+                        if self.metadata.inputtemplate == t.id:
+                            template = t
+                            break
+                elif isinstance(self, CLAMOutputFile) and self.metadata.provenancedata:
+                    for t in profile.outputtemplates():
+                        if self.metadata.provenancedata.outputtemplate == t.id:
+                            template = t
+                            break
+                else:
+                    raise NotImplementedError #Is ok, nothing to implement for now
+                if template:
+                    break
+            if template and template.viewers:
+                for viewer in template.viewers:
+                    self.viewers.append(viewer)
+                    
+    def attachconverters(self, profiles):
+        """Attach viewers to file, automatically scan all profiles for outputtemplate or inputtemplate"""
+        if self.metadata:
+            template = None
+            for profile in profiles:
+                if isinstance(self, CLAMInputFile):
+                    for t in profile.input:
+                        if self.metadata.inputtemplate == t.id:
+                            template = t
+                            break
+                elif isinstance(self, CLAMOutputFile) and self.metadata.provenancedata:
+                    for t in profile.outputtemplates():
+                        if self.metadata.provenancedata.outputtemplate == t.id:
+                            template = t
+                            break
+                else:
+                    raise NotImplementedError #Is ok, nothing to implement for now
+                if template:
+                    break
+            if template and template.converters:
+                for converter in template.converters:
+                    self.converters.append(converter)
                 
     def metafilename(self):
             """Returns the filename for the meta file (not full path). Only used for local files."""
@@ -407,6 +443,18 @@ class Profile(object):
         for inputtemplate in self.input:
             l += inputtemplate.matchingfiles(projectpath)
         return l
+
+    def outputtemplates(self):
+        """Returns all outputtemplates, resolving ParameterConditions to all possibilities"""
+        outputtemplates = []
+        for o in self.output:
+            if not isinstance(o, ParameterCondition):
+                outputtemplates += o.allpossibilities()
+            else:
+                assert isinstance(o, OutputTemplate)
+                outputtemplates.append(o)
+        return outputtemplates
+            
 
     def generate(self, projectpath, parameters, serviceid, servicename,serviceurl):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""

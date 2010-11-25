@@ -644,15 +644,12 @@ class OutputFileHandler(object):
             #this is a request for everything
             for line in self.getarchive(project):
                 yield line
-        elif len(raw) >= 2 and raw[-1].lower() == 'metadata':
-            #this is a request for metadata
-            filename = "/".join(raw[:-1])
-            viewer = 'metadata'
         elif len(raw) >= 2:
-            #this may be a viewer request, check and set viewer=
-            #TODO: Re-implement viewer support!
-            raise NotImplementedError
-            
+            #This MAY be a viewer/metadata request, check:
+            if os.path.isfile(Project.path(project), "/".join(raw[:-1])):
+                filename = "/".join(raw[:-1])
+                viewer = raw[-1].lower()                        
+
         try:
             outputfile = clam.common.data.CLAMOutputFile(Project.path(project), filename)
         except:
@@ -667,8 +664,18 @@ class OutputFileHandler(object):
                 else:
                     raise web.webapi.NotFound("No metadata found!")
             else:
-                #TODO: Re-implement viewer support!
-                raise NotImplementedError                
+                #attach viewer data
+                outputfile.attachviewers(settings.PROFILES)
+                
+                found = False
+                for v in outputfile.viewers:
+                    if v.id == viewer:
+                        found = True
+                if found:                    
+                    for line in viewer.view(outputfile, **web.input()):
+                        yield line
+                else:
+                    raise web.webapi.NotFound("No such viewer: " + viewer)
         else:
             if outputfile.metadata and outputfile.metadata.mimetype:
                 web.header('Content-Type', outputfile.metadata.mimetype)
