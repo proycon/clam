@@ -657,7 +657,7 @@ class CLAMMetaData(object):
             xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
         else:
             xml = ""
-        xml += indent + "<CLAMMetaData xmlns=\"http://ilk.uvt.nl/clam\" format=\"" + self.__class__.__name__ + "\""
+        xml += indent + "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
              xml += " mimetype=\""+self.mimetype+"\""
         if self.schema:

@@ -2,13 +2,13 @@ $def with (version, system_id,system_name, system_description, user, project, ur
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 $if project and user:
-    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
 $elif project:
-    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
 $elif user:
-    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
 $else:
-    <clam xmlns="http://ilk.uvt.nl/clam" xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url">
  <description>$system_description</description>
 $if not project:
         <projects>

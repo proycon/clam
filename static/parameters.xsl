@@ -9,7 +9,7 @@
     </table>
 </xsl:template>
 
-<xsl:template match="BooleanParameter|booleanparameter"> <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
+<xsl:template match="BooleanParameter"> <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
     <tr>
     <xsl:if test="@error"> 
          <xsl:attribute name="class">error</xsl:attribute>
