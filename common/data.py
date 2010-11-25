@@ -59,7 +59,7 @@ class CLAMFile:
         self.converters = []
                 
     def attachviewers(self, profiles):
-        """Attach viewers to file, automatically scan all profiles for outputtemplate or inputtemplate"""
+        """Attach viewers *and converters* to file, automatically scan all profiles for outputtemplate or inputtemplate"""
         if self.metadata:
             template = None
             for profile in profiles:
@@ -80,30 +80,10 @@ class CLAMFile:
             if template and template.viewers:
                 for viewer in template.viewers:
                     self.viewers.append(viewer)
-                    
-    def attachconverters(self, profiles):
-        """Attach viewers to file, automatically scan all profiles for outputtemplate or inputtemplate"""
-        if self.metadata:
-            template = None
-            for profile in profiles:
-                if isinstance(self, CLAMInputFile):
-                    for t in profile.input:
-                        if self.metadata.inputtemplate == t.id:
-                            template = t
-                            break
-                elif isinstance(self, CLAMOutputFile) and self.metadata.provenancedata:
-                    for t in profile.outputtemplates():
-                        if self.metadata.provenancedata.outputtemplate == t.id:
-                            template = t
-                            break
-                else:
-                    raise NotImplementedError #Is ok, nothing to implement for now
-                if template:
-                    break
             if template and template.converters:
                 for converter in template.converters:
                     self.converters.append(converter)
-                
+                    
     def metafilename(self):
             """Returns the filename for the meta file (not full path). Only used for local files."""
             metafilename = os.path.dirname(self.filename) 
