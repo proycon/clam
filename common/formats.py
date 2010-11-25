@@ -41,21 +41,30 @@ class ExampleFormat(CLAMMetaData):
     #NOTE: Never override the constructor with different arguments!
     
     def validate(self):
-        #Add your validation method here, should return True or False
+        """Add your validation method here, should return True or False"""
         return True
         
     def loadinlinemetadata(self):
-        #If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file
+        """If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file"""
         pass
         
     def saveinlinemetadata(self):
-        #If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file
+        """If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file"""
         pass
+        
+    def httpheaders(self):
+        """HTTP headers to output for this format. Yields (key,value) tuples."""
+        yield ("Content-Type", self.mimetype)
            
 
 class PlainTextFormat(CLAMMetaData):
     attributes = {'encoding':True,'language':False }
     mimetype = "text/plain"
+    
+    def httpheaders(self):
+        """HTTP headers to output for this format. Yields (key,value) tuples."""
+        yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
+
                 
 class TadpoleFormat(CLAMMetaData):    
     attributes = {'encoding':True,'language':False }    

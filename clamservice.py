@@ -648,15 +648,15 @@ class OutputFileHandler(object):
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project), "/".join(raw[:-1])):
                 filename = "/".join(raw[:-1])
-                viewer = raw[-1].lower()                        
+                requestid = raw[-1].lower()                        
 
         try:
             outputfile = clam.common.data.CLAMOutputFile(Project.path(project), filename)
         except:
             raise web.webapi.NotFound()
             
-        if viewer:
-            if viewer == 'metadata':
+        if requestid:
+            if requestid == 'metadata':
                 if outputfile.metadata:
                     web.header('Content-Type', 'text/xml')
                     for line in outputfile.metadata.xml().split("\n"):
@@ -664,21 +664,29 @@ class OutputFileHandler(object):
                 else:
                     raise web.webapi.NotFound("No metadata found!")
             else:
-                #attach viewer data
+                #attach viewer data (also attaches converters!
                 outputfile.attachviewers(settings.PROFILES)
                 
-                found = False
+                viewer = None
                 for v in outputfile.viewers:
-                    if v.id == viewer:
-                        found = True
-                if found:                    
+                    if v.id == requestid:
+                        viewer = v
+                if viewer:                    
                     for line in viewer.view(outputfile, **web.input()):
                         yield line
                 else:
-                    raise web.webapi.NotFound("No such viewer: " + viewer)
+                    #Check for converters
+                    for c in outputfile.converters:
+                        if c.id == requestid:
+                            converter = c
+                    if converter:
+                        #TODO: Implement converter
+                    else:
+                        raise web.webapi.NotFound("No such viewer or converter:" + requestid)
         else:
-            if outputfile.metadata and outputfile.metadata.mimetype:
-                web.header('Content-Type', outputfile.metadata.mimetype)
+            if outputfile.metadata:
+                for header, value in outputfile.metadata.httpheaders():
+                    web.header(header, value)
             for line in outputfile:
                 yield line
             
