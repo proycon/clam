@@ -336,7 +336,8 @@ function renderfileparameters(id, target, enableconverters) {
             }
             $(target).html(result);
             if ((enableconverters) && ($(inputtemplate.converters))) {
-                var s = "Automatically convert from: <select name=\"converter\">";
+                var s = "Automatic conversion: <select name=\"converter\">";
+                s += "<option value=\"\">No</option>";
                 for (var i = 0; i < inputtemplate.converters.length; i++) {
                     s += "<option value=\"" + inputtemplate.converters[i].id + "\">" + inputtemplate.converters[i].label + "</option>";
                 }
