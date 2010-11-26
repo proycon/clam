@@ -23,10 +23,10 @@ $(document).ready(function(){
    $(".inputtemplates").html(inputtemplate_options);
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
-   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters'); });
-   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters');});
+   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
+   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters',true);});
    $("#editorinputtemplate").change(function(event){
-        renderfileparameters($('#editorinputtemplate').val(),'#editorparameters');
+        renderfileparameters($('#editorinputtemplate').val(),'#editorparameters',false);
         var inputtemplate = getinputtemplate('#editorinputtemplate');
         if (inputtemplate != null) {
             if (inputtemplate.filename) {
@@ -312,7 +312,7 @@ function validateuploadfilename(filename, inputtemplate_id) {
 
 
 
-function renderfileparameters(id, target) {
+function renderfileparameters(id, target, enableconverters) {
     if (id == "") {
         $(target).html("");
     } else {
@@ -335,6 +335,14 @@ function renderfileparameters(id, target) {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
             $(target).html(result);
+            if ((enableconverters) && ($(inputtemplate.converters))) {
+                var s = "Automatically convert from: <select name=\"converter\">";
+                for (var i = 0; i < inputtemplate.converters.length; i++) {
+                    s += "<option value=\"" + inputtemplate.converters[i].id + "\">" + inputtemplate.converters[i].label + "</option>";
+                }
+                s += "</select><br />";
+                $(target).prepend(s);
+            }
         } else {
             $(target).html("<strong>Error: Selected input template is invalid!</strong>");
         }
