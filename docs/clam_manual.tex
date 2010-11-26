@@ -299,7 +299,7 @@ In addition to input files and the associated metadata parameters, there is anot
 
 The parameters which an NLP application, or rather the wrapper script, can take, are defined in the service configuration. First of all parameters can be subdivided into parameter groups, but these serve only presentational purposes. 
 
-There are seven parameter types available, though custom types can be easily added\footenote{to \texttt{common/parameters.py}}. Each parameter type is a Python class taking the following mandatory arguments:
+There are seven parameter types available, though custom types can be easily added\footnote{to \texttt{common/parameters.py}}. Each parameter type is a Python class taking the following mandatory arguments:
 
 \begin{enumerate}
 \item \textbf{\texttt{id}} -- An id for internal use only.
@@ -335,7 +335,12 @@ All parameters can take the following extra keyword arguments:
 The following example defines a boolean parameter with a parameter flag:
 
 \begin{verbatim}
-BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?',paramflag='-l')
+BooleanParameter(
+  id='createlexicon',
+  name='Create Lexicon',
+  description='Generate a separate overall lexicon?',
+  paramflag='-l'
+)
 \end{verbatim}
 
 Thus if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
@@ -368,7 +373,7 @@ After specifying any such parameters, there are some possible keyword arguments:
 \begin{enumerate}
 \item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, indicates whether this input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
 \item \texttt{multi} -- This is simply the logical inverse of the above, you can whichever you prefer. \texttt{multi=False} is the default if not specified.
-\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{#} character in the filename, which will be replaced by a number in sequence. After all, we can't have multiple files with the very same name.
+\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we can't have multiple files with the very same name.
 \item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
 \end{enumerate}
 
@@ -377,10 +382,15 @@ Take a look at the following example of an input template for plaintext document
 
 \begin{verbatim}
 InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text document",  
-    StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
-    ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
-    extension='.txt',
-    multi=True
+  StaticParameter(
+    id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'
+  ),  
+  ChoiceParameter(
+    id='language',name='Language',description='The language the text is in', 
+    choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+  ),      
+  extension='.txt',
+  multi=True
 )
 \end{verbatim}
 
@@ -397,17 +407,17 @@ To set (or unset!) particular metadata fields you specify so-called ``metafield 
 \item \texttt{SetMetaField(\emph{key},\emph{value})} - Set metafield \emph{key} to the specified value.
 \item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} - If a value is specified: Unset this metafield if it has the specified value. If no value is specified: Unset the metafield regardless of value. This only makes sense if you set \texttt{copymetadata=True}.
 \item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} - Copy metadata from one of the input template's metadata. Here \emph{inputtemplate} is the ID of one of inputtemplates in the profile, and the \emph{key} part is the metadata field to copy. This allows you to combine metadata from multiple input source into your output metadata.
-\item \texttt{ParameterMetaField(\emph{key}, \emph{parameter_id})} - Get the value for this metadata field from a global parameter with the specified ID.
+\item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} - Get the value for this metadata field from a global parameter with the specified ID.
 \end{itemize}
 
 Take a look at the following example for a ficticious automatic translation system, translating to Esperanto.
 
 \begin{verbatim}
-    OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
-        CopyMetaField('encoding','maininput.encoding')
-        SetMetaField('language','eo'),
-        multi=True
-    )
+OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
+    CopyMetaField('encoding','maininput.encoding')
+    SetMetaField('language','eo'),
+    multi=True
+)
 \end{verbatim}
 
 
@@ -418,15 +428,20 @@ Putting it all together, we obtain the following profile definition describing a
 PROFILES = [ 
   Profile( 
     InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
-        StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
-        ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
-        extension='.txt',
-        multi=True
+      StaticParameter(
+       id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'
+      ),  
+      ChoiceParameter(
+       id='language',name='Language',description='The language the text is in', 
+       choices=[('en','English'),('nl','Dutch'),('fr','French')]
+      ),
+      extension='.txt',
+      multi=True
     ), 
     OutputTemplate('translationoutput', PlainTextFormat,"Esperanto translation (Plain-text document)",  
-        CopyMetaField('encoding','maininput.encoding')
-        SetMetaField('language','eo'),
-        multi=True
+      CopyMetaField('encoding','maininput.encoding')
+      SetMetaField('language','eo'),
+      multi=True
     )    
   )
 ]
