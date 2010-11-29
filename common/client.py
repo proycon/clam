@@ -203,7 +203,7 @@ class CLAMClient:
         datagen, headers = multipart_encode(data)
 
         # Create the Request object
-        request = urllib2.Request(self.url + project + '/input/', datagen, headers)
+        request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
         return urllib2.urlopen(request).read()
 
     def addinput(self, project, inputtemplate, contents, **kwargs):
@@ -214,12 +214,39 @@ class CLAMClient:
         contents - The contents for the file to add (string)
         
         Keyword arguments (optional but recommended!):
-            filename - the filename on the server (will be same as sourcefile if not specified)
+            filename - the filename on the server (mandatory!)
             metadata - A metadata object.
             metafile - A metadata file (filename)
             Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
         """ 
+        if not isinstance(inputtemplate, InputTemplate):
+            raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
         
+        if not isinstance(sourcefile, file):
+            sourcefile = open(sourcefile,'r')
+        
+        if 'filename' in kwargs:
+            filename = self.getinputfilename(inputtemplate, kwargs['filename'])
+        else:
+            raise Exception("No filename provided!")
+                    
+        data = {"contents": contents, 'inputtemplate': inputtemplate.id}
+        for key, value in kwargs.items():
+            if key == 'filename':
+                pass #nothing to do
+            elif key == 'metadata':
+                assert isinstance(value, CLAMMetaData)
+                data['metadata'] =  value.xml()
+            elif key == 'metafile':
+                data['metafile'] = open(value,'r')
+            else:
+                data[key] = value
+        
+        datagen, headers = multipart_encode(data)
+
+        # Create the Request object
+        request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
+        return urllib2.urlopen(request).read()        
                
 
     def upload(self,project, inputtemplate, sourcefile, **kwargs):
