@@ -152,8 +152,29 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
+    def addinputfile(self, project, inputtemplate, sourcefile, **kwargs):
+        """Add/upload an input file to the CLAM service.
+        
+        project - the ID of the project you want to add the file to.
+        inputtemplate - The input template you want to use to add this file (contains its ID, string)
+        sourcefile - The file you want to add: either an instance of 'file' or a string containing a filename 
+        
+        Keyword arguments (optional but recommended!):
+            filename - the filename on the server (will be same as sourcefile if not specified)
+            metadata - A metadata object.
+        """
+        
+        if not isinstance(sourcefile, file):
+            sourcefile = open(sourcefile,'r')
+        
+        datagen, headers = multipart_encode({"file": file, 'uploadformat1': format.__class__.__name__})
+
+        # Create the Request object
+        request = urllib2.Request(self.url + project + '/upload/', datagen, headers)
+        return urllib2.urlopen(request).read()
+
     def upload(self, project, file, format):
-        """upload a file (or archive)"""
+        """Alias for addinputfile."""
         #TODO: Adapt for new metadata scheme and httplib2
         # datagen is a generator object that yields the encoded parameters
         datagen, headers = multipart_encode({"file": file, 'uploadformat1': format.__class__.__name__})
