@@ -866,6 +866,7 @@ class InputFileHandler(object):
         
         postdata = web.input(file={})
         inputtemplate = None
+        metadata = None
         
         if 'inputtemplate' in postdata:
             #An input template must always be provided            
@@ -969,7 +970,24 @@ class InputFileHandler(object):
           
         #============================ Generate metadata ========================================
         printdebug('(Generating and validating metadata)')
-        errors, parameters = inputtemplate.validate(postdata, user)
+        if ('metafile' in postdata and (not isinstance(postdata['metafile'], dict) or len(postdata['metafile']) > 0)):
+            #an explicit metadata file was provided, upload it:
+            printlog("Metadata explicitly provided in file, uploading...")          
+            try:
+                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'].file)
+            except:
+                validmeta = False
+            errors, parameters = inputtemplate.validate(metadata, user)
+        elif 'metadata' in postdata and postdata['metadata']:
+            printlog("Metadata explicitly provided in message, uploading...")
+            try:
+                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
+            except:
+                validmeta = False            
+            errors, parameters = inputtemplate.validate(metadata, user)
+        else:
+            errors, parameters = inputtemplate.validate(postdata, user)
+            validmeta = True #will be checked later
         
         
         if not errors:
@@ -1019,17 +1037,24 @@ class InputFileHandler(object):
         
         #============== Generate metadata ==============
 
-        try:
-            #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
-            validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
-            if validmeta:
-                #And we tie it to the CLAMFile object
-                file.metadata = metadata
-                #Add inputtemplate ID to metadata
-                metadata.inputtemplate = inputtemplate.id
-            
-        except ValueError, KeyError:
-            validmeta = False
+        if not metadata: #check if it has not already been set in another stage
+            #for newly generated metadata
+            try:
+                #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+                validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
+                if validmeta:
+                    #And we tie it to the CLAMFile object
+                    file.metadata = metadata
+                    #Add inputtemplate ID to metadata
+                    metadata.inputtemplate = inputtemplate.id
+                
+            except ValueError, KeyError:
+                validmeta = False
+        elif validmeta:
+            #for explicitly uploaded metadata
+            metadata.file = file
+            file.metadata = metadata
+            metadata.inputtemplate = inputtemplate.id
             
         if not validmeta:    
             output += "<metadataerror />" #This usually indicates an error in service configuration!

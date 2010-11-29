@@ -3,7 +3,7 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- CLAM API - Data structures --
+# -- CLAM Data API - Common data structures --
 #       by Maarten van Gompel (proycon)
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
