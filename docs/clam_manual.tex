@@ -21,6 +21,7 @@
 
 
 \begin{document}
+\sffamily
 
 \maketitle
 \tableofcontents
@@ -48,7 +49,7 @@ CLAM comes with a large number of features, the most notable ones are summarised
 \item \textbf{Client and Data API} - \emph{A rich Python API for writing CLAM Clients and system wrappers}
 \item \textbf{Authentication} - \emph{A user-based authentication mechanism through HTTP Digest is provided}
 \item \textbf{Metadata and provenance data} - \emph{There is extensive support for metadata and provenance data}
-\item \textbf{Automatic converters} - \emph{Automatic converters enable conversion from an auxiliary format to the desired input format, and conversion from the produce output format to an auxiliary output format}
+\item \textbf{Automatic converters} - \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
 \item \textbf{Viewers} - \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
 \end{itemize}
 
@@ -334,6 +335,7 @@ All parameters can take the following extra keyword arguments:
 
 The following example defines a boolean parameter with a parameter flag:
 
+{\footnotesize{
 \begin{verbatim}
 BooleanParameter(
   id='createlexicon',
@@ -342,6 +344,7 @@ BooleanParameter(
   paramflag='-l'
 )
 \end{verbatim}
+}}
 
 Thus if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
 
@@ -351,11 +354,13 @@ Multiple profiles may be specified, and all profiles are always assumed to be in
 
 Below an example of the profile specification skeleton. Note that there may be multiple input templates and/or multiple output templates:
 
+{\footnotesize{
 \begin{verbatim}
 PROFILES = [ 
     Profile( InputTemplate(...), OutputTemplate(...) ) 
 ]
 \end{verbatim}
+}}
 
 
 The definition for both \texttt{InputTemplate} takes three mandatory arguments:
@@ -380,10 +385,12 @@ After specifying any such parameters, there are some possible keyword arguments:
 
 Take a look at the following example of an input template for plaintext documents for an automatic translation system:
 
+{\footnotesize{
 \begin{verbatim}
 InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text document",  
   StaticParameter(
-    id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'
+    id='encoding',name='Encoding',description='The character encoding of the file', 
+    value='utf-8'
   ),  
   ChoiceParameter(
     id='language',name='Language',description='The language the text is in', 
@@ -393,6 +400,7 @@ InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text documen
   multi=True
 )
 \end{verbatim}
+}}
 
 
 For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments layed out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source, this other source is the inputtemplate that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particualr file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
@@ -412,6 +420,7 @@ To set (or unset!) particular metadata fields you specify so-called ``metafield 
 
 Take a look at the following example for a ficticious automatic translation system, translating to Esperanto.
 
+{\footnotesize{
 \begin{verbatim}
 OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
     CopyMetaField('encoding','maininput.encoding')
@@ -419,7 +428,7 @@ OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-te
     multi=True
 )
 \end{verbatim}
-
+}}
 
 Putting it all together, we obtain the following profile definition describing a ficticious machine translation system from English, Dutch or French to Esperanto. In which the system accepts and produces UTF-8 encoded plain-text files.
 
@@ -429,7 +438,8 @@ PROFILES = [
   Profile( 
     InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
       StaticParameter(
-       id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'
+       id='encoding',name='Encoding',description='The character encoding of the file', 
+       value='utf-8'
       ),  
       ChoiceParameter(
        id='language',name='Language',description='The language the text is in', 
@@ -438,7 +448,8 @@ PROFILES = [
       extension='.txt',
       multi=True
     ), 
-    OutputTemplate('translationoutput', PlainTextFormat,"Esperanto translation (Plain-text document)",  
+    OutputTemplate('translationoutput', PlainTextFormat,
+      "Esperanto translation (Plain-text document)",  
       CopyMetaField('encoding','maininput.encoding')
       SetMetaField('language','eo'),
       multi=True
@@ -452,16 +463,16 @@ PROFILES = [
 
 Service providers are encouraged to write a wrapper script that acts as the glue between CLAM and the NLP Application(s). CLAM will execute the wrapper script and the wrapper script will invoke the actual NLP Application(s). Using a wrapper script offers more flexibility than letting CLAM directly invoke the NLP Application, and allows the NLP Application itself to be totally independent of CLAM. 
 
-The wrapper script takes the arguments as selected for \texttt{COMMAND} in the service configuration file. There are some important things to take into account:
+The wrapper script takes the arguments as specified in \texttt{COMMAND} in the service configuration file, see Section~\ref{sec:command}. There are some important things to take into account:
 
 \begin{itemize}
-\item All user-controllable input has to be read from the specified input directory. If you do not use the \texttt{clam.xml} data file, then you have to determine the file's format based on its extension. See Section \ref{sec:formats}.
-\item All user-viewable output must be put in the specified output directory. Make sure your system outputs files with an extension CLAM will recognise. See \texttt{\$OUTPUTFORMATS} in Section \ref{sec:formats}.
-\item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. 
+\item All user-provided input has to be read from the specified input directory. A full listing of this input will be provided in the \texttt{clam.xml} data file. If you choose not to use this, but use \texttt{\$PARAMETERS} instead, then you must take care that your application can identify the file-formats by filename, extension or otherwise.
+\item All user-viewable output must be put in the specified output directory. Output files must be generated in accordance with the profiles that describe this generation. 
+\item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. Whilst this is not mandatory, it offers valuable feedback to the user on the state of the system. 
 \item The wrapper script is always started with the current working directory set to the selected project directory.
 \end{itemize}
 
-The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Client API, which handles things such as reading the \texttt{clam.xml} data file.
+The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and make all parameters and input files (with metadata!) directly accessible.
 
 \begin{devnotes}
 CLAM Client API will be further discussed, possibly in next chapter.
@@ -470,7 +481,7 @@ CLAM Client API will be further discussed, possibly in next chapter.
 
 \chapter{Documentation for Service Clients}
 
-Being a RESTful webservice, automated clients can communicate with CLAM. 
+Being a RESTful webservice, automated clients can communicate with CLAM. Appendix~\ref{ap:restspec} gives a complete RESTful specification.
 
 
 \begin{devnotes}
@@ -480,6 +491,7 @@ Yet to be written... %TODO
 
 \appendix
 \chapter{RESTful specification}
+\label{ap:restspec}
 
 This appendix provides a full specification of the RESTful interface to CLAM:
 
