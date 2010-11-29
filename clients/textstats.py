@@ -27,6 +27,7 @@ os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 #Import the CLAM Client API and CLAM Data API and other dependencies
 from clam.common.client import *
 from clam.common.data import *
+from clam.common.formats import *
 import clam.common.status
 
 
@@ -76,10 +77,10 @@ project = "textstatsclient" + str(random.getrandbits(64))
 #Now we call the webservice and create the project
 clamclient.create(project)
 
-
+#get project status and specification
+data = clamclient.get(project)
 
 print "Uploading Files..."
-
 
 #Upload the files (names were passed on the command line) to the webservice, always indicating
 #the format.
@@ -87,7 +88,7 @@ for f in files:
     print "\tUploading " + f + " to webservice..."
     #This invokes the actual upload
     #TODO: Adapt
-    clamclient.upload(project, open(f), PlainTextFormat('utf-8') )
+    clamclient.addinputfile(project, data.inputtemplate('maininput'), f, language='en')
 
 
 

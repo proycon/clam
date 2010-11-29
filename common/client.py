@@ -16,6 +16,7 @@
 import codecs
 import os.path
 import httplib2
+import urllib2
 from urllib import urlencode
 
 
@@ -27,9 +28,9 @@ from clam.external.poster.streaminghttp import register_openers
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
-from clam.common.data import CLAMData, CLAMInputFile, CLAMOutputFile
+from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate
 
-VERSION = 0.3
+VERSION = 0.5
 
 
 # Register poster's streaming http handlers with urllib2
@@ -133,7 +134,7 @@ class CLAMClient:
         return self.request(project + '/', 'POST', urlencode(parameters))
 
 
-    def delete(self,project)
+    def delete(self,project):
         """aborts AND deletes a project"""
         return self.request(project + '/', 'DELETE')
 
@@ -152,34 +153,76 @@ class CLAMClient:
             targetfile.write(chunk)
 
 
+    def getinputfilename(self, inputtemplate, filename):        
+        """Determine the final filename for an input file given an inputtemplate and a given filename"""
+        if inputtemplate.filename:
+            filename = inputtemplate.filename
+        elif inputtemplate.extension: 
+            if filename[-len(inputtemplate.extension) - 1:].lower() != inputtemplate.extension.lower():
+                filename += inputtemplate.extension        
+                
+        return filename
+
+
     def addinputfile(self, project, inputtemplate, sourcefile, **kwargs):
         """Add/upload an input file to the CLAM service.
         
         project - the ID of the project you want to add the file to.
-        inputtemplate - The input template you want to use to add this file (contains its ID, string)
+        inputtemplate - The input template you want to use to add this file (InputTemplate instance)
         sourcefile - The file you want to add: either an instance of 'file' or a string containing a filename 
         
         Keyword arguments (optional but recommended!):
             filename - the filename on the server (will be same as sourcefile if not specified)
             metadata - A metadata object.
+            metafile - A metadata file (filename)
+            Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
         """
+        if not isinstance(inputtemplate, InputTemplate):
+            raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
         
         if not isinstance(sourcefile, file):
             sourcefile = open(sourcefile,'r')
         
-        datagen, headers = multipart_encode({"file": file, 'uploadformat1': format.__class__.__name__})
+        if 'filename' in kwargs:
+            filename = self.getinputfilename(inputtemplate, kwargs['filename'])
+        else:
+            filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
+                    
+        data = {"file": sourcefile, 'inputtemplate': inputtemplate.id}
+        for key, value in kwargs.items():
+            if key == 'filename':
+                pass #nothing to do
+            elif key == 'metadata':
+                assert isinstance(value, CLAMMetaData)
+                data['metadata'] =  value.xml()
+            elif key == 'metafile':
+                data['metafile'] = open(value,'r')
+            else:
+                data[key] = value
+        
+        datagen, headers = multipart_encode(data)
 
         # Create the Request object
-        request = urllib2.Request(self.url + project + '/upload/', datagen, headers)
+        request = urllib2.Request(self.url + project + '/input/', datagen, headers)
         return urllib2.urlopen(request).read()
 
-    def upload(self, project, file, format):
+    def addinput(self, project, inputtemplate, contents, **kwargs):
+        """Add an input file to the CLAM service. Explictly providing the contents as a string
+                
+        project - the ID of the project you want to add the file to.
+        inputtemplate - The input template you want to use to add this file (InputTemplate instance)
+        contents - The contents for the file to add (string)
+        
+        Keyword arguments (optional but recommended!):
+            filename - the filename on the server (will be same as sourcefile if not specified)
+            metadata - A metadata object.
+            metafile - A metadata file (filename)
+            Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
+        """ 
+        
+               
+
+    def upload(self,project, inputtemplate, sourcefile, **kwargs):
         """Alias for addinputfile."""
-        #TODO: Adapt for new metadata scheme and httplib2
-        # datagen is a generator object that yields the encoded parameters
-        datagen, headers = multipart_encode({"file": file, 'uploadformat1': format.__class__.__name__})
-
-        # Create the Request object
-        request = urllib2.Request(self.url + project + '/upload/', datagen, headers)
-        return urllib2.urlopen(request).read()
+        return self.addinputfile(project, inputtemplate,sourcefile, **kwargs)
 

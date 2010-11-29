@@ -355,6 +355,22 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                     else:
                         paramdict[parameter.id] = parameter.value
         return paramdict
+        
+        
+    def inputtemplates(self):
+        """Return all input templates as a list"""
+        l = []
+        for profile in self.profiles:
+            l += profile.input
+        return l
+        
+    def inputtemplate(self,id):
+        """Return the inputtemplate with the specified ID"""
+        for profile in self.profiles:
+            for inputtemplate in profile.input:
+                if inputtemplate.id == id:
+                    return inputtemplate            
+        raise KeyError
 
 
 def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
@@ -622,10 +638,21 @@ class CLAMMetaData(object):
     
 
     def __init__(self, file, **kwargs):
-        assert isinstance(file, CLAMFile) or file is None
 
-        self.file = file #will be used for reading inline metadata, can be None if no file is associated
 
+        if isinstance(file, CLAMFile):
+            self.file = file
+        elif file is None:
+            self.file = None
+        else:
+            raise Exception("Invalid file argument for CLAMMetaData")
+            
+            
+
+        self.file = file #will be used for reading inline metadata, can be None if no file is associated        
+        if self.file:
+            self.file.metadata = self
+        
         self.provenance = None
 
         self.inputtemplate = None
