@@ -8,6 +8,8 @@
 \title{CLAM Documentation \\ \small version 0.5-pre-alpha}
 \author{Maarten van Gompel \\ Induction of Linguistic Knowledge Research Group \\ Tilburg University }
 
+\parindent=0pt %no paragraph indentation
+\parskip=12pt %paragraph skip
 
 \newenvironment{devnotes}
 {\newpage
@@ -237,13 +239,13 @@ The hostname and port of the webserver can be configured in the service configur
 
 When CLAM runs in an existing webserver without its own virtual host, it is often configured at a different URL rather than the webserver root. In this case the value of \texttt{URLPREFIX} should be configured accordingly.
 
-\subsection{Users}
+\subsection{User Authentication}
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. 
 
 A list of users can be defined in \texttt{USERS} in the service configuration file, this is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, the system ID, and the password. Furthermore there is a setting \texttt{PROJECTS\_PUBLIC}, which can be set to \texttt{True} or \texttt{False}, in the former case all projects will be open to all authenticated users, in the latter case projects will only be accessible by their owners.
 
-User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons.
+User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
 
 The ability to view and set parameters can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
 
@@ -252,7 +254,7 @@ Eventually, an option will probably be implemented to read users from a database
 \end{devnotes}
 
 
-\subsection{Command}
+\subsection{Command Definition}
 \label{sec:command}
 
 Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported, in addition there are some special variables you can use that will be automatically set by CLAM. 
@@ -272,11 +274,11 @@ Make sure the actual command is an absolute path or the executable is in the \te
 
 \subsection{Paradigm: Metadata, Profiles \& Parameters}
 
-In order to explain how to build service configuration files for the tools you want to make into webservices, we first need to clarify the paradigm CLAM uses. We start with a word about metadata. Metadata is data \emph{about} your data, i.e. data about your input and output files. Take the example of a plain textfile, metadata for such a file can be for example the character encoding the text is in, and the language the text is written in. Such data is not necessarily encoded within the file itself, such as in the example of plain text files. CLAM therefore builds a metadata file for each input and output file that contains all of its metadata. These are stored in the CLAM Metadata XML format, a very simple and straightforward format\footnote{It is in essence a simple XML representation of key, value pairs. These metadata files are named \texttt{.filename.METADATA}, in which filename is the name of the file it describes and reside in the very same input/output directory.}
+In order to explain how to build service configuration files for the tools you want to make into webservices, we first need to clarify the paradigm CLAM uses. We shall start with a word about metadata. Metadata is data \emph{about} your data, i.e. data about your input and output files. Take the example of a plain text file, metadata for such a file can be for example the character encoding the text is in, and the language the text is written in. Such data is not necessarily encoded within the file itself, as is also not the case in the example of plain text files. CLAM therefore builds external metadata files for each input and output file, these files contain all metadata of the files they describe. These are stored in the CLAM Metadata XML format, a very simple and straightforward format\footnote{It is in essence a simple XML representation of key, value pairs. These metadata files are named \texttt{.filename.METADATA}, in which filename is the name of the file it describes and reside in the very same input/output directory.} Metadata simply consists out of metadata fields and associated values.
 
-Metadata in CLAM is tied to a particular format (such as \texttt{PlainTextFormat}), a format defines what kind of metadata it absolutely needs, but usually still offers a lot of freedom for extra metadata fields to the service provider, or even to the end-user. 
+Metadata in CLAM is tied to a particular file format (such as plain text format, CSV format, etc..), a format defines what kind of metadata it absolutely needs, but usually still offers a lot of freedom for extra metadata fields to the service provider, or even to the end-user. 
 
-When a user or automated client uploads a new input file, metadata is often not available yet. The user or client is therefore asked to provide this, in the webapplication a nice form is presented with all possible metadata parameters. And the system will take care of generating the metadata files according to the choices made. If the service provider does not want to make use of any metadata description at all, then that is of course an option too, though this may come at the cost of your service not providing enough information to interact with others.
+When a user or automated client uploads a new input file, metadata is often not available yet. The user or client is therefore asked to provide this, in the webapplication a nice form is presented with all possible metadata parameters. And the system will take care of generating the metadata files according to the choices made. If the service provider does not want to make use of any metadata description at all, then that is of course an option as well, though this may come at the cost of your service not providing enough information to interact with others.
 
 In a webservice it is important to precisely define what kind of input goes in, and what kind of output goes out, this results in a deterministic and thus predictable webservice. It is also necessary to define exactly how the output metadata is based on the input metadata, if that's the case. These definitions are made in so-called \emph{profiles}. A profile defines \emph{input templates} and \emph{output templates}. The input templates and output template can be seen as ``slots'' for certain filetypes and metadata, an analogy from childhood memory may facilitate understanding this, as shown and explained in Figure~\ref{fig:blokkendoos}:
 
@@ -290,9 +292,9 @@ In a webservice it is important to precisely define what kind of input goes in, 
 
 A profile is thus a precise specification of what output files will be produced given what input files,  it specifies exactly how the metadata for the outputfiles can be constructed given the metadata of the inputfiles. The generation of metadata for output files is fully handled by CLAM, outside of your wrapper script and NLP application.
 
-Input templates are specified in part as a collection of parameters for which the user/client is expected to choose a value in the predetermined range. Output templates are specified as a collection of ``metafields'', which simply assign a value, unassign a value, or copy a value from an inputtemplate or from a global parameter. All this will be demonstrated in more detail later. Input templates and output templates always have a label describing their function. Upon input, this provides the means for the user to recognise and select the desired input template, and upon output, it allows the user to easily recognise the type of output file.
+Input templates are specified in part as a collection of parameters for which the user/client is expected to choose a value in the predetermined range. Output templates are specified as a collection of ``metafields'', which simply assign a value, unassign a value, or copy a value from an inputtemplate or from a global parameter. Through these templates, the actual metadata can be constructed. Input templates and output templates always have a label describing their function. Upon input, this provides the means for the user to recognise and select the desired input template, and upon output, it allows the user to easily recognise the type of output file. How all this is specified exactly will be demonstrated in detail later.
 
-In addition to input files and the associated metadata parameters, there is another source of data input: global parameters. A webservice may define a set of parameters that it takes. We will start by elaborating this in the next section.
+In addition to input files and the associated metadata parameters, there is another source of data input: global parameters. A webservice may define a set of parameters that it takes. We will start by explaining this part in the next section.
 
 
 \subsection{Parameter Specification}
@@ -307,7 +309,6 @@ There are seven parameter types available, though custom types can be easily add
 \item \textbf{\texttt{name}} -- The name of this parameter, this will be shown to the user in the interface.
 \item \textbf{\texttt{description}} -- A description of this parameter, meant for the end-user.
 \end{enumerate}
-
 
 The seven parameter types are:
 
@@ -458,6 +459,84 @@ PROFILES = [
 ]
 \end{verbatim}
 }}
+
+
+
+\subsection{Parameter Conditions}
+
+It's not always possible to define all output templates straight away, sometimes output templates are dependent on certain global parameters. For example, say you have a global parameter that toggles the generation of a lexicon: you then want to only include the output template that describes this lexicon, if the parameter is enabled. CLAM offers a solution for such situations using the \texttt{ParameterCondition} directive.
+
+Assume you have the following \emph{global} parameter:
+
+\begin{verbatim}
+BooleanParameter(
+  id='createlexicon',name='Create Lexicon',description='Create lexicon files', 
+)
+\end{verbatim}
+
+We can then turn an output template into an output template conditional on this parameter using the following construction:
+
+\begin{verbatim}
+  ParameterCondition(createlexicon=True, 
+    then=OutputTemplate('lexiconoutput', PlainTextFormat,
+      "Lexicon (Plain-text document)",  
+      unique=True
+    ) 
+  )
+\end{verbatim}
+
+The first argument of ParameterCondition is the condition, here you use the ID of the parameter and the value you want to check against. The above example illustrates an equality comparison, but other comparisons are also possible:
+
+\begin{itemize}
+\item \texttt{\emph{ID}$=$\emph{value}} - Equality; matches if the global parameter with the specified ID has the specified value.
+\item \texttt{\emph{ID}\_equals$=$\emph{value}} - Same as above, the above is an alias.
+\item \texttt{\emph{ID}\_notequals$=$\emph{value}} - The reverse of the above, matches if the value is \emph{not equal}
+\item \texttt{\emph{ID}\_lessthan$=$\emph{number}} - Matches if the parameter with the specified ID is less than then specified number
+\item \texttt{\emph{ID}\_greaterthan$=$\emph{number}} - Matches if the parameter with the specified ID is greater than then specified number
+\item \texttt{\emph{ID}\_lessequalthan$=$\emph{number}} - Matches if the parameter with the specified ID is equal or less than then specified number
+\item \texttt{\emph{ID}\_greaterequalthan$=$\emph{number}} - Matches if the parameter with the specified ID is equal or greater than then specified number
+\end{itemize}
+
+After the condition you specify \texttt{then=} and optionally also \texttt{else=}, here you specify an \texttt{OutputTemplate} or yet another \texttt{ParameterCondition}! They can be nested at will.
+
+Parameter conditions can not only be used around OutputTemplate, but they can also be used around metafield actors, inside the output template specification. So you can make metadata fields conditional on global parameters.
+
+%TODO: Provide example?
+
+\subsection{Converters}
+
+Users do not always have their files in the format you desire as input, and asking clueless users to convert their data may be problematic. Similarly, users may not always like the output format you offer. CLAM therefore introduces a converter framework that can do two things:
+
+\begin{enumerate}
+\item Convert input files from auxiliary formats to your desired format, upon upload
+\item Convert output files from your output format to secondary formats
+\end{enumerate}
+
+A converter, using the above-mentioned class names, can be included in input templates (for situation 1), and in output templates (for situation 2). Include them directly after any Parameter fields or Metafield actors.
+
+It is important to note that the converters convert only the files themselves and not the associated metadata. This implies that these converters are intended primarily for end-users and not as much for automated clients.
+
+For most purposes, you will need to write your own converters. These are to be implemented in \texttt{clam/common/converters.py}. Some converters however will be provided out of the box, note that the actual conversion will be performed by 3rd party software in most cases.
+
+\begin{itemize}
+\item \texttt{MSWordConverter} - Convert MS Word files to plain text
+\item \texttt{PDFConverter} - Convert PDF to plain text.
+\item \texttt{CharEncodingConverter} - Convert between plain text files in different character encodings.
+\end{itemize}
+
+Note that specific converters take specific parameters, consult the API reference for details.
+
+%TODO: Include examples?
+
+\subsection{Viewers}
+
+Viewers are intended for human-end users only, and enable visualisation of a particular file format. CLAM offers a viewer framework that enables you to write viewers for your format. Viewers may either be written within the CLAM framework, using Python, but they can also be external (non-CLAM) webservices, hosted elsewhere.
+
+Viewers can be included in output templates. Include them directly after any metafield actors.
+
+\begin{devnotes}
+To be completed still...
+\end{devnotes}
 
 \section{Wrapper script}
 

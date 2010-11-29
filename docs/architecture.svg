@@ -310,7 +310,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -326,7 +326,10 @@
        x="46.453552"
        y="165.43477"
        rx="13.939467"
-       ry="6.7186217" />
+       ry="6.7186217"
+       inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
        style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2834-83"
