@@ -1035,17 +1035,18 @@ class InputFileHandler(object):
             output += "<metadataerror />" #This usually indicates an error in service configuration!
         else:                    
             #=========== Convert the uploaded file (if requested) ==============
+            
             conversionerror = False
             if 'converter' in postdata and postdata['converter']:
                 for c in inputtemplate.converters:
                     if c.id == postdata['converter']:
                         converter = c
                         break
-                    if converter: #(should always be found, error already provided earlier if not)
-                        success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
-                        if not success:
-                            conversionerror = True
-                            output += "<conversionerror />" 
+                if converter: #(should always be found, error already provided earlier if not)
+                    success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                    if not success:
+                        conversionerror = True
+                        output += "<conversionerror />" 
             
         
             #====================== Validate the file itself ====================
