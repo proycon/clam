@@ -125,7 +125,7 @@ In order to run CLAM in Apache, you have to install and configure several files.
  </Directory>
 \end{verbatim}
 
-The WSGIDaemonProcess directive goes on online, but was wrapped here for presentational purpouses. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. 
+The WSGIDaemonProcess directive goes on online, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. 
 
 \item Restart Apache
 \end{enumerate}
@@ -193,7 +193,7 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
 
 \subsection{Using CLAM with other webservers}
 
-You are not limited to using either Apache with WSGI or nginx with FastCGI, multiple options are possible, despite the fact we tested only these two. It should also be possible to get CLAM working on other unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
+You are not limited to using either Apache with WSGI or nginx with FastCGI, multiple options are possible, despite the fact we tested only these two. It should also be possible to get CLAM working on other Unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 \section{Architecture}
 
@@ -245,7 +245,7 @@ A list of users can be defined in \texttt{USERS} in the service configuration fi
 
 User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons.
 
-The ability to view and set parameteres can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
+The ability to view and set parameters can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
 
 \begin{devnotes}
 Eventually, an option will probably be implemented to read users from a database. HTTPS support may also be added at a later stage.
@@ -260,7 +260,7 @@ Central in the configuration file is the command that CLAM will execute. This co
 \begin{itemize}
 \item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
 \item \texttt{\$OUTPUTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
-\item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a unix timestamp (a long number), and the status message itself (a UTF-8 string).
+\item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
 \item \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
 \item \texttt{\$DATAFILE} - This is the absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} - The username of the logged in user.
@@ -318,7 +318,7 @@ The seven parameter types are:
 \item \textbf{\texttt{StringParameter}} - A parameter taking a string value. Use \texttt{maxlength=} if you want to restrict the maximum length.
 \item \textbf{\texttt{TextParameter}} - A parameter taking multiple lines of text. 
 \item \textbf{\texttt{ChoiceParameter}} - A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice. If you want the user to be able to select multiple parameters, then you can set the option \texttt{multi=True}. The IDs will be concatenated together in the parameter value, a delimiter (a comma by default) can be specified with \texttt{delimiter=}. If you do not use \texttt{multi=True}, but you do want all options to be visible in one view, then you can set the option \texttt{showall=True}.
-\item \textbf{\texttt{StaticParameter}} - A parameter with a fixed inmutable value. This may seem a bit of a contradiction), but it serves a purpose in forcing a parameter or metadata parameter to have a specific non-variable value.
+\item \textbf{\texttt{StaticParameter}} - A parameter with a fixed immutable value. This may seem a bit of a contradiction), but it serves a purpose in forcing a parameter or metadata parameter to have a specific non-variable value.
 \end{itemize}
 
 All parameters can take the following extra keyword arguments:
@@ -350,7 +350,7 @@ Thus if this parameter is set, the invoked command will have \texttt{\$PARAMETER
 
 \subsection{Profile specification}
 
-Multiple profiles may be specified, and all profiles are always assumed to be independent of eachother. Things that are dependent belong together in one profile, as each profile describes how which input files are transformed into which output files. For each profile, you need to define input templates and output templates. All matching profiles are assumed to be delivered as promised. A profile matches if all input files according to the input templates of that profile are provided and if it generates output. If no input templates have been defined at all for a profile, then it will match as well, to allow for the option of producing output files that are not dependent on input files. It's okay if a profile doesn't match, but if none of the profiles match, the system will produce an error, as it can not perform any action. 
+Multiple profiles may be specified, and all profiles are always assumed to be independent of each other. Things that are dependent belong together in one profile, as each profile describes how which input files are transformed into which output files. For each profile, you need to define input templates and output templates. All matching profiles are assumed to be delivered as promised. A profile matches if all input files according to the input templates of that profile are provided and if it generates output. If no input templates have been defined at all for a profile, then it will match as well, to allow for the option of producing output files that are not dependent on input files. It's okay if a profile doesn't match, but if none of the profiles match, the system will produce an error, as it can not perform any action. 
 
 Below an example of the profile specification skeleton. Note that there may be multiple input templates and/or multiple output templates:
 
@@ -379,7 +379,7 @@ After specifying any such parameters, there are some possible keyword arguments:
 \item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, indicates whether this input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
 \item \texttt{multi} -- This is simply the logical inverse of the above, you can whichever you prefer. \texttt{multi=False} is the default if not specified.
 \item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we can't have multiple files with the very same name.
-\item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
+\item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
 \end{enumerate}
 
 
@@ -403,7 +403,7 @@ InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text documen
 }}
 
 
-For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments layed out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source, this other source is the inputtemplate that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particualr file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
+For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments laid out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source, this other source is the inputtemplate that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particular file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
 
 As there may be multiple input templates, it is not always clear what input template is the parent. The system will automatically select the \emph{first} defined inputtemplate with the same value for unique/multi the output template has. If this is not what you want, you can explicitly set a parent using the \texttt{parent} keyword, which takes the value of the input template's ID.
 
@@ -430,7 +430,7 @@ OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-te
 \end{verbatim}
 }}
 
-Putting it all together, we obtain the following profile definition describing a ficticious machine translation system from English, Dutch or French to Esperanto. In which the system accepts and produces UTF-8 encoded plain-text files.
+Putting it all together, we obtain the following profile definition describing a fictitious machine translation system from English, Dutch or French to Esperanto. In which the system accepts and produces UTF-8 encoded plain-text files.
 
 {\footnotesize{
 \begin{verbatim}
@@ -473,6 +473,8 @@ The wrapper script takes the arguments as specified in \texttt{COMMAND} in the s
 \end{itemize}
 
 The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and make all parameters and input files (with metadata!) directly accessible.
+
+\subsection{CLAM Data API}
 
 \begin{devnotes}
 CLAM Client API will be further discussed, possibly in next chapter.
@@ -532,7 +534,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{POST} \\
 \textbf{Querystring} & \texttt{usecorpus$=[corpus_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service), the parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
-\textbf{Description} & This starts running a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string, the input files are provided in seperate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely can't invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
+\textbf{Description} & This starts running a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string, the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely can't invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
@@ -568,7 +570,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{POST} \\
 \textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and inputtemplate), the parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Reponse is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as paramater to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
+\textbf{Description} & This method adds a new input file. Response is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as parameter to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
 
