@@ -78,7 +78,9 @@ project = "textstatsclient" + str(random.getrandbits(64))
 clamclient.create(project)
 
 #get project status and specification
+
 data = clamclient.get(project)
+
 
 print "Uploading Files..."
 
@@ -88,7 +90,7 @@ for f in files:
     print "\tUploading " + f + " to webservice..."
     #This invokes the actual upload
     #TODO: Adapt
-    clamclient.addinputfile(project, data.inputtemplate('maininput'), f, language='en')
+    clamclient.addinputfile(project, data.inputtemplate('textinput'), f, language='en')
 
 
 
