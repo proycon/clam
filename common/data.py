@@ -68,9 +68,9 @@ class CLAMFile:
                         if self.metadata.inputtemplate == t.id:
                             template = t
                             break
-                elif isinstance(self, CLAMOutputFile) and self.metadata.provenancedata:
+                elif isinstance(self, CLAMOutputFile) and self.metadata and self.metadata.provenance:
                     for t in profile.outputtemplates():
-                        if self.metadata.provenancedata.outputtemplate == t.id:
+                        if self.metadata.provenance.outputtemplate_id == t.id:
                             template = t
                             break
                 else:
@@ -444,7 +444,7 @@ class Profile(object):
         """Returns all outputtemplates, resolving ParameterConditions to all possibilities"""
         outputtemplates = []
         for o in self.output:
-            if not isinstance(o, ParameterCondition):
+            if isinstance(o, ParameterCondition):
                 outputtemplates += o.allpossibilities()
             else:
                 assert isinstance(o, OutputTemplate)
