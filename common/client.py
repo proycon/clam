@@ -16,7 +16,6 @@
 import codecs
 import os.path
 import httplib2
-from bolacha import Bolacha
 import urllib2
 from urllib import urlencode
 
