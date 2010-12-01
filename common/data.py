@@ -370,7 +370,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
             for inputtemplate in profile.input:
                 if inputtemplate.id == id:
                     return inputtemplate            
-        raise KeyError
+        raise Exception("No such input template!")
 
 
 def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):

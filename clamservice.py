@@ -927,7 +927,7 @@ class InputFileHandler(object):
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                 filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
-                raise web.webapi.Forbidden("Specified filename does not have the extention dictated by the inputtemplate ("+inputtemplate.textension+")") #403
+                raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
             
             
         if 'converter' in postdata and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            

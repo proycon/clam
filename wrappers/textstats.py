@@ -169,6 +169,3 @@ if __name__ == "__main__":
     clam.common.status.write(statusfile, "Done",100) # status update
 
     sys.exit(0) #non-zero exit codes indicate an error and will be picked up by CLAM as such!
-
-    
-

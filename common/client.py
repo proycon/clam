@@ -16,6 +16,7 @@
 import codecs
 import os.path
 import httplib2
+from bolacha import Bolacha
 import urllib2
 from urllib import urlencode
 
@@ -44,28 +45,28 @@ class BadRequest(Exception):
             return "Bad Request"
 
 class NotFound(Exception):
-         def __init__(self):
-            pass
+         def __init__(self, msg=""):
+            self.msg = msg
          def __str__(self):
-            return "Not Found"
+            return "Not Found: " +  msg
 
 class PermissionDenied(Exception):
-         def __init__(self):
-            pass
-         def __str__(self):
-            return "Permission Denied"
+         def __init__(self, msg = ""):
+            self.msg = msg
+         def __str__(self, msg):
+            return "Permission Denied: " + msg
 
 class ServerError(Exception):
-         def __init__(self):
-            pass
+         def __init__(self, msg = ""):
+            self.msg = msg
          def __str__(self):
-            return "Server Error"
+            return "Server Error: " + msg
 
 class AuthRequired(Exception):
-         def __init__(self):
-            pass
+         def __init__(self, msg = ""):
+            self.msg = msg
          def __str__(self):
-            return "Authorization Required"
+            return "Authorization Required: " + msg
 
 class NoConnection(Exception):
          def __init__(self):
@@ -81,9 +82,21 @@ class CLAMClient:
         if url[-1] != '/': url += '/'
         self.url = url
         if user and password:
+            #for most things we use httplib2
             self.http.add_credentials(user, password)
-
+            
+            #for file upload we use urllib2:
+            passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            # this creates a password manager
+            passman.add_password(None, url, user, password)
+            authhandler = urllib2.HTTPDigestAuthHandler(passman)
+            opener = urllib2.build_opener(authhandler)
+            urllib2.install_opener(opener)
+            
+            
+            
     def request(self, url, method = 'GET', data = None):
+        """Returns a CLAMData object if a proper CLAM XML response is received. Otherwise: returns True, on success, False on failure.  Raises an Exception on most HTTP errors!"""
         try:
             if data: 
                 response, content = self.http.request(self.url + url, method, data)
@@ -93,20 +106,28 @@ class CLAMClient:
             raise NoConnection()
         return self._parse(response, content)
 
-    def _parse(self, response, content):
-        if response['status'] == '200':
-            if content:
-                return CLAMData(content)
-            else:
-                return True
+    def _parse(self, response, content):    
+        if content.find('<clam') != -1:
+            data = CLAMData(content)
+        else:
+            data = False
+            
+        if response['status'] == '200' or response['status'] == '201' or response['status'] == '202':
+            if not data: data = True
         elif response['status'] == '400':
             raise BadRequest()
         elif response['status'] == '401':
             raise AuthRequired()
-        elif response['status'] == '403':
-            raise PermissionDenied()
-        elif response['status'] == '404':
-            raise NotFound()
+        elif response['status'] == '403' and not data:
+            raise PermissionDenied(content)
+        elif response['status'] == '404' and not data:
+            raise NotFound(content)
+        elif response['status'] == '500':
+            raise ServerError(content)
+        else:
+            raise Exception("Server returned HTTP response " + response['status'])
+        
+        return data
                 
    
 
@@ -117,7 +138,15 @@ class CLAMClient:
 
     def get(self, project):
         """query the project status"""
-        return self.request(project + '/')
+        try:
+            data = self.request(project + '/')
+        except:
+            raise
+        if not isinstance(data, CLAMData):
+            raise Exception("Unable to retrieve CLAM Data")
+        else:
+            return data
+            
 
     def create(self,project):
         """create a new project"""
@@ -159,7 +188,7 @@ class CLAMClient:
             filename = inputtemplate.filename
         elif inputtemplate.extension: 
             if filename[-len(inputtemplate.extension) - 1:].lower() != inputtemplate.extension.lower():
-                filename += inputtemplate.extension        
+                filename += '.' + inputtemplate.extension        
                 
         return filename
 
