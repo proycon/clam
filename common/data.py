@@ -87,13 +87,14 @@ class CLAMFile:
                     self.converters.append(converter)
                     
     def metafilename(self):
-            """Returns the filename for the meta file (not full path). Only used for local files."""
-            metafilename = os.path.dirname(self.filename) 
-            if metafilename: metafilename += '/'
-            metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
-            return metafilename
+        """Returns the filename for the meta file (not full path). Only used for local files."""
+        metafilename = os.path.dirname(self.filename) 
+        if metafilename: metafilename += '/'
+        metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
+        return metafilename
                 
     def loadmetadata(self):
+        """Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled."""
         if not self.remote:
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
             if os.path.exists(metafile):
@@ -170,6 +171,7 @@ class CLAMFile:
         
 
     def validate(self):
+        """Validate this file. Returns a boolean."""
         if self.metadata:
             return self.metadata.validate()
         else:
@@ -203,33 +205,56 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         statusmessage   - The latest status message (string)
         completion      - An integer between 0 and 100 indicating
                           the percentage towards completion.
-        parameters      - List of parameters (but use the methods instead)
-        inputformats    - List of all input formats
-        outputformats   - List of all output formats
-        corpora         - List of pre-installed corpora
+        parameters      - List of parameters (but use the methods instead)        
+        profiles        - List of profiles ([ Profile ])
         input           - List of input files  ([ CLAMInputFile ])
         output          - List of output files ([ CLAMOutputFile ])
         projects        - List of projects ([ string ])
+        corpora         - List of pre-installed corpora
         errors          - Boolean indicating whether there are errors in parameter specification
-        errormsh        - String containing an error message
+        errormsg        - String containing an error message
 
     Note that depending on the current status of the project, not all may be available.
     """
 
     def __init__(self, xml, localroot = False):
         """Pass an xml string containing the full response. It will be automatically parsed."""
+        
+        #: String containing the base URL of the webserivice
         self.baseurl = ''
+        
+        #: String containing the full URL to the project, if a project was indeed selected
         self.projecturl = ''
+        
+        #: The current status of the service, returns clam.common.status.READY (1), clam.common.status.RUNNING (2), or clam.common.status.DONE (3)
         self.status = clam.common.status.READY
+        
+        #: The current status of the service in a human readable message
         self.statusmessage = ""
         self.completion = 0
+        
+        #: This contains a list of (parametergroup, [parameters]) tuples.
         self.parameters = []
+
+        #: List of profiles ([ Profile ])    
         self.profiles = []
+        
+        #:  List of pre-installed corpora
         self.corpora = []
+        
+        #: List of output files ([ CLAMInputFile ])
         self.input = []
+        
+        #: List of output files ([ CLAMOutputFile ])
         self.output = []
+        
+        #: List of projects ([ string ])
         self.projects = None
-        self.errors = False
+        
+        #: Boolean indicating whether there are errors in parameter specification
+        self.errors = False        
+        
+        #: String containing an error message if an error occured
         self.errormsg = ""
 
         self.parseresponse(xml, localroot)
@@ -317,7 +342,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                         self.projects.append(projectnode.text)
 
     def parameter(self, id):                                 
-        """Return the specified parameter"""
+        """Return the specified global parameter"""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:
@@ -325,7 +350,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         raise KeyError
 
     def __getitem__(self, id):                                 
-        """Return the specified parameter"""
+        """Return the specified global parameter (alias for getparameter)"""
         try:
             return self.parameter(id)
         except KeyError:
@@ -341,6 +366,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         raise KeyError
         
     def __contains__(self, id):
+        """Check if a global parameter with the specified ID exists. Returns a boolean."""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:
@@ -361,14 +387,14 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         
         
     def inputtemplates(self):
-        """Return all input templates as a list"""
+        """Return all input templates as a list (of InputTemplate instances)"""
         l = []
         for profile in self.profiles:
             l += profile.input
         return l
         
     def inputtemplate(self,id):
-        """Return the inputtemplate with the specified ID"""
+        """Return the inputtemplate with the specified ID. This is used to resolve a inputtemplate ID to an InputTemplate object instance"""
         for profile in self.profiles:
             for inputtemplate in profile.input:
                 if inputtemplate.id == id:
@@ -388,7 +414,8 @@ def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
 
 
 class Profile(object):
-    def __init__(self, *args): #input, output, parameters): #, **kwargs):
+    def __init__(self, *args):
+        """Create a Profile. Arguments can be of class InputTemplate, OutputTemplate or ParameterCondition"""
     
         self.input = []
         self.output = []
@@ -522,6 +549,7 @@ class Profile(object):
         
     @staticmethod
     def fromxml(node):
+        """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
             
@@ -597,6 +625,7 @@ class CLAMProvenanceData(object):
 
     @staticmethod
     def fromxml(node):
+        """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         if node.tag == 'provenance':
@@ -760,7 +789,7 @@ class CLAMMetaData(object):
     
     @staticmethod    
     def fromxml(file,node):
-        """Read metadata from XML."""
+        """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         if node.tag == 'CLAMMetaData':
@@ -873,6 +902,7 @@ class InputTemplate(object):
 
     @staticmethod
     def fromxml(node):
+        """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         assert(node.tag.lower() == 'inputtemplate')
@@ -1047,6 +1077,7 @@ class AbstractMetaField(object): #for OutputTemplate only
 
     @staticmethod
     def fromxml(node):
+        """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         if node.tag.lower() != 'meta':
@@ -1223,6 +1254,7 @@ class OutputTemplate(object):
     
     @staticmethod    
     def fromxml(node):
+        """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         assert(node.tag.lower() == 'outputtemplate')
@@ -1474,7 +1506,8 @@ class ParameterCondition(object):
         return xml
 
     @staticmethod
-    def fromxml(node):        
+    def fromxml(node):    
+        """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""    
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         assert(node.tag.lower() == 'parametercondition')
