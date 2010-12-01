@@ -206,7 +206,10 @@ class CLAMClient:
             metafile - A metadata file (filename)
             Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
         """
-        if not isinstance(inputtemplate, InputTemplate):
+        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+            data = self.get(project) #causes an extra query to server
+            inputtemplate = data.inputtemplate(inputtemplate)
+        elif not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
         
         if not isinstance(sourcefile, file):
@@ -247,8 +250,11 @@ class CLAMClient:
             metadata - A metadata object.
             metafile - A metadata file (filename)
             Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
-        """ 
-        if not isinstance(inputtemplate, InputTemplate):
+        """
+        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+            data = self.get(project) #causes an extra query to server
+            inputtemplate = data.inputtemplate(inputtemplate)
+        elif not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
         
         
