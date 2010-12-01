@@ -28,10 +28,11 @@ from clam.external.poster.streaminghttp import register_openers
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
-from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate
+from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
 
-VERSION = 0.5
-
+VERSION = '0.5'
+if VERSION != DATAAPIVERSION:
+    raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
 # Register poster's streaming http handlers with urllib2
 register_openers()
@@ -47,25 +48,25 @@ class NotFound(Exception):
          def __init__(self, msg=""):
             self.msg = msg
          def __str__(self):
-            return "Not Found: " +  msg
+            return "Not Found: " +  self.msg
 
 class PermissionDenied(Exception):
          def __init__(self, msg = ""):
             self.msg = msg
          def __str__(self, msg):
-            return "Permission Denied: " + msg
+            return "Permission Denied: " + self.msg
 
 class ServerError(Exception):
          def __init__(self, msg = ""):
             self.msg = msg
          def __str__(self):
-            return "Server Error: " + msg
+            return "Server Error: " + self.msg
 
 class AuthRequired(Exception):
          def __init__(self, msg = ""):
-            self.msg = msg
+            self.msg = msg            
          def __str__(self):
-            return "Authorization Required: " + msg
+            return "Authorization Required: " + self.msg
 
 class NoConnection(Exception):
          def __init__(self):
@@ -250,8 +251,6 @@ class CLAMClient:
         if not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
         
-        if not isinstance(sourcefile, file):
-            sourcefile = open(sourcefile,'r')
         
         if 'filename' in kwargs:
             filename = self.getinputfilename(inputtemplate, kwargs['filename'])

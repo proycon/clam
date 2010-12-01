@@ -28,6 +28,8 @@ import clam.common.util
 import clam.common.viewers
 #clam.common.formats is deliberately imported _at the end_ 
 
+VERSION = '0.5'
+
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
      def __init__(self, value):
@@ -240,8 +242,9 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
-        #if float(root.attrib['version'][0:3]) > VERSION[0:3]:
-        #    raise Exception("The clam client version is too old!")
+            
+        if root.attrib['version'][0:3] != VERSION[0:3]:
+            raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])                    
         self.system_id = root.attrib['id']
         self.system_name = root.attrib['name']        
         if 'project' in root.attrib:
