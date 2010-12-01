@@ -183,7 +183,7 @@ class CLAMClient:
 
 
     def getinputfilename(self, inputtemplate, filename):        
-        """Determine the final filename for an input file given an inputtemplate and a given filename"""
+        """Determine the final filename for an input file given an inputtemplate and a given filename. """
         if inputtemplate.filename:
             filename = inputtemplate.filename
         elif inputtemplate.extension: 
