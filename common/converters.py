@@ -145,7 +145,7 @@ class MSWordConverter(AbstractConverter):
         super(MSWordConverter,self).convertforinput(filepath, metadata)
         
         shutil.copy(filepath, filepath + '.convertsource.doc')
-        returncode = os.system(self.converttool + '-w ' + filepath + '.convertsource.doc > ' + filepath)
+        returncode = os.system(self.converttool + ' -x ' + filepath + '.convertsource.doc > ' + filepath)
         os.unlink(filepath + '.convertsource.doc')
         
         return (returncode == 0)
