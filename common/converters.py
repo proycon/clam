@@ -94,3 +94,59 @@ class CharEncodingConverter(AbstractConverter):
         
         
 
+class PDFtoTextConverter(AbstractConverter):
+    acceptforinput = [clam.common.formats.PlainTextFormat]
+    
+    converttool = 'pdftotext'
+    
+    def __init__(self, id,  **kwargs):                
+        super(PDFConverter,self).__init__(id, **kwargs)
+        
+    
+    def convertforinput(self,filepath, metadata=None):
+        super(PDFConverter,self).convertforinput(filepath, metadata)
+        
+        shutil.copy(filepath, filepath + '.convertsource.pdf')
+        returncode = os.system(self.converttool + ' -layout ' + filepath + '.convertsource.pdf ' + filepath)
+        os.unlink(filepath + '.convertsource.pdf')
+        
+        return (returncode == 0)
+        
+
+class PDFtoHTMLConverter(AbstractConverter):
+    acceptforinput = [clam.common.formats.HTMLFormat]
+    
+    converttool = 'pdftohtml'
+    
+    def __init__(self, id,  **kwargs):                
+        super(PDFtoHTMLConverter,self).__init__(id, **kwargs)
+        
+    
+    def convertforinput(self,filepath, metadata=None):
+        super(PDFtoHTMLConverter,self).convertforinput(filepath, metadata)
+        
+        shutil.copy(filepath, filepath + '.convertsource.pdf')
+        returncode = os.system(self.converttool + ' -layout ' + filepath + '.convertsource.pdf ' + filepath)
+        os.unlink(filepath + '.convertsource.pdf')
+        
+        return (returncode == 0)
+        
+        
+class MSWordConverter(AbstractConverter):
+    acceptforinput = [clam.common.formats.HTMLFormat]
+    
+    converttool = 'catdoc'
+    
+    def __init__(self, id,  **kwargs):                
+        super(MSWordConverter,self).__init__(id, **kwargs)
+        
+    
+    def convertforinput(self,filepath, metadata=None):
+        super(MSWordConverter,self).convertforinput(filepath, metadata)
+        
+        shutil.copy(filepath, filepath + '.convertsource.doc')
+        returncode = os.system(self.converttool + '-w ' + filepath + '.convertsource.doc > ' + filepath)
+        os.unlink(filepath + '.convertsource.doc')
+        
+        return (returncode == 0)
+            
