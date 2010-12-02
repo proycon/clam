@@ -53,9 +53,9 @@ def usage():
     print >>sys.stderr, " xml    [project] - Get entire project state in CLAM XML"        
     #print >>sys.stderr, " download [project] [filename]"
     #print >>sys.stderr, "\t Download the specified output file (with metadata)"
-    #print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
-    #print >>sys.stderr, "\t Upload the specified file from client to server. Metadata is either"
-    #print >>sys.stderr, "\t a file, or a space-sperated set of --key=value parameters."
+    print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
+    print >>sys.stderr, "\t Upload the specified file from client to server. Metadata is either"
+    print >>sys.stderr, "\t a file, or a space-sperated set of --key=value parameters."
     print >>sys.stderr, " inputtemplate [inputtemplate]"
     print >>sys.stderr, "\t View the metadata parameters in the requested inputtemplate"
     #print >>sys.stderr, " metadata [project] [filename]"
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     
     username = password = None
     
+    parameters = {}
     begin = 0
     rawargs = sys.argv[1:]
     for i,o in enumerate(rawargs):
@@ -86,6 +87,13 @@ if __name__ == "__main__":
             usage()
             print "ERROR: Unknown option: ", o
             sys.exit(2)            
+        elif o[:2] == '--':
+            if len(rawargs) > i + 1:
+                parameters[o[2:]] = rawargs[i+1]
+                begin = i+2
+            else:
+                parameters[o[2:]] = True
+                begin = i+1
     
     if len(rawargs) > begin:
         url = rawargs[begin]
@@ -139,6 +147,21 @@ if __name__ == "__main__":
                 data = client.get(args[0])
             else:
                 data = client.index()
+        elif command == 'upload':
+            if len(args) < 3:
+                print >>sys.stderr, "Expected: project inputtemplate file "
+                sys.exit(2)        
+            data = client.get(args[0])
+            try:
+                inputtemplate = data.inputtemplate(args[1])
+            except:
+                print >>sys.stderr, "No such input template: " + args[1]
+                sys.exit(2)
+            filepath = args[2]
+            if not os.path.isfile(filepath):
+                print >>sys.stderr, "File does not exist: " + filepath
+                sys.exit(2)
+            client.upload(project,inputtemplate, filepath, **parameters)                            
         else:
             print >>sys.stderr,"Unknown command: " + command
             sys.exit(1)
