@@ -466,3 +466,35 @@ OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
     filename='overall.freqlist',
     unique=True
 ), 
+
+
+
+
+TESTS:
+    File upload:
+        - File upload (filename)
+            - match
+            - mismatch
+        - File upload (extension)
+            - match
+            - mismatch
+    Parameters:
+        - Boolean
+            - unset
+            - set
+        - Required
+            - pass
+            - forgetting a required parameter
+                - global
+                - metadata
+        - Integer
+            - pass
+            - out of range
+        - Choice
+            - 
+        - Choice multi=True
+            - pass
+            
+    Profiles:
+        - no profile match
+        
