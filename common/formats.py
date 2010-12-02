@@ -64,6 +64,16 @@ class PlainTextFormat(CLAMMetaData):
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples."""
         yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
+        
+        
+class HTMLFormat(CLAMMetaData):
+    attributes = {'encoding':True,'language':False }
+    mimetype = "text/html"
+    
+    def httpheaders(self):
+        """HTTP headers to output for this format. Yields (key,value) tuples."""
+        yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
+        
 
                 
 class TadpoleFormat(CLAMMetaData):    
