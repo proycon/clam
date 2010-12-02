@@ -97,9 +97,9 @@ class AbstractParameter(object):
         else:
             error = ""
         if self.value:
-            print self.__class__.__name__ + " " + self.id + ": " + str(self.value) + error
+            return self.__class__.__name__ + " " + self.id + ": " + str(self.value) + error
         else: 
-            print self.__class__.__name__ + " " + self.id + error
+            return self.__class__.__name__ + " " + self.id + error
 
     def set(self, value):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
@@ -332,9 +332,9 @@ class ChoiceParameter(AbstractParameter):
         else:
             error = ""
         if self.value:
-            print self.__class__.__name__ + " " + self.id + ": " + ",".join(self.value) + error
+            return self.__class__.__name__ + " " + self.id + ": " + ",".join(self.value) + error
         else: 
-            print self.__class__.__name__ + " " + self.id + error        
+            return self.__class__.__name__ + " " + self.id + error        
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""

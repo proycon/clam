@@ -930,7 +930,7 @@ class InputFileHandler(object):
                 raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
             
             
-        if 'converter' in postdata and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
+        if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
                 raise web.webapi.Forbidden("Invalid converter specified: " + postdata['converter']) #403
 
         #Very simple security, prevent breaking out the input dir

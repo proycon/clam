@@ -219,6 +219,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
 
     def __init__(self, xml, localroot = False):
         """Pass an xml string containing the full response. It will be automatically parsed."""
+        self.xml = xml
         
         #: String containing the base URL of the webserivice
         self.baseurl = ''
@@ -531,10 +532,7 @@ class Profile(object):
     def xml(self, indent = ""):
         """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
         xml = "\n" + indent + "<profile"
-        #if self.multi:
-        #    xml += "  multi=\"yes\""
-        #else:   
-        #    xml += "  multi=\"no\""
+
         xml += ">\n"
         xml += indent + " <input>\n"
         for inputtemplate in self.input:
@@ -547,13 +545,24 @@ class Profile(object):
         xml += indent + "</profile>"
         return xml
         
+    def out(self, indent = ""):
+        o = indent + "Profile" 
+        o += indent + "\tInput"
+        for inputtemplate in self.input:
+            o += inputtemplate.out(indent +"\t") + "\n"            
+        xml += indent + "\tOutput"
+        for outputtemplate in self.output:
+            o += outputtemplate.out(indent +"\t") + "\n"
+
+        return o
+        
     @staticmethod
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
             
-        args = []   
+        args = []
             
         if node.tag == 'profile':
             for node in node:
@@ -1466,7 +1475,7 @@ class ParameterCondition(object):
         if isinstance(self.then, ParameterCondition):
             #recursive parametercondition
             l += self.then.allpossibilities()
-        else:
+        elif self.then:
             l.append(self.then)
         if self.otherwise:
             if isinstance(self.otherwise, ParameterCondition):

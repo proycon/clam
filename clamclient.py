@@ -17,10 +17,14 @@
 #
 ###############################################################
 
-from clam.common.client import CLAMClient, NotFound, PermissionDenied, 
-
-import getopt
 import sys
+import os
+sys.path.append(sys.path[0] + '/..')
+os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+
+
+from clam.common.client import CLAMClient, NotFound, PermissionDenied, ServerError, AuthRequired
+from clam.common.data import ParameterCondition
 
 VERSION = '0.5'
 
@@ -47,14 +51,16 @@ def usage():
     print >>sys.stderr, " output [project] - Get a list of output files"
     print >>sys.stderr, " xml              - Get service specification and project list in CLAM XML"
     print >>sys.stderr, " xml    [project] - Get entire project state in CLAM XML"        
-    print >>sys.stderr, " download [project] [filename]"
-    print >>sys.stderr, "\t Download the specified output file (with metadata)"
-    print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
-    print >>sys.stderr, "\t Upload the specified file from client to server. Metadata is either"
-    print >>sys.stderr, " metadata [project] [filename]"
-    print >>sys.stderr, "\t View the metadata of the specified file"
-    print >>sys.stderr, "\t a file, or a space-sperated set of --key=value parameters."
-
+    #print >>sys.stderr, " download [project] [filename]"
+    #print >>sys.stderr, "\t Download the specified output file (with metadata)"
+    #print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
+    #print >>sys.stderr, "\t Upload the specified file from client to server. Metadata is either"
+    #print >>sys.stderr, "\t a file, or a space-sperated set of --key=value parameters."
+    print >>sys.stderr, " inputtemplate [inputtemplate]"
+    print >>sys.stderr, "\t View the metadata parameters in the requested inputtemplate"
+    #print >>sys.stderr, " metadata [project] [filename]"
+    #print >>sys.stderr, "\t View the metadata of the specified file"
+    
 
 
 if __name__ == "__main__":
@@ -63,8 +69,8 @@ if __name__ == "__main__":
     
     begin = 0
     rawargs = sys.argv[1:]
-    for i,o in enumerate(rawargs]
-        elif o == '-u':
+    for i,o in enumerate(rawargs):
+        if o == '-u':
             username = rawargs[i+1]
             begin = i+2
         elif o == '-p':
@@ -81,7 +87,7 @@ if __name__ == "__main__":
             print "ERROR: Unknown option: ", o
             sys.exit(2)            
     
-    if not len(rawargs) > begin:
+    if len(rawargs) > begin:
         url = rawargs[begin]
     else:
         usage()
@@ -94,7 +100,7 @@ if __name__ == "__main__":
     
     client = CLAMClient(url, username,password)
 
-    if not len(rawargs) > begin + 1:    
+    if len(rawargs) > begin + 1:    
         command = rawargs[begin+1]
         args = rawargs[begin+2:]
     else:
@@ -105,73 +111,120 @@ if __name__ == "__main__":
         command = 'get'
 
     
-
-    
     try:        
-        if command in ['info','projects','inputtemplates','parameters']:
+        if command in ['info','index','projects','inputtemplates','parameters','profiles']:
             data = client.index()
-        elif command in ['get','input','output','status']:
-            data = client.project(args[0])
+        elif command in ['get','input','output','status','inputtemplate']:
+            if len(args) != 1:
+                print >>sys.stderr, "Expected project ID"
+                sys.exit(2)
+            data = client.get(args[0])
         elif command == 'create':
+            if len(args) != 1:
+                print >>sys.stderr, "Expected project ID"
+                sys.exit(2)
             client.create(args[0])
         elif command == 'delete' or command == 'abort':
+            if len(args) != 1:
+                print >>sys.stderr, "Expected project ID"
+                sys.exit(2)            
             client.delete(args[0])
         elif command == 'reset':
+            if len(args) != 1:
+                print >>sys.stderr, "Expected project ID"
+                sys.exit(2)
             client.reset(args[0])
+        elif command == 'xml':
+            if len(args) ==1:
+                data = client.get(args[0])
+            else:
+                data = client.index()
         else:
-            data = None
+            print >>sys.stderr,"Unknown command: " + command
+            sys.exit(1)
         
-
+        
         if data:
-            if outputxml:
-            else:   
-                if command == 'xml':
-                    print data.xml()
-                if command in ['info','get']:
-                    print "General Information"
-                    print "\tSystem ID:   " + data.system_id
-                    print "\tSystem Name: " + data.system_name
-                    print "\tSystem URL:  " + data.baseurl
-                    if user:
-                        print "\tUser:        " + user
-                    if command == 'get':
-                        print "\tProject:     " + data.project
-                if command in ['info','projects']: 
-                    print "Projects"
-                    for project in data.projects:
-                        print "\t" + project
-                if command in ['info','status']:
-                    print "Status Information"
-                    print "\tStatus: " + str(data.status) #TODO: nicer messages
-                    print "\tStatus Message: " + data.statusmessage
-                    print "\tCompletion: " + str(data.completion) + "%"
-                if command in ['info','profiles']: 
-                    print "Profiles:" #TODO: Implement
-                if command in ['info','parameters']: 
-                    print "Global Parameters:"
-                    for group, parameters in data.parameters:
-                        print "\t" + group
-                        for parameter in parameters:
-                            print "\t\t" + str(parameter) #VERIFY: unicode support?
-                if command in ['get','input'] and data.input: 
-                    print "Input files:"
-                    for f in data.input:
-                        print f.filename + "\t" + str(f),
-                        if f.metadata and f.metadata.inputtemplate:
-                            print "\t" + f.metadata.inputtemplate
+            if command == 'xml':
+                print data.xml
+            if command in ['info','get']:
+                print "General Information"
+                print "\tSystem ID:   " + data.system_id
+                print "\tSystem Name: " + data.system_name
+                print "\tSystem URL:  " + data.baseurl
+                if username:
+                    print "\tUser:        " + username
+                if command == 'get':
+                    print "\tProject:     " + data.project
+            if command in ['info','projects','index']: 
+                print "Projects"
+                for project in data.projects:
+                    print "\t" + project
+            if command in ['get','status']:
+                print "Status Information"
+                print "\tStatus: " + str(data.status) #TODO: nicer messages
+                print "\tStatus Message: " + data.statusmessage
+                print "\tCompletion: " + str(data.completion) + "%"
+            if command in ['info','profiles']: 
+                print "Profiles:" #TODO: Implement
+                for i, profile in enumerate(data.profiles):
+                    print "\tProfile " + str(i+1)
+                    print "\t Input"
+                    for template in profile.input:
+                        print "\t\t" + template.id + " - " + template.label
+                    print "\t Output"
+                    for template in profile.output:
+                        if isinstance(template, ParameterCondition):
+                            for t in template.allpossibilities():
+                                print "\t\t(CONDITIONAL!) " + t.id + " - " + t.label
                         else:
-                            print
-                if command in ['get','output'] and data.input: 
-                    print "Output files:"
-                    for f in data.output:
-                        print f.filename + "\t" + str(f), 
-                        if f.metadata and f.metadata.provenance and f.metadata.provenance.outputtemplate_id:
-                            print "\t" + f.metadata.provenance.outputtemplate_id
-                        else:
-                            print 
-                
-                
+                            print "\t\t" + template.id + " - " + template.label
+            if command == 'inputtemplates':
+                print "Input templates:"
+                for template in data.input:
+                    print "\t\t" + template.id + " - " + template.label            
+            if command == 'inputtemplate':
+                try:
+                    inputtemplate = data.inputtemplate(args[0])
+                except:
+                    print >>sys.stderr, "No such inputtemplate"                
+                    sys.exit(1)
+                print "Inputtemplate parameters:"
+                for parameter in inputtemplate.parameters:
+                    print "\t\t" + str(parameter) #VERIFY: unicode support?
+                print "Inputtemplate converters:"
+                for c in inputtemplate.converters:
+                    print "\t\t" + c.id + " - " + c.label #VERIFY: unicode support?
+            if command in ['info','parameters']: 
+                print "Global Parameters:"
+                for group, parameters in data.parameters:
+                    print "\t" + group
+                    for parameter in parameters:
+                        print "\t\t" + str(parameter) #VERIFY: unicode support?
+            if command in ['get','input'] and data.input: 
+                print "Input files:"
+                for f in data.input:
+                    print "\t" + f.filename + "\t" + str(f),
+                    if f.metadata and f.metadata.inputtemplate:
+                        print "\t" + f.metadata.inputtemplate
+                    else:
+                        print
+            if command in ['get','output'] and data.output: 
+                print "Output files:"
+                for f in data.output:
+                    print "\t" + f.filename + "\t" + str(f), 
+                    if f.metadata and f.metadata.provenance and f.metadata.provenance.outputtemplate_id:
+                        print "\t" + f.metadata.provenance.outputtemplate_id
+                    else:
+                        print 
 
-    except: 
+    except NotFound: 
+        print >>sys.stderr, "Not Found (404)"
+    except PermissionDenied: 
+        print >>sys.stderr, "Permission Denied (403)"
+    except ServerError: 
+        print >>sys.stderr, "Server Error! (500)"
+    except AuthRequired: 
+        print >>sys.stderr, "Authorization required (401)"      
         
 
