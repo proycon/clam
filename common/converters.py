@@ -100,11 +100,11 @@ class PDFtoTextConverter(AbstractConverter):
     converttool = 'pdftotext'
     
     def __init__(self, id,  **kwargs):                
-        super(PDFConverter,self).__init__(id, **kwargs)
+        super(PDFtoTextConverter,self).__init__(id, **kwargs)
         
     
     def convertforinput(self,filepath, metadata=None):
-        super(PDFConverter,self).convertforinput(filepath, metadata)
+        super(PDFtoTextConverter,self).convertforinput(filepath, metadata)
         
         shutil.copy(filepath, filepath + '.convertsource.pdf')
         returncode = os.system(self.converttool + ' -layout ' + filepath + '.convertsource.pdf ' + filepath)
@@ -133,7 +133,7 @@ class PDFtoHTMLConverter(AbstractConverter):
         
         
 class MSWordConverter(AbstractConverter):
-    acceptforinput = [clam.common.formats.HTMLFormat]
+    acceptforinput = [clam.common.formats.PlainTextFormat]
     
     converttool = 'catdoc'
     

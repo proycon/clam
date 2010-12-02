@@ -1068,7 +1068,10 @@ class InputFileHandler(object):
                         converter = c
                         break
                 if converter: #(should always be found, error already provided earlier if not)
-                    success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                    try:
+                        success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                    except:
+                        success = False
                     if not success:
                         conversionerror = True
                         output += "<conversionerror />" 
