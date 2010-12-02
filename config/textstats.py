@@ -70,6 +70,8 @@ PROFILES = [
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
+            PDFtoTextConverter(id='pdfconv',label='Convert from PDF'),
+            MSWordConverter(id='pdfconv',label='Convert from PDF'),
             extension='.txt',
             multi=True
         ),
