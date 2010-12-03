@@ -1434,15 +1434,16 @@ class ParameterCondition(object):
 
         for key, value in kwargs.items():
             if key == 'then':
-                if not isinstance(value, OutputTemplate) and not isinstance(value, InputTemplate) and not isinstance(value, ParameterCondition):
-                    assert Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")
-                else:
+                if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
                     self.then = value
-            elif key == 'else' or key == 'otherwise':
-                if not isinstance(value, OutputTemplate) and not isinstance(value, InputTemplate) and not isinstance(value, ParameterCondition):
-                    assert Exception("Value of 'else=' must be InputTemplate, OutputTemplate or ParameterCondition!")
                 else:
-                    self.otherwise = value
+                    raise Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")                    
+            elif key == 'else' or key == 'otherwise':
+                if instance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
+                    self.otherwise = value                    
+                else:
+                    raise Exception("Value of 'else=' must be InputTemplate, OutputTemplate or ParameterCondition!")
+                    
             elif key == 'disjunction' or key == 'or':
                 self.disjunction = value
             else:
@@ -1461,10 +1462,15 @@ class ParameterCondition(object):
                 elif key[-7:] == '_equals':
                     self.conditions.append( (key[:-7], value,lambda x: x == value, 'equals') )
                 elif key[-7:] == '_set':
-                    self.conditions.append( (key[:-7], value,lambda x: x, 'set') )
+                    if value:
+                        self.conditions.append( (key[:-7], value,lambda x: x, 'set') )
+                    else:
+                        self.conditions.append( (key[:-7], value,lambda x: not x, 'set') )
                 else: #default is _is
                     self.conditions.append( (key,value, lambda x: x == value,'equals') )
-                    
+
+        if not self.then:
+            raise Exception("No then= specified for ParameterCondition!")
 
     def match(self, parameters):
         for key,_,evalf,_ in self.conditions:
