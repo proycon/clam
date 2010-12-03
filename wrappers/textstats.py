@@ -47,7 +47,7 @@ def calcstats(filename, encoding):
     lines = characters = 0
     for line in f:
         lines += 1
-        wordlist = set([ x.lower() for x in re.split('\W+', line) if x ])
+        wordlist = set([ x.lower() for x in re.split('\W+', line, flags=re.UNICODE) if x ])
         words = len(wordlist)
         for word in wordlist:
             if not word in freqlist:

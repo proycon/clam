@@ -25,10 +25,10 @@ REQUIRE_VERSION = 0.2
 SYSTEM_ID = "clamtest"
 
 #System name, the way the system is presented to the world
-SYSTEM_NAME = "CLAM Demo"
+SYSTEM_NAME = "CLAM Test"
 
 #An informative description for this system:
-SYSTEM_DESCRIPTION = "This is a small demo for CLAM. It does not really do anything useful but simply shows some of CLAM's abilities. Most of the parameters you can configure below don't have any real function. All the system will do is reverse all letters in the files you upload and output a log file with some information about the parameters."
+SYSTEM_DESCRIPTION = "This is a test case for CLAM."
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
@@ -82,7 +82,7 @@ PARAMETERS =  [
         BooleanParameter('boolean','-b','Boolean','To be or not to be? That is the question'),
         IntegerParameter('integer','-i','Integer','Integer between zero and ten',minvalue=0, maxvalue=10),
         FloatParameter('float','-f','Float','Float between 0.0 and 1.0',minvalue=0.0, maxvalue=1.0),
-        StringParameter('string','-s','String','Enter a word'),
+        StringParameter('string','-s','String','Enter a word',maxlength=10),
         TextParameter('text','-t','String','Text'),
         ChoiceParameter('colourchoice','-c','Choice','Favourite colour',choices=[('red','red'),('green','green'),('blue','blue')]),
         ChoiceParameter('cities','-C', 'Visited cities', 'What cities have you visited?', choices=[('amsterdam', 'Amsterdam'), ('ny', 'New York'), ('london', 'London'), ('paris','Paris')], multi=True)
