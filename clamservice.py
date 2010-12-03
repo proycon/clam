@@ -542,7 +542,9 @@ class Project(object):
                     postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
                     if not (isinstance(postvalue,bool) and postvalue == False):
                         if parameter.set(postvalue): #may generate an error in parameter.error
-                            params.append(parameter.compilearg(parameter.value))
+                            p = parameter.compilearg()
+                            if p:
+                                params.append(p)
                         else:
                             if not parameter.error: parameter.error = "Something went wrong whilst setting this parameter!" #shouldn't happen
                             printlog("Unable to set " + parameter.id + ": " + parameter.error)

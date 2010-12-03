@@ -188,10 +188,12 @@ class BooleanParameter(AbstractParameter):
         super(BooleanParameter,self).set(False)
 
 
-    def compilearg(self, value):
-        if self.reverse: value = not value
-        if value:
-            return self.paramflag  
+    def compilearg(self):
+        if not self.paramflag:
+            Exception("paramflag not set for BooleanParameter " + self.id)
+        if self.reverse: self.value = not self.value
+        if self.value:
+            return self.paramflag
         else:
             return ""
 
