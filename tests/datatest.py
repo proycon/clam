@@ -27,7 +27,7 @@ import clam.common.formats
 import clam.common.converters
 
 class InputTemplateTest(unittest2.TestCase):
-    def geninputtemplate(self):
+    def generate(self):
         return clam.common.data.InputTemplate('test', clam.common.formats.PlainTextFormat,"test",
             clam.common.parameters.StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             clam.common.parameters.ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
@@ -39,12 +39,12 @@ class InputTemplateTest(unittest2.TestCase):
         )
     
     def setUp(self):
-        self.data = self.geninputtemplate()  
+        self.data = self.generate()  
     
     
     def test1_equality(self):
         """Input template - Shallow equality check (ID only)"""
-        self.assertTrue(self.data == self.geninputtemplate())
+        self.assertTrue(self.data == self.generate())
 
         
     def test2_sanity(self):
@@ -76,7 +76,7 @@ class InputTemplateTest(unittest2.TestCase):
 
 
 class OutputTemplateTest(unittest2.TestCase):
-    def genoutputtemplate(self):
+    def generate(self):
         return clam.common.data.OutputTemplate('test', clam.common.formats.PlainTextFormat,'test', 
             clam.common.data.SetMetaField('x1','y1'),             
             clam.common.data.UnsetMetaField('x2','y2'),             
@@ -90,12 +90,12 @@ class OutputTemplateTest(unittest2.TestCase):
         )
     
     def setUp(self):
-        self.data = self.genoutputtemplate()  
+        self.data = self.generate()  
     
     
     def test1_equality(self):
         """Output template - Shallow equality check (ID only)"""
-        self.assertTrue(self.data == self.genoutputtemplate())
+        self.assertTrue(self.data == self.generate())
 
         
     def test2_sanity(self):
@@ -122,7 +122,30 @@ class OutputTemplateTest(unittest2.TestCase):
         self.assertTrue(data.unique) 
         #note: viewers and converters not supported client-side
         
-                                            
+class ParameterCondition(unittest2.TestCase):
+    def generate(self):    
+        return clam.common.data.ParameterCondition(x=True, 
+            then=clam.common.data.SetMetaField('x','yes'), 
+            otherwise=clam.common.data.SetMetaField('x','no'), 
+        )
+    
+    def setUp(self):
+        self.data = self.generate()
+        
+    def test1_sanity(self):
+        """Parameter Condition - Sanity check"""
+        self.assertTrue(len(self.data.conditions) == 1)
+        self.assertTrue(isinstance(self.data.then, clam.common.data.SetMetaField))
+        self.assertTrue(isinstance(self.data.otherwise, clam.common.data.SetMetaField))
+    
+
+    def test2_equality(self):
+        """Parameter Condition - Equality check after XML generation and parsing"""
+        xml = self.data.xml()
+        data = clam.common.data.ParameterCondition.fromxml(xml)   
+        self.assertTrue(len(data.conditions) == 1)
+        self.assertTrue(isinstance(data.then, clam.common.data.SetMetaField))
+        self.assertTrue(isinstance(data.otherwise, clam.common.data.SetMetaField))        
                                             
 if __name__ == '__main__':
     unittest2.main(verbosity=2)

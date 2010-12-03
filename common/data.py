@@ -1445,7 +1445,7 @@ class ParameterCondition(object):
                 else:
                     raise Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")                    
             elif key == 'else' or key == 'otherwise':
-                if instance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
+                if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
                     self.otherwise = value                    
                 else:
                     raise Exception("Value of 'else=' must be InputTemplate, OutputTemplate or ParameterCondition!")
