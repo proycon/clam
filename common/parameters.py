@@ -28,6 +28,7 @@ class AbstractParameter(object):
         self.forbid = []
         self.allowusers = []
         self.denyusers = []
+        self.hasvalue = False
         for key, value in kwargs.items():
             if key == 'allowusers': 
                 self.allowusers = value  #Users to allow access to this parameter (If not set, all users have access)
@@ -52,6 +53,8 @@ class AbstractParameter(object):
                 self.error = value
             elif key == 'flag' or key == 'option' or key == 'paramflag':
                 self.paramflag = value
+            else:
+                raise Exception("Unknown attribute specified for parameter: " + key + "=" + str(value))
 
     def validate(self,value):
         self.error = None #reset error
@@ -84,7 +87,7 @@ class AbstractParameter(object):
                     xml += ' ' + key + '="'+v+ '"'        
                 else:
                     xml += ' ' + key + '="'+str(v)+ '"'        
-        if self.value:
+        if self.hasvalue:
             xml += ' value="'+unicode(self.value) + '"'
         if self.error:
             xml += ' error="'+self.error + '"'
@@ -105,6 +108,7 @@ class AbstractParameter(object):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
         if self.validate(value):
             #print "Parameter " + self.id + " successfully set to " + repr(value)
+            self.hasvalue = True
             self.value = value
             return True
         else:
@@ -213,14 +217,10 @@ class StringParameter(AbstractParameter):
     def __init__(self, id, name, description = '', **kwargs):
         self.maxlength = 0 #unlimited
 
-        #defaults
-        if not 'default' in kwargs and not 'value' in kwargs:
-            self.value = ""
         for key, value in kwargs.items():
-            if key == 'default': 
-                self.value = value  
-            elif key == 'maxlength': 
+            if key == 'maxlength': 
                 self.maxlength = int(value)
+                del kwargs[key]
 
         super(StringParameter,self).__init__(id,name,description, **kwargs)
 
@@ -250,7 +250,7 @@ class ChoiceParameter(AbstractParameter):
                 self.choices.append( (x,x) ) #list of two tuples
             else:
                 self.choices.append(x) #list of two tuples
-
+        del kwargs['choices']
 
         #defaults
         self.delimiter = ","
@@ -262,10 +262,13 @@ class ChoiceParameter(AbstractParameter):
         for key, value in kwargs.items():
             if key == 'multi': 
                 self.multi = value #boolean 
+                del kwargs[key]
             elif key == 'showall': 
                 self.showall = value #show all options at once (radio instead of a pull down) 
+                del kwargs[key]
             elif key == 'delimiter': 
                 self.delimiter = value #char
+                del kwargs[key]
 
         super(ChoiceParameter,self).__init__(id,name,description, **kwargs)
 
@@ -384,11 +387,13 @@ class IntegerParameter(AbstractParameter):
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0
         for key, value in kwargs.items():
-            if key == 'minvalue': 
+            if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
-            elif key == 'maxvalue': 
+                del kwargs[key]
+            elif key == 'maxvalue' or key == 'max': 
                 self.maxvalue = int(value)                
-
+                del kwargs[key]
+              
         super(IntegerParameter,self).__init__(id,name,description, **kwargs)
 
 
@@ -423,10 +428,12 @@ class FloatParameter(AbstractParameter):
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0.0
         for key, value in kwargs.items():
-            if key == 'minvalue': 
+            if key == 'minvalue' or key == 'min': 
                 self.minvalue = float(value)
-            elif key == 'maxvalue': 
+                del kwargs[key]
+            elif key == 'maxvalue' or key == 'max': 
                 self.maxvalue = float(value)
+                del kwargs[key]
 
         super(FloatParameter,self).__init__(id,name,description, **kwargs)
 
