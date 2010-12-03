@@ -286,12 +286,12 @@ class ChoiceParameter(AbstractParameter):
 
 
 
-    def compilearg(self, values): 
+    def compilearg(self): 
         """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
-        if isinstance(values,list):
+        if isinstance(self.value,list):
             value = self.delimiter.join(values)
         else:
-            value = values
+            value = self.value
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
 
