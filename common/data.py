@@ -912,6 +912,8 @@ class InputTemplate(object):
             xml +=" extension=\""+self.extension+"\""
         if self.unique:
             xml +=" unique=\"yes\""
+        else:
+            xml +=" unique=\"no\""
         xml += ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+"\t") + "\n"
@@ -937,9 +939,10 @@ class InputTemplate(object):
         if 'extension' in node.attrib:
             kwargs['extension'] = node.attrib['extension']
         if 'unique' in node.attrib:
-            kwargs['unique'] = node.attrib['unique']
-        if 'multi' in node.attrib:
-            kwargs['multi'] = node.attrib['multi']
+            if node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1':
+                kwargs['unique'] = True
+            else:
+                kwargs['unique'] = False
             
         #find formatclass
         if format in vars(clam.common.formats):
@@ -1266,6 +1269,8 @@ class OutputTemplate(object):
             xml +=" schema=\""+self.formatclass.schema+"\""
         if self.unique:
             xml +=" unique=\"yes\""
+        else:
+            xml +=" unique=\"no\""
         xml += ">\n"
         for metafield in self.metafields:
             xml += metafield.xml(indent + "\t") + "\n"
@@ -1289,9 +1294,10 @@ class OutputTemplate(object):
         if 'extension' in node.attrib:
             kwargs['extension'] = node.attrib['extension']
         if 'unique' in node.attrib:
-            kwargs['unique'] = node.attrib['unique']
-        if 'multi' in node.attrib:
-            kwargs['multi'] = node.attrib['multi']
+            if node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1':
+                kwargs['unique'] = True
+            else:
+                kwargs['unique'] = False
             
         #find formatclass
         if format in vars(clam.common.formats):
@@ -1543,6 +1549,7 @@ class ParameterCondition(object):
         
         kwargs = {}
         
+        found = False
         for node in node:
             if node.tag == 'if':
                 #interpret conditions:
@@ -1551,6 +1558,7 @@ class ParameterCondition(object):
                     parameter = subnode.attrib['parameter']
                     value = subnode.text
                     kwargs[parameter + '_' + operator] = value
+                    found = True
             elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
                 #interpret statements:        
                 for subnode in node: #TODO LATER: Support for multiple statement in then=, else= ?
@@ -1559,6 +1567,8 @@ class ParameterCondition(object):
                     elif subnode.tag == 'meta':                
                         #assume metafield?
                         kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
+        if not found:
+            raise Exception("No condition found in ParameterCondition!")
         return ParameterCondition(**kwargs)
 
 

@@ -60,13 +60,15 @@ class AbstractParameter(object):
         self.error = None #reset error
         return True
 
-    def compilearg(self, value):
+    def compilearg(self):
         """This method compiles the parameter into syntax that can be used on the shell, such as for example: --paramflag=value"""
         if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
             sep = ''
         elif self.paramflag:
             sep = ' '
-        return self.paramflag + sep + str(value)
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(self.value)
 
     def xml(self, indent = ""):
         """This methods renders an XML representation of this parameter, along with 
@@ -235,11 +237,18 @@ class StringParameter(AbstractParameter):
         else:
             return True            
 
-    def compilearg(self, value):
-        if value.find(" ") >= 0 or value.find(";") >= 0:            
-            value = value.replace('"',r'\"')
-            value = '"' + value + '"' #wrap in quotes
-        return super(StringParameter,self).compilearg(value)
+    def compilearg(self):
+        if self.value.find(" ") >= 0 or self.value.find(";") >= 0:            
+            value = '"' + value.replace('"',r'\"') + '"' #wrap in quotes
+        else:
+            value = self.value
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
+            sep = ''
+        elif self.paramflag:
+            sep = ' '
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(value)
 
 
 class ChoiceParameter(AbstractParameter):
@@ -295,7 +304,7 @@ class ChoiceParameter(AbstractParameter):
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
 
-        #for some odd, reason this procudes an error, as if we're not an instance of choiceparameter
+        #for some odd, reason this produced an error, as if we're not an instance of choiceparameter
         #return super(ChoiceParameter,self).compilearg(value)
 
         #workaround:
@@ -303,6 +312,8 @@ class ChoiceParameter(AbstractParameter):
             sep = ''
         elif self.paramflag:
             sep = ' '
+        else:
+            return str(value)
         return self.paramflag + sep + str(value)
 
     def xml(self, indent = ""):
@@ -374,11 +385,18 @@ class TextParameter(StringParameter): #TextArea based
     def __init__(self, id, name, description = '', **kwargs):
         super(TextParameter,self).__init__(id,name,description, **kwargs)
 
-    def compilearg(self, value):
-        if value.find(" ") >= 0 or value.find(";") >= 0:            
-            value = value.replace('"',r'\"')
-            value = '"' + value + '"' #wrap in quotes
-        return super(TextParameter,self).compilearg(value)
+    def compilearg(self):
+        if self.value.find(" ") >= 0 or self.value.find(";") >= 0:            
+            value = '"' + self.value.replace('"',r'\"') + '"' #wrap in quotes
+        else:
+            value = self.value
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
+            sep = ''
+        elif self.paramflag:
+            sep = ' '
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(value)
 
 class IntegerParameter(AbstractParameter):
     def __init__(self, id, name, description = '', **kwargs):

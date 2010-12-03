@@ -42,19 +42,54 @@ PORT= 8080
 USERS = None #no user authentication
 #USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
 
-ADMINS = ['admin'] #Define which of the above users are admins
+#ADMINS = ['admin'] #Define which of the above users are admins
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
-#List of supported Input formats by the system
-#New format types should be added to common/formats.py, and can then be used here:
-INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
-
-#List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered at the same time)
-OUTPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
+PROFILES = [ 
+    Profile(
+        InputTemplate('textinput', PlainTextFormat,"Input text document",  
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+            CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
+            PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
+            MSWordConverter(id='docconv',label='Convert from MS Word Document'),
+            extension='.txt',
+            multi=True
+        ),
+        OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
+            SetMetaField('encoding','ascii'),
+            extension='.stats',
+            multi=True
+        ),
+        OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
+            CopyMetaField('language','textinput.language'), 
+            CopyMetaField('encoding','textinput.encoding'), 
+            extension='.freqlist',
+            multi=True
+        ),
+        OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
+            SetMetaField('encoding','utf-8'),
+            filename='overall.stats',
+            unique=True
+        ), 
+        OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
+            SetMetaField('encoding','utf-8'),
+            filename='overall.freqlist',
+            unique=True
+        ), 
+        ParameterCondition(createlexicon=True, 
+            then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
+                SetMetaField('encoding','utf-8'),
+                filename='overall.lexikon',
+                unique=True
+            )            
+        )
+    ) 
+]
 
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using

@@ -541,7 +541,7 @@ class Project(object):
                 if parameter.access(user):
                     postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
                     if not (isinstance(postvalue,bool) and postvalue == False):
-                        if parameter.set(postvalue): #may generate an error in parameter.error
+                        if parameter.set(postvalue): #may generate an error in parameter.error                            
                             p = parameter.compilearg()
                             if p:
                                 params.append(p)
