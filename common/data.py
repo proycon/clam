@@ -614,6 +614,8 @@ class CLAMProvenanceData(object):
                 self.timestamp = int(time.time())
             else:
                 self.timestamp = int(timestamp)
+        else:
+            self.timestamp = 0
             
         assert isinstance(inputfiles, list)
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
@@ -1458,6 +1460,8 @@ class ParameterCondition(object):
                     self.conditions.append( (key[:-9], value,lambda x: x in value, 'contains') )
                 elif key[-7:] == '_equals':
                     self.conditions.append( (key[:-7], value,lambda x: x == value, 'equals') )
+                elif key[-7:] == '_set':
+                    self.conditions.append( (key[:-7], value,lambda x: x, 'set') )
                 else: #default is _is
                     self.conditions.append( (key,value, lambda x: x == value,'equals') )
                     

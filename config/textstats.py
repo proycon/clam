@@ -87,12 +87,18 @@ PROFILES = [
             multi=True
         ),
         OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
-            SetMetaField('encoding','utf-8'),
+            SetMetaField('encoding','ascii'),
+            ParameterCondition(author_set=True, 
+                then=ParameterMetaField('author','author'), 
+            ),
             filename='overall.stats',
             unique=True
         ), 
         OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
+            ParameterCondition(author_set=True, 
+                then=ParameterMetaField('author','author'), 
+            ),
             filename='overall.freqlist',
             unique=True
         ), 
@@ -134,7 +140,9 @@ COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIR
 PARAMETERS =  [ 
     ('Main', [ 
         BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
+        ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
         IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),
+        StringParameter(id='author',name='Author',description='Sign output metadata with the specified author name',maxlength=255),
     ] )
 ]
 

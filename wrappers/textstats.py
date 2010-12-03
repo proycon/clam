@@ -37,18 +37,21 @@ import clam.common.status
 #########################################################################################################
 
 
-def calcstats(filename, encoding):
+def calcstats(filename, encoding, casesensitive=True):
     #This is the actual core program, a very simple statistics gatherer. This function is totally independent of the CLAM API.
     
     global overallstats, overallfreqlist
     
     freqlist = {}
     f = codecs.open(filename,'r', encoding)
-    lines = characters = 0
+    lines = words = characters = 0
     for line in f:
         lines += 1
-        wordlist = set([ x.lower() for x in re.split('\W+', line, flags=re.UNICODE) if x ])
-        words = len(wordlist)
+        if casesensitive:
+            wordlist = set([ x for x in re.split('\W+', line, flags=re.UNICODE) if x ])
+        else:
+            wordlist = set([ x.lower() for x in re.split('\W+', line, flags=re.UNICODE) if x ])
+        words += len(wordlist)
         for word in wordlist:
             if not word in freqlist:
                 freqlist[word] = 1
@@ -131,7 +134,7 @@ if __name__ == "__main__":
             
         #Calling a function containing the actual core of this program (totally CLAM unaware).
         #In other scenarios, this could be where you invoke other scripts/programs through os.system()
-        localstats, localfreqlist =  calcstats(str(inputfile), encoding) 
+        localstats, localfreqlist =  calcstats(str(inputfile), encoding, clamdata.parameters['casesensitive']) 
         
         #Write statistics output for this file
         #Note 1) The filenames must always correspond to what has been defined in PROFILES in the service configuration file!
