@@ -593,18 +593,27 @@ class RawXMLProvenanceData(object):
     
 class CLAMProvenanceData(object):
     
-    def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None):
+    def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None, timestamp = None):
         self.serviceid = serviceid
         self.servicename = servicename
         self.serviceurl = serviceurl
         self.outputtemplate_id = outputtemplate_id
         self.outputtemplate_label = outputtemplate_label
-        if isinstance(parameters, dict):
-            assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters.values()])
-            self.parameters = parameters    
-        else:
-            assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters])
-            self.parameters = parameters  
+        if parameters:
+            if isinstance(parameters, dict):
+                assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters.values()])
+                self.parameters = parameters    
+            else:
+                assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters])
+                self.parameters = parameters  
+        else: 
+            self.parameters = []
+    
+        if timestamp:
+            if isinstance(datetime.datetime):
+                self.timestamp = int(time.time())
+            else:
+                self.timestamp = int(timestamp)
             
         assert isinstance(inputfiles, list)
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
@@ -615,7 +624,7 @@ class CLAMProvenanceData(object):
         
         
     def xml(self, indent = ""):
-        xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\">"
+        xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">"
         for filename, metadata in self.inputfiles:
             xml += indent + " <inputfile name=\"" + filename + "\">"
             xml += metadata.xml(indent + " ") + "\n"
@@ -642,6 +651,7 @@ class CLAMProvenanceData(object):
                 serviceid = node.attrib['id']
                 servicename = node.attrib['name']
                 serviceurl = node.attrib['url']
+                timestamp = node.attrib['timestamp']
                 outputtemplate = node.attrib['outputtemplate']
                 outputtemplatelabel = node.attrib['outputtemplatelabel']
                 inputfiles = []
@@ -661,7 +671,7 @@ class CLAMProvenanceData(object):
                                 parameters.append(vars(clam.common.parameters)[subsubnode.tag].fromxml(subsubnode))
                             else:
                                 raise Exception("Expected parameter class '" + subsubnode.tag + "', but not defined!")
-                return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters)
+                return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters, timestamp)
             else:
                 raise NotImplementedError
             
