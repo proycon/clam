@@ -96,7 +96,22 @@ class IntegerParameterTest(unittest2.TestCase):
         self.assertFalse(success)
         self.assertFalse(self.parameter.hasvalue)
         
-        
+    def test5_set_float(self):
+        """Integer parameter - setting to float (automatically converted)"""
+        success = self.parameter.set(5.6)
+        self.assertTrue(success)
+        self.assertTrue(self.parameter.hasvalue)
+        self.assertTrue(self.parameter.value == 6)
+          
+    def test6_set_string(self):
+        """Integer parameter - setting to text (invalid)"""
+        success = self.parameter.set('test')
+        #print self.parameter.error
+        self.assertTrue(self.parameter.error == "Not a number", self.parameter.error)
+        self.assertFalse(success)
+        self.assertFalse(self.parameter.hasvalue)
+
+    
 class FloatParameterTest(unittest2.TestCase):
     """Float Parameter Test"""
     

@@ -422,7 +422,7 @@ class IntegerParameter(AbstractParameter):
         try:
             value = int(value)
         except:
-            self.error = "Not a valid number, note that no decimals are allowed"
+            self.error = "Not a number"
             return False
         if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
             return True
@@ -436,6 +436,21 @@ class IntegerParameter(AbstractParameter):
             return int(postdata[self.id])
         else: 
             return False
+
+    def set(self, value):
+        """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
+        if self.validate(value):
+            #print "Parameter " + self.id + " successfully set to " + repr(value)
+            self.hasvalue = True
+            if isinstance(value, float):
+                self.value = round(value)
+            else:
+                self.value = int(value)
+            return True
+        else:
+            #print "Parameter " + self.id + " COULD NOT BE set to " + repr(value)
+            return False
+
 
 
 class FloatParameter(AbstractParameter):

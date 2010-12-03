@@ -1569,6 +1569,7 @@ class ParameterCondition(object):
                         kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
         if not found:
             raise Exception("No condition found in ParameterCondition!")
+        import pdb; pdb.set_trace()
         return ParameterCondition(**kwargs)
 
 
