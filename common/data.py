@@ -821,7 +821,7 @@ class CLAMMetaData(object):
             if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
                 formatclass = vars(clam.common.formats)[format]
             if not formatclass:
-                d = globals()
+                d = vars(clam.common.formats)
                 raise Exception("Format class " + format + " not found!")
             
             data = {}    
@@ -1431,7 +1431,7 @@ class OutputTemplate(object):
 class ParameterCondition(object):
     def __init__(self, **kwargs):
         if not 'then' in kwargs:
-            assert Exception("No 'then=' specified!")
+            raise Exception("No 'then=' specified!")
 
         self.then = None
         self.otherwise = None
@@ -1476,7 +1476,7 @@ class ParameterCondition(object):
                 else: #default is _equals
                     self.conditions.append( (key,value, lambda x: x == value,'equals') )
 
-        if not self.then:
+        if self.then is None:
             raise Exception("No then= specified for ParameterCondition!")
 
     def match(self, parameters):
@@ -1563,11 +1563,13 @@ class ParameterCondition(object):
             elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
                 #interpret statements:        
                 for subnode in node: #TODO LATER: Support for multiple statement in then=, else= ?
-                    if subnode.tag == 'parametercondition':
+                    if subnode.tag.lower() == 'parametercondition':
                         kwargs[node.tag] = ParameterCondition.fromxml(subnode)
                     elif subnode.tag == 'meta':                
                         #assume metafield?
                         kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
+                    elif subnode.tag == 'outputtemplate':
+                        kwargs[node.tag] = OutputTemplate.fromxml(subnode) 
         if not found:
             raise Exception("No condition found in ParameterCondition!")
         return ParameterCondition(**kwargs)

@@ -48,6 +48,15 @@ class AbstractViewer(object):
 
 
 
+class SimpleTableViewer(AbstractViewer):
+    id = 'tableviewer'
+    name = "Table viewer"
+
+    def view(self,file,**kwargs):
+        render = web.template.render('templates')
+        return render.crudetableviewer( file, "\t")
+
+
 
 class FrogViewer(AbstractViewer):
     id = 'frogviewer'

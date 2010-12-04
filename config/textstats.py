@@ -83,6 +83,7 @@ PROFILES = [
         OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
             CopyMetaField('language','textinput.language'), 
             CopyMetaField('encoding','textinput.encoding'), 
+            SimpleTableViewer(),
             extension='.freqlist',
             multi=True
         ),
@@ -99,6 +100,7 @@ PROFILES = [
             ParameterCondition(author_set=True, 
                 then=ParameterMetaField('author','author'), 
             ),
+            SimpleTableViewer(),
             filename='overall.freqlist',
             unique=True
         ), 
