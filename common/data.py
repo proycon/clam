@@ -1568,7 +1568,7 @@ class ParameterCondition(object):
                     elif subnode.tag == 'meta':                
                         #assume metafield?
                         kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
-                    elif subnode.tag == 'outputtemplate':
+                    elif subnode.tag.lower() == 'outputtemplate':
                         kwargs[node.tag] = OutputTemplate.fromxml(subnode) 
         if not found:
             raise Exception("No condition found in ParameterCondition!")
