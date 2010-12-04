@@ -48,9 +48,9 @@ def calcstats(filename, encoding, casesensitive=True):
     for line in f:
         lines += 1
         if casesensitive:
-            wordlist = set([ x for x in re.split('\W+', line, flags=re.UNICODE) if x ])
+            wordlist = set([ x for x in re.split('\W+', line, re.UNICODE) if x ])
         else:
-            wordlist = set([ x.lower() for x in re.split('\W+', line, flags=re.UNICODE) if x ])
+            wordlist = set([ x.lower() for x in re.split('\W+', line, re.UNICODE) if x ])
         words += len(wordlist)
         for word in wordlist:
             if not word in freqlist:
@@ -119,9 +119,9 @@ if __name__ == "__main__":
     overallfreqlist = {} #will hold overall frequency list
 
     #Read a user-defined parameter
-    if 'freqlistlimit' in clamdata.parameters:
-        freqlistlimit = clamdata.parameters['freqlistlimit']
-    else:
+    try:
+        freqlistlimit = clamdata.parameter('freqlistlimit')
+    except KeyError:
         freqlistlimit = 0
         
 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             
         #Calling a function containing the actual core of this program (totally CLAM unaware).
         #In other scenarios, this could be where you invoke other scripts/programs through os.system()
-        localstats, localfreqlist =  calcstats(str(inputfile), encoding, clamdata.parameters['casesensitive']) 
+        localstats, localfreqlist =  calcstats(str(inputfile), encoding, clamdata.parameter('casesensitive')) 
         
         #Write statistics output for this file
         #Note 1) The filenames must always correspond to what has been defined in PROFILES in the service configuration file!
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     f.write(dicttotext(overallfreqlist, True, freqlistlimit ))
     f.close()
 
-    if 'createlexicon' in clamdata.parameters and clamdata.parameters['createlexicon'] == True:
+    if clamdata.parameter('createlexicon'):
         #Write overall frequency list output for this file    
         f = codecs.open(outputdir + 'overall.lexicon','w','utf-8')
         for word in sorted(overallfreqlist.keys()):

@@ -20,6 +20,7 @@ import httplib2
 import os.path
 import codecs
 import json
+import time
 from copy import copy
 
 import clam.common.parameters
@@ -348,7 +349,7 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
             for parameter in parameters:
                 if parameter.id == id:
                     return parameter
-        raise KeyError
+        raise KeyError("No such parameter exists: " + id )
 
     def __getitem__(self, id):                                 
         """Return the specified global parameter (alias for getparameter)"""
@@ -429,7 +430,7 @@ class Profile(object):
             elif isinstance(arg, ParameterCondition):
                 self.output.append(arg)
                     
-        #Check for orphan OutputTemplates. OutputTemplates must have a parent (unless there is no input, then outputtemplates with filename, unique=True and copymetadata=False are parentless)
+        #Check for orphan OutputTemplates. OutputTemplates must have a parent (only outputtemplates with filename, unique=True may be parentless)
         for o in self.output:
             if isinstance(o, ParameterCondition):
                 for o in o.allpossibilities():
@@ -610,12 +611,9 @@ class CLAMProvenanceData(object):
             self.parameters = []
     
         if timestamp:
-            if isinstance(datetime.datetime):
-                self.timestamp = int(time.time())
-            else:
                 self.timestamp = int(timestamp)
         else:
-            self.timestamp = 0
+            self.timestamp = time.time()
             
         assert isinstance(inputfiles, list)
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
@@ -1268,6 +1266,10 @@ class OutputTemplate(object):
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
             xml +=" schema=\""+self.formatclass.schema+"\""
+        if self.filename:
+            xml +=" filename=\""+self.filename+"\""
+        if self.extension:
+            xml +=" extension=\""+self.extension+"\""            
         if self.unique:
             xml +=" unique=\"yes\""
         else:

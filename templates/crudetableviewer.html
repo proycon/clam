@@ -1,7 +1,7 @@
 $def with (file, delimiter)
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=$file.format.encoding" />
+<meta http-equiv="content-type" content="text/html; charset=$file.metadata['encoding']" />
 <title>$file.filename</title>
 <style type="text/css">
     body {
@@ -43,13 +43,13 @@ $def with (file, delimiter)
 
 <body>
 <div id="viewer">
-    <h1>$file.filename.encode(file.format.encoding)</h1>
+    <h1>$file.filename.encode(file.metadata['encoding'])</h1>
 
     <table>
     $for line in file:
         <tr>
         $for field in line.strip('\n\t ').split(delimiter):
-            <td>$field.encode(file.format.encoding)</td>
+            <td>$field.encode(file.metadata['encoding'])</td>
         </tr>
     </table>
 </div>
