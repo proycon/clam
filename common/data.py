@@ -611,7 +611,7 @@ class CLAMProvenanceData(object):
             self.parameters = []
     
         if timestamp:
-                self.timestamp = int(timestamp)
+            self.timestamp = int(float(timestamp))
         else:
             self.timestamp = time.time()
             
