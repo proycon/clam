@@ -757,12 +757,13 @@ class CLAMMetaData(object):
 
     def __setitem__(self, key, value):
         if self.attributes != None and not key in self.attributes:
-            raise KeyError
+            if not self.allowcustomattributes:
+                raise KeyError("Trying to set metadata field '" + key + "', but no custom attributes are allowed by the format")
         elif self.attributes and key in self.attributes:
             maxvalues = self.attributes[key]
             if isinstance(maxvalues, list):
                 if not value in maxvalues:
-                    raise ValueError
+                    raise ValueError("Invalid value '" + str(value) + "' for metadata field '" + key + "'")
             
         assert not isinstance(value, list)
         self.data[key] = value
@@ -1467,12 +1468,12 @@ class ParameterCondition(object):
                     self.conditions.append( (key[:-9], value,lambda x: x in value, 'contains') )
                 elif key[-7:] == '_equals':
                     self.conditions.append( (key[:-7], value,lambda x: x == value, 'equals') )
-                elif key[-7:] == '_set':
+                elif key[-4:] == '_set':
                     if value:
-                        self.conditions.append( (key[:-7], value,lambda x: x, 'set') )
+                        self.conditions.append( (key[:-4], value,lambda x: x, 'set') )
                     else:
-                        self.conditions.append( (key[:-7], value,lambda x: not x, 'set') )
-                else: #default is _is
+                        self.conditions.append( (key[:-4], value,lambda x: not x, 'set') )
+                else: #default is _equals
                     self.conditions.append( (key,value, lambda x: x == value,'equals') )
 
         if not self.then:
@@ -1569,7 +1570,6 @@ class ParameterCondition(object):
                         kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
         if not found:
             raise Exception("No condition found in ParameterCondition!")
-        import pdb; pdb.set_trace()
         return ParameterCondition(**kwargs)
 
 
