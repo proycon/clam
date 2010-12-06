@@ -21,6 +21,7 @@ import os
 sys.path.append(sys.path[0] + '/../../')
 os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 
+import clam.common.data
 import clam.common.parameters
 
 
@@ -274,7 +275,79 @@ class MultiChoiceParameterTest(unittest2.TestCase):
         self.assertFalse(self.parameter.hasvalue)
                 
 
+class ParameterProcessingTest(unittest2.TestCase):
+    """Parameter Processing Tests"""
+    
+    def setUp(self):
+        #string REQUIRES boolean (but not vice versa)
+        #float FORBIDS int (and vice versa)        
+        #choice is required
+        self.nogroups = [            
+            clam.common.parameters.StringParameter('teststring','test','test',paramflag='-s',maxlength=10, require=['testbool']),
+            clam.common.parameters.ChoiceParameter('testchoice','test','test',choices=[('a','A'),('b','B'),('c','C')], paramflag='-c',required=True),
+            clam.common.parameters.FloatParameter('testfloat','test','test',paramflag='-f',min=0.0,max=1.0, forbid=['testint']),
+            clam.common.parameters.IntegerParameter('testint','test','test',paramflag='-i',min=1,max=10,forbid=['testfloat']),
+            clam.common.parameters.BooleanParameter('testbool','test','test',paramflag='-b')
+        ]
+        self.groups = [
+            ('Main',
+                self.nogroups
+            )
+        ]
+        #valid settings
+        self.postdata = {'teststring': 'test', 'testbool': True, 'testint': 4, 'testchoice':'c'}
                         
+    def test1_sanity_nogroup(self):
+        """Parameter Processing - Sanity check (no group)"""
+        errors, parameters, _ = clam.common.data.processparameters(self.postdata, self.nogroups)
+        self.assertFalse(errors)
+        self.assertTrue(parameters[0].id == 'teststring')
+        self.assertTrue(parameters[1].id == 'testchoice')
+        self.assertTrue(parameters[2].id == 'testfloat')
+        self.assertTrue(parameters[3].id == 'testint')
+        self.assertTrue(parameters[4].id == 'testbool')
+    
+    def test2_sanity_group(self):
+        """Parameter Processing - Sanity check (group)"""
+        errors, parameters, _ = clam.common.data.processparameters(self.postdata, self.groups)
+        self.assertFalse(errors)
+        group, parameters = parameters[0]
+        self.assertTrue(group == 'Main')        
+        self.assertTrue(parameters[0].id == 'teststring')
+        self.assertTrue(parameters[1].id == 'testchoice')
+        self.assertTrue(parameters[2].id == 'testfloat')
+        self.assertTrue(parameters[3].id == 'testint')
+        self.assertTrue(parameters[4].id == 'testbool')
+        
+    def test3_valuecheck_nogroup(self):    
+        """Parameter Processing - Value check (no group)"""
+        errors, parameters, _ = clam.common.data.processparameters(self.postdata, self.nogroups)
+        self.assertFalse(errors)    
+        self.assertTrue(parameters[0].value == self.postdata['teststring'])
+        self.assertTrue(parameters[1].value == self.postdata['testchoice'])
+        self.assertFalse(parameters[2].hasvalue)
+        self.assertTrue(parameters[3].value == self.postdata['testint'])
+        self.assertTrue(parameters[4].value == self.postdata['testbool'])        
+        
+    def test4_valuecheck_group(self):    
+        """Parameter Processing - Value check (group)"""
+        errors, parameters, _ = clam.common.data.processparameters(self.postdata, self.groups)
+        self.assertFalse(errors) 
+        group, parameters = parameters[0]   
+        self.assertTrue(parameters[0].value == self.postdata['teststring'])
+        self.assertTrue(parameters[1].value == self.postdata['testchoice'])
+        self.assertFalse(parameters[2].hasvalue)
+        self.assertTrue(parameters[3].value == self.postdata['testint'])
+        self.assertTrue(parameters[4].value == self.postdata['testbool'])         
+                        
+    def test5_commandline(self):    
+        """Parameter Processing - Command line argument check"""                                        
+        errors, parameters, commandlineargs = clam.common.data.processparameters(self.postdata, self.groups)
+        self.assertFalse(errors) 
+        self.assertTrue(commandlineargs == ['-s test', '-c c', '-i 4', '-b']) #order same as defined
+            
+         
+         
                                         
 if __name__ == '__main__':
     unittest2.main(verbosity=2)

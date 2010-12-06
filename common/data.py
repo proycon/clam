@@ -202,11 +202,11 @@ def processparameter(postdata, parameter, user=None):
     commandlineparam = ""
     
     if parameter.access(user):
-        try:
-            postvalue = parameter.valuefrompostdata(postdata)
-        except:
-            clam.common.util.printlog("An error occured whilst interpreting postdata for parameter " + parameter.id + ", continuing without this parameter...")
-            postvalue = None
+        #try:
+        postvalue = parameter.valuefrompostdata(postdata)
+        #except:
+        #    clam.common.util.printlog("An error occured whilst interpreting postdata for parameter " + parameter.id + ", continuing without this parameter...")
+        #    postvalue = None
         if not (postvalue is None):
             if parameter.set(postvalue): #may generate an error in parameter.error                            
                 p = parameter.compilearg()
@@ -244,7 +244,7 @@ def processparameters(postdata, parameters, user=None):
                     tempparlist.append(parameter)
                     if commandlineparam:
                         commandlineparams.append(commandlineparam)                    
-                newparameters += newparameterlist                
+                newparameters.append( (parametergroup, newparameterlist) )
         elif all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters]):
             for parameter in parameters:
                 error, parameter, commandlineparam = processparameter(postdata, copy(parameter), user)

@@ -524,8 +524,10 @@ class Project(object):
         #Generate arguments based on POSTed parameters
         commandlineparams = []
         postdata = web.input()
-                                        
+
+        parin = settings.PARAMETERS
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
+        parout = parameters
                                         
         url = 'http://' + settings.HOST
         if settings.PORT != 80:

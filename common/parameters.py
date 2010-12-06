@@ -202,7 +202,7 @@ class BooleanParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
+        if self.id in postdata and (isinstance(postdata[self.id], bool) or (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled')):
             return True #postdata[self.id]
         else: 
             return False
@@ -299,7 +299,7 @@ class ChoiceParameter(AbstractParameter):
     def compilearg(self): 
         """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
         if isinstance(self.value,list):
-            value = self.delimiter.join(values)
+            value = self.delimiter.join(self.value)
         else:
             value = self.value
         if value.find(" ") >= 0:
@@ -434,7 +434,7 @@ class IntegerParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id].isdigit():
+        if self.id in postdata and (isinstance(postdata[self.id],int) or postdata[self.id].isdigit()):
             return int(postdata[self.id])
         else: 
             return None
