@@ -41,7 +41,7 @@ class BasicServiceTest(unittest2.TestCase):
         self.client = CLAMClient(self.url)
 
     def test1_index(self):
-        """Basic Service Test - Index and and sanity"""
+        """Basic Service Test - Index and sanity"""
         data = self.client.index()
         self.assertTrue(data.system_id == "textstats")
         self.assertTrue(isinstance(data.projects,list))
@@ -67,14 +67,53 @@ class BasicServiceTest(unittest2.TestCase):
         self.assertTrue(isinstance(data.input,list))        
         
     def test2_4_upload(self):
-        """Basic Service Test - File upload"""
+        """Basic Service Test - File upload with extension"""
         f = codecs.open('/tmp/servicetest.txt','w','utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
-        success = clamclient.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        data = self.client.get('basicservicetest')
+        success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)        
+        
+    def test2_5_upload(self):
+        """Basic Service Test - File upload verification"""
+        data = self.client.get('basicservicetest')
+        found = False
+        for f in data.input:
+            if f.filename == 'servicetest.txt':
+                found = True    
+        self.assertTrue(found)        
+        
+    def test2_6_deletion(self):
+        """Basic Service Test - File Deletion"""
+        data = self.client.get('basicservicetest')
+        success = False
+        for f in data.input:
+            if f.filename == 'servicetest.txt':
+                success = f.delete()
         self.assertTrue(success)        
 
-    def test2_5_delete(self):
+                
+    def test2_7_upload(self):
+        """Basic Service Test - File upload without extension"""
+        f = codecs.open('/tmp/servicetest','w','utf-8')
+        f.write(u"On espère que tout ça marche bien.")
+        f.close()
+        data = self.client.get('basicservicetest')
+        success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='fr')
+        self.assertTrue(success)   
+        
+    def test2_8_upload(self):
+        """Basic Service Test - File upload verification + metadata check"""
+        data = self.client.get('basicservicetest')
+        found = False
+        for f in data.input:
+            if f.filename == 'servicetest.txt':
+                self.assertTrue(f.metadata)  
+                found = True    
+        self.assertTrue(found)   
+
+    def test2_9_delete(self):
         """Basic Service Test - Project deletion"""
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
