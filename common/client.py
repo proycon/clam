@@ -18,7 +18,8 @@ import os.path
 import httplib2
 import urllib2
 from urllib import urlencode
-
+from lxml import etree as ElementTree
+from StringIO import StringIO
 
 from clam.external.poster.encode import multipart_encode
 from clam.external.poster.streaminghttp import register_openers
@@ -74,6 +75,18 @@ class NoConnection(Exception):
          def __str__(self):
             return "Can't establish a connection with the server" 
 
+
+class UploadError(Exception):
+         def __init__(self, msg = ""):
+            self.msg = msg            
+         def __str__(self):
+            return "Error during Upload: " + self.msg
+
+class ParameterError(Exception):
+         def __init__(self, msg = ""):
+            self.msg = msg            
+         def __str__(self):
+            return "Error setting parameter: " + self.msg
 
 
 class CLAMClient:
@@ -149,19 +162,31 @@ class CLAMClient:
             
 
     def create(self,project):
-        """create a new project"""
+        """Create a new project"""
         return self.request(project + '/', 'PUT')
-     
+    
 
     def start(self, project, **parameters):
-        """start a run"""
+        """Start a run. 'project' is the ID of the project, and **parameters are keyword arguments for
+        the global parameters. Returns a CLAMData object or raises exceptions. Note that no exceptions are raised on parameter errors, you have to check for those manually! (Use startsafe instead if want Exceptions on parameter errors)"""
         auth = None
         if 'auth' in parameters:
             auth = parameters['auth']
             del parameters['auth']
 
-        return self.request(project + '/', 'POST', urlencode(parameters))
-
+        return self.request(project + '/', 'POST', urlencode(parameters))        
+        
+    def startsafe(self, project, **parameters):
+        try:
+            data = self.start(project, **parameters)
+            for parametergroup, paramlist in data.parameters:
+                for parameter in paramlist:
+                    if parameter.error:
+                        raise ParameterError(parameter.error)
+            return data
+        except:
+            raise
+        
 
     def delete(self,project):
         """aborts AND deletes a project"""
@@ -191,6 +216,24 @@ class CLAMClient:
                 filename += '.' + inputtemplate.extension        
                 
         return filename
+
+    def _parseupload(self, node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        if node.tag != 'clamupload':
+            raise Exception("No a valid CLAM upload response")
+        for subnode in node:
+            if subnode.tag == 'error':
+                raise UploadError(subnode.text)
+            if subnode.tag == 'parameters':           
+                if 'errors' in subnode.attrib:                    
+                    errormsg = "An unknown parameter error occured"
+                    for parameternode in subnode:                    
+                        if 'error' in parameternode.attrib:
+                            errormsg = parameternode.attrib['error']
+                            break
+                    raise ParameterError(errormsg)
+        return True
 
 
     def addinputfile(self, project, inputtemplate, sourcefile, **kwargs):
@@ -236,7 +279,12 @@ class CLAMClient:
 
         # Create the Request object
         request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        return urllib2.urlopen(request).read()
+        xml = urllib2.urlopen(request).read()
+        try:
+            return self._parseupload(xml)
+        except:
+            raise
+        
 
     def addinput(self, project, inputtemplate, contents, **kwargs):
         """Add an input file to the CLAM service. Explictly providing the contents as a string
@@ -279,7 +327,11 @@ class CLAMClient:
 
         # Create the Request object
         request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        return urllib2.urlopen(request).read()        
+        xml = urllib2.urlopen(request).read()
+        try:
+            return self._parseupload(xml)
+        except:
+            raise
                
 
     def upload(self,project, inputtemplate, sourcefile, **kwargs):

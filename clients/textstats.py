@@ -99,7 +99,9 @@ print "Starting..."
 #starting the project. The start() method takes a project name and a set of keyword arguments, the keywords here
 #correspond with the parameter IDs defined by your webservice.
 data = clamclient.start(project, createlexicon=createlexicon) #start the process with the specified parameters
-#Always check for errors! Don't just assume everything went well!
+
+#Always check for parameter errors! Don't just assume everything went well! Use startsafe instead of start
+#to simply raise exceptions on parameter errors.
 if data.errors:
     print >>sys.stderr,"An error occured: " + data.errormsg
     for parametergroup, paramlist in data.parameters:
