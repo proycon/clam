@@ -212,7 +212,7 @@ class CLAMClient:
         if inputtemplate.filename:
             filename = inputtemplate.filename
         elif inputtemplate.extension: 
-            if filename[-len(inputtemplate.extension) - 1:].lower() != inputtemplate.extension.lower():
+            if filename[-len(inputtemplate.extension) - 1:].lower() != '.' +  inputtemplate.extension.lower():
                 filename += '.' + inputtemplate.extension        
                 
         return filename
