@@ -90,11 +90,20 @@ class IntegerParameterTest(unittest2.TestCase):
         
         
     def test4_set_outofrange(self):
-        """Integer parameter - setting to value out of range"""
+        """Integer parameter - setting to value out of range (lower)"""
         success = self.parameter.set(0)
         self.assertTrue(self.parameter.error == "Number must be a whole number between 1 and 10")
         self.assertFalse(success)
         self.assertFalse(self.parameter.hasvalue)
+        
+                
+    def test41_set_outofrange(self):
+        """Integer parameter - setting to value out of range (higher)"""
+        success = self.parameter.set(11)
+        self.assertTrue(self.parameter.error == "Number must be a whole number between 1 and 10")
+        self.assertFalse(success)
+        self.assertFalse(self.parameter.hasvalue)
+        
         
     def test5_set_float(self):
         """Integer parameter - setting to float (automatically converted)"""

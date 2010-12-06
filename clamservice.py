@@ -522,48 +522,10 @@ class Project(object):
             raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
                     
         #Generate arguments based on POSTed parameters
-        params = []
+        commandlineparams = []
         postdata = web.input()
-        errors = False
-
-        #we're going to modify parameter values, this we can't do
-        #on the global variable, that won't be thread-safe, we first
-        #make a (shallow) copy and act on that  
-        parameters = []
-        for parametergroup, parameterlist in settings.PARAMETERS:
-            newparameterlist = []
-            for parameter in parameterlist:
-                newparameterlist.append(copy(parameter))
-            parameters.append( (parametergroup, newparameterlist) ) 
-
-        for parametergroup, parameterlist in parameters:
-            for parameter in parameterlist:
-                if parameter.access(user):
-                    postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
-                    if not (isinstance(postvalue,bool) and postvalue == False):
-                        if parameter.set(postvalue): #may generate an error in parameter.error                            
-                            p = parameter.compilearg()
-                            if p:
-                                params.append(p)
-                        else:
-                            if not parameter.error: parameter.error = "Something went wrong whilst setting this parameter!" #shouldn't happen
-                            printlog("Unable to set " + parameter.id + ": " + parameter.error)
-                            errors = True
-                    elif parameter.required:
-                        #Not all required parameters were filled!
-                        parameter.error = "This option must be set"
-                        errors = True
-                    if parameter.value and (parameter.forbid or parameter.require):
-                        for _, parameterlist2 in parameters:
-                            for parameter2 in parameterlist2:
-                                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
-                                        parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                                        printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
-                                        errors = True
-                                    if parameter.require and parameter2.id in parameter.require and not parameter2.value:
-                                        parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                                        printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
-                                        errors = True
+                                        
+        errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
                                         
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
@@ -595,7 +557,7 @@ class Project(object):
 
             #Start project with specified parameters
             cmd = settings.COMMAND
-            cmd = cmd.replace('$PARAMETERS', " ".join(params))
+            cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams))
             if 'usecorpus' in postdata and postdata['usecorpus']:
                 corpus = postdata['usecorpus'].replace('..','') #security            
                 #use a preinstalled corpus:

@@ -13,6 +13,7 @@
 from lxml import etree as ElementTree
 from StringIO import StringIO
 
+
 class AbstractParameter(object):
     def __init__(self, id, name, description = '', **kwargs):
         self.id = id #a unique ID
@@ -192,7 +193,7 @@ class BooleanParameter(AbstractParameter):
 
     def compilearg(self):
         if not self.paramflag:
-            Exception("paramflag not set for BooleanParameter " + self.id)
+            return ""
         if self.reverse: self.value = not self.value
         if self.value:
             return self.paramflag

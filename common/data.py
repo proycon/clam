@@ -196,7 +196,57 @@ def getclamdata(filename):
     f.close()
     return CLAMData(xml, True)
     
-    
+def processparameters(postdata, parameters, user=None):
+        #we're going to modify parameter values, this we can't do
+        #on the global variable, that won't be thread-safe, we first
+        #make a (shallow) copy and act on that  
+        
+        newparameters = []
+        if all([isinstance(x,tuple) for x in parameters ]):                 
+            for parametergroup, parameterlist in parameters:
+                newparameterlist = []
+                for parameter in parameterlist:
+                    newparameterlist.append(copy(parameter))
+                newparameters += newparameterlist
+        elif all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters]):
+            for parameter in parameters:
+                newparameters.append(copy(parameter))
+        else:
+            raise Exception("Invalid parameters")
+                        
+        commandlineparams = []
+                        
+        parameters = newparameters
+        errors = False
+        for parameter in parameters:            
+            if parameter.access(user):
+                postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
+                if not (isinstance(postvalue,bool) and postvalue == False):
+                    if parameter.set(postvalue): #may generate an error in parameter.error                            
+                        p = parameter.compilearg()
+                        if p:
+                            commandlineparams.append(p)
+                    else:
+                        if not parameter.error: parameter.error = "Something went wrong whilst setting this parameter!" #shouldn't happen
+                        clam.common.util.printlog("Unable to set " + parameter.id + ": " + parameter.error)
+                        errors = True
+                elif parameter.required:
+                    #Not all required parameters were filled!
+                    parameter.error = "This option must be set"
+                    errors = True
+                if parameter.value and (parameter.forbid or parameter.require):
+                    for _, parameterlist2 in parameters:
+                        for parameter2 in parameterlist2:
+                                if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
+                                    parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
+                                    clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                                    errors = True
+                                if parameter.require and parameter2.id in parameter.require and not parameter2.value:
+                                    parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
+                                    clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                                    errors = True
+
+        return errors, parameters, commandlineparams
 
 class CLAMData(object): #TODO: Adapt CLAMData for new metadata
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
@@ -551,7 +601,7 @@ class Profile(object):
         o += indent + "\tInput"
         for inputtemplate in self.input:
             o += inputtemplate.out(indent +"\t") + "\n"            
-        xml += indent + "\tOutput"
+        o += indent + "\tOutput"
         for outputtemplate in self.output:
             o += outputtemplate.out(indent +"\t") + "\n"
 
@@ -1014,43 +1064,12 @@ class InputTemplate(object):
 
                 
                 
-    def validate(self, postdata, user = None):
-        errors = False
-        
-        
-        #we're going to modify parameter values, this we can't do
-        #on the inputtemplate variable, that won't be thread-safe, we first
-        #make a (shallow) copy and act on that          
-        parameters = []
-        for parameter in self.parameters:
-            parameters.append(copy(parameter))
-        
-        
-        for parameter in parameters:
-            if parameter.access(user):
-                postvalue = parameter.valuefrompostdata(postdata) #parameter.id in postdata and postdata[parameter.id] != '':    
-                if not (isinstance(postvalue,bool) and postvalue == False):
-                    clam.common.util.printdebug("InputTemplate.validate(): Setting " + parameter.id + " to: " + postvalue)
-                    if not parameter.set(postvalue): #may generate an error in parameter.error                    
-                        if not parameter.error: parameter.error = "Something mysterious went wrong whilst settings this parameter!" #shouldn't happen
-                        clam.common.util.printdebug("InputTemplate.validate(): Unable to set " + parameter.id + ": " + parameter.error)
-                        #printlog("Unable to set " + parameter.id + ": " + parameter.error)
-                        errors = True
-                elif parameter.required:
-                    #Not all required parameters were filled!
-                    parameter.error = "This option must be set"
-                    errors = True
-                if parameter.value and (parameter.forbid or parameter.require):
-                    for parameter2 in parameters:
-                            if parameter.forbid and parameter2.id in parameter.forbid and parameter2.value:
-                                parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                                clam.common.util.printdebug("InputTemplate.validate(): Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
-                                errors = True
-                            if parameter.require and parameter2.id in parameter.require and not parameter2.value:
-                                parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                                clam.common.util.printdebug("InputTemplate.validate(): Setting " + parameter.id + " requires you also set " + parameter2.id )
-                                errors = True
+    def validate(self, postdata, user = None):            
+        clam.common.util.printdebug("Validating inputtemplate " + self.id + "...")
+        errors, parameters, _  = processparameters(postdata, self.parameters, user)        
         return errors, parameters
+        
+
 
 
     def generate(self, file, validatedata = None,  inputdata=None, user = None):
