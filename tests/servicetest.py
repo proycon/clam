@@ -65,9 +65,23 @@ class BasicServiceTest(unittest2.TestCase):
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)        
         self.assertTrue(isinstance(data.input,list))        
+        
+    def test2_4_upload(self):
+        """Basic Service Test - File upload"""
+        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f.write(u"On espère que tout ça marche bien.")
+        f.close()
+        success = clamclient.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)        
 
-    def test2_4_delete(self):
+    def test2_5_delete(self):
         """Basic Service Test - Project deletion"""
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
+        
+class ExtensiveServiceTest(unittest2.TestCase):
+    def setUp(self):
+        self.url = 'http://' + os.uname()[1] + ':8080'
+        self.client = CLAMClient(self.url)    
+    
         

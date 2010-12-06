@@ -494,6 +494,10 @@ def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
     return matched
 
 
+
+        
+        
+
 class Profile(object):
     def __init__(self, *args):
         """Create a Profile. Arguments can be of class InputTemplate, OutputTemplate or ParameterCondition"""
@@ -612,7 +616,6 @@ class Profile(object):
     def xml(self, indent = ""):
         """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
         xml = "\n" + indent + "<profile"
-
         xml += ">\n"
         xml += indent + " <input>\n"
         for inputtemplate in self.input:

@@ -134,10 +134,10 @@ $(document).ready(function(){
             dataType: "xml", 
             data: data, 
             success: function(response){ 
-                processuploadresponse(response);
+                processuploadresponse(response, '#editorparameters');
             },
             error: function(response, errortype){
-                alert("An error occured while attempting to upload the text: " + errortype + "\n" + response);
+                processuploadresponse(response, '#editorparameters');
             }            
         });            
         return true;
@@ -161,12 +161,12 @@ $(document).ready(function(){
                 dataType: "xml", 
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
                 success: function(response){
-                    processuploadresponse(response);
+                    processuploadresponse(response, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
                 },
                 error: function(response, errortype){
-                    alert("An error occured while attempting to fetch this file. Please verify the URL is correct and up: " + errortype);
+                    processuploadresponse(response, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
                 }                
@@ -192,7 +192,7 @@ $(document).ready(function(){
                 $('#uploadprogress').show();           
             },  
             onComplete: function(file, response){
-                processuploadresponse(response);
+                processuploadresponse(response, '#uploadparameters');
                 $('#uploadprogress').hide();
                 $('#clientupload').show();
             }       
@@ -213,13 +213,29 @@ function addformdata(parent, data) {
     });
 }
 
-function processuploadresponse(response) {
+function processuploadresponse(response, paramdiv) {
       //Processes CLAM Upload XML
       
       $(response).find('upload').each(function(){       //for each uploaded file
-        var children = $(this).children();
+        //var children = $(this).children();
         var inputtemplate = $(this).attr('inputtemplate');
-        var metadataerror = false;
+        
+        var errors = false;
+        $(response).find('error').each(function() {
+                errors = true;
+                alert($(this).text());
+        });
+        $(response).find('parameters').each(function(){ 
+             if ($(this).attr('errors') == 'no') {
+                    errors = false;
+             } else {
+                    errors = true;
+                    //propagate the parameter errors to the interface
+                    renderfileparameters(inputtemplate, paramdiv, true, $(this) );
+             }
+        });        
+        
+        /*var metadataerror = false;
         var conversionerror = false;
         var parametererrors = false;
         var valid = false;
@@ -243,9 +259,10 @@ function processuploadresponse(response) {
             }
         }
           
-        if ((valid) && (!parametererrors) && (!metadataerror)) {
+        if ((valid) && (!parametererrors) && (!metadataerror)) {*/
             //good! 
-            
+        
+        if (!errors) {
             //Check if file already exists in input table
             var found = false;
             var data = tableinputfiles.fnGetData();
@@ -260,8 +277,9 @@ function processuploadresponse(response) {
             if (!found) {
                 tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] )
             }
-            
-         //TODO: Make errors nicer, instead of alerts, propagate to interface
+        }
+        
+        /* //TODO: Make errors nicer, instead of alerts, propagate to interface
         } else if (metadataerror) {
             alert("A metadata error occured, contact the service provider");
         } else if (conversionerror) {
@@ -271,10 +289,10 @@ function processuploadresponse(response) {
             //TODO: Specify what parameter errors occured
         } else if (!valid) {
             alert("The file you uploaded did not validate, it's probably not of the type you specified");
-        }
-    
+        }*/
     });  
 }
+
 
 
 function getinputtemplate(id) {
@@ -312,7 +330,7 @@ function validateuploadfilename(filename, inputtemplate_id) {
 
 
 
-function renderfileparameters(id, target, enableconverters) {
+function renderfileparameters(id, target, enableconverters, parametersxmloverride = null) {
     if (id == "") {
         $(target).html("");
     } else {
@@ -322,7 +340,12 @@ function renderfileparameters(id, target, enableconverters) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)    
                 xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
-                var xmldoc = $(inputtemplate.parametersxml)[0];
+                var xmldoc;
+                if (parametersxmloverride != null) {
+                    xmldoc = $(inputtemplate.parametersxml)[0];
+                } else {
+                    xmldoc = parametersxmloverride;
+                }
                 //var s = (new XMLSerializer()).serializeToString(xmldoc);
                 //alert(s);
                 
@@ -349,6 +372,8 @@ function renderfileparameters(id, target, enableconverters) {
         }
     }
 }
+
+
 
 
 function deleteinputfile(filename) {   

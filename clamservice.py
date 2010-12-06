@@ -844,7 +844,7 @@ class InputFileHandler(object):
             if not inputtemplate:
                 #Inputtemplate not found, send 404 - Bad Request
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-                raise web.webapi.notfound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
+                raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
         else:
             #Check if the specified filename can be uniquely associated with an inputtemplate
             for profile in settings.PROFILES:
@@ -915,8 +915,10 @@ class InputFileHandler(object):
         
         
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        output += "<clamupload>\n"
+        head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        head += "<clamupload>\n"
+        
+        
         
         if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
             printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
@@ -932,7 +934,8 @@ class InputFileHandler(object):
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
             
-        output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
+        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
+        output = head
 
           
         #============================ Generate metadata ========================================
@@ -964,6 +967,8 @@ class InputFileHandler(object):
         for parameter in parameters:
             output += parameter.xml()
         output += "</parameters>"
+        
+
             
         if not errors:
             #============================ Transfer file ========================================
@@ -1002,6 +1007,8 @@ class InputFileHandler(object):
         #Create a file object
         file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
         
+        fatalerror = None
+        
         #============== Generate metadata ==============
 
         if not metadata: #check if it has not already been set in another stage
@@ -1024,7 +1031,8 @@ class InputFileHandler(object):
             metadata.inputtemplate = inputtemplate.id
             
         if not validmeta:    
-            output += "<metadataerror />" #This usually indicates an error in service configuration!
+            #output += "<metadataerror />" #This usually indicates an error in service configuration!
+            fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ", this usually indicates an error in service configuration!</error>"
         else:                    
             #=========== Convert the uploaded file (if requested) ==============
             
@@ -1041,8 +1049,7 @@ class InputFileHandler(object):
                         success = False
                     if not success:
                         conversionerror = True
-                        output += "<conversionerror />" 
-            
+                        fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
         
             #====================== Validate the file itself ====================
             if not conversionerror:
@@ -1061,16 +1068,29 @@ class InputFileHandler(object):
                     os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
                 else:
                     #Too bad, everything worked out but the file itself doesn't validate.
-                    output += "<valid>no</valid>"
+                    #output += "<valid>no</valid>"
+                    fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
                 
                     #remove upload
                     os.unlink(Project.path(project) + 'input/' + filename)
         
         
-        output += "</upload>\n"       
+        foot = "</upload>\n"       
 
-        output += "</clamupload>"
-        return output #200
+        foot += "</clamupload>"
+        
+        output += foot
+        
+        
+        if fatalerror:
+            #fatal error return error message with 403 code
+            raise web.webapi.Forbidden(head + fatalerror + foot)
+        elif errors:
+            #parameter errors, return XML output with 403 code
+            raise web.webapi.Forbidden(output)
+        else:
+            #everything ok, return XML output with 200 code
+            return output
 
 
 class InterfaceData(object):
