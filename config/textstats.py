@@ -57,6 +57,11 @@ ADMINS = ['admin'] #Define which of the above users are admins
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
+# ======== WEB-APPLICATION STYLING =============
+
+#Choose a style (has to be defined as a CSS file in style/ )
+STYLE = 'classic'
+
 # ======== ENABLED FORMATS ===========
 
 #Here you can specify an extra formats module

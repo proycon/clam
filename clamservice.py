@@ -118,6 +118,7 @@ class CLAMService(object):
     urls = (
         '/', 'Index',
         '/data.js', 'InterfaceData', #provides Javascript data for the web interface
+        '/style.css', 'StyleData', #provides stylesheet for the web interface
         #'/t/', 'TestInterface',
         '/([A-Za-z0-9_]*)/?', 'Project',
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
@@ -1116,6 +1117,16 @@ class InterfaceData(object):
 
         return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
+
+class StyleData(object):
+    """Provides Stylesheet"""
+
+    def GET(self):
+        web.header('Content-Type', 'text/css')
+
+        for line in codecs.open('style/' + settings.STYLE + '.css','r','utf-8'):
+            yield line
+        
         
 #class Uploader(object): #OBSOLETE!
 
@@ -1397,6 +1408,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.HOST = os.uname()[1]
     if not 'URLPREFIX' in settingkeys:
         settings.URLPREFIX = ''    
+    if not 'REQUIREMEMORY' in settingkeys:
+        settings.REQUIREMEMORY = 0
+    if not 'STYLE' in settingkeys:
+        settings.STYLE = 'classic'
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')

@@ -45,7 +45,8 @@
       <meta http-equiv="refresh" content="10" />            
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/style.css" type="text/css"></link>
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
+    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
     <!--<link rel="stylesheet" href="/static/humanity/jquery-ui-1.8.1.custom.css" type="text/css" />-->
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.4.2.min.js"></script>
