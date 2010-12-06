@@ -64,9 +64,6 @@ class PlainTextFormat(CLAMMetaData):
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples."""
         yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
-
-    def validate(self):
-        return False
         
 class HTMLFormat(CLAMMetaData):
     attributes = {'encoding':True,'language':False }
