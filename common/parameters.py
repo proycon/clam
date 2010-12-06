@@ -202,8 +202,10 @@ class BooleanParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and (isinstance(postdata[self.id], bool) or (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled')):
-            return True #postdata[self.id]
+        if not self.id in postdata:
+            return None
+        elif self.id in postdata and (isinstance(postdata[self.id], bool) or (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled')):
+            return True #postdata[self.id]        
         else: 
             return False
 

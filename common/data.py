@@ -202,23 +202,24 @@ def processparameter(postdata, parameter, user=None):
     commandlineparam = ""
     
     if parameter.access(user):
-        #try:
-        postvalue = parameter.valuefrompostdata(postdata)
-        #except:
-        #    clam.common.util.printlog("An error occured whilst interpreting postdata for parameter " + parameter.id + ", continuing without this parameter...")
-        #    postvalue = None
+        try:
+            postvalue = parameter.valuefrompostdata(postdata)
+        except:
+            clam.common.util.printlog("An error occured whilst interpreting postdata for parameter " + parameter.id + ", continuing without this parameter...")
+            postvalue = None
+        
         if not (postvalue is None):
             if parameter.set(postvalue): #may generate an error in parameter.error                            
                 p = parameter.compilearg()
                 if p:
                     commandlineparam = p
             else:
-                if not parameter.error: parameter.error = "Something went wrong whilst setting this parameter!" #shouldn't happen
+                if not parameter.error: parameter.error = "Something undefined went wrong whilst setting this parameter!" #shouldn't happen
                 clam.common.util.printlog("Unable to set " + parameter.id + ": " + parameter.error)
                 errors = True
         elif parameter.required:
             #Not all required parameters were filled!
-            parameter.error = "This option must be set"
+            parameter.error = "This parameter is mandatory and must be set!"
             errors = True
             
     return errors, parameter, commandlineparam
@@ -252,7 +253,7 @@ def processparameters(postdata, parameters, user=None):
                 newparameters.append(copy(parameter))
                 if commandlineparam:
                     commandlineparams.append(commandlineparam)                    
-            tempparlists = newparameters
+            tempparlist = newparameters
         else:
             raise Exception("Invalid parameters")
         
@@ -260,14 +261,14 @@ def processparameters(postdata, parameters, user=None):
         for parameter in tempparlist:    
             if parameter.hasvalue and (parameter.forbid or parameter.require):
                 for parameter2 in tempparlist:
-                        if parameter.forbid and parameter2.id in parameter.forbid and parameter2.hasvalue:
-                            parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                            clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
-                            errors = True
-                        if parameter.require and parameter2.id in parameter.require and not parameter2.hasvalue:
-                            parameter.error = parameter2.error = "Parameters '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                            clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
-                            errors = True                     
+                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.hasvalue:
+                        parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
+                        clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                        errors = True
+                    if parameter.require and parameter2.id in parameter.require and not parameter2.hasvalue:
+                        parameter.error = parameter2.error = "Parameter '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
+                        clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                        errors = True                     
                                                     
         return errors, newparameters, commandlineparams
 

@@ -346,7 +346,31 @@ class ParameterProcessingTest(unittest2.TestCase):
         self.assertFalse(errors) 
         self.assertTrue(commandlineargs == ['-s test', '-c c', '-i 4', '-b']) #order same as defined
             
-         
+    def test6_required(self):    
+        """Parameter Processing - Forgetting a required parameter (independent)"""                                        
+        postdata = {'teststring': 'test', 'testbool': True, 'testint': 4}
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)        
+        self.assertTrue(errors) 
+        self.assertTrue(parameters[1].id == 'testchoice')
+        self.assertTrue(parameters[1].error)
+
+    def test7_require(self):    
+        """Parameter Processing - Forgetting a required parameter (dependent)"""                                        
+        postdata = {'teststring': 'test',  'testint': 4,'testchoice':'c'}
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)        
+        self.assertTrue(errors) 
+        self.assertTrue(parameters[0].id == 'teststring')
+        self.assertTrue(parameters[0].error)   
+        
+    def test8_forbid(self):    
+        """Parameter Processing - Setting a forbidden parameter combination (dependent)"""                                        
+        postdata = {'teststring': 'test',  'testint': 4,'testfloat':0.5, 'testchoice':'c', 'testbool':False}
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)        
+        self.assertTrue(errors) 
+        self.assertTrue(parameters[2].id == 'testfloat')
+        self.assertTrue(parameters[2].error)        
+        self.assertTrue(parameters[3].id == 'testint')
+        self.assertTrue(parameters[3].error)        
          
                                         
 if __name__ == '__main__':
