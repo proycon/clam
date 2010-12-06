@@ -330,7 +330,7 @@ function validateuploadfilename(filename, inputtemplate_id) {
 
 
 
-function renderfileparameters(id, target, enableconverters, parametersxmloverride = null) {
+function renderfileparameters(id, target, enableconverters, parametersxmloverride) {
     if (id == "") {
         $(target).html("");
     } else {
@@ -341,7 +341,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
                 var xmldoc;
-                if (parametersxmloverride != null) {
+                if (parametersxmloverride == undefined) {
                     xmldoc = $(inputtemplate.parametersxml)[0];
                 } else {
                     xmldoc = parametersxmloverride;
