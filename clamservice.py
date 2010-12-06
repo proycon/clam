@@ -679,7 +679,10 @@ class OutputFileHandler(object):
                     if v.id == requestid:
                         viewer = v
                 if viewer:                    
-                    for line in viewer.view(outputfile, **web.input()):
+                    output = viewer.view(outputfile, **web.input())
+                    if isinstance(output, web.template.TemplateResult):
+                       output =  output['__body__']                  
+                    for line in output:
                         yield line
                 else:
                     #Check for converters
