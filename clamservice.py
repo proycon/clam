@@ -525,10 +525,8 @@ class Project(object):
         commandlineparams = []
         postdata = web.input()
 
-        parin = settings.PARAMETERS
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
-        parout = parameters
-                                        
+                                                
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
             url += ':' + str(settings.PORT)

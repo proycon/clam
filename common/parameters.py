@@ -436,7 +436,7 @@ class IntegerParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and (isinstance(postdata[self.id],int) or postdata[self.id].isdigit()):
+        if self.id in postdata:
             return int(postdata[self.id])
         else: 
             return None
@@ -492,7 +492,7 @@ class FloatParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id] != "":
+        if self.id in postdata:
             return float(postdata[self.id])
         else: 
             return None

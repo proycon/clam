@@ -205,10 +205,12 @@ def processparameter(postdata, parameter, user=None):
         try:
             postvalue = parameter.valuefrompostdata(postdata)
         except:
-            clam.common.util.printlog("An error occured whilst interpreting postdata for parameter " + parameter.id + ", continuing without this parameter...")
-            postvalue = None
+            clam.common.util.printlog("Invalid value, unable to interpret parameter " + parameter.id + ", ...")
+            parameter.error = "Invalid value, unable to interpret"
+            return True, parameter, ''
         
         if not (postvalue is None):
+            clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue))
             if parameter.set(postvalue): #may generate an error in parameter.error                            
                 p = parameter.compilearg()
                 if p:
@@ -221,7 +223,7 @@ def processparameter(postdata, parameter, user=None):
             #Not all required parameters were filled!
             parameter.error = "This parameter is mandatory and must be set!"
             errors = True
-            
+
     return errors, parameter, commandlineparam
     
 def processparameters(postdata, parameters, user=None):
