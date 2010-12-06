@@ -120,10 +120,10 @@ class AbstractParameter(object):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id]:
+        if self.id in postdata:
             return postdata[self.id]
         else: 
-            return False
+            return None
 
 
     def access(self, user):
@@ -202,7 +202,7 @@ class BooleanParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and (postdata[self.id] == '1' or postdata[self.id] == 'True' or postdata[self.id] == 'yes' or postdata[self.id] == 'enabled'):
+        if self.id in postdata and (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
             return True #postdata[self.id]
         else: 
             return False
@@ -357,7 +357,8 @@ class ChoiceParameter(AbstractParameter):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if self.multi: #multi parameters can be passed as  parameterid=choiceid1,choiceid2 or by setting parameterid[choiceid]=1 (or whatever other non-zero value)
             found = False
-            if self.id in postdata and postdata[self.id]:
+            if self.id in postdata:
+                found = True
                 passedvalues = postdata[self.id].split(',')
                 values = []                
                 for choicekey in [x[0] for x in self.choices]:
@@ -372,14 +373,14 @@ class ChoiceParameter(AbstractParameter):
                         if postdata[self.id+'['+choicekey+']']:
                             values.append(choicekey)
             if not found: 
-                return False
+                return None
             else:
                 return values
         else:
-            if self.id in postdata and postdata[self.id]:
+            if self.id in postdata:
                 return postdata[self.id]
             else:
-                return False
+                return None
 
 
 class TextParameter(StringParameter): #TextArea based
@@ -436,7 +437,7 @@ class IntegerParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id].isdigit():
             return int(postdata[self.id])
         else: 
-            return False
+            return None
 
     def set(self, value):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
@@ -492,5 +493,5 @@ class FloatParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id] != "":
             return float(postdata[self.id])
         else: 
-            return False
+            return None
 
