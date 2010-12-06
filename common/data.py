@@ -298,6 +298,9 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
         """Pass an xml string containing the full response. It will be automatically parsed."""
         self.xml = xml
         
+        self.system_id = ""
+        self.system_name = ""
+        
         #: String containing the base URL of the webserivice
         self.baseurl = ''
         
