@@ -46,7 +46,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.5.prealpha'
+VERSION = '0.5.alpha1'
 
 DEBUG = False
     
@@ -935,7 +935,7 @@ class InputFileHandler(object):
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
             
-        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" >\n"
+        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
         output = head
 
           
@@ -970,7 +970,7 @@ class InputFileHandler(object):
         output += "</parameters>"
         
 
-            
+        fatalerror = None
         if not errors:
             #============================ Transfer file ========================================
             printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
@@ -1000,80 +1000,86 @@ class InputFileHandler(object):
                 f.close()
             
             
-        printdebug('(File transfer completed)')
+            printdebug('(File transfer completed)')
         
         
             
         
-        #Create a file object
-        file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
-        
-        fatalerror = None
-        
-        #============== Generate metadata ==============
+            #Create a file object
+            file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+            
+            
+            
+            #============== Generate metadata ==============
 
-        if not metadata: #check if it has not already been set in another stage
-            #for newly generated metadata
-            try:
-                #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
-                validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
-                if validmeta:
-                    #And we tie it to the CLAMFile object
-                    file.metadata = metadata
-                    #Add inputtemplate ID to metadata
-                    metadata.inputtemplate = inputtemplate.id
+            metadataerror = None
+            if not metadata and not errors: #check if it has not already been set in another stage
+                #for newly generated metadata
+                try:
+                    #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+                    validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
+                    if validmeta:
+                        #And we tie it to the CLAMFile object
+                        file.metadata = metadata
+                        #Add inputtemplate ID to metadata
+                        metadata.inputtemplate = inputtemplate.id
+                    else:
+                        metadataerror = "Undefined error"
+                except ValueError, msg:
+                    validmeta = False
+                    metadataerror = msg
+                except KeyError, msg:
+                    validmeta = False
+                    metadataerror = msg
+            elif validmeta:
+                #for explicitly uploaded metadata
+                metadata.file = file
+                file.metadata = metadata
+                metadata.inputtemplate = inputtemplate.id
                 
-            except ValueError, KeyError:
-                validmeta = False
-        elif validmeta:
-            #for explicitly uploaded metadata
-            metadata.file = file
-            file.metadata = metadata
-            metadata.inputtemplate = inputtemplate.id
-            
-        if not validmeta:    
-            #output += "<metadataerror />" #This usually indicates an error in service configuration!
-            fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ", this usually indicates an error in service configuration!</error>"
-        else:                    
-            #=========== Convert the uploaded file (if requested) ==============
-            
-            conversionerror = False
-            if 'converter' in postdata and postdata['converter']:
-                for c in inputtemplate.converters:
-                    if c.id == postdata['converter']:
-                        converter = c
-                        break
-                if converter: #(should always be found, error already provided earlier if not)
-                    try:
-                        success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
-                    except:
-                        success = False
-                    if not success:
-                        conversionerror = True
-                        fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
-        
-            #====================== Validate the file itself ====================
-            if not conversionerror:
-                valid = file.validate()        
+            if metadataerror:    
+                #output += "<metadataerror />" #This usually indicates an error in service configuration!
+                fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + metadataerror + " (this usually indicates an error in service configuration!)</error>"
+            elif validmeta:                    
+                #=========== Convert the uploaded file (if requested) ==============
                 
-                if valid:                       
-                    output += "<valid>yes</valid>"                
-                                    
-                    #Great! Everything ok, save metadata
-                    metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                conversionerror = False
+                if 'converter' in postdata and postdata['converter']:
+                    for c in inputtemplate.converters:
+                        if c.id == postdata['converter']:
+                            converter = c
+                            break
+                    if converter: #(should always be found, error already provided earlier if not)
+                        try:
+                            success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                        except:
+                            success = False
+                        if not success:
+                            conversionerror = True
+                            fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
+            
+                #====================== Validate the file itself ====================
+                if not conversionerror:
+                    valid = file.validate()        
                     
-                    #And create symbolic link for inputtemplates
-                    linkfilename = os.path.dirname(filename) 
-                    if linkfilename: linkfilename += '/'
-                    linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
-                    os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
-                else:
-                    #Too bad, everything worked out but the file itself doesn't validate.
-                    #output += "<valid>no</valid>"
-                    fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
-                
-                    #remove upload
-                    os.unlink(Project.path(project) + 'input/' + filename)
+                    if valid:                       
+                        output += "<valid>yes</valid>"                
+                                        
+                        #Great! Everything ok, save metadata
+                        metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                        
+                        #And create symbolic link for inputtemplates
+                        linkfilename = os.path.dirname(filename) 
+                        if linkfilename: linkfilename += '/'
+                        linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
+                        os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
+                    else:
+                        #Too bad, everything worked out but the file itself doesn't validate.
+                        #output += "<valid>no</valid>"
+                        fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
+                    
+                        #remove upload
+                        os.unlink(Project.path(project) + 'input/' + filename)
         
         
         foot = "</upload>\n"       

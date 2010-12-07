@@ -1129,7 +1129,7 @@ class InputTemplate(object):
         else:
             try:
                 metadata = self.formatclass(file, **metadata)
-            except ValueError, KeyError:
+            except:
                 raise                
                 
         return success, metadata, parameters

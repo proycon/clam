@@ -117,8 +117,7 @@ $(document).ready(function(){
 
 
    //Submit data through in-browser editor
-   $("#editorsubmit").click(function(event){ 
-        $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
+   $("#editorsubmit").click(function(event){         
         var filename = validateuploadfilename($('#editorfilename').val(), $('#editorinputtemplate').val());
         if (!filename) {
              //alert already produced by getuploadfilename()
@@ -135,7 +134,8 @@ $(document).ready(function(){
             data: data, 
             success: function(response){ 
                 processuploadresponse(response, '#editorparameters');
-            },
+                $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
+            },            
             error: function(response, errortype){
                 processuploadresponse(response, '#editorparameters');
             }            
@@ -221,11 +221,11 @@ function processuploadresponse(response, paramdiv) {
         var inputtemplate = $(this).attr('inputtemplate');
         
         var errors = false;
-        $(response).find('error').each(function() {
+        $(this).find('error').each(function() {
                 errors = true;
                 alert($(this).text());
         });
-        $(response).find('parameters').each(function(){ 
+        $(this).find('parameters').each(function(){ 
              if ($(this).attr('errors') == 'no') {
                     errors = false;
              } else {
