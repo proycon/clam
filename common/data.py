@@ -453,6 +453,14 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                 if parameter.id == id:
                     return True
         return False
+        
+    def parametererror(self):
+        """Return the first parameter error, or False if there is none"""
+        for parametergroup, parameters in self.parameters:
+            for parameter in parameters:
+                if parameter.error:
+                    return parameter.error
+        return false
 
     def passparameters(self):
         """Return all parameters as {id: value} dictionary"""

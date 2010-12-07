@@ -54,8 +54,11 @@ class NotFound(Exception):
 class PermissionDenied(Exception):
          def __init__(self, msg = ""):
             self.msg = msg
-         def __str__(self, msg):
-            return "Permission Denied: " + self.msg
+         def __str__(self):
+            if isinstance(clam.common.data,CLAMData):
+                return "Permission Denied"
+            else:
+                return "Permission Denied: " + self.msg
 
 class ServerError(Exception):
          def __init__(self, msg = ""):
@@ -117,11 +120,18 @@ class CLAMClient:
                 response, content = self.http.request(self.url + url, method)
         except:
             raise NoConnection()
-        return self._parse(response, content)
+        try:
+            return self._parse(response, content)
+        except:
+            raise
 
     def _parse(self, response, content):    
         if content.find('<clam') != -1:
             data = CLAMData(content)
+            if data.errors:
+                error = data.parametererror()
+                if error:
+                    raise ParameterError(error)
         else:
             data = False
             
@@ -131,12 +141,12 @@ class CLAMClient:
             raise BadRequest()
         elif response['status'] == '401':
             raise AuthRequired()
-        elif response['status'] == '403' and not data:
-            raise PermissionDenied(content)
-        elif response['status'] == '404' and not data:
+        elif response['status'] == '403' and data:
+            raise PermissionDenied(data)
+        elif response['status'] == '404' and data:
             raise NotFound(content)
         elif response['status'] == '500':
-            raise ServerError(content)
+            raise ServerError(data)
         else:
             raise Exception("Server returned HTTP response " + response['status'])
         

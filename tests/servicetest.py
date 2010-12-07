@@ -175,7 +175,16 @@ class ExtensiveServiceTest(unittest2.TestCase):
                 #print outputfile.metadata.provenance.outputtemplate_id
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
 
-        
+    def test2_parametererror(self):
+        """Extensive Service Test - Global parameter error"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)   
+        try:
+            data = self.client.start(self.project, casesensitive='nonexistant')
+            self.assertTrue(False)
+        except ParameterError, e:
+            self.assertTrue(True)    
         
     def tearDown(self):
         success = self.client.delete(self.project)
