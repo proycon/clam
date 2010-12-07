@@ -137,7 +137,7 @@ $(document).ready(function(){
                 $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
             },            
             error: function(response, errortype){
-                processuploadresponse(response, '#editorparameters');
+                processuploadresponse(response.responseXML, '#editorparameters');
             }            
         });            
         return true;
@@ -166,7 +166,7 @@ $(document).ready(function(){
                     $('#urlupload').show();
                 },
                 error: function(response, errortype){
-                    processuploadresponse(response, '#urluploadparameters');
+                    processuploadresponse(response.responseXML, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
                 }                
@@ -231,7 +231,7 @@ function processuploadresponse(response, paramdiv) {
              } else {
                     errors = true;
                     //propagate the parameter errors to the interface
-                    renderfileparameters(inputtemplate, paramdiv, true, $(this) );
+                    renderfileparameters(inputtemplate, paramdiv, true, this );
              }
         });        
         
@@ -344,7 +344,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 if (parametersxmloverride == undefined) {
                     xmldoc = $(inputtemplate.parametersxml)[0];
                 } else {
-                    xmldoc = parametersxmloverride;
+                    xmldoc = $(parametersxmloverride)[0];
                 }
                 //var s = (new XMLSerializer()).serializeToString(xmldoc);
                 //alert(s);
