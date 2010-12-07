@@ -242,7 +242,7 @@ class StringParameter(AbstractParameter):
 
     def compilearg(self):
         if self.value.find(" ") >= 0 or self.value.find(";") >= 0:            
-            value = '"' + value.replace('"',r'\"') + '"' #wrap in quotes
+            value = '"' + self.value.replace('"',r'\"') + '"' #wrap in quotes
         else:
             value = self.value
         if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
