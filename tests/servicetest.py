@@ -130,7 +130,7 @@ class BasicServiceTest(unittest2.TestCase):
         try:
             success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='nonexistant')
             self.assertFalse(success)
-        except ParameterError e:
+        except ParameterError, e:
             print e
             self.assertTrue(True)
 
