@@ -193,7 +193,16 @@ class StringParameterTest(unittest2.TestCase):
         self.assertTrue(self.parameter.error is None, self.parameter.error)
         self.assertTrue(self.parameter.hasvalue)
         self.assertTrue(self.parameter.value == "test")
-        self.assertTrue(success)        
+        self.assertTrue(success)   
+        
+        
+    def test32_set_value(self):
+        """String parameter - setting to a valid value that contains spaces"""
+        success = self.parameter.set("test test test")
+        self.assertTrue(self.parameter.error is None, self.parameter.error)
+        self.assertTrue(self.parameter.hasvalue)
+        self.assertTrue(self.parameter.value == "test test test")
+        self.assertTrue(success)             
         
     def test4_set_maxsize(self):
         """String parameter - setting to value that is as long as it may get"""
