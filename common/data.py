@@ -106,12 +106,12 @@ class CLAMFile:
                 raise IOError(2, "No metadata found!")
         else:
             try:
-                httpcode, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
+                response, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
             except:
                 raise IOError(2, "Can't download metadata!")
             
-            if httpcode != 200: #TODO: Verify
-                    raise IOError(2, "Can't download metadata!")
+            if response.status != 200: #TODO: Verify
+                    raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
         
         #parse metadata
         self.metadata = CLAMMetaData.fromxml(self, xml) #returns CLAMMetaData object (or child thereof)

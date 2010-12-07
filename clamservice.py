@@ -123,7 +123,7 @@ class CLAMService(object):
         '/([A-Za-z0-9_]*)/?', 'Project',
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
-        '/([A-Za-z0-9_]*)/input/([^/]*)/?', 'InputFileHandler',
+        '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
 
@@ -776,27 +776,47 @@ class InputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
-        """Download an input file"""
-        
-        if os.path.basename(filename.rstrip('/')).lower() == 'metadata':
-            #this is a request for metadata? using filename/metadata ?
-            filename = filename.rstrip('/')[:-9]
-            metafilename = os.path.dirname(filename) 
-            if metafilename: metafilename += '/'
-            metafilename += '.' + os.path.basename(filename) + '.METADATA'
-            filename = metafilename
- 
-        path = Project.path(project) + "input/" + filename.replace("..","")
+        raw = filename.split('/')
 
+        viewer = None
+        requestid = None
         
-        if os.path.isfile(path): 
-            for line in open(path,'r'): 
-                yield line
-        elif os.path.isdir(path): 
-            for f in glob.glob(path + "/*"):
-                yield os.path.basename(f)                
-        else:
+        if filename.strip('/') == "":
+            #this is a request for the index
+            raise web.webapi.Forbidden()
+        if len(raw) >= 2:
+            #This MAY be a viewer/metadata request, check:
+            if os.path.isfile(Project.path(project) + 'input/' +  "/".join(raw[:-1])):
+                filename = "/".join(raw[:-1])
+                requestid = raw[-1].lower()                        
+
+        try:
+            inputfile = clam.common.data.CLAMInputFile(Project.path(project), filename)
+        except:
             raise web.webapi.NotFound()
+            
+        if requestid:
+            if requestid == 'metadata':
+                if inputfile.metadata:
+                    web.header('Content-Type', 'text/xml')
+                    for line in inputfile.metadata.xml().split("\n"):
+                        yield line                    
+                else:
+                    raise web.webapi.NotFound("No metadata found!")
+            else:
+                raise web.webapi.NotFound()
+        else:
+            #normal request - return file contents
+            if inputfile.metadata:
+                for header, value in inputfile.metadata.httpheaders():
+                    web.header(header, value)
+            try:
+                for line in inputfile:
+                    yield line
+            except IOError: 
+                raise web.webapi.NotFound()
+
+
 
     @requirelogin
     def DELETE(self, project, filename, user=None):    

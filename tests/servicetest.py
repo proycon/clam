@@ -109,6 +109,7 @@ class BasicServiceTest(unittest2.TestCase):
         found = False
         for f in data.input:
             if f.filename == 'servicetest.txt':
+                f.loadmetadata()
                 self.assertTrue(f.metadata)  
                 found = True    
         self.assertTrue(found)   
