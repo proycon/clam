@@ -92,7 +92,7 @@ class BasicServiceTest(unittest2.TestCase):
             if f.filename == 'servicetest.txt':
                 success = f.delete()
         self.assertTrue(success)        
-
+      
                 
     def test2_7_upload(self):
         """Basic Service Test - File upload without extension"""
@@ -102,6 +102,7 @@ class BasicServiceTest(unittest2.TestCase):
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='fr')
         self.assertTrue(success)   
+               
         
     def test2_8_upload(self):
         """Basic Service Test - File upload verification + metadata check"""
@@ -113,8 +114,26 @@ class BasicServiceTest(unittest2.TestCase):
                 self.assertTrue(f.metadata)  
                 found = True    
         self.assertTrue(found)   
+        
+    def test2_9_deletion(self):
+        """Basic Service Test - File Deletion"""
+        data = self.client.get('basicservicetest')
+        success = False
+        for f in data.input:
+            if f.filename == 'servicetest.txt':
+                success = f.delete()
+        self.assertTrue(success)         
+    
+    def test2_A_metadataerror(self):
+        """Basic Service Test - Upload with parameter errors"""
+        data = self.client.get('basicservicetest')
+        try:
+            success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='nonexistant')
+            self.assertFalse(success)
+        except ParameterError:
+            self.assertTrue(True)
 
-    def test2_9_delete(self):
+    def test2_B_delete(self):
         """Basic Service Test - Project deletion"""
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
@@ -154,6 +173,7 @@ class ExtensiveServiceTest(unittest2.TestCase):
                 outputfile.loadmetadata()
                 #print outputfile.metadata.provenance.outputtemplate_id
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
+
         
         
     def tearDown(self):

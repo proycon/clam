@@ -222,17 +222,19 @@ class CLAMClient:
             node = ElementTree.parse(StringIO(node)).getroot() 
         if node.tag != 'clamupload':
             raise Exception("No a valid CLAM upload response")
-        for subnode in node:
-            if subnode.tag == 'error':
-                raise UploadError(subnode.text)
-            if subnode.tag == 'parameters':           
-                if 'errors' in subnode.attrib:                    
-                    errormsg = "An unknown parameter error occured"
-                    for parameternode in subnode:                    
-                        if 'error' in parameternode.attrib:
-                            errormsg = parameternode.attrib['error']
-                            break
-                    raise ParameterError(errormsg)
+        for node in node:
+            if node.tag == 'upload':
+                for subnode in node:
+                    if subnode.tag == 'error':
+                        raise UploadError(subnode.text)
+                    if subnode.tag == 'parameters':           
+                        if 'errors' in subnode.attrib and subnode.attrib['errors'] == 'yes':                    
+                            errormsg = "An unknown parameter error occured"
+                            for parameternode in subnode:                    
+                                if 'error' in parameternode.attrib:
+                                    errormsg = parameternode.attrib['error']
+                                    break
+                            raise ParameterError(errormsg)
         return True
 
 
@@ -279,7 +281,11 @@ class CLAMClient:
 
         # Create the Request object
         request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        xml = urllib2.urlopen(request).read()
+        try:
+            xml = urllib2.urlopen(request).read()
+        except urllib2.HTTPError, e:
+            xml = e.read()        
+            
         try:
             return self._parseupload(xml)
         except:
