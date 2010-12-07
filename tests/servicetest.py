@@ -143,11 +143,17 @@ class ExtensiveServiceTest(unittest2.TestCase):
             data = self.client.get(self.project) #get status again  
         self.assertFalse(data.errors)
         self.assertTrue(isinstance(data.output, list))
-        found = False
+        self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])        
         for outputfile in data.output:
             if outputfile.filename == 'servicetest.txt.freqlist':
-                found = True
-        self.assertTrue(found)
+                outputfile.loadmetadata()
+                #print outputfile.metadata.provenance.outputtemplate_id
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'freqlistbydoc')
+            if outputfile.filename == 'servicetest.txt.stats':
+                outputfile.loadmetadata()
+                #print outputfile.metadata.provenance.outputtemplate_id
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
         
         
     def tearDown(self):
