@@ -122,6 +122,35 @@ class BasicServiceTest(unittest2.TestCase):
 class ExtensiveServiceTest(unittest2.TestCase):
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
-        self.client = CLAMClient(self.url)    
+        self.client = CLAMClient(self.url)
+        self.project = 'extservicetest'
+        self.client.create(self.project)
+        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f.write(u"On espère que tout ça marche bien.")
+        f.close()
+        
+        
+    def test1_simplerun(self):
+        """Extensive Service Test - Full simple run"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)    
+        data = self.client.start(self.project)
+        self.assertTrue(data)    
+        self.assertFalse(data.errors)    
+        while data.status != clam.common.status.DONE:
+            time.sleep(1) #wait 1 second before polling status
+            data = self.client.get(self.project) #get status again  
+        self.assertFalse(data.errors)
+        self.assertTrue(isinstance(data.output, list))
+        found = False
+        for outputfile in data.output:
+            if outputfile.filename == 'servicetest.txt.freqlist':
+                found = True
+        self.assertTrue(found)
+        
+        
+    def tearDown(self):
+        success = self.client.delete(self.project)
     
         
