@@ -1543,7 +1543,7 @@ class ParameterCondition(object):
     def match(self, parameters):
         for key,_,evalf,_ in self.conditions:
             if key in parameters:
-                value = parameters[key]
+                value = parameters[key].value
             else:
                 value = None
             if evalf(value):

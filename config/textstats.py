@@ -117,7 +117,7 @@ PROFILES = [
         ParameterCondition(createlexicon=True, 
             then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 SetMetaField('encoding','utf-8'),
-                filename='overall.lexikon',
+                filename='overall.lexicon',
                 unique=True
             )            
         )
