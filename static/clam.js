@@ -342,10 +342,22 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
                 var xmldoc;
                 if (parametersxmloverride == undefined) {
-                    xmldoc = $(inputtemplate.parametersxml)[0];
+                    xmldoc = $(inputtemplate.parametersxml);                    
                 } else {
-                    xmldoc = $(parametersxmloverride)[0];
+                    xmldoc = $(parametersxmloverride);
                 }
+                var found = false;
+                for (var i = 0; i < xmldoc.length; i++) {
+                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
+                        xmldoc = xmldoc[i];
+                        found = true;
+                    }                    
+                }
+                if (!found) {
+                    alert("You browser was unable render the metadata parameters...");
+                    return false;
+                }
+                                
                 //var s = (new XMLSerializer()).serializeToString(xmldoc);
                 //alert(s);
                 
@@ -353,7 +365,11 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 //var s = (new XMLSerializer()).serializeToString(result);
                 //alert(s);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
-                result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
+                if (parametersxmloverride == undefined) {
+                    result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
+                } else {
+                    result = inputtemplate.parametersxmloverride.transformNode(xsl); //VERIFY
+                }
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
