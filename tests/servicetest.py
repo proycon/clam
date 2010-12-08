@@ -185,6 +185,33 @@ class ExtensiveServiceTest(unittest2.TestCase):
             self.assertTrue(False)
         except ParameterError, e:
             self.assertTrue(True)    
+            
+    def test3_conditionaloutput(self):
+        """Extensive Service Test - Output conditional on parameter"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)    
+        data = self.client.start(self.project, createlexicon=True)
+        self.assertTrue(data)    
+        self.assertFalse(data.errors)    
+        while data.status != clam.common.status.DONE:
+            time.sleep(1) #wait 1 second before polling status
+            data = self.client.get(self.project) #get status again  
+        self.assertFalse(data.errors)
+        self.assertTrue(isinstance(data.output, list))
+        self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])        
+        self.assertTrue('overall.lexicon' in [ x.filename for x in data.output ])        
+        for outputfile in data.output:
+            if outputfile.filename == 'servicetest.txt.freqlist':
+                outputfile.loadmetadata()
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'freqlistbydoc')
+            if outputfile.filename == 'servicetest.txt.stats':
+                outputfile.loadmetadata()
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')            
+            if outputfile.filename == 'overall.lexicon':
+                outputfile.loadmetadata()
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')            
         
     def tearDown(self):
         success = self.client.delete(self.project)
