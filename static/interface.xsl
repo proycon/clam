@@ -280,8 +280,8 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         </td>
 
         <xsl:variable name="template" select="@template" />
-        <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@label"/></td>
-        <td><xsl:value-of select="/clam/profiles/profile/output/OutputTemplate[@id = $template]/@format"/></td>
+        <td><xsl:value-of select="//OutputTemplate[@id = $template]/@label"/></td>
+        <td><xsl:value-of select="//OutputTemplate[@id = $template]/@format"/></td>
         
         <td>
             <xsl:for-each select="./viewers/viewer">
