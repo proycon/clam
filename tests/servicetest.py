@@ -134,7 +134,25 @@ class BasicServiceTest(unittest2.TestCase):
             print e
             self.assertTrue(True)
 
-    def test2_B_delete(self):
+    def test2_B_metadata(self):
+        """Basic Service Test - Upload with explicit metadata file"""            
+        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f.write(u"On espère que tout ça marche bien.")
+        f.close()
+        f = codecs.open('/tmp/servicetest.txt.METADATA','w','utf-8')
+        f.write(u"""<?xml version="1.0" encoding="UTF-8"?>
+<CLAMMetaData format="PlainTextFormat" mimetype="text/plain" inputtemplate="textinput">
+<meta id="encoding">utf-8</meta>
+<meta id="author">proycon</meta>
+<meta id="language">fr</meta>
+<meta id="year">2010</meta>
+</CLAMMetaData>""")
+        f.close()
+        data = self.client.get('basicservicetest')
+        success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr', metafile='/tmp/servicetest.txt.METADATA')
+        self.assertTrue(success)     
+
+    def test2_C_delete(self):
         """Basic Service Test - Project deletion"""
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
