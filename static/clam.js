@@ -214,6 +214,20 @@ $(document).ready(function(){
                 }                
         });     
    });
+   
+   $('#uploadinputsourcebutton').click(function(event){
+       $.ajax({
+            type: "POST",
+            url: "input/",
+            data: {'inputsource': $('#uploadinputsource').val() }, 
+            success: function(response){
+                processuploadresponse(response, '#nonexistant');
+            },
+            error: function(response,errortype){
+                processuploadresponse(response.responseXML, '#nonexistant');                
+            }
+       });
+   });
 
 });  //ready
 

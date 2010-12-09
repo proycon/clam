@@ -134,7 +134,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             
             <div id="inputsourceupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
-                    <select id="uploadinputtemplate">
+                    <select id="uploadinputsource">
                     <xsl:for-each select="profile">
                     <xsl:for-each select="input/InputTemplate">
                         <xsl:for-each select="inputsource">
