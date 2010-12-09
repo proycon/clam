@@ -458,11 +458,7 @@ class Project(object):
         statuscode, statusmsg, statuslog, completion = self.status(project)
         
 
-        corpora = []
-        if statuscode == clam.common.status.READY:
-            corpora = CLAMService.corpusindex()
-        else:
-            corpora = []
+        
         if statuscode == clam.common.status.DONE:
             outputpaths = Project.outputindex(project)
             if self.exitstatus(project) != 0: #non-zero codes indicate errors!
@@ -496,7 +492,7 @@ class Project(object):
         if url[-1] == '/': url = url[:-1]
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode,statusmsg, statuslog, completion, errors, errormsg, parameters,corpora, outputpaths,inputpaths, settings.PROFILES, datafile, None )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None )
         
                     
     @requirelogin
@@ -849,8 +845,9 @@ class InputFileHandler(object):
     def POST(self, project, filename, user=None): 
         """Add a new input file, this invokes the actual uploader"""
 
-        #TODO LATER: add support for uploading metadata files
-        #TODO LATER: re-add support for archives
+        #TODO: test support for uploading metadata files
+        
+        #TODO LATER: re-add support for archives?
         
         postdata = web.input(file={})
         inputtemplate = None
@@ -863,7 +860,7 @@ class InputFileHandler(object):
                     if t.id == postdata['inputtemplate']:
                         inputtemplate = t
             if not inputtemplate:
-                #Inputtemplate not found, send 404 - Bad Request
+                #Inputtemplate not found, send 404
                 printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
                 raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
         else:
@@ -952,6 +949,15 @@ class InputFileHandler(object):
             #In message
             printlog("Adding file " + filename + " with explicitly provided contents to input files")
             sourcefile = "editor"
+        elif 'inputsource' in postdata and postdata['inputsource']:
+            printlog("Adding file " + filename + " from preinstalled data to input files")
+            inputsource = None
+            for s in inputtemplate.inputsources:
+                if s.id.lower() == postdata['inputsource'].lower():
+                    inputsource = s
+            if not inputsource:
+                raise web.webapi.Forbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
+            sourcefile = os.path.basename(inputsource.path)
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
             
@@ -967,6 +973,7 @@ class InputFileHandler(object):
             try:
                 metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'].file)
                 errors, parameters = inputtemplate.validate(metadata, user)
+                validmeta = True
             except:
                 printlog("Uploaded metadata is invalid!")          
                 metadata = None
@@ -978,12 +985,35 @@ class InputFileHandler(object):
             try:
                 metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
                 errors, parameters = inputtemplate.validate(metadata, user)
+                validmeta = True
             except:
                 printlog("Uploaded metadata is invalid!")          
                 metadata = None
                 errors = True
                 parameters = []
                 validmeta = False 
+        elif 'inputsource' in postdata and postdata['inputsource']:
+            printlog("Getting metadata from inputsource, uploading...")
+            if inputsource.metadata:
+                metadata = inputsource.metadata
+                errors, parameters = inputtemplate.validate(metadata, user)
+            else:
+                metafilename = os.path.dirname(inputsource.path) 
+                if metafilename: metafilename += '/'
+                metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'            
+                if os.path.exists(metafilename):
+                    try:
+                        metadata = clam.common.data.CLAMMetaData.fromxml(metafilename)
+                        errors, parameters = inputtemplate.validate(metadata, user)
+                        validmeta = True
+                    except:
+                        printlog("Uploaded metadata is invalid!")          
+                        metadata = None
+                        errors = True
+                        parameters = []
+                        validmeta = False             
+                else:
+                     raise web.webapi.InternalError("No metadata found nor specified for inputsource " + inputsource.id )
         else:
             errors, parameters = inputtemplate.validate(postdata, user)
             validmeta = True #will be checked later
@@ -1026,11 +1056,12 @@ class InputFileHandler(object):
                 f = codecs.open(Project.path(project) + 'input/' + filename,'wb')
                 f.write(postdata['contents'])
                 f.close()
-            
+            elif 'inputsource' in postdata and postdata['inputsource']:                
+                #Copy (symlink!) from preinstalled data
+                os.symlink(inputsource.path, Project.path(project) + 'input/' + filename)
             
             printdebug('(File transfer completed)')
-        
-        
+                
             
         
             #Create a file object
@@ -1436,6 +1467,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.PROJECTS_PUBLIC = True
     if not 'PROFILES' in settingkeys:
         settings.PROFILES = []
+    if not 'INPUTSOURCES' in settingkeys:
+        settings.INPUTSOURCES = []
     if not 'PORT' in settingkeys and not PORT:
         settings.PORT = 80
     if not 'HOST' in settingkeys and not HOST:

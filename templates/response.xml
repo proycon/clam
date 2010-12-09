@@ -1,4 +1,4 @@
-$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, corpora, outputpaths, inputpaths,profiles, datafile, projects)
+$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects)
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 $if project and user:
@@ -35,10 +35,10 @@ $if statuscode == 0 or statuscode == 2 or not project:
                 </parametergroup>
         </parameters>
 $if statuscode == 0 or datafile or not project:
-        <corpora>
-            $for corpus in corpora:
-                <corpus>$corpus</corpus>
-        </corpora> 
+        <inputsources>
+            $for inputsource in inputsources:
+                <inputsource id="$inputsource.id">$inputsource.label</inputsource>
+        </inputsources> 
         $if project:
             <input>
                 $for inputfile in inputpaths:

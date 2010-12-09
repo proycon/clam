@@ -570,14 +570,16 @@ Yet to be completed... %TODO
 \end{devnotes}
 
 
-
 \chapter{Documentation for Service Clients}
 
-Being a RESTful webservice, automated clients can communicate with CLAM. Appendix~\ref{ap:restspec} gives a complete RESTful specification.
+Being a RESTful webservice, automated clients can communicate with CLAM. In writing such clients, python users can befenit from the CLAM Client API, which in addition to the CLAM Data API, provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Of course clients can also be written without the Client API, and in other programming languages. For this refer to Appendix~\ref{ap:restspec}, which provides a full specification of the RESTful API.
 
+Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/clam/docs/api}.
+
+There is also a generic CLAM Client, \texttt{clam/clamclient.py}, which offers a command line interface to \emph{any} CLAM service.
 
 \begin{devnotes}
-Yet to be written... %TODO
+More elaborate documentation yet to be written..
 \end{devnotes}
 
 
@@ -622,7 +624,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{usecorpus$=[corpus_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service), the parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Querystring} & \texttt{inputsource$=[inputsource_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service), the parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
 \textbf{Description} & This starts running a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string, the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely can't invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
 \hline

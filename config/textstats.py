@@ -70,6 +70,13 @@ REQUIREMEMORY = 10 * 1024
 #Here you can specify an extra formats module
 CUSTOM_FORMATS_MODULE = None
 
+
+# ======== PREINSTALLED DATA ===========
+
+INPUTSOURCES = [
+    InputSource(id='sampledocs',label='Sample texts',path=ROOT+'/corpora/sampledata',defaultmetadata=PlainTextFormat(None, encoding='utf-8') ),
+]
+
 # ======== PROFILE DEFINITIONS ===========
 
 PROFILES = [ 
@@ -82,6 +89,7 @@ PROFILES = [
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='docconv',label='Convert from MS Word Document'),
+            InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/corpora/sampledoc.txt', optional=True),
             extension='.txt',
             multi=True
         ),

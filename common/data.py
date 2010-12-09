@@ -1644,7 +1644,7 @@ class ParameterCondition(object):
         return ParameterCondition(**kwargs)
 
 class InputSource(object):
-    def __init__(self, **kwargs)
+    def __init__(self, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
         else:
