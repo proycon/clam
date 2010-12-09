@@ -1669,6 +1669,11 @@ class InputSource(object):
             assert isinstance(self.metadata, CLAMMetaData)
         else:
             self.metadata = None
+            
+        if 'inputtemplate' in kwargs:
+            self.inputtemplate = kwargs['inputemplate']
+        else:
+            self.inputtemplate = None
     
     def isfile(self):
         return os.path.isfile(self.path)
@@ -1681,6 +1686,9 @@ class InputSource(object):
     def xml(self, indent = ""):
         return indent + "<inputsource id=\""+self.id+"\">"+self.label+"</inputsource>"
 
-
+    def check(self):
+        """Checks if this inputsource is usable in INPUTSOURCES"""
+        if not self.inputtemplate:
+            raise Exception("Input source has no input template")        
 
 import clam.common.formats #yes, this is deliberately placed at the end!

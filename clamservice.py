@@ -850,8 +850,39 @@ class InputFileHandler(object):
         #TODO LATER: re-add support for archives?
         
         postdata = web.input(file={})
+        
+        if filename == '':
+            #Handle inputsource
+            if 'inputsource' in postdata and postdata['inputsource']:
+                for s in settings.INPUTSOURCES:
+                    if s.id == postdata['inputsource']:
+                        inputsource = s
+                if not inputsource:
+                    raise web.webapi.Forbidden("No such inputsource exists")
+                if inputsource.isfile():
+                    filename = os.path.basename(inputsource.path)
+                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputsource.inputtemplate}, inputsource)
+                elif inputsource.isdir():
+                    for f in glob.glob(inputsource.path + "/*"):
+                        if f[0] != '.':
+                            tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f)
+                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputsource.inputtemplate}, tmpinputsource)
+                            #WARNING: Output is dropped silently here!
+                    return "" #200
+                else:
+                    assert False                    
+            else:
+                raise web.webapi.Forbidden("No filename or inputsource specified")
+        else:
+            #Simply forward to addfile
+            self.addfile(project,filename,user, postdata)
+        
+    def addfile(self, project, filename, user, postdata, inputsource=None):
+        """Add a new input file, this invokes the actual uploader"""
+
         inputtemplate = None
         metadata = None
+            
         
         if 'inputtemplate' in postdata:
             #An input template must always be provided            
@@ -951,12 +982,13 @@ class InputFileHandler(object):
             sourcefile = "editor"
         elif 'inputsource' in postdata and postdata['inputsource']:
             printlog("Adding file " + filename + " from preinstalled data to input files")
-            inputsource = None
-            for s in inputtemplate.inputsources:
-                if s.id.lower() == postdata['inputsource'].lower():
-                    inputsource = s
             if not inputsource:
-                raise web.webapi.Forbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
+                inputsource = None                    
+                for s in inputtemplate.inputsources:
+                    if s.id.lower() == postdata['inputsource'].lower():
+                        inputsource = s
+                if not inputsource:
+                    raise web.webapi.Forbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
             sourcefile = os.path.basename(inputsource.path)
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
