@@ -1017,6 +1017,9 @@ class InputTemplate(object):
         if self.converters:
             for converter in self.converters:
                 xml += indent + "\t<converter id=\""+converter.id+"\">"+converter.label+"</converter>"
+        if self.inputsources:
+            for inputsource in self.inputsources:
+                xml += inputsource.xml(indent+"\t")
         xml += indent + "</InputTemplate>"
         return xml
 

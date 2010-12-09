@@ -387,7 +387,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
-            $(target).html(result);
+            $(target).html('<div id="' + target + '_form">'  + result + '</div>');
             if ((enableconverters) && ($(inputtemplate.inputsources))) {                
                 var s = "Add pre-installed resource? <select name=\"inputsource\" onchange=\"setlocalinputsource(this)\">";
                 s += "<option value=\"\">No, custom resource</option>";
@@ -447,7 +447,9 @@ function setinputsource(tempelement) {
 function setlocalinputsource(selector, target) {
     var value = selector.val()
     if (value != "") { 
-        //TODO
+        $(target+'_form').show();
+    } else {
+        $(target+'_form').hide();
     }
 }
 

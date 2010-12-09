@@ -128,6 +128,27 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 <xsl:template match="/clam/profiles">
         <div id="uploadarea">
             
+            <xsl:if test="profile/input/InputTemplate/inputsource">
+            
+            <h3>Add an already available resource</h3>
+            
+            <div id="inputsourceupload">
+                    <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
+                    <select id="uploadinputtemplate">
+                    <xsl:for-each select="profile">
+                    <xsl:for-each select="input/InputTemplate">
+                        <xsl:for-each select="inputsource">
+                            <option value="@id"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
+                        </xsl:for-each>
+                    </xsl:for-each>
+                    </xsl:for-each>
+                    </select><br />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="inputsourceuploadbutton" class="uploadbutton" type="submit" value="Add file" />
+            </div>
+            
+            </xsl:if>
+        
+            
             <div class="uploadform">
                 <h3>Upload a file from disk</h3>
                 <p>Use this to upload files from your computer to the system.</p>
@@ -162,6 +183,8 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             
 
             </div>
+            
+
             
             <h3>Grab a file from the web</h3>
             <div id="urlupload">
