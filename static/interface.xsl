@@ -285,11 +285,11 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
         
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a><xml:text> | </xml:text>
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
             </xsl:for-each>
             <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
             <xsl:if test="@template">
-                <xml:text> | </xml:text>
+                <xsl:text> | </xsl:text>
                 <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a>                
             </xsl:if>
         </td>
