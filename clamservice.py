@@ -966,16 +966,24 @@ class InputFileHandler(object):
             printlog("Metadata explicitly provided in file, uploading...")          
             try:
                 metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'].file)
+                errors, parameters = inputtemplate.validate(metadata, user)
             except:
-                validmeta = False
-            errors, parameters = inputtemplate.validate(metadata, user)
+                printlog("Uploaded metadata is invalid!")          
+                metadata = None
+                errors = True
+                parameters = []
+                validmeta = False            
         elif 'metadata' in postdata and postdata['metadata']:
             printlog("Metadata explicitly provided in message, uploading...")
             try:
                 metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
+                errors, parameters = inputtemplate.validate(metadata, user)
             except:
-                validmeta = False            
-            errors, parameters = inputtemplate.validate(metadata, user)
+                printlog("Uploaded metadata is invalid!")          
+                metadata = None
+                errors = True
+                parameters = []
+                validmeta = False 
         else:
             errors, parameters = inputtemplate.validate(postdata, user)
             validmeta = True #will be checked later

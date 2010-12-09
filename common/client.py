@@ -244,7 +244,7 @@ class CLAMClient:
                                 if 'error' in parameternode.attrib:
                                     errormsg = parameternode.attrib['error']
                                     break
-                            raise ParameterError(errormsg)
+                            raise ParameterError(errormsg + " (parameter="+parameternode.attrib['id']+")")
         return True
 
 
