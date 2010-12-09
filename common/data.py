@@ -988,8 +988,8 @@ class InputTemplate(object):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
-            elif isinstance(arg, clam.common.viewers.InputSource):
-                self.viewers.inputsources(arg)
+            elif isinstance(arg, InputSource):
+                self.inputsources.append(arg)
             else:
                 raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting Parameter, Converter, Viewer or InputSource.")
             
@@ -1079,6 +1079,8 @@ class InputTemplate(object):
             parametersxml += parameter.xml()
         d['parametersxml'] = '<?xml version="1.0" encoding="utf-8" ?><parameters>' + parametersxml + '</parameters>'
         d['converters'] = [ {'id':x.id, 'label':x.label} for x in self.converters ]
+        d['inputsources'] = [ {'id':x.id, 'label':x.label} for x in self.inputsources ]
+
         return json.dumps(d)
 
     def __eq__(self, other):

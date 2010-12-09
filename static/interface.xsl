@@ -152,7 +152,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 
                 <div id="clientupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the metadata parameters for this type of file:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><em>Select a type first</em></div>
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><em>Select a type first</em></div>
                     <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />
                 </div>
                 <div id="uploadprogress">
@@ -167,7 +167,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             <div id="urlupload">
                 <p>Retrieves an input file from another location on the web.</p>
                 <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates"></select><br />
-                <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the metadata parameters for this type of file:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><em>Select a type first</em></div>
+                <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><em>Select a type first</em></div>
                 <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" value="http://" /><br />
                 <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
             </div>
@@ -202,15 +202,15 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 <xsl:template match="/clam/input">
         <h2>Input</h2>
         
-        <xsl:if test="/clam/corpora/corpus">
+        <xsl:if test="/clam/inputsources/inputsource">
             <div id="corpusselection">
-            <label>Input source: </label>
-            <select onchange="setinputsource(this);">
-                <option value="" selected="selected">Use uploaded files</option>
-                <xsl:for-each select="/clam/corpora/corpus">
-                    <option><xsl:attribute name="value"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></option>
+            <label>Add files from pre-installed input source: </label>
+            <select id="inputsource" onchange="setinputsource(this);">
+                <xsl:for-each select="/clam/inputsources/inputsource">
+                    <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
                 </xsl:for-each>
             </select>
+            <button id="inputsourceselect">Copy files</button>
             </div>
         </xsl:if>
 

@@ -200,6 +200,20 @@ $(document).ready(function(){
    }
 
 
+   $('#inputsourceselect').click(function(event){
+        $.ajax({ 
+                type: "POST", 
+                url: "input/", 
+                //dataType: "xml", 
+                data: {'inputsource': $('#inputsource').val() }, 
+                success: function(response){
+                    window.location.href = ""; /* refresh */   
+                },
+                error: function(response, errortype){
+                    alert(response);
+                }                
+        });     
+   });
 
 });  //ready
 
@@ -374,7 +388,16 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
             $(target).html(result);
-            if ((enableconverters) && ($(inputtemplate.converters))) {
+            if ((enableconverters) && ($(inputtemplate.inputsources))) {                
+                var s = "Add pre-installed resource? <select name=\"inputsource\" onchange=\"setlocalinputsource(this)\">";
+                s += "<option value=\"\">No, custom resource</option>";
+                for (var i = 0; i < inputtemplate.inputsources.length; i++) {
+                    s += "<option value=\"" + inputtemplate.inputsources[i].id + "\">" + inputtemplate.inputsources[i].label + "</option>";
+                }
+                s += "</select><br />";
+                $(target).prepend(s);
+            }
+            if ((enableconverters) && ($(inputtemplate.converters))) {                
                 var s = "Automatic conversion from other format? <select name=\"converter\">";
                 s += "<option value=\"\">No</option>";
                 for (var i = 0; i < inputtemplate.converters.length; i++) {
@@ -418,6 +441,13 @@ function setinputsource(tempelement) {
     } else {
         $('#inputfilesarea').hide();
         $('#uploadarea').hide();
+    }
+}
+
+function setlocalinputsource(selector, target) {
+    var value = selector.val()
+    if (value != "") { 
+        //TODO
     }
 }
 

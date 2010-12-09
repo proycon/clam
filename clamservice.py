@@ -1524,9 +1524,6 @@ def test_dirs():
     if not os.path.isdir(settings.ROOT):
         warning("Root directory does not exist yet, creating...")
         os.mkdir(settings.ROOT)
-    if not os.path.isdir(settings.ROOT + 'corpora'):
-        warning("Corpora directory does not exist yet, creating...")
-        os.mkdir(settings.ROOT + 'corpora')
     if not os.path.isdir(settings.ROOT + 'projects'):
         warning("Projects directory does not exist yet, creating...")
         os.mkdir(settings.ROOT + 'projects')    
