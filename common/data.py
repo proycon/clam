@@ -955,11 +955,13 @@ class InputTemplate(object):
         self.parameters = []
         self.converters = []
         self.viewers = [] #TODO Later: Support viewers in InputTemplates?
+        self.inputsources = []
         
         self.unique = True #may mark input/output as unique
 
         self.filename = None
         self.extension = None
+        self.onlyinputsource = False #Use only the input sources
 
         for key, value in kwargs.items():
             if key == 'unique':   
@@ -973,6 +975,8 @@ class InputTemplate(object):
                     self.extension = value[1:]        
                 else:
                     self.extension = value
+            elif key == 'onlyinputsource':
+                self.onlyinputsource = bool(value)
 
         if not self.unique and (self.filename and not '#' in self.filename):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
@@ -984,9 +988,13 @@ class InputTemplate(object):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
+            elif isinstance(arg, clam.common.viewers.InputSource):
+                self.viewers.inputsources(arg)
             else:
-                raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting instance derived from AbstractParameter.")
-
+                raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting Parameter, Converter, Viewer or InputSource.")
+            
+        if self.onlyinputsource and not self.inputsources: 
+            raise Exception("No input sources defined for input template " + id + ", but onlyinputsource=True")
 
     def xml(self, indent = ""):
         """Produce Template XML"""
@@ -1635,12 +1643,43 @@ class ParameterCondition(object):
             raise Exception("No condition found in ParameterCondition!")
         return ParameterCondition(**kwargs)
 
+class InputSource(object):
+    def __init__(self, **kwargs)
+        if 'id' in kwargs:
+            self.id = kwargs['id']
+        else:
+            raise Exception("No id specified for InputSource")
+        if 'label' in kwargs:
+            self.label = kwargs['label']
+        else:
+            raise Exception("No label specified for InputSource")
+        
+        if 'path' in kwargs:
+            self.path = kwargs['path']
+            if not os.path.exists(self.path):
+                raise Exception("No such file or directory for InputSource: " + self.path)
+        else:
+            raise Exception("No path specified for InputSource")
+        
+        if 'defaultmetadata' in kwargs:
+            self.metadata = kwargs['defaultmetadata']
+            assert isinstance(self.metadata, CLAMMetaData)
+        elif 'metadata' in kwargs: #alias
+            self.metadata = kwargs['metadata']
+            assert isinstance(self.metadata, CLAMMetaData)
+        else:
+            self.metadata = None
+    
+    def isfile(self):
+        return os.path.isfile(self.path)
+        
+    
+    def isdir(self):
+        return os.path.isdir(self.path)
 
 
-
-
-
-
+    def xml(self, indent = ""):
+        return indent + "<inputsource id=\""+self.id+"\">"+self.label+"</inputsource>"
 
 
 
