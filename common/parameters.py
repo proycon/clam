@@ -10,60 +10,14 @@
 #
 ###############################################################
 
-
 from lxml import etree as ElementTree
 from StringIO import StringIO
 
-#class Validation(object):
-#    def __init__(self, bool: valid, error = None):
-#        self.valid = valid
-#        self.error = error
-#    
-#    def __nonzero__(self):
-#        return self.valid
-    
-
-def parameterfromxml(node):
-    if not isinstance(node,ElementTree._Element):
-        node = ElementTree.parse(StringIO(node)).getroot() 
-    if node.tag in globals():
-        id = ''
-        paramflag = ''
-        name = ''
-        description = ''
-        kwargs = {}
-        for attrib, value in node.attrib.items():
-            if attrib == 'id':
-                id = value
-            elif attrib == 'paramflag':
-                paramflag = value       
-            elif attrib == 'name':
-                name = value
-            elif attrib == 'description':
-                description = value
-            else:
-                kwargs[attrib] = value
-        for subtag in node: #parse possible subtags
-            if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
-                if not 'choices' in kwargs: kwargs['choices'] = {}
-                kwargs['choices'][subtag.attrib['id']] = subtag.text
-                if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                    if 'multi' in kwargs and kwargs['multi'] == '1':
-                        if not 'value' in kwargs: kwargs['value'] = []
-                        kwargs['value'].append(subtag.attrib['id'])
-                    else:
-                        kwargs['value'] = subtag.attrib['id']
-
-        return globals()[node.tag](id, paramflag, name, description, **kwargs) #return parameter instance
-    else:
-        raise Exception("No such parameter exists: " + node.tag)
-
-    pass
 
 class AbstractParameter(object):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.id = id #a unique ID
-        self.paramflag = paramflag #the parameter flag passed to the command (include a trailing space!)        
+        self.paramflag = None #the parameter flag passed to the command (include a trailing space!) #CHECK: space still necessary?
         self.name = name #a representational name
         self.description = description
         self.error = None                    
@@ -75,6 +29,7 @@ class AbstractParameter(object):
         self.forbid = []
         self.allowusers = []
         self.denyusers = []
+        self.hasvalue = False
         for key, value in kwargs.items():
             if key == 'allowusers': 
                 self.allowusers = value  #Users to allow access to this parameter (If not set, all users have access)
@@ -97,47 +52,66 @@ class AbstractParameter(object):
             elif key == 'error':
                 #set an error message (if you also set a value, make sure this is set AFTER the value is set)
                 self.error = value
+            elif key == 'flag' or key == 'option' or key == 'paramflag':
+                self.paramflag = value
+            else:
+                raise Exception("Unknown attribute specified for parameter: " + key + "=" + str(value))
 
     def validate(self,value):
         self.error = None #reset error
         return True
 
-    def compilearg(self, value):
+    def compilearg(self):
         """This method compiles the parameter into syntax that can be used on the shell, such as for example: --paramflag=value"""
         if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
             sep = ''
         elif self.paramflag:
             sep = ' '
-        return self.paramflag + sep + str(value)
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(self.value)
 
-    def xml(self):
+    def xml(self, indent = ""):
         """This methods renders an XML representation of this parameter, along with 
         its selected value, and feedback on validation errors"""
-        xml = "<" + self.__class__.__name__
+        xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
-        xml += ' flag="'+self.paramflag + '"'
+        if self.paramflag:
+            xml += ' flag="'+self.paramflag + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
         for key, v in self.kwargs.items():    
-            if isinstance(v, bool):
-                xml += ' ' + key + '="' + str(int(v))+ '"'                    
-            elif isinstance(v, list):
-                xml += ' ' + key + '="'+",".join(v)+ '"'        
-            elif isinstance(v, unicode) or isinstance(v, str)  :
-                xml += ' ' + key + '="'+v+ '"'        
-            else:
-                xml += ' ' + key + '="'+str(v)+ '"'        
-        if self.value:
+            if not key in ['value','error','name','description']:
+                if isinstance(v, bool):
+                    xml += ' ' + key + '="' + str(int(v))+ '"'                    
+                elif isinstance(v, list):
+                    xml += ' ' + key + '="'+",".join(v)+ '"'        
+                elif isinstance(v, unicode) or isinstance(v, str)  :
+                    xml += ' ' + key + '="'+v+ '"'        
+                else:
+                    xml += ' ' + key + '="'+str(v)+ '"'        
+        if self.hasvalue:
             xml += ' value="'+unicode(self.value) + '"'
         if self.error:
             xml += ' error="'+self.error + '"'
         xml += " />"
         return xml
+        
+    def __str__(self):
+        if self.error:
+            error = " (ERROR: " + self.error + ")"
+        else:
+            error = ""
+        if self.value:
+            return self.__class__.__name__ + " " + self.id + ": " + str(self.value) + error
+        else: 
+            return self.__class__.__name__ + " " + self.id + error
 
     def set(self, value):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
         if self.validate(value):
             #print "Parameter " + self.id + " successfully set to " + repr(value)
+            self.hasvalue = True
             self.value = value
             return True
         else:
@@ -146,10 +120,10 @@ class AbstractParameter(object):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id]:
+        if self.id in postdata:
             return postdata[self.id]
         else: 
-            return False
+            return None
 
 
     def access(self, user):
@@ -161,10 +135,46 @@ class AbstractParameter(object):
             if not user in self.allowusers:
                 return False
         return True
+
+    @staticmethod
+    def fromxml(node):
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot() 
+        if node.tag in globals():
+            id = ''
+            paramflag = ''
+            name = ''
+            description = ''
+            kwargs = {}
+            for attrib, value in node.attrib.items():
+                if attrib == 'id':
+                    id = value
+                elif attrib == 'paramflag':
+                    paramflag = value       
+                elif attrib == 'name':
+                    name = value
+                elif attrib == 'description':
+                    description = value
+                else:
+                    kwargs[attrib] = value
+            for subtag in node: #parse possible subtags
+                if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
+                    if not 'choices' in kwargs: kwargs['choices'] = {}
+                    kwargs['choices'][subtag.attrib['id']] = subtag.text
+                    if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
+                        if 'multi' in kwargs and kwargs['multi'] == '1':
+                            if not 'value' in kwargs: kwargs['value'] = []
+                            kwargs['value'].append(subtag.attrib['id'])
+                        else:
+                            kwargs['value'] = subtag.attrib['id']
+
+            return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+        else:
+            raise Exception("No such parameter exists: " + node.tag)
             
         
 class BooleanParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         
         #defaultinstance
         self.reverse = False
@@ -172,7 +182,7 @@ class BooleanParameter(AbstractParameter):
             if key == 'reverse': 
                 self.reverse = value  #Option gets outputted when option is NOT checked
 
-        super(BooleanParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(BooleanParameter,self).__init__(id,name,description, **kwargs)
 
     def set(self, value = True):
         return super(BooleanParameter,self).set(value)
@@ -181,36 +191,45 @@ class BooleanParameter(AbstractParameter):
         super(BooleanParameter,self).set(False)
 
 
-    def compilearg(self, value):
-        if self.reverse: value = not value
-        if value:
-            return self.paramflag  
+    def compilearg(self):
+        if not self.paramflag:
+            return ""
+        if self.reverse: self.value = not self.value
+        if self.value:
+            return self.paramflag
         else:
             return ""
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and (postdata[self.id] == '1' or postdata[self.id] == 'True' or postdata[self.id] == 'yes' or postdata[self.id] == 'enabled'):
-            return True #postdata[self.id]
+        if not self.id in postdata:
+            return None
+        elif self.id in postdata and (isinstance(postdata[self.id], bool) or (postdata[self.id] == '1' or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled')):
+            return True #postdata[self.id]        
         else: 
             return False
 
 
+class StaticParameter(AbstractParameter):
+    """This is a parameter that can't be changed (it's a bit of a contradiction, I admit). But useful for some metadata specifications."""
+
+    def __init__(self, id, name, description = '', **kwargs):    
+        if not 'value' in kwargs:
+            raise ValueError("Static parameter expects value= !")
+        super(StaticParameter,self).__init__(id,name,description, **kwargs)
+        
+
 
 class StringParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.maxlength = 0 #unlimited
 
-        #defaults
-        if not 'default' in kwargs and not 'value' in kwargs:
-            self.value = ""
         for key, value in kwargs.items():
-            if key == 'default': 
-                self.value = value  
-            elif key == 'maxlength': 
+            if key == 'maxlength': 
                 self.maxlength = int(value)
+                del kwargs[key]
 
-        super(StringParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(StringParameter,self).__init__(id,name,description, **kwargs)
 
 
     def validate(self,value):
@@ -221,15 +240,22 @@ class StringParameter(AbstractParameter):
         else:
             return True            
 
-    def compilearg(self, value):
-        if value.find(" ") >= 0 or value.find(";") >= 0:            
-            value = value.replace('"',r'\"')
-            value = '"' + value + '"' #wrap in quotes
-        return super(StringParameter,self).compilearg(value)
+    def compilearg(self):
+        if self.value.find(" ") >= 0 or self.value.find(";") >= 0:            
+            value = '"' + self.value.replace('"',r'\"') + '"' #wrap in quotes
+        else:
+            value = self.value
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
+            sep = ''
+        elif self.paramflag:
+            sep = ' '
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(value)
 
 
 class ChoiceParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description, **kwargs):    
+    def __init__(self, id, name, description, **kwargs):    
         if not 'choices' in kwargs:
             raise Exception("No parameter choices specified for parameter " + id + "!")
         self.choices = [] #list of key,value tuples
@@ -238,7 +264,7 @@ class ChoiceParameter(AbstractParameter):
                 self.choices.append( (x,x) ) #list of two tuples
             else:
                 self.choices.append(x) #list of two tuples
-
+        del kwargs['choices']
 
         #defaults
         self.delimiter = ","
@@ -250,12 +276,15 @@ class ChoiceParameter(AbstractParameter):
         for key, value in kwargs.items():
             if key == 'multi': 
                 self.multi = value #boolean 
+                del kwargs[key]
             elif key == 'showall': 
                 self.showall = value #show all options at once (radio instead of a pull down) 
+                del kwargs[key]
             elif key == 'delimiter': 
                 self.delimiter = value #char
+                del kwargs[key]
 
-        super(ChoiceParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(ChoiceParameter,self).__init__(id,name,description, **kwargs)
 
     def validate(self,values):
         self.error = None
@@ -269,16 +298,16 @@ class ChoiceParameter(AbstractParameter):
 
 
 
-    def compilearg(self, values): 
+    def compilearg(self): 
         """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
-        if isinstance(values,list):
-            value = self.delimiter.join(values)
+        if isinstance(self.value,list):
+            value = self.delimiter.join(self.value)
         else:
-            value = values
+            value = self.value
         if value.find(" ") >= 0:
             value = '"' + value + '"' #wrap all in quotes
 
-        #for some odd, reason this procudes an error, as if we're not an instance of choiceparameter
+        #for some odd, reason this produced an error, as if we're not an instance of choiceparameter
         #return super(ChoiceParameter,self).compilearg(value)
 
         #workaround:
@@ -286,12 +315,14 @@ class ChoiceParameter(AbstractParameter):
             sep = ''
         elif self.paramflag:
             sep = ' '
+        else:
+            return str(value)
         return self.paramflag + sep + str(value)
 
-    def xml(self):
+    def xml(self, indent = ""):
         """This methods renders an XML representation of this parameter, along with 
         its selected value, and feedback on validation errors"""
-        xml = "<" + self.__class__.__name__
+        xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
@@ -313,12 +344,23 @@ class ChoiceParameter(AbstractParameter):
                 xml += " <choice id=\""+key+"\">" + value + "</choice>"
         xml += "</" + self.__class__.__name__ + ">"
         return xml
+        
+    def __str__(self):
+        if self.error:
+            error = " (ERROR: " + self.error + ")"
+        else:
+            error = ""
+        if self.value:
+            return self.__class__.__name__ + " " + self.id + ": " + ",".join(self.value) + error
+        else: 
+            return self.__class__.__name__ + " " + self.id + error        
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if self.multi: #multi parameters can be passed as  parameterid=choiceid1,choiceid2 or by setting parameterid[choiceid]=1 (or whatever other non-zero value)
             found = False
-            if self.id in postdata and postdata[self.id]:
+            if self.id in postdata:
+                found = True
                 passedvalues = postdata[self.id].split(',')
                 values = []                
                 for choicekey in [x[0] for x in self.choices]:
@@ -333,28 +375,35 @@ class ChoiceParameter(AbstractParameter):
                         if postdata[self.id+'['+choicekey+']']:
                             values.append(choicekey)
             if not found: 
-                return False
+                return None
             else:
                 return values
         else:
-            if self.id in postdata and postdata[self.id]:
+            if self.id in postdata:
                 return postdata[self.id]
             else:
-                return False
+                return None
 
 
 class TextParameter(StringParameter): #TextArea based
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
-        super(TextParameter,self).__init__(id,paramflag,name,description, **kwargs)
+    def __init__(self, id, name, description = '', **kwargs):
+        super(TextParameter,self).__init__(id,name,description, **kwargs)
 
-    def compilearg(self, value):
-        if value.find(" ") >= 0 or value.find(";") >= 0:            
-            value = value.replace('"',r'\"')
-            value = '"' + value + '"' #wrap in quotes
-        return super(TextParameter,self).compilearg(value)
+    def compilearg(self):
+        if self.value.find(" ") >= 0 or self.value.find(";") >= 0:            
+            value = '"' + self.value.replace('"',r'\"') + '"' #wrap in quotes
+        else:
+            value = self.value
+        if self.paramflag and self.paramflag[-1] == '=' or self.nospace:
+            sep = ''
+        elif self.paramflag:
+            sep = ' '
+        else:
+            return str(self.value)
+        return self.paramflag + sep + str(value)
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0
         self.maxvalue = 0 #unlimited        
         
@@ -362,12 +411,14 @@ class IntegerParameter(AbstractParameter):
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0
         for key, value in kwargs.items():
-            if key == 'minvalue': 
+            if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
-            elif key == 'maxvalue': 
-                self.maxvalue = int(value)
-
-        super(IntegerParameter,self).__init__(id,paramflag,name,description, **kwargs)
+                del kwargs[key]
+            elif key == 'maxvalue' or key == 'max': 
+                self.maxvalue = int(value)                
+                del kwargs[key]
+              
+        super(IntegerParameter,self).__init__(id,name,description, **kwargs)
 
 
     def validate(self, value):
@@ -375,7 +426,7 @@ class IntegerParameter(AbstractParameter):
         try:
             value = int(value)
         except:
-            self.error = "Not a valid number, note that no decimals are allowed"
+            self.error = "Not a number"
             return False
         if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
             return True
@@ -385,14 +436,29 @@ class IntegerParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id].isdigit():
+        if self.id in postdata and postdata[self.id] != '':
             return int(postdata[self.id])
         else: 
+            return None
+
+    def set(self, value):
+        """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
+        if self.validate(value):
+            #print "Parameter " + self.id + " successfully set to " + repr(value)
+            self.hasvalue = True
+            if isinstance(value, float):
+                self.value = round(value)
+            else:
+                self.value = int(value)
+            return True
+        else:
+            #print "Parameter " + self.id + " COULD NOT BE set to " + repr(value)
             return False
 
 
+
 class FloatParameter(AbstractParameter):
-    def __init__(self, id, paramflag, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0.0
         self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
 
@@ -401,12 +467,14 @@ class FloatParameter(AbstractParameter):
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0.0
         for key, value in kwargs.items():
-            if key == 'minvalue': 
+            if key == 'minvalue' or key == 'min': 
                 self.minvalue = float(value)
-            elif key == 'maxvalue': 
+                del kwargs[key]
+            elif key == 'maxvalue' or key == 'max': 
                 self.maxvalue = float(value)
+                del kwargs[key]
 
-        super(FloatParameter,self).__init__(id,paramflag,name,description, **kwargs)
+        super(FloatParameter,self).__init__(id,name,description, **kwargs)
 
     def validate(self, value):
         self.error = None
@@ -424,8 +492,8 @@ class FloatParameter(AbstractParameter):
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if self.id in postdata and postdata[self.id] != "":
+        if self.id in postdata and postdata[self.id] != '':
             return float(postdata[self.id])
         else: 
-            return False
+            return None
 

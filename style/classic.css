@@ -1,0 +1,111 @@
+body {
+    background: #e6dcca;
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+#status p {
+    text-align: center;
+    font-style: italic;
+    color: #434343;
+}
+
+h2 {
+    font-size: 120%;
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+h3 {
+    margin-left: 5px;
+    font-size: 100%;
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+
+#header h1 {
+    color: white;
+}
+
+#header h2 {
+    color: white;
+    font-style: italic;
+    font-size: 100%;
+    margin: 1px;
+    border: none;
+}
+
+div.box {
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+}
+
+table.files, table#projects {
+    border: #ca9c4d;
+}
+
+table#projects td {
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+
+body table.files td:hover, table.files th:hover, table#projects td:hover {
+    background: #eee;
+}
+
+table.files td {
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+
+table.files thead th {
+    background: #cbcbcb;
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+
+table.files td.actions {
+    background: #eee;
+    text-align: center;
+}
+
+.parameters table th, #parameters table  td {
+  border-bottom:  1px solid #e1e1e1;
+}
+
+.parameters h4 {
+    color: #ac8644;
+    text-decoration: small-caps;  
+    border-bottom:  1px solid #ca9c4d;
+}
+input.start {
+    font-weight: bold;
+    font-size: 160%;
+}
+
+input.uploadbutton {
+    font-weight: bold;
+}
+
+#status p {
+    text-align: center;
+    font-style: italic;
+    color: #434343;
+}
+
+#statuslog td.time {
+    font-size: 80%;
+    font-family: monospace;
+    color: gray;
+}
+#statuslog td.message {
+    font-style: italic;
+}
+
+#progressvalue {
+    background: gray;
+    color: white;
+}

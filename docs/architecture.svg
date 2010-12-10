@@ -13,7 +13,7 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47 r22583"
+   inkscape:version="0.48.0 r9654"
    sodipodi:docname="architecture.svg"
    inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
    inkscape:export-xdpi="90"
@@ -292,13 +292,13 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="168.66636"
+     inkscape:cx="-6.0900309"
      inkscape:cy="726.52649"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="976"
+     inkscape:window-width="1680"
+     inkscape:window-height="998"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1" />
@@ -319,14 +319,17 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#ccffaa;stroke:#030301;stroke-width:2.56806707;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#ccffaa;stroke:#000301;stroke-width:2.56800000000000006;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:5.13600000000000012, 2.56800000000000006;stroke-dashoffset:0;opacity:0.67873303"
        id="rect2840"
        width="632.38239"
        height="476.81894"
        x="46.453552"
        y="165.43477"
        rx="13.939467"
-       ry="6.7186217" />
+       ry="6.7186217"
+       inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
        style="fill:#eeffaa;stroke:#030301;stroke-width:2.59500003;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect2834-83"
@@ -499,7 +502,7 @@
          x="503.05594"
          y="88.676651">CLAM Client API</tspan></text>
     <rect
-       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.50879765;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:2.50879765;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:5.01759529,2.50879765;stroke-dashoffset:0"
        id="rect2891-0"
        width="152.61923"
        height="39.482151"
@@ -542,7 +545,7 @@
          sodipodi:role="line"
          x="583.86816"
          y="150.91399"
-         id="tspan6020">XML</tspan></text>
+         id="tspan6020">CLAM-XML</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:4.36592197;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow2Mstart);marker-end:none"
        d="M 555.42728,233.83683 555.28134,105.58095"
@@ -570,7 +573,7 @@
          sodipodi:role="line"
          x="261.80603"
          y="140.95959"
-         id="tspan6589">XML + XSL</tspan><tspan
+         id="tspan6589">CLAM-XML + XSL</tspan><tspan
          sodipodi:role="line"
          x="261.80603"
          y="154.70959"
@@ -643,7 +646,7 @@
          sodipodi:role="line"
          id="tspan2895-1"
          x="347.49243"
-         y="543.75043">CLAM Client API</tspan></text>
+         y="543.75043">CLAM Data API</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:2.07141328;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
        d="m 176.5221,236.47334 c 0.0518,-5.44573 0.10359,-10.89146 0.15538,-16.33718 0.006,-0.65842 -0.0552,-3.87943 0.0388,-4.0843 0.13372,-0.29127 0.49412,-0.40962 0.62784,-0.70089 0.11469,-0.24982 0.0279,-2.93012 0.0324,-3.40358 0.004,-0.45381 0.009,-0.90762 0.0129,-1.36143 0.002,-0.22691 -0.20065,-0.674 0.006,-0.68072 0.20713,-0.007 -0.009,0.90762 -0.006,0.68072 0.004,-0.45382 0.009,-0.90763 0.0129,-1.36144"

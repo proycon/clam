@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink">
 
 <xsl:import href="parameters.xsl" />
 
@@ -18,7 +18,7 @@
               <xsl:when test="status/@code = 0">  
                 <div id="input" class="box">            
                  <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
-                 <xsl:apply-templates select="inputformats"/>             
+                 <xsl:apply-templates select="profiles"/> 
                 </div>
                 <xsl:apply-templates select="parameters"/>  
               </xsl:when>
@@ -45,13 +45,15 @@
       <meta http-equiv="refresh" content="10" />            
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/style.css" type="text/css"></link>
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
+    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
     <!--<link rel="stylesheet" href="/static/humanity/jquery-ui-1.8.1.custom.css" type="text/css" />-->
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.4.2.min.js"></script>
     <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
   </head>
 </xsl:template>
@@ -63,7 +65,6 @@
 <strong>CLAM</strong> is funded under <a href="http://www.clarin.nl/">CLARIN-NL</a> projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
 </span>
 </div>
-
 
 </xsl:template>
 
@@ -125,106 +126,123 @@
     <tr><td class="time"><xsl:value-of select="@time" /></td><td class="message"><xsl:value-of select="." /></td></tr>
 </xsl:template>
 
-<xsl:template match="/clam/inputformats">
+<xsl:template match="/clam/profiles">
         <div id="uploadarea">
-        <div class="uploadform">
-            <h3>Upload a file from disk</h3>
-            <p>Use this to upload files from your computer to the system.</p>
-            <!--
-            <div id="simpleupload">
-             <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
-                <input type="hidden" name="uploadcount" value="1" />
-                <table>
-                 <tr><th><label for="upload1">Upload file:</label></th><td><input type="file" name="upload1" /></td></tr>
-                 <tr><th><label for="uploadformat1">Format:</label></th><td>
-                    <select name="uploadformat1">
-                    <xsl:for-each select="*">
-                        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+            
+            <xsl:if test="profile/input/InputTemplate/inputsource">
+            
+            <h3>Add already available resources</h3>
+            
+            <div id="inputsourceupload">
+                    <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
+                    <select id="uploadinputsource">
+                    <xsl:for-each select="/clam/inputsources/inputsource">
+                        <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
                     </xsl:for-each>
-                    </select>
-                 </td></tr>
-                 <tr><td></td><td><input id="uploadbutton" type="submit" value="Upload input file" /></td></tr>
-                </table>
-             </form>
-            </div>
-            -->
-
-            <div id="complexupload">
-                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format for this upload:</em><xsl:text> </xsl:text><select id="uploadformat1">
-                    <xsl:call-template name="inputformats" />
+                    <xsl:for-each select="profile">
+                    <xsl:for-each select="input/InputTemplate">
+                        <xsl:for-each select="inputsource">
+                            <option value="{@id}"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
+                        </xsl:for-each>
+                    </xsl:for-each>
+                    </xsl:for-each>
                     </select><br />
-                <strong>Step 2)</strong><xsl:text> </xsl:text><input id="upload1" class="uploadbutton" type="submit" value="Select and upload a file" />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />
             </div>
-            <div id="uploadprogress">
-                    <strong>Upload in progress... Please wait...</strong><br />
-                    <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-            </div>
+            
+            </xsl:if>
         
+            
+            <div class="uploadform">
+                <h3>Upload a file from disk</h3>
+                <p>Use this to upload files from your computer to the system.</p>
+                <!--
+                <div id="simpleupload">
+                 <form id="uploadform" method="POST" enctype="multipart/form-data" action="upload/">
+                    <input type="hidden" name="uploadcount" value="1" />
+                    <table>
+                     <tr><th><label for="upload1">Upload file:</label></th><td><input type="file" name="upload1" /></td></tr>
+                     <tr><th><label for="uploadformat1">Format:</label></th><td>
+                        <select name="uploadformat1">
+                        <xsl:for-each select="*">
+                            <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
+                        </xsl:for-each>
+                        </select>
+                     </td></tr>
+                     <tr><td></td><td><input id="uploadbutton" type="submit" value="Upload input file" /></td></tr>
+                    </table>
+                 </form>
+                </div>
+                -->
 
-        </div>
-        <h3>Grab a file from the web</h3>
-        <div id="urlupload">
-            <p>Retrieves an input file from another location on the web.</p>
-            <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input format:</em><xsl:text> </xsl:text><select id="uploadformaturl">
-                    <xsl:call-template name="inputformats" />
-            </select><br />
-            <strong>Step 2)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="uploadurl" value="http://" /><br />
-            <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadurlsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
-        </div>
-        <div id="urluploadprogress">
-                    <strong>Downloadin progress... Please wait...</strong><br />
-                    <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-        </div>    
+                <div id="clientupload">
+                    <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><em>Select a type first</em></div>
+                    <strong>Step 3)</strong><xsl:text> </xsl:text><input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />
+                </div>
+                <div id="uploadprogress">
+                        <strong>Upload in progress... Please wait...</strong><br />
+                        <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+                </div>
+            
 
-        <h3>Add input from browser</h3>
-        <p>You can create new files right from your browser: <button id="openeditor">Open Live Editor</button></p>
-        <div id="mask"></div>
-        <div id="editor">
+            </div>
+            
+
+            
+            <h3>Grab a file from the web</h3>
+            <div id="urlupload">
+                <p>Retrieves an input file from another location on the web.</p>
+                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates"></select><br />
+                <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><em>Select a type first</em></div>
+                <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" value="http://" /><br />
+                <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
+            </div>
+            
+            <div id="urluploadprogress">
+                        <strong>Download in progress... Please wait...</strong><br />
+                        <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+            </div>    
+
             <h3>Add input from browser</h3>
-            <!--<form id="editorform" method="POST" enctype="multipart/form-data" action="upload/">-->
-            <!--<input type="hidden" name="uploadcount" value="1" />-->
-                <table>
-                 <tr><th><label for="uploadtext1">Input:</label></th><td><textarea id="uploadtext1"></textarea></td></tr>
-                 <tr><th><label for="uploadfilename1">Desired filename:</label></th><td><input id="uploadfilename1" /></td></tr>
-                 <tr><th><label for="uploadformat1">Format:</label></th><td>
-                    <select id="editoruploadformat">
-                    <xsl:call-template name="inputformats" />
-                    </select>
-                 </td></tr>
-                 <tr><th></th><td class="buttons"><input id="submiteditor" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
-                </table>
-            <!--</form>-->
+            <p>You can create and add new files from within your browser: <button id="openeditor">Open Live Editor</button></p>
+            <div id="mask"></div>
+            <div id="editor">
+                <h3>Add input from browser</h3>
+                    <table>
+                     <tr><th><label for="editorcontents">Input:</label></th><td><textarea id="editorcontents"></textarea></td></tr>                     
+                     <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
+                      <select id="editorinputtemplate" class="inputtemplates"></select>
+                     </td></tr>
+                     <tr><th><label for="editorparameters">Parameters:</label></th><td>
+                        <div id="editorparameters" class="parameters"><em>Select a type first</em></div>
+                     </td></tr>
+                     <tr><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
+                     <tr><th></th><td class="buttons"><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
+                    </table>
+            </div>
+            
         </div>
-        </div>
-</xsl:template>
-
-<xsl:template name="inputformats">
-    <xsl:for-each select="/clam/inputformats/*">
-        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-    </xsl:for-each>
-</xsl:template>
-
-<xsl:template name="outputformats">
-    <xsl:for-each select="/clam/outputformats/*">
-        <option><xsl:attribute name="value"><xsl:value-of select="name(.)" /></xsl:attribute><xsl:value-of select="@name" /><xsl:if test="@encoding"> [<xsl:value-of select="@encoding" />]</xsl:if></option>
-    </xsl:for-each>
 </xsl:template>
 
 
 <xsl:template match="/clam/input">
         <h2>Input</h2>
         
-        <xsl:if test="/clam/corpora/corpus">
+        
+        <!--
+        <xsl:if test="/clam/inputsources/inputsource">
             <div id="corpusselection">
-            <label>Input source: </label>
-            <select onchange="setinputsource(this);">
-                <option value="" selected="selected">Use uploaded files</option>
-                <xsl:for-each select="/clam/corpora/corpus">
-                    <option><xsl:attribute name="value"><xsl:value-of select="." /></xsl:attribute><xsl:value-of select="." /></option>
+            <label>Add files from pre-installed input source: </label>
+            <select id="inputsource" onchange="setinputsource(this);">
+                <xsl:for-each select="/clam/inputsources/inputsource">
+                    <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
                 </xsl:for-each>
             </select>
+            <button id="inputsourceselect">Copy files</button>
             </div>
         </xsl:if>
+        -->
 
         <div id="inputfilesarea">
         <h3>Input files</h3>
@@ -232,13 +250,13 @@
             <thead>
                 <tr>
                     <th>Input File</th>
+                    <th>Template</th>
                     <th>Format</th>
-                    <th>Encoding</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select="path" /> 
+                <xsl:apply-templates select="file" /> 
             </tbody>
         </table>
         </div>
@@ -251,62 +269,66 @@
         <table id="outputfiles" class="files">
             <thead>
                 <tr>
-                    <th>Input File</th>
+                    <th>Output File</th>
+                    <th>Template</th>
                     <th>Format</th>
-                    <th>Encoding</th>
                     <th>Viewers</th>
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select="path" />
+                <xsl:apply-templates select="file" />
             </tbody>
         </table>
     </div>
 </xsl:template>
 
-<xsl:template match="/clam/input/path">
+<xsl:template match="/clam/input/file">
     <tr>
-        <td class="file"><a><xsl:attribute name="href">input/<xsl:value-of select="."/></xsl:attribute><xsl:value-of select="."/></a></td>
-        <xsl:variable name="format" select="@format" />
-        <td><xsl:value-of select="/clam/inputformats/*[name() = $format]/@name"/></td>
-        <td><xsl:value-of select="@encoding" /></td>
+        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
+        <xsl:variable name="template" select="@template" />
+        <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
+        <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
         <td class="actions"><img src="{/clam/@baseurl}/static/delete.png" title="Delete this file">
-            <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="."/>');</xsl:attribute>
+            <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
         </img></td>
     </tr>
 </xsl:template>
 
 
-<xsl:template match="/clam/output/path">
+<xsl:template match="/clam/output/file">
     <tr>
-        <xsl:variable name="href">output/<xsl:value-of select="."/></xsl:variable>
-        <xsl:variable name="format" select="@format" />
-
+        
         <td class="file">
         <xsl:choose>
-        <xsl:when test="/clam/outputformats/*[name() = $format]/viewers">
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" />/view</xsl:attribute><xsl:value-of select="."/></a>
+        <xsl:when test="./viewers/viewer[1]">
+            <a><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:when>
         <xsl:otherwise>
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="."/></a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:otherwise>
         </xsl:choose>
         </td>
 
-        <td><xsl:value-of select="/clam/outputformats/*[name() = $format]/@name"/></td>
-        <td><xsl:value-of select="@encoding"/></td>
+        <xsl:variable name="template" select="@template" />
+        <td><xsl:value-of select="//OutputTemplate[@id = $template]/@label"/></td>
+        <td><xsl:value-of select="//OutputTemplate[@id = $template]/@format"/></td>
+        
         <td>
-            <xsl:for-each select="/clam/outputformats/*[name() = $format]/viewers/*">
-                <a><xsl:attribute name="href"><xsl:value-of select="$href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="@name" /></a> |
+            <xsl:for-each select="./viewers/viewer">
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
             </xsl:for-each>
-            <a><xsl:attribute name="href"><xsl:value-of select="$href" /></xsl:attribute><xsl:value-of select="@name" />Download</a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
+            <xsl:if test="@template">
+                <xsl:text> | </xsl:text>
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a>                
+            </xsl:if>
         </td>
     </tr>
 </xsl:template>
 
 <xsl:template match="/clam/parameters">
     <form method="POST" enctype="multipart/form-data" action="">
-    <div id="parameters" class="box">
+    <div id="parameters" class="box parameters">
         <h2>Parameter Selection</h2>
 
         <xsl:for-each select="parametergroup">
@@ -375,7 +397,7 @@
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="." />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
+            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
            </xsl:for-each>
           </tbody>
         </table>

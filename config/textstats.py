@@ -16,47 +16,80 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.converters import *
+from clam.common.viewers import *
+from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.2
+REQUIRE_VERSION = 0.5
+
+# ======== GENERAL INFORMATION ===========
 
 #The System ID, a short alphanumeric identifier for internal use only
-SYSTEM_ID = "clamtest"
+SYSTEM_ID = "textstats"
 
 #System name, the way the system is presented to the world
-SYSTEM_NAME = "CLAM Test"
+SYSTEM_NAME = "Text Statistics (CLAM Demo)"
 
 #An informative description for this system:
-SYSTEM_DESCRIPTION = "This is a test case for CLAM."
+SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext files. It is a demo for CLAM."
+
+# ======== LOCATION ===========
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = sys.path[0] + "/clamtestroot/"
+ROOT = "/home/proycon/work/clam.textstats/"
 
 #The URL of the system
-#URL = "http://localhost:8080"
 PORT= 8080
+
+# ======== AUTHENTICATION & SECURITY ===========
 
 #Users and passwords
 USERS = None #no user authentication
 #USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
 
-#ADMINS = ['admin'] #Define which of the above users are admins
+ADMINS = ['admin'] #Define which of the above users are admins
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
+# ======== WEB-APPLICATION STYLING =============
+
+#Choose a style (has to be defined as a CSS file in style/ )
+STYLE = 'classic'
+
+#Amount of free memory required prior to starting a new process (in Kbytes!)
+REQUIREMEMORY = 10 * 1024
+
+# ======== ENABLED FORMATS ===========
+
+#Here you can specify an extra formats module
+CUSTOM_FORMATS_MODULE = None
+
+
+# ======== PREINSTALLED DATA ===========
+
+INPUTSOURCES = [
+    InputSource(id='sampledocs',label='Sample texts',path=ROOT+'/inputsources/sampledata',defaultmetadata=PlainTextFormat(None, encoding='utf-8') ),
+]
+
+# ======== PROFILE DEFINITIONS ===========
+
 PROFILES = [ 
     Profile(
         InputTemplate('textinput', PlainTextFormat,"Input text document",  
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+            StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
+            IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='docconv',label='Convert from MS Word Document'),
+            InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
             extension='.txt',
             multi=True
         ),
@@ -68,28 +101,38 @@ PROFILES = [
         OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
             CopyMetaField('language','textinput.language'), 
             CopyMetaField('encoding','textinput.encoding'), 
+            SimpleTableViewer(),
             extension='.freqlist',
             multi=True
         ),
         OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
-            SetMetaField('encoding','utf-8'),
+            SetMetaField('encoding','ascii'),
+            ParameterCondition(author_set=True, 
+                then=ParameterMetaField('author','author'), 
+            ),
             filename='overall.stats',
             unique=True
         ), 
         OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
+            ParameterCondition(author_set=True, 
+                then=ParameterMetaField('author','author'), 
+            ),
+            SimpleTableViewer(),
             filename='overall.freqlist',
             unique=True
         ), 
         ParameterCondition(createlexicon=True, 
             then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 SetMetaField('encoding','utf-8'),
-                filename='overall.lexikon',
+                filename='overall.lexicon',
                 unique=True
             )            
         )
     ) 
 ]
+
+# ======== COMMAND ===========
 
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
@@ -109,18 +152,17 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/tests/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
+COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
 
-#The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
+# ======== PARAMETER DEFINITIONS ===========
+
+#The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS =  [ 
     ('Main', [ 
-        BooleanParameter('boolean','-b','Boolean','To be or not to be? That is the question'),
-        IntegerParameter('integer','-i','Integer','Integer between zero and ten',minvalue=0, maxvalue=10),
-        FloatParameter('float','-f','Float','Float between 0.0 and 1.0',minvalue=0.0, maxvalue=1.0),
-        StringParameter('string','-s','String','Enter a word',maxlength=10),
-        TextParameter('text','-t','String','Text'),
-        ChoiceParameter('colourchoice','-c','Choice','Favourite colour',choices=[('red','red'),('green','green'),('blue','blue')]),
-        ChoiceParameter('cities','-C', 'Visited cities', 'What cities have you visited?', choices=[('amsterdam', 'Amsterdam'), ('ny', 'New York'), ('london', 'London'), ('paris','Paris')], multi=True)
+        BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
+        ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
+        IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),
+        StringParameter(id='author',name='Author',description='Sign output metadata with the specified author name',maxlength=255),
     ] )
 ]
 
