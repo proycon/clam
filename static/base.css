@@ -1,0 +1,269 @@
+body {
+    background: #e6dcca;
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+#header {
+    margin: 5px;
+    width: 97%;
+    background: #ceb383;
+    border: 1px none #ca9c4d;
+    padding: 10px;
+    text-align: center;
+    border-radius: 12px; /* general CSS3 */
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+
+}
+
+#header h1 {
+    margin: 3px;
+}
+
+
+#header h2 {
+    font-style: italic;
+    font-size: 100%;
+    margin: 1px;
+    border: none;
+}
+
+#description {
+    font-style: italic;
+}
+
+#container {
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+    border: 1px none;
+}
+
+
+div.box {
+    width: 97%;
+    clear: both;
+    margin: 5px;
+    padding: 10px;
+}
+
+/*div.leftbox {
+    float: left;
+    margin: 5px;
+    width: 45%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+div.rightbox {
+    float: right;
+    margin: 5px;
+    width: 45%;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}*/
+div#mask {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    opacity: 0.6;
+}
+div#editor {
+    display: none;
+    position: fixed;
+    top: 100px;
+    width: 65%;
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    background: #f6f6f6;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
+}
+
+
+#status .ready {
+    color: #2f7e35;
+    font-weight: bold;
+    font-size: 120%;
+}
+#status .error {
+    margin: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    padding: 10px;
+    text-align: center;
+    background: #5c0202;
+    border: 3px dashed #b81515;
+    color: white;
+    font-size: 120%;
+}
+#status img.progress {
+    margin: 2px;
+    margin-left: 10px; 
+}
+
+#input table {
+    text-align: left;
+}
+td.buttons {
+    text-align: right;
+}
+
+table.files, table#projects {
+    text-align: left;
+    width: 95%;
+    clear: both;
+}
+
+table#projects td {
+    padding: 3px;
+    padding-left: 20px;
+    
+}
+
+table.files th {
+    font-weight: none;    
+    width: 60%;
+    padding: 4px;
+}
+table.files td {
+    -moz-border-radius: 5px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 5px; /* CSS3 for Safari */
+}
+
+table.files td.file {
+    font-weight: bold;
+    font-style: normal;
+}
+table.files td.actions {
+    width: 5%;
+}
+table.files ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+table.files li {
+    margin: 0px;
+    padding: 0px;
+}
+
+
+#footer {
+    width: 97%;
+    margin: 5px;
+    font-family: monospace;
+    font-size: 80%;
+    text-align: center;
+    padding: 10px;
+}
+
+.parameters table {
+    width: 90%;
+    text-align: left;
+}
+
+.parameters table th, #parameters table  td {
+  text-align: left;
+}
+
+.parameters th .description {
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 20px; 
+    font-size: 90%;   
+}
+.parameters th .error {
+    margin-left: 20px; 
+    color: red;
+}
+.parameters th, .parameters td {
+    width: 49%;
+    text-align: left;
+}
+.parameters td.option {
+    text-align: right;
+}
+
+#startbutton {
+    width: 100%;
+    text-align: center;
+}
+input.start {
+    width: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+}
+
+input#abortbutton, input#restartbutton, input#indexbutton {
+    float: right;
+}
+.uploadform table, #inputbox table {
+    width: 100%;
+    text-align: left;
+}
+#editor textarea {
+    width: 100%;
+    height: 240px;
+}
+#editor th {
+    width: 15%;
+}
+
+button#openeditor {
+    margin-left: 10%;
+}
+#uploadprogress, #urluploadprogress {
+    display: none;
+}
+
+#status p {
+    display: block;
+    width: 100%;
+}
+
+#statuslog {
+    width: 85%;
+    height: 100px;
+    overflow: auto;
+}
+#statuslog table {
+    width: 95%; 
+    text-align: left;
+}
+#statuslog td.time {
+    width: 15%;
+}
+#statuslog td.message {
+    width: 85%;
+}
+
+#progressbar {
+    width: 75%;
+    height: 35px;
+    border: gray 1px solid;
+    font-weight: bold;
+    font-size: 120%;
+    vertical-align: middle;
+    font-weight: bold;
+}
+#progressvalue {
+    text-align: right;
+    display: inline-block;
+    height: 35px;
+    background: gray;
+    vertical-align: middle;
+    color: white;
+    font-weight: bold;
+}

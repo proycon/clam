@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+###############################################################
+# CLAM: Computational Linguistics Application Mediator
+# -- Settings --
+#       by Maarten van Gompel (proycon)
+#       http://ilk.uvt.nl/~mvgompel
+#       Induction for Linguistic Knowledge Research Group
+#       Universiteit van Tilburg
+#       
+#       Licensed under GPLv3
+#
+###############################################################
+
+# *** DO NOT ALTER THIS FILE, MAKE A COPY INSTEAD! ***
+
+from clam.common.parameters import *
+from clam.common.formats import *
+from clam.common.digestauth import pwhash
+
+REQUIRE_VERSION = 0.2
+
+#========================== META INFORMATION ===================================
+
+
+#The System ID, a short alphanumeric identifier for internal use only
+SYSTEM_ID = "clam"
+
+#System name, the way the system is presented to the world
+SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
+
+#An informative description for this system:
+SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
+
+
+#========================== SERVER ADMINISTRATION ===================================
+
+
+#The root directory for CLAM, all project files, (input & output) and
+#pre-installed corpora will be stored here. The directories will be
+#made if they do not exist yet. Set to an absolute path.
+ROOT = ""
+
+#The port the webserver (either built-in or a parent server) runs on:
+PORT = 80
+#The host the webserver (either built-in or a parent server) runs on, note
+#that clients are forced to use the very same hostname, so make sure it's
+#accessible as-such.
+HOST = 'localhost'
+
+#If CLAM runs in an existing webserver, it can be configured to run at certain deeper URL, rather than at the root of the server (don't worry about leading/trailing slashes). In a stand-alone webserver, CLAM will always run in the root.
+#URLPREFIX = ''
+
+#Users and passwords
+USERS = None #no user authentication
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+
+ADMINS = []
+
+
+#========================== SERVICE CONFIGURATION ===================================
+
+
+#Do you want all projects to be public to all users? Otherwise projects are 
+#private and only open to their owners and users explictly granted access.
+PROJECTS_PUBLIC = True
+
+#The system command. It is recommended you set this to small wrapper
+#script around your actual system. Full shell syntax is supported. Using
+#absolute paths is always preferred. The current working directory will be
+#set to the project directory.
+#
+#You can make use of the following special variables, 
+#which will be automatically set by CLAM:
+#     $INPUTDIRECTORY  - The directory where input files are uploaded.
+#     $OUTPUTDIRECTORY - The directory where the system should output
+#                        its output files.
+#     $STATUSFILE      - Filename of the .status file where the system 
+#                        should output status messages. 
+#     $DATAFILE        - Filename of the clam.xml file describing the 
+#                        system and chosen configuration.
+#     $USERNAME        - The username of the currently logged in user
+#                        (set to "anonymous" if there is none)
+#     $PARAMETERS      - List of chosen parameters, using the specified flags
+#
+COMMAND = ""
+
+#Example:
+#COMMAND = "/home/proycon/work/clam/tests/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+
+#The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
+PARAMETERS = []
+
+#List of supported Input formats by the system
+#New format types should be added to common/formats.py, and can then be used here:
+INPUTFORMATS = []
+
+#Example:
+#INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
+
+#List of delivered Output formats by the system (it's not mandatory for all these filetypes to be delivered at the same time)
+OUTPUTFORMATS = []
+
+#Example:
+#OUTPUTFORMATS = [ PlainTextFormat('utf-8',['txt']) ]
+
+

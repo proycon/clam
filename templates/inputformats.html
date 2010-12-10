@@ -1,0 +1,5 @@
+$def with (name,formats)
+<select name="$name">
+    $for format_id, format_name in formats:    
+        <option value="$format_id">$format_name</option>
+</select>
