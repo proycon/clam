@@ -367,23 +367,25 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
         inputtemplate = getinputtemplate(id);
         if (inputtemplate) {
             var xmldoc;
-            if (parametersxmloverride == undefined) {
-                xmldoc = $(inputtemplate.parametersxml);                    
-            } else {
-                xmldoc = $(parametersxmloverride);
-            }
-            var found = false;
-            for (var i = 0; i < xmldoc.length; i++) {
-                if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
-                    xmldoc = xmldoc[i];
-                    found = true;
-                }                    
-            }
-            if (!found) {
-                alert("You browser was unable render the metadata parameters...");
-                return false;
-            }            
             if (document.implementation && document.implementation.createDocument) {
+            
+                if (parametersxmloverride == undefined) {
+                    xmldoc = $(inputtemplate.parametersxml);                    
+                } else {
+                    xmldoc = $(parametersxmloverride);
+                }
+                var found = false;
+                for (var i = 0; i < xmldoc.length; i++) {
+                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
+                        xmldoc = xmldoc[i];
+                        found = true;
+                    }                    
+                }
+                if (!found) {
+                    alert("You browser was unable render the metadata parameters...");
+                    return false;
+                }     
+
                 //For decent browsers (Firefox, Opera, Chromium, etc...)    
                 xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
@@ -395,8 +397,9 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 result = xsltProcessor.transformToFragment(xmldoc, document);
                 //var s = (new XMLSerializer()).serializeToString(result);
                 //alert(s);
-            } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
-                result = xmldoc.transformNode(parametersxsl); //VERIFY
+            } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
+                xmldoc = (new DOMParser()).parseFromString(inputtemplate.parametersxml, "text/xml")
+                result = xmldoc.transformNode(parametersxsl);
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
