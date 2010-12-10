@@ -858,6 +858,14 @@ class InputFileHandler(object):
                     if s.id == postdata['inputsource']:
                         inputsource = s
                 if not inputsource:
+                    for profile in settings.PROFILES:
+                        for inputtemplate in profile.input:
+                            for s in inputtemplate.inputsources:
+                                if s.id == postdata['inputsource']:
+                                    inputsource = s
+                                    inputsource.inpputtemplate = inputtemplate
+                                    break                    
+                if not inputsource:
                     raise web.webapi.Forbidden("No such inputsource exists")
                 if inputsource.isfile():
                     filename = os.path.basename(inputsource.path)

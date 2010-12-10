@@ -143,7 +143,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
                     </xsl:for-each>
                     </xsl:for-each>
                     </select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="inputsourceuploadbutton" class="uploadbutton" type="submit" value="Add file" />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add file" />
             </div>
             
             </xsl:if>
