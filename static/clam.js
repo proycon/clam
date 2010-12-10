@@ -366,27 +366,28 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
     } else {
         inputtemplate = getinputtemplate(id);
         if (inputtemplate) {
+            var xmldoc;
+            if (parametersxmloverride == undefined) {
+                xmldoc = $(inputtemplate.parametersxml);                    
+            } else {
+                xmldoc = $(parametersxmloverride);
+            }
+            var found = false;
+            for (var i = 0; i < xmldoc.length; i++) {
+                if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
+                    xmldoc = xmldoc[i];
+                    found = true;
+                }                    
+            }
+            if (!found) {
+                alert("You browser was unable render the metadata parameters...");
+                return false;
+            }            
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)    
                 xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
-                var xmldoc;
-                if (parametersxmloverride == undefined) {
-                    xmldoc = $(inputtemplate.parametersxml);                    
-                } else {
-                    xmldoc = $(parametersxmloverride);
-                }
-                var found = false;
-                for (var i = 0; i < xmldoc.length; i++) {
-                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
-                        xmldoc = xmldoc[i];
-                        found = true;
-                    }                    
-                }
-                if (!found) {
-                    alert("You browser was unable render the metadata parameters...");
-                    return false;
-                }
+
                                 
                 //var s = (new XMLSerializer()).serializeToString(xmldoc);
                 //alert(s);
@@ -395,24 +396,11 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 //var s = (new XMLSerializer()).serializeToString(result);
                 //alert(s);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
-                if (parametersxmloverride == undefined) {
-                    result = inputtemplate.parametersxml.transformNode(parametersxsl); //VERIFY
-                } else {
-                    result = inputtemplate.parametersxmloverride.transformNode(parametersxsl); //VERIFY
-                }
+                result = xmldoc.transformNode(parametersxsl); //VERIFY
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
-            $(target).html('<div id="' + target + '_form">'  + result + '</div>');
-            if ((enableconverters) && ($(inputtemplate.inputsources))) {                
-                var s = "Add pre-installed resource? <select name=\"inputsource\" onchange=\"setlocalinputsource(this)\">";
-                s += "<option value=\"\">No, custom resource</option>";
-                for (var i = 0; i < inputtemplate.inputsources.length; i++) {
-                    s += "<option value=\"" + inputtemplate.inputsources[i].id + "\">" + inputtemplate.inputsources[i].label + "</option>";
-                }
-                s += "</select><br />";
-                $(target).prepend(s);
-            }
+            $(target).html(result);
             if ((enableconverters) && ($(inputtemplate.converters))) {                
                 var s = "Automatic conversion from other format? <select name=\"converter\">";
                 s += "<option value=\"\">No</option>";
