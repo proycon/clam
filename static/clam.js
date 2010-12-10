@@ -396,9 +396,9 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 //alert(s);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)
                 if (parametersxmloverride == undefined) {
-                    result = inputtemplate.parametersxml.transformNode(xsl); //VERIFY
+                    result = inputtemplate.parametersxml.transformNode(parametersxsl); //VERIFY
                 } else {
-                    result = inputtemplate.parametersxmloverride.transformNode(xsl); //VERIFY
+                    result = inputtemplate.parametersxmloverride.transformNode(parametersxsl); //VERIFY
                 }
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
