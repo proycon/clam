@@ -89,7 +89,7 @@ PROFILES = [
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='docconv',label='Convert from MS Word Document'),
-            InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', optional=True),
+            InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
             extension='.txt',
             multi=True
         ),

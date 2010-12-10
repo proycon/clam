@@ -854,6 +854,7 @@ class InputFileHandler(object):
         if filename == '':
             #Handle inputsource
             if 'inputsource' in postdata and postdata['inputsource']:
+                inputsource = None
                 for s in settings.INPUTSOURCES:
                     if s.id == postdata['inputsource']:
                         inputsource = s
@@ -863,7 +864,7 @@ class InputFileHandler(object):
                             for s in inputtemplate.inputsources:
                                 if s.id == postdata['inputsource']:
                                     inputsource = s
-                                    inputsource.inpputtemplate = inputtemplate
+                                    inputsource.inputtemplate = inputtemplate.id
                                     break                    
                 if not inputsource:
                     raise web.webapi.Forbidden("No such inputsource exists")
@@ -953,6 +954,8 @@ class InputFileHandler(object):
             else:
                 raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
             
+        if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
+            raise web.webapi.Forbidden("Adding files for this inputtemplate must proceed through inputsource") #403
             
         if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
                 raise web.webapi.Forbidden("Invalid converter specified: " + postdata['converter']) #403
@@ -1037,6 +1040,7 @@ class InputFileHandler(object):
             if inputsource.metadata:
                 metadata = inputsource.metadata
                 errors, parameters = inputtemplate.validate(metadata, user)
+                validmeta = True
             else:
                 metafilename = os.path.dirname(inputsource.path) 
                 if metafilename: metafilename += '/'

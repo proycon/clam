@@ -130,20 +130,23 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             
             <xsl:if test="profile/input/InputTemplate/inputsource">
             
-            <h3>Add an already available resource</h3>
+            <h3>Add already available resources</h3>
             
             <div id="inputsourceupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
                     <select id="uploadinputsource">
+                    <xsl:for-each select="/clam/inputsources/inputsource">
+                        <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
+                    </xsl:for-each>
                     <xsl:for-each select="profile">
                     <xsl:for-each select="input/InputTemplate">
                         <xsl:for-each select="inputsource">
-                            <option value="@id"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
+                            <option value="{@id}"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
                         </xsl:for-each>
                     </xsl:for-each>
                     </xsl:for-each>
                     </select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add file" />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />
             </div>
             
             </xsl:if>
@@ -225,6 +228,8 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
 <xsl:template match="/clam/input">
         <h2>Input</h2>
         
+        
+        <!--
         <xsl:if test="/clam/inputsources/inputsource">
             <div id="corpusselection">
             <label>Add files from pre-installed input source: </label>
@@ -236,6 +241,7 @@ Funded under CLARIN-NL projects TICCLops (09-011) and WP1 of TTNWW, coordinated 
             <button id="inputsourceselect">Copy files</button>
             </div>
         </xsl:if>
+        -->
 
         <div id="inputfilesarea">
         <h3>Input files</h3>

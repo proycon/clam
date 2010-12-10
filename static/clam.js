@@ -221,10 +221,12 @@ $(document).ready(function(){
             url: "input/",
             data: {'inputsource': $('#uploadinputsource').val() }, 
             success: function(response){
-                processuploadresponse(response, '#nonexistant');
+                //processuploadresponse(response, '#nonexistant');
+                window.location.href = ""; /* refresh */   
             },
             error: function(response,errortype){
-                processuploadresponse(response.responseXML, '#nonexistant');                
+                alert("Error, unable to add file ("+response.status+")")
+                //processuploadresponse(response.responseXML, '#nonexistant');                
             }
        });
    });
