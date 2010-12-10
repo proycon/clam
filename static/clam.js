@@ -398,7 +398,9 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 //var s = (new XMLSerializer()).serializeToString(result);
                 //alert(s);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
-                xmldoc = (new DOMParser()).parseFromString(inputtemplate.parametersxml, "text/xml")
+                xmldoc=new ActiveXObject("Microsoft.XMLDOM");
+                xmldoc.async="false";
+                xmldoc.loadXML(inputtemplate.parametersxml);
                 result = xmldoc.transformNode(parametersxsl);
             } else {
                 result = "<strong>Error: Unable to render parameter form!</strong>";
