@@ -368,7 +368,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
         if (inputtemplate) {
             var xmldoc;
             if (document.implementation && document.implementation.createDocument) {
-            
+                //For decent browsers (Firefox, Opera, Chromium, etc...)                
                 if (parametersxmloverride == undefined) {
                     xmldoc = $(inputtemplate.parametersxml);                    
                 } else {
@@ -386,17 +386,11 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                     return false;
                 }     
 
-                //For decent browsers (Firefox, Opera, Chromium, etc...)    
+                
                 xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
-
-                                
-                //var s = (new XMLSerializer()).serializeToString(xmldoc);
-                //alert(s);
-                
+                            
                 result = xsltProcessor.transformToFragment(xmldoc, document);
-                //var s = (new XMLSerializer()).serializeToString(result);
-                //alert(s);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
                 xmldoc=new ActiveXObject("Microsoft.XMLDOM");
                 xmldoc.async="false";
