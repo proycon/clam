@@ -625,7 +625,7 @@ outputdir = sys.argv[3]
 clamdata = clam.common.data.getclamdata(datafile)
 \end{verbatim}
 
-The first statements parse the command line arguments. And the last statement returns a CLAMData instance, containing all data your wrapper might need.
+The first statements parse the command line arguments. The last statement returns a CLAMData instance, containing all data your wrapper might need.
 
 For an extensive overview of the CLAMData class, we at this stage refer to the CLAM Data API Documentation at \url{http://ilk.uvt.nl/~mvgompel/clamapi/}.
 
@@ -636,7 +636,7 @@ This section will be expanded at a later stage
 
 \chapter{Documentation for Service Clients}
 
-Being a RESTful webservice, automated clients can communicate with CLAM. In writing such clients, python users can befenit from the CLAM Client API, which in addition to the CLAM Data API, provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Of course clients can also be written without the Client API, and in other programming languages. For this refer to Appendix~\ref{ap:restspec}, which provides a full specification of the RESTful API.
+Being a RESTful webservice, automated clients can communicate with CLAM. In writing such clients, python users can benefit from the CLAM Client API, which in addition to the CLAM Data API provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Of course clients can also be written without the Client API, and in other programming languages. For this refer to Appendix~\ref{ap:restspec}, which provides a full specification of the RESTful API.
 
 Whereever possible, the CLAM Client API returns a CLAMData instance as response.
 
@@ -678,28 +678,28 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This returns the current state of the project in CLAM XML format, depending on the state this contains a specification of all accepted parameters, all input files, all output files. Note that errors in parameter validation are encoded in the CLAM XML response, the system will still return a 200 response. \\ 
+\textbf{Description} & This returns the current state of the project in CLAM XML format. Depending on the state this contains a specification of all accepted parameters, all input files, and all output files. Note that errors in parameter validation are encoded in the CLAM XML response; the system will still return a 200 response. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Create new empty project}} \\
 \hline
 \textbf{Method} & \texttt{PUT} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{201 - Created}, \texttt{401 - Unauthorised}, \texttt{403 - Forbidden} \emph{(Invalid project ID)},  \texttt{403 - Forbidden} \emph{(No project name)} \\ 
-\textbf{Description} & This is necessary before attempting to upload any files, it initialises an empty new project \\ 
+\textbf{Description} & This is necessary before attempting to upload any files; it initialises an empty new project. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputsource$=[inputsource_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service), the parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Querystring} & \texttt{inputsource$=[inputsource_id]$} \emph{(optional)} \linebreak Other accepted parameters are defined in the Service Configuration file (and thus differs per service). The parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
-\textbf{Description} & This starts running a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string, the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely can't invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
+\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely is not able to invoke the underlying application. If \texttt{usecorpus=} is specified, then the designated pre-installed corpus will be used, instead of the regular input files. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK}, \texttt{401 - Unauthorised},  \texttt{404 - Not Found}\\ 
-\textbf{Description} & Deletes a project, any running processes will be aborted. \\ 
+\textbf{Description} & Deletes a project. Any running processes will be aborted. \\ 
 \hline
 \end{supertabular}
 
@@ -714,21 +714,21 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Retrieves the specified input file \\ 
+\textbf{Description} & Retrieves the specified input file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an input file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Deletes the specified input file \\
+\textbf{Description} & Deletes the specified input file. \\
 \hline
 \multicolumn{2}{|c|}{\textbf{Add/upload a new input file}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and inputtemplate), the parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Response is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory, the inputtemplate, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the} query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as parameter to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
+\textbf{Description} & This method adds a new input file. Response is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory: the input template, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/ query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as parameter to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
 
@@ -743,14 +743,14 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Retrieves the specified output file \\ 
+\textbf{Description} & Retrieves the specified output file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an output file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Deletes the specified output file \\
+\textbf{Description} & Deletes the specified output file. \\
 \hline
 \end{supertabular}
 
@@ -764,7 +764,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Retrieves the metadata for the specified output file \\ 
+\textbf{Description} & Retrieves the metadata for the specified output file. \\ 
 \hline
 \end{supertabular}
 
@@ -777,7 +777,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & Retrieves the metadata for the specified input file \\ 
+\textbf{Description} & Retrieves the metadata for the specified input file. \\ 
 \hline
 \end{supertabular}
 
@@ -799,7 +799,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{DELETE} \\
 \textbf{Querystring} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised} \\ 
-\textbf{Description} & Deletes all output files and resets the project for another run \\
+\textbf{Description} & Deletes all output files and resets the project for another run. \\
 \hline
 \end{supertabular}
 
@@ -807,7 +807,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 
 \chapter{Prefined Formats}
 
-The following formats are pre-defined in CLAM, each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
+The following formats are pre-defined in CLAM. Each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
 
 \begin{devnotes}
 To be written still...
