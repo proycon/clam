@@ -40,37 +40,41 @@ register_openers()
 
 
 class BadRequest(Exception):
-         def __init__(self):
-            pass
-         def __str__(self):
-            return "Bad Request"
+     def __init__(self):
+        pass
+     def __str__(self):
+        return "Bad Request"
 
 class NotFound(Exception):
-         def __init__(self, msg=""):
-            self.msg = msg
-         def __str__(self):
-            return "Not Found: " +  self.msg
+    """Raised on 404 - Not Found Errors"""
+     def __init__(self, msg=""):
+        self.msg = msg
+     def __str__(self):
+        return "Not Found: " +  self.msg
 
 class PermissionDenied(Exception):
-         def __init__(self, msg = ""):
-            self.msg = msg
-         def __str__(self):
-            if isinstance(clam.common.data,CLAMData):
-                return "Permission Denied"
-            else:
-                return "Permission Denied: " + self.msg
+    """Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
+     def __init__(self, msg = ""):
+        self.msg = msg
+     def __str__(self):
+        if isinstance(clam.common.data,CLAMData):
+            return "Permission Denied"
+        else:
+            return "Permission Denied: " + self.msg
 
 class ServerError(Exception):
-         def __init__(self, msg = ""):
-            self.msg = msg
-         def __str__(self):
-            return "Server Error: " + self.msg
+    """Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side."""
+     def __init__(self, msg = ""):
+        self.msg = msg
+     def __str__(self):
+        return "Server Error: " + self.msg
 
 class AuthRequired(Exception):
-         def __init__(self, msg = ""):
-            self.msg = msg            
-         def __str__(self):
-            return "Authorization Required: " + self.msg
+    """Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
+     def __init__(self, msg = ""):
+        self.msg = msg            
+     def __str__(self):
+        return "Authorization Required: " + self.msg
 
 class NoConnection(Exception):
          def __init__(self):
@@ -86,14 +90,22 @@ class UploadError(Exception):
             return "Error during Upload: " + self.msg
 
 class ParameterError(Exception):
-         def __init__(self, msg = ""):
-            self.msg = msg            
-         def __str__(self):
-            return "Error setting parameter: " + self.msg
+    """Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly."""
+     def __init__(self, msg = ""):
+        self.msg = msg            
+     def __str__(self):
+        return "Error setting parameter: " + self.msg
 
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None):
+        """Initialise the CLAM client (does not actually connect yet)
+        
+        url - URL of the webservice
+        user - username (or None)
+        password - password (or None)
+        """
+        
         self.http = httplib2.Http()
         if url[-1] != '/': url += '/'
         self.url = url
@@ -156,11 +168,11 @@ class CLAMClient:
 
  
     def index(self):
-        """get index of projects"""
+        """Get index of projects. Returns CLAMData instance. Use CLAMData.projects for the index of projects."""
         return self.request('')
 
     def get(self, project):
-        """query the project status"""
+        """Query the project status. Returns CLAMData instance."""
         try:
             data = self.request(project + '/')
         except:
@@ -187,6 +199,9 @@ class CLAMClient:
         return self.request(project + '/', 'POST', urlencode(parameters))        
         
     def startsafe(self, project, **parameters):
+        """Start a run. 'project' is the ID of the project, and **parameters are keyword arguments for
+        the global parameters. Returns a CLAMData object or raises exceptions. This version, unlike start(), raises Exceptions (ParameterError) on parameter errors"""
+        
         try:
             data = self.start(project, **parameters)
             for parametergroup, paramlist in data.parameters:
@@ -203,11 +218,16 @@ class CLAMClient:
         return self.request(project + '/', 'DELETE')
 
     def abort(self, project): #alias
+        """aborts AND deletes a project (alias of delete() )"""    
         return self.abort(project)
 
 
     def downloadarchive(self, project, targetfile, format = 'zip'):
-        """download all output as archive"""
+        """Download all output files as a single archive
+        
+        format - the format of the archive, can be 'zip','gz','bz2'
+        
+        """
         #TODO: Redo
         req = urllib2.urlopen(self.url + project + '/output/?format=' + format) #TODO: Auth support
         CHUNK = 16 * 1024
