@@ -15,19 +15,39 @@ from StringIO import StringIO
 
 
 class AbstractParameter(object):
+    """This is the base class from which all parameter classes have to be derived."""
+    
+    
+    
     def __init__(self, id, name, description = '', **kwargs):
-        self.id = id #a unique ID
-        self.paramflag = None #the parameter flag passed to the command (include a trailing space!) #CHECK: space still necessary?
-        self.name = name #a representational name
+        
+        
+        #: A unique alphanumeric ID
+        self.id = id 
+        
+        #: The parameter flag that will be used when this parameter is passed on the commandline (using COMMAND= and $PARAMETERS) (by default set to None)
+        self.paramflag = None 
+        
+        #: A representational name for this parameter, which the user will see
+        self.name = name
+        
+        #: A clear description for this parameter, which the user will see
         self.description = description
+        
+        #: If this parameter has any validation errors, this will be set to an error message (by default set to None, meaning no error)        
         self.error = None                    
+        
         self.value = False
         self.kwargs = kwargs #make a copy for XML generation later
         self.required = False
         self.nospace = False
         self.require = []
         self.forbid = []
+        
+        #: You can restrict this parameter to only be available to certain users, set the usernames you want to allow here, all others are denied
         self.allowusers = []
+        
+        #: You can restrict this parameter to only be available to certain users, set the usernames you want to deny access here, all others are allowed
         self.denyusers = []
         self.hasvalue = False
         for key, value in kwargs.items():
@@ -58,6 +78,7 @@ class AbstractParameter(object):
                 raise Exception("Unknown attribute specified for parameter: " + key + "=" + str(value))
 
     def validate(self,value):
+        """Validate the parameter"""
         self.error = None #reset error
         return True
 
@@ -138,6 +159,7 @@ class AbstractParameter(object):
 
     @staticmethod
     def fromxml(node):
+        """Create a Parameter instance (of any class derived from AbstractParameter!) given its XML description. Node can be a string containing XML or an lxml _Element"""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 
         if node.tag in globals():
@@ -174,7 +196,12 @@ class AbstractParameter(object):
             
         
 class BooleanParameter(AbstractParameter):
+    """A parameter that takes a Boolean (True/False) value. """
+    
     def __init__(self, id, name, description = '', **kwargs):
+        """Keyword arguments:
+            reverse = True/False  - If True, the command line option flag gets outputted when the option is NOT checked.            
+        """
         
         #defaultinstance
         self.reverse = False
@@ -185,6 +212,7 @@ class BooleanParameter(AbstractParameter):
         super(BooleanParameter,self).__init__(id,name,description, **kwargs)
 
     def set(self, value = True):
+        """Set the boolean parameter"""
         return super(BooleanParameter,self).set(value)
 
     def unset(self):
@@ -221,7 +249,14 @@ class StaticParameter(AbstractParameter):
 
 
 class StringParameter(AbstractParameter):
+    """String Parameter, taking a text value, presented as a one line input box"""
+    
     def __init__(self, id, name, description = '', **kwargs):
+        """Keyword arguments:
+        
+        maxlength - The maximum length of the value, in number of characters
+        """
+        
         self.maxlength = 0 #unlimited
 
         for key, value in kwargs.items():
@@ -255,7 +290,20 @@ class StringParameter(AbstractParameter):
 
 
 class ChoiceParameter(AbstractParameter):
+    """Choice parameter, users have to choose one of the available values, or multiple values if instantiated with multi=True."""
+    
     def __init__(self, id, name, description, **kwargs):    
+        """Keyword arguments:
+        
+        choices - A list of choices. If keys and values are not the same, you can
+                  specify a list of two-tuples:
+                  choices=[('y','yes'),('n',no')]
+        multi   - (boolean) User may select multiple values? (parameter value will be a list)          
+        delimiter - The delimiter between multiple options (if multi=True), and
+                    when used on the command line.
+        """
+        
+    
         if not 'choices' in kwargs:
             raise Exception("No parameter choices specified for parameter " + id + "!")
         self.choices = [] #list of key,value tuples
@@ -386,6 +434,8 @@ class ChoiceParameter(AbstractParameter):
 
 
 class TextParameter(StringParameter): #TextArea based
+    """Text Parameter, taking a text value, presented as a multiline input box"""
+
     def __init__(self, id, name, description = '', **kwargs):
         super(TextParameter,self).__init__(id,name,description, **kwargs)
 

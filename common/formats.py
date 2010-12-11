@@ -19,6 +19,7 @@ from clam.common.data import CLAMMetaData  #import CLAMMetaData
 ###############################################################################################################################################
 
 class ExampleFormat(CLAMMetaData):
+    """This is an Example format, please inspect its source code if you want to create custom formats!"""
 
     #A dictionary of attributes that this format can take, the keys correspond
     #to the attributes, the values can be either:
@@ -58,6 +59,8 @@ class ExampleFormat(CLAMMetaData):
            
 
 class PlainTextFormat(CLAMMetaData):
+    """Plain Text Format Definition. This format has one required attribute: encoding"""
+    
     attributes = {'encoding':True,'language':False }
     mimetype = "text/plain"
     
@@ -66,6 +69,7 @@ class PlainTextFormat(CLAMMetaData):
         yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
         
 class HTMLFormat(CLAMMetaData):
+    """HTML Format Definition. This format has one required attribute: encoding"""
     attributes = {'encoding':True,'language':False }
     mimetype = "text/html"
     
