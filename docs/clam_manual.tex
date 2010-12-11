@@ -113,8 +113,8 @@ In order to run CLAM in Apache, you have to install and configure several files.
 \begin{enumerate}
 \item Install \texttt{mod\_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
 \item Next we need to write a simple WSGI-script, which is a Python script that will be invoked by the webserver. Copy \texttt{clam/config/example.wsgi} to something like  \texttt{clam/config/yourservice.wsgi} and adapt the script. If CLAM is not installed in a standard location where Python can find it, make sure to explicitly specify its parent directory according to the instructions in the example.
-\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port and optionally a URL prefix to use if the service isn't assigned a virtualhost of its own.
-\item Configure Apache to let it know about WSGI and your service. I assume the reader is acquianted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
+\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
+\item Configure Apache to let it know about WSGI and your service. I assume the reader is acquainted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
 
 \begin{verbatim}
  WSGIScriptAlias /yourservice /path/to/clam/config/yourservice.wsgi/
@@ -134,7 +134,7 @@ The WSGIDaemonProcess directive goes on online, but was wrapped here for present
 \item Restart Apache
 \end{enumerate}
 
-Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}, important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes and maximum-requests can also be configured to optimise performance and system resources according to your needs.
+Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}. Important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes, and maximum-requests can also be configured to optimise performance and system resources according to your needs.
 
 
 \subsection{Using CLAM with nginx}
@@ -147,7 +147,7 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
   text/xsl                              xsl;
 \end{verbatim}
 
-\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port and optionally a URL prefix to use if the service isn't assigned a virtualhost of its own.
+\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
 
 \item Make a script \texttt{start\_yourservice.sh} which will start the daemon for FastCGI. Change \texttt{UID} and \texttt{GID} with user ID/group ID you intend to use. Note that the IP and port can be set to anything you like, as long as you use the same consistently throughout the configuration.
 \begin{verbatim}
@@ -162,7 +162,7 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
  kill `pgrep -f "python /path/to/clam/clamservice.py"`
 \end{verbatim}
 
-\item Add and adapt the following configuration to a server in \texttt{/etc/nginx/sites-enabled}. Note that in this example, we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may if course configure a \texttt{URLPREFIX} when desired, take care to update the below \texttt{location} and directives accordingly then:
+\item Add and adapt the following configuration to a server in \texttt{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
 \begin{verbatim}
  root /path/to/clam;
 
@@ -197,11 +197,11 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
 
 \subsection{Using CLAM with other webservers}
 
-You are not limited to using either Apache with WSGI or nginx with FastCGI, multiple options are possible, despite the fact we tested only these two. It should also be possible to get CLAM working on other Unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
+You are not limited to using either Apache with WSGI or nginx with FastCGI; we tested only these two. It should also be possible to get CLAM working on other Unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 \section{Architecture}
 
-CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The application itself can remain totally untouched and unaware of CLAM. The scheme in Figure~\ref{fig:arch} illustrates the various layers:
+CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The application itself can remain untouched and unaware of CLAM. The scheme in Figure~\ref{fig:arch} illustrates the various layers:
 
 \begin{figure}[h]
 \begin{center}
@@ -216,9 +216,9 @@ The workflow interface layer is not provided nor necessary, but shows a possible
 A CLAM webservice needs the following three components from the service developer:
 
 \begin{enumerate}
-\item A service configuration file
-\item A wrapper script for your NLP application
-\item An NLP application
+\item A service configuration file;
+\item A wrapper script for your NLP application;
+\item An NLP application.
 \end{enumerate}
 
 The wrapper script is not strictly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration, and allows you to keep the actual NLP application unmodified. The wrapper scripts can be seen as the ``glue'' between CLAM and your application, taking care of any translation steps.
@@ -237,7 +237,7 @@ One of the first things to configure is the root path (\texttt{ROOT}). All proje
 \subsection{Server Administration}
 \label{sec:sadmin}
 
-The hostname and port of the webserver can be configured in the service configuration file. Note that the hostname has to match exactly with what the end-users will use, an attempt will be made to detect this automatically if no hostname is specified. A mismatch in the name you define and the hostname the user uses, may result in unexpected behaviour\footnote{Most likely, the XSLT stylesheet will refuse to build the web application interface}. CLAM comes with a built-in webserver, which will be used when it's invoked directly from the command-line\footnote{unless FastCGI mode is enabled}.
+The hostname and port of the webserver can be configured in the service configuration file. Note that the hostname has to match exactly with what the end users will use. An attempt will be made to detect this automatically if no hostname is specified. A mismatch in the name you define and the hostname the user uses may result in unexpected behaviour\footnote{Most likely, the XSLT stylesheet will refuse to build the web application interface}. CLAM comes with a built-in webserver, which will be used when invoked directly from the command-line\footnote{unless FastCGI mode is enabled}.
 
 When CLAM runs in an existing webserver without its own virtual host, it is often configured at a different URL rather than the webserver root. In this case the value of \texttt{URLPREFIX} should be configured accordingly.
 
@@ -245,11 +245,11 @@ When CLAM runs in an existing webserver without its own virtual host, it is ofte
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. 
 
-A list of users can be defined in \texttt{USERS} in the service configuration file, this is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, the system ID, and the password. Furthermore there is a setting \texttt{PROJECTS\_PUBLIC}, which can be set to \texttt{True} or \texttt{False}, in the former case all projects will be open to all authenticated users, in the latter case projects will only be accessible by their owners.
+A list of users can be defined in \texttt{USERS} in the service configuration file. This is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, the system ID, and the password. Furthermore there is a setting \texttt{PROJECTS\_PUBLIC}, which can be set to \texttt{True} or \texttt{False}. In the former case all projects will be open to all authenticated users; in the latter case projects will only be accessible by their owners.
 
-User authentication is not mandatory. But for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
+User authentication is not mandatory, but for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
 
-The ability to view and set parameters can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
+The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you do not want the guest user to use.
 
 \begin{devnotes}
 At a later stage, OpenID support will be added.
@@ -259,36 +259,36 @@ At a later stage, OpenID support will be added.
 \subsection{Command Definition}
 \label{sec:command}
 
-Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported, in addition there are some special variables you can use that will be automatically set by CLAM. 
+Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported. In addition there are some special variables you can use that will be automatically set by CLAM. 
 
 \begin{itemize}
 \item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
 \item \texttt{\$OUTPUTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
 \item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
 \item \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
-\item \texttt{\$DATAFILE} - This is the absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
-\item \texttt{\$USERNAME} - The username of the logged in user.
+\item \texttt{\$DATAFILE} - The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
+\item \texttt{\$USERNAME} - The username of the logged-in user.
 \end{itemize}
 
 
-Make sure the actual command is an absolute path or the executable is in the \texttt{\$PATH} of the user \texttt{clamservice.py} will run as. Upon launch, the current working directory will be automatically set to the specific project directory. Within this directory, there will be an \texttt{input/} and \texttt{output/} directory, but use the full path as stored in \texttt{\$INPUTDIRECTORY} and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory. Your wrapper script and NLP tool are of course free to use any other locations on the filesystem for whatever other purposes.
+Make sure the actual command is an absolute path, or that the executable is in the \texttt{\$PATH} of the user \texttt{clamservice.py} will run as. Upon launch, the current working directory will be automatically set to the specific project directory. Within this directory, there will be an \texttt{input/} and \texttt{output/} directory, but use the full path as stored in \texttt{\$INPUTDIRECTORY} and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user input will be in this input directory, and all output that users should be able to view or download, should be in this output directory. Your wrapper script and NLP tool are of course free to use any other locations on the filesystem for whatever other purposes.
 
 
 \subsection{Paradigm: Metadata, Profiles \& Parameters}
 
-In order to explain how to build service configuration files for the tools you want to make into webservices, we first need to clarify the paradigm CLAM uses. We shall start with a word about metadata. Metadata is data \emph{about} your data, i.e. data about your input and output files. Take the example of a plain text file, metadata for such a file can be for example the character encoding the text is in, and the language the text is written in. Such data is not necessarily encoded within the file itself, as is also not the case in the example of plain text files. CLAM therefore builds external metadata files for each input and output file, these files contain all metadata of the files they describe. These are stored in the CLAM Metadata XML format, a very simple and straightforward format\footnote{It is in essence a simple XML representation of key, value pairs. These metadata files are named \texttt{.filename.METADATA}, in which filename is the name of the file it describes and reside in the very same input/output directory.} Metadata simply consists out of metadata fields and associated values.
+In order to explain how to build service configuration files for the tools you want to make into webservices, we first need to clarify the paradigm CLAM uses. We shall start with a word about metadata. Metadata is data \emph{about}\/ your data, i.e. data about your input and output files. Take the example of a plain text file: metadata for such a file can be for example the character encoding the text is in, and the language the text is written in. Such data is not necessarily encoded within the file itself, as is also not the case in the example of plain text files. CLAM therefore builds external metadata files for each input and output file. These files contain all metadata of the files they describe. These are stored in the CLAM Metadata XML format, a very simple and straightforward format\footnote{It is in essence a simple XML representation of key--value pairs. These metadata files are named \texttt{.filename.METADATA}, in which filename is the name of the file it describes and reside in the very same input/output directory.} Metadata simply consists out of metadata fields and associated values.
 
-Metadata in CLAM is tied to a particular file format (such as plain text format, CSV format, etc..), a format defines what kind of metadata it absolutely needs, but usually still offers a lot of freedom for extra metadata fields to the service provider, or even to the end-user. 
+Metadata in CLAM is tied to a particular file format (such as plain text format, CSV format, etc.). A format defines what kind of metadata it absolutely needs, but usually still offers a lot of freedom for extra metadata fields to the service provider, or even to the end user. 
 
-When a user or automated client uploads a new input file, metadata is often not available yet. The user or client is therefore asked to provide this, in the webapplication a nice form is presented with all possible metadata parameters. And the system will take care of generating the metadata files according to the choices made. If the service provider does not want to make use of any metadata description at all, then that is of course an option as well, though this may come at the cost of your service not providing enough information to interact with others.
+When a user or automated client uploads a new input file, metadata is often not available yet. The user or client is therefore asked to provide this. In the webapplication a form is presented with all possible metadata parameters; the system will take care of generating the metadata files according to the choices made. If the service provider does not want to make use of any metadata description at all, then that is of course an option as well, though this may come at the cost of your service not providing enough information to interact with others.
 
-In a webservice it is important to precisely define what kind of input goes in, and what kind of output goes out, this results in a deterministic and thus predictable webservice. It is also necessary to define exactly how the output metadata is based on the input metadata, if that's the case. These definitions are made in so-called \emph{profiles}. A profile defines \emph{input templates} and \emph{output templates}. The input templates and output template can be seen as ``slots'' for certain filetypes and metadata, an analogy from childhood memory may facilitate understanding this, as shown and explained in Figure~\ref{fig:blokkendoos}:
+In a webservice it is important to precisely define what kind of input goes in, and what kind of output goes out: this results in a deterministic and thus predictable webservice. It is also necessary to define exactly how the output metadata is based on the input metadata, if that is the case. These definitions are made in so-called \emph{profiles}. A profile defines \emph{input templates}\/ and \emph{output templates}. The input templates and output template can be seen as ``slots'' for certain filetypes and metadata. An analogy from childhood memory may facilitate understanding this, as shown and explained in Figure~\ref{fig:blokkendoos}:
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=100.0mm]{blokkendoos.jpg}
 \end{center}
-\caption{Box and blocks analogy from childhood memory: the holes on one end correspond to input templates, the holes on the other end correspond to output templates; imagine blocks going in through one and out through the other. The blocks themselves correspond to input or output files \emph{with attached metadata}. Profiles describe how one or more input blocks are transformed into output blocks, which may differ in type and number. Granted, I'm stretching the analogy here; your childhood toy did not have this magic feature of course!}
+\caption{Box and blocks analogy from childhood memory: the holes on one end correspond to input templates, the holes on the other end correspond to output templates. Imagine blocks going in through one and out through the other. The blocks themselves correspond to input or output files \emph{with attached metadata}. Profiles describe how one or more input blocks are transformed into output blocks, which may differ in type and number.\footnote{Granted, I'm stretching the analogy here; your childhood toy did not have this magic feature of course!}}
 \label{fig:blokkendoos} 
 \end{figure}
 
