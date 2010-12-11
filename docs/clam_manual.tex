@@ -84,12 +84,14 @@ The following software is required to run CLAM. These will be available in any m
 
 For development and testing, each CLAM webservice can run standalone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 
+If you want to run in the supplied test units, an additional dependency is needed: python-unittest2.
+
 To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest:
 
 \begin{itemize}
 \item \texttt{clamservice.py} -- This is the webservice itself, the command to be invoked to start it.
 \item \texttt{config/} -- This directory contains service configuration files. Place you service configuration here.
-\item \texttt{config/defaults.py} -- This is a default configuration template which you can copy to make your own service configuration.
+\item \texttt{config/textstats.py} -- An example configuration.
 \item \texttt{common/} -- Common Python modules for CLAM
 \item \texttt{common/parameters.py} -- Parameter-type definitions
 \item \texttt{common/format.py} -- Format-type definitions
@@ -250,7 +252,7 @@ User authentication is not mandatory. But for any world-accessible environment i
 The ability to view and set parameters can be restricted to certain users, you can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you don't want the guest user to use.
 
 \begin{devnotes}
-Eventually, an option will probably be implemented to read users from a database. HTTPS support may also be added at a later stage.
+At a later stage, OpenID support will be added.
 \end{devnotes}
 
 
@@ -538,6 +540,52 @@ Viewers can be included in output templates. Include them directly after any met
 To be completed still...
 \end{devnotes}
 
+
+\subsection{Working with pre-installed data}
+
+Rather than letting users upload files, CLAM also offers the possibility of pre-installing input data on the server. This feature is ideally suited for dealing with data for a demo, or for offering a selection of pre-installed corpora that are too big to transfer over network. Furthermore, pre-installed data is also suited in situations where you want the user to be able to choose from several pre-installed resources, such as lexicons, grammars, etc.., instead of having to upload files they may not have available.
+
+Pre-installed data sources are called ``input sources'' in CLAM, not to be confused with input templates. Input sources can be specified either in an input template, or more globally. 
+
+Take a look at the following example:
+
+\begin{verbatim}
+InputTemplate('lexicon', PlainTextFormat,"Input Lexicon", 
+   StaticParameter(id='encoding',name='Encoding',description='Character encoding',
+       value='utf-8'),
+   ChoiceParameter(id='language',name='Language',description='The language the text is in', 
+       choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+   InputSource(id='lexiconA', label="Lexicon A",
+    path="/path/to/lexiconA.txt", 
+    metadata=PlainTextFormat(None, encoding='utf-8',language='en')
+   ),
+   InputSource(id='lexiconB', label="Lexicon B",
+    path="/path/to/lexiconB.txt", 
+    metadata=PlainTextFormat(None, encoding='utf-8',language='en')
+   ),
+   onlyinputsource=False
+),            
+\end{verbatim}
+
+This defines an input template for some kind of lexicon, with two pre-defined input sources: ``lexicon A'' and ``lexicon B''. The user can choose between these, or alternatively upload a lexicon of his own. If however \texttt{onlyinputsource} is set to \texttt{True}, then the user is forced to choose only from the input sources, and can't upload his own version. 
+
+Metadata can be provided either in the inputsource configuration, or by simply adding a CLAM metadata file alongside the actual file. For the file \texttt{/path/to/lexiconA.txt}, the metadata file would be \texttt{/path/to/.lexiconA.txt.METADATA} (note the initial period, metadata files are hidden). 
+
+Input sources can also be defined globally, and correspond to multiple files, i.e. they point to a directory containing multiple files instead of pointing to a single file. Let's take the example of a spelling correction demo, in which a test set consisting out of many text documents is the input source:
+
+\begin{verbatim}
+INPUTSOURCES = [
+    InputSource(id='demotexts', label="Demo texts",
+        path="/path/to/demotextdir/", 
+        metadata=PlainTextFormat(None, encoding='utf-8',language='en'),
+        inputtemplate='maininput',
+       ),
+]
+\end{verbatim}
+
+In these cases, it is essential to fill the \texttt{inputtemplate=} parameter. And all files in the directory must be fitted for this input template. Adding input sources for multiple input templates is done by simply defining multiple input sources. The user may always select from as many/few input sources as he/she wants.
+
+
 \section{Wrapper script}
 
 Service providers are encouraged to write a wrapper script that acts as the glue between CLAM and the NLP Application(s). CLAM will execute the wrapper script and the wrapper script will invoke the actual NLP Application(s). Using a wrapper script offers more flexibility than letting CLAM directly invoke the NLP Application, and allows the NLP Application itself to be totally independent of CLAM. 
@@ -557,16 +605,6 @@ The wrapper script can be written in any language. Python developers will have t
 
 \begin{devnotes}
 CLAM Client API will be further discussed, possibly in next chapter.
-\end{devnotes}
-
-\subsection{Working with pre-installed data}
-
-Rather than letting users upload files, CLAM also offers the possibility of pre-installing input data on the server. This feature is ideally suited for dealing with data for a demo, or for offering a selection of pre-installed corpora that are too big to transfer over network.
-
-Preparing such data requires some effort on the part of the service provider, as all data needs to be accompanied by the relevant metadata.
-
-\begin{devnotes}
-Yet to be completed... %TODO
 \end{devnotes}
 
 
