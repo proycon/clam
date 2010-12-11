@@ -603,8 +603,34 @@ The wrapper script can be written in any language. Python developers will have t
 
 \subsection{CLAM Data API}
 
+The key function of CLAM Data API is parsing the CLAM XML Data file that the clam webservice uses to communicate with clients. This data is parsed and all its components are made available in an instance of a CLAMData class.
+
+Suppose your wrapper script is called with the following command definition:
+
+\begin{verbatim}
+COMMAND = "/path/to/wrapperscript.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+\end{verbatim}
+
+Your wrapper scripts then typically starts in the following fashion:
+
+
+\begin{verbatim}
+import sys
+import clam.common.data
+
+datafile = sys.argv[1]
+statusfile = sys.argv[2]
+outputdir = sys.argv[3]
+
+clamdata = clam.common.data.getclamdata(datafile)
+\end{verbatim}
+
+The first statements parse the command line arguments. And the last statement returns a CLAMData instance, containing all data your wrapper might need.
+
+For an extensive overview of the CLAMData class, we at this stage refer to the CLAM Data API Documentation at \url{http://ilk.uvt.nl/~mvgompel/clamapi/}.
+
 \begin{devnotes}
-CLAM Client API will be further discussed, possibly in next chapter.
+This section will be expanded at a later stage
 \end{devnotes}
 
 
@@ -612,7 +638,9 @@ CLAM Client API will be further discussed, possibly in next chapter.
 
 Being a RESTful webservice, automated clients can communicate with CLAM. In writing such clients, python users can befenit from the CLAM Client API, which in addition to the CLAM Data API, provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Of course clients can also be written without the Client API, and in other programming languages. For this refer to Appendix~\ref{ap:restspec}, which provides a full specification of the RESTful API.
 
-Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/clam/docs/api}.
+Whereever possible, the CLAM Client API returns a CLAMData instance as response.
+
+Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/~mvgompel/clamapi}/.
 
 There is also a generic CLAM Client, \texttt{clam/clamclient.py}, which offers a command line interface to \emph{any} CLAM service.
 
