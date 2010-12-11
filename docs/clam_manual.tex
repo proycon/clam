@@ -6,7 +6,7 @@
 \usepackage{supertabular}
 
 \title{CLAM Documentation \\ \small version 0.5-pre-alpha}
-\author{Maarten van Gompel \\ Induction of Linguistic Knowledge Research Group \\ Tilburg University }
+\author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
 \parskip=12pt %paragraph skip
@@ -30,24 +30,24 @@
 
 \chapter{Introduction} 
 
-The Computational Linguistics Application Mediator (CLAM) allows you to quickly and transparently transform your Natural Language Processing application into a \emph{RESTful} webservice, with which automated clients can communicate, but which at the same time also acts as a modern webapplication with which human end-users can interact. CLAM takes a description of your system and wraps itself around the system, allowing clients or users to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application. Whilst the application runs, users can monitor its status.
+The Computational Linguistics Application Mediator (CLAM) allows you to quickly and transparently transform your Natural Language Processing application into a \emph{RESTful}\/ webservice, with which automated clients can communicate, but which at the same time also acts as a modern webapplication with which human end users can interact. CLAM takes a description of your system and wraps itself around the system, allowing clients or users to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application. Whilst the application runs, users can monitor its status.
 
-CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats and output formats need to be described. The applications themselves need not be network aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats, and output formats need to be described. The applications themselves need not be network-aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
 
-CLAM is entirely written in Python and is available as open-source under the GNU Public License (v3), it is set up in a modular fashion and as such is easily extendable. It offers a rich API for writing clients and wrapper scripts.
+CLAM is entirely written in Python and is available as open source under the GNU Public License (v3). It is set up in a modular fashion and as such is easily extendable. It offers a rich API for writing clients and wrapper scripts.
 
-The kind of applications that CLAM is intended for are Natural Language Processing applications, usually of a kind that do some processing on a text corpus. This corpus or smaller text can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
+The kind of applications that CLAM is intended for are Natural Language Processing applications, usually of a kind that do some processing on a text corpus. This corpus (any text file) can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
 
-The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources and returns responses using the HTTP response codes. The principal resource in CLAM is called a \emph{project}. Various users can maintain various projects, each representing one specific run of the system, with particular input data, output data and a set of configured parameters.
+The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs GET, POST, PUT and DELETE to manipulate resources and returns responses using the HTTP response codes. The principal resource in CLAM is called a \emph{project}. Various users can maintain various projects, each representing one specific run of the system, with particular input data, output data, and a set of configured parameters.
 
-In addition to using HTTP Error Codes for error responses, the webservice responds in the CLAM XML format, an associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus providing a perfect standalone web application for humand end-users. 
+In addition to using HTTP Error Codes for error responses, the webservice responds in the CLAM XML format. An associated XSL stylesheet can directly transform this to xhtml in the user's browser, thus providing a standalone web application for humand end-users. 
 
-CLAM comes with a large number of features, the most notable ones are summarised below:
+CLAM comes with an ample number of features, the most notable ones being:
 
 \begin{itemize}
 \item \textbf{RESTful webservice} - \emph{CLAM is a fully RESTful webservice}
 \item \textbf{Webapplication} - \emph{CLAM is also a modern ``web 2.0'' web application, heavily relying on technologies such as XSLT and AJAX}
-\item \textbf{Extensible} - \emph{Due to the clean and modular setup, CLAM is quite extensible}
+\item \textbf{Extensible} - \emph{Due to a modular setup, CLAM is quite extensible}
 \item \textbf{Client and Data API} - \emph{A rich Python API for writing CLAM Clients and system wrappers}
 \item \textbf{Authentication} - \emph{A user-based authentication mechanism through HTTP Digest is provided}
 \item \textbf{Metadata and provenance data} - \emph{There is extensive support for metadata and provenance data}
@@ -58,7 +58,7 @@ CLAM comes with a large number of features, the most notable ones are summarised
 This documentation is split into two parts: a chapter for service providers, people who want to build a CLAM Webservice around their tool, and a chapter for service clients, users wanting to write automated clients to communicate with the aforemented webservice.
 
 \begin{devnotes}
-Note that at this stage, CLAM is still under heavy development. As such, this documentation is not complete yet, but is also a work in progress.
+Note that at this stage, CLAM is still under development. As such, this documentation is not complete yet, but is also a work in progress.
 \end{devnotes}
 
 
@@ -66,9 +66,9 @@ Note that at this stage, CLAM is still under heavy development. As such, this do
 
 \section{Technical details}
 
-CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver. So no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver, supported are: Apache, nginx or lighthttpd, though others may work too.
+CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver; no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver. Supported are: Apache, nginx or lighthttpd, though others may work too.
 
- Note that the software is designed for UNIX systems only!
+ Note that the software is designed for Unix-based systems (e.g. Linux or BSD) only.
 
 \subsection{Installation}
 
@@ -82,29 +82,29 @@ The following software is required to run CLAM. These will be available in any m
 %\item python-django
 \end{itemize}
 
-For development and testing, each CLAM webservice can run standalone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
+For development and testing, each CLAM webservice can run stand-alone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 
 If you want to run in the supplied test units, an additional dependency is needed: python-unittest2.
 
 To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest:
 
 \begin{itemize}
-\item \texttt{clamservice.py} -- This is the webservice itself, the command to be invoked to start it.
-\item \texttt{config/} -- This directory contains service configuration files. Place you service configuration here.
+\item \texttt{clamservice.py} -- The webservice itself, the command to be invoked to start it.
+\item \texttt{config/} -- The directory containing service configuration files. Place you service configuration here.
 \item \texttt{config/textstats.py} -- An example configuration.
-\item \texttt{common/} -- Common Python modules for CLAM
-\item \texttt{common/parameters.py} -- Parameter-type definitions
-\item \texttt{common/format.py} -- Format-type definitions
-\item \texttt{common/data.py} -- CLAM Data API
-\item \texttt{common/client.py} -- CLAM Client API
-\item \texttt{static/style.css} -- The styling for visualisation
+\item \texttt{common/} -- Common Python modules for CLAM.
+\item \texttt{common/parameters.py} -- Parameter-type definitions.
+\item \texttt{common/format.py} -- Format-type definitions.
+\item \texttt{common/data.py} -- CLAM Data API.
+\item \texttt{common/client.py} -- CLAM Client API.
+\item \texttt{static/style.css} -- The styling for visualisation.
 \end{itemize}
 
-Starting the service in standalone mode is done by simply launching clamservice.py with the name of your service configuration (test in the example below). This standalone mode is intended primarily for development purposes and not recommended for production use.
+Starting the service in stand-alone mode is done by launching clamservice.py with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use.
 
 \texttt{\$ ./clamservice.py clam.config.test}
 
-Setting up the service to be used with an already existing webserver, requires some additional work. This is explained below for Apache and nginx:
+Setting up the service to be used with an already existing webserver requires some additional work. This is explained below for Apache and nginx:
 
 \subsection{Using CLAM with Apache 2}
 
