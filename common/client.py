@@ -47,16 +47,16 @@ class BadRequest(Exception):
 
 class NotFound(Exception):
     """Raised on 404 - Not Found Errors"""
-     def __init__(self, msg=""):
+    def __init__(self, msg=""):
         self.msg = msg
-     def __str__(self):
+    def __str__(self):
         return "Not Found: " +  self.msg
 
 class PermissionDenied(Exception):
     """Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
-     def __init__(self, msg = ""):
+    def __init__(self, msg = ""):
         self.msg = msg
-     def __str__(self):
+    def __str__(self):
         if isinstance(clam.common.data,CLAMData):
             return "Permission Denied"
         else:
@@ -64,36 +64,36 @@ class PermissionDenied(Exception):
 
 class ServerError(Exception):
     """Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side."""
-     def __init__(self, msg = ""):
+    def __init__(self, msg = ""):
         self.msg = msg
-     def __str__(self):
+    def __str__(self):
         return "Server Error: " + self.msg
 
 class AuthRequired(Exception):
     """Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
-     def __init__(self, msg = ""):
+    def __init__(self, msg = ""):
         self.msg = msg            
-     def __str__(self):
+    def __str__(self):
         return "Authorization Required: " + self.msg
 
 class NoConnection(Exception):
-         def __init__(self):
-            pass
-         def __str__(self):
-            return "Can't establish a connection with the server" 
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "Can't establish a connection with the server" 
 
 
 class UploadError(Exception):
-         def __init__(self, msg = ""):
-            self.msg = msg            
-         def __str__(self):
-            return "Error during Upload: " + self.msg
+    def __init__(self, msg = ""):
+        self.msg = msg            
+    def __str__(self):
+        return "Error during Upload: " + self.msg
 
 class ParameterError(Exception):
     """Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly."""
-     def __init__(self, msg = ""):
+    def __init__(self, msg = ""):
         self.msg = msg            
-     def __str__(self):
+    def __str__(self):
         return "Error setting parameter: " + self.msg
 
 
