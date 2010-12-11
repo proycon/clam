@@ -45,14 +45,14 @@ In addition to using HTTP Error Codes for error responses, the webservice respon
 CLAM comes with an ample number of features, the most notable ones being:
 
 \begin{itemize}
-\item \textbf{RESTful webservice} - \emph{CLAM is a fully RESTful webservice}
-\item \textbf{Webapplication} - \emph{CLAM is also a modern ``web 2.0'' web application, heavily relying on technologies such as XSLT and AJAX}
-\item \textbf{Extensible} - \emph{Due to a modular setup, CLAM is quite extensible}
-\item \textbf{Client and Data API} - \emph{A rich Python API for writing CLAM Clients and system wrappers}
-\item \textbf{Authentication} - \emph{A user-based authentication mechanism through HTTP Digest is provided}
-\item \textbf{Metadata and provenance data} - \emph{There is extensive support for metadata and provenance data}
-\item \textbf{Automatic converters} - \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
-\item \textbf{Viewers} - \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
+\item \textbf{RESTful webservice} -- \emph{CLAM is a fully RESTful webservice}
+\item \textbf{Webapplication} -- \emph{CLAM is also a modern ``web 2.0'' web application, heavily relying on technologies such as XSLT and AJAX}
+\item \textbf{Extensible} -- \emph{Due to a modular setup, CLAM is quite extensible}
+\item \textbf{Client and Data API} -- \emph{A rich Python API for writing CLAM Clients and system wrappers}
+\item \textbf{Authentication} -- \emph{A user-based authentication mechanism through HTTP Digest is provided}
+\item \textbf{Metadata and provenance data} -- \emph{There is extensive support for metadata and provenance data}
+\item \textbf{Automatic converters} -- \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
+\item \textbf{Viewers} -- \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
 \end{itemize}
 
 This documentation is split into two parts: a chapter for service providers, people who want to build a CLAM Webservice around their tool, and a chapter for service clients, users wanting to write automated clients to communicate with the aforemented webservice.
@@ -262,12 +262,12 @@ At a later stage, OpenID support will be added.
 Central in the configuration file is the command that CLAM will execute. This command should start the actual NLP application, or preferably a script wrapped around it. Full shell syntax is supported. In addition there are some special variables you can use that will be automatically set by CLAM. 
 
 \begin{itemize}
-\item \texttt{\$INPUTDIRECTORY} - The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
-\item \texttt{\$OUTPUTDIRECTORY} - The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
-\item \texttt{\$STATUSFILE} - The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
-\item \texttt{\$PARAMETERS} - This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
-\item \texttt{\$DATAFILE} - The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
-\item \texttt{\$USERNAME} - The username of the logged-in user.
+\item \texttt{\$INPUTDIRECTORY} -- The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
+\item \texttt{\$OUTPUTDIRECTORY} -- The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
+\item \texttt{\$STATUSFILE} -- The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
+\item \texttt{\$PARAMETERS} -- This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
+\item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
+\item \texttt{\$USERNAME} -- The username of the logged-in user.
 \end{itemize}
 
 
@@ -315,25 +315,25 @@ There are seven parameter types available, though custom types can be easily add
 The seven parameter types are:
 
 \begin{itemize}
-\item \textbf{\texttt{BooleanParameter}} - A parameter that can only be turned on or off, represented in the interface by a checkbox. If it is turned on, the parameter flag is included in \texttt{\$PARAMETERS}, if it is turned off, it is not. If \texttt{reverse=True} is set, it will do the inverse.
-\item \textbf{\texttt{IntegerParameter}} - A parameter expecting an integer number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range if desired.
-\item \textbf{\texttt{FloatParameter}} - A parameter expecting a float number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range if desired.
-\item \textbf{\texttt{StringParameter}} - A parameter taking a string value. Use \texttt{maxlength=} if you want to restrict the maximum length.
-\item \textbf{\texttt{TextParameter}} - A parameter taking multiple lines of text. 
-\item \textbf{\texttt{ChoiceParameter}} - A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice. If you want the user to be able to select multiple parameters, then you can set the option \texttt{multi=True}. The IDs will be concatenated together in the parameter value, a delimiter (a comma by default) can be specified with \texttt{delimiter=}. If you do not use \texttt{multi=True}, but you do want all options to be visible in one view, then you can set the option \texttt{showall=True}.
-\item \textbf{\texttt{StaticParameter}} - A parameter with a fixed immutable value. This may seem a bit of a contradiction), but it serves a purpose in forcing a parameter or metadata parameter to have a specific non-variable value.
+\item \textbf{\texttt{BooleanParameter}} -- A parameter that can only be turned on or off, represented in the interface by a checkbox. If it is turned on, the parameter flag is included in \texttt{\$PARAMETERS}, if it is turned off, it is not. If \texttt{reverse=True} is set, it will do the inverse.
+\item \textbf{\texttt{IntegerParameter}} -- A parameter expecting an integer number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range if desired.
+\item \textbf{\texttt{FloatParameter}} -- A parameter expecting a float number. Use \texttt{minrange=}, and \texttt{maxrange=} to restrict the range if desired.
+\item \textbf{\texttt{StringParameter}} -- A parameter taking a string value. Use \texttt{maxlength=} if you want to restrict the maximum length.
+\item \textbf{\texttt{TextParameter}} -- A parameter taking multiple lines of text. 
+\item \textbf{\texttt{ChoiceParameter}} -- A multiple-choice parameter. The choices must be specified as a list of \texttt{(ID, label)} tuples, in which ID is the internal value, and label the text the user sees. For example, suppose a parameter with flag \texttt{-c} is defined.  \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user selects ``green'', then  \texttt{-c g} will be added to \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=}, and then the ID of the choice. If you want the user to be able to select multiple parameters, then you can set the option \texttt{multi=True}. The IDs will be concatenated together in the parameter value. A delimiter (a comma by default) can be specified with \texttt{delimiter=}. If you do not use \texttt{multi=True}, but you do want all options to be visible in one view, then you can set the option \texttt{showall=True}.
+\item \textbf{\texttt{StaticParameter}} -- A parameter with a fixed immutable value. This may seem a bit of a contradiction, but it serves a purpose in forcing a parameter or metadata parameter to have a specific non-variable value.
 \end{itemize}
 
 All parameters can take the following extra keyword arguments:
 
 \begin{itemize}
-\item \textbf{\texttt{paramflag}} -- The parameter flag, this flag will be added to \texttt{\$PARAMETERS} when the parameter is set, it thus is mandatory if you use the \texttt{\$PARAMETERS} variable in your \texttt{COMMAND} definition! It is customary for parameter flags to consist of a hyphen and a letter or two hyphens and a string. Parameter flags could be for example be formed like: \texttt{-p} ,\texttt{--pages}, \texttt{--pages=}. There will be a space between the parameter flag and its value, unless it ends in a \texttt{=} sign or \texttt{nospace=True} is set. Multi-word string values will automatically be enclosed in quotation marks, for the shell to correctly parse them. Technically, you are also allowed to specify an empty parameter flag, in which case only the value will be outputted, as if it were an argument.
-\item \textbf{\texttt{default}} - Set a default value.
-\item \textbf{\texttt{required}} - Set to \texttt{True} to make this parameter required rather than optional.
-\item \textbf{\texttt{require}} - Set this to a list of parameter IDs. If this parameter is set, so must all others in this list. If not, an error will be returned.
-\item \textbf{\texttt{forbid}} - Set this to a list of parameter IDs. If this parameter is set, none of the others in the list may be set.  If not, an error will be returned.
-\item \textbf{\texttt{allowusers}} - Allow only the specified lists of usernames to see and set this parameter. If unset, all users will have access. You can decide whether to use this option or \texttt{denyusers}, or to allow access for all.
-\item \textbf{\texttt{denyusers}} - Disallow the specified lists of usernames to see and set this parameter. If unset, no users are blocked from having access. You can decide whether to use this option or \texttt{allowusers}, or to allow access for all.
+\item \textbf{\texttt{paramflag}} -- The parameter flag. This flag will be added to \texttt{\$PARAMETERS} when the parameter is set. Consequently, it is mandatory if you use the \texttt{\$PARAMETERS} variable in your \texttt{COMMAND} definition. It is customary for parameter flags to consist of a hyphen and a letter or two hyphens and a string. Parameter flags could be for example be formed like: \texttt{-p} ,\texttt{--pages}, \texttt{--pages=}. There will be a space between the parameter flag and its value, unless it ends in a \texttt{=} sign or \texttt{nospace=True} is set. Multi-word string values will automatically be enclosed in quotation marks for the shell to correctly parse them. Technically, you are also allowed to specify an empty parameter flag, in which case only the value will be outputted as if it were an argument.
+\item \textbf{\texttt{default}} -- Set a default value.
+\item \textbf{\texttt{required}} -- Set to \texttt{True} to make this parameter required rather than optional.
+\item \textbf{\texttt{require}} -- Set this to a list of parameter IDs. If this parameter is set, so must all others in this list. If not, an error will be returned.
+\item \textbf{\texttt{forbid}} -- Set this to a list of parameter IDs. If this parameter is set, none of the others in the list may be set.  If not, an error will be returned.
+\item \textbf{\texttt{allowusers}} -- Allow only the specified lists of usernames to see and set this parameter. If unset, all users will have access. You can decide whether to use this option or \texttt{denyusers}, or to allow access for all.
+\item \textbf{\texttt{denyusers}} -- Disallow the specified lists of usernames to see and set this parameter. If unset, no users are blocked from having access. You can decide whether to use this option or \texttt{allowusers}, or to allow access for all.
 \end{itemize}
 
 The following example defines a boolean parameter with a parameter flag:
@@ -349,13 +349,13 @@ BooleanParameter(
 \end{verbatim}
 }}
 
-Thus if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
+Thus, if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
 
 \subsection{Profile specification}
 
-Multiple profiles may be specified, and all profiles are always assumed to be independent of each other. Things that are dependent belong together in one profile, as each profile describes how which input files are transformed into which output files. For each profile, you need to define input templates and output templates. All matching profiles are assumed to be delivered as promised. A profile matches if all input files according to the input templates of that profile are provided and if it generates output. If no input templates have been defined at all for a profile, then it will match as well, to allow for the option of producing output files that are not dependent on input files. It's okay if a profile doesn't match, but if none of the profiles match, the system will produce an error, as it can not perform any action. 
+Multiple profiles may be specified, and all profiles are always assumed to be independent of each other. Dependencies should be together in one profile, as each profile describes how a certain type of input file is transformed into a certain type of output file. For each profile, you need to define input templates and output templates. All matching profiles are assumed to be delivered as promised. A profile matches if all input files according to the input templates of that profile are provided and if it generates output. If no input templates have been defined at all for a profile, then it will match as well, to allow for the option of producing output files that are not dependent on input files. A profile is allowed to mismatch, but if none of the profiles match, the system will produce an error, as it can not perform any actions. 
 
-Below an example of the profile specification skeleton. Note that there may be multiple input templates and/or multiple output templates:
+The profile specification skeleton looks as follows. Note that there may be multiple input templates and/or multiple output templates:
 
 {\footnotesize{
 \begin{verbatim}
@@ -366,12 +366,12 @@ PROFILES = [
 }}
 
 
-The definition for both \texttt{InputTemplate} takes three mandatory arguments:
+The definition for \texttt{InputTemplate} takes three mandatory arguments:
 
 \begin{enumerate}
 \item \texttt{id} -- An ID for the InputTemplate. This will be used internally and by automated clients.
-\item \texttt{format} -- This points to a Format class, indicating the kind of format that this inputtemplate accepts. Formats are defined in \texttt{clam/common/formats.py}, custom formats can be added there if necessary.
-\item \texttt{label} -- This is a human readable label for the input template, this is how it will be known to users in the web application and on the basis of which they will select it.
+\item \texttt{format} -- This points to a Format class, indicating the kind of format that this inputtemplate accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there.
+\item \texttt{label} -- A human readable label for the input template. This is how it will be known to users in the web application and on the basis of which they will select it.
 \end{enumerate}
 
 Subsequently you may specify any of the Parameter types to indicate the accepted/required metadata. Use any of the types from Section~\label{sec:parameters}. 
@@ -379,9 +379,9 @@ Subsequently you may specify any of the Parameter types to indicate the accepted
 After specifying any such parameters, there are some possible keyword arguments:
 
 \begin{enumerate}
-\item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, indicates whether this input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
-\item \texttt{multi} -- This is simply the logical inverse of the above, you can whichever you prefer. \texttt{multi=False} is the default if not specified.
-\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we can't have multiple files with the very same name.
+\item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, this indicates whether the input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
+\item \texttt{multi} -- The logical inverse of the above; you can whichever you prefer. \texttt{multi=False} is the default if not specified.
+\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name.
 \item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
 \end{enumerate}
 
@@ -406,19 +406,19 @@ InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text documen
 }}
 
 
-For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments laid out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source, this other source is the inputtemplate that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particular file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
+For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments laid out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source. This other source is the input template that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particular file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
 
-As there may be multiple input templates, it is not always clear what input template is the parent. The system will automatically select the \emph{first} defined inputtemplate with the same value for unique/multi the output template has. If this is not what you want, you can explicitly set a parent using the \texttt{parent} keyword, which takes the value of the input template's ID.
+As there may be multiple input templates, it is not always clear what input template is the parent. The system will automatically select the \emph{first} defined input template with the same value for unique/multi the output template has. If this is not what you want, you can explicitly set a parent using the \texttt{parent} keyword, which takes the value of the input template's ID.
 
-Whereas for \texttt{InputTemplate} you can specify various parameter types. Output templates work differently. Output templates define what metadata fields (metafields for short) they want to set with what values, and from where to get these values. In some situations the output file is an extension of the input file, and you want it to inherit the metadata from the input file. Set \texttt{copymetadata=True} to accomplish this, now all metadata will be inherited from the parent, but you can still make modifications!
+Whereas for \texttt{InputTemplate} you can specify various parameter types, output templates work differently. Output templates define what metadata fields (metafields for short) they want to set with what values, and from where to get these values. In some situations the output file is an extension of the input file, and you want it to inherit the metadata from the input file. Set \texttt{copymetadata=True} to accomplish this: now all metadata will be inherited from the parent, but you can still make modifications.
 
-To set (or unset!) particular metadata fields you specify so-called ``metafield actors''. Each metafield actor sets or unsets a particular metadata attribute. There are four different types of metafield actors:
+To set (or unset) particular metadata fields you specify so-called ``metafield actors''. Each metafield actor sets or unsets a particular metadata attribute. There are four different types of metafield actors:
 
 \begin{itemize}
-\item \texttt{SetMetaField(\emph{key},\emph{value})} - Set metafield \emph{key} to the specified value.
-\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} - If a value is specified: Unset this metafield if it has the specified value. If no value is specified: Unset the metafield regardless of value. This only makes sense if you set \texttt{copymetadata=True}.
-\item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} - Copy metadata from one of the input template's metadata. Here \emph{inputtemplate} is the ID of one of inputtemplates in the profile, and the \emph{key} part is the metadata field to copy. This allows you to combine metadata from multiple input source into your output metadata.
-\item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} - Get the value for this metadata field from a global parameter with the specified ID.
+\item \texttt{SetMetaField(\emph{key},\emph{value})} -- Set metafield \emph{key} to the specified value.
+\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} -- If a value is specified: Unset this metafield if it has the specified value. If no value is specified: Unset the metafield regardless of value. This only makes sense if you set \texttt{copymetadata=True}.
+\item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} -- Copy metadata from one of the input template's metadata. Here \emph{inputtemplate} is the ID of one of inputtemplates in the profile, and the \emph{key} part is the metadata field to copy. This allows you to combine metadata from multiple input source into your output metadata.
+\item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} -- Get the value for this metadata field from a global parameter with the specified ID.
 \end{itemize}
 
 Take a look at the following example for a ficticious automatic translation system, translating to Esperanto.
@@ -433,7 +433,7 @@ OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-te
 \end{verbatim}
 }}
 
-Putting it all together, we obtain the following profile definition describing a fictitious machine translation system from English, Dutch or French to Esperanto. In which the system accepts and produces UTF-8 encoded plain-text files.
+Putting it all together, we obtain the following profile definition describing a fictitious machine translation system from English, Dutch or French to Esperanto, where the system accepts and produces UTF-8 encoded plain-text files.
 
 {\footnotesize{
 \begin{verbatim}
@@ -466,7 +466,7 @@ PROFILES = [
 
 \subsection{Parameter Conditions}
 
-It's not always possible to define all output templates straight away, sometimes output templates are dependent on certain global parameters. For example, say you have a global parameter that toggles the generation of a lexicon: you then want to only include the output template that describes this lexicon, if the parameter is enabled. CLAM offers a solution for such situations using the \texttt{ParameterCondition} directive.
+It is not always possible to define all output templates straight away. Sometimes output templates are dependent on certain global parameters. For example, given a global parameter that toggles the generation of a lexicon, you want to only include the output template that describes this lexicon, if the parameter is enabled. CLAM offers a solution for such situations using the \texttt{ParameterCondition} directive.
 
 Assume you have the following \emph{global} parameter:
 
@@ -487,43 +487,43 @@ We can then turn an output template into an output template conditional on this 
   )
 \end{verbatim}
 
-The first argument of ParameterCondition is the condition, here you use the ID of the parameter and the value you want to check against. The above example illustrates an equality comparison, but other comparisons are also possible:
+The first argument of ParameterCondition is the condition. Here you use the ID of the parameter and the value you want to check against. The above example illustrates an equality comparison, but other comparisons are also possible:
 
 \begin{itemize}
-\item \texttt{\emph{ID}$=$\emph{value}} - Equality; matches if the global parameter with the specified ID has the specified value.
-\item \texttt{\emph{ID}\_equals$=$\emph{value}} - Same as above, the above is an alias.
-\item \texttt{\emph{ID}\_notequals$=$\emph{value}} - The reverse of the above, matches if the value is \emph{not equal}
-\item \texttt{\emph{ID}\_lessthan$=$\emph{number}} - Matches if the parameter with the specified ID is less than then specified number
-\item \texttt{\emph{ID}\_greaterthan$=$\emph{number}} - Matches if the parameter with the specified ID is greater than then specified number
-\item \texttt{\emph{ID}\_lessequalthan$=$\emph{number}} - Matches if the parameter with the specified ID is equal or less than then specified number
-\item \texttt{\emph{ID}\_greaterequalthan$=$\emph{number}} - Matches if the parameter with the specified ID is equal or greater than then specified number
+\item \texttt{\emph{ID}$=$\emph{value}} -- Equality; matches if the global parameter with the specified ID has the specified value.
+\item \texttt{\emph{ID}\_equals$=$\emph{value}} -- Same as above, the above is an alias.
+\item \texttt{\emph{ID}\_notequals$=$\emph{value}} -- The reverse of the above, matches if the value is \emph{not equal}
+\item \texttt{\emph{ID}\_lessthan$=$\emph{number}} -- Matches if the parameter with the specified ID is less than then specified number
+\item \texttt{\emph{ID}\_greaterthan$=$\emph{number}} -- Matches if the parameter with the specified ID is greater than then specified number
+\item \texttt{\emph{ID}\_lessequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or less than then specified number
+\item \texttt{\emph{ID}\_greaterequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or greater than then specified number
 \end{itemize}
 
-After the condition you specify \texttt{then=} and optionally also \texttt{else=}, here you specify an \texttt{OutputTemplate} or yet another \texttt{ParameterCondition}! They can be nested at will.
+After the condition you specify \texttt{then=} and optionally also \texttt{else=}, and then you specify an \texttt{OutputTemplate} or yet another \texttt{ParameterCondition}---they can be nested at will.
 
-Parameter conditions can not only be used around OutputTemplate, but they can also be used around metafield actors, inside the output template specification. So you can make metadata fields conditional on global parameters.
+Parameter conditions can not only be used around output templates, but also be around metafield actors, inside the output template specification. In other words, you can make metadata fields conditional on global parameters.
 
 %TODO: Provide example?
 
 \subsection{Converters}
 
-Users do not always have their files in the format you desire as input, and asking clueless users to convert their data may be problematic. Similarly, users may not always like the output format you offer. CLAM therefore introduces a converter framework that can do two things:
+Users do not always have their files in the format you desire as input, and asking users to convert their data may be problematic. Similarly, users may not always like the output format you offer. CLAM therefore introduces a converter framework that can do two things:
 
 \begin{enumerate}
-\item Convert input files from auxiliary formats to your desired format, upon upload
-\item Convert output files from your output format to secondary formats
+\item Convert input files from auxiliary formats to your desired format, upon upload;
+\item Convert output files from your output format to secondary formats.
 \end{enumerate}
 
 A converter, using the above-mentioned class names, can be included in input templates (for situation 1), and in output templates (for situation 2). Include them directly after any Parameter fields or Metafield actors.
 
-It is important to note that the converters convert only the files themselves and not the associated metadata. This implies that these converters are intended primarily for end-users and not as much for automated clients.
+It is important to note that the converters convert only the files themselves and not the associated metadata. This implies that these converters are intended primarily for end users and not as much for automated clients.
 
-For most purposes, you will need to write your own converters. These are to be implemented in \texttt{clam/common/converters.py}. Some converters however will be provided out of the box, note that the actual conversion will be performed by 3rd party software in most cases.
+For most purposes, you will need to write your own converters. These are to be implemented in \texttt{clam/common/converters.py}. Some converters however will be provided out of the box. Note that the actual conversion will be performed by 3rd party software in most cases.
 
 \begin{itemize}
-\item \texttt{MSWordConverter} - Convert MS Word files to plain text
-\item \texttt{PDFConverter} - Convert PDF to plain text.
-\item \texttt{CharEncodingConverter} - Convert between plain text files in different character encodings.
+\item \texttt{MSWordConverter} -- Convert MS Word files to plain text
+\item \texttt{PDFConverter} -- Convert PDF to plain text.
+\item \texttt{CharEncodingConverter} -- Convert between plain text files in different character encodings.
 \end{itemize}
 
 Note that specific converters take specific parameters, consult the API reference for details.
@@ -532,7 +532,7 @@ Note that specific converters take specific parameters, consult the API referenc
 
 \subsection{Viewers}
 
-Viewers are intended for human-end users only, and enable visualisation of a particular file format. CLAM offers a viewer framework that enables you to write viewers for your format. Viewers may either be written within the CLAM framework, using Python, but they can also be external (non-CLAM) webservices, hosted elsewhere.
+Viewers are intended for human end users, and enable visualisation of a particular file format. CLAM offers a viewer framework that enables you to write viewers for your format. Viewers may either be written within the CLAM framework, using Python, but they can also be external (non-CLAM) webservices, hosted elsewhere.
 
 Viewers can be included in output templates. Include them directly after any metafield actors.
 
@@ -543,7 +543,7 @@ To be completed still...
 
 \subsection{Working with pre-installed data}
 
-Rather than letting users upload files, CLAM also offers the possibility of pre-installing input data on the server. This feature is ideally suited for dealing with data for a demo, or for offering a selection of pre-installed corpora that are too big to transfer over network. Furthermore, pre-installed data is also suited in situations where you want the user to be able to choose from several pre-installed resources, such as lexicons, grammars, etc.., instead of having to upload files they may not have available.
+Rather than letting users upload files, CLAM also offers the possibility of pre-installing input data on the server. This feature is ideally suited for dealing with data for a demo, or for offering a selection of pre-installed corpora that are too big to transfer over network. Furthermore, pre-installed data is also suited in situations where you want the user to be able to choose from several pre-installed resources, such as lexicons, grammars, etc., instead of having to upload files they may not have available.
 
 Pre-installed data sources are called ``input sources'' in CLAM, not to be confused with input templates. Input sources can be specified either in an input template, or more globally. 
 
@@ -567,11 +567,11 @@ InputTemplate('lexicon', PlainTextFormat,"Input Lexicon",
 ),            
 \end{verbatim}
 
-This defines an input template for some kind of lexicon, with two pre-defined input sources: ``lexicon A'' and ``lexicon B''. The user can choose between these, or alternatively upload a lexicon of his own. If however \texttt{onlyinputsource} is set to \texttt{True}, then the user is forced to choose only from the input sources, and can't upload his own version. 
+This defines an input template for some kind of lexicon, with two pre-defined input sources: ``lexicon A'' and ``lexicon B''. The user can choose between these, or alternatively upload a lexicon of his own. If, however, \texttt{onlyinputsource} is set to \texttt{True}, then the user is forced to choose only from the input sources, and can't upload his own version. 
 
-Metadata can be provided either in the inputsource configuration, or by simply adding a CLAM metadata file alongside the actual file. For the file \texttt{/path/to/lexiconA.txt}, the metadata file would be \texttt{/path/to/.lexiconA.txt.METADATA} (note the initial period, metadata files are hidden). 
+Metadata can be provided either in the inputsource configuration, or by simply adding a CLAM metadata file alongside the actual file. For the file \texttt{/path/to/lexiconA.txt}, the metadata file would be \texttt{/path/to/.lexiconA.txt.METADATA} (note the initial period; metadata files are hidden). 
 
-Input sources can also be defined globally, and correspond to multiple files, i.e. they point to a directory containing multiple files instead of pointing to a single file. Let's take the example of a spelling correction demo, in which a test set consisting out of many text documents is the input source:
+Input sources can also be defined globally, and correspond to multiple files, i.e. they point to a directory containing multiple files instead of pointing to a single file. Let us take the example of a spelling correction demo, in which a test set consisting out of many text documents is the input source:
 
 \begin{verbatim}
 INPUTSOURCES = [
@@ -583,23 +583,23 @@ INPUTSOURCES = [
 ]
 \end{verbatim}
 
-In these cases, it is essential to fill the \texttt{inputtemplate=} parameter. And all files in the directory must be fitted for this input template. Adding input sources for multiple input templates is done by simply defining multiple input sources. The user may always select from as many/few input sources as he/she wants.
+In these cases, it is essential to fill the \texttt{inputtemplate=} parameter. All files in the directory must be formatted according to this input template. Adding input sources for multiple input templates is done by simply defining multiple input sources. %The user may always select from as many or few input sources as he wants.
 
 
 \section{Wrapper script}
 
-Service providers are encouraged to write a wrapper script that acts as the glue between CLAM and the NLP Application(s). CLAM will execute the wrapper script and the wrapper script will invoke the actual NLP Application(s). Using a wrapper script offers more flexibility than letting CLAM directly invoke the NLP Application, and allows the NLP Application itself to be totally independent of CLAM. 
+Service providers are encouraged to write a wrapper script that acts as the glue between CLAM and the NLP Application(s). CLAM will execute the wrapper script, and the wrapper script will in turn invoke the actual NLP Application(s). Using a wrapper script offers more flexibility than letting CLAM directly invoke the NLP Application, and allows the NLP Application itself to be totally independent of CLAM. 
 
-The wrapper script takes the arguments as specified in \texttt{COMMAND} in the service configuration file, see Section~\ref{sec:command}. There are some important things to take into account:
+The wrapper script takes the arguments as specified in \texttt{COMMAND} in the service configuration file; see Section~\ref{sec:command}. There are some important things to take into account:
 
 \begin{itemize}
-\item All user-provided input has to be read from the specified input directory. A full listing of this input will be provided in the \texttt{clam.xml} data file. If you choose not to use this, but use \texttt{\$PARAMETERS} instead, then you must take care that your application can identify the file-formats by filename, extension or otherwise.
+\item All user-provided input has to be read from the specified input directory. A full listing of this input will be provided in the \texttt{clam.xml} data file. If you choose not to use this, but use \texttt{\$PARAMETERS} instead, then you must take care that your application can identify the file formats by filename, extension or otherwise.
 \item All user-viewable output must be put in the specified output directory. Output files must be generated in accordance with the profiles that describe this generation. 
 \item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. Whilst this is not mandatory, it offers valuable feedback to the user on the state of the system. 
 \item The wrapper script is always started with the current working directory set to the selected project directory.
 \end{itemize}
 
-The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and make all parameters and input files (with metadata!) directly accessible.
+The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and make all parameters and input files (with metadata) directly accessible.
 
 \subsection{CLAM Data API}
 
