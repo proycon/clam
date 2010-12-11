@@ -884,7 +884,7 @@ class InputFileHandler(object):
                 raise web.webapi.Forbidden("No filename or inputsource specified")
         else:
             #Simply forward to addfile
-            self.addfile(project,filename,user, postdata)
+            return self.addfile(project,filename,user, postdata)
         
     def addfile(self, project, filename, user, postdata, inputsource=None):
         """Add a new input file, this invokes the actual uploader"""

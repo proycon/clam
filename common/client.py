@@ -249,7 +249,10 @@ class CLAMClient:
 
     def _parseupload(self, node):
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            try:
+                node = ElementTree.parse(StringIO(node)).getroot() 
+            except:
+                raise Exception(node)
         if node.tag != 'clamupload':
             raise Exception("No a valid CLAM upload response")
         for node in node:
