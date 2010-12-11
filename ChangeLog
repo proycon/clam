@@ -1,0 +1,86 @@
+    
+March:
+    - Concept, brainstorming, initial meetings with Antal, Martin (TICCLops), Tanja (VICI) (starting end of february)
+    - Wrote first jobserver and jobclient (starting end of february)
+    - Discarded jobserver and jobclient, and started RESTful webservice
+    - Invented parameter class scheme
+    - Invented format class scheme and inputformat, outputformat specification
+    - Implemented smart file uploader
+    - First commit to SVN
+    - jobservice.py is now the primary and callable script instead of the custom settings.py
+    - Initial fixes -- system now runs partially
+    - Added index of inputfiles to the XML response
+    - Added inputformats/outputformats to response XML
+    - Implemented fromxml parsers for parameters and formats
+    - Implemented archive extraction
+    - Implemented passing input and outputdir to blackbox
+    - Implemented selecting a preinstalled corpora
+    - Implemented free text submission
+    - Implemented interface in webservice itself (using XSLT)
+    - Implemented parameter validation and feedback
+    - First complete test of the system on ucto
+
+April:
+    - Fixed custom errors
+    - Look into and fix large file upload problem
+    - View of status 1 (running) now auto-refreshes
+    - Added reset/go back function to run system on same input (but with different params), and abort buttons
+    - Fixed zombie problem
+    - Confine particular formats to subdirectories
+    - Add ability to extract without subdirs
+    - Implemented downloading all files as archive
+    - Implemented writing configuration file (clam.xml) for the blackbox
+    - Made parameter implementation thread-safe
+    - Implemented parameter forbid, require
+    - Improved settings import, removed globals
+    - Implemented user authentication
+    - Catch errors from the system 
+    - Fixed bugs, render parameter groups
+    - Started CLAM Documentation
+    - Lots of fixes
+    - Finished UCTO service (may act as example)
+    - Made Tadpole service
+    - Index now produces full CLAM response (index.xml is obsolete)
+    - Tested and finished user authentication (HTTP Digest)
+    - Implemented access control lists for parameters
+    - Fixed multiple choice support in ChoiceParameter
+
+May:
+    - Interface improvements
+    - Also show parameter in done-mode (status 2)
+    - Added fancy table with pagination support for input/output files and project list
+    - Uploads now proceed through AJAX, major interface improvements
+    - fixed bugs with Choiceparameter (clam.xml)
+    - Disallow empty filename in submit user input (test)  (pre-beta1)  
+    - Implemented status log and progress bar 
+    - Split client library and data library, fixes
+    - Made CLAM presentation
+    - Input files now viewable and deletetable
+    - Fix: no double files in list, adding a file with same name overwrites earlier file
+    - Added the option to download input files from an external URL
+    - Added time-stamp in project list (pre-beta1)
+    - Added support for sysadmin user, users can only access own projects   (pre-beta1)
+    - Tested on nginx (fastcgi) (pre-beta2)
+
+June:
+    - bugfixes
+
+July:
+    - bugfixes
+    - (0.2.7) Made compatible with Internet Explorer 8
+    - (0.2.8) Made ready for Apache using mod_wsgi (proper support for WSGI and URLPREFIX)
+    - bugfixes
+    - (0.2.9) Input source selector moved to top, and made more interactive
+    - Wrote documentation for integration in Apache (WSGI) and Nginx (FastCGI)
+    - (0.3.0) Started viewer support
+
+August:
+    - (0.3.2) CLAMInputFile/CLAMOutputFile now work both locally and remote, in a transparent fashion
+    - (0.3.2) Wrote viewers for Frog (using a crude table viewer), and SoNaR (using XSL)
+    - (0.3.2) Finished viewer support
+    
+November:
+    - Started new profile & metadata framework
+    
+
+    

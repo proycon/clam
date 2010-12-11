@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://aurora:8080/" />
+<title>textstats_parametererrortest</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">textstats_parametererrortest</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>projectname</td>
+	<td>seleniumtest</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>startprojectbutton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>openeditor</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>editorinputtemplate</td>
+	<td>label=Input text document</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>language</td>
+	<td>label=Dutch</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>editorfilename</td>
+	<td>test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>editorcontents</td>
+	<td>Dit is een test.</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>editorsubmit</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>freqlistlimit</td>
+	<td>-34</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@value='Start']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>exact:Error: One or more parameters are invalid</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Number must be a whole number between 0 and 99999999</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>abortbutton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Start a new Project</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
