@@ -282,14 +282,14 @@ Metadata in CLAM is tied to a particular file format (such as plain text format,
 
 When a user or automated client uploads a new input file, metadata is often not available yet. The user or client is therefore asked to provide this. In the webapplication a form is presented with all possible metadata parameters; the system will take care of generating the metadata files according to the choices made. If the service provider does not want to make use of any metadata description at all, then that is of course an option as well, though this may come at the cost of your service not providing enough information to interact with others.
 
-In a webservice it is important to precisely define what kind of input goes in, and what kind of output goes out: this results in a deterministic and thus predictable webservice. It is also necessary to define exactly how the output metadata is based on the input metadata, if that is the case. These definitions are made in so-called \emph{profiles}. A profile defines \emph{input templates}\/ and \emph{output templates}. The input templates and output template can be seen as ``slots'' for certain filetypes and metadata. An analogy from childhood memory may facilitate understanding this, as shown and explained in Figure~\ref{fig:blokkendoos}:
+In a webservice it is important to precisely define what kind of input goes in, and what kind of output goes out: this results in a deterministic and thus predictable webservice. It is also necessary to define exactly how the output metadata is based on the input metadata, if that is the case. These definitions are made in so-called \emph{profiles}. A profile defines \emph{input templates} and \emph{output templates}. The input templates and output template can be seen as ``slots'' for certain filetypes and metadata. An analogy from childhood memory may facilitate understanding this, as shown and explained in Figure~\ref{fig:blokkendoos}:
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=100.0mm]{blokkendoos.jpg}
-\end{center}
-\caption{Box and blocks analogy from childhood memory: the holes on one end correspond to input templates, the holes on the other end correspond to output templates. Imagine blocks going in through one and out through the other. The blocks themselves correspond to input or output files \emph{with attached metadata}. Profiles describe how one or more input blocks are transformed into output blocks, which may differ in type and number.\footnote{Granted, I'm stretching the analogy here; your childhood toy did not have this magic feature of course!}}
+\caption{Box and blocks analogy from childhood memory: the holes on one end correspond to input templates, the holes on the other end correspond to output templates. Imagine blocks going in through one and out through the other. The blocks themselves correspond to input or output files \emph{with attached metadata}. Profiles describe how one or more input blocks are transformed into output blocks, which may differ in type and number.Granted, I'm stretching the analogy here; your childhood toy did not have this magic feature of course!}
 \label{fig:blokkendoos} 
+\end{center}
 \end{figure}
 
 A profile is thus a precise specification of what output files will be produced given what input files,  it specifies exactly how the metadata for the outputfiles can be constructed given the metadata of the inputfiles. The generation of metadata for output files is fully handled by CLAM, outside of your wrapper script and NLP application.
