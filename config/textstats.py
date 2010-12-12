@@ -39,7 +39,7 @@ SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext 
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/home/proycon/work/clam.textstats/"
+ROOT = "/tmp/clam.textstats/"
 
 #The URL of the system
 PORT= 8080
