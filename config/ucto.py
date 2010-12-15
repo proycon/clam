@@ -19,27 +19,20 @@ from clam.common.formats import *
 from clam.common.digestauth import pwhash
 from sys import path 
 
-REQUIRE_VERSION = 0.2
+REQUIRE_VERSION = 0.5
 
 SYSTEM_ID = "ucto"
-SYSTEM_NAME = "Unicode Tokeniser"
+SYSTEM_NAME = "Tokeniser"
 SYSTEM_DESCRIPTION = "Ucto is a tokeniser designed for unicode (utf-8) texts. Furthermore, it is also an inspection tool for examining the nature or count of the characters in a text. Support also exists for some basic transformations."
 
 #Root directory for CLAM
 ROOT = path[0] + "/../ucto.clam/"
 PORT = 8080
-URL = "http://localhost:" + str(PORT)
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
-
-#List of supported Input formats by the system
-INPUTFORMATS = [ PlainTextFormat('utf-8',['txt']), TokenizedTextFormat('utf-8',['tok']) ]
-
-#List of delivered Output formats by the system
-OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['tok']) ]
 
 #The system command. It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
@@ -59,28 +52,57 @@ OUTPUTFORMATS = [ TokenizedTextFormat('utf-8',['tok']) ]
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = path[0] +  "/wrappers/uctowrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+COMMAND = path[0] +  "/wrappers/uctowrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+
+
+PROFILES = [
+    Profile( #profile for non-verbose mode
+        InputTemplate('untokinput', PlainTextFormat,"Text document", 
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
+            CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
+            CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
+            multi=True,
+        ),
+        ParameterCondition(verbose=True,
+            then=OutputTemplate('tokoutput', PlainTextFormat,"Verbosely Tokenised Text Document",
+                ParameterCondition(sentenceperline=True,
+                    then=SetMetaField('sentenceperline','yes')
+                ),            
+                ParameterCondition(lowercase=True,
+                    then=SetMetaField('lowercase','yes')
+                ),
+                ParameterCondition(uppercase=True,
+                    then=SetMetaField('uppercase','yes')
+                ),
+                copymetadata=True,
+                extension='vtok',
+                multi=True,
+            ),
+            otherwise=OutputTemplate('tokoutput', PlainTextFormat,"Tokenised Text Document",
+                ParameterCondition(sentenceperline=True,
+                    then=SetMetaField('sentenceperline','yes')
+                ),
+                ParameterCondition(lowercase=True,
+                    then=SetMetaField('lowercase','yes')
+                ),
+                ParameterCondition(uppercase=True,
+                    then=SetMetaField('uppercase','yes')
+                ),
+                copymetadata=True,
+                extension='tok',
+                multi=True,
+            )
+        )
+    ),
+]
 
 PARAMETERS =  [ 
-    ('Tokenisation', [
-        ChoiceParameter('tok','-t','Tokenise for language','Tokenise for the specified language',choices=[('','No language-specific tokenisation'),('nl','Nederlands'),('en','English')], nospace=True), #note that when an empty value is selected,   
-        BooleanParameter('sentok','-Ts','Sentence Tokenisation','Compute sentence boundaries'),
-        BooleanParameter('crudetok','-TS','Crude tokenisation','Crude non-language-specific tokenisation', forbid=['tok']),
-        BooleanParameter('verbose','-Tv','Verbose tokeniser output','Outputs token types per token, one token per line', require=['tok']),
-    ]),
-    ('Transformations', [ 
+    ('Tokenisation options', [
+        BooleanParameter('verbose','-v','Verbose tokeniser output','Outputs token types per token, one token per line'),
+        BooleanParameter('sentenceperline','-Ts','Sentence per line','Output each sentence on a single line'),
         BooleanParameter('lowercase','-l','Lowercase','Convert text to lowercase',forbid=['uppercase']),
         BooleanParameter('uppercase','-u','Uppercase','Convert text to uppercase',forbid=['lowercase']),
-        BooleanParameter('reverse','-r','Reverse words','Reverses all the words in a line'),
-        BooleanParameter('bigrams','-2','List bigrams','',forbid=['trigrams','quadgrams']),
-        BooleanParameter('trigrams','-3','List trigrams','',forbid=['bigrams','quadgrams']),
-        BooleanParameter('quadgrams','-4','List quadgrams','',forbid=['bigrams','trigrams']),
     ]),
-    ('Word and Character Information', [
-        BooleanParameter('info','-i','Unicode Info','Show unicode information per character, one per line'),
-        BooleanParameter('countwords','-cw','Count words','Count words'),
-    	BooleanParameter('countchars','-cc','Count characters (without spaces and punctuation)'),
-    	BooleanParameter('countchars2','-cs','Count characters (with spaces and punctuation)'),
-    ])
 ]
 
