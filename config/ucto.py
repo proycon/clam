@@ -16,6 +16,8 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.data import *
+from clam.common.converters import *
 from clam.common.digestauth import pwhash
 from sys import path 
 
@@ -99,10 +101,10 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Tokenisation options', [
-        BooleanParameter('verbose','-v','Verbose tokeniser output','Outputs token types per token, one token per line'),
-        BooleanParameter('sentenceperline','-Ts','Sentence per line','Output each sentence on a single line'),
-        BooleanParameter('lowercase','-l','Lowercase','Convert text to lowercase',forbid=['uppercase']),
-        BooleanParameter('uppercase','-u','Uppercase','Convert text to uppercase',forbid=['lowercase']),
+        BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line'),
+        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line'),
+        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase']),
+        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase']),
     ]),
 ]
 
