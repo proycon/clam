@@ -58,7 +58,7 @@ COMMAND = path[0] +  "/wrappers/uctowrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRE
 
 
 PROFILES = [
-    Profile( #profile for non-verbose mode
+    Profile(
         InputTemplate('untokinput', PlainTextFormat,"Text document", 
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
@@ -101,10 +101,10 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Tokenisation options', [
-        BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line'),
-        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line'),
-        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase']),
-        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase']),
+        BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v'),
+        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line', paramflag='-s'),
+        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase'], paramflag='-u'),
+        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase'], paramflag='-l'),
     ]),
 ]
 
