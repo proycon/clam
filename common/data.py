@@ -274,7 +274,7 @@ def processparameters(postdata, parameters, user=None):
                                                     
         return errors, newparameters, commandlineparams
 
-class CLAMData(object): #TODO: Adapt CLAMData for new metadata
+class CLAMData(object):
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
     XML responses. Its member variables are: 
 
@@ -421,6 +421,16 @@ class CLAMData(object): #TODO: Adapt CLAMData for new metadata
                  for projectnode in node:
                     if projectnode.tag == 'project':
                         self.projects.append(projectnode.text)
+    
+    def commandlineargs(self):
+        commandlineargs = []
+        for parametergroup, parameters in self.parameters:
+            for parameter in parameters:
+                p = parameter.compileargs()
+                if p:
+                    commandlineargs.append(p)
+        return " ".join(commandlineargs)
+                
 
     def parameter(self, id):                                 
         """Return the specified global parameter"""
