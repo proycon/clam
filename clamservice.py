@@ -935,10 +935,10 @@ class InputFileHandler(object):
                     nextseq = seq + 1 #next available sequence number
             
 
-        if not filename:
+        if not filename: #Actually, I don't think this can occur at this stage, but we'll leave it in to be sure
             if inputtemplate.filename:
                 filename = inputtemplate.filename
-            elif inputtemplate.extension:
+            elif inputtemplate.extension: 
                 filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) + '.' + inputtemplate.extension
             else:
                 filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
@@ -967,10 +967,6 @@ class InputFileHandler(object):
         #Create the project (no effect if already exists)
         Project.create(project, user)        
 
-        if not inputtemplate.unique:
-            if '#' in filename: #resolve number in filename
-                filename = filename.replace('#',str(nextseq))
-        
 
         
         
@@ -1004,8 +1000,7 @@ class InputFileHandler(object):
         else:
             raise web.webapi.Forbidden("No file, url or contents specified!")
             
-        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
-        output = head
+
 
           
         #============================ Generate metadata ========================================
@@ -1061,6 +1056,13 @@ class InputFileHandler(object):
         else:
             errors, parameters = inputtemplate.validate(postdata, user)
             validmeta = True #will be checked later
+
+
+
+        filename = clam.common.data.resolveinputfilename(filename, inputtemplate, nextseq)
+
+        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
+        output = head
         
         
         if not errors:

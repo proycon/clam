@@ -1706,4 +1706,35 @@ class InputSource(object):
         if not self.inputtemplate:
             raise Exception("Input source has no input template")        
 
+def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0)
+        #parameters are local
+        if filename.find('$') != -1:
+            for parameter in sorted(parameters, key=lambda x: -1 * len(x.id)):                            
+                if parameter.hasvalue:
+                    filename = filename.replace('$' + parameter.id, str(parameter.value))
+        
+        if not inputtemplate.unique:
+            if '#' in filename: #resolve number in filename
+                filename = filename.replace('#',str(nextseq))
+                
+        return filename
+
+def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq = 0)
+        if filename.find('$') != -1:
+            for parameter in sorted(globalparameters, key=lambda x: -1 * len(x.id)):                            
+                if parameter.hasvalue:
+                    filename = filename.replace('$' + parameter.id, str(parameter.value))
+            for parameter in sorted(localparameters, key=lambda x: -1 * len(x.id)):                            
+                if parameter.hasvalue:
+                    filename = filename.replace('$' + parameter.id, str(parameter.value))
+        
+
+    
+        if not outputtemplate.unique:
+            if '#' in filename: #resolve number in filename
+                filename = filename.replace('#',str(nextseq))
+        return filename
+    
+    
+
 import clam.common.formats #yes, this is deliberately placed at the end!
