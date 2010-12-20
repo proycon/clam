@@ -1471,8 +1471,14 @@ class OutputTemplate(object):
                 if self.extension and not self.filename:
                     filename += '.' + self.extension   
                     
+                
                 #Now we create the actual metadata
-                yield filename, self.generatemetadata(parameters, parentfile, relevantinputfiles, provenancedata)
+                metadata = self.generatemetadata(parameters, parentfile, relevantinputfiles, provenancedata)
+                
+                #Resolve filename
+                filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr)
+                                            
+                yield filename, metadata
                 
         elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
