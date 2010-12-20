@@ -1483,7 +1483,11 @@ class OutputTemplate(object):
         elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
 
-            yield self.filename, self.generatemetadata(parameters, None, [], provenancedata)
+            metadata = self.generatemetadata(parameters, None, [], provenancedata)
+            
+            filename = resolveoutputfilename(self.filename, parameters, metadata, self, seqnr)
+            
+            yield filename, metadata
             
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
