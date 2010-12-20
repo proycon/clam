@@ -1709,7 +1709,7 @@ class InputSource(object):
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0)
         #parameters are local
         if filename.find('$') != -1:
-            for parameter in sorted(parameters, key=lambda x: -1 * len(x.id)):                            
+            for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
         
@@ -1721,15 +1721,13 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0)
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq = 0)
         if filename.find('$') != -1:
-            for parameter in sorted(globalparameters, key=lambda x: -1 * len(x.id)):                            
+            for parameter in sorted(globalparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
-            for parameter in sorted(localparameters, key=lambda x: -1 * len(x.id)):                            
+            for parameter in sorted(localparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
-        
-
-    
+            
         if not outputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
