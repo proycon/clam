@@ -266,8 +266,8 @@ class CLAMClient:
                             for parameternode in subnode:                    
                                 if 'error' in parameternode.attrib:
                                     errormsg = parameternode.attrib['error']
-                                    break
-                            raise ParameterError(errormsg + " (parameter="+parameternode.attrib['id']+")")
+                                    raise ParameterError(errormsg + " (parameter="+parameternode.attrib['id']+")")
+                            raise ParameterError(errormsg)
         return True
 
 
