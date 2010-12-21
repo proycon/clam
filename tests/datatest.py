@@ -146,6 +146,29 @@ class ParameterCondition(unittest2.TestCase):
         self.assertTrue(len(data.conditions) == 1)
         self.assertTrue(isinstance(data.then, clam.common.data.SetMetaField))
         self.assertTrue(isinstance(data.otherwise, clam.common.data.SetMetaField))        
+        
+class ParametersInFilename(unittest2.TestCase):
+    def setUp(self):
+        self.inputtemplate = clam.common.data.InputTemplate('test', clam.common.formats.PlainTextFormat,"test",
+            clam.common.parameters.StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            clam.common.parameters.ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+            filename='test.$encoding.$language.txt',
+            unique=True
+        )
+        
+
+    def test1_inputfilename(self):
+        """Input Template - Testing resolution of filename with parameters"""
+        postdata = {'language':'fr','encoding':'utf-8'}
+        validmeta, metadata, parameters = self.inputtemplate.generate(None, None, postdata)
+        self.assertTrue(validmeta)
+        self.assertTrue(isinstance(metadata,clam.common.data.CLAMMetaData))
+        filename = clam.common.data.resolveinputfilename(self.inputtemplate.filename, parameters, self.inputtemplate, 0)
+        self.assertEqual(filename,'test.utf-8.fr.txt')
+    
+
+        
+        
                                             
 if __name__ == '__main__':
     unittest2.main(verbosity=2)

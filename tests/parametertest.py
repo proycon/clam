@@ -379,7 +379,9 @@ class ParameterProcessingTest(unittest2.TestCase):
         self.assertTrue(parameters[2].id == 'testfloat')
         self.assertTrue(parameters[2].error)        
         self.assertTrue(parameters[3].id == 'testint')
-        self.assertTrue(parameters[3].error)        
+        self.assertTrue(parameters[3].error)
+        
+
          
                                         
 if __name__ == '__main__':

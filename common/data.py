@@ -1451,9 +1451,9 @@ class OutputTemplate(object):
                     if seqnr2 == 0 or seqnr2 == seqnr:
                         relevantinputfiles.append( (inputtemplate2, CLAMInputFile(projectpath, inputfilename2)) )
                         
-                #resolve # in filename
-                if not self.unique:
-                    filename.replace('#',str(seqnr))
+                #resolve # in filename (done later)
+                #if not self.unique:
+                #    filename.replace('#',str(seqnr))
             
                 if self.removeextensions:
                     #Remove unwanted extensions
