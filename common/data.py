@@ -1716,7 +1716,7 @@ class InputSource(object):
         if not self.inputtemplate:
             raise Exception("Input source has no input template")        
 
-def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0)
+def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0):
         #parameters are local
         if filename.find('$') != -1:
             for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
@@ -1729,7 +1729,7 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0)
                 
         return filename
 
-def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq = 0)
+def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq = 0):
         if filename.find('$') != -1:
             for parameter in sorted(globalparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
