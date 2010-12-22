@@ -381,7 +381,7 @@ After specifying any such parameters, there are some possible keyword arguments:
 \begin{enumerate}
 \item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, this indicates whether the input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
 \item \texttt{multi} -- The logical inverse of the above; you can whichever you prefer. \texttt{multi=False} is the default if not specified.
-\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name.
+\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name. You can also use any of the metadata parameters as variable in the filename; as explained in section~\ref{sec:filenamevariables}.
 \item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
 \end{enumerate}
 
@@ -406,8 +406,7 @@ InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text documen
 }}
 
 
-For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments laid out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source. This other source is the input template that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particular file, and get that very same file back with the same name. If you specify \texttt{extension}, it will prepend an extra extension. 
-
+For \texttt{OutputTemplate}, the syntax is similar. It takes the three mandatory arguments \emph{id}, \emph{format} and \emph{label}, and it also takes the four keyword arguments laid out above. If no explicit filename has been specified for an output template, then it needs to find out what name the output filename will get from another source. This other source is the input template that acts as the \emph{parent}. The output template will thus inherit the filename from the input template that is its parent. In this way, the user may upload a particular file, and get that very same file back with the same name. If you specify \texttt{extension}, it will append an extra extension to this inherited filename. Prior to appending an extension, you may often want to remove existing extension, you can do that with the \texttt{removeextension} attribute. 
 As there may be multiple input templates, it is not always clear what input template is the parent. The system will automatically select the \emph{first} defined input template with the same value for unique/multi the output template has. If this is not what you want, you can explicitly set a parent using the \texttt{parent} keyword, which takes the value of the input template's ID.
 
 Whereas for \texttt{InputTemplate} you can specify various parameter types, output templates work differently. Output templates define what metadata fields (metafields for short) they want to set with what values, and from where to get these values. In some situations the output file is an extension of the input file, and you want it to inherit the metadata from the input file. Set \texttt{copymetadata=True} to accomplish this: now all metadata will be inherited from the parent, but you can still make modifications.
@@ -421,13 +420,15 @@ To set (or unset) particular metadata fields you specify so-called ``metafield a
 \item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} -- Get the value for this metadata field from a global parameter with the specified ID.
 \end{itemize}
 
-Take a look at the following example for a ficticious automatic translation system, translating to Esperanto.
+Take a look at the following example for a ficticious automatic translation system, translating to Esperanto. If an input file \texttt{x.txt} is uploaded, the output file will be named \texttt{x.translation}.
 
 {\footnotesize{
 \begin{verbatim}
 OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
     CopyMetaField('encoding','maininput.encoding')
     SetMetaField('language','eo'),
+    removeextension='.txt',
+    extension='.translation',
     multi=True
 )
 \end{verbatim}
@@ -455,6 +456,47 @@ PROFILES = [
       "Esperanto translation (Plain-text document)",  
       CopyMetaField('encoding','maininput.encoding')
       SetMetaField('language','eo'),
+      removeextension='.txt',
+      extension='.translation',
+      multi=True
+    )    
+  )
+]
+\end{verbatim}
+}}
+
+
+
+\subsection{Control over filenames}
+\label{sec:filenamevariables}
+
+There are several ways of controlling the way input and output files within a profile are named. As illustrated in the previous section, each Output Template has an Input Template as parent, from which it inherits the filename if no explicit filename is specified. This is a very important aspect that has to be realised By default, if no \texttt{filename=}, \texttt{extension=} or \texttt{removeextension=} is specified for an Output Template, it will use the same filename as the parent Input Template. If \texttt{filename=} and \texttt{extension=} are not specified for the Input Template, then the file the user uploads will simply maintain the very same name as it is uploaded with. If \texttt{extension=} is specified, then the input file is required to have the specified extension, the web application and CLAM Client API takes care of this automatically if not the case.
+
+In the previous section, we mentioned the use of the variable \texttt{\#} that will insert a number in when the Input Template or Output Template is in multi-mode. In addition to this, other variables can also be used. In Input Templates, you can use any of the metadata parameters as variables in the filename, use \texttt{\$ID} in the filename specification, using the ID of the parameter. For Output Templates, you can use metafield IDs or global parameter IDs (in that order of priority) in the same way. This syntax is valid in both \texttt{filename=} and \texttt{extension=}.
+
+The following example illustrates a translation system that encodes the character encoding and language in the filename itself. Note also the use of the special variable \texttt{\#}, which assigns a number as the templates are both in multi mode.
+
+{\footnotesize{
+\begin{verbatim}
+PROFILES = [ 
+  Profile( 
+    InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
+      StaticParameter(
+       id='encoding',name='Encoding',description='The character encoding of the file', 
+       value='utf-8'
+      ),  
+      ChoiceParameter(
+       id='language',name='Language',description='The language the text is in', 
+       choices=[('en','English'),('nl','Dutch'),('fr','French')]
+      ),
+      filename='input#.$language.$encoding.txt'
+      multi=True
+    ), 
+    OutputTemplate('translationoutput', PlainTextFormat,
+      "Esperanto translation (Plain-text document)",  
+      CopyMetaField('encoding','maininput.encoding')
+      SetMetaField('language','eo'),
+      filename='output#.$language.$encoding.txt'
       multi=True
     )    
   )
