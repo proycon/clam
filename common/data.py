@@ -426,7 +426,7 @@ class CLAMData(object):
         commandlineargs = []
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
-                p = parameter.compileargs()
+                p = parameter.compilearg()
                 if p:
                     commandlineargs.append(p)
         return " ".join(commandlineargs)
