@@ -24,8 +24,8 @@ from sys import path
 REQUIRE_VERSION = 0.5
 
 SYSTEM_ID = "ucto"
-SYSTEM_NAME = "Tokeniser"
-SYSTEM_DESCRIPTION = "Ucto is a tokeniser designed for unicode (utf-8) texts. Furthermore, it is also an inspection tool for examining the nature or count of the characters in a text. Support also exists for some basic transformations."
+SYSTEM_NAME = "Ucto Tokeniser"
+SYSTEM_DESCRIPTION = "Ucto is a tokeniser designed for unicode (utf-8) texts. The tokeniser also supports some basic transformations."
 
 #Root directory for CLAM
 ROOT = path[0] + "/../ucto.clam/"
@@ -61,13 +61,13 @@ PROFILES = [
     Profile(
         InputTemplate('untokinput', PlainTextFormat,"Text document", 
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
-            ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
+            ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
         ),
         ParameterCondition(verbose=True,
-            then=OutputTemplate('tokoutput', PlainTextFormat,"Verbosely Tokenised Text Document",
+            then=OutputTemplate('vtokoutput', PlainTextFormat,"Verbosely Tokenised Text Document",
                 ParameterCondition(sentenceperline=True,
                     then=SetMetaField('sentenceperline','yes')
                 ),            
