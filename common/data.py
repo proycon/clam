@@ -519,16 +519,16 @@ def sanitizeparameters(parameters):
     
 
 
-def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
+def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl,printdebug=None):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
-
+    
     parameters = sanitizeparameters(parameters)
-
+    
     matched = []
-    for profile in profiles:
+    for profile in profiles:        
         if profile.match(projectpath, parameters):
             matched.append(profile)
-            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)
+            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)            
     return matched
 
 
@@ -582,7 +582,7 @@ class Profile(object):
         outputproduced = False
         if not self.output: return False
         for outputtemplate in self.output:
-            if not isinstance(outputtemplate, ParameterCondition) or outputtemplate.match(parameters):
+            if not isinstance(outputtemplate, ParameterCondition) or (not outputtemplate.otherwise and outputtemplate.match(parameters)) or outputtemplate.otherwise:
                 outputproduced = True
             
         return outputproduced
