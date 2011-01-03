@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     #Read a user-defined parameter
     try:
-        freqlistlimit = clamdata.parameter('freqlistlimit')
+        freqlistlimit = clamdata['freqlistlimit']
     except KeyError:
         freqlistlimit = 0
         
@@ -134,7 +134,7 @@ if __name__ == "__main__":
             
         #Calling a function containing the actual core of this program (totally CLAM unaware).
         #In other scenarios, this could be where you invoke other scripts/programs through os.system()
-        localstats, localfreqlist =  calcstats(str(inputfile), encoding, clamdata.parameter('casesensitive')) 
+        localstats, localfreqlist =  calcstats(str(inputfile), encoding, clamdata['casesensitive']) 
         
         #Write statistics output for this file
         #Note 1) The filenames must always correspond to what has been defined in PROFILES in the service configuration file!
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     f.write(dicttotext(overallfreqlist, True, freqlistlimit ))
     f.close()
 
-    if clamdata.parameter('createlexicon'):
+    if clamdata['createlexicon']:
         #Write overall frequency list output for this file    
         f = codecs.open(outputdir + 'overall.lexicon','w','utf-8')
         for word in sorted(overallfreqlist.keys()):
