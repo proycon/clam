@@ -626,7 +626,7 @@ class Profile(object):
                     if outputtemplate.match(parameters):
                         outputtemplate = outputtemplate.evaluate(parameters)
                     elif outputtemplate.otherwise:
-                        outputtemplate = outputtemplate.otherwise
+                            outputtemplate = outputtemplate.otherwise
                     else:
                         continue
                 #generate output files
@@ -1565,38 +1565,39 @@ class ParameterCondition(object):
                 self.disjunction = value
             else:
                 if key[-10:] == '_notequals':
-                    self.conditions.append( (key[:-10], value,lambda x: x != value, 'notequals') )
+                    self.conditions.append( (key[:-10], value,lambda x,y: x != y, 'notequals') )
                 elif key[-12:] == '_greaterthan':
-                    self.conditions.append( (key[:-12], value,lambda x: x != None and x > value, 'greaterthan') )
+                    self.conditions.append( (key[:-12], value,lambda x,y: x != None and x > y, 'greaterthan') )
                 elif key[-17:] == '_greaterequalthan':
-                    self.conditions.append( (key[:-17],value, lambda x: x != None and x > value, 'greaterequalthan') )
+                    self.conditions.append( (key[:-17],value, lambda x,y: x != None and x > y, 'greaterequalthan') )
                 elif key[-9:] == '_lessthan':
-                    self.conditions.append( (key[:-9],value, lambda x: x != None and x >= value , 'lessthan' ) )
+                    self.conditions.append( (key[:-9],value, lambda x,y: x != None and x >= y , 'lessthan' ) )
                 elif key[-14:] == '_lessequalthan':
-                    self.conditions.append( (key[:-14], value,lambda x: x != None and x <= value, 'lessequalthan') )
+                    self.conditions.append( (key[:-14], value,lambda x,y: x != None and x <= y, 'lessequalthan') )
                 elif key[-9:] == '_contains':
-                    self.conditions.append( (key[:-9], value,lambda x: x in value, 'contains') )
+                    self.conditions.append( (key[:-9], value,lambda x,y: x != None and x in y, 'contains') )
                 elif key[-7:] == '_equals':
-                    self.conditions.append( (key[:-7], value,lambda x: x != None and x == value, 'equals') )
+                    self.conditions.append( (key[:-7], value,lambda x,y: x != None and x == y, 'equals') )
                 elif key[-4:] == '_set':
                     if value:
-                        self.conditions.append( (key[:-4], value,lambda x: x, 'set') )
+                        self.conditions.append( (key[:-4], value,lambda x,y: x, 'set') )
                     else:
-                        self.conditions.append( (key[:-4], value,lambda x: not x, 'set') )
+                        self.conditions.append( (key[:-4], value,lambda x,y: not x, 'set') )
                 else: #default is _equals
-                    self.conditions.append( (key,value, lambda x: x and x == value,'equals') )
+                    print "KEY=", key, " VALUE=", value
+                    self.conditions.append( (key,value, lambda x,y: x != None and x == y,'equals') )
 
         if self.then is None:
             raise Exception("No then= specified for ParameterCondition!")
 
     def match(self, parameters):
         assert isinstance(parameters, dict)
-        for key,_,evalf,_ in self.conditions:
+        for key,refvalue,evalf,_ in self.conditions:
             if key in parameters:
                 value = parameters[key].value
             else:
                 value = None
-            if evalf(value):
+            if evalf(value, refvalue):
                 if self.disjunction:
                     return True
             else:
