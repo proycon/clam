@@ -52,9 +52,9 @@ if __name__ == "__main__":
         language = inputfile.metadata['language']
    
         if clamdata['verbose']:
-            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' ' + outputdir +'/'+ inputfile.filename + '.vtok')
+            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
         else:
-            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' ' + outputdir +'/'+ inputfile.filename + '.tok')
+            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.tok')
 
     #A nice status message to indicate we're done
     clam.common.status.write(statusfile, "Done",100) # status update
