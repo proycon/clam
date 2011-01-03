@@ -1584,7 +1584,6 @@ class ParameterCondition(object):
                     else:
                         self.conditions.append( (key[:-4], value,lambda x,y: not x, 'set') )
                 else: #default is _equals
-                    print "KEY=", key, " VALUE=", value
                     self.conditions.append( (key,value, lambda x,y: x != None and x == y,'equals') )
 
         if self.then is None:
