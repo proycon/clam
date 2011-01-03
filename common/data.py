@@ -433,7 +433,7 @@ class CLAMData(object):
                 
 
     def parameter(self, id):                                 
-        """Return the specified global parameter"""
+        """Return the specified global parameter (the entire object, not just the value)"""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:
@@ -441,14 +441,14 @@ class CLAMData(object):
         raise KeyError("No such parameter exists: " + id )
 
     def __getitem__(self, id):                                 
-        """Return the specified global parameter (alias for getparameter)"""
+        """Return the value of the specified global parameter"""
         try:
-            return self.parameter(id)
+            return self.parameter(id).value
         except KeyError:
             raise
 
     def __setitem__(self, id, value):
-        """Set the specified parameter"""
+        """Set the value of the specified parameter"""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:

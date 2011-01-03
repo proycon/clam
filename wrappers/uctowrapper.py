@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
 
     commandlineargs = clamdata.commandlineargs()
-
+    
 
     for i, inputfile in enumerate(clamdata.input):
         #Update our status message to let CLAM know what we're doing

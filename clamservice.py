@@ -534,7 +534,7 @@ class Project(object):
         if url[-1] == '/': url = url[:-1]                                        
 
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url)
+            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url, printdebug)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
@@ -555,15 +555,15 @@ class Project(object):
             #Start project with specified parameters
             cmd = settings.COMMAND
             cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams))
-            if 'usecorpus' in postdata and postdata['usecorpus']:
-                corpus = postdata['usecorpus'].replace('..','') #security            
-                #use a preinstalled corpus:
-                if os.path.exists(settings.ROOT + "corpora/" + corpus):
-                    cmd = cmd.replace('$INPUTDIRECTORY', settings.ROOT + "corpora/" + corpus + "/")
-                else:
-                    raise web.webapi.NotFound("Corpus " + corpus + " not found")
-            else:
-                cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
+            #if 'usecorpus' in postdata and postdata['usecorpus']:
+            #    corpus = postdata['usecorpus'].replace('..','') #security            
+            #    #use a preinstalled corpus:
+            #    if os.path.exists(settings.ROOT + "corpora/" + corpus):
+            #        cmd = cmd.replace('$INPUTDIRECTORY', settings.ROOT + "corpora/" + corpus + "/")
+            #    else:
+            #        raise web.webapi.NotFound("Corpus " + corpus + " not found")
+            #else:
+            cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
             cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
             cmd = cmd.replace('$DATAFILE',Project.path(project) + 'clam.xml')
