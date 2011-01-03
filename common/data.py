@@ -624,7 +624,9 @@ class Profile(object):
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
                     if outputtemplate.match(parameters):
-                        outputtemplate = outputtemplate.evaluate(parameters)                
+                        outputtemplate = outputtemplate.evaluate(parameters)
+                    elif outputtemplate.otherwise:
+                        outputtemplate = outputtemplate.otherwise
                     else:
                         continue
                 #generate output files
