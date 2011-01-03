@@ -147,6 +147,51 @@ class ParameterCondition(unittest2.TestCase):
         self.assertTrue(isinstance(data.then, clam.common.data.SetMetaField))
         self.assertTrue(isinstance(data.otherwise, clam.common.data.SetMetaField))        
         
+    def test3_evaluation(self):        
+        """Parameter Condition - Evaluation Check (BooleanParameter True, with otherwise)"""
+        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=True) ]
+        out = self.data.evaluate(parameters)
+        self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
+        self.assertTrue(out.key == 'x')
+        self.assertTrue(out.value == 'yes')
+        
+    def test32_evaluation(self):        
+        """Parameter Condition - Evaluation Check (BooleanParameter True, without otherwise)"""
+        self.data = clam.common.data.ParameterCondition(x=True, 
+            then=clam.common.data.SetMetaField('x','yes'),         
+        )
+        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=True) ]
+        out = self.data.evaluate(parameters)
+        self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
+        self.assertTrue(out.key == 'x')
+        self.assertTrue(out.value == 'yes')        
+        
+        
+    def test4_evaluation(self):        
+        """Parameter Condition - Evaluation Check (BooleanParameter False (explicit), with otherwise)"""
+        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=False) ]
+        out = self.data.evaluate(parameters)
+        self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
+        self.assertTrue(out.key == 'x')
+        self.assertTrue(out.value == 'no')
+        
+    def test5_evaluation(self):        
+        """Parameter Condition - Evaluation Check (BooleanParameter False (implicit), with otherwise)"""
+        parameters = []
+        out = self.data.evaluate(parameters)
+        self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
+        self.assertTrue(out.key == 'x')
+        self.assertTrue(out.value == 'no')
+    
+    def test6_evaluation(self):            
+        """Parameter Condition - Evaluation Check (BooleanParameter False (implicit), without otherwise)"""
+        self.data = clam.common.data.ParameterCondition(x=True, 
+            then=clam.common.data.SetMetaField('x','yes'),         
+        )
+        parameters = []
+        out = self.data.evaluate(parameters)
+        self.assertTrue(out == False)
+        
 class ParametersInFilename(unittest2.TestCase):
     def setUp(self):
         self.inputtemplate = clam.common.data.InputTemplate('test', clam.common.formats.PlainTextFormat,"test",
