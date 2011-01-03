@@ -470,7 +470,7 @@ class CLAMData(object):
             for parameter in parameters:
                 if parameter.error:
                     return parameter.error
-        return false
+        return False
 
     def passparameters(self):
         """Return all parameters as {id: value} dictionary"""
@@ -1551,24 +1551,24 @@ class ParameterCondition(object):
                 if key[-10:] == '_notequals':
                     self.conditions.append( (key[:-10], value,lambda x: x != value, 'notequals') )
                 elif key[-12:] == '_greaterthan':
-                    self.conditions.append( (key[:-12], value,lambda x: x > value, 'greaterthan') )
+                    self.conditions.append( (key[:-12], value,lambda x: x != None and x > value, 'greaterthan') )
                 elif key[-17:] == '_greaterequalthan':
-                    self.conditions.append( (key[:-17],value, lambda x: x > value, 'greaterequalthan') )
+                    self.conditions.append( (key[:-17],value, lambda x: x != None and x > value, 'greaterequalthan') )
                 elif key[-9:] == '_lessthan':
-                    self.conditions.append( (key[:-9],value, lambda x: x >= value , 'lessthan' ) )
+                    self.conditions.append( (key[:-9],value, lambda x: x != None and x >= value , 'lessthan' ) )
                 elif key[-14:] == '_lessequalthan':
-                    self.conditions.append( (key[:-14], value,lambda x: x <= value, 'lessequalthan') )
+                    self.conditions.append( (key[:-14], value,lambda x: x != None and x <= value, 'lessequalthan') )
                 elif key[-9:] == '_contains':
                     self.conditions.append( (key[:-9], value,lambda x: x in value, 'contains') )
                 elif key[-7:] == '_equals':
-                    self.conditions.append( (key[:-7], value,lambda x: x == value, 'equals') )
+                    self.conditions.append( (key[:-7], value,lambda x: x != None and x == value, 'equals') )
                 elif key[-4:] == '_set':
                     if value:
                         self.conditions.append( (key[:-4], value,lambda x: x, 'set') )
                     else:
                         self.conditions.append( (key[:-4], value,lambda x: not x, 'set') )
                 else: #default is _equals
-                    self.conditions.append( (key,value, lambda x: x == value,'equals') )
+                    self.conditions.append( (key,value, lambda x: x and x == value,'equals') )
 
         if self.then is None:
             raise Exception("No then= specified for ParameterCondition!")
