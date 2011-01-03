@@ -150,7 +150,6 @@ class ParameterCondition(unittest2.TestCase):
     def test3_evaluation(self):        
         """Parameter Condition - Evaluation Check (BooleanParameter True, with otherwise)"""
         parameters = { 'x': clam.common.parameters.BooleanParameter('x', 'x','x',value=True) }
-        import pdb; pdb.set_trace()
         out = self.data.evaluate(parameters)
         self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
         self.assertTrue(out.key == 'x')
