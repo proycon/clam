@@ -149,7 +149,8 @@ class ParameterCondition(unittest2.TestCase):
         
     def test3_evaluation(self):        
         """Parameter Condition - Evaluation Check (BooleanParameter True, with otherwise)"""
-        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=True) ]
+        parameters = { 'x': clam.common.parameters.BooleanParameter('x', 'x','x',value=True) }
+        import pdb; pdb.set_trace()
         out = self.data.evaluate(parameters)
         self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
         self.assertTrue(out.key == 'x')
@@ -160,7 +161,7 @@ class ParameterCondition(unittest2.TestCase):
         self.data = clam.common.data.ParameterCondition(x=True, 
             then=clam.common.data.SetMetaField('x','yes'),         
         )
-        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=True) ]
+        parameters = { 'x': clam.common.parameters.BooleanParameter('x', 'x','x',value=True) }
         out = self.data.evaluate(parameters)
         self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
         self.assertTrue(out.key == 'x')
@@ -169,7 +170,7 @@ class ParameterCondition(unittest2.TestCase):
         
     def test4_evaluation(self):        
         """Parameter Condition - Evaluation Check (BooleanParameter False (explicit), with otherwise)"""
-        parameters = [ clam.common.parameters.BooleanParameter('x', 'x','x',value=False) ]
+        parameters = { 'x': clam.common.parameters.BooleanParameter('x', 'x','x',value=False) }
         out = self.data.evaluate(parameters)
         self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
         self.assertTrue(out.key == 'x')
@@ -177,7 +178,7 @@ class ParameterCondition(unittest2.TestCase):
         
     def test5_evaluation(self):        
         """Parameter Condition - Evaluation Check (BooleanParameter False (implicit), with otherwise)"""
-        parameters = []
+        parameters = {}
         out = self.data.evaluate(parameters)
         self.assertTrue(isinstance(out, clam.common.data.SetMetaField))
         self.assertTrue(out.key == 'x')
@@ -188,7 +189,7 @@ class ParameterCondition(unittest2.TestCase):
         self.data = clam.common.data.ParameterCondition(x=True, 
             then=clam.common.data.SetMetaField('x','yes'),         
         )
-        parameters = []
+        parameters = {}
         out = self.data.evaluate(parameters)
         self.assertTrue(out == False)
         

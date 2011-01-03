@@ -1574,6 +1574,7 @@ class ParameterCondition(object):
             raise Exception("No then= specified for ParameterCondition!")
 
     def match(self, parameters):
+        assert isinstance(parameters, dict)
         for key,_,evalf,_ in self.conditions:
             if key in parameters:
                 value = parameters[key].value
