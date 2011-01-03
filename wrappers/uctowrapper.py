@@ -51,7 +51,7 @@ if __name__ == "__main__":
         #We need one of the metadata fields        
         language = inputfile.metadata['language']
    
-        if clamdata.parameters['verbose']:
+        if clamdata['verbose']:
             os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' ' + outputdir +'/'+ inputfile.filename + '.vtok')
         else:
             os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' ' + outputdir +'/'+ inputfile.filename + '.tok')
