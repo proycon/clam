@@ -501,8 +501,28 @@ class CLAMData(object):
         raise Exception("No such input template!")
 
 
+
+
+def sanitizeparameters(parameters):
+    #Make dictionary of parameters
+    if not isinstance(parameters,dict):
+        d = {}
+        for x in parameters:
+            if isinstance(x,tuple) and len(x) == 2:
+                for parameter in x[1]:  
+                    d[parameter.id] = parameter
+            elif isinstance(x, clam.common.parameters.AbstractParameter):
+                d[x.id] = x
+        return d
+    else:
+        return parameters
+    
+
+
 def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
+
+    parameters = sanitizeparameters(parameters)
 
     matched = []
     for profile in profiles:
@@ -549,8 +569,9 @@ class Profile(object):
                     if not o.parent and (not (o.filename and o.unique)):
                         raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
 
-    def match(self, projectpath, parameters):
+    def match(self, projectpath, parameters):            
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
+        parameters = sanitizeparameters(parameters)
                         
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
@@ -589,14 +610,7 @@ class Profile(object):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
 
         #Make dictionary of parameters
-        d = {}
-        for x in parameters:
-            if isinstance(x,tuple) and len(x) == 2:
-                for parameter in x[1]:  
-                    d[parameter.id] = parameter
-            elif isinstance(x, clam.common.parameters.AbstractParameter):
-                d[x.id] = x
-        parameters = d
+        parameters = sanitizeparameters(parameters)
                 
         if self.match(projectpath, parameters): #Does the profile match?
         
@@ -1611,13 +1625,13 @@ class ParameterCondition(object):
         if self.match(parameters):
             if isinstance(self.then, ParameterCondition):
                 #recursive parametercondition
-                return self.then.evaluate()
+                return self.then.evaluate(parameters)
             else:
                 return self.then
         elif self.otherwise:
             if isinstance(self.otherwise, ParameterCondition):
                 #recursive else
-                return self.otherwise.evaluate()
+                return self.otherwise.evaluate(parameters)
             else:
                 return self.otherwise
         return False
