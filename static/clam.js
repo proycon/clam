@@ -47,7 +47,7 @@ $(document).ready(function(){
                 window.location.href = $("#projectname").val() + "/";
             },
             error: function(response){
-                alert("Unable to create project");   
+                alert("Unable to create project. Do not use spaces or special characters in the ID, only underscores and alphanumeric characters are allowed.");   
             }
          });
          //$("#startprojectform").attr("action",$("#projectname").val());
