@@ -103,8 +103,8 @@ PARAMETERS =  [
     ('Tokenisation options', [
         BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v'),
         BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line', paramflag='-s'),
-        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase'], paramflag='-u'),
-        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase'], paramflag='-l'),
+        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase'], paramflag='-l'),
+        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase'], paramflag='-u'),
     ]),
 ]
 
