@@ -1009,11 +1009,11 @@ class InputFileHandler(object):
             #an explicit metadata file was provided, upload it:
             printlog("Metadata explicitly provided in file, uploading...")          
             try:
-                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'].file)
+                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'])
                 errors, parameters = inputtemplate.validate(metadata, user)
                 validmeta = True
-            except:
-                printlog("Uploaded metadata is invalid!")          
+            except Exception, e:
+                printlog("Uploaded metadata is invalid! " + str(e))          
                 metadata = None
                 errors = True
                 parameters = []
@@ -1042,7 +1042,7 @@ class InputFileHandler(object):
                 metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'            
                 if os.path.exists(metafilename):
                     try:
-                        metadata = clam.common.data.CLAMMetaData.fromxml(metafilename)
+                        metadata = clam.common.data.CLAMMetaData.fromxml(open(metafilename,'r').readlines())
                         errors, parameters = inputtemplate.validate(metadata, user)
                         validmeta = True
                     except:

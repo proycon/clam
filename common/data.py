@@ -114,7 +114,7 @@ class CLAMFile:
                     raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
         
         #parse metadata
-        self.metadata = CLAMMetaData.fromxml(self, xml) #returns CLAMMetaData object (or child thereof)
+        self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
@@ -778,7 +778,7 @@ class CLAMProvenanceData(object):
                         metadata = None
                         for subsubnode in subnode:
                             if subsubnode.tag == 'CLAMMetaData':
-                                metadata = CLAMMetaData.fromxml(None, subsubnode)
+                                metadata = CLAMMetaData.fromxml(subsubnode)
                                 break
                         inputfiles.append( (filename, metadata) )
                     elif subnode.tag == 'parameters':
@@ -924,7 +924,7 @@ class CLAMMetaData(object):
         pass
     
     @staticmethod    
-    def fromxml(file,node):
+    def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot() 

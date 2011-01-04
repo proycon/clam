@@ -254,7 +254,7 @@ class CLAMClient:
             except:
                 raise Exception(node)
         if node.tag != 'clamupload':
-            raise Exception("No a valid CLAM upload response")
+            raise Exception("Not a valid CLAM upload response")
         for node in node:
             if node.tag == 'upload':
                 for subnode in node:
@@ -262,7 +262,7 @@ class CLAMClient:
                         raise UploadError(subnode.text)
                     if subnode.tag == 'parameters':           
                         if 'errors' in subnode.attrib and subnode.attrib['errors'] == 'yes':                    
-                            errormsg = "An unknown parameter error occured"
+                            errormsg = "The submitted metadata did not validate properly" #default
                             for parameternode in subnode:                    
                                 if 'error' in parameternode.attrib:
                                     errormsg = parameternode.attrib['error']
