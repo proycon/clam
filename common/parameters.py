@@ -96,13 +96,13 @@ class AbstractParameter(object):
         """This methods renders an XML representation of this parameter, along with 
         its selected value, and feedback on validation errors"""
         xml = indent + "<" + self.__class__.__name__
-        xml += ' id="'+self.id + '"'
-        if self.paramflag:
-            xml += ' flag="'+self.paramflag + '"'
+        xml += ' id="'+self.id + '"'        
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
+        if self.paramflag:
+            xml += ' flag="'+self.paramflag + '"'
         for key, v in self.kwargs.items():    
-            if not key in ['value','error','name','description']:
+            if not key in ['value','error','name','description','flag']:
                 if isinstance(v, bool):
                     xml += ' ' + key + '="' + str(int(v))+ '"'                    
                 elif isinstance(v, list):
@@ -374,6 +374,8 @@ class ChoiceParameter(AbstractParameter):
         xml += ' id="'+self.id + '"'
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
+        if self.paramflag:
+            xml += ' flag="'+self.paramflag + '"'
         for key, value in self.kwargs.items():    
             if key != 'choices' and key != 'default':
                 if isinstance(value, bool):
