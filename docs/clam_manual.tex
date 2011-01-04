@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.5-pre-alpha}
+\title{CLAM Documentation \\ \small version 0.5.0}
 \author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
@@ -100,9 +100,9 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 \item \texttt{static/style.css} -- The styling for visualisation.
 \end{itemize}
 
-Starting the service in stand-alone mode is done by launching clamservice.py with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use.
+Starting the service in stand-alone mode is done by launching clamservice.py with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use. The below example shows how to launch the supplied ``Text Statistics'' demo-service:
 
-\texttt{\$ ./clamservice.py clam.config.test}
+\texttt{\$ ./clamservice.py clam.config.textstats}
 
 Setting up the service to be used with an already existing webserver requires some additional work. This is explained below for Apache and nginx:
 
@@ -237,9 +237,11 @@ One of the first things to configure is the root path (\texttt{ROOT}). All proje
 \subsection{Server Administration}
 \label{sec:sadmin}
 
-The hostname and port of the webserver can be configured in the service configuration file. Note that the hostname has to match exactly with what the end users will use. An attempt will be made to detect this automatically if no hostname is specified. A mismatch in the name you define and the hostname the user uses may result in unexpected behaviour\footnote{Most likely, the XSLT stylesheet will refuse to build the web application interface}. CLAM comes with a built-in webserver, which will be used when invoked directly from the command-line\footnote{unless FastCGI mode is enabled}.
+The hostname and port of the webserver can be configured in the service configuration file. Note that the hostname has to match exactly with what the end users will use. An attempt will be made to detect this automatically if no hostname is specified. A mismatch in the name you define and the hostname the user uses may result in unexpected behaviour\footnote{Most likely, the XSLT stylesheet will refuse to render the web application interface due to this mismatch}. CLAM comes with a built-in webserver, which will be used when invoked directly from the command-line\footnote{unless FastCGI mode is enabled}.
 
 When CLAM runs in an existing webserver without its own virtual host, it is often configured at a different URL rather than the webserver root. In this case the value of \texttt{URLPREFIX} should be configured accordingly.
+
+In order to keep server load manageable, two methods are configurable in the service configuration file. First, you can set the variable \texttt{REQUIREMEMORY} to the minumum amount of free memory that has to be available (in megabytes, and not considering swap memory!). If not enough memory is free, users will not be able to launch new processes, but will receive an HTTP 500 error instead. Second, there is the \texttt{MAXLOADAVG} variable; if the 5-minute load average exceeds this number, new processes will also be rejected. If any of these values is set to zero, they are disabled. Note though that this makes your system vulnerable to denial-of-service attacks by possibly malicious users, especially if no user authentication is configured!
 
 \subsection{User Authentication}
 
@@ -736,7 +738,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{POST} \\
 \textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differs per service). The parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
-\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely is not able to invoke the underlying application. \\ 
+\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
@@ -849,7 +851,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 
 
 
-\chapter{Prefined Formats}
+\chapter{Predefined Formats}
 
 The following formats are pre-defined in CLAM. Each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
 
