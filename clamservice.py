@@ -533,6 +533,11 @@ class Project(object):
             url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]                                        
 
+        if not sufficientresources():            
+            printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAIABLE ***")
+            #TODO: Use 503 instead of 500 (but 503 not implemented in web.py)
+            raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. Please try again later.")
+
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url, printdebug)
 
@@ -1483,6 +1488,34 @@ class StyleData(object):
         #return output #200
 
 
+def sufficientresources():
+    if settings.REQUIREMEMORY > 0:
+        if not os.path.exists('/proc/meminfo'):
+            printlog("WARNING: No /proc/meminfo available on your system! Not Linux? Skipping memory requirement check!")
+        else:
+            memfree = cached = 0
+            f = open('/proc/meminfo')
+            for line in f:
+                if line[0:8] == "MemFree:":                    
+                    memfree = float(line[9:].replace('kB','').strip()) #in kB
+                if line[0:8] == "Cached:":                    
+                    cached = float(line[9:].replace('kB','').strip()) #in kB
+            f.close()
+            if settings.REQUIREMEMORY * 1024 > memfree + cached:
+                return False                                
+    if settings.MAXLOADAVG > 0:
+        if not os.path.exists('/proc/loadavg'):
+            printlog("WARNING: No /proc/loadavg available on your system! Not Linux? Skipping load average check!")
+        else:
+            f = open('/proc/loadavg')
+            line = f.readline()
+            loadavg = float(line.split(' ')[0])
+            f.close()
+            if settings.MAXLOADAVG < loadavg:
+                return False
+    return True
+        
+
 
 def usage():
         print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
@@ -1522,7 +1555,9 @@ def set_defaults(HOST = None, PORT = None):
     if not 'URLPREFIX' in settingkeys:
         settings.URLPREFIX = ''    
     if not 'REQUIREMEMORY' in settingkeys:
-        settings.REQUIREMEMORY = 0
+        settings.REQUIREMEMORY = 0 #unlimited
+    if not 'MAXLOADAVG' in settingkeys:
+        settings.MAXLOADAVG = 0 #unlimited
     if not 'STYLE' in settingkeys:
         settings.STYLE = 'classic'
 

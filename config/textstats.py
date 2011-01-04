@@ -57,13 +57,17 @@ ADMINS = ['admin'] #Define which of the above users are admins
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
+#Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
+REQUIREMEMORY = 10
+
+#Maximum load average at which processes are still started (first number reported by 'uptime')
+MAXLOADAVG = 1.0
+
+
 # ======== WEB-APPLICATION STYLING =============
 
 #Choose a style (has to be defined as a CSS file in style/ )
 STYLE = 'classic'
-
-#Amount of free memory required prior to starting a new process (in Kbytes!)
-REQUIREMEMORY = 10 * 1024
 
 # ======== ENABLED FORMATS ===========
 
