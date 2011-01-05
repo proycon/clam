@@ -25,6 +25,7 @@ import sys
 import os
 import codecs
 import re
+import string
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.
 import clam.common.data
@@ -33,8 +34,24 @@ import clam.common.status
 
 
 ##########################################################################################################
-#   Auxiliary functions (not using CLAM API at all, skip)
+#   Auxiliary functions (not using CLAM API at all, SKIP THIS if you're only interested in the wrapper script! )
 #########################################################################################################
+
+
+
+def crude_tokenizer(line):
+    """This is a very crude tokenizer from pynlpl"""
+    tokens = []
+    buffer = ''
+    for c in line.strip():
+        if c == ' ' or c in string.punctuation:
+            if buffer:
+                tokens.append(buffer)
+                buffer = ''
+        else:
+            buffer += c          
+    if buffer: tokens.append(buffer)  
+    return tokens
 
 
 def calcstats(filename, encoding, casesensitive=True):
@@ -44,15 +61,21 @@ def calcstats(filename, encoding, casesensitive=True):
     
     freqlist = {}
     f = codecs.open(filename,'r', encoding)
-    lines = words = characters = 0
+    lines = types = tokens = characters = 0
     for line in f:
-        lines += 1
+        lines += 1                
         if casesensitive:
-            wordlist = set([ x for x in re.split('\W+', line, re.UNICODE) if x ])
+            words = crude_tokenizer(line)
         else:
-            wordlist = set([ x.lower() for x in re.split('\W+', line, re.UNICODE) if x ])
-        words += len(wordlist)
-        for word in wordlist:
+            words = crude_tokenizer(line)
+        if casesensitive:
+            types += len(set(words))
+        else:
+            types += len(set([ x.lower() for x in words]))
+        tokens += len(words)
+        for word in words:
+            if not casesensitive:
+                word = word.lower()
             if not word in freqlist:
                 freqlist[word] = 1
             else:
@@ -60,7 +83,7 @@ def calcstats(filename, encoding, casesensitive=True):
         characters += len(line)        
     f.close()
     
-    stats = {'lines': lines, 'words': words, 'characters': characters}
+    stats = {'lines': lines, 'types': types,'tokens': tokens, 'characters': characters}
     
     for key, value in stats.items():
         if key in overallstats:
