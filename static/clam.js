@@ -134,6 +134,7 @@ $(document).ready(function(){
             data: data, 
             success: function(response){ 
                 processuploadresponse(response, '#editorparameters');
+                $('#editorcontents').val('');
                 $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
             },            
             error: function(response, errortype){
@@ -246,6 +247,9 @@ function addformdata(parent, data) {
 function processuploadresponse(response, paramdiv) {
       //Processes CLAM Upload XML
       
+      //Clear all previous errors
+      $(paramdiv).find('.error').each(function(){ $(this).html('') }); 
+      
       $(response).find('upload').each(function(){       //for each uploaded file
         //var children = $(this).children();
         var inputtemplate = $(this).attr('inputtemplate');
@@ -293,6 +297,8 @@ function processuploadresponse(response, paramdiv) {
             //good! 
         
         if (!errors) {
+        
+            
             //Check if file already exists in input table
             var found = false;
             var data = tableinputfiles.fnGetData();
@@ -307,6 +313,7 @@ function processuploadresponse(response, paramdiv) {
             if (!found) {
                 tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] )
             }
+            
         }
         
         /* //TODO: Make errors nicer, instead of alerts, propagate to interface
@@ -364,6 +371,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
     if (id == "") {
         $(target).html("");
     } else {
+        $(target).find('.error').each(function(){ $(this).html(''); }); 
         inputtemplate = getinputtemplate(id);
         if (inputtemplate) {
             var xmldoc;
