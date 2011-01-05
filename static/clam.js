@@ -135,6 +135,7 @@ $(document).ready(function(){
             success: function(response){ 
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
+                $('#editorfilename').val('');
                 $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
             },            
             error: function(response, errortype){
