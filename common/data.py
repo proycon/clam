@@ -19,7 +19,10 @@ import urllib2
 import httplib2
 import os.path
 import codecs
-import json
+try:
+    import simplejson as json
+except ImportError:
+    import json
 import time
 from copy import copy
 
