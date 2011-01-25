@@ -309,6 +309,7 @@ class Project(object):
         try:
             printlog("Aborting process in project '" + project + "'" )
             os.kill(self.pid(project), 15)
+            #TODO: Check if process halted
             os.unlink(Project.path(project) + ".pid")
             return True
         except:
@@ -1680,7 +1681,6 @@ if __name__ == "__main__":
     CLAMService('fastcgi' if fastcgi else '') #start
 
 def run_wsgi(settingsmodule):
-    global LOG
     """Run CLAM in WSGI mode"""
     #import_string = "import " + settingsmodule + " as settings"
     #exec import_string
@@ -1689,9 +1689,6 @@ def run_wsgi(settingsmodule):
     globals()['settings'] = settingsmodule
 
     set_defaults(None,None)
-    if LOG == sys.stdout:
-        #there is no stdout in WSGI mode, and the user didn't configure a log, discard output
-        LOG = None
     test_dirs()
 
     if settings.USERS:

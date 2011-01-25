@@ -62,6 +62,7 @@ PROFILES = [
         InputTemplate('untokinput', PlainTextFormat,"Text document", 
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
+            StringParameter(id='documentid', name='Document ID', description='Enter a unique identifier for this document (no spaces)')
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
@@ -101,10 +102,11 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Tokenisation options', [
-        BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v'),
-        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line', paramflag='-s'),
-        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase'], paramflag='-l'),
-        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase'], paramflag='-u'),
+        BooleanParameter('xml','FoLiA XML Output','Output FoLiA XML (preliminary!)'),
+        BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v',forbid=['sentenceperline','xml']),),
+        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line', paramflag='-s', forbid=['verbose','xml']),    
+        BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase'], paramflag='-l',forbid=['xml']),
+        BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase'], paramflag='-u',forbid=['xml']),        
     ]),
 ]
 
