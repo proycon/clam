@@ -1688,6 +1688,7 @@ def run_wsgi(settingsmodule):
 
     globals()['settings'] = settingsmodule
 
+    setlog(None)
     set_defaults(None,None)
     test_dirs()
 
