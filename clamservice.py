@@ -308,8 +308,13 @@ class Project(object):
             return False
         try:
             printlog("Aborting process in project '" + project + "'" )
-            os.kill(self.pid(project), 15)
-            #TODO: Check if process halted
+            pid = self.pid(project)            
+            os.kill(pid, 15)  
+            #Wait for process to halt
+            try:
+                returnedpid, statuscode = os.waitpid(pid)
+            except OSError:
+                pass            
             os.unlink(Project.path(project) + ".pid")
             return True
         except:
