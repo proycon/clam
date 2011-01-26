@@ -32,7 +32,7 @@ import clam.common.util
 import clam.common.viewers
 #clam.common.formats is deliberately imported _at the end_ 
 
-VERSION = '0.5'
+VERSION = '0.5.1'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
@@ -529,7 +529,7 @@ def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl,p
     
     matched = []
     for profile in profiles:        
-        if profile.match(projectpath, parameters):
+        if profile.match(projectpath, parameters)[0]:
             matched.append(profile)
             profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)            
     return matched
@@ -575,20 +575,36 @@ class Profile(object):
     def match(self, projectpath, parameters):            
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
         parameters = sanitizeparameters(parameters)
+
+        mandatory_absent = [] #list of input templates that are missing but mandatory
+        optional_absent = [] #list of absent but optional input templates
                         
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
             if not inputtemplate.matchingfiles(projectpath):
-                return False
+                if inputtemplate.optional:
+                    optional_absent.append(inputtemplate)
+                else:
+                    mandatory_absent.append(inputtemplate)
+        
+        if mandatory_absent:
+            return False, mandatory_absent
         
         #check if output is produced
         outputproduced = False
         if not self.output: return False
         for outputtemplate in self.output:
-            if not isinstance(outputtemplate, ParameterCondition) or (not outputtemplate.otherwise and outputtemplate.match(parameters)) or outputtemplate.otherwise:
-                outputproduced = True
-            
-        return outputproduced
+            if isinstance(outputtemplate, ParameterCondition):
+                outputtemplate = outputtemplate.evaluate(parameters)
+                
+            assert isinstance(outputtemplate, OutputTemplate)
+            if outputtemplate.parent:
+                if not outputtemplate._getparent(self) in  optional_absent:
+                    return True, optional_absent
+            else:
+                return True, optional_absent
+                          
+        return False, optional_absent
 
     def matchingfiles(self, projectpath):
         """Return a list of all inputfiles matching the profile (filenames)"""
@@ -615,7 +631,8 @@ class Profile(object):
         #Make dictionary of parameters
         parameters = sanitizeparameters(parameters)
                 
-        if self.match(projectpath, parameters): #Does the profile match?
+        match, optional_absent = self.match(projectpath, parameters) #Does the profile match?
+        if match:
         
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
@@ -626,26 +643,28 @@ class Profile(object):
                                         
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
-                    if outputtemplate.match(parameters):
-                        outputtemplate = outputtemplate.evaluate(parameters)
-                    elif outputtemplate.otherwise:
-                            outputtemplate = outputtemplate.otherwise
-                    else:
-                        continue
-                #generate output files
-                if outputtemplate:
-                    #generate provenance data
-                    provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)
+                    outputtemplate = outputtemplate.evaluate(parameters)
                     
+                #generate output files
+                if outputtemplate:                
                     if isinstance(outputtemplate, OutputTemplate):                    
-                        for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
-                            clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)                            
-                            metafilename = os.path.dirname(outputfilename) 
-                            if metafilename: metafilename += '/'
-                            metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'                                                        
-                            f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
-                            f.write(metadata.xml())
-                            f.close()
+                        #generate provenance data
+                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)                    
+                        
+                        create = True
+                        if outputtemplate.parent:
+                            if outputtemplate._getparent(self) in optional_absent:
+                                create = False
+
+                        if create:
+                            for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
+                                clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)                            
+                                metafilename = os.path.dirname(outputfilename) 
+                                if metafilename: metafilename += '/'
+                                metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'                                                        
+                                f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
+                                f.write(metadata.xml())
+                                f.close()
                     else:
                         raise TypeError("OutputTemplate expected, but got " + outputtemplate.__class__.__name__)
 
@@ -988,6 +1007,8 @@ class InputTemplate(object):
         
         self.unique = True #may mark input/output as unique
 
+        self.optional = False #Output templates that are derived from optional Input Templates are conditional on the optional input file being presented!
+
         self.filename = None
         self.extension = None
         self.onlyinputsource = False #Use only the input sources
@@ -997,6 +1018,8 @@ class InputTemplate(object):
                 self.unique = bool(value)
             elif key == 'multi':   
                 self.unique = not bool(value)
+            elif key == 'optional':   
+                self.optional = bool(value)
             elif key == 'filename':
                 self.filename = value # use '#' to insert a number in multi mode (will happen server-side!)
             elif key == 'extension':
@@ -1036,6 +1059,10 @@ class InputTemplate(object):
             xml +=" filename=\""+self.filename+"\""
         if self.extension:
             xml +=" extension=\""+self.extension+"\""
+        if self.optional:
+            xml +=" optional=\"yes\""
+        else:
+            xml +=" optional=\"no\""
         if self.unique:
             xml +=" unique=\"yes\""
         else:

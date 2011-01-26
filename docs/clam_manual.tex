@@ -468,7 +468,6 @@ PROFILES = [
 }}
 
 
-
 \subsection{Control over filenames}
 \label{sec:filenamevariables}
 
@@ -546,6 +545,8 @@ The first argument of ParameterCondition is the condition. Here you use the ID o
 After the condition you specify \texttt{then=} and optionally also \texttt{else=}, and then you specify an \texttt{OutputTemplate} or yet another \texttt{ParameterCondition}---they can be nested at will.
 
 Parameter conditions can not only be used around output templates, but also be around metafield actors, inside the output template specification. In other words, you can make metadata fields conditional on global parameters.
+
+Parameter conditions can not be used around input templates, for the simple reason that in CLAM the parameters are set after the input files are uploaded. However, input templates can be \emph{optional}, by setting \texttt{optional=True}. This means that providing such input files is optional, this also implies that any output templates that have this optional input template as a parent are also conditional on the presence of those input files.
 
 %TODO: Provide example?
 

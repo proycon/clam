@@ -96,3 +96,12 @@ class KBXMLFormat(CLAMMetaData):
     scheme = '' #TODO
 
 
+class TICCLVariantOutputXML(CLAMMetaData):
+    name="Ticcl Variant Output"
+    mimetype='text/xml'
+    scheme='' #TODO
+
+class TICCLShadowOutputXML(CLAMMetaData):
+    name="Ticcl Shadow Output"
+    mimetype='text/xml'
+    scheme='' #TODO
