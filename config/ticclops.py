@@ -13,7 +13,6 @@
 #
 ###############################################################
 
-# *** DO NOT ALTER THIS FILE, MAKE A COPY INSTEAD! ***
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -35,10 +34,10 @@ SYSTEM_DESCRIPTION = "TICCLops is the online processing system representing TICC
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/exp2/ticclops/"
+ROOT = "/exp2/ticclops2/"
 
 #The URL of the system
-PORT = 1989 
+PORT = 1988 
 HOST = 'localhost'
 #URL = "http://localhost:" + str(PORT)
 
