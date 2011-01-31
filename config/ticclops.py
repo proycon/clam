@@ -73,26 +73,32 @@ CUSTOM_FORMATS_MODULE = None
 PROFILES = [
     Profile(
         InputTemplate('textinput', PlainTextFormat, 'Plain-Text Input',
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='iso-8859-1'),  
             StaticParameter(id='language',name='Language',description='The language of the text', value='nl'),  
             #ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
-            CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
-            CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
+            CharEncodingConverter(id='utf8',label='Convert from UTF-8',charset='utf-8'),
             MSWordConverter(id='msword',label='Convert from MS Word Document'),
             PDFToTextConverter(id='pdf',label='Convert from PDF Document'),
             extension='.txt',
             multi=True,
         ),
         InputTemplate('lexicon', PlainTextFormat,  'Lexicon',
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='iso-8859-1'),  
             StaticParameter(id='language',name='Language',description='The language of the text', value='nl'),  
             InputSource(id='contemp', label="Contemporary Dutch Lexicon",
-                path="/path/to/contemplexicon.txt",
-                metadata=PlainTextFormat(None, encoding='utf-8',language='nl')    
+                path="/son/KB-TICCL/PRODv4/ARG4.SGDLEX.isolat1.TICCL.v.4.lst",
+                metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
+            ),
+            InputSource(id='hist', label="Historical Dutch Lexicon",
+                path="/son/KB-TICCL/PRODv4/ARG4.SGDLEX.GB1914.isolat1.TICCL.v.4.lst",
+                metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
+            ),
+            InputSource(id='none', label="Empty lexicon",
+                path="/son/KB-TICCL/PRODv2/empty.lst2",
+                metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
             ),
             filename='lexicon',
             unique=True,
-            optional=True,
         ),
         ParameterCondition(switches_contains='K',
             then=OutputTemplate('shadow', TICCLShadowOutputXML, 'Corrected plain-text Document',
@@ -139,13 +145,13 @@ PARAMETERS = [
     #('Lexicon', [ChoiceParameter('contemp','-l','Choose a Dutch Lexicon','Dutch Lexicon',choices=[('contemp','Contemporary Dutch lexicon'),('hist','Historical/Contemporary Dutch lexicon'),('none','No validated Dutch lexicon')], nospace=True)
     #]),
     ('Focus Word Selection', [
-        IntegerParameter('minfrq','-a','Minimum Word Frequency','Integer between zero and ten million',minvalue=0, maxvalue=10000000),
-        IntegerParameter('maxfrq','-b','Maximum Word Frequency','Integer between zero and ten million',minvalue=0, maxvalue=10000000),
-        IntegerParameter('minlength','-c','Minimum Word Length','Integer between zero and one hundred',minvalue=0, maxvalue=100),
-        IntegerParameter('maxlength','-d','Maximum Word Length','Integer between zero and one hundred',minvalue=0, maxvalue=100)
+        IntegerParameter('minfrq','-a','Minimum Word Frequency','Integer between zero and ten million',default=0, minvalue=0, maxvalue=10000000),
+        IntegerParameter('maxfrq','-b','Maximum Word Frequency','Integer between zero and ten million',default=10000000,minvalue=0, maxvalue=10000000),
+        IntegerParameter('minlength','-c','Minimum Word Length','Integer between zero and one hundred',default=0,minvalue=0, maxvalue=100),
+        IntegerParameter('maxlength','-d','Maximum Word Length','Integer between zero and one hundred',default=100,minvalue=0, maxvalue=100)
     ]),
     ('Edit/Levenshtein Distance', [
-        ChoiceParameter('LD','-e','How many edits?','Search N characters far for variants',choices=[('1','Only 1 edit'),('2','Up to two edits'),('3','Up to three edits')], nospace=True)
+        ChoiceParameter('ld','-e','How many edits?','Search N characters far for variants',choices=[('1','Only 1 edit'),('2','Up to two edits'),('3','Up to three edits')], nospace=True)
     ]),
 #('Extension of Input Files',[
         #ChoiceParameter('ext','-f','Extension','Extension of Input files',choices=
@@ -155,7 +161,7 @@ PARAMETERS = [
     #    StringParameter('string','-s','File name','Enter a basic file name')
     #]),
     ('N-best Ranking', [
-        ChoiceParameter('TOP','-t','How many ranked variants?','Return N best-first ranked variants',choices=[('1','First-best Only'),('2','Up to two N-best ranked'),('3','Up to three N-best ranked'),('5','Up to five N-best ranked'),('10','Up to ten N-best ranked'),('20','Up to twenty N-best ranked')], nospace=True)
+        ChoiceParameter('top','-t','How many ranked variants?','Return N best-first ranked variants',choices=[('1','First-best Only'),('2','Up to two N-best ranked'),('3','Up to three N-best ranked'),('5','Up to five N-best ranked'),('10','Up to ten N-best ranked'),('20','Up to twenty N-best ranked')], nospace=True)
     ]),
     ('Options', [
         ChoiceParameter('switches','-w', 'Options', 'Which options do you want to set?', choices=[('E', 'Evaluation'), ('C', 'Conversion'), ('K', 'Text Correction')], multi=True)
