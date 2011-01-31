@@ -32,16 +32,22 @@ SYSTEM_NAME = "TICCLops"
 #An informative description for this system:
 SYSTEM_DESCRIPTION = "TICCLops is the online processing system representing TICCL (Text-Induced Corpus Clean-up) developed within the CLARIN-NL framework."
 
+
+
+#########################################################################################################
+#   ADMINISTRATOR: ADAPT THE DATA IN THIS SECTION TO YOUR SPECIFIC SITUATION!!!!!!!
+#########################################################################################################
+HOST = 'localhost' 
+PORT = 1988        
+BASEDIR = '/exp2/mvgompel/ticclops/'
+#########################################################################################################
+#########################################################################################################
+
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/exp2/ticclops2/"
-
-#The URL of the system
-PORT = 1988 
-HOST = 'localhost'
-#URL = "http://localhost:" + str(PORT)
-
-
+ROOT = BASEDIR + 'data'
+CLAMDIR = BASEDIR + 'ticclops/clam/'          ##Directory where CLAM is installed (defaults to current working directory, assuming clam is called from it's own directory)
+TICCLDIR = BASEDIR + 'ticclops/ticcl/'
 
 #Users and passwords
 USERS = None #no user authentication
@@ -54,7 +60,7 @@ PROJECTS_PUBLIC = False
 REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 1.0
+#MAXLOADAVG = 1.0
 
 
 # ======== WEB-APPLICATION STYLING =============
@@ -85,18 +91,18 @@ PROFILES = [
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='iso-8859-1'),  
             StaticParameter(id='language',name='Language',description='The language of the text', value='nl'),  
             InputSource(id='contemp', label="Contemporary Dutch Lexicon",
-                path="/son/KB-TICCL/PRODv4/ARG4.SGDLEX.isolat1.TICCL.v.4.lst",
+                path=TICCLDIR + "/data/int/ARG4.SGDLEX.isolat1.TICCL.v.4.lst",
                 metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
             ),
             InputSource(id='hist', label="Historical Dutch Lexicon",
-                path="/son/KB-TICCL/PRODv4/ARG4.SGDLEX.GB1914.isolat1.TICCL.v.4.lst",
+                path=TICCLDIR + "/data/int/ARG4.SGDLEX.GB1914.isolat1.TICCL.v.4.lst",
                 metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
             ),
             InputSource(id='none', label="Empty lexicon",
-                path="/son/KB-TICCL/PRODv2/empty.lst2",
+                path=TICCLDIR + "/data/int/empty.lst2",
                 metadata=PlainTextFormat(None, encoding='iso-8859-1',language='nl')    
             ),
-            filename='lexicon',
+            filename='lexicon.lst',
             unique=True,
         ),
         ParameterCondition(switches_contains='K',
@@ -136,7 +142,7 @@ PROFILES = [
 #
 #COMMAND = "/exp2/mvgompel/clam/wrappers/ticclopswrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS" 
 
-COMMAND = sys.path[0] +  "/wrappers/ticclopswrapper.pl $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $STATUSFILE"
+COMMAND = TICCLDIR +  "/ticclops/ticclopswrapper.pl $PARAMETERS " + TICCLDIR + " $INPUTDIRECTORY $OUTPUTDIRECTORY $STATUSFILE"
 
 
 #The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
