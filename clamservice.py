@@ -900,7 +900,7 @@ class InputFileHandler(object):
                         if not inputtemplate.filename:
                             filename = os.path.basename(f)                          
                         if f[0] != '.':
-                            tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f)
+                            tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f, metadata=inputsource.metadata)
                             self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputtemplate.id}, tmpinputsource)
                             #WARNING: Output is dropped silently here!
                     return "" #200
@@ -1059,10 +1059,12 @@ class InputFileHandler(object):
         elif 'inputsource' in postdata and postdata['inputsource']:
             printlog("Getting metadata from inputsource, uploading...")
             if inputsource.metadata:
+                printlog("DEBUG: Validating metadata from inputsource")
                 metadata = inputsource.metadata
                 errors, parameters = inputtemplate.validate(metadata, user)
                 validmeta = True
             else:
+                printlog("DEBUG: No metadata provided with inputsource, looking for metadata files..")
                 metafilename = os.path.dirname(inputsource.path) 
                 if metafilename: metafilename += '/'
                 metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'            

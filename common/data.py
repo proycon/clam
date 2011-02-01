@@ -823,7 +823,7 @@ class CLAMMetaData(object):
     attributes = None #if None, all attributes are allowed! Otherwise it should be a dictionary with keys corresponding to the various attributes and a list of values corresponding to the *maximally* possible settings (include False as element if not setting the attribute is valid), if no list of values are defined, set True if the attrbute is required or False if not. If only one value is specified (either in a list or not), then it will be 'fixed' metadata
     allowcustomattributes = True
 
-    mimetype = "" #No mimetype by default
+    mimetype = "text/plain" #No mimetype by default
     schema = ""
     
 
@@ -979,6 +979,10 @@ class CLAMMetaData(object):
             return formatclass(file, **data)
         else:    
             raise Exception("Invalid CLAM Metadata!")        
+            
+    def httpheaders(self):
+        """HTTP headers to output for this format. Yields (key,value) tuples. Should be overridden in sub-classes!"""
+        yield ("Content-Type", self.mimetype)            
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement
