@@ -595,8 +595,9 @@ class Profile(object):
         if not self.output: return False
         for outputtemplate in self.output:
             if isinstance(outputtemplate, ParameterCondition):
-                outputtemplate = outputtemplate.evaluate(parameters)
-                
+                outputtemplate = outputtemplate.evaluate(parameters)                
+            if not outputtemplate:
+                continue
             assert isinstance(outputtemplate, OutputTemplate)
             if outputtemplate.parent:
                 if not outputtemplate._getparent(self) in  optional_absent:
