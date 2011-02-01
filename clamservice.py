@@ -1229,10 +1229,13 @@ class InterfaceData(object):
     @requirelogin
     def GET(self, project, user=None):
         web.header('Content-Type', 'application/javascript')
+        
+        inputtemplates_mem = []
         inputtemplates = []
         for profile in settings.PROFILES:
             for inputtemplate in profile.input:
-                if not inputtemplate in inputtemplates: #no duplicates
+                if not inputtemplate in inputtemplates_mem: #no duplicates
+                    inputtemplates_mem.append(inputtemplate)
                     inputtemplates.append( inputtemplate.json() )
 
         url = 'http://' + settings.HOST

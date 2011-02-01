@@ -1211,7 +1211,8 @@ class InputTemplate(object):
                 raise                
                 
         return success, metadata, parameters
-    
+
+
 class AbstractMetaField(object): #for OutputTemplate only
     def __init__(self,key,value=None):
         self.key = key
@@ -1796,6 +1797,5 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
                 filename = filename.replace('#',str(nextseq))
         return filename
     
-    
-
+ 
 import clam.common.formats #yes, this is deliberately placed at the end!

@@ -94,7 +94,16 @@ $(document).ready(function(){
             window.location.href = "../"; /* refresh */
        });
    }  
-
+   
+   
+   //PATCH: Remove duplicates from inputsources list (not the most elegant, but works)
+   if ($('#inputsourceupload')) {
+    var found = [];
+    $("#inputsourceupload option").each(function() {
+        if($.inArray(this.value, found) != -1) $(this).remove();
+        found.push(this.value);
+    });
+   }
 
    //Tables for input files and output files
    tableinputfiles = $('#inputfiles').dataTable( {
@@ -112,9 +121,11 @@ $(document).ready(function(){
 			});
 
 
+
    //Open in-browser editor
    $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
 
+    
 
    //Submit data through in-browser editor
    $("#editorsubmit").click(function(event){         
