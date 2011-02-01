@@ -123,7 +123,7 @@ $(document).ready(function(){
 
 
    //Open in-browser editor
-   $("#openeditor").click(function(event){ $("#mask").show(); $("#editor").slideDown(); })
+   $("#openeditor").click(function(event){ $("#editormask").show(); $("#editor").slideDown(); })
 
     
 
@@ -147,7 +147,7 @@ $(document).ready(function(){
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
                 $('#editorfilename').val('');
-                $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); 
+                $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); 
             },            
             error: function(response, errortype){
                 processuploadresponse(response.responseXML, '#editorparameters');
@@ -155,7 +155,7 @@ $(document).ready(function(){
         });            
         return true;
    });
-   $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#mask").hide(); } ); return false; });
+   $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); return false; });
 
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
@@ -229,6 +229,8 @@ $(document).ready(function(){
    });
    
    $('#uploadinputsourcebutton').click(function(event){
+       $('#inputsourceupload').hide();
+       $('#inputsourceprogress').show();
        $.ajax({
             type: "POST",
             url: "input/",
@@ -238,6 +240,8 @@ $(document).ready(function(){
                 window.location.href = ""; /* refresh */   
             },
             error: function(response,errortype){
+                $('#inputsourceprogress').hide();
+                $('#inputsourceupload').show();
                 if (response.status == 200) { //patch
                     window.location.href = ""; /* refresh */   
                 } else {

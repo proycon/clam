@@ -64,7 +64,7 @@ div.rightbox {
     border: 1px solid #ca9c4d;
     padding: 10px;
 }*/
-div#mask {
+div.mask {
     display: none;
     position: fixed;
     left: 0;
@@ -73,6 +73,23 @@ div#mask {
     height: 100%;
     background: black;
     opacity: 0.6;
+}
+div#loader {
+    /*display: none;*/
+    position: fixed;
+    top: 100px;
+    min-height: 30px;
+    width: 250px;
+    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    margin: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    background: #f6f6f6;
+    background-repeat: no-repeat;
+    border: 1px solid #ca9c4d;
+    padding: 10px;
 }
 div#editor {
     display: none;
@@ -111,6 +128,7 @@ div#editor {
     margin: 2px;
     margin-left: 10px; 
 }
+
 
 #input table {
     text-align: left;
@@ -229,7 +247,7 @@ input#abortbutton, input#restartbutton, input#indexbutton {
 button#openeditor {
     margin-left: 10%;
 }
-#uploadprogress, #urluploadprogress {
+#uploadprogress, #urluploadprogress, #inputsourceprogress {
     display: none;
 }
 

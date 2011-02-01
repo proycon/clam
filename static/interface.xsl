@@ -32,6 +32,9 @@
          </xsl:otherwise>
         </xsl:choose>    
         <xsl:call-template name="footer" />
+               
+        
+        
     </div>
   </body>
   </html>
@@ -147,8 +150,12 @@
                     </xsl:for-each>
                     </xsl:for-each>
                     </select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />            
             </div>
+            <div id="inputsourceprogress">
+                <strong>Gathering files... Please wait...</strong><br />
+                <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+            </div>            
             
             </xsl:if>
         
@@ -206,7 +213,8 @@
 
             <h3>Add input from browser</h3>
             <p>You can create and add new files from within your browser: <button id="openeditor">Open Live Editor</button></p>
-            <div id="mask"></div>
+
+            <div id="editormask" class="mask"></div>
             <div id="editor">
                 <h3>Add input from browser</h3>
                     <table>
