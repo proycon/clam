@@ -864,7 +864,6 @@ class InputFileHandler(object):
         
         if filename == '':
             #Handle inputsource
-            import pdb; pdb.set_trace()
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
                 for s in settings.INPUTSOURCES:
