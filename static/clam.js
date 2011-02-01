@@ -202,7 +202,7 @@ $(document).ready(function(){
    }
 
 
-   $('#inputsourceselect').click(function(event){
+   $('#inputsourceselect').click(function(event){ /* Doesn't exist???? */
         $.ajax({ 
                 type: "POST", 
                 url: "input/", 

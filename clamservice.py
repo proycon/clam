@@ -864,6 +864,7 @@ class InputFileHandler(object):
         
         if filename == '':
             #Handle inputsource
+            import pdb; pdb.set_trace()
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
                 for s in settings.INPUTSOURCES:
@@ -880,10 +881,17 @@ class InputFileHandler(object):
                 if not inputsource:
                     raise web.webapi.Forbidden("No such inputsource exists")
                 if inputsource.isfile():
-                    filename = os.path.basename(inputsource.path)
+                    if inputtemplate.filename:
+                        filename = inputtemplate.filename
+                    else:
+                        filename = os.path.basename(inputsource.path)                
                     return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputsource.inputtemplate}, inputsource)
                 elif inputsource.isdir():
+                    if inputtemplate.filename:
+                        filename = inputtemplate.filename
                     for f in glob.glob(inputsource.path + "/*"):
+                        if not inputtemplate.filename:
+                            filename = os.path.basename(f)                          
                         if f[0] != '.':
                             tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f)
                             self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputsource.inputtemplate}, tmpinputsource)
