@@ -1354,7 +1354,7 @@ class OutputTemplate(object):
                 self.unique = not bool(value)
             elif key == 'filename':
                 self.filename = value # use # to insert a number in multi mode
-            elif key == 'removeextension':
+            elif key == 'removeextension' or key=='removeextensions':
                 #remove the following extension(s) (prior to adding the extension specified)
                 if value is True:
                     self.removeextensions = True #will remove all (only 1 level though)

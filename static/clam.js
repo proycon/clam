@@ -16,9 +16,9 @@ $(document).ready(function(){
    });
     
    //Create lists of all possible inputtemplates (aggregated over all profiles)
-   var inputtemplate_options = "";
+   var inputtemplate_options = "<option value=\"\">Select a filetype...</option>";
    for (var i = 0; i < inputtemplates.length; i++) {
-        inputtemplate_options += '<option value="">Select a filetype...</option><option value="' + inputtemplates[i].id + '">' + inputtemplates[i].label + '</option>';
+        inputtemplate_options += '<option value="' + inputtemplates[i].id + '">' + inputtemplates[i].label + '</option>';
    }
    $(".inputtemplates").html(inputtemplate_options);
 
