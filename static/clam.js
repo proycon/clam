@@ -238,7 +238,11 @@ $(document).ready(function(){
                 window.location.href = ""; /* refresh */   
             },
             error: function(response,errortype){
-                alert("Error, unable to add file ("+response.status+")")
+                if (response.status == 200) { //patch
+                    window.location.href = ""; /* refresh */   
+                } else {
+                    alert("Error, unable to add file ("+response.status+")");
+                }
                 //processuploadresponse(response.responseXML, '#nonexistant');                
             }
        });
