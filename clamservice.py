@@ -866,34 +866,42 @@ class InputFileHandler(object):
             #Handle inputsource
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
+                inputtemplate = None
                 for s in settings.INPUTSOURCES:
                     if s.id == postdata['inputsource']:
                         inputsource = s
                 if not inputsource:
                     for profile in settings.PROFILES:
-                        for inputtemplate in profile.input:
-                            for s in inputtemplate.inputsources:
+                        for t in profile.input:
+                            for s in t.inputsources:
                                 if s.id == postdata['inputsource']:
                                     inputsource = s
-                                    inputsource.inputtemplate = inputtemplate
+                                    inputsource.inputtemplate = t.id
+                                    inputtemplate = t
                                     break                    
                 if not inputsource:
                     raise web.webapi.Forbidden("No such inputsource exists")
+                if not inputtemplate:
+                    for profile in settings.PROFILES:
+                        for t in profile.input:
+                            if inputsource.inputtemplate == t.id:
+                                inputtemplate = t
+                assert (inputtemplate != None)    
                 if inputsource.isfile():
-                    if inputsource.inputtemplate.filename:
-                        filename = inputsource.inputtemplate.filename
+                    if inputtemplate.filename:
+                        filename = inputtemplate.filename
                     else:
                         filename = os.path.basename(inputsource.path)                
-                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputsource.inputtemplate.id}, inputsource)
+                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputtemplate.id}, inputsource)
                 elif inputsource.isdir():
-                    if inputsource.inputtemplate.filename:
-                        filename = inputsource.inputtemplate.filename
+                    if inputtemplate.filename:
+                        filename = inputtemplate.filename
                     for f in glob.glob(inputsource.path + "/*"):
-                        if not inputsource.inputtemplate.filename:
+                        if not inputtemplate.filename:
                             filename = os.path.basename(f)                          
                         if f[0] != '.':
                             tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f)
-                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputsource.inputtemplate.id}, tmpinputsource)
+                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputtemplate.id}, tmpinputsource)
                             #WARNING: Output is dropped silently here!
                     return "" #200
                 else:
