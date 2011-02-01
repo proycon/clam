@@ -1749,7 +1749,7 @@ class InputSource(object):
             self.metadata = None
             
         if 'inputtemplate' in kwargs:
-            self.inputtemplate = kwargs['inputemplate']
+            self.inputtemplate = kwargs['inputtemplate']
         else:
             self.inputtemplate = None
     
