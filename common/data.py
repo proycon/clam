@@ -1472,7 +1472,11 @@ class OutputTemplate(object):
 
     def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None): 
         """Yields (outputfilename, metadata) tuples"""
+        
+        
         if self.parent:
+            #We have a parent, infer the correct filename
+            
             #copy filename from parent
             parent = self._getparent(profile)
             
@@ -1486,6 +1490,7 @@ class OutputTemplate(object):
                 
                 if self.filename:
                     filename = self.filename
+                    parentfile = CLAMInputFile(projectpath, inputfilename)
                 elif parent:
                     filename = inputfilename
                     parentfile = CLAMInputFile(projectpath, inputfilename)
@@ -1502,7 +1507,7 @@ class OutputTemplate(object):
                 #if not self.unique:
                 #    filename.replace('#',str(seqnr))
             
-                if self.removeextensions:
+                if not self.filename and self.removeextensions:
                     #Remove unwanted extensions
                     if self.removeextensions is True:
                         #Remove any extension
@@ -1527,7 +1532,7 @@ class OutputTemplate(object):
                                             
                 yield filename, metadata
                 
-        elif self.unique and self.filename:
+        elif self.unique and self.filename:            
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
 
             metadata = self.generatemetadata(parameters, None, [], provenancedata)
