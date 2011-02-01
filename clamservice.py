@@ -875,25 +875,25 @@ class InputFileHandler(object):
                             for s in inputtemplate.inputsources:
                                 if s.id == postdata['inputsource']:
                                     inputsource = s
-                                    inputsource.inputtemplate = inputtemplate.id
+                                    inputsource.inputtemplate = inputtemplate
                                     break                    
                 if not inputsource:
                     raise web.webapi.Forbidden("No such inputsource exists")
                 if inputsource.isfile():
-                    if inputtemplate.filename:
-                        filename = inputtemplate.filename
+                    if inputsource.inputtemplate.filename:
+                        filename = inputsource.inputtemplate.filename
                     else:
                         filename = os.path.basename(inputsource.path)                
-                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputsource.inputtemplate}, inputsource)
+                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputsource.inputtemplate.id}, inputsource)
                 elif inputsource.isdir():
-                    if inputtemplate.filename:
-                        filename = inputtemplate.filename
+                    if inputsource.inputtemplate.filename:
+                        filename = inputsource.inputtemplate.filename
                     for f in glob.glob(inputsource.path + "/*"):
-                        if not inputtemplate.filename:
+                        if not inputsource.inputtemplate.filename:
                             filename = os.path.basename(f)                          
                         if f[0] != '.':
                             tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f)
-                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputsource.inputtemplate}, tmpinputsource)
+                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputsource.inputtemplate.id}, tmpinputsource)
                             #WARNING: Output is dropped silently here!
                     return "" #200
                 else:
@@ -1234,7 +1234,7 @@ class InterfaceData(object):
         inputtemplates = []
         for profile in settings.PROFILES:
             for inputtemplate in profile.input:
-                if not inputtemplate in inputtemplates_mem: #no duplicates
+                if not inputtemplate in inputtemplates: #no duplicates
                     inputtemplates_mem.append(inputtemplate)
                     inputtemplates.append( inputtemplate.json() )
 
