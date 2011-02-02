@@ -306,19 +306,15 @@ class Project(object):
     def abort(self,project):
         if self.pid(project) == 0:
             return False
-        try:
-            printlog("Aborting process in project '" + project + "'" )
-            pid = self.pid(project)            
-            os.kill(pid, 15)  
-            #Wait for process to halt
-            try:
-                returnedpid, statuscode = os.waitpid(pid)
-            except OSError:
-                pass            
-            os.unlink(Project.path(project) + ".pid")
-            return True
-        except:
-            return False  
+            
+        printlog("Aborting process in project '" + project + "'" )
+        pid = self.pid(project)            
+        if pid > 0:
+            success = 1
+            while success != 0:
+                success = os.system("kill -15 " + pid)
+        os.unlink(Project.path(project) + ".pid")
+        return True
 
     def done(self,project):
         return os.path.isfile(Project.path(project) + ".done")
