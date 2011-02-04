@@ -1,0 +1,955 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg3296"
+   version="1.1"
+   inkscape:version="0.48.0 r9654"
+   sodipodi:docname="clam_poster.svg">
+  <defs
+     id="defs3">
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend-4"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3754-1"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4406"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4408"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mend"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3754"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4412"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4414"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Mstart"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3751"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(0.6,0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4418"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4420"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(0.6,0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4422"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4424"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4426"
+       style="overflow:visible">
+      <path
+         inkscape:connector-curvature="0"
+         id="path4428"
+         style="font-size:12px;fill-rule:evenodd;stroke-width:0.625;stroke-linejoin:round"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="scale(-0.6,-0.6)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     inkscape:document-units="mm"
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="314.00464"
+     inkscape:cy="603.15979"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1051"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:0.67873307999999999;fill:#e6dbc7;fill-opacity:1;stroke:#ce8404;stroke-width:2.72796511999999991;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4641-9"
+       width="389.22482"
+       height="220.52423"
+       x="33.362076"
+       y="703.79834"
+       rx="8.291398"
+       ry="11.973808" />
+    <rect
+       style="opacity:0.67873307999999999;fill:#ed9f18;stroke:#6a5500;stroke-width:2.37500000000000000;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;fill-opacity:1"
+       id="rect2985"
+       width="695.43842"
+       height="116.63851"
+       x="29.423628"
+       y="19.757215"
+       rx="14.718728"
+       ry="5.7042203" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="276.12759"
+       y="82.613388"
+       id="text2987"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2989"
+         x="276.12759"
+         y="82.613388"
+         style="font-size:64px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ffffff;font-family:Ubuntu;-inkscape-font-specification:Ubuntu Bold;fill-opacity:1">CLAM</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:28px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="74.097076"
+       y="119.98903"
+       id="text2995"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2997"
+         x="74.097076"
+         y="119.98903"
+         style="font-size:28px;fill:#ffffff;font-family:Ubuntu;-inkscape-font-specification:Ubuntu;fill-opacity:1"><tspan
+   style="font-weight:bold;fill:#ffffff;fill-opacity:1"
+   id="tspan5206">C</tspan>omputational <tspan
+   style="font-weight:bold;fill:#ffffff;fill-opacity:1"
+   id="tspan5208">L</tspan>inguistics <tspan
+   style="font-weight:bold;fill:#ffffff;fill-opacity:1"
+   id="tspan5210">A</tspan>pplication <tspan
+   style="font-weight:bold;fill:#ffffff;fill-opacity:1"
+   id="tspan5212">M</tspan>ediator</tspan></text>
+    <path
+       style="fill:#554400;fill-opacity:1;stroke:#554400;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 104.40165,88.674311 532.3504,0"
+       id="path3018"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#916f6f;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.45398775"
+       d="m 27.782222,1005.8883 693.968748,0 -693.968748,0 z"
+       id="path5544" />
+    <text
+       xml:space="preserve"
+       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0.56441716;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="26.775888"
+       y="1017.9981"
+       id="text5546"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5548"
+         x="26.775888"
+         y="1017.9981">Maarten van Gompel, Martin Reynaert &amp; Antal van den Bosch</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:end;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:end;fill:#000000;fill-opacity:0.56441716;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="721.34302"
+       y="1015.8875"
+       id="text5546-5"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5548-1"
+         x="721.34302"
+         y="1015.8875">ILK Research Group</tspan><tspan
+         sodipodi:role="line"
+         x="721.34302"
+         y="1028.3876"
+         id="tspan5575">Tilburg Center for Cognition and Communication</tspan><tspan
+         sodipodi:role="line"
+         x="721.34302"
+         y="1040.8875"
+         id="tspan5577">Tilburg University</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0.56441716;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="80.109711"
+       y="1038.6815"
+       id="text5546-8"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5548-3"
+         x="80.109711"
+         y="1038.6815">FoLiA development is being funded by CLARIN-NL</tspan></text>
+    <rect
+       style="opacity:0.67873308;fill:#ccffaa;stroke:#000301;stroke-width:1.54746687;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3.09493351, 1.54746675;stroke-dashoffset:0"
+       id="rect2840"
+       width="387.31827"
+       height="282.69485"
+       x="37.602692"
+       y="410.94717"
+       rx="8.5375719"
+       ry="3.9833148"
+       inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834-83"
+       width="289.54831"
+       height="228.77826"
+       x="90.199829"
+       y="457.0701"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834-9"
+       width="289.54831"
+       height="228.77826"
+       x="86.487671"
+       y="453.47672"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <rect
+       style="fill:#eeffaa;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2834"
+       width="289.54831"
+       height="228.77826"
+       x="83.394211"
+       y="450.48227"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <rect
+       style="fill:#c8beb7;stroke:#030301;stroke-width:1.41432679;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2828"
+       width="182.04758"
+       height="175.02463"
+       x="171.1727"
+       y="-658.97162"
+       rx="6.9778738"
+       ry="4.0708966"
+       transform="scale(1,-1)" />
+    <rect
+       style="fill:#000000;stroke:#030301;stroke-width:1.30397487;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2818"
+       width="142.56339"
+       height="82.304321"
+       x="191.0831"
+       y="524.07886"
+       rx="8.5530472"
+       ry="2.8231318" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="258.78473"
+       y="564.04321"
+       id="text2820"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2822"
+         x="258.78473"
+         y="564.04321">NLP Application(s)</tspan><tspan
+         sodipodi:role="line"
+         x="258.78473"
+         y="582.12109"
+         id="tspan4782" /><tspan
+         sodipodi:role="line"
+         x="258.78473"
+         y="600.19897"
+         id="tspan2824">(  black box )</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="156.31226"
+       y="476.12872"
+       id="text2830"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2832"
+         x="156.31226"
+         y="476.12872">CLAM Webservice</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="181.43512"
+       y="513.15582"
+       id="text2836"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2838"
+         x="181.43512"
+         y="513.15582">System wrapper script</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="173.98932"
+       y="432.00092"
+       id="text2842"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2844"
+         x="173.98932"
+         y="432.00092">Optional Workflow Interface</tspan><tspan
+         sodipodi:role="line"
+         x="173.98932"
+         y="447.00092"
+         id="tspan4778">(not provided by CLAM!)</tspan></text>
+    <rect
+       style="fill:#ffb380;stroke:#030301;stroke-width:0.81377399;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2828-2"
+       width="61.394165"
+       height="171.8166"
+       x="100.95517"
+       y="484.9946"
+       rx="2.353235"
+       ry="3.9962809" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="-653.80341"
+       y="136.22485"
+       id="text2889"
+       transform="matrix(0.00460132,-0.98386081,1.0163831,0.00445408,0,0)"><tspan
+         sodipodi:role="line"
+         id="tspan2891"
+         x="-653.80341"
+         y="136.22485">Service Configuration</tspan></text>
+    <rect
+       style="fill:#aaccff;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2839"
+       width="130.36964"
+       height="55.899807"
+       x="35.399979"
+       y="324.4288"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="97.671181"
+       y="351.26865"
+       id="text2841"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2843"
+         x="97.671181"
+         y="351.26865">End-User</tspan><tspan
+         sodipodi:role="line"
+         x="97.671181"
+         y="369.34653"
+         id="tspan2847">in webbrowser</tspan></text>
+    <rect
+       style="fill:#aaccff;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2839-3"
+       width="130.36964"
+       height="55.899807"
+       x="292.45059"
+       y="324.4288"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <text
+       xml:space="preserve"
+       style="font-size:14.46230602px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="351.83655"
+       y="350.13773"
+       id="text2841-5"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         x="351.83655"
+         y="350.13773"
+         id="tspan2845-7">Automated Client</tspan></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.56373686, 1.56373686;stroke-dashoffset:0"
+       id="rect2891"
+       width="100.22826"
+       height="23.356943"
+       x="307.97977"
+       y="350.46664"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <text
+       xml:space="preserve"
+       style="font-size:10.84673023px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="312.14301"
+       y="371.4299"
+       id="text2893"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2895"
+         x="312.14301"
+         y="371.4299">CLAM Client API</tspan></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:1.51179171;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3.0235833, 1.51179165;stroke-dashoffset:0"
+       id="rect2891-0"
+       width="93.475433"
+       height="23.408049"
+       x="48.10231"
+       y="419.01465"
+       rx="7.9620185"
+       ry="4.0763769" />
+    <text
+       xml:space="preserve"
+       style="font-size:10.84673023px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="50.395996"
+       y="440.51892"
+       id="text2893-9"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2895-7"
+         x="50.395996"
+         y="440.51892">CLAM Client API</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.41038442;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 60.626205,382.52252 c -0.0807,6.39709 -0.16134,12.7942 -0.24199,19.19129 -0.01,0.77345 0.0487,4.55749 -0.0605,4.79783 -0.15525,0.34169 -0.57112,0.47944 -0.72637,0.82112 -0.13316,0.29307 -0.0434,3.44202 -0.0504,3.9982 -0.007,0.5331 -0.0135,1.06618 -0.0202,1.59928 -0.003,0.26654 0.22868,0.79247 -0.0101,0.79964 -0.23877,0.007 0.0134,-1.06619 0.0101,-0.79964 -0.007,0.53309 -0.0134,1.06618 -0.0202,1.59928"
+       id="path2950" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.78001714;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend)"
+       d="m 148.08919,380.75104 2.22486,73.04838"
+       id="path4405" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.63088751;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow2Mstart);marker-end:none"
+       d="m 361.48545,375.95889 0.36918,76.03914"
+       id="path4405-6" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="360.84018"
+       y="400.64816"
+       id="text5579"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan5581"
+         x="360.84018"
+         y="400.64816">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="360.84018"
+         y="408.93387"
+         id="tspan6020">CLAM-XML</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.63088751;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow2Mstart);marker-end:none"
+       d="m 349.33627,451.50112 -0.0894,-76.03992"
+       id="path4405-6-9" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="322.58533"
+       y="398.75958"
+       id="text5579-0"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan5581-1"
+         x="322.58533"
+         y="398.75958">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="166.76675"
+       y="394.64969"
+       id="text5579-9"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         x="166.76675"
+         y="394.64969"
+         id="tspan6020-1">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="166.76675"
+         y="402.93539"
+         id="tspan6589">CLAM-XML + XSL</tspan><tspan
+         sodipodi:role="line"
+         x="166.76675"
+         y="411.22107"
+         id="tspan6524">= xHTML</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.41038442;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 72.611835,417.15882 c 0.0597,-6.39731 0.11941,-12.79463 0.1791,-19.19194 0.007,-0.77347 -0.0636,-4.55731 0.0448,-4.79799 0.15413,-0.34217 0.56954,-0.4812 0.72367,-0.82336 0.1322,-0.29347 0.0322,-3.44212 0.0373,-3.99833 0.005,-0.5331 0.01,-1.06622 0.0149,-1.59932 0.002,-0.26656 -0.23128,-0.79177 0.007,-0.79967 0.23875,-0.008 -0.01,1.06623 -0.007,0.79967 0.005,-0.53312 0.01,-1.06623 0.0149,-1.59934"
+       id="path2950-7" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:2.78001714;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend)"
+       d="m 162.06738,455.18689 -2.49422,-73.04024"
+       id="path4405-8" />
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="124.75327"
+       y="397.01114"
+       id="text5579-9-0"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         x="124.75327"
+         y="397.01114"
+         id="tspan6020-1-8">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="36.169067"
+       y="402.41187"
+       id="text5579-0-6"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan5581-1-6"
+         x="36.169067"
+         y="402.41187">HTTP</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.62855673px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#aa0000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:'10.15 Saturday Night BRK Bold'"
+       x="81.546806"
+       y="398.83728"
+       id="text5579-99"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan5581-5"
+         x="81.546806"
+         y="398.83728">HTTP</tspan><tspan
+         sodipodi:role="line"
+         x="81.546806"
+         y="407.12299"
+         id="tspan6020-0">xHTML</tspan></text>
+    <rect
+       style="fill:#ffeeaa;stroke:#030301;stroke-width:1.5637368;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1.56373686, 1.56373686;stroke-dashoffset:0"
+       id="rect2891-2"
+       width="100.22826"
+       height="23.356943"
+       x="212.70105"
+       y="620.26929"
+       rx="8.5372086"
+       ry="4.0674772" />
+    <text
+       xml:space="preserve"
+       style="font-size:10.84673023px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       x="218.40106"
+       y="645.65552"
+       id="text2893-3"
+       transform="scale(1.0163936,0.98387082)"><tspan
+         sodipodi:role="line"
+         id="tspan2895-1"
+         x="218.40106"
+         y="645.65552">CLAM Data API</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.24822557;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 117.2664,453.06425 c 0.0317,-3.22865 0.0634,-6.4573 0.0951,-9.68594 0.004,-0.39036 -0.0338,-2.30002 0.0238,-2.42149 0.0819,-0.17268 0.30263,-0.24285 0.38453,-0.41553 0.0702,-0.14812 0.0171,-1.73721 0.0198,-2.01791 0.002,-0.26905 0.006,-0.5381 0.008,-0.80716 0.001,-0.13452 -0.12289,-0.3996 0.004,-0.40358 0.12686,-0.005 -0.006,0.5381 -0.004,0.40358 0.002,-0.26906 0.006,-0.53811 0.008,-0.80716"
+       id="path2950-7-8" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:none;stroke:#000000;stroke-width:1.12518978;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:url(#Arrow2Mend-4)"
+       d="m 109.82844,437.66016 c -0.0386,2.9126 -0.0772,5.82522 -0.11581,8.73782 -0.005,0.35215 0.0233,2.07503 -0.029,2.18445 -0.0743,0.15557 -0.27335,0.2183 -0.34764,0.37386 -0.0637,0.13343 -0.0208,1.56716 -0.0241,1.82038 -0.003,0.24272 -0.006,0.48543 -0.01,0.72815 -0.002,0.12137 0.10945,0.36082 -0.005,0.36408 -0.11428,0.004 0.006,-0.48544 0.005,-0.36408 -0.003,0.24273 -0.006,0.48544 -0.01,0.72816"
+       id="path2950-3" />
+    <rect
+       style="opacity:0.67873307999999999;fill:#e6dbc7;fill-opacity:1;stroke:#ce8404;stroke-width:2.86198043999999996;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4641"
+       width="695.85181"
+       height="135.76747"
+       x="29.4377"
+       y="151.30611"
+       rx="14.823269"
+       ry="7.3717694" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ce8404;fill-opacity:1;stroke:none;font-family:Ubuntu-Title;-inkscape-font-specification:Ubuntu-Title"
+       x="322.23868"
+       y="173.52948"
+       id="text4643"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4645"
+         x="322.23868"
+         y="173.52948">- objective - </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#803300;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="53.119671"
+       y="197.70134"
+       id="text4741"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="53.119671"
+         y="197.70134"
+         id="tspan4745">CLAM <tspan
+   style="font-size:20px;font-weight:bold"
+   id="tspan4954">wraps</tspan> around your command-line NLP tools and turns them into </tspan><tspan
+         sodipodi:role="line"
+         x="53.119671"
+         y="222.70134"
+         id="tspan4751">fully fledged RESTful <tspan
+   style="font-size:20px;font-weight:bold"
+   id="tspan4956">webservices</tspan> with minimal effort. CLAM also acts </tspan><tspan
+         sodipodi:role="line"
+         x="53.119671"
+         y="247.70134"
+         id="tspan4755">as a modern <tspan
+   style="font-size:20px;font-weight:bold"
+   id="tspan4958">web application</tspan>, with which end-users can interact</tspan><tspan
+         sodipodi:role="line"
+         x="53.119671"
+         y="272.70132"
+         id="tspan5095"> directly from their browser.</tspan><tspan
+         sodipodi:role="line"
+         x="53.119671"
+         y="297.70132"
+         id="tspan4753" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ce8404;fill-opacity:1;stroke:none;font-family:Ubuntu-Title;-inkscape-font-specification:Ubuntu-Title"
+       x="165.20425"
+       y="311.79871"
+       id="text4643-1"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4645-8"
+         x="165.20425"
+         y="311.79871">- architecture - </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ce8404;fill-opacity:1;stroke:none;font-family:Ubuntu-Title;-inkscape-font-specification:Ubuntu-Title"
+       x="83.222778"
+       y="727.06586"
+       id="text4643-1-3"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4645-8-3"
+         x="83.222778"
+         y="727.06586">- service provider perspective - </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="38.732426"
+       y="751.51874"
+       id="text4807"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4809"
+         x="38.732426"
+         y="751.51874">What you need to write:</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="91.923882"
+       y="815.98651"
+       id="text4811"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4813"
+         x="91.923882"
+         y="815.98651" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="37.599716"
+       y="772.78265"
+       id="text4815"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="37.599716"
+         y="772.78265"
+         id="tspan4843"
+         style="font-size:18px;font-weight:bold">Service configuration file <tspan
+   style="font-size:18px;font-weight:normal"
+   id="tspan4849">- A configuration</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="37.599716"
+         y="795.28265"
+         id="tspan4851">file for CLAM that describes the behaviour</tspan><tspan
+         sodipodi:role="line"
+         x="37.599716"
+         y="817.78265"
+         id="tspan4853">of your application in terms of <tspan
+   style="font-style:italic"
+   id="tspan4855">profiles</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="37.599716"
+         y="840.28265"
+         id="tspan4878"><tspan
+   style="font-style:italic"
+   id="tspan4872">(input and output definitions) </tspan>and <tspan
+   style="font-style:italic"
+   id="tspan4860">parameters.</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="37.599716"
+         y="862.78265"
+         id="tspan4821" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="36.648109"
+       y="864.40125"
+       id="text4815-1"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="36.648109"
+         y="864.40125"
+         id="tspan4843-6"
+         style="font-size:18px;font-weight:bold">System Wrapper Script <tspan
+   style="font-size:18px;font-weight:normal"
+   id="tspan4849-3">- A script that CLAM</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="36.648109"
+         y="886.90125"
+         style="font-size:18px;font-weight:normal"
+         id="tspan4938">invokes and which should in turn invoke your</tspan><tspan
+         sodipodi:role="line"
+         x="36.648109"
+         y="909.40125"
+         id="tspan4878-1"
+         style="font-size:18px;font-style:normal;font-weight:normal">actual NLP application.</tspan><tspan
+         sodipodi:role="line"
+         x="36.648109"
+         y="931.90125"
+         id="tspan4821-6" /></text>
+    <rect
+       style="opacity:0.67873307999999999;fill:#e6dbc7;fill-opacity:1;stroke:#ce8404;stroke-width:3.14395021999999980;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4641-9-9"
+       width="288.37372"
+       height="395.34366"
+       x="439.94586"
+       y="302.26266"
+       rx="6.143034"
+       ry="21.465982" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ce8404;fill-opacity:1;stroke:none;font-family:Ubuntu-Title;-inkscape-font-specification:Ubuntu-Title"
+       x="519.67853"
+       y="326.87903"
+       id="text4643-1-3-1"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4645-8-3-8"
+         x="519.67853"
+         y="326.87903">- features - </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="449.86453"
+       y="358.51865"
+       id="text4999"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5001"
+         x="449.86453"
+         y="358.51865">- No need to modify actual NLP</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="381.01865"
+         id="tspan5041">  application!</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="403.51865"
+         id="tspan5019">- RESTful <tspan
+   style="font-weight:bold"
+   id="tspan5071">webservice</tspan> &amp; </tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="426.01865"
+         id="tspan5023">  modern <tspan
+   style="font-weight:bold"
+   id="tspan5073">webapplication</tspan> in one</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="448.51865"
+         id="tspan5017">- Strong <tspan
+   style="font-weight:bold"
+   id="tspan5055">metadata</tspan> and</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="471.01865"
+         id="tspan5013"><tspan
+   style="font-weight:bold"
+   id="tspan5057">  provenance</tspan> data support</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="493.51865"
+         id="tspan5029">- <tspan
+   style="font-weight:bold"
+   id="tspan5059">Viewers</tspan> for output data.</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="516.01862"
+         id="tspan5031">- Supports long batch</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="538.51862"
+         id="tspan5035">  processes on large corpora.</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="561.01862"
+         id="tspan5047">- Python <tspan
+   style="font-weight:bold"
+   id="tspan5065">Data API</tspan> for writing</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="583.51862"
+         id="tspan5049">  system wrapper scripts</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="606.01862"
+         id="tspan5051">- Python <tspan
+   style="font-weight:bold"
+   id="tspan5067">Client API</tspan> for writing</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="628.51862"
+         id="tspan5053">  automated clients.</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="651.01862"
+         id="tspan5075">- Runs with Apache, nginx.</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="673.51862"
+         id="tspan5003">- Input/Output <tspan
+   style="font-weight:bold"
+   id="tspan5069">Conversion</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="687.90723"
+         id="tspan5005"
+         style="font-size:10px">    (from for example PDF or MS Word)</tspan><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="700.40723"
+         style="font-size:10px"
+         id="tspan5009" /><tspan
+         sodipodi:role="line"
+         x="449.86453"
+         y="712.90723"
+         id="tspan5007" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ce8404;fill-opacity:1;stroke:none;font-family:Ubuntu-Title;-inkscape-font-specification:Ubuntu-Title"
+       x="492.37384"
+       y="721.66962"
+       id="text4643-1-3-7"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4645-8-3-5"
+         x="492.37384"
+         y="721.66962">- user perspective - </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       x="439.28574"
+       y="746.64789"
+       id="text5170"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="746.64789"
+         id="tspan5180">1) create a new <tspan
+   style="font-size:16px;font-style:italic"
+   id="tspan5196">project</tspan></tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="766.64789"
+         id="tspan5190">2) upload input files with metadata</tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="786.64789"
+         id="tspan5184">     parameters</tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="806.64789"
+         id="tspan5174">3) set global parameters</tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="826.64789"
+         id="tspan5200">4) start the project, wait for completion</tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="846.64789"
+         id="tspan5198">5) view/download output files</tspan><tspan
+         sodipodi:role="line"
+         x="439.28574"
+         y="866.64789"
+         id="tspan5186" /></text>
+  </g>
+</svg>
