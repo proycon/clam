@@ -310,9 +310,12 @@ class Project(object):
         printlog("Aborting process in project '" + project + "'" )
         pid = self.pid(project)            
         if pid > 0:
-            success = 1
-            while success != 0:
-                success = os.system("kill -15 " + pid)
+            running = True
+            while running:
+                printdebug("Killing process " + str(pid))
+                os.system("kill -15 " + str(pid))
+                running = (os.system('ps ' + str(pid)) == 0)
+                if running: printdebug("Process not dead yet!")
         os.unlink(Project.path(project) + ".pid")
         return True
 
