@@ -15,7 +15,10 @@
    id="svg3296"
    version="1.1"
    inkscape:version="0.48.0 r9654"
-   sodipodi:docname="clam_poster.svg">
+   sodipodi:docname="clam_poster.svg"
+   inkscape:export-filename="/home/proycon/work/clam/docs/clam_poster.png"
+   inkscape:export-xdpi="163.42372"
+   inkscape:export-ydpi="163.42372">
   <defs
      id="defs3">
     <marker
@@ -139,9 +142,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
+     inkscape:zoom="0.98994949"
      inkscape:cx="314.00464"
-     inkscape:cy="477.63412"
+     inkscape:cy="316.60444"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
@@ -267,14 +270,14 @@
     <text
        xml:space="preserve"
        style="font-size:10px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0.56441716;stroke:none;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
-       x="80.109711"
-       y="1038.6815"
+       x="25.561474"
+       y="1037.6714"
        id="text5546-8"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan5548-3"
-         x="80.109711"
-         y="1038.6815">FoLiA development is being funded by CLARIN-NL</tspan></text>
+         x="25.561474"
+         y="1037.6714">CLAM development is being funded by CLARIN-NL (www.clarin.nl)</tspan></text>
     <rect
        style="opacity:0.67873308;fill:#ccffaa;stroke:#000301;stroke-width:1.54746687;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3.09493351, 1.54746675;stroke-dashoffset:0"
        id="rect2840"
@@ -779,7 +782,7 @@
          x="36.648109"
          y="928.68695"
          id="tspan4843-6"
-         style="font-size:18px;font-weight:bold">System Wrapper Script <tspan
+         style="font-size:18px;font-weight:bold">System wrapper script <tspan
    style="font-size:18px;font-weight:normal"
    id="tspan4849-3">- A script that CLAM</tspan></tspan><tspan
          sodipodi:role="line"
