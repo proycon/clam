@@ -215,6 +215,7 @@
             <p>You can create and add new files from within your browser: <button id="openeditor">Open Live Editor</button></p>
 
             <div id="editormask" class="mask"></div>
+            <a name="#editor"></a>
             <div id="editor">
                 <h3>Add input from browser</h3>
                     <table>

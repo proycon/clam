@@ -93,7 +93,7 @@ div#loader {
 }
 div#editor {
     display: none;
-    position: fixed;
+    position: absolute;
     top: 100px;
     width: 65%;
     -moz-border-radius: 12px; /* CSS3 for Mozilla */
