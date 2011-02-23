@@ -171,7 +171,7 @@ class CLAMFile:
                return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
         else:
             httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename)
-            if self.metadata and 'encoding' in self.metadata:
+            if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
                 content = unicode(content, self.metadata['encoding'])
             return content
         
