@@ -32,7 +32,7 @@ import clam.common.util
 import clam.common.viewers
 #clam.common.formats is deliberately imported _at the end_ 
 
-VERSION = '0.5.1'
+VERSION = '0.5.2'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
