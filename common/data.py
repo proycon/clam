@@ -174,7 +174,15 @@ class CLAMFile:
             if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
                 content = unicode(content, self.metadata['encoding'])
             return content
-        
+            
+    def copy(self, target):
+        if self.metadata and 'encoding' in self.metadata:
+            f = codecs.open(target,'w', self.metadata['encoding'])
+            f.write(self.readlines())
+        else:
+            f = open(target,'w')            
+            f.write(self.readlines())
+        f.close()                    
 
     def validate(self):
         """Validate this file. Returns a boolean."""
