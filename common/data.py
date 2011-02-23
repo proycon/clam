@@ -582,6 +582,22 @@ class Profile(object):
                     if not o.parent and (not (o.filename and o.unique)):
                         raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
 
+        #Sanity check (note: does not consider ParameterConditions!)
+        for o in self.output:
+            for o2 in self.output:                
+                if not isinstance(o, ParameterCondition) and o.id != o2.id:
+                    if o.filename == o2.filename:
+                        if not o.filename:
+                            #no filename specified (which means it's inherited from parent as is)
+                            if o.extension == o2.extension: #extension is the same (or both none)
+                                if o.parent == o2.parent:
+                                    raise Exception("Output templates '" + o.id + "' and '" + o2.id + "' describe identically named output files, this is not possible. They define no filename and no extension (or equal extension) so both inherit the same filename from the same parent. Use filename= or extension= to distinguish the two.")                            
+                        else: 
+                            raise Exception("Output templates '" + o.id + "' and '" + o2.id + "' describe identically named output files, this is not possible. Use filename= or extension= to distinguish the two.")
+                    
+        
+        
+
     def match(self, projectpath, parameters):            
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
         parameters = sanitizeparameters(parameters)
