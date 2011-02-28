@@ -50,7 +50,15 @@ if __name__ == "__main__":
         
         #We need one of the metadata fields        
         language = inputfile.metadata['language']
-   
+        
+        
+        if clamdata['xml']:
+            docid = None
+            if 'documentid' in inputfile.metadata:
+                docid = inputfile.metadata['documentid']
+            if not docid:
+                docid = "untitled"                
+            os.system('ucto -L ' + language + ' -X ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
         if clamdata['verbose']:
             os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
         else:

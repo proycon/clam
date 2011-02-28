@@ -113,7 +113,7 @@ PARAMETERS =  [
     ('Tokenisation options', [
         BooleanParameter('xml','FoLiA XML Output','Output FoLiA XML (preliminary!)'),
         BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v',forbid=['sentenceperline','xml'] ),
-        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line. Does not work in verbose or XML mode.', paramflag='-s', forbid=['verbose','xml']),    
+        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line. Does not work in verbose or XML mode.', paramflag='-n', forbid=['verbose','xml']),    
         BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase', 'xml'], paramflag='-l'),
         BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase', 'xml'], paramflag='-u'),        
     ]),
