@@ -27,7 +27,7 @@ class ExampleFormat(CLAMMetaData):
     # False  - Accept any value, but this attribute is not required
     # a list - Accept any of the specified values (if False is a member then this attribute is not required)
     # a specific value - Simply always assign this static value
-    attributes = {'encoding':True, 'language':False, 'colour': ['green','red','blue'], 'pi':3.14 }
+    #attributes = {'encoding':True, 'language':False, 'colour': ['green','red','blue'], 'pi':3.14 }
     
     #Do you want to allow any other custom attributes? Defined by the InputTemplate/OutputTemplate
     allowcustomattributes = True
@@ -80,9 +80,16 @@ class HTMLFormat(CLAMMetaData):
 
                 
 class TadpoleFormat(CLAMMetaData):    
-    attributes = {'encoding':True,'language':False }    
+    attributes = {'tokenisation':'yes','lemmatisation':['yes','no'],'postagging':['yes','no'],'morphologicalanalysis':['yes','no'],'mwudetection':['yes','no'],'parsing':['yes','no'] }    
     name = "Tadpole Columned Output Format"
     mimetype = 'text/plain'
+
+class FoLiAXMLFormat(CLAMMetaData):    
+    attributes = {}    
+    name = "FoLiA XML"
+    mimetype = 'text/xml'
+    scheme = '' #TODO
+
 
 class DCOIFormat(CLAMMetaData):    
     name = "DCOI format"
