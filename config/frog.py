@@ -14,11 +14,13 @@
 #
 ###############################################################
 
+
 from clam.common.parameters import *
 from clam.common.formats import *
-from clam.common.viewers import *
+from clam.common.data import *
+from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path
+from sys import path 
 from os import uname
 
 
@@ -84,6 +86,6 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Skip Components', [
-        BooleanParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multichoice=True ),        
+        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multi=True ),        
     ]), 
 ]
