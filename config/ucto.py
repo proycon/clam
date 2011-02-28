@@ -69,7 +69,7 @@ PROFILES = [
             multi=True,
         ),
         ParameterCondition(xml=True,
-        then=OutputTemplate('foliatokoutput', FoLiAXML, "Tokenised Text Document (FoLiA XML)",
+        then=OutputTemplate('foliatokoutput', FoLiAXMLFormat, "Tokenised Text Document (FoLiA XML)",
                 SetMetaField('tokenisation','ucto'),
                 copymetadata=True,
                 extension='xml',
