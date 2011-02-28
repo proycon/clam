@@ -25,7 +25,7 @@ REQUIRE_VERSION = 0.5
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Ucto Tokeniser"
-SYSTEM_DESCRIPTION = "Ucto is a tokeniser designed for unicode (utf-8) texts. The tokeniser also supports some basic transformations."
+SYSTEM_DESCRIPTION = "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
 
 #Root directory for CLAM
 ROOT = path[0] + "/../ucto.clam/"
@@ -61,13 +61,21 @@ PROFILES = [
     Profile(
         InputTemplate('untokinput', PlainTextFormat,"Text document", 
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
-            ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')]),
-            StringParameter(id='documentid', name='Document ID', description='Enter a unique identifier for this document (no spaces)'),
+            ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')], required=True),
+            StringParameter(id='documentid', name='Document ID', description='Enter a unique identifier for this document (no spaces). Needed only for XML output, will be auto-generated if not specified.'),
+            StringParameter(id='author', name='Author', description='The author of the document (optional)'),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
         ),
-        ParameterCondition(verbose=True,
+        ParameterCondition(xml=True,
+        then=OutputTemplate('foliatokoutput', FoLiAXML, "Tokenised Text Document (FoLiA XML)",
+                SetMetaField('tokenisation','ucto'),
+                copymetadata=True,
+                extension='xml',
+                multi=True,                
+             ),
+        otherwise=ParameterCondition(verbose=True,
             then=OutputTemplate('vtokoutput', PlainTextFormat,"Verbosely Tokenised Text Document",
                 ParameterCondition(sentenceperline=True,
                     then=SetMetaField('sentenceperline','yes')
@@ -97,6 +105,7 @@ PROFILES = [
                 multi=True,
             )
         )
+        )
     ),
 ]
 
@@ -104,7 +113,7 @@ PARAMETERS =  [
     ('Tokenisation options', [
         BooleanParameter('xml','FoLiA XML Output','Output FoLiA XML (preliminary!)'),
         BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-v',forbid=['sentenceperline','xml'] ),
-        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line', paramflag='-s', forbid=['verbose','xml']),    
+        BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line. Does not work in verbose or XML mode.', paramflag='-s', forbid=['verbose','xml']),    
         BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase', 'xml'], paramflag='-l'),
         BooleanParameter('uppercase','Uppercase','Convert text to uppercase',forbid=['lowercase', 'xml'], paramflag='-u'),        
     ]),
