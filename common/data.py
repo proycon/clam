@@ -585,7 +585,7 @@ class Profile(object):
         #Sanity check (note: does not consider ParameterConditions!)
         for o in self.output:
             for o2 in self.output:                
-                if not isinstance(o, ParameterCondition) and o.id != o2.id:
+                if not isinstance(o, ParameterCondition) and not isinstance(o2, ParameterCondition) and o.id != o2.id:
                     if o.filename == o2.filename:
                         if not o.filename:
                             #no filename specified (which means it's inherited from parent as is)
