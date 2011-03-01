@@ -1086,7 +1086,7 @@ class InputFileHandler(object):
 
 
 
-        filename = clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq)
+        filename = clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)
 
         head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
         output = head

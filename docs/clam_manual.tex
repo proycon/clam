@@ -383,7 +383,7 @@ After specifying any such parameters, there are some possible keyword arguments:
 \begin{enumerate}
 \item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, this indicates whether the input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
 \item \texttt{multi} -- The logical inverse of the above; you can whichever you prefer. \texttt{multi=False} is the default if not specified.
-\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert a single \texttt{\#} character in the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name. You can also use any of the metadata parameters as variable in the filename; as explained in section~\ref{sec:filenamevariables}.
+\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert the variable \texttt{\$SEQNR} into the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name. You can also use any of the metadata parameters as variable in the filename; as explained in section~\ref{sec:filenamevariables}.
 \item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
 \end{enumerate}
 
@@ -473,9 +473,19 @@ PROFILES = [
 
 There are several ways of controlling the way input and output files within a profile are named. As illustrated in the previous section, each Output Template has an Input Template as parent, from which it inherits the filename if no explicit filename is specified. This is a very important aspect that has to be realised By default, if no \texttt{filename=}, \texttt{extension=} or \texttt{removeextension=} is specified for an Output Template, it will use the same filename as the parent Input Template. If \texttt{filename=} and \texttt{extension=} are not specified for the Input Template, then the file the user uploads will simply maintain the very same name as it is uploaded with. If \texttt{extension=} is specified, then the input file is required to have the specified extension, the web application and CLAM Client API takes care of this automatically if not the case.
 
-In the previous section, we mentioned the use of the variable \texttt{\#} that will insert a number in when the Input Template or Output Template is in multi-mode. In addition to this, other variables can also be used. In Input Templates, you can use any of the metadata parameters as variables in the filename, use \texttt{\$ID} in the filename specification, using the ID of the parameter. For Output Templates, you can use metafield IDs or global parameter IDs (in that order of priority) in the same way. This syntax is valid in both \texttt{filename=} and \texttt{extension=}.
+In a previous section, we mentioned the use of the variable \texttt{\$SEQNR} that will insert a number in when the Input Template or Output Template is in multi-mode. In addition to this, other variables can also be used. Here is an overview:
 
-The following example illustrates a translation system that encodes the character encoding and language in the filename itself. Note also the use of the special variable \texttt{\#}, which assigns a number as the templates are both in multi mode.
+\begin{itemize}
+\item \texttt{\$SEQNR} - The sequence number of the file. Valid only if \texttt{unique=True} or \texttt{multi=False}.
+\item \texttt{\$PROJECT} - The ID of the project.
+\item \texttt{\$INPUTFILENAME} - The filename of the associated input file. Valid only in Output Templates.
+\item \texttt{\$INPUTSTRIPPEDFILENAME} - The filename of the associated input file without any extensions. Valid only in Output Templates.
+\item \texttt{\$INPUTEXTENSION} - The extension of the associated input file (without the initial period). Valid only in Output Templates.
+\end{itemize} 
+
+Other than these variables pre-defined by CLAM, you can in input templates use any of the metadata parameters as variables in the filename. To this end, use a dollar sign followed by the ID of the parameter in the filename specification. For Output Templates, you can use metafield IDs or global parameter IDs (in that order of priority) in the same way. This syntax is valid in both \texttt{filename=} and \texttt{extension=}.
+
+The following example illustrates a translation system that encodes the character encoding and language in the filename itself. Note also the use of the special variable \texttt{\$SEQNR}, which assigns a sequence number as the templates are both in multi mode.
 
 {\footnotesize{
 \begin{verbatim}
@@ -490,14 +500,14 @@ PROFILES = [
        id='language',name='Language',description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]
       ),
-      filename='input#.$language.$encoding.txt'
+      filename='input$SEQNR.$language.$encoding.txt'
       multi=True
     ), 
     OutputTemplate('translationoutput', PlainTextFormat,
       "Esperanto translation (Plain-text document)",  
       CopyMetaField('encoding','maininput.encoding')
       SetMetaField('language','eo'),
-      filename='output#.$language.$encoding.txt'
+      filename='output$SEQNR.$language.$encoding.txt'
       multi=True
     )    
   )
@@ -505,6 +515,12 @@ PROFILES = [
 \end{verbatim}
 }}
 
+In addition to variables that refer to global or local parameters. There are some additional variables set by CLAM which you can use:
+
+\begin{itemize}
+\item \texttt{\$PROJECT} - Is set to the project ID.
+\item \texttt{\$INPUTFILE} - Is set to the project ID.
+\end{itemize}
 
 
 \subsection{Parameter Conditions}

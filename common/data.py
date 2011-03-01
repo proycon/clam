@@ -1504,6 +1504,7 @@ class OutputTemplate(object):
     def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None): 
         """Yields (outputfilename, metadata) tuples"""
         
+        project = os.path.basename(projectpath)
         
         if self.parent:
             #We have a parent, infer the correct filename
@@ -1559,7 +1560,7 @@ class OutputTemplate(object):
                 metadata = self.generatemetadata(parameters, parentfile, relevantinputfiles, provenancedata)
                 
                 #Resolve filename
-                filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr)
+                filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr, project, inputfilename)
                                             
                 yield filename, metadata
                 
@@ -1800,31 +1801,49 @@ class InputSource(object):
         if not self.inputtemplate:
             raise Exception("Input source has no input template")        
 
-def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0):
+def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
         #parameters are local
         if filename.find('$') != -1:
             for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
+            if filename.find('$') != -1:
+                if project: filename = filename.replace('$PROJECT', project)            
+                if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
         
+        #BACKWARD COMPATIBILITY:    
         if not inputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
                 
         return filename
 
-def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq = 0):
+def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
+        #MAYBE TODO: make more efficient
         if filename.find('$') != -1:
             for parameter in sorted(globalparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
-            for parameter in sorted(localparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
-                if parameter.hasvalue:
-                    filename = filename.replace('$' + parameter.id, str(parameter.value))
-            
+            if filename.find('$') != -1:
+                for parameter in sorted(localparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
+                    if parameter.hasvalue:
+                        filename = filename.replace('$' + parameter.id, str(parameter.value))
+            if filename.find('$') != -1:
+                if inputfilename:
+                    inputfilename = os.path.basename(inputfilename)
+                    inputstrippedfilename, inputextension = inputfilename.split('.',1)
+                    filename = filename.replace('$INPUTFILENAME', inputfilename)
+                    filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
+                    filename = filename.replace('$INPUTEXTENSION', inputextension)
+                if project: filename = filename.replace('$PROJECT', project)            
+                if not outputtemplate.unique:
+                    filename = filename.replace('$SEQNR', str(nextseq))            
+
+        #BACKWARD COMPATIBILITY:    
         if not outputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
+                
         return filename
     
  

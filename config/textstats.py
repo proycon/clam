@@ -97,6 +97,7 @@ PROFILES = [
             extension='.txt',
             multi=True
         ),
+        #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
             SetMetaField('encoding','ascii'),
             extension='.stats',
