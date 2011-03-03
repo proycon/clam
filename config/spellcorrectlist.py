@@ -85,28 +85,29 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
-        InputTemplate('textinput', PlainTextFormat,"Input text document",  
+        InputTemplate('textinput',PlainTextFormat,"Input text document",  
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+            StaticParameter(id='language',name='Language',description='The language the text is in', value='Dutch'),
+            #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
+            #IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
+            #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
+            extension='.txt',
+            multi=False
+        ),
+        InputTemplate('listinput',PlainTextFormat,"Errolist input",  
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             StaticParameter(id='language',name='Language',description='The language the text is in', value='Dutch'),
             StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
-            IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
+            #IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
             #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
             extension='.txt',
-            multi=True
+            multi=False
         ),
-        InputTemplate('listinput', PlainTextFormat,"Errolist input",  
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
-            StaticParameter(id='language',name='Language',description='The language the text is in', value='Dutch'),
-            StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
-            IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
-            #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
-            extension='.txt',
-            multi=True
-        ),
-        OutputTemplate('textoutput',PlainTextFormat,'Corrected version of input document',
+        OutputTemplate('textoutput',PlainTextFormat,"Corrected version of input document",
             SetMetaField('encoding','ascii'),
+            removeextension='.txt',
             extension='.spellcorrectlist',
-            multi=True
+            multi=False
         ),
     ) 
 ]
