@@ -83,6 +83,11 @@ class TadpoleFormat(CLAMMetaData):
     attributes = {'tokenisation':'yes','lemmatisation':['yes','no'],'postagging':['yes','no'],'morphologicalanalysis':['yes','no'],'mwudetection':['yes','no'],'parsing':['yes','no'] }    
     name = "Tadpole Columned Output Format"
     mimetype = 'text/plain'
+    
+class UndefinedXMLFormat(CLAMMetaData):
+    name = "Undefined XML Format"
+    mimetype = 'text/xml'
+    scheme = ''
 
 class FoLiAXMLFormat(CLAMMetaData):    
     attributes = {}    
