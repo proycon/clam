@@ -77,7 +77,7 @@ PROFILES = [
                 then=SetMetaField('parsing','no'),
                 otherwise=SetMetaField('parsing','yes'),
             ),            
-            extension='.out',
+            extension='.frog.out',
             copymetadata=True,
             multi=True,
         ),        
