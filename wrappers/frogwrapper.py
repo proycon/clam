@@ -47,8 +47,8 @@ clam.common.status.write(statusfile, "Starting...")
 #assemble parameters for Frog:
 cmdoptions = ""
 
-if 'skip' in clamdata and clamdata['skip'].value:
-    cmdoptions += ' --skip=' + "".join(clamdata['skip'].value)    
+if 'skip' in clamdata and clamdata['skip']:
+    cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
