@@ -46,16 +46,9 @@ clam.common.status.write(statusfile, "Starting...")
 
 #assemble parameters for Frog:
 cmdoptions = ""
-if clamdata['tok'].value == 'tok':
-    #tokenise only
-    cmdoptions += ' --tok'
-elif clamdata['tok'].value == 'vtok':
-    cmdoptions += ' --vtok'
-if clamdata['nopar'].value:
-    cmdoptions += ' --nopar'
-elif clamdata['skip'].value:
-    cmdoptions += ' --skip=' + "".join(clamdata['skip'].value)
-    
+
+if 'skip' in clamdata and clamdata['skip'].value:
+    cmdoptions += ' --skip=' + "".join(clamdata['skip'].value)    
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
