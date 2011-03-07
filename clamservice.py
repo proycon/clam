@@ -119,6 +119,7 @@ class CLAMService(object):
         '/', 'Index',
         '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         '/style.css', 'StyleData', #provides stylesheet for the web interface
+        '/([A-Za-z0-9_]*)/(input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
         '/([A-Za-z0-9_]*)/?', 'Project',
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
@@ -1258,6 +1259,13 @@ class InterfaceData(object):
 
         return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
+class FoLiAXSL(object):
+    """Provides Stylesheet"""
+    def GET(self):
+        web.header('Content-Type', 'text/xsl')
+
+        for line in codecs.open('style/folia.xsl','r','utf-8'):
+            yield line
 
 class StyleData(object):
     """Provides Stylesheet"""
