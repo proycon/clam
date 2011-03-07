@@ -54,12 +54,12 @@ if __name__ == "__main__":
         
         if clamdata['xml']:
             docid = None
-            if 'documentid' in inputfile.metadata:
+            if 'documentid' in inputfile.metadata and inputfile.metadata['documentid']:
                 docid = inputfile.metadata['documentid']
             if not docid:
                 docid = "untitled"                
             os.system('ucto -L ' + language + ' -X ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.xml')
-        if clamdata['verbose']:
+        elif clamdata['verbose']:
             os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
         else:
             os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.tok')
