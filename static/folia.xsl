@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<xsl:stylesheet version="1.0" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:imdi="http://www.mpi.nl/IMDI/Schema/IMDI">
+<xsl:stylesheet version="1.0" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:imdi="http://www.mpi.nl/IMDI/Schema/IMDI" xmlns:folia="http://ilk.uvt.nl/folia">
 
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" cdata-section-elements="script"/>
 
-<xsl:template match="/FoLiA">
+<xsl:template match="/folia:FoLiA">
     <html>
         <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -20,7 +20,7 @@
         </head>
         <body>
             <xsl:apply-templates select="//imdi:METATRANSCRIPT" />
-            <xsl:apply-templates select="text" />
+            <xsl:apply-templates select="folia:text" />
         </body>
     </html>
 </xsl:template>
@@ -42,17 +42,17 @@
 </xsl:template>
 
 
-<xsl:template match="text">
+<xsl:template match="folia:text">
  <div class="text">
    <xsl:choose>
-   <xsl:when test="/div">
-    <xsl:apply-templates select="/div" />
+   <xsl:when test="/folia:div">
+    <xsl:apply-templates select="/folia:div" />
    </xsl:when>
-   <xsl:when test="//p">
-    <xsl:apply-templates select="//p|//head" />
+   <xsl:when test="//folia:p">
+    <xsl:apply-templates select="//folia:p|//folia:head" />
    </xsl:when>
-   <xsl:when test="//s">
-    <xsl:apply-templates select="//s|//head" />
+   <xsl:when test="//folia:s">
+    <xsl:apply-templates select="//folia:s|//folia:head" />
    </xsl:when> 
    <xsl:otherwise>
     <span class="error">No content found in this text!</span>
@@ -61,51 +61,50 @@
  </div>
 </xsl:template>
 
-<xsl:template match="div">
+<xsl:template match="folia:div">
  <div class="div">
   <xsl:apply-templates />
  </div>
 </xsl:template>
 
-<xsl:template match="p">
+<xsl:template match="folia:p">
  <p>
   <xsl:apply-templates />
  </p>
 </xsl:template>
 
 
-<xsl:template match="head">
+<xsl:template match="folia:head">
  <h1>
   <xsl:apply-templates />
  </h1>
 </xsl:template>
 
-<xsl:template match="s">
+<xsl:template match="folia:s">
  <span class="s">
   <xsl:apply-templates />
  </span>
 </xsl:template>
 
-<xsl:template match="w">
+<xsl:template match="folia:w">
  <span id="{@xml:id}" class="word">
         <span class="attributes">
                 <span class="wordid"><xsl:value-of select="@xml:id" /></span>
                 <dl>
-                        <xsl:apply-templates select="pos" />
-                        <xsl:apply-templates select="lemma" />                        
+                        <xsl:apply-templates />
                 </dl>
         </span>
-        <xsl:value-of select="t"/>
+        <xsl:value-of select="folia:t"/>
  </span>
  <xsl:text> </xsl:text> <!-- TODO: implement @nospace check -->
 </xsl:template>
 
-<xsl:template match="pos">
- <dt>PoS</dt><dd><xsl:value-of select="@class"/></dd>
+<xsl:template match="folia:pos">
+ <dt>PoS</dt><dd><xsl:value-of select="@folia:class"/></dd>
 </xsl:template>
 
-<xsl:template match="lemma">
- <dt>Lemma</dt><dd><xsl:value-of select="@class"/></dd>
+<xsl:template match="folia:lemma">
+ <dt>Lemma</dt><dd><xsl:value-of select="@folia:class"/></dd>
 </xsl:template>
 
 </xsl:stylesheet>
