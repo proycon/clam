@@ -131,7 +131,7 @@ $(document).ready(function(){
    $("#editorsubmit").click(function(event){         
         var filename = validateuploadfilename($('#editorfilename').val(), $('#editorinputtemplate').val());
         if (!filename) {
-             //alert already produced by getuploadfilename()
+             alert("Please specify a filename");
              return false;
         }
         
@@ -161,7 +161,7 @@ $(document).ready(function(){
    $('#urluploadsubmit').click(function(event){
             var filename = validateuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
             if (!filename) {
-               //alert already produced by getuploadfilename()
+               alert("Please specify a filename");
                return false;
             }
 
