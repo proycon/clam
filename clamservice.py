@@ -1264,7 +1264,7 @@ class FoLiAXSL(object):
     def GET(self):
         web.header('Content-Type', 'text/xsl')
 
-        for line in codecs.open('style/folia.xsl','r','utf-8'):
+        for line in codecs.open('static/folia.xsl','r','utf-8'):
             yield line
 
 class StyleData(object):
