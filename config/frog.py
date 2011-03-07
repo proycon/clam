@@ -33,10 +33,10 @@ SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmat
 
 # ================ Root directory for CLAM ===============
 host = uname()[1]
-if host == 'aurora': #proycon's laptop
-    CLAMDIR = "/home/proycon/work/demo/clam"
+if host == 'aurora' or host == 'roma': #proycon's laptop/server
+    CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/frog.clam/"
-    PORT = 8000
+    PORT = 9001
     #URLPREFIX = 'frog'
 else:
     raise Exception("Help! I don't know where I'm running from! Configure me!")
@@ -86,6 +86,7 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Skip Components', [
-        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multi=True ),        
+#        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multi=True ),        
+        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the     parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Parser')] ),
     ]), 
 ]
