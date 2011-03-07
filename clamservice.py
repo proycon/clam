@@ -119,7 +119,7 @@ class CLAMService(object):
         '/', 'Index',
         '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         '/style.css', 'StyleData', #provides stylesheet for the web interface
-        '/([A-Za-z0-9_]*)/(input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
+        '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
         '/([A-Za-z0-9_]*)/?', 'Project',
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
