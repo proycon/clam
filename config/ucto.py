@@ -64,6 +64,8 @@ PROFILES = [
             ChoiceParameter(id='language',name='Language',description='The language this text is in', choices=[('en','English'),('nl','Dutch'),('fr','French'),('de','German'),('it','Italian')], required=True),
             StringParameter(id='documentid', name='Document ID', description='Enter a unique identifier for this document (no spaces). Needed only for XML output, will be auto-generated if not specified.'),
             StringParameter(id='author', name='Author', description='The author of the document (optional)'),
+            PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
+            MSWordConverter(id='mswordconv',label='Convert from MS Word Document'),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
