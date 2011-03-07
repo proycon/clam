@@ -102,7 +102,7 @@ class AbstractParameter(object):
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'
         for key, v in self.kwargs.items():    
-            if not key in ['value','error','name','description','flag']:
+            if not key in ['value','error','name','description','flag','paramflag']:
                 if isinstance(v, bool):
                     xml += ' ' + key + '="' + str(int(v))+ '"'                    
                 elif isinstance(v, list):
@@ -377,7 +377,7 @@ class ChoiceParameter(AbstractParameter):
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'
         for key, value in self.kwargs.items():    
-            if key != 'choices' and key != 'default':
+            if key != 'choices' and key != 'default' and key != 'flag' and key != 'paramflag':
                 if isinstance(value, bool):
                     xml += ' ' + key + '="' + str(int(value))+ '"'                    
                 elif isinstance(value, list):
