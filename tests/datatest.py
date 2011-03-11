@@ -200,7 +200,6 @@ class ParametersInFilename(unittest2.TestCase):
             filename='test.$encoding.$language.txt',
             unique=True
         )
-        
 
     def test1_inputfilename(self):
         """Input Template - Testing resolution of filename with parameters"""
@@ -212,7 +211,18 @@ class ParametersInFilename(unittest2.TestCase):
         self.assertEqual(filename,'test.utf-8.fr.txt')
     
 
-        
+      
+    def test2_outputfilename(self):
+        """Output Template - Testing resolution of filename with parameters"""
+        postdata = {'language':'fr','encoding':'utf-8'}
+        validmeta, metadata, parameters = self.inputtemplate.generate(None, None, postdata)
+        self.assertTrue(validmeta)
+        self.assertTrue(isinstance(metadata,clam.common.data.CLAMMetaData))
+        filename = clam.common.data.resolveinputfilename(self.inputtemplate.filename, parameters, self.inputtemplate, 0)
+        self.assertEqual(filename,'test.utf-8.fr.txt')
+    
+
+          
         
                                             
 if __name__ == '__main__':

@@ -452,7 +452,7 @@ class CLAMData(object):
                 if parameter.id == id:
                     return parameter
         raise KeyError("No such parameter exists: " + id )
-
+        
     def __getitem__(self, id):                                 
         """Return the value of the specified global parameter"""
         try:
@@ -916,7 +916,7 @@ class CLAMMetaData(object):
         return self.data.items()
 
     def __iter__(self):
-        return self.data
+        return iter(self.data)
 
     def __setitem__(self, key, value):
         if self.attributes != None and not key in self.attributes:
@@ -1415,8 +1415,8 @@ class OutputTemplate(object):
                     raise Exception("Invalid viewer specified!")
 
 
-        if not self.unique and (self.filename and not '#' in self.filename):
-            raise Exception("OutputTemplate configuration error in outputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
+        if not self.unique and (self.filename and not '$SEQNR' in self.filename and not '#' in self.filename):
+            raise Exception("OutputTemplate configuration error in outputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '$SEQNR' in filename, which will automatically resolve to a number in sequence.")
 
 
     def xml(self, indent = ""):
@@ -1806,7 +1806,7 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, proje
         #parameters are local
         if filename.find('$') != -1:
             for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
-                if parameter.hasvalue:
+                if parameter and parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
                 if project: filename = filename.replace('$PROJECT', project)            
@@ -1817,22 +1817,29 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, proje
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
                 
+        clam.common.util.printdebug("Determined input filename: " + filename)
+                
         return filename
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
         #MAYBE TODO: make more efficient
         if filename.find('$') != -1:
             for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
-                if parameter.hasvalue:
+                if parameter and parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
-                for parameter in sorted(localparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
-                    if parameter.hasvalue:
-                        filename = filename.replace('$' + parameter.id, str(parameter.value))
+                for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
+                    if value != None:
+                        filename = filename.replace('$' + id, str(parameter))
             if filename.find('$') != -1:
                 if inputfilename:
                     inputfilename = os.path.basename(inputfilename)
-                    inputstrippedfilename, inputextension = inputfilename.split('.',1)
+                    raw = inputfilename.split('.',1)
+                    inputstrippedfilename = raw[0]
+                    if len(raw) > 1:
+                        inputextension = raw[1]
+                    else:
+                        inputextension = ""
                     filename = filename.replace('$INPUTFILENAME', inputfilename)
                     filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
                     filename = filename.replace('$INPUTEXTENSION', inputextension)
@@ -1844,6 +1851,8 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
         if not outputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
+            
+        clam.common.util.printdebug("Determined output filename: " + filename)
                 
         return filename
     
