@@ -1821,11 +1821,11 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, proje
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
         #MAYBE TODO: make more efficient
         if filename.find('$') != -1:
-            for parameter in sorted(globalparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
+            for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
-                for parameter in sorted(localparameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
+                for id, parameter in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
                     if parameter.hasvalue:
                         filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
