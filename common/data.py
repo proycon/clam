@@ -1829,7 +1829,7 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
                 if parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
-                for id, parameter in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
+                for parameter in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
                     if parameter.hasvalue:
                         filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
