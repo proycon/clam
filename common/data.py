@@ -1569,7 +1569,11 @@ class OutputTemplate(object):
 
             metadata = self.generatemetadata(parameters, None, [], provenancedata)
             
+<<<<<<< HEAD
             filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0, project, None)
+=======
+            filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0)
+>>>>>>> fix
             
             yield filename, metadata
             
