@@ -1830,7 +1830,7 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
             if filename.find('$') != -1:
                 for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
                     if value != None:
-                        filename = filename.replace('$' + id, str(parameter))
+                        filename = filename.replace('$' + id, str(value))
             if filename.find('$') != -1:
                 if inputfilename:
                     inputfilename = os.path.basename(inputfilename)
