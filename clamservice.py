@@ -516,7 +516,14 @@ class Project(object):
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
-        raise web.webapi.Created("Project " + project + " has been created", {'Location': project + '/'}) #201
+        url = 'http://' + settings.HOST
+        if settings.PORT != 80:
+            url += ':' + str(settings.PORT)
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url += '/'
+            url += settings.URLPREFIX
+        raise web.webapi.Created("Project " + project + " has been created", {'Location': url + '/' + project + '/'}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
