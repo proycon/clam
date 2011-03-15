@@ -523,7 +523,8 @@ class Project(object):
             if settings.URLPREFIX[0] != '/':
                 url += '/'
             url += settings.URLPREFIX
-        raise web.webapi.Created("Project " + project + " has been created", {'Location': url + '/' + project + '/'}) #201
+        msg = "Project " + project + " has been created"
+        raise web.webapi.Created(msg, {'Location': url + '/' + project + '/', 'Content-Length': len(msg)}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
@@ -613,7 +614,10 @@ class Project(object):
             self.abort(project)   
         printlog("Deleting project '" + project + "'" )
         shutil.rmtree(Project.path(project))
-        return "Project deleted: " + project #200
+        msg = "Deleted"
+        web.header('Content-Type', 'text/plain')
+        web.header('Content-Length',len(msg))
+        return msg #200                
 
 class OutputFileHandler(object):
 
@@ -691,11 +695,17 @@ class OutputFileHandler(object):
         if len(filename) == 0:
             #Deleting all output files and resetting
             self.reset(project)
-            return "Deleted" #200
+            msg = "Deleted"
+            web.header('Content-Type', 'text/plain')
+            web.header('Content-Length',len(msg))
+            return msg #200
         elif os.path.isdir(Project.path(project) + filename): 
             #Deleting specified directory
             shutil.rmtree(Project.path(project) + filename)
-            return "Deleted" #200
+            msg = "Deleted"
+            web.header('Content-Type', 'text/plain')
+            web.header('Content-Length',len(msg))
+            return msg #200
         else:
             try:
                 file = clam.common.data.CLAMOutputFile(Project.path(project), filename)
@@ -706,7 +716,10 @@ class OutputFileHandler(object):
             if not success:
                 raise web.webapi.NotFound()
             else:
-                return "Deleted" #200    
+                msg = "Deleted"
+                web.header('Content-Type', 'text/plain')
+                web.header('Content-Length',len(msg))
+                return msg #200   
 
 
     def reset(self, project):
@@ -857,7 +870,10 @@ class InputFileHandler(object):
             if not success:
                 raise web.webapi.NotFound()
             else:
-                return "Deleted" #200
+                msg = "Deleted"
+                web.header('Content-Type', 'text/plain')
+                web.header('Content-Length',len(msg))
+                return msg #200
 
     @requirelogin
     def POST(self, project, filename, user=None): 
