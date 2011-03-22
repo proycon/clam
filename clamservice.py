@@ -524,7 +524,7 @@ class Project(object):
                 url += '/'
             url += settings.URLPREFIX
         msg = "Project " + project + " has been created"
-        raise web.webapi.Created(msg, {'Location': url + '/' + project + '/', 'Content-Length': len(msg)}) #201
+        raise web.webapi.Created(msg, {'Location': url + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
