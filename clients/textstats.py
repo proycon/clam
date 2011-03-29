@@ -123,10 +123,7 @@ print "All done."
 #Download all output files to current directory
 for outputfile in data.output:
     print "\tDownloading " + str(outputfile) + " ..."
-    f = codecs.open(os.path.basename(str(outputfile)),'w','utf-8')
-    for line in outputfile:
-        f.write(line)
-    f.close()
+    outputfile.copy(os.path.basename(str(outputfile)))
 
 
 #delete our project (remember, it was temporary, otherwise clients would leave a mess)
