@@ -26,7 +26,7 @@
     \begin{block}{Problems}        
         \begin{enumerate}        
             \item Tools often available only locally, installation and configuration can be time and resource consuming
-            \item \textbf{Human aspect:} Not very user-friendly for the untrained general public or technically-challenged researchers (aka Linguists)
+            \item \textbf{Human aspect:} Not very user-friendly for the untrained general public
             \item \textbf{Machine aspect:} How to connect one tool to another? How to communicate with a tool in a uniform fashion?
         \end{enumerate}
     \end{block}
@@ -60,7 +60,7 @@
             \item NLP tasks time consuming: service may run for days before yielding result
             \item NLP tasks on large data collections
             \item Handling of metadata descriptions
-            \item Webervices have to be fully deterministic
+            \item Webservices have to be fully deterministic/predictable
             \item Establishing general interfaces for both humans and machines            
         \end{enumerate}
     \end{block}
@@ -299,7 +299,7 @@ Metaphor:
             \item A machine translation system:
             \begin{itemize}
                 \item \textbf{Input Template: } The input text in source language X which is to be translated
-                \item \textbf{Output Template: } The translated text target language Y
+                \item \textbf{Output Template: } The translated text in target language Y
             \end{itemize}    
             \item A simple lexicon-based spelling correction system:
             \begin{itemize}
@@ -315,7 +315,7 @@ Metaphor:
 \subsection{Writing a Wrapper Script}
 
 \begin{frame}
-    \begin{block}
+    \begin{block}{Writing a Wrapper Script}
         Typical layout of a wrapper script:
         \begin{enumerate}
             \item Read command line arguments (argv) set by CLAM
