@@ -512,8 +512,28 @@ class CLAMData(object):
                 if inputtemplate.id == id:
                     return inputtemplate            
         raise Exception("No such input template!")
+    
+    def inputfile(self, inputtemplate=None):
+        inputfiles = list(self.inputfiles(inputtemplate))
+        if len(inputfiles) < 1:
+            raise Exception("No such input file")
+        elif len(inputfiles) > 1:
+            raise Exception("Multiple input files matched. Use inputfiles() instead!")        
+        return inputfiles[0]
 
 
+    def inputfiles(self, inputtemplate=None):
+        if isinstance(inputtemplate, InputTemplate):
+            #ID suffices:
+            inputtemplate = inputtemplate.id
+        for inputfile in self.input:
+            if not inputtemplate or inputfile.metadata.inputtemplate == inputtemplate:
+                yield inputfile
+            
+            
+                
+            
+        
 
 
 def sanitizeparameters(parameters):
