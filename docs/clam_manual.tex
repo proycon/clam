@@ -229,7 +229,7 @@ The wrapper script is not strictly mandatory if the NLP application can be direc
 
 The service configuration consists of a description of your NLP application, or rather, a description of the system wrapper script that surrounds it. It specifies what parameters the system can take, and what input and output formats are expected under what circumstances. The service configuration is itself a Python script, but knowledge of Python is not essential to be able to make your own service configurations. 
 
-The server configuration files reside in the \texttt{config/} directory. Making a new webservice starts with copying the sample \texttt{defaults.py} and editing your copy. When reading this section, it may help your understanding to inspect this file alongside.
+The server configuration files reside in the \texttt{config/} directory. Making a new webservice starts with copying the sample \texttt{template.py} and editing your copy. When reading this section, it may help your understanding to inspect this file alongside.
 
 One of the first things to configure is the root path (\texttt{ROOT}). All projects will be confined to the \texttt{projects/} directory within this root path, each project having its own subdirectory. When your NLP application or wrapper script is launched, the current working directory will be set to this project directory. Pre-installed corpora should be put in the \texttt{corpora/} directory. The \texttt{ROOT} will be automatically created upon the first run.
 
