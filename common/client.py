@@ -145,7 +145,7 @@ class CLAMClient:
                 if data: 
                     response, content = self.http.request(self.url + url, method, data)
                 else:
-                    response, content = self.http.request(self.url + url, method            
+                    response, content = self.http.request(self.url + url, method)
                 return self._parse(response, content)                    
             except:
                 raise
