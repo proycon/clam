@@ -66,7 +66,6 @@ def usage():
 if __name__ == "__main__":
     
     username = password = None
-    
     parameters = {}
     begin = 0
     rawargs = sys.argv[1:]
@@ -120,6 +119,7 @@ if __name__ == "__main__":
 
     
     try:        
+        data = None
         if command in ['info','index','projects','inputtemplates','parameters','profiles']:
             data = client.index()
         elif command in ['get','input','output','status','inputtemplate']:

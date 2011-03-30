@@ -96,6 +96,11 @@ class ParameterError(Exception):
     def __str__(self):
         return "Error setting parameter: " + self.msg
 
+class TimeOut(Exception):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "Connection with server timed-out" 
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None):
@@ -134,6 +139,16 @@ class CLAMClient:
             raise NoConnection()
         try:
             return self._parse(response, content)
+        except TimeOut:
+            #Do it again once
+            try:
+                if data: 
+                    response, content = self.http.request(self.url + url, method, data)
+                else:
+                    response, content = self.http.request(self.url + url, method            
+                return self._parse(response, content)                    
+            except:
+                raise
         except:
             raise
 
@@ -159,6 +174,8 @@ class CLAMClient:
             raise NotFound(content)
         elif response['status'] == '500':
             raise ServerError(data)
+        elif response['status'] == '408':
+            raise TimeOut()
         else:
             raise Exception("Server returned HTTP response " + response['status'])
         
