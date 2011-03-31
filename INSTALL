@@ -1,0 +1,46 @@
+
+
+INSTRUCTIONS FOR MAC OS X USERS
+
+1) Download and install python 2.6 (*not* 3.x!) if you don't already have it (2.5 will do too):
+ http://python.org/download
+
+2) Download and install Macports (if you don't already have it
+ http://www.macports.org/
+
+3) Open a Terminal and install the following dependencies:
+ $ sudo port install py26-lxml
+ $ sudo port install py26-httplib2
+ $ sudo port install git-core
+
+(If you use python 2.5: use py25*)
+
+4) Make and go to a directory where you want to add clam
+ $ mkdir ~/clam/
+ $ cd ~/clam/
+
+5) Retrieve CLAM from github:
+ $ git clone git://github.com/proycon/clam.git
+ 
+6) Retrieve Web.py from github
+ $ git clone git://github.com/webpy/webpy.git
+ 
+ Set some symlinks so web.py can be found:
+ $ cd clam
+ $ ln -s ../webpy/web
+ $ cd common
+ $ ln -s ../web
+ $ cd ..
+
+7) Start the demo service
+ $ ./clamservice.py -H localhost -p 8080 clam.config.textstats
+
+ERRORS?
+ Error importing lxml even though you succesfully installed it? There may be multiple pythons on your machine, python may not be the same as python2.6 or python2.5. Try python2.6 or python2.5 explicitly:
+
+ Change 'python' to 'python2.6' in the first line (hashbang) of clamservice.py and the wrapper script you want to use (i.e. clam/config/textstats.py), then try again:
+ 
+
+INSTRUCTIONS FOR WINDOWS USERS
+
+ 1) Delete Windows and install a decent OS ;)
