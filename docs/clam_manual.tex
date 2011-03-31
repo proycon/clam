@@ -68,7 +68,7 @@ Note that at this stage, CLAM is still under development. As such, this document
 
 CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver; no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver. Supported are: Apache, nginx or lighthttpd, though others may work too.
 
- Note that the software is designed for Unix-based systems (e.g. Linux or BSD) only.
+ Note that the software is designed for Unix-based systems (e.g. Linux or BSD) only. It also has been verified to run on Mac OS X.
 
 \subsection{Installation}
 
@@ -78,9 +78,16 @@ The following software is required to run CLAM. These will be available in any m
 \item python 2.5 (or a higher 2.x version)
 \item python-webpy, version 0.33 or higher
 \item python-lxml, version 2 or higher
+\item python-httplib2
 %\item python-libxslt1
 %\item python-django
 \end{itemize}
+
+On Debian or Ubuntu systems, the following should suffice to install these dependencies, provided that \texttt{python-webpy} has version 0.33 or above:
+
+\texttt{\$ sudo apt-get install python-webpy python-lxml python-httplib2 }
+
+More detailed instructions, including for Mac OS X, can be found in the INSTALL file included with CLAM.
 
 For development and testing, each CLAM webservice can run stand-alone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 

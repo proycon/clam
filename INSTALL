@@ -1,6 +1,40 @@
+== INSTRUCTIONS FOR LINUX/BSD USERS ==
+
+1) Verify that the package version of python-webpy offered by your distribution is 0.33 or above, if not or not offered at all, we will install it later in step 4b
+
+2) Install all dependencies (leave python-webpy out if it is too old or unavailable)
+ DEBIAN/UBUNTU:
+  $ sudo apt-get install python-webpy python-lxml python-httplib2
+ FEDORA/OPENSUSE/CENTOS/RHEL:
+  # yum install python-webpy python-lxml python-httplib2
+ OTHERS?
+  Please look for the appropriate packages in your distribution's repository or ports collection
+   
+3) Create a directory for CLAM somewhere
+ $ mkdir ~/clam
+ $ cd ~/clam
+ 
+4) Obtain CLAM from github
+ $ git clone git://github.com/proycon/clam.git
+ 
+4b) *ONLY IF* your distribution's python-webpy was too old or unavailable; grab it from github: 
+ 
+  $ git clone git://github.com/webpy/webpy.git
+ 
+  Set some symlinks so web.py can be found:
+  $ cd clam
+  $ ln -s ../webpy/web
+  $ cd common
+  $ ln -s ../web
+  $ cd ..
+
+5) Start the demo service
+ $ ./clamservice.py -H localhost -p 8080 clam.config.textstats
+ 
+ Navigate your browser to http://localhost:8080 and verify everything works
 
 
-INSTRUCTIONS FOR MAC OS X USERS
+== INSTRUCTIONS FOR MAC OS X USERS ==
 
 1) Download and install python 2.6 (*not* 3.x!) if you don't already have it (2.5 will do too):
  http://python.org/download
@@ -34,6 +68,8 @@ INSTRUCTIONS FOR MAC OS X USERS
 
 7) Start the demo service
  $ ./clamservice.py -H localhost -p 8080 clam.config.textstats
+ 
+ Navigate your browser too to http://localhost:8080 and verify everything works
 
 ERRORS?
  Error importing lxml even though you succesfully installed it? There may be multiple pythons on your machine, python may not be the same as python2.6 or python2.5. Try python2.6 or python2.5 explicitly:
@@ -41,6 +77,6 @@ ERRORS?
  Change 'python' to 'python2.6' in the first line (hashbang) of clamservice.py and the wrapper script you want to use (i.e. clam/config/textstats.py), then try again:
  
 
-INSTRUCTIONS FOR WINDOWS USERS
+== INSTRUCTIONS FOR WINDOWS USERS == 
 
  1) Delete Windows and install a decent OS ;)
