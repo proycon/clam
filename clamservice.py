@@ -46,7 +46,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.5.3'
+VERSION = '0.5.4'
 
 DEBUG = False
     
@@ -127,6 +127,16 @@ class CLAMService(object):
         '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
+    
+    if settings.SERVICEGHOST:
+        urls = (
+            '/' + settings.SERVICEGHOST + '/', 'IndexGhost',
+            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',
+            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
+            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
+            #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
+        ) + urls
 
     def __init__(self, mode = 'standalone'):
         global VERSION
@@ -179,6 +189,8 @@ class CLAMService(object):
 
 
 class Index(object):
+    GHOST = False
+    
     @requirelogin
     def GET(self, user = None):
         """Get list of projects"""
@@ -207,11 +219,12 @@ class Index(object):
         if url[-1] == '/': url = url[:-1]
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, self.GHOST )
         
 
 
 class Project(object):
+    GHOST = False
 
     @staticmethod
     def users(project):
@@ -498,7 +511,7 @@ class Project(object):
         if url[-1] == '/': url = url[:-1]
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None )
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , self.GHOST)
         
                     
     @requirelogin
@@ -1299,6 +1312,13 @@ class StyleData(object):
         for line in codecs.open('style/' + settings.STYLE + '.css','r','utf-8'):
             yield line
         
+class ProjectGhost(Project):
+    GHOST=True
+    pass
+
+class IndexGhost(Index):
+    GHOST=True
+    pass
         
 #class Uploader(object): #OBSOLETE!
 
@@ -1616,6 +1636,14 @@ def set_defaults(HOST = None, PORT = None):
         settings.MAXLOADAVG = 0 #unlimited
     if not 'STYLE' in settingkeys:
         settings.STYLE = 'classic'
+    if not 'ENABLEWEBAPP' in settingkeys:
+        settings.ENABLEWEBAPP = True
+    elif settings.ENABLEWEBAPP is False:
+        Project.GHOST = True
+        Index.GHOST = True        
+    if not 'WEBSERVICEGHOST' in settingkeys:
+        settings.WEBSERVICEGHOST = False
+        
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
