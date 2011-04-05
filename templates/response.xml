@@ -14,6 +14,9 @@ $else:
 $if not project:
         <projects>
         $for p, time in projects:
+            $if ghost:
+                <project xlink:type="simple" xlink:href="$url/$ghost/$p" time="$time">$p</project>
+            $else:
                 <project xlink:type="simple" xlink:href="$url/$p" time="$time">$p</project>
         </projects>
 $if not datafile and project:
@@ -44,9 +47,15 @@ $if statuscode == 0 or datafile or not project:
             <input>
                 $for inputfile in inputpaths:
                     $if inputfile.metadata and inputfile.metadata.inputtemplate:
-                      <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
+                      $if ghost:
+                         <file xlink:type="simple" xlink:href="$url/$ghost/$project/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
+                      $else:
+                         <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename" template="$inputfile.metadata.inputtemplate">
                     $else:
-                      <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename">
+                      $if ghost:
+                         <file xlink:type="simple" xlink:href="$url/$ghost/$project/input/$inputfile.filename">
+                      $else:
+                         <file xlink:type="simple" xlink:href="$url/$project/input/$inputfile.filename">
                     <name>$inputfile.filename</name>
                     </file>
             </input>
@@ -55,19 +64,31 @@ $if statuscode == 2 or datafile or not project:
             <output>
                 $for outputfile in outputpaths:
                      $if outputfile.metadata and outputfile.metadata.provenance:
-                        <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
+                        $if ghost:
+                            <file xlink:type="simple" xlink:href="$url/$ghost/$project/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
+                        $else:
+                            <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename" template="$outputfile.metadata.provenance.outputtemplate_id">
                      $else:
-                        <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename">
+                        $if ghost:
+                            <file xlink:type="simple" xlink:href="$url/$ghost/$project/output/$outputfile.filename">
+                        $else:
+                            <file xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename">                        
                      <name>$outputfile.filename</name>
                      $if outputfile.viewers:
                         <viewers>
                         $for viewer in outputfile.viewers:
-                            <viewer xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
+                            $if ghost:
+                                <viewer xlink:type="simple" xlink:href="$url/$ghost/$project/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
+                            $else:
+                                <viewer xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$viewer.id">$viewer.name</viewer>
                         </viewers>
                      $if outputfile.converters:
                         <converters>
                         $for converter in outputfile.converters:
-                            <converter xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$converter.id">$converter.label</converter>
+                            $if ghost:
+                                <converter xlink:type="simple" xlink:href="$url/$ghost/$project/output/$outputfile.filename/$converter.id">$converter.label</converter>
+                            $else:
+                                <converter xlink:type="simple" xlink:href="$url/$project/output/$outputfile.filename/$converter.id">$converter.label</converter>
                         </converters>
                      </file>
             </output>
