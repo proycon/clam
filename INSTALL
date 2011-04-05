@@ -36,18 +36,28 @@
 
 == INSTRUCTIONS FOR MAC OS X USERS ==
 
-1) Download and install python 2.6 (*not* 3.x!) if you don't already have it (2.5 will do too):
- http://python.org/download
 
-2) Download and install Macports (if you don't already have it
- http://www.macports.org/
+1) Install the Apple Developer Tools (available as a seperate install
+    on the Apple installation DVD) as well as X11 if it's not installed
+    yet. 
+    
+2) Install either fink or macports (http://www.macports.org/), if not available yet.
 
-3) Open a Terminal and install the following dependencies:
- $ sudo port install py26-lxml
- $ sudo port install py26-httplib2
- $ sudo port install git-core
+3) Obtain python 2.6 (*not* 3.x; 2.5 or 2.7 will do too)
+ For macports users, grab it from macports or directly from http://python.org/download
+ For fink users: $sudo fink install python 
 
-(If you use python 2.5: use py25*)
+4) Open a Terminal and install the following dependencies:
+ Macports:
+  $ sudo port install py26-lxml        (or py25-lxml)
+  $ sudo port install py26-httplib2    (or py25-httplib2)
+  $ sudo port install git-core
+ Fink:
+  $ sudo fink install lxml-py26  (or lxml-py27 or lxml-py25 depending on your python version)
+  $ sudo fink install httplib2-py26 (or httplib2-py27 or httplib2-py25)
+   (NOTE: httplib2-py27 does not seem to exist yet at this time of writing, so we recommend using Python 2.6 with fink!)
+  $ sudo fink install git
+
 
 4) Make and go to a directory where you want to add clam
  $ mkdir ~/clam/
