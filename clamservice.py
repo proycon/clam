@@ -698,7 +698,8 @@ class OutputFileHandler(object):
                     yield line
             except IOError: 
                 raise web.webapi.NotFound()
-            
+            except UnicodeError:
+                raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
             
     def DELETE(self, project, filename, user=None):    
         """Delete an output file"""
