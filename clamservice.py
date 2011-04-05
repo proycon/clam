@@ -128,15 +128,7 @@ class CLAMService(object):
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
     
-    if settings.SERVICEGHOST:
-        urls = (
-            '/' + settings.SERVICEGHOST + '/', 'IndexGhost',
-            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',
-            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
-            '/' + settings.SERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
-            #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
-        ) + urls
+
 
     def __init__(self, mode = 'standalone'):
         global VERSION
@@ -1644,7 +1636,15 @@ def set_defaults(HOST = None, PORT = None):
         Index.GHOST = True        
     if not 'WEBSERVICEGHOST' in settingkeys:
         settings.WEBSERVICEGHOST = False
-        
+    elif settings.WEBSERVICEGHOST:
+        CLAMService.urls = (
+            '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
+            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',
+            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
+            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
+            #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
+        ) + CLAMService.urls
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')

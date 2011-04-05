@@ -31,6 +31,8 @@ SYSTEM_DESCRIPTION = "Ucto is a unicode-compliant tokeniser. It takes input in t
 ROOT = path[0] + "/../ucto.clam/"
 PORT = 8080
 
+WEBSERVICEGHOST = 'ws'
+
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
