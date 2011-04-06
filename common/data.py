@@ -638,7 +638,7 @@ class Profile(object):
         
         #check if output is produced
         outputproduced = False
-        if not self.output: return False
+        if not self.output: return False, mandatory_absent
         for outputtemplate in self.output:
             if isinstance(outputtemplate, ParameterCondition):
                 outputtemplate = outputtemplate.evaluate(parameters)                
