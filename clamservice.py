@@ -1155,10 +1155,18 @@ class InputFileHandler(object):
                     f.write(chunk)     
                 f.close()                                  
             elif 'contents' in postdata and postdata['contents']:  
+                #grab encoding
+                encoding = 'utf-8'
+                for p in parameters:
+                    if p.id == 'encoding':
+                        encoding = p.value                        
                 #Contents passed in POST message itself
-                f = codecs.open(Project.path(project) + 'input/' + filename,'wb')
-                f.write(postdata['contents'])
-                f.close()
+                try:
+                    f = codecs.open(Project.path(project) + 'input/' + filename,'w',encoding)
+                    f.write(postdata['contents'])
+                    f.close()
+                except UnicodeError:
+                    raise web.webapi.Forbidden("Input file " + str(filename) + " is not in the expected encoding!")
             elif 'inputsource' in postdata and postdata['inputsource']:                
                 #Copy (symlink!) from preinstalled data
                 os.symlink(inputsource.path, Project.path(project) + 'input/' + filename)
