@@ -12,7 +12,7 @@ $(document).ready(function(){
         dataType: "xml", 
         success: function(xml){ 
             parametersxsl = xml;
-        },
+        }
    });
     
    //Create lists of all possible inputtemplates (aggregated over all profiles)
