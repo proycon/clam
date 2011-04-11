@@ -252,8 +252,8 @@ class ArchiveUploadTest(unittest2.TestCase):
         f = codecs.open('/tmp/servicetest3.txt','w','utf-8')
         f.write(u"Ni le mal qu'on m'a fait, ni le bien, tout ça me semble égal!")
         f.close()
-        os.system('zip /tmp/servicetest.zip /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest.txt')
-        os.system('tar -cvf /tmp/servicetest.tar.gz /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest.txt')
+        os.system('zip /tmp/servicetest.zip /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest3.txt')
+        os.system('tar -cvzf /tmp/servicetest.tar.gz /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest3.txt')
 
     def test1_zip(self):
         """Archive Upload Test - ZIP file"""
@@ -261,9 +261,9 @@ class ArchiveUploadTest(unittest2.TestCase):
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.zip', language='fr')
         self.assertTrue(success)    
         data = self.client.get(self.project) #get status again  
-        self.assertTrue('servicetest.txt' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest.txt' in [ x.filename for x in data.input ])
+        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.input ])
+        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.input ])
         
     def test2_targz(self):
         """Archive Upload Test - TAR.GZ file"""
@@ -271,9 +271,9 @@ class ArchiveUploadTest(unittest2.TestCase):
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.tar.gz', language='fr')
         self.assertTrue(success)    
         data = self.client.get(self.project) #get status again  
-        self.assertTrue('servicetest.txt' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest.txt' in [ x.filename for x in data.input ])
+        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.input ])
+        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.input ])
         
     def tearDown(self):
         success = self.client.delete(self.project)        

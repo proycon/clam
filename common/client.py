@@ -32,7 +32,7 @@ import clam.common.parameters
 import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
 
-VERSION = '0.5.3'
+VERSION = '0.5.5'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
@@ -260,6 +260,10 @@ class CLAMClient:
         if inputtemplate.filename:
             filename = inputtemplate.filename
         elif inputtemplate.extension: 
+            if filename.lower()[-4:] == '.zip' or filename.lower()[-7:] == '.tar.gz' or filename.lower()[-8:] == '.tar.bz2':
+                #pass archives as-is
+                return filename
+                
             if filename[-len(inputtemplate.extension) - 1:].lower() != '.' +  inputtemplate.extension.lower():
                 filename += '.' + inputtemplate.extension        
                 
@@ -311,8 +315,8 @@ class CLAMClient:
         if not isinstance(sourcefile, file):
             sourcefile = open(sourcefile,'r')
         
-        if 'filename' in kwargs:
-            filename = self.getinputfilename(inputtemplate, kwargs['filename'])
+        if 'filename' in kwargs:            
+            filename = self.getinputfilename(inputtemplate, kwargs['filename'])            
         else:
             filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
                     

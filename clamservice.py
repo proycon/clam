@@ -1000,16 +1000,20 @@ class InputFileHandler(object):
             else:
                 filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
                 
-        if inputtemplate.filename:
-            if filename != inputtemplate.filename:
-                raise web.webapi.Forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
-            #TODO LATER: add support for calling this with an actual number instead of #
-        if inputtemplate.extension:
-            if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
-                #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
-                filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
-            else:
-                raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
+        #Make sure filename matches (only if not an archive)
+        if inputtemplate.acceptarchive and (filename[-7:].lower() == '.tar.gz' or filename[-8:].lower() == '.tar.bz2' or filename[-4:].lower() == '.zip'):                
+            pass
+        else:    
+            if inputtemplate.filename:
+                if filename != inputtemplate.filename:
+                    raise web.webapi.Forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+                #TODO LATER: add support for calling this with an actual number instead of #
+            if inputtemplate.extension:
+                if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
+                    #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
+                    filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
+                else:
+                    raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
             
         if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
             raise web.webapi.Forbidden("Adding files for this inputtemplate must proceed through inputsource") #403
@@ -1118,11 +1122,14 @@ class InputFileHandler(object):
 
 
         #  ----------- Check if archive are allowed -------------
+        archive = False
+        addedfiles = []  
         if not errors and inputtemplate.acceptarchive:
+            printdebug('(Archive test)')
             # -------- Are we an archive? If so, determine what kind
             archivetype = None
             if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
-                uploadname = postdata['file'].name.lower()
+                uploadname = sourcefile.lower()
                 archivetype = None
                 if uploadname[-4:] == '.zip':
                     archivetype = 'zip'
@@ -1140,7 +1147,7 @@ class InputFileHandler(object):
             if archivetype:     
                 # =============== upload archive ======================
                 #random name
-                archive = "%032x" % random.getrandbits(128) + '.archivetype'
+                archive = "%032x" % random.getrandbits(128) + '.' + archivetype
                     
                 #Upload file from client to server
                 printdebug('(Archive transfer starting)')
@@ -1152,7 +1159,7 @@ class InputFileHandler(object):
                 # =============== Extract archive ======================
                 
                 #Determine extraction command
-                if archivetype == 'unzip':
+                if archivetype == 'zip':
                     cmd = 'unzip -u'
                 elif archivetype == 'tar':
                     cmd = 'tar -xvf'
@@ -1173,12 +1180,12 @@ class InputFileHandler(object):
 
 
                 #Read filename results
-                
-                addedfiles = []                
+                              
                 firstline = True
                 for line in out.split("\n"):    
                     line = line.strip()        
                     if line:
+                        printdebug('(Extraction output: ' + line+')')
                         subfile = None
                         if archivetype[0:3] == 'tar':
                             subfile = line
@@ -1187,7 +1194,8 @@ class InputFileHandler(object):
                             if colon:
                                 subfile =  line[colon + 1:].strip()
                         if subfile and os.path.exists(Project.path(project) + subfile):
-                            subfile_newname = clam.common.data.resolveinputfilename(subfile, parameters, inputtemplate, nextseq+len(addedfiles), project)
+                            subfile_newname = clam.common.data.resolveinputfilename(os.path.basename(subfile), parameters, inputtemplate, nextseq+len(addedfiles), project) 
+                            printdebug('(Extracted file ' + subfile + ', moving to input/' + subfile_newname+')')
                             os.rename(Project.path(project) + subfile, Project.path(project) + 'input/' +  subfile_newname)
                             addedfiles.append(subfile_newname)
                     firstline = False
@@ -1195,10 +1203,12 @@ class InputFileHandler(object):
                 #all done, remove archive
                 os.unlink(Project.path(project) + archive)
                 
-        else:
-            archive = False
+        if not archive:
             addedfiles = [clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)]
-                
+
+        fatalerror = None                
+        
+        
         output = head
         for filename in addedfiles:
             output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"            
@@ -1212,7 +1222,7 @@ class InputFileHandler(object):
             output += "</parameters>"
             
 
-            fatalerror = None
+            
             if not errors:
                 if not archive:
                     #============================ Transfer file ========================================
