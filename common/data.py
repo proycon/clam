@@ -1063,6 +1063,7 @@ class InputTemplate(object):
         self.filename = None
         self.extension = None
         self.onlyinputsource = False #Use only the input sources
+        self.acceptarchive = False #Accept and auto-extract archives
 
         for key, value in kwargs.items():
             if key == 'unique':   
@@ -1078,11 +1079,16 @@ class InputTemplate(object):
                     self.extension = value[1:]        
                 else:
                     self.extension = value
+            elif key == 'acceptarchive':
+                self.acceptarchive = bool(value)
             elif key == 'onlyinputsource':
                 self.onlyinputsource = bool(value)
 
         if not self.unique and (self.filename and not '#' in self.filename):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
+        if self.unique and self.acceptarchive:
+            raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', acceptarchive demands multi=True")
+            
 
         for arg in args:
             if isinstance(arg, clam.common.parameters.AbstractParameter):
@@ -1805,6 +1811,9 @@ class InputSource(object):
             self.inputtemplate = kwargs['inputtemplate']
         else:
             self.inputtemplate = None
+            
+        
+            
     
     def isfile(self):
         return os.path.isfile(self.path)

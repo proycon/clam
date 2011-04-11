@@ -46,7 +46,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.5.4'
+VERSION = '0.5.5'
 
 DEBUG = False
     
@@ -941,6 +941,7 @@ class InputFileHandler(object):
             #Simply forward to addfile
             return self.addfile(project,filename,user, postdata)
         
+        
     def addfile(self, project, filename, user, postdata, inputsource=None):
         """Add a new input file, this invokes the actual uploader"""
 
@@ -1115,148 +1116,227 @@ class InputFileHandler(object):
             validmeta = True #will be checked later
 
 
-
-        filename = clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)
-
-        head += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
-        output = head
-        
-        
-        if not errors:
-            output += "<parameters errors=\"no\">"
-        else:
-            output += "<parameters errors=\"yes\">"
-        for parameter in parameters:
-            output += parameter.xml()
-        output += "</parameters>"
-        
-
-        fatalerror = None
-        if not errors:
-            #============================ Transfer file ========================================
-            printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
+        #  ----------- Check if archive are allowed -------------
+        if not errors and inputtemplate.acceptarchive:
+            # -------- Are we an archive? If so, determine what kind
+            archivetype = None
             if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                uploadname = postdata['file'].name.lower()
+                archivetype = None
+                if uploadname[-4:] == '.zip':
+                    archivetype = 'zip'
+                elif uploadname[-7:] == '.tar.gz':
+                    archivetype = 'tar.gz'
+                elif uploadname[-8:] == '.tar.bz2':
+                    archivetype = 'tar.bz2'
+                    
+                # NOT ACTUAL ARCHIVES
+                #elif uploadname[-4:] == '.bz2':
+                #    archivetype = 'bz2'
+                #elif uploadname[-3:] == '.gz':
+                #    archivetype = 'gz' 
+            
+            if archivetype:     
+                # =============== upload archive ======================
+                #random name
+                archive = "%032x" % random.getrandbits(128) + '.archivetype'
+                    
                 #Upload file from client to server
-                f = open(Project.path(project) + 'input/' + filename,'wb')
+                printdebug('(Archive transfer starting)')
+                f = open(Project.path(project) + archive,'wb')
                 for line in postdata['file'].file:
-                    f.write(line) #encoding unaware, seems to solve big-file upload problem
-                f.close()            
-            elif 'url' in postdata and postdata['url']:
-                #Download file from 3rd party server to CLAM server
+                    f.write(line)
+                f.close()
+                printdebug('(Archive transfer completed)')
+                # =============== Extract archive ======================
+                
+                #Determine extraction command
+                if archivetype == 'unzip':
+                    cmd = 'unzip -u'
+                elif archivetype == 'tar':
+                    cmd = 'tar -xvf'
+                elif archivetype == 'tar.gz':
+                    cmd = 'tar -xvzf'
+                elif archivetype == 'tar.bz2':
+                    cmd = 'tar -xvjf'
+                else:
+                    raise Exception("Invalid archive format: " + archivetype) #invalid archive, shouldn't happend
+
+                #invoke extractor
+                printlog("Extracting '" + archive + "'" )            
                 try:
-                    req = urllib2.urlopen(postdata['url'])
+                    process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 except:
-                    raise web.webapi.NotFound()
-                CHUNK = 16 * 1024
-                f = open(Project.path(project) + 'input/' + filename,'wb')
-                while True:
-                    chunk = req.read(CHUNK)
-                    if not chunk: break
-                    f.write(chunk)     
-                f.close()                                  
-            elif 'contents' in postdata and postdata['contents']:  
-                #grab encoding
-                encoding = 'utf-8'
-                for p in parameters:
-                    if p.id == 'encoding':
-                        encoding = p.value                        
-                #Contents passed in POST message itself
-                try:
-                    f = codecs.open(Project.path(project) + 'input/' + filename,'w',encoding)
-                    f.write(postdata['contents'])
-                    f.close()
-                except UnicodeError:
-                    raise web.webapi.Forbidden("Input file " + str(filename) + " is not in the expected encoding!")
-            elif 'inputsource' in postdata and postdata['inputsource']:                
-                #Copy (symlink!) from preinstalled data
-                os.symlink(inputsource.path, Project.path(project) + 'input/' + filename)
-            
-            printdebug('(File transfer completed)')
-                
-            
-        
-            #Create a file object
-            file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
-            
-            
-            
-            #============== Generate metadata ==============
+                    raise web.webapi.InternalError("Unable to extract archive")       
+                out, err = process.communicate() #waits for process to end 
 
-            metadataerror = None
-            if not metadata and not errors: #check if it has not already been set in another stage
-                #for newly generated metadata
-                try:
-                    #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
-                    validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
-                    if validmeta:
-                        #And we tie it to the CLAMFile object
-                        file.metadata = metadata
-                        #Add inputtemplate ID to metadata
-                        metadata.inputtemplate = inputtemplate.id
-                    else:
-                        metadataerror = "Undefined error"
-                except ValueError, msg:
-                    validmeta = False
-                    metadataerror = msg
-                except KeyError, msg:
-                    validmeta = False
-                    metadataerror = msg
-            elif validmeta:
-                #for explicitly uploaded metadata
-                metadata.file = file
-                file.metadata = metadata
-                metadata.inputtemplate = inputtemplate.id
+
+                #Read filename results
                 
-            if metadataerror:    
-                #output += "<metadataerror />" #This usually indicates an error in service configuration!
-                fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + metadataerror + " (this usually indicates an error in service configuration!)</error>"
-            elif validmeta:                    
-                #=========== Convert the uploaded file (if requested) ==============
-                
-                conversionerror = False
-                if 'converter' in postdata and postdata['converter']:
-                    for c in inputtemplate.converters:
-                        if c.id == postdata['converter']:
-                            converter = c
-                            break
-                    if converter: #(should always be found, error already provided earlier if not)
-                        try:
-                            success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
-                        except:
-                            success = False
-                        if not success:
-                            conversionerror = True
-                            fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
-            
-                #====================== Validate the file itself ====================
-                if not conversionerror:
-                    valid = file.validate()        
-                    
-                    if valid:                       
-                        output += "<valid>yes</valid>"                
+                addedfiles = []                
+                firstline = True
+                for line in out.split("\n"):    
+                    line = line.strip()        
+                    if line:
+                        subfile = None
+                        if archivetype[0:3] == 'tar':
+                            subfile = line
+                        elif archivetype == 'zip' and not firstline: #firstline contains archive name itself, skip it
+                            colon = line.find(":")
+                            if colon:
+                                subfile =  line[colon + 1:].strip()
+                        if subfile and os.path.exists(Project.path(project) + subfile):
+                            subfile_newname = clam.common.data.resolveinputfilename(subfile, parameters, inputtemplate, nextseq+len(addedfiles), project)
+                            os.rename(Project.path(project) + subfile, Project.path(project) + 'input/' +  subfile_newname)
+                            addedfiles.append(subfile_newname)
+                    firstline = False
                                         
-                        #Great! Everything ok, save metadata
-                        metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                #all done, remove archive
+                os.unlink(Project.path(project) + archive)
+                
+        else:
+            archive = False
+            addedfiles = [clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)]
+                
+        output = head
+        for filename in addedfiles:
+            output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"            
                         
-                        #And create symbolic link for inputtemplates
-                        linkfilename = os.path.dirname(filename) 
-                        if linkfilename: linkfilename += '/'
-                        linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
-                        os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
-                    else:
-                        #Too bad, everything worked out but the file itself doesn't validate.
-                        #output += "<valid>no</valid>"
-                        fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
-                    
-                        #remove upload
-                        os.unlink(Project.path(project) + 'input/' + filename)
-        
-        
-        foot = "</upload>\n"       
+            if not errors:
+                output += "<parameters errors=\"no\">"
+            else:
+                output += "<parameters errors=\"yes\">"
+            for parameter in parameters:
+                output += parameter.xml()
+            output += "</parameters>"
+            
 
-        foot += "</clamupload>"
+            fatalerror = None
+            if not errors:
+                if not archive:
+                    #============================ Transfer file ========================================
+                    printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
+                    if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                        #Upload file from client to server
+                        f = open(Project.path(project) + 'input/' + filename,'wb')
+                        for line in postdata['file'].file:
+                            f.write(line) #encoding unaware, seems to solve big-file upload problem
+                        f.close()
+                    elif 'url' in postdata and postdata['url']:
+                        #Download file from 3rd party server to CLAM server
+                        try:
+                            req = urllib2.urlopen(postdata['url'])
+                        except:
+                            raise web.webapi.NotFound()
+                        CHUNK = 16 * 1024
+                        f = open(Project.path(project) + 'input/' + filename,'wb')
+                        while True:
+                            chunk = req.read(CHUNK)
+                            if not chunk: break
+                            f.write(chunk)     
+                        f.close()
+                    elif 'contents' in postdata and postdata['contents']:  
+                        #grab encoding
+                        encoding = 'utf-8'
+                        for p in parameters:
+                            if p.id == 'encoding':
+                                encoding = p.value                        
+                        #Contents passed in POST message itself
+                        try:
+                            f = codecs.open(Project.path(project) + 'input/' + filename,'w',encoding)
+                            f.write(postdata['contents'])
+                            f.close()
+                        except UnicodeError:
+                            raise web.webapi.Forbidden("Input file " + str(filename) + " is not in the expected encoding!")
+                    elif 'inputsource' in postdata and postdata['inputsource']:                
+                        #Copy (symlink!) from preinstalled data
+                        os.symlink(inputsource.path, Project.path(project) + 'input/' + filename)
+                    
+                    printdebug('(File transfer completed)')
+                    
+                
+            
+                #Create a file object
+                file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+                
+                
+                
+                #============== Generate metadata ==============
+
+                metadataerror = None
+                if not metadata and not errors: #check if it has not already been set in another stage
+                    #for newly generated metadata
+                    try:
+                        #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+                        validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
+                        if validmeta:
+                            #And we tie it to the CLAMFile object
+                            file.metadata = metadata
+                            #Add inputtemplate ID to metadata
+                            metadata.inputtemplate = inputtemplate.id
+                        else:
+                            metadataerror = "Undefined error"
+                    except ValueError, msg:
+                        validmeta = False
+                        metadataerror = msg
+                    except KeyError, msg:
+                        validmeta = False
+                        metadataerror = msg
+                elif validmeta:
+                    #for explicitly uploaded metadata
+                    metadata.file = file
+                    file.metadata = metadata
+                    metadata.inputtemplate = inputtemplate.id
+                    
+                if metadataerror:    
+                    #output += "<metadataerror />" #This usually indicates an error in service configuration!
+                    fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + metadataerror + " (this usually indicates an error in service configuration!)</error>"
+                elif validmeta:                    
+                    #=========== Convert the uploaded file (if requested) ==============
+                    
+                    conversionerror = False
+                    if 'converter' in postdata and postdata['converter']:
+                        for c in inputtemplate.converters:
+                            if c.id == postdata['converter']:
+                                converter = c
+                                break
+                        if converter: #(should always be found, error already provided earlier if not)
+                            try:
+                                success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                            except:
+                                success = False
+                            if not success:
+                                conversionerror = True
+                                fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
+                
+                    #====================== Validate the file itself ====================
+                    if not conversionerror:
+                        valid = file.validate()        
+                        
+                        if valid:                       
+                            output += "<valid>yes</valid>"                
+                                            
+                            #Great! Everything ok, save metadata
+                            metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                            
+                            #And create symbolic link for inputtemplates
+                            linkfilename = os.path.dirname(filename) 
+                            if linkfilename: linkfilename += '/'
+                            linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
+                            os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
+                        else:
+                            #Too bad, everything worked out but the file itself doesn't validate.
+                            #output += "<valid>no</valid>"
+                            fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
+                        
+                            #remove upload
+                            os.unlink(Project.path(project) + 'input/' + filename)
+            
+            
+            output += "</upload>\n"       
+
+        output += "</clamupload>"
         
-        output += foot
         
         
         if fatalerror:
@@ -1268,6 +1348,16 @@ class InputFileHandler(object):
         else:
             #everything ok, return XML output with 200 code
             return output
+
+
+    def extract(self,project,filename, archivetype):
+        #namelist = None
+        subfiles = []
+        
+
+        #return [ subfile for subfile in subfiles ] #return only the files that actually exist
+        
+
 
 
 class InterfaceData(object):
