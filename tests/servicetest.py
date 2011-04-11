@@ -233,5 +233,48 @@ class ExtensiveServiceTest(unittest2.TestCase):
         
     def tearDown(self):
         success = self.client.delete(self.project)
-    
+
+        
+            
+        
+class ArchiveUploadTest(unittest2.TestCase):
+    def setUp(self):
+        self.url = 'http://' + os.uname()[1] + ':8080'
+        self.client = CLAMClient(self.url)
+        self.project = 'archivetest'
+        self.client.create(self.project)
+        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f.write(u"On espère que tout ça marche bien.")
+        f.close()
+        f = codecs.open('/tmp/servicetest2.txt','w','utf-8')
+        f.write(u"Non, rien de rien, non je ne regrette rien.")
+        f.close()
+        f = codecs.open('/tmp/servicetest3.txt','w','utf-8')
+        f.write(u"Ni le mal qu'on m'a fait, ni le bien, tout ça me semble égal!")
+        f.close()
+        os.system('zip /tmp/servicetest.zip /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest.txt')
+        os.system('tar -cvf /tmp/servicetest.tar.gz /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest.txt')
+
+    def test1_zip(self):
+        """Archive Upload Test - ZIP file"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.zip', language='fr')
+        self.assertTrue(success)    
+        data = self.client.get(self.project) #get status again  
+        self.assertTrue('servicetest.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.output ])
+        
+    def test2_targz(self):
+        """Archive Upload Test - TAR.GZ file"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.tar.gz', language='fr')
+        self.assertTrue(success)    
+        data = self.client.get(self.project) #get status again  
+        self.assertTrue('servicetest.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest2.txt' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest3.txt' in [ x.filename for x in data.output ])
+        
+    def tearDown(self):
+        success = self.client.delete(self.project)        
         
