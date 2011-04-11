@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.5.4}
+\title{CLAM Documentation \\ \small version 0.5.5}
 \author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
@@ -395,6 +395,7 @@ After specifying any such parameters, there are some possible keyword arguments:
 \item \texttt{multi} -- The logical inverse of the above; you can whichever you prefer. \texttt{multi=False} is the default if not specified.
 \item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert the variable \texttt{\$SEQNR} into the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name. You can also use any of the metadata parameters as variable in the filename; as explained in section~\ref{sec:filenamevariables}.
 \item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
+\item \texttt{acceptarchive} -- This is a boolean which can be set to True if you want to accept the upload of archives to instantly upload multiple files \emph{for the same input template}. The file must be in zip, tar.gz or tar.bz2 format. Archives will be automatically extracted and the files within renamed according to the input template's specifications if necessary. Using this option implies that the exact same metadata will be associated with all uploaded files! This option can only be used in combination with \texttt{multi=True}. Note that archives can only be uploaded when all files therein fit the same input template!
 \end{enumerate}
 
 
@@ -531,6 +532,7 @@ In addition to variables that refer to global or local parameters. There are som
 \item \texttt{\$PROJECT} - Is set to the project ID.
 \item \texttt{\$INPUTFILE} - Is set to the project ID.
 \end{itemize}
+
 
 
 \subsection{Parameter Conditions}

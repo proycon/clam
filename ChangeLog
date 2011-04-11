@@ -1,5 +1,22 @@
-    
-March:
+   
+0.5.5) [April 2011]
+ - Added acceptarchive= parameter for Input Templates, allowing the upload and automatic extraction of archives (zip/tar.gz/tar.bz2)
+
+0.5.4) [April 2011]
+ - Bugfix IE compatibility (thanks to Brecht Desplanques) 
+ - Bugfix in encoding handling when passing text contents directly 
+ - Added freqlist examples from CLAM Demo videos 
+ - Added webservice ghosting, a 2nd URL on which the webservice without association webapplication is reachable
+ - Added the ability to start a webservice WITHOUT associated webapplication 
+ - added friendlier error when outputfile in wrong encoding 
+ - updated INSTALL with instructions for fink (thanks to Patrick Wambacq) 
+ - added INSTALL instructions for Mac OS X (macports)
+
+(ChangeLog gap here, forgot to maintain)
+
+------------- OLD CHANGELOG (pre 0.5.0) ------------------
+
+March 2010:
     - Concept, brainstorming, initial meetings with Antal, Martin (TICCLops), Tanja (VICI) (starting end of february)
     - Wrote first jobserver and jobclient (starting end of february)
     - Discarded jobserver and jobclient, and started RESTful webservice
@@ -20,7 +37,7 @@ March:
     - Implemented parameter validation and feedback
     - First complete test of the system on ucto
 
-April:
+April 2010:
     - Fixed custom errors
     - Look into and fix large file upload problem
     - View of status 1 (running) now auto-refreshes
@@ -45,7 +62,7 @@ April:
     - Implemented access control lists for parameters
     - Fixed multiple choice support in ChoiceParameter
 
-May:
+May 2010:
     - Interface improvements
     - Also show parameter in done-mode (status 2)
     - Added fancy table with pagination support for input/output files and project list
@@ -62,10 +79,10 @@ May:
     - Added support for sysadmin user, users can only access own projects   (pre-beta1)
     - Tested on nginx (fastcgi) (pre-beta2)
 
-June:
+June 2010:
     - bugfixes
 
-July:
+July 2010:
     - bugfixes
     - (0.2.7) Made compatible with Internet Explorer 8
     - (0.2.8) Made ready for Apache using mod_wsgi (proper support for WSGI and URLPREFIX)
@@ -74,12 +91,12 @@ July:
     - Wrote documentation for integration in Apache (WSGI) and Nginx (FastCGI)
     - (0.3.0) Started viewer support
 
-August:
+August 2010:
     - (0.3.2) CLAMInputFile/CLAMOutputFile now work both locally and remote, in a transparent fashion
     - (0.3.2) Wrote viewers for Frog (using a crude table viewer), and SoNaR (using XSL)
     - (0.3.2) Finished viewer support
     
-November:
+November 2010:
     - Started new profile & metadata framework
     
 
