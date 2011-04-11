@@ -5,6 +5,7 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Data API - Common data structures --
 #       by Maarten van Gompel (proycon)
+#       http://ilk.uvt.nl/clam
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
@@ -32,7 +33,7 @@ import clam.common.util
 import clam.common.viewers
 #clam.common.formats is deliberately imported _at the end_ 
 
-VERSION = '0.5.3'
+VERSION = '0.5.5'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""

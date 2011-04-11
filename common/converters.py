@@ -2,6 +2,7 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Converters --
 #       by Maarten van Gompel (proycon)
+#       http://ilk.uvt.nl/clam
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
