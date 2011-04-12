@@ -121,7 +121,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = "/home/proycon/work/valkuil/processingchain.py clam /home/proycon/work/valkuil/ $DATAFILE $OUTPUTDIRECTORY"
+COMMAND = "/home/proycon/work/valkuil/processchain.py clam /home/proycon/work/valkuil/ $DATAFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
