@@ -20,6 +20,7 @@ from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
+from os import uname
 import sys
 
 REQUIRE_VERSION = 0.5
