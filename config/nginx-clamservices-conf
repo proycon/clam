@@ -40,18 +40,28 @@ server {
 		wsgi_use_main_interpreter on;
     }
     
+    location /frog/static/ {
+        root /var/www/clam/static;
+    }
+    
     location  /ucto/ {
         wsgi_pass /var/www/clam/config/ucto.wsgi;
         wsgi_script_reloading on;
 		wsgi_use_main_interpreter on;
     }
+    
+    location /ucto/static/ {
+        root /var/www/clam/static;
+    }
 
-    location  /valkuil/ {
+    location /valkuil/ {
         wsgi_pass /var/www/valkuil/clamwsgi.py;
         wsgi_script_reloading on;
 		wsgi_use_main_interpreter on;
     }
-
-
+    
+    location /valkuil/static/ {
+        root /var/www/clam/static;
+    }
 
 }
