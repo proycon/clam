@@ -17,8 +17,8 @@ import os
 import sys
 
 
-sys.path.append('/home/proycon/work')
-os.environ['PYTHONPATH'] = '/home/proycon/work'
+sys.path.append('/var/www')
+os.environ['PYTHONPATH'] = '/var/www'
 
 import clam.config.frog
 import clam.clamservice
