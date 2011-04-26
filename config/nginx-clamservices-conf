@@ -55,7 +55,7 @@ server {
     }
 
     location /valkuil/ {
-        wsgi_pass /var/www/valkuil/clamwsgi.py;
+        wsgi_pass /var/www/clam/config/clam.wsgi;
         wsgi_script_reloading on;
 		wsgi_use_main_interpreter on;
     }
