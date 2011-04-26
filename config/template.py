@@ -41,8 +41,11 @@ SYSTEM_DESCRIPTION = ""
 #pre-installed corpora will be stored here. Set to an absolute path:
 ROOT = "/tmp/clam.projects/"
 
-#The URL of the system
+#The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
 PORT= 8080
+
+#The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
+#HOST = 'localhost'
 
 #If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it 
 #doesn't run at the root of the server, you can specify a URL prefix here:
