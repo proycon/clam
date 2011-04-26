@@ -36,17 +36,20 @@ SYSTEM_NAME = "Valkuil"
 SYSTEM_DESCRIPTION = "Valkuil Spellingcorrectie voor het Nederlands"
 
 # ======== LOCATION ===========
-
-#The root directory for CLAM, all project files, (input & output) and
-#pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/tmp/clam.valkuil/"
-
-#The URL of the system
-PORT= 8080
-
-#If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it 
-#doesn't run at the root of the server, you can specify a URL prefix here:
-URLPREFIX = "/clam/"
+host = uname()[1]
+if host == 'aurora' or host == 'roma': #proycon's laptop/server
+    CLAMDIR = "/home/proycon/work/clam"
+    ROOT = "/home/proycon/work/valkuil.clam/"
+    PORT = 9001
+    #URLPREFIX = 'ucto'
+else:
+    #Assuming ILK server
+    CLAMDIR = "/var/www/clam"
+    ROOT = "/var/www/clamdata/valkuil/"
+    HOST = 'webservices.ticc.uvt.nl'
+    PORT = 80
+    URLPREFIX = 'valkuil'
+    WEBSERVICEGHOST = 'ws'
 
 # ======== AUTHENTICATION & SECURITY ===========
 

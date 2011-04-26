@@ -1,0 +1,57 @@
+server { 
+	listen       80;
+	server_name  webservices.ticc.uvt.nl;
+	
+	wsgi_var  REQUEST_METHOD      $request_method;
+	#wsgi_var  SCRIPT_NAME         $uri;
+	#wsgi_var  PATH_INFO           $uri; 
+	wsgi_var  QUERY_STRING        $query_string;
+	
+	wsgi_var  CONTENT_TYPE        $content_type;
+	wsgi_var  CONTENT_LENGTH      $content_length;
+	
+	wsgi_var  SERVER_NAME         $server_name;
+	wsgi_var  SERVER_PORT         $server_port;
+	
+	wsgi_var  SERVER_PROTOCOL     $server_protocol;
+	
+	#
+	# additional variables
+	# (they will be present in the WSGI environment only if not empty)
+	#
+	wsgi_var  REQUEST_URI         $request_uri;
+	wsgi_var  DOCUMENT_URI        $document_uri;
+	wsgi_var  DOCUMENT_ROOT       $document_root;
+	
+	wsgi_var  SERVER_SOFTWARE     $nginx_version;
+	
+	wsgi_var  REMOTE_ADDR         $remote_addr;
+	wsgi_var  REMOTE_PORT         $remote_port;
+	wsgi_var  SERVER_ADDR         $server_addr;
+	
+	
+	wsgi_var REMOTE_USER $remote_user;
+    #wsgi_middleware  wsgiref.validate  validator;
+	#wsgi_middleware  paste.lint;
+
+    location  /frog/ {
+        wsgi_pass /var/www/clam/config/frog.wsgi;
+        wsgi_script_reloading on;
+		wsgi_use_main_interpreter on;
+    }
+    
+    location  /ucto/ {
+        wsgi_pass /var/www/clam/config/ucto.wsgi;
+        wsgi_script_reloading on;
+		wsgi_use_main_interpreter on;
+    }
+
+    location  /valkuil/ {
+        wsgi_pass /var/www/valkuil/clamwsgi.py;
+        wsgi_script_reloading on;
+		wsgi_use_main_interpreter on;
+    }
+
+
+
+}

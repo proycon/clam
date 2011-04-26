@@ -39,7 +39,13 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     PORT = 9001
     #URLPREFIX = 'frog'
 else:
-    raise Exception("Help! I don't know where I'm running from! Configure me!")
+    #Assuming ILK server
+    CLAMDIR = "/var/www/clam"
+    ROOT = "/var/www/clamdata/frog/"
+    HOST = 'webservices.ticc.uvt.nl'
+    PORT = 80
+    URLPREFIX = 'frog'
+    WEBSERVICEGHOST = 'ws'
 
 
 #=========== Definition of users and passwords =====================

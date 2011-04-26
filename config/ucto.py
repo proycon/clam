@@ -31,7 +31,23 @@ SYSTEM_DESCRIPTION = "Ucto is a unicode-compliant tokeniser. It takes input in t
 ROOT = path[0] + "/../ucto.clam/"
 PORT = 8080
 
-WEBSERVICEGHOST = 'ws'
+# ================ Root directory for CLAM ===============
+host = uname()[1]
+if host == 'aurora' or host == 'roma': #proycon's laptop/server
+    CLAMDIR = "/home/proycon/work/clam"
+    ROOT = "/home/proycon/work/ucto.clam/"
+    PORT = 9001
+    #URLPREFIX = 'ucto'
+else:
+    #Assuming ILK server
+    CLAMDIR = "/var/www/clam"
+    ROOT = "/var/www/clamdata/ucto/"
+    HOST = 'webservices.ticc.uvt.nl'
+    PORT = 80
+    URLPREFIX = 'ucto'
+    WEBSERVICEGHOST = 'ws'
+    
+
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
