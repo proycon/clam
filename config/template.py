@@ -44,6 +44,10 @@ ROOT = "/tmp/clam.projects/"
 #The URL of the system
 PORT= 8080
 
+#If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it 
+#doesn't run at the root of the server, you can specify a URL prefix here:
+#URLPREFIX = "/myservice/"
+
 # ======== AUTHENTICATION & SECURITY ===========
 
 #Users and passwords
