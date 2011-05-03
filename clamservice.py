@@ -47,7 +47,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 
 DEBUG = False
     
@@ -1402,7 +1402,7 @@ class FoLiAXSL(object):
     def GET(self):
         web.header('Content-Type', 'text/xsl')
 
-        for line in codecs.open('static/folia.xsl','r','utf-8'):
+        for line in codecs.open(settings.CLAMDIR + '/static/folia.xsl','r','utf-8'):
             yield line
 
 class StyleData(object):
@@ -1411,7 +1411,7 @@ class StyleData(object):
     def GET(self):
         web.header('Content-Type', 'text/css')
 
-        for line in codecs.open('style/' + settings.STYLE + '.css','r','utf-8'):
+        for line in codecs.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r','utf-8'):
             yield line
         
 class ProjectGhost(Project):
@@ -1738,6 +1738,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.MAXLOADAVG = 0 #unlimited
     if not 'STYLE' in settingkeys:
         settings.STYLE = 'classic'
+    if not 'CLAMDIR' in settingkeys:
+        settings.CLAMDIR = os.path.dirname(sys.argv[0])
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     elif settings.ENABLEWEBAPP is False:
