@@ -52,7 +52,7 @@ if 'skip' in clamdata and clamdata['skip']:
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
-    os.system("Frog " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
+    os.system("frog " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
 
 clam.common.status.write(statusfile, "Done",100)       
 
