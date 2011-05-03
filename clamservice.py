@@ -200,7 +200,7 @@ class Index(object):
 
         corpora = CLAMService.corpusindex()
 
-        render = web.template.render(settings.CLAMDIR + 'templates')
+        render = web.template.render(settings.CLAMDIR + '/templates')
 
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
@@ -492,7 +492,7 @@ class Project(object):
                     printlog("One or more parameters are invalid")
                     break
 
-        render = web.template.render(settings.CLAMDIR + 'templates')
+        render = web.template.render(settings.CLAMDIR + '/templates')
         
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
@@ -570,7 +570,7 @@ class Project(object):
             raise web.webapi.Forbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
         else:
             #write clam.xml output file
-            render = web.template.render(settings.CLAMDIR + 'templates')
+            render = web.template.render(settings.CLAMDIR + '/templates')
             f = open(Project.path(project) + "clam.xml",'w')
             f.write(str(self.response(user, project, parameters, "",True)))
             f.close()
