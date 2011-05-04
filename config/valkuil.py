@@ -44,6 +44,7 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     PORT = 9001
     BINDIR = '/usr/local/bin/'
     #URLPREFIX = 'ucto'
+    VALKUILDIR = '/home/proycon/work/valkuil/'
 else:
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
@@ -53,6 +54,7 @@ else:
     URLPREFIX = 'valkuil'
     WEBSERVICEGHOST = 'ws'
     BINDIR = '/var/www/bin/'
+    VALKUILDIR = '/var/www/valkuil/'
 
 # ======== AUTHENTICATION & SECURITY ===========
 
@@ -131,7 +133,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = "/home/proycon/work/valkuil/processchain.py clam /home/proycon/work/valkuil/ " + BINDIR + " $DATAFILE $OUTPUTDIRECTORY"
+COMMAND = VALKUILDIR + "processchain.py clam /home/proycon/work/valkuil/ " + BINDIR + " $DATAFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
