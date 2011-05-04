@@ -28,9 +28,10 @@ import clam.common.status
 if __name__ == "__main__":
 
     #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
-    datafile = sys.argv[1]
-    statusfile = sys.argv[2]
-    outputdir = sys.argv[3]
+    bindir = sys.argv[1]
+    datafile = sys.argv[2]
+    statusfile = sys.argv[3]
+    outputdir = sys.argv[4]
 
     #Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml))
     clamdata = clam.common.data.getclamdata(datafile)
@@ -58,11 +59,11 @@ if __name__ == "__main__":
                 docid = inputfile.metadata['documentid']
             if not docid:
                 docid = "untitled"                
-            os.system('ucto -L ' + language + ' -x ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.xml')
+            os.system(bindir + 'ucto -L ' + language + ' -x ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.xml')
         elif clamdata['verbose']:
-            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
+            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
         else:
-            os.system('ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.tok')
+            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.tok')
 
     #A nice status message to indicate we're done
     clam.common.status.write(statusfile, "Done",100) # status update

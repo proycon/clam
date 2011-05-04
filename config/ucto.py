@@ -38,10 +38,12 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/ucto.clam/"
     PORT = 9001
+    BINDIR = "/usr/local/bin/"
     #URLPREFIX = 'ucto'
 else:
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
+    BINDIR = "/var/www/bin/"
     ROOT = "/var/www/clamdata/ucto/"
     HOST = 'webservices.ticc.uvt.nl'
     PORT = 80
@@ -73,7 +75,7 @@ USERS = None #Enable this instead if you want no authentication
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = path[0] +  "/wrappers/uctowrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
+COMMAND = path[0] +  "/wrappers/uctowrapper.py " + BINDIR + " $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
 
 
 PROFILES = [

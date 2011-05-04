@@ -37,6 +37,7 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/frog.clam/"
     PORT = 9001
+    BINDIR = "/usr/local/bin/"
     #URLPREFIX = 'frog'
 else:
     #Assuming ILK server
@@ -46,7 +47,7 @@ else:
     PORT = 80
     URLPREFIX = 'frog'
     WEBSERVICEGHOST = 'ws'
-
+    BINDIR = "/var/www/bin/"
 
 #=========== Definition of users and passwords =====================
 
@@ -58,7 +59,7 @@ USERS = None #Enable this instead if you want no authentication
 
 
 #The system command (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
-COMMAND = CLAMDIR +  "/wrappers/frogwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
+COMMAND = CLAMDIR +  "/wrappers/frogwrapper.py " + BINDIR + " $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
 
 
 PROFILES = [

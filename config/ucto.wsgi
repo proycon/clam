@@ -19,6 +19,7 @@ import sys
 
 sys.path.append('/var/www')
 os.environ['PYTHONPATH'] = '/var/www'
+os.environ['LD_LIBRARY_PATH'] = '/var/www/lib:/usr/local/lib:/usr/lib:/lib'
 
 import clam.config.ucto
 import clam.clamservice

@@ -32,9 +32,10 @@ import clam.common.formats
 
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
-datafile = sys.argv[1]
-statusfile = sys.argv[2]
-outputdir = sys.argv[3]
+bindir = sys.argv[1]
+datafile = sys.argv[2]
+statusfile = sys.argv[3]
+outputdir = sys.argv[4]
 
 #Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml))
 clamdata = clam.common.data.getclamdata(datafile)
@@ -52,7 +53,7 @@ if 'skip' in clamdata and clamdata['skip']:
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
-    os.system("frog " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
+    os.system(bindir + "frog " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
 
 clam.common.status.write(statusfile, "Done",100)       
 
