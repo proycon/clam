@@ -123,7 +123,7 @@ $(document).ready(function(){
 
 
    //Open in-browser editor
-   $("#openeditor").click(function(event){  $("#editormask").show(); window.location.hash="editor"; $("#editor").slideDown(); })
+   $("#openeditor").click(function(event){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); })
 
     
 
