@@ -4,6 +4,7 @@
 import sys
 import os
 import datetime
+import subprocess
 
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
@@ -19,7 +20,7 @@ if projectdir[-1] != '/':
 
 cmd = " ".join(sys.argv[3:])
 
-print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.strftime('%Y-%m-%d %H:%M:%S') + ")"
+print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
 
 if not cmd:
     print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: No command specified!"
@@ -32,10 +33,11 @@ exec "import " + settingsmodule + " as settings"
 settingkeys = dir(settings)
 
 cmd += " 2>> " + projectdir + "output/error.log"
+print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
 process = subprocess.Popen(cmd,cwd=projectdir, shell=True)				
 if process:
     pid = process.pid
-    printlog("Started with pid " + str(pid) )
+    print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid)
     f = open(projectdir + '.pid','w')
     f.write(str(pid))
     f.close()
@@ -51,6 +53,6 @@ f.close()
 os.unlink(projectdir + '.pid')
 
     
-print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.strftime('%Y-%m-%d %H:%M:%S') + ")"
+print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
 
 sys.exit(statuscode)
