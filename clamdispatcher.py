@@ -34,7 +34,7 @@ settingkeys = dir(settings)
 
 
 print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
-process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stdout=stdout)				
+process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)				
 if process:
     pid = process.pid
     print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid)
