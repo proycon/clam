@@ -32,17 +32,22 @@ elif not os.path.isdir(projectdir):
 exec "import " + settingsmodule + " as settings"
 settingkeys = dir(settings)
 
-cmd += " 2>> " + projectdir + "output/error.log"
+
 print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
-process = subprocess.Popen(cmd,cwd=projectdir, shell=True)				
+process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stdout=stdout)				
 if process:
     pid = process.pid
     print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid)
+    sys.stderr.flush()
     f = open(projectdir + '.pid','w')
     f.write(str(pid))
     f.close()
 else:
     print >>sys.stderr, "[CLAM Dispatcher] Unable to launch process"
+    sys.stderr.flush()
+    f = open(projectdir + '.done','w')
+    f.write(str(1))
+    f.close()
     sys.exit(1)
     
 returnedpid, statuscode = os.wait() #waitpid(pid)
@@ -53,6 +58,6 @@ f.close()
 os.unlink(projectdir + '.pid')
 
     
-print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
+print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode)
 
 sys.exit(statuscode)

@@ -611,9 +611,9 @@ class Project(object):
             if process:
                 pid = process.pid
                 printlog("Started dispatcher with pid " + str(pid) )
-                #f = open(Project.path(project) + '.pid','w') #will be handled by dispatcher!
-                #f.write(str(pid))
-                #f.close()
+                f = open(Project.path(project) + '.pid','w') #will be handled by dispatcher!
+                f.write(str(pid))
+                f.close()
                 raise web.webapi.Accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
