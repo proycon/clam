@@ -32,7 +32,6 @@ exec "import " + settingsmodule + " as settings"
 settingkeys = dir(settings)
 
 cmd += " 2>> " + projectdir + "output/error.log"
-
 process = subprocess.Popen(cmd,cwd=projectdir, shell=True)				
 if process:
     pid = process.pid

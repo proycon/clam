@@ -538,6 +538,7 @@ class Project(object):
 
     @requirelogin
     def POST(self, project, user=None):  
+        global settingsmodule
         Project.create(project, user)
         if user and not Project.access(project, user):
             raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
@@ -603,9 +604,10 @@ class Project(object):
             #TODO: protect against insertion
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
+            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
-            process = subprocess.Popen(settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + cmd,cwd=settings.CLAMDIR, shell=True)				
+            process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)				
             if process:
                 pid = process.pid
                 printlog("Started dispatcher with pid " + str(pid) )
@@ -1746,7 +1748,7 @@ def set_defaults(HOST = None, PORT = None):
         settings.CLAMDIR = os.path.dirname(sys.argv[0])
     if not 'DISPATCHER' in settingkeys:
         settings.DISPATCHER = 'clamdispatcher.py'
-    if not 'REALM' in settingskeys:
+    if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
