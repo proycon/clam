@@ -126,6 +126,7 @@ class CLAMService(object):
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
+
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
     
@@ -1740,6 +1741,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.STYLE = 'classic'
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(sys.argv[0])
+    if not 'REALM' in settingskeys:
+        settings.REALM = settings.SYSTEM_ID
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     elif settings.ENABLEWEBAPP is False:
@@ -1868,7 +1871,7 @@ if __name__ == "__main__":
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
+        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.REALM)
 
     if not fastcgi:
         settings.URLPREFIX = '' #standalone server always runs at the root
@@ -1888,7 +1891,7 @@ def run_wsgi(settingsmodule):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
+        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.REALM)
 
     service = CLAMService('wsgi')
     return service.application
