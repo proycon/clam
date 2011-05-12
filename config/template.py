@@ -54,11 +54,20 @@ PORT= 8080
 # ======== AUTHENTICATION & SECURITY ===========
 
 #Users and passwords
+
+REALM = SYSTEM_ID #set security realm, a required component for hashing passwords
+
 USERS = None #no user authentication
-#USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
+
+#If you want to enable user-based security, you can define a dictionary
+#of users and (hashed) passwords here. The actual authentication will proceed
+#as HTTP Digest Authentication. Although being a convenient shortcut,
+#using pwhash and plaintext password in code is not secure!!
+
+#USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
+
 
 ADMINS = ['admin'] #Define which of the above users are admins
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
