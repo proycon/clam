@@ -53,6 +53,8 @@ DEBUG = False
     
 DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 
+settingsmodule = None #will be overwritten later
+
 setlog(sys.stdout)
 #Empty defaults
 #SYSTEM_ID = "clam"
@@ -1885,14 +1887,16 @@ if __name__ == "__main__":
 
     CLAMService('fastcgi' if fastcgi else '') #start
 
-def run_wsgi(settingsmodule):
+def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""
+    global settingsmodule
     #import_string = "import " + settingsmodule + " as settings"
     #exec import_string
 
 
-    globals()['settings'] = settingsmodule
-
+    globals()['settings'] = settings_module
+    settingsmodule = settings_module.__name__
+    
     setlog(None)
     set_defaults(None,None)
     test_dirs()
