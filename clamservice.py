@@ -47,7 +47,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.5.6'
+VERSION = '0.6.0'
 
 DEBUG = False
     
@@ -126,7 +126,6 @@ class CLAMService(object):
         '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
-
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
     
@@ -291,6 +290,10 @@ class Project(object):
             return 0
 
     def running(self,project):
+        return os.path.exists(Project.path(project) + ".pid")
+        
+
+    def running_pre0_6(self,project): #obsolete
         pid = self.pid(project)
         if pid == 0:
             return False
@@ -328,7 +331,7 @@ class Project(object):
         return True
 
     def done(self,project):
-        return os.path.isfile(Project.path(project) + ".done")
+        return os.path.exists(Project.path(project) + ".done")
 
     def exitstatus(self, project):
         f = open(Project.path(project) + ".done")
@@ -336,10 +339,10 @@ class Project(object):
         f.close()
         return status
 
-    def preparingdownload(self,project):
+    def preparingdownload(self,project): #obsolete
         return os.path.isfile(Project.path(project) + ".download")
 
-    def processingupload(self,project):
+    def processingupload(self,project): #obsolete
         return os.path.isfile(Project.path(project) + ".upload")
 
     def exists(self, project):
@@ -600,14 +603,15 @@ class Project(object):
             #TODO: protect against insertion
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
-            printlog("Starting " + settings.COMMAND + ": " + repr(cmd) + " ..." )
-            process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
+            printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
+            #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
+            process = subprocess.Popen(settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + cmd,cwd=settings.CLAMDIR, shell=True)				
             if process:
                 pid = process.pid
-                printlog("Started with pid " + str(pid) )
-                f = open(Project.path(project) + '.pid','w')
-                f.write(str(pid))
-                f.close()
+                printlog("Started dispatcher with pid " + str(pid) )
+                #f = open(Project.path(project) + '.pid','w') #will be handled by dispatcher!
+                #f.write(str(pid))
+                #f.close()
                 raise web.webapi.Accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
@@ -1716,7 +1720,6 @@ def set_defaults(HOST = None, PORT = None):
 
     if 'ROOT' in settingkeys and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
-
     if not 'USER' in settingkeys:
         settings.USER = None
     if not 'ADMINS' in settingkeys:
@@ -1741,6 +1744,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.STYLE = 'classic'
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(sys.argv[0])
+    if not 'DISPATCHER' in settingkeys:
+        settings.DISPATCHER = 'clamdispatcher.py'
     if not 'REALM' in settingskeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'ENABLEWEBAPP' in settingkeys:
@@ -1749,7 +1754,7 @@ def set_defaults(HOST = None, PORT = None):
         Project.GHOST = True
         Index.GHOST = True        
     if not 'WEBSERVICEGHOST' in settingkeys:
-        settings.WEBSERVICEGHOST = False
+        settings.WEBSERVICEGHOST = False        
     elif settings.WEBSERVICEGHOST:
         CLAMService.urls = (
             '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
