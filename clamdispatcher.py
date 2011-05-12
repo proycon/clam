@@ -26,7 +26,7 @@ if not cmd:
     print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: No command specified!"
     sys.exit(1)
 elif not os.path.isdir(projectdir):
-    print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Project directory does not exist"
+    print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist"
     sys.exit(1)
 
 exec "import " + settingsmodule + " as settings"

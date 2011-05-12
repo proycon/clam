@@ -604,7 +604,7 @@ class Project(object):
             #TODO: protect against insertion
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
-            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + cmd
+            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + ' ' + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
             process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)				
