@@ -1709,6 +1709,23 @@ def sufficientresources():
             f.close()
             if settings.MAXLOADAVG < loadavg:
                 return False
+    if settings.MINDISKSPACE and settings.DISK:
+        dffile = '/tmp/df.' + str("%034x" % random.getrandbits(128))
+        ret = os.system('df -m ' + settings.DISK + " | gawk '{ print $4; }'  > " + dffile)
+        if ret == 0:
+            try:
+                f = open(dffile,'r')
+                free = int(f.readlines()[-1])
+                f.close()
+                if free < settings.MINDISKFREE:
+                    os.unlink(dffile)
+                    return False
+            except:
+                printlog("WARNING: df " + settings.DISK + " failed (unexpected format). Skipping disk space check!")                                                
+                os.unlink(dffile)
+
+        else:
+            printlog("WARNING: df " + settings.DISK + " failed. Skipping disk space check!")        
     return True
         
 
@@ -1753,6 +1770,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.REQUIREMEMORY = 0 #unlimited
     if not 'MAXLOADAVG' in settingkeys:
         settings.MAXLOADAVG = 0 #unlimited
+    if not 'MINDISKSPACE' in settingkeys:
+        settings.MINDISKSPACE = 0
+    if not 'DISK' in settingkeys:
+        settings.DISK = None    
     if not 'STYLE' in settingkeys:
         settings.STYLE = 'classic'
     if not 'CLAMDIR' in settingkeys:
