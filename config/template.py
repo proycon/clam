@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
-
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
 # -- Service Configuration File --
@@ -22,9 +21,12 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.5
+REQUIRE_VERSION = 0.6
 
 # ======== GENERAL INFORMATION ===========
+
+# General information concerning your system.
+
 
 #The System ID, a short alphanumeric identifier for internal use only
 SYSTEM_ID = ""
@@ -32,7 +34,7 @@ SYSTEM_ID = ""
 #System name, the way the system is presented to the world
 SYSTEM_NAME = ""
 
-#An informative description for this system:
+#An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
 SYSTEM_DESCRIPTION = ""
 
 # ======== LOCATION ===========
@@ -45,19 +47,24 @@ ROOT = "/tmp/clam.projects/"
 PORT= 8080
 
 #The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
+#Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
 #HOST = 'localhost'
 
 #If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it 
 #doesn't run at the root of the server, you can specify a URL prefix here:
 #URLPREFIX = "/myservice/"
 
+#The location of where CLAM is installed (will be determined automatically if not set)
+#CLAMDIR = "/path/to/clam"
+
 # ======== AUTHENTICATION & SECURITY ===========
 
 #Users and passwords
 
-REALM = SYSTEM_ID #set security realm, a required component for hashing passwords
+#set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
+#REALM = SYSTEM_ID 
 
-USERS = None #no user authentication
+USERS = None #no user authentication/security (this is not recommended for production environments!)
 
 #If you want to enable user-based security, you can define a dictionary
 #of users and (hashed) passwords here. The actual authentication will proceed
@@ -66,30 +73,33 @@ USERS = None #no user authentication
 
 #USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
 
-
-ADMINS = ['admin'] #Define which of the above users are admins
+#Define which of the above users are admins and may see/edit/delete all projects:
+#ADMINS = ['admin']
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
-#Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
+#Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
 REQUIREMEMORY = 10
 
-#Maximum load average at which processes are still started (first number reported by 'uptime')
+#Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
 MAXLOADAVG = 1.0
+
+#Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
+DISK = '/dev/sda1' #set this to the disk where ROOT is on
+MINDISKSPACE = 10
 
 
 # ======== WEB-APPLICATION STYLING =============
 
-#Choose a style (has to be defined as a CSS file in style/ )
+#Choose a style (has to be defined as a CSS file in style/ ). You can copy, rename and adapt it to make your own style
 STYLE = 'classic'
 
 # ======== ENABLED FORMATS ===========
 
 #Here you can specify an extra formats module
 CUSTOM_FORMATS_MODULE = None
-
 
 # ======== PREINSTALLED DATA ===========
 
@@ -147,6 +157,7 @@ COMMAND = sys.path[0] + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE 
 # ======== PARAMETER DEFINITIONS ===========
 
 #The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
+
 PARAMETERS =  [ 
     ('Group title', [ 
         #BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
@@ -155,3 +166,16 @@ PARAMETERS =  [
     ] )
 ]
 
+
+
+# ======== DISPATCHING (ADVANCED! YOU CAN SAFELY SKIP THIS!) ========
+
+#The dispatcher to use (defaults to clamdispatcher.py), you almost never want to change this
+#DISPATCHER = 'clamdispatcher.py' 
+
+#Run background process on a remote host? Then set the following:
+#REMOTEHOST = 'some.remote.host'
+#REMOTEUSER = 'username'
+
+#For this to work, the user under which CLAM runs must have (passwordless) ssh access (use ssh keys) to the remote host using the specified username (ssh REMOTEUSER@REMOTEHOST)
+#Moreover, both systems must have access to the same filesystem (ROOT) under the same mountpoint.

@@ -26,6 +26,7 @@ import random
 import re
 import urllib2
 import getopt
+import time
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -119,7 +120,7 @@ class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
-        '/', 'Index'i,
+        '/', 'Index',
         '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         '/style.css', 'StyleData', #provides stylesheet for the web interface
         '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -319,7 +320,16 @@ class Project(object):
     def abort(self,project):
         if self.pid(project) == 0:
             return False
-            
+        printlog("Aborting process of project '" + project + "'" )
+        while not os.path.exists(Project.path(project) + ".done"):
+            printdebug("Waiting for process to die")
+            time.sleep(1)
+        return True
+    
+    def abort_pre0_6(self,project): #obsolete
+        if self.pid(project) == 0:
+            return False
+                    
         printlog("Aborting process in project '" + project + "'" )
         pid = self.pid(project)            
         if pid > 0:
@@ -607,6 +617,11 @@ class Project(object):
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
             cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + ' ' + cmd
+            if settings.REMOTEHOST():
+                if settings.REMOTEUSER:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+                else:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)				
             process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)				
@@ -1768,6 +1783,10 @@ def set_defaults(HOST = None, PORT = None):
             '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
             #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
         ) + CLAMService.urls
+    if not 'REMOTEHOST' in settingkeys:
+        settings.REMOTEHOST = None
+    elif not 'REMOTEUSER' in settingkeys:
+        settings.REMOTEUSER = None
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
