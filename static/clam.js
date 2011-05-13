@@ -5,15 +5,18 @@ $(document).ready(function(){
         alert("System error: data.js not properly loaded?");
    }
 
-   //Download parameters.xsl so it's available to javascript for file-parameters
-   $.ajax({ 
-        type: "GET", 
-        url: baseurl + "/static/parameters.xsl",
-        dataType: "xml", 
-        success: function(xml){ 
-            parametersxsl = xml;
-        }
-   });
+   if (stage == 0) {
+       //Download parameters.xsl so it's available to javascript for file-parameters
+       $.ajax({ 
+            type: "GET", 
+            url: baseurl + "/static/parameters.xsl",
+            dataType: "xml", 
+            success: function(xml){ 
+                parametersxsl = xml;
+            }
+       });
+    }
+
    
    //set custom text
    if ($('#customtextindex').length > 0) {

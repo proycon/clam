@@ -56,7 +56,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <xsl:if test="status/@code = 1">
-      <meta http-equiv="refresh" content="10" />            
+      <meta http-equiv="refresh" content="2" />            
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
@@ -69,6 +69,22 @@
     <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
+    
+    <xsl:if test="status/@code = 1">
+        <script type="text/javascript">
+            stage = 1;
+        </script>
+    </xsl:if>
+    <xsl:if test="status/@code = 0">
+        <script type="text/javascript">
+            stage = 0;
+        </script>
+    </xsl:if>
+    <xsl:if test="status/@code = 2">
+        <script type="text/javascript">
+            stage = 2;
+        </script>
+    </xsl:if>
   </head>
 </xsl:template>
 

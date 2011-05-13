@@ -351,12 +351,6 @@ class Project(object):
         f.close()
         return status
 
-    def preparingdownload(self,project): #obsolete
-        return os.path.isfile(Project.path(project) + ".download")
-
-    def processingupload(self,project): #obsolete
-        return os.path.isfile(Project.path(project) + ".upload")
-
     def exists(self, project):
         """Check if the project exists"""
         printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 

@@ -52,8 +52,8 @@ settingkeys = dir(settings)
 
 print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
 
-begintime = datetime.datetime.now()
 process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)				
+begintime = datetime.datetime.now()
 if process:
     pid = process.pid
     print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid)
@@ -69,25 +69,26 @@ else:
     f.close()
     sys.exit(1)
     
-intervalf = lambda s: min(s/10.0, 15)
+#intervalf = lambda s: min(s/10.0, 15)
 abortchecktime = 0
 
 while True:    
     duration = datetime.datetime.now() - begintime
+    d = duration.microseconds / 10000.0
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
-            print >>sys.stderr, "[CLAM Dispatcher] Process ended"
+            print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + str(d)+"s)"
             break
     except OSError: #no such process
-        print >>sys.stderr, "[CLAM Dispatcher] Process ended"
-        break     
-    d = duration.microseconds / 1000.0
+        print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + str(d)+"s)"
+        statuscode = 1
+        break         
     abortchecktime += d
     if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
         abortchecktime = 0                
         if os.path.exists(projectdir + '.abort'):
-            print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON USER SIGNAL!"
+            print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON USER SIGNAL! (" + str(d)+"s)"
             running = True
             while running:
                 os.system("kill -15 " + str(pid))
@@ -96,7 +97,14 @@ while True:
                     time.sleep(0.2)            
             os.unlink(projectdir + '.abort')
             break
-    time.sleep(intervalf(d))
+    if d <= 1:
+        time.sleep(0.05)
+    elif d <= 2:
+        time.sleep(0.2)
+    elif d <= 10:
+        time.sleep(0.5)
+    else:
+        time.sleep(1)
     
 f = open(projectdir + '.done','w')
 f.write(str(statuscode))
