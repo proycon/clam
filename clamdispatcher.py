@@ -80,8 +80,9 @@ while True:
             break
     except OSError: #no such process
         break     
-    abortchecktime += duration.microseconds / 1000.0
-    if abortchecktime >= duration+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
+    d = duration.microseconds / 1000.0
+    abortchecktime += d
+    if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
         abortchecktime = 0                
         if os.path.exists(projectdir + '.abort'):
             print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON USER SIGNAL!"
@@ -93,7 +94,7 @@ while True:
                     time.sleep(0.2)            
             os.unlink(projectdir + '.abort')
             break
-    time.sleep(intervalf(duration.microseconds/1000.0))
+    time.sleep(intervalf(d))
     
 f = open(projectdir + '.done','w')
 f.write(str(statuscode))
