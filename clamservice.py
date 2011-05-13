@@ -293,7 +293,7 @@ class Project(object):
             return 0
 
     def running(self,project):
-        return os.path.exists(Project.path(project) + ".pid")
+        return os.path.isfile(Project.path(project) + ".pid") and not os.path.isfile(Project.path(project) + ".done")
         
 
     def running_pre0_6(self,project): #obsolete
@@ -343,7 +343,7 @@ class Project(object):
         return True
 
     def done(self,project):
-        return os.path.exists(Project.path(project) + ".done")
+        return os.path.isfile(Project.path(project) + ".done")
 
     def exitstatus(self, project):
         f = open(Project.path(project) + ".done")

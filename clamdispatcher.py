@@ -76,9 +76,11 @@ while True:
     duration = datetime.datetime.now() - begintime
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
-        if returnedpid == pid:
+        if returnedpid != 0:
+            print >>sys.stderr, "[CLAM Dispatcher] Process ended"
             break
     except OSError: #no such process
+        print >>sys.stderr, "[CLAM Dispatcher] Process ended"
         break     
     d = duration.microseconds / 1000.0
     abortchecktime += d
