@@ -16,41 +16,41 @@ $(document).ready(function(){
    });
    
    //set custom text
-   if ($('#customtextindex')) {
+   if ($('#customtextindex').length > 0) {
        $.ajax({
             type: "GET",
-            url: baseurl + "/static/custom/" + systemid + '_index.html';
+            url: baseurl + "/static/custom/" + systemid + '_index.html',
             dataType: "html",
             success: function(data) {
                 $('#customtextindex').innerHTML = data;
-            }
-            failure: function() {
+            },
+            error: function() {
                 $('#customtextindex').hide();
             }
        });
    } 
-   if ($('#customtextprojectstart')) {
+   if ($('#customtextprojectstart').length > 0) {
         $.ajax({
             type: "GET",
-            url: baseurl + "/static/custom/" + systemid + '_projectstart.html';
+            url: baseurl + "/static/custom/" + systemid + '_projectstart.html',
             dataType: "html",
             success: function(data) {
                 $('#customtextprojectstart').innerHTML = data;
-            }
-            failure: function() {
+            },
+            error: function() {
                 $('#customtextprojectstart').hide();
             }
        });       
    }
-   if ($('#customtextprojectdone')) {
+   if ($('#customtextprojectdone').length > 0) {
         $.ajax({
             type: "GET",
-            url: baseurl + "/static/custom/" + systemid + '_projectdone.html';
+            url: baseurl + "/static/custom/" + systemid + '_projectdone.html',
             dataType: "html",
             success: function(data) {
                 $('#customtextprojectdone').innerHTML = data;
-            }
-            failure: function() {
+            },
+            error: function() {
                 $('#customtextprojectdone').hide();
             }
        });              

@@ -401,7 +401,7 @@
 <xsl:template name="clamindex">
         <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
         <div id="description" class="box">
-         <xsl:value select="description" />
+         <xsl:value-of select="description" />
         </div>
         
         <div id="customtextindex" class="box"></div>
