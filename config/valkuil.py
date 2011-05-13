@@ -133,7 +133,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = VALKUILDIR + "processchain.py clam /home/proycon/work/valkuil/ " + BINDIR + " $DATAFILE $OUTPUTDIRECTORY"
+COMMAND = VALKUILDIR + "processchain.py clam " + VALKUILDIR + ' ' + BINDIR + " $DATAFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
