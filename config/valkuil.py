@@ -67,7 +67,7 @@ ADMINS = ['admin'] #Define which of the above users are admins
 
 #Do you want all projects to be public to all users? Otherwise projects are 
 #private and only open to their owners and users explictly granted access.
-PROJECTS_PUBLIC = False
+PROJECTS_PUBLIC = True
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
 #REQUIREMEMORY = 10
