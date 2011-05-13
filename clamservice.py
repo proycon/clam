@@ -119,7 +119,7 @@ class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
-        '/', 'Index',
+        '/', 'Index'i,
         '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         '/style.css', 'StyleData', #provides stylesheet for the web interface
         '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -1404,7 +1404,7 @@ class InterfaceData(object):
             url += settings.URLPREFIX
         if url[-1] == '/': url = url[:-1]
 
-        return "baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
+        return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
 class FoLiAXSL(object):
     """Provides Stylesheet"""

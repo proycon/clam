@@ -1,4 +1,10 @@
-   
+0.6.0) [May 2011]
+- Implementer dispatcher, dispatcher now mediates execution of wrapper script
+- Fixed some static images (thanks to Brecht Deplanques)
+- Fixes in URL handling
+- Fixes concerning opening live editor
+
+ 
 0.5.5) [April 2011]
  - Added acceptarchive= parameter for Input Templates, allowing the upload and automatic extraction of archives (zip/tar.gz/tar.bz2)
 

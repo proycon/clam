@@ -22,11 +22,11 @@ from clam.common.digestauth import pwhash
 from sys import path 
 from os import uname
 
-REQUIRE_VERSION = 0.5
+REQUIRE_VERSION = 0.6
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Ucto Tokeniser"
-SYSTEM_DESCRIPTION = "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
+SYSTEM_DESCRIPTION = 'Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages.'
 
 #Root directory for CLAM
 ROOT = path[0] + "/../ucto.clam/"
@@ -49,7 +49,7 @@ else:
     PORT = 80
     URLPREFIX = 'ucto'
     WEBSERVICEGHOST = 'ws'
-    
+
 
 
 #Users and passwords

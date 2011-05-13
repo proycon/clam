@@ -10,7 +10,7 @@ $elif user:
     <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
 $else:
     <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url">
- <description>$system_description</description>
+ <description>$:system_description</description>
 $if not project:
         <projects>
         $for p, time in projects:

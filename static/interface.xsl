@@ -16,6 +16,16 @@
             <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
             <xsl:apply-templates select="status"/>
             <xsl:choose>
+                <xsl:when test="status/@code = 0">  
+                 <div id="customtextprojectstart" class="box"></div>
+                </xsl:when>
+                <xsl:when test="status/@code = 1">  
+                 <div id="customtextprojectdone" class="box"></div>
+                </xsl:when>
+            </xsl:choose>
+            
+            <xsl:apply-templates select="status"/>
+            <xsl:choose>
               <xsl:when test="status/@code = 0">  
                 <div id="input" class="box">            
                  <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
@@ -388,12 +398,14 @@
     </xsl:choose>
 </xsl:template>
 
-
 <xsl:template name="clamindex">
         <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
         <div id="description" class="box">
-              <xsl:value-of select="description" />   
+         <xsl:value select="description" />
         </div>
+        
+        <div id="customtextindex" class="box"></div>
+        
         <div id="startproject" class="box">
             <h3>Start a new Project</h3>    
                 Project ID: <input id="projectname" type="projectname" value="" />

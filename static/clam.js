@@ -14,6 +14,48 @@ $(document).ready(function(){
             parametersxsl = xml;
         }
    });
+   
+   //set custom text
+   if ($('#customtextindex')) {
+       $.ajax({
+            type: "GET",
+            url: baseurl + "/static/custom/" + systemid + '_index.html';
+            dataType: "html",
+            success: function(data) {
+                $('#customtextindex').innerHTML = data;
+            }
+            failure: function() {
+                $('#customtextindex').hide();
+            }
+       });
+   } 
+   if ($('#customtextprojectstart')) {
+        $.ajax({
+            type: "GET",
+            url: baseurl + "/static/custom/" + systemid + '_projectstart.html';
+            dataType: "html",
+            success: function(data) {
+                $('#customtextprojectstart').innerHTML = data;
+            }
+            failure: function() {
+                $('#customtextprojectstart').hide();
+            }
+       });       
+   }
+   if ($('#customtextprojectdone')) {
+        $.ajax({
+            type: "GET",
+            url: baseurl + "/static/custom/" + systemid + '_projectdone.html';
+            dataType: "html",
+            success: function(data) {
+                $('#customtextprojectdone').innerHTML = data;
+            }
+            failure: function() {
+                $('#customtextprojectdone').hide();
+            }
+       });              
+   }
+    
     
    //Create lists of all possible inputtemplates (aggregated over all profiles)
    var inputtemplate_options = "<option value=\"\">Select a filetype...</option>";

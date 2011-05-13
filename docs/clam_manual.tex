@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.5.5}
+\title{CLAM Documentation \\ \small version 0.6.0}
 \author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
@@ -664,6 +664,17 @@ It is possible and sometimes necessary to define more than one profile. Recall t
 
 Now suppose there is another kind of mandatory input, a lexicon against which spell checking occurs, that is relevant for \emph{both} profiles, and exactly the same for both profiles. In such circumstances, you could simply respecify the full input template, with the same ID as in the other profile. The most elegant solution however, is to instantiate the input template in a variable, prior to the profile definition, and then use this variable in both profiles.
 
+\subsection{Customising the web application}
+
+The CLAM web application offers a single uniform interface for all kinds of services. However, a certain degree of customisation is possible. One thing you may want is to include more HTML text on the pages, possibly enriched with images and hyperlinks to external sites. It is an ideal way to add extra instructions for your users. Doing this is very straightforward, by adding some custom HTML files to \texttt{static/custom/}, the HTML files should be named as followed, where SYSTEMID should be replaced by the ID of your system, as configured in your service configuration file.
+
+\begin{itemize}
+\item \texttt{static/custom/SYSTEMID_index.html} - This file will be included in the index view, the overview of all projects.
+\item \texttt{static/custom/SYSTEMID_projectstart.html} - This file will be included in the project view where the user can upload files and select parameters.
+\item \texttt{static/custom/SYSTEMID_projectdone.html} - This file will be included in the project view when the project is done and output is ready to be viewed/downloaded.
+\end{itemize}
+
+A second kind of customisation is customisation of the style, this can be achieved by creating new CSS themes. CLAM gets shipped with the default ``classic'' style. Copy, rename and adapt \texttt{style/classic.css} to create your own style. And set \texttt{STYLE} accordingly in your service configuration file.
 
 \section{Wrapper script}
 
