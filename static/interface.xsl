@@ -14,7 +14,7 @@
         <xsl:choose>
          <xsl:when test="@project">
             <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
-            <xsl:apply-templates select="status"/>
+
             <xsl:choose>
                 <xsl:when test="status/@code = 0">  
                  <div id="customtextprojectstart" class="box"></div>
