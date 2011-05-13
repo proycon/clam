@@ -1765,7 +1765,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'HOST' in settingkeys and not HOST:
         settings.HOST = os.uname()[1]
     if not 'URLPREFIX' in settingkeys:
-        settings.URLPREFIX = ''    
+        settings.URLPREFIX = ''            
     if not 'REQUIREMEMORY' in settingkeys:
         settings.REQUIREMEMORY = 0 #unlimited
     if not 'MAXLOADAVG' in settingkeys:
@@ -1917,6 +1917,8 @@ if __name__ == "__main__":
         auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.REALM)
 
     if not fastcgi:
+        if settings.URLPREFIX:
+            raise Exception("Can't use URLPREFIX when running in standalone mode!")
         settings.URLPREFIX = '' #standalone server always runs at the root
 
     CLAMService('fastcgi' if fastcgi else '') #start
