@@ -71,14 +71,15 @@ else:
     
 #intervalf = lambda s: min(s/10.0, 15)
 abortchecktime = 0
+idle = 0
 
 while True:    
     duration = datetime.datetime.now() - begintime
-    d = duration.microseconds / 10000.0
+    d = duration.microseconds / 1000000.0
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
-            print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + str(d)+"s)"
+            print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + str(d)+"s) "
             break
     except OSError: #no such process
         print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + str(d)+"s)"
@@ -94,16 +95,21 @@ while True:
                 os.system("kill -15 " + str(pid))
                 running = (os.system('ps ' + str(pid)) == 0)            
                 if running:
+                    idle += 0.2
                     time.sleep(0.2)            
             os.unlink(projectdir + '.abort')
             break
     if d <= 1:
+        idle += 0.05
         time.sleep(0.05)
     elif d <= 2:
+        idle += 0.2
         time.sleep(0.2)
     elif d <= 10:
+        idle += 0.5
         time.sleep(0.5)
     else:
+        idle += 1
         time.sleep(1)
     
 f = open(projectdir + '.done','w')
@@ -111,7 +117,7 @@ f.write(str(statuscode))
 f.close()
 os.unlink(projectdir + '.pid')
 
-    
-print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode)
-
+d = duration.microseconds / 1000000.0  
+print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s"
+ 
 sys.exit(statuscode)
