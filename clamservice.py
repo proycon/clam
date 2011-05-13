@@ -195,7 +195,7 @@ class Index(object):
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
                 project = os.path.basename(f)
-                if not settings.PROJECTS_PUBLIC or user in settings.ADMINS or user in Project.path(project):
+                if settings.PROJECTS_PUBLIC or user in settings.ADMINS or Project.access(project, user):
                     projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
 
         errors = "no"
@@ -529,7 +529,7 @@ class Project(object):
         if not self.exists(project):
             raise web.webapi.NotFound("Project " + project + " was not found") #404
         else:
-            if user and not Project.access(project, user):
+            if user and not Project.access(project, user) and not user in settings.ADMINS:
                 raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
             return self.response(user, project, settings.PARAMETERS) #200
 
