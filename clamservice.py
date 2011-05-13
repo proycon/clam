@@ -617,7 +617,7 @@ class Project(object):
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
             cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + ' ' + cmd
-            if settings.REMOTEHOST():
+            if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
                 else:

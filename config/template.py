@@ -173,8 +173,8 @@ PARAMETERS =  [
 #The dispatcher to use (defaults to clamdispatcher.py), you almost never want to change this
 #DISPATCHER = 'clamdispatcher.py' 
 
-#Run background process on a remote host? Then set the following:
-#REMOTEHOST = 'some.remote.host'
+#Run background process on a remote host? Then set the following (leave the lambda in):
+#REMOTEHOST = lambda: return 'some.remote.host'
 #REMOTEUSER = 'username'
 
 #For this to work, the user under which CLAM runs must have (passwordless) ssh access (use ssh keys) to the remote host using the specified username (ssh REMOTEUSER@REMOTEHOST)
