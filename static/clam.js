@@ -5,7 +5,7 @@ $(document).ready(function(){
         alert("System error: data.js not properly loaded?");
    }
 
-   if (stage == 0) {
+   if ((stage !== undefined) && (stage == 0)) {
        //Download parameters.xsl so it's available to javascript for file-parameters
        $.ajax({ 
             type: "GET", 
