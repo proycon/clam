@@ -1,11 +1,11 @@
 
 
 $(document).ready(function(){
-   if (inputtemplates == undefined) {
+   if (typeof(inputtemplates) == 'undefined') {
         alert("System error: data.js not properly loaded?");
    }
 
-   if ((stage !== undefined) && (stage == 0)) {
+   if (typeof(stage) != 'undefined') {
        //Download parameters.xsl so it's available to javascript for file-parameters
        $.ajax({ 
             type: "GET", 
