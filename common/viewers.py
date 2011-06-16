@@ -11,7 +11,10 @@
 ###############################################################
 
 
-import web
+try:
+    import web
+except ImportError:
+    pass
 import urllib2
 from urllib import urlencode
 
