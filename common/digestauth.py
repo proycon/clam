@@ -61,19 +61,20 @@ class auth(object):
             requestHeader = web.ctx.environ.get('HTTP_AUTHORIZATION', None)
             if not requestHeader:
                 # client has failed to include an authentication header; send a 401 response
-                print "DEBUG norequestheader"
+                print "AUTH DEBUG norequestheader"
                 return self.send401UnauthorizedResponse()
             if requestHeader[0:7] != "Digest ":
                 # client has attempted to use something other than Digest authenication; deny
+                print "AUTH DEBUG badrequest"
                 return self.denyBadRequest()
             reqHeaderDict = parseAuthHeader(requestHeader)
             if not self.directiveProper(reqHeaderDict, web.ctx.fullpath):
-                print "DEBUG notdirectiveproper"
+                print "AUTH DEBUG notdirectiveproper"
                 # Something is wrong with the authentication header
                 if reqHeaderDict.get('opaque',self.opaque) != self.opaque:
                     # Didn't send back the correct "opaque;" probably, our server restarted.  Just send
                     # them another authentication header with the correct opaque field.
-                    print "DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'"                    
+                    print "AUTH DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'"                    
                     return self.send401UnauthorizedResponse()
                 else:
                     # Their header had a more fundamental problem.  Something is fishy.  Deny access.
@@ -85,21 +86,21 @@ class auth(object):
             nonceReaction = self.outstandingNonces.nonceState(reqHeaderDict,  self.nonceSkip)
             if nonceReaction == 2:
                 # Client sent a nonce we've never heard of before
-                print "DEBUG unknownnonce"
+                print "AUTH DEBUG unknownnonce"
                 return self.denyBadRequest()
             if nonceReaction == 3:
                 # Client sent an old nonce.  Give the client a new one, and ask to authenticate again before continuing.
-                print "DEBUG oldnonce"
+                print "AUTH DEBUG oldnonce"
                 return self.send401UnauthorizedResponse(stale=True)
             username = reqHeaderDict.username    
-            print "DEBUG user="+username
+            print "AUTH DEBUG user="+username
             status = self.user_status.get(username, (self.tries, 0))
             if status[0] < 1 and time.time() < status[1]:
                 # User got the password wrong within the last (self.lockTime) seconds
-                print "DEBUG wrong pw 1"
+                print "AUTH DEBUG wrong pw 1"
                 return self.denyForbidden()
             if status[0] < 1: 
-                print "DEBUG wrong pw 2"
+                print "AUTH DEBUG wrong pw 2"
                 # User sent the wrong password, but more than (self.lockTime) seconds have passed, so give
                 # them another try.  However, send a 401 header so user's browser prompts for a password
                 # again.
@@ -108,6 +109,7 @@ class auth(object):
             if self.requestDigestValid(reqHeaderDict, web.ctx.environ['REQUEST_METHOD']):
                 # User authenticated; forgive any past incorrect passwords and run the function we're decorating
                 self.user_status[username] = (self.tries, 0)
+                arguments += (username,) #added by proycon
                 return f(*arguments, **keywords)
             else:
                 # User entered the wrong password.  Deduct one try, and lock account if necessary

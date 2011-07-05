@@ -88,19 +88,21 @@ def warning(msg):
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
 def userdb_lookup_dict(user, realm):
     global TEMPUSER
+    printdebug("Looking up user " + user)
     TEMPUSER = user
     return settings.USERS[user] #possible KeyError is captured by digest.auth itself!
 
 
 def userdb_lookup_mysql(user, realm):
+    printdebug("Looking up user " + user + " in MySQL")
     host,port, mysqluser,passwd, database, table = validate_users_mysql()
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf-8', use_unicode=True)
     cursor = db.cursor()
-    user = user.replace("'","") #simple prevention against mysql injection
+    #simple protection against mysql injection
+    user = user.replace("'","") 
     user = user.replace(";","")
     sql = "SELECT user, password FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
     cursor.execute(sql)
-    snippets = []
     password = None
     while True:
         data = cursor.fetchone()
@@ -158,11 +160,12 @@ auth = lambda x: x
 def requirelogin(f):
     global TEMPUSER, auth
     def wrapper(*args, **kwargs):
-        printdebug("wrapper:"+ repr(f))        
-        args = list(args)
-        args.append(TEMPUSER)
-        args = tuple(args)
-        if settings.USERS:
+        
+        #args = list(args)
+        #args.append(TEMPUSER)
+        #args = tuple(args)
+        printdebug("wrapper: "+ repr(f)+", user: " + TEMPUSER)        
+        if settings.USERS or settings.USERS_MYSQL:
             #f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
             return auth(f)(*args, **kwargs)
         else:
@@ -1836,6 +1839,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.PREAUTHHEADER = None         
     if not 'PREAUTHMAPPINGS' in settingkeys:
         settings.PREAUTHMAPPINGS = None 
+    if not 'USERS_MYSQL' in settingkeys:
+        settings.USERS_MYSQL = None
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')

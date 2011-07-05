@@ -69,16 +69,9 @@ USERS = None #no user authentication/security (this is not recommended for produ
 #If you want to enable user-based security, you can define a dictionary
 #of users and (hashed) passwords here. The actual authentication will proceed
 #as HTTP Digest Authentication. Although being a convenient shortcut,
-#using pwhash and plaintext password in code is not secure!!
+#using pwhash and plaintext password in this code is not secure!!
 
 #USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
-
-#Define which of the above users are admins and may see/edit/delete all projects:
-#ADMINS = ['admin']
-
-#Do you want all projects to be public to all users? Otherwise projects are 
-#private and only open to their owners and users explictly granted access.
-PROJECTS_PUBLIC = False
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
 REQUIREMEMORY = 10
