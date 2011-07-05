@@ -42,6 +42,10 @@ import clam.common.data
 from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug
 import clam.config.defaults as settings #will be overridden by real settings later
 
+try:
+    import MySQLdb
+except ImportError:
+    print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql "
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -82,10 +86,66 @@ def warning(msg):
 
 
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
-def userdb_lookup(user, realm):
+def userdb_lookup_dict(user, realm):
     global TEMPUSER
     TEMPUSER = user
     return settings.USERS[user] #possible KeyError is captured by digest.auth itself!
+
+
+def userdb_lookup_mysql(user, realm):
+    host,port, mysqluser,passwd, database, table = validate_users_mysql()
+    db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf-8', use_unicode=True)
+    cursor = db.cursor()
+    user = user.replace("'","") #simple prevention against mysql injection
+    user = user.replace(";","")
+    sql = "SELECT user, password FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
+    cursor.execute(sql)
+    snippets = []
+    password = None
+    while True:
+        data = cursor.fetchone()
+        if data:
+            user, password = data            
+        else:
+            break
+    cursor.close()
+    db.close()
+    if password:
+        return password
+    else:
+        raise KeyError
+
+    
+
+    
+def validate_users_mysql():
+    if not settings.USERS_MYSQL:
+        raise Exception("No USERS_MYSQL configured")    
+    if 'host' in settings.USERS_MYSQL:
+        host = settings.USERS_MYSQL['host']
+    else:
+        host = 'localhost'
+    if 'port' in settings.USERS_MYSQL:
+        port = int(settings.USERS_MYSQL['port'])
+    else:
+        port = 3306
+    if not 'user' in settings.USERS_MYSQL:
+        user = settings.USERS_MYSQL['user']
+    else:
+        raise Exception("No MySQL user defined in USERS_MYSQL")
+    if 'password' in settings.USERS_MYSQL:
+        password = settings.USERS_MYSQL['password']
+    else:
+        raise Exception("No MySQL user defined in USERS_MYSQL")            
+    if 'database' in settings.USERS_MYSQL:
+        database = settings.USERS_MYSQL['database']
+    else:
+        raise Exception("No MySQL user defined in USERS_MYSQL")     
+    if 'table' in settings.USERS_MYSQL:
+        table = settings.USERS_MYSQL['table']
+    else:
+        raise Exception("No MySQL user defined in USERS_MYSQL")   
+    return host,port, user,password, database, table
 
 #requirelogin = lambda x: x
 #if settings.USERS:
@@ -1888,7 +1948,11 @@ if __name__ == "__main__":
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.REALM)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM)
+    elif settings.USERS_MYSQL:
+        validate_users_mysql()
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM)    
+        
 
     if not fastcgi:
         if settings.URLPREFIX:
@@ -1912,7 +1976,10 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.REALM)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM)
+    elif settings.USERS_MYSQL:
+        validate_users_mysql()
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM)            
 
     service = CLAMService('wsgi')
     return service.application
