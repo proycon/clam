@@ -257,9 +257,9 @@ If you for some reason do not want to make use of the web application in CLAM, t
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. 
 
-A list of users can be defined in \texttt{USERS} in the service configuration file. This is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, a string reprenting the security realm (by default the system ID), and the password. Furthermore there is a setting \texttt{PROJECTS\_PUBLIC}, which can be set to \texttt{True} or \texttt{False}. In the former case all projects will be open to all authenticated users; in the latter case projects will only be accessible and visible to their owners.
+A list of users can be defined in \texttt{USERS} in the service configuration file. This is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, a string reprenting the security realm (by default the system ID), and the password. Projects will only be accessible and visible to their owners, unless no authentication is used at all, in which case everybody can see all projects.
 
-You can mark certain users as beings administrators using the \texttt{ADMINS} list. Administrators can see and modify all projects.
+%You can mark certain users as being administrators using the \texttt{ADMINS} list. Administrators can see and modify all projects.
 
 User authentication is not mandatory, but for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
 

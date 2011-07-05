@@ -48,7 +48,7 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.6.0'
+VERSION = '0.7.0'
 
 DEBUG = False
     
@@ -191,12 +191,12 @@ class Index(object):
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
-        for f in glob.glob(settings.ROOT + "projects/*"): #TODO LATER: Implement some kind of caching
+        if not user: user = 'anonymous'
+        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
                 project = os.path.basename(f)
-                if settings.PROJECTS_PUBLIC or user in settings.ADMINS or Project.access(project, user):
-                    projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
 
         errors = "no"
         errormsg = ""
@@ -222,68 +222,70 @@ class Index(object):
 class Project(object):
     GHOST = False
 
-    @staticmethod
-    def users(project):
-        path = Project.path(project)
-        users = []
-        if os.path.isfile(path + '.users'):
-            f = codecs.open(path + '.users','r','utf-8')
-            for user in f.readlines():
-                if user.strip():
-                    users.append(user.strip())
-            f.close()
-        return users
-    
+    #@staticmethod
+    #def users(project):
+    #    path = Project.path(project)
+    #    users = []
+    #    if os.path.isfile(path + '.users'):
+    #        f = codecs.open(path + '.users','r','utf-8')
+    #        for user in f.readlines():
+    #            if user.strip():
+    #                users.append(user.strip())
+    #        f.close()
+    #    return users    
 
     @staticmethod
     def validate(project):
         return re.match(r'^\w+$',project, re.UNICODE)
 
     @staticmethod
-    def path(project):
+    def path(project, user):
         """Get the path to the project (static method)"""
-        return settings.ROOT + "projects/" + project + "/"
+        if not user: user = 'anonymous'
+        return settings.ROOT + "projects/" + user + '/' + project + "/"
 
     @staticmethod
-    def create(project, user):         
+    def create(project, user):                
         """Create project skeleton if it does not already exist (static method)"""
+        if not user: user = 'anonymous'
         if not Project.validate(project):
             raise web.webapi.Forbidden('Invalid project ID')
-        printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
+        printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists") 
         if not project:
             raise web.webapi.Forbidden('No project name') 
-        if not os.path.isdir(settings.ROOT + "projects/" + project):
+        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
-            os.mkdir(settings.ROOT + "projects/" + project)
-            os.mkdir(settings.ROOT + "projects/" + project + "/input")
-            os.mkdir(settings.ROOT + "projects/" + project + "/output")
-            if not settings.PROJECTS_PUBLIC:
-                f = codecs.open(settings.ROOT + "projects/" + project + '/.users','w','utf-8')                         
-                f.write(user + "\n")
-                f.close()
+            os.mkdir(settings.ROOT + "projects/" + user)
+            os.mkdir(settings.ROOT + "projects/" + user + '/' + project)
+            os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/input")
+            os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/output")
+            #if not settings.PROJECTS_PUBLIC:
+            #    f = codecs.open(settings.ROOT + "projects/" + user + '/' + project + '/.users','w','utf-8')                         
+            #    f.write(user + "\n")
+            #    f.close()
         else:
             #project already exists, pass silently
             pass
 
     @staticmethod
-    def access(project, user):
-        """Checks whether the specified user has access to the project"""
-        userfile = Project.path(project) + ".users"
-        if os.path.isfile(userfile):
-            access = False
-            f = codecs.open(userfile,'r','utf-8')
-            for line in f:
-                line = line.strip()
-                if line and user == line.strip():
-                    access = True
-                    break
-            f.close()
-            return access
-        else:
-            return True #no access file, grant access for all users
+    #def access(project, user):
+    #    """Checks whether the specified user has access to the project"""
+    #    userfile = Project.path(project) + ".users"
+    #    if os.path.isfile(userfile):
+    #        access = False
+    #        f = codecs.open(userfile,'r','utf-8')
+    #        for line in f:
+    #            line = line.strip()
+    #            if line and user == line.strip():
+    #                access = True
+    #                break
+    #        f.close()
+    #        return access
+    #    else:
+    #        return True #no access file, grant access for all users
 
-    def pid(self, project):
-        pidfile = Project.path(project) + '.pid'
+    def pid(self, project, user):
+        pidfile = Project.path(project, user) + '.pid'
         if os.path.isfile(pidfile):
             f = open(pidfile,'r')
             pid = int(f.read(os.path.getsize(pidfile)))
@@ -292,73 +294,37 @@ class Project(object):
         else:
             return 0
 
-    def running(self,project):
-        return os.path.isfile(Project.path(project) + ".pid") and not os.path.isfile(Project.path(project) + ".done")
+    def running(self,project, user):
+        return os.path.isfile(Project.path(project, user) + ".pid") and not os.path.isfile(Project.path(project, user) + ".done")
         
-
-    def running_pre0_6(self,project): #obsolete
-        pid = self.pid(project)
-        if pid == 0:
-            return False
-        #printdebug("Polling process " + str(pid) + ", still running?" ) 
-        done = False
-        statuscode = 0
-        try:
-            returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
-            if returnedpid == 0:
-                return True
-        except OSError: #no such process
-            done = True            
-        if done or returnedpid == pid:
-            if os.path.isfile(Project.path(project) + ".pid"):
-                f = open(Project.path(project) + ".done",'w')
-                f.write(str(statuscode)) #non-zero exit codes are interpreted as errors!
-                f.close()
-                os.unlink(Project.path(project) + ".pid")
-            return False        
     
-    def abort(self,project):
-        if self.pid(project) == 0:
+    def abort(self, project, user):
+        if self.pid(project, user) == 0:
             return False
         printlog("Aborting process of project '" + project + "'" )
-        while not os.path.exists(Project.path(project) + ".done"):
+        while not os.path.exists(Project.path(project, user) + ".done"):
             printdebug("Waiting for process to die")
             time.sleep(1)
         return True
-    
-    def abort_pre0_6(self,project): #obsolete
-        if self.pid(project) == 0:
-            return False
-                    
-        printlog("Aborting process in project '" + project + "'" )
-        pid = self.pid(project)            
-        if pid > 0:
-            running = True
-            while running:
-                printdebug("Killing process " + str(pid))
-                os.system("kill -15 " + str(pid))
-                running = (os.system('ps ' + str(pid)) == 0)
-                if running: printdebug("Process not dead yet!")
-        os.unlink(Project.path(project) + ".pid")
-        return True
 
-    def done(self,project):
-        return os.path.isfile(Project.path(project) + ".done")
+    def done(self,project,user):
+        return os.path.isfile(Project.path(project, user) + ".done")
 
-    def exitstatus(self, project):
-        f = open(Project.path(project) + ".done")
+    def exitstatus(self, project, user):
+        f = open(Project.path(project, user) + ".done")
         status = int(f.read(1024))
         f.close()
         return status
 
-    def exists(self, project):
+    def exists(self, project, user):
         """Check if the project exists"""
-        printdebug("Checking if " + settings.ROOT + "projects/" + project + " exists") 
-        return os.path.isdir(Project.path(project))
+        if not user: user = 'anonymous'
+        printdebug("Checking if project " + project + " exists for " + user)  
+        return os.path.isdir(Project.path(project, user))
 
-    def statuslog(self,project):
+    def statuslog(self,project, user):
         statuslog = []
-        statusfile = Project.path(project) + ".status"
+        statusfile = Project.path(project,user) + ".status"
         totalcompletion = 0
         if os.path.isfile(statusfile):
             prevmsg = None
@@ -394,16 +360,16 @@ class Project(object):
             statuslog.reverse()
         return statuslog, totalcompletion
 
-    def status(self, project):
+    def status(self, project, user):
         global DATEMATCH
-        if self.running(project):
-            statuslog, completion = self.statuslog(project)
+        if self.running(project, user):
+            statuslog, completion = self.statuslog(project, user)
             if statuslog:
                 return (clam.common.status.RUNNING, statuslog[0][0],statuslog, completion)
             else:
                 return (clam.common.status.RUNNING, "The system is running",  [], 0) #running
-        elif self.done(project):
-            statuslog, completion = self.statuslog(project)
+        elif self.done(project, user):
+            statuslog, completion = self.statuslog(project, user)
             if statuslog:
                 return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
             else:
@@ -413,58 +379,58 @@ class Project(object):
 
 
     @staticmethod
-    def inputindex(project, d = ''):
-        prefix = Project.path(project) + 'input/'
+    def inputindex(project, user, d = ''):
+        prefix = Project.path(project, user) + 'input/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
-                    for result in Project.inputindex(project, f[len(prefix):]):
+                    for result in Project.inputindex(project, user, f[len(prefix):]):
                         yield result
                 else:   
-                    file = clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+                    file = clam.common.data.CLAMInputFile(Project.path(project,user), f[len(prefix):])
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
 
 
     @staticmethod
-    def outputindex(project, d = ''):
-        prefix = Project.path(project) + 'output/'
+    def outputindex(project, user, d = ''):
+        prefix = Project.path(project, user) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
-                    for result in Project.outputindex(project, f[len(prefix):]):
+                    for result in Project.outputindex(project, user, f[len(prefix):]):
                         yield result
                 else:   
-                    file = clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+                    file = clam.common.data.CLAMOutputFile(Project.path(project,user), f[len(prefix):])
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
 
     @staticmethod
-    def inputindexbytemplate(project, inputtemplate):
+    def inputindexbytemplate(project, user, inputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
-        prefix = Project.path(project) + 'input/'
+        prefix = Project.path(project, user) + 'input/'
         for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
         #yield CLAMFile objects in proper sequence
         for seq, f in sorted(index):
-            yield seq, clam.common.data.CLAMInputFile(Project.path(project), f[len(prefix):])
+            yield seq, clam.common.data.CLAMInputFile(Project.path(project, user), f[len(prefix):])
             
             
     @staticmethod
-    def outputindexbytemplate(project, outputtemplate):
+    def outputindexbytemplate(project, user, outputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
-        prefix = Project.path(project) + 'output/'
+        prefix = Project.path(project, user) + 'output/'
         for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
             index.append( (seq,f) )
             
         #yield CLAMFile objects in proper sequence
         for seq, f in sorted(index):
-            yield seq, clam.common.data.CLAMOutputFile(Project.path(project), f[len(prefix):])
+            yield seq, clam.common.data.CLAMOutputFile(Project.path(project, user), f[len(prefix):])
                         
 
 
@@ -477,20 +443,20 @@ class Project(object):
         else:
             errors = "yes"
 
-        statuscode, statusmsg, statuslog, completion = self.status(project)
+        statuscode, statusmsg, statuslog, completion = self.status(project, user)
         
 
         
         if statuscode == clam.common.status.DONE:
-            outputpaths = Project.outputindex(project)
-            if self.exitstatus(project) != 0: #non-zero codes indicate errors!
+            outputpaths = Project.outputindex(project, user)
+            if self.exitstatus(project, user) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
                 printlog("Child process failed, exited with non zero-exit code.")
         else:
             outputpaths = []        
         if statuscode == clam.common.status.READY:
-            inputpaths = Project.inputindex(project)
+            inputpaths = Project.inputindex(project, user)
         else:
             inputpaths = []      
         
@@ -520,11 +486,11 @@ class Project(object):
     @requirelogin
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
-        if not self.exists(project):
-            raise web.webapi.NotFound("Project " + project + " was not found") #404
+        if not self.exists(project, user):
+            raise web.webapi.NotFound("Project " + project + " was not found for user " + user) #404
         else:
-            if user and not Project.access(project, user) and not user in settings.ADMINS:
-                raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
+            #if user and not Project.access(project, user) and not user in settings.ADMINS:
+            #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
             return self.response(user, project, settings.PARAMETERS) #200
 
 
@@ -539,15 +505,17 @@ class Project(object):
             if settings.URLPREFIX[0] != '/':
                 url += '/'
             url += settings.URLPREFIX
-        msg = "Project " + project + " has been created"
+        if not user: user = 'anonymous'
+        msg = "Project " + project + " has been created for user " + user
         raise web.webapi.Created(msg, {'Location': url + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
         global settingsmodule
+        if not user: user = 'anonymous'
         Project.create(project, user)
-        if user and not Project.access(project, user):
-            raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
+        #if user and not Project.access(project, user):
+        #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
                     
         #Generate arguments based on POSTed parameters
         commandlineparams = []
@@ -570,7 +538,7 @@ class Project(object):
             raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. Please try again later.")
 
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url, printdebug)
+            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url, printdebug)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
@@ -582,7 +550,7 @@ class Project(object):
         else:
             #write clam.xml output file
             render = web.template.render(settings.CLAMDIR + '/templates')
-            f = open(Project.path(project) + "clam.xml",'w')
+            f = open(Project.path(project, user) + "clam.xml",'w')
             f.write(str(self.response(user, project, parameters, "",True)))
             f.close()
 
@@ -599,18 +567,18 @@ class Project(object):
             #    else:
             #        raise web.webapi.NotFound("Corpus " + corpus + " not found")
             #else:
-            cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project) + 'input/')
-            cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project) + 'output/')
-            cmd = cmd.replace('$STATUSFILE',Project.path(project) + '.status')
-            cmd = cmd.replace('$DATAFILE',Project.path(project) + 'clam.xml')
+            cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project, user) + 'input/')
+            cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project, user) + 'output/')
+            cmd = cmd.replace('$STATUSFILE',Project.path(project, user) + '.status')
+            cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])        
             #TODO: protect against insertion
             if settings.COMMAND.find("2>") == -1:
-                cmd += " 2> " + Project.path(project) + "output/error.log" #add error output
-            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project) + ' ' + cmd
+                cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
+            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
@@ -622,7 +590,7 @@ class Project(object):
             if process:
                 pid = process.pid
                 printlog("Started dispatcher with pid " + str(pid) )
-                f = open(Project.path(project) + '.pid','w') #will be handled by dispatcher!
+                f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
                 f.write(str(pid))
                 f.close()
                 raise web.webapi.Accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
@@ -631,13 +599,14 @@ class Project(object):
 
     @requirelogin
     def DELETE(self, project, user=None):
-        if not self.exists(project):
-            raise web.webapi.NotFound("No such project: " + project)
-        statuscode, _, _, _  = self.status(project)
+        if not user: user = 'anonymous'
+        if not self.exists(project, user):
+            raise web.webapi.NotFound("No such project: " + project + " for user " + user)
+        statuscode, _, _, _  = self.status(project, user)
         if statuscode == clam.common.status.RUNNING:
-            self.abort(project)   
+            self.abort(project, user)   
         printlog("Deleting project '" + project + "'" )
-        shutil.rmtree(Project.path(project))
+        shutil.rmtree(Project.path(project, user))
         msg = "Deleted"
         web.header('Content-Type', 'text/plain')
         web.header('Content-Length',len(msg))
@@ -654,16 +623,16 @@ class OutputFileHandler(object):
         
         if filename.strip('/') == "":
             #this is a request for everything
-            for line in self.getarchive(project):
+            for line in self.getarchive(project, user):
                 yield line
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
-            if os.path.isfile(Project.path(project) + 'output/' +  "/".join(raw[:-1])):
+            if os.path.isfile(Project.path(project, user) + 'output/' +  "/".join(raw[:-1])):
                 filename = "/".join(raw[:-1])
                 requestid = raw[-1].lower()                        
 
         try:
-            outputfile = clam.common.data.CLAMOutputFile(Project.path(project), filename)
+            outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
         except:
             raise web.webapi.NotFound()
             
@@ -711,7 +680,8 @@ class OutputFileHandler(object):
                 raise web.webapi.NotFound()
             except UnicodeError:
                 raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
-            
+    
+    @requirelogin
     def DELETE(self, project, filename, user=None):    
         """Delete an output file"""
         
@@ -719,21 +689,21 @@ class OutputFileHandler(object):
         
         if len(filename) == 0:
             #Deleting all output files and resetting
-            self.reset(project)
+            self.reset(project, user)
             msg = "Deleted"
             web.header('Content-Type', 'text/plain')
             web.header('Content-Length',len(msg))
             return msg #200
-        elif os.path.isdir(Project.path(project) + filename): 
+        elif os.path.isdir(Project.path(project, user) + filename): 
             #Deleting specified directory
-            shutil.rmtree(Project.path(project) + filename)
+            shutil.rmtree(Project.path(project, user) + filename)
             msg = "Deleted"
             web.header('Content-Type', 'text/plain')
             web.header('Content-Length',len(msg))
             return msg #200
         else:
             try:
-                file = clam.common.data.CLAMOutputFile(Project.path(project), filename)
+                file = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
             except:
                 raise web.webapi.NotFound()
                 
@@ -747,22 +717,22 @@ class OutputFileHandler(object):
                 return msg #200   
 
 
-    def reset(self, project):
+    def reset(self, project, user):
         """Reset system, delete all output files and prepare for a new run"""
-        d = Project.path(project) + "output"
+        d = Project.path(project, user) + "output"
         if os.path.isdir(d):
             shutil.rmtree(d)
             os.mkdir(d)
         else:
             raise web.webapi.NotFound()
-        if os.path.exists(Project.path(project) + ".done"):
-            os.unlink(Project.path(project) + ".done")                       
-        if os.path.exists(Project.path(project) + ".status"):
-            os.unlink(Project.path(project) + ".status")        
+        if os.path.exists(Project.path(project, user) + ".done"):
+            os.unlink(Project.path(project, user) + ".done")                       
+        if os.path.exists(Project.path(project, user) + ".status"):
+            os.unlink(Project.path(project, user) + ".status")        
 
-    def getarchive(self, project):
+    def getarchive(self, project, user):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
-        if os.path.isfile(Project.path(project) + '.download'):
+        if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
             raise web.forbidden()
         else:
@@ -777,45 +747,45 @@ class OutputFileHandler(object):
             if format == 'zip':
                 contenttype = 'application/zip'
                 command = "/usr/bin/zip -r" #TODO: do not hard-code path!
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
             elif format == 'tar.gz':
                 contenttype = 'application/x-tar'
                 contentencoding = 'gzip'
                 command = "/bin/tar -czf"
-                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project) + "output/" + project + ".zip")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.bz2")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
             elif format == 'tar.bz2': 
                 contenttype = 'application/x-bzip2'
                 command = "/bin/tar -cjf"
-                if os.path.isfile(Project.path(project) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project) + "output/" + project + ".zip")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
+                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
+                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
             else:
                 raise web.webapi.Forbidden('Invalid archive format') #TODO: message won't show
 
-            path = Project.path(project) + "output/" + project + "." + format
+            path = Project.path(project, user) + "output/" + project + "." + format
             
             if not os.path.isfile(path):
                 printlog("Building download archive in " + format + " format")
                 cmd = command + ' ' + project + '.' + format + ' *'
                 printdebug(cmd)
-                printdebug(Project.path(project)+'output/')
-                process = subprocess.Popen(cmd, cwd=Project.path(project)+'output/', shell=True)	        			
+                printdebug(Project.path(project, user)+'output/')
+                process = subprocess.Popen(cmd, cwd=Project.path(project, user)+'output/', shell=True)	        			
                 if not process:
                     raise web.webapi.InternalError("Unable to make download package")                
                 else:
                     pid = process.pid
-                    f = open(Project.path(project) + '.download','w') 
+                    f = open(Project.path(project, user) + '.download','w') 
                     f.write(str(pid))
                     f.close()
                     os.waitpid(pid, 0) #wait for process to finish
-                    os.unlink(Project.path(project) + '.download')
+                    os.unlink(Project.path(project, user) + '.download')
 
             if contentencoding:
                 web.header('Content-Encoding', contentencoding)
@@ -838,12 +808,12 @@ class InputFileHandler(object):
             raise web.webapi.Forbidden()
         if len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
-            if os.path.isfile(Project.path(project) + 'input/' +  "/".join(raw[:-1])):
+            if os.path.isfile(Project.path(project, user) + 'input/' +  "/".join(raw[:-1])):
                 filename = "/".join(raw[:-1])
                 requestid = raw[-1].lower()                        
 
         try:
-            inputfile = clam.common.data.CLAMInputFile(Project.path(project), filename)
+            inputfile = clam.common.data.CLAMInputFile(Project.path(project, user), filename)
         except:
             raise web.webapi.NotFound()
             
@@ -878,16 +848,16 @@ class InputFileHandler(object):
         
         if len(filename) == 0:
             #Deleting all input files
-            shutil.rmtree(Project.path(project) + 'input')
-            os.mkdir(Project.path(project) + 'input') #re-add new input directory
+            shutil.rmtree(Project.path(project, user) + 'input')
+            os.mkdir(Project.path(project, user) + 'input') #re-add new input directory
             return "Deleted" #200
-        elif os.path.isdir(Project.path(project) + filename): 
+        elif os.path.isdir(Project.path(project, user) + filename): 
             #Deleting specified directory
-            shutil.rmtree(Project.path(project) + filename)
+            shutil.rmtree(Project.path(project, user) + filename)
             return "Deleted" #200
         else:
             try:
-                file = clam.common.data.CLAMInputFile(Project.path(project), filename)
+                file = clam.common.data.CLAMInputFile(Project.path(project, user), filename)
             except:
                 raise web.webapi.NotFound()
                 
@@ -1002,7 +972,7 @@ class InputFileHandler(object):
         else:
             nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
             
-        for seq, inputfile in Project.inputindexbytemplate(project, inputtemplate):
+        for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
             if inputtemplate.unique:
                 raise web.webapi.Forbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
             else:
@@ -1169,7 +1139,7 @@ class InputFileHandler(object):
                     
                 #Upload file from client to server
                 printdebug('(Archive transfer starting)')
-                f = open(Project.path(project) + archive,'wb')
+                f = open(Project.path(project,user) + archive,'wb')
                 for line in postdata['file'].file:
                     f.write(line)
                 f.close()
@@ -1191,7 +1161,7 @@ class InputFileHandler(object):
                 #invoke extractor
                 printlog("Extracting '" + archive + "'" )            
                 try:
-                    process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                    process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 except:
                     raise web.webapi.InternalError("Unable to extract archive")       
                 out, err = process.communicate() #waits for process to end 
@@ -1211,15 +1181,15 @@ class InputFileHandler(object):
                             colon = line.find(":")
                             if colon:
                                 subfile =  line[colon + 1:].strip()
-                        if subfile and os.path.exists(Project.path(project) + subfile):
+                        if subfile and os.path.exists(Project.path(project, user) + subfile):
                             subfile_newname = clam.common.data.resolveinputfilename(os.path.basename(subfile), parameters, inputtemplate, nextseq+len(addedfiles), project) 
                             printdebug('(Extracted file ' + subfile + ', moving to input/' + subfile_newname+')')
-                            os.rename(Project.path(project) + subfile, Project.path(project) + 'input/' +  subfile_newname)
+                            os.rename(Project.path(project, user) + subfile, Project.path(project, user) + 'input/' +  subfile_newname)
                             addedfiles.append(subfile_newname)
                     firstline = False
                                         
                 #all done, remove archive
-                os.unlink(Project.path(project) + archive)
+                os.unlink(Project.path(project, user) + archive)
                 
         if not archive:
             addedfiles = [clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)]
@@ -1244,10 +1214,10 @@ class InputFileHandler(object):
             if not errors:
                 if not archive:
                     #============================ Transfer file ========================================
-                    printdebug('(Start file transfer: ' +  Project.path(project) + 'input/' + filename+' )')
+                    printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
                     if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
                         #Upload file from client to server
-                        f = open(Project.path(project) + 'input/' + filename,'wb')
+                        f = open(Project.path(project, user) + 'input/' + filename,'wb')
                         for line in postdata['file'].file:
                             f.write(line) #encoding unaware, seems to solve big-file upload problem
                         f.close()
@@ -1258,7 +1228,7 @@ class InputFileHandler(object):
                         except:
                             raise web.webapi.NotFound()
                         CHUNK = 16 * 1024
-                        f = open(Project.path(project) + 'input/' + filename,'wb')
+                        f = open(Project.path(project, user) + 'input/' + filename,'wb')
                         while True:
                             chunk = req.read(CHUNK)
                             if not chunk: break
@@ -1272,21 +1242,21 @@ class InputFileHandler(object):
                                 encoding = p.value                        
                         #Contents passed in POST message itself
                         try:
-                            f = codecs.open(Project.path(project) + 'input/' + filename,'w',encoding)
+                            f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
                             f.write(postdata['contents'])
                             f.close()
                         except UnicodeError:
                             raise web.webapi.Forbidden("Input file " + str(filename) + " is not in the expected encoding!")
                     elif 'inputsource' in postdata and postdata['inputsource']:                
                         #Copy (symlink!) from preinstalled data
-                        os.symlink(inputsource.path, Project.path(project) + 'input/' + filename)
+                        os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
                     
                     printdebug('(File transfer completed)')
                     
                 
             
                 #Create a file object
-                file = clam.common.data.CLAMInputFile(Project.path(project), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+                file = clam.common.data.CLAMInputFile(Project.path(project, user), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
                 
                 
                 
@@ -1331,7 +1301,7 @@ class InputFileHandler(object):
                                 break
                         if converter: #(should always be found, error already provided earlier if not)
                             try:
-                                success = converter.convertforinput(Project.path(project) + 'input/' + filename, metadata)
+                                success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
                             except:
                                 success = False
                             if not success:
@@ -1346,20 +1316,20 @@ class InputFileHandler(object):
                             output += "<valid>yes</valid>"                
                                             
                             #Great! Everything ok, save metadata
-                            metadata.save(Project.path(project) + 'input/' + file.metafilename())
+                            metadata.save(Project.path(project, user) + 'input/' + file.metafilename())
                             
                             #And create symbolic link for inputtemplates
                             linkfilename = os.path.dirname(filename) 
                             if linkfilename: linkfilename += '/'
                             linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
-                            os.symlink(Project.path(project) + 'input/' + filename, Project.path(project) + 'input/' + linkfilename)
+                            os.symlink(Project.path(project, user) + 'input/' + filename, Project.path(project, user) + 'input/' + linkfilename)
                         else:
                             #Too bad, everything worked out but the file itself doesn't validate.
                             #output += "<valid>no</valid>"
                             fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
                         
                             #remove upload
-                            os.unlink(Project.path(project) + 'input/' + filename)
+                            os.unlink(Project.path(project, user) + 'input/' + filename)
             
             
             output += "</upload>\n"       
@@ -1802,6 +1772,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.REMOTEHOST = None
     elif not 'REMOTEUSER' in settingkeys:
         settings.REMOTEUSER = None
+    if not 'PREAUTHHEADER' in settingkeys:
+        settings.PREAUTHHEADER = None         
+    if not 'PREAUTHMAPPINGS' in settingkeys:
+        settings.PREAUTHMAPPINGS = None 
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
