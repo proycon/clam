@@ -158,15 +158,22 @@ auth = lambda x: x
 #auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
 def requirelogin(f):
-    global TEMPUSER, auth
+    global auth
     def wrapper(*args, **kwargs):
-        
-        #args = list(args)
-        #args.append(TEMPUSER)
-        #args = tuple(args)
-        printdebug("wrapper: "+ repr(f)+", user: " + TEMPUSER)        
-        if settings.USERS or settings.USERS_MYSQL:
-            #f = clam.common.digestauth.auth(userdb_lookup, realm=settings.SYSTEM_ID)(f)       
+        printdebug("wrapper: "+ repr(f))   
+        if settings.PREAUTHHEADER:
+            user = web.ctx.env.get(settings.PREAUTHHEADER, '')
+            if user:
+                if settings.PREAUTHMAPPING:
+                    try:
+                        user = settings.PREAUTHMAPPING[user]
+                    except KeyError:
+                        raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
+                args += (user,)
+                return f(*args, **kwargs)
+            else:
+                raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
+        elif settings.USERS or settings.USERS_MYSQL:
             return auth(f)(*args, **kwargs)
         else:
             return f(*args, **kwargs)
@@ -1837,8 +1844,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.REMOTEUSER = None
     if not 'PREAUTHHEADER' in settingkeys:
         settings.PREAUTHHEADER = None         
-    if not 'PREAUTHMAPPINGS' in settingkeys:
-        settings.PREAUTHMAPPINGS = None 
+    if not 'PREAUTHMAPPING' in settingkeys:
+        settings.PREAUTHMAPPING = None 
     if not 'USERS_MYSQL' in settingkeys:
         settings.USERS_MYSQL = None
 
