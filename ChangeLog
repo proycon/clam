@@ -1,5 +1,13 @@
+0.7.0) [July 2011]
+- Projects now stored on a per-user basis (no naming conflicts)
+- Added support for a pre-authentication header (to be used with for example Shibboleth) (untested)
+- Added MySQL support for user database (untested)
+- Major fixes in authentication
+- Better error feedback
+
+
 0.6.0) [May 2011]
-- Implementer dispatcher, dispatcher now mediates execution of wrapper script
+- Implemented dispatcher, dispatcher now mediates execution of wrapper script
 - Fixed some static images (thanks to Brecht Deplanques)
 - Fixes in URL handling
 - Fixes concerning opening live editor
