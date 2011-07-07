@@ -476,7 +476,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 xmldoc.loadXML(inputtemplate.parametersxml);
                 result = xmldoc.transformNode(parametersxsl);
             } else {
-                result = "<strong>g Unable to render parameter form!</strong>";
+                result = "<strong>Error: Unable to render parameter form!</strong>";
             }
             $(target).html(result);
             if ((enableconverters) && ($(inputtemplate.converters))) {                

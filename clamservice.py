@@ -1433,7 +1433,7 @@ class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
 
     @requirelogin
-    def GET(self, project, user=None):
+    def GET(self, user=None):
         web.header('Content-Type', 'application/javascript')
         
         inputtemplates_mem = []
