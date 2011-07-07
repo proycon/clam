@@ -1864,8 +1864,19 @@ def test_dirs():
     if not os.path.isdir(settings.ROOT + 'projects'):
         warning("Projects directory does not exist yet, creating...")
         os.mkdir(settings.ROOT + 'projects')    
-    elif not settings.PARAMETERS:
+        os.mkdir(settings.ROOT + 'projects/anonymous')    
+    else:
+        if not os.path.isdir(settings.ROOT + 'projects/anonymous'):    
+            warning("Directory for anonymous user not detected, migrating existing project directory from CLAM <0.7 to >=0.7")
+            os.mkdir(settings.ROOT + 'projects/anonymous')    
+            for d in glob.glob(settings.ROOT + 'projects/'):
+                if os.path.isdir(d):
+                    if d[-1] == '/': d = d[:-1]
+                    shutil.move(d, settings.ROOT + 'projects/anonymous/' + os.path.basename(d))            
+    if not settings.PARAMETERS:
             warning("No parameters specified in settings module!")
+    if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER:
+            warning("No user authentication enabled, this is not recommended for production environments!")
 
 
 if __name__ == "__main__":
