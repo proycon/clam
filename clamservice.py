@@ -1869,9 +1869,10 @@ def test_dirs():
         if not os.path.isdir(settings.ROOT + 'projects/anonymous'):    
             warning("Directory for anonymous user not detected, migrating existing project directory from CLAM <0.7 to >=0.7")
             os.mkdir(settings.ROOT + 'projects/anonymous')    
-            for d in glob.glob(settings.ROOT + 'projects/'):
-                if os.path.isdir(d):
+            for d in glob.glob(settings.ROOT + 'projects/*'):
+                if os.path.isdir(d) and os.path.basename(d) != 'anonymous':
                     if d[-1] == '/': d = d[:-1]
+                    warning("\tMoving " + d + " to " + settings.ROOT + 'projects/anonymous/' + os.path.basename(d))
                     shutil.move(d, settings.ROOT + 'projects/anonymous/' + os.path.basename(d))            
     if not settings.PARAMETERS:
             warning("No parameters specified in settings module!")

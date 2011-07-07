@@ -39,7 +39,6 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     ROOT = "/home/proycon/work/ucto.clam/"
     PORT = 9001
     BINDIR = "/usr/local/bin/"
-    URLPREFIX = 'ucto'
 else:
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
