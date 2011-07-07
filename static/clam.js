@@ -92,7 +92,9 @@ $(document).ready(function(){
                 window.location.href = $("#projectname").val() + "/";
             },
             error: function(response){
-                alert("Unable to create project. Do not use spaces or special characters in the ID, only underscores and alphanumeric characters are allowed.");   
+                if ((response.status < 200) || (response.status > 299)) { //patch
+                    alert("Unable to create project. Do not use spaces or special characters in the ID, only underscores and alphanumeric characters are allowed (" +  response.status +")");   
+                }
             }
          });
          //$("#startprojectform").attr("action",$("#projectname").val());
@@ -110,7 +112,9 @@ $(document).ready(function(){
                 window.location.href = "/"; /* back to index - TODO: FIX, doesn't work with urlprefix! */
             },
             error: function(response){
-                alert("Unable to delete project");   
+                if ((response.status < 200) || (response.status > 299)) { //patch
+                    alert("Unable to delete project (" + response.status + ")");   
+                }
             }
          });         
        });
@@ -127,7 +131,9 @@ $(document).ready(function(){
                 window.location.href = ""; /* refresh */
             },
             error: function(response){
-                alert("Unable to delete output files");   
+                if ((response.status < 200) || (response.status > 299)) { //patch
+                    alert("Unable to delete output files (" + status + ")");   
+                }
             }
          });         
        });
@@ -287,7 +293,7 @@ $(document).ready(function(){
             error: function(response,errortype){
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
-                if (response.status == 200) { //patch
+                if ((response.status >= 200) && (response.status <= 299)) { //patch
                     window.location.href = ""; /* refresh */   
                 } else {
                     alert("Error, unable to add file ("+response.status+")");
@@ -470,7 +476,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 xmldoc.loadXML(inputtemplate.parametersxml);
                 result = xmldoc.transformNode(parametersxsl);
             } else {
-                result = "<strong>Error: Unable to render parameter form!</strong>";
+                result = "<strong>g Unable to render parameter form!</strong>";
             }
             $(target).html(result);
             if ((enableconverters) && ($(inputtemplate.converters))) {                
