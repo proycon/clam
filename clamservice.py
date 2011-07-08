@@ -323,9 +323,11 @@ class Project(object):
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists") 
         if not project:
             raise web.webapi.Forbidden('No project name') 
-        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
-            printlog("Creating project '" + project + "'")
+        if not os.path.isdir(settings.ROOT + "projects/" + user):
+            printlog("Creating user directory '" + user + "'")
             os.mkdir(settings.ROOT + "projects/" + user)
+        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
+            printlog("Creating project '" + project + "'")            
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project)
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/input")
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/output")

@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Chris AtLee
+# Copyright (c) 2011 Chris AtLee
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,4 +29,4 @@ New in version 0.6."""
 import clam.external.poster.streaminghttp
 import clam.external.poster.encode
 
-version = (0, 6, 0) # Thanks JP!
+version = (0, 8, 1) # Thanks JP!

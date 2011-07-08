@@ -16,7 +16,7 @@
 
 import codecs
 import os.path
-import httplib2
+#import httplib2
 import urllib2
 from urllib import urlencode
 from lxml import etree as ElementTree
@@ -31,6 +31,7 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
+from clam.common.util import RequestWithMethod
 
 VERSION = '0.7.0'
 if VERSION != DATAAPIVERSION:
@@ -102,6 +103,7 @@ class TimeOut(Exception):
         pass
     def __str__(self):
         return "Connection with server timed-out" 
+        
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None):
@@ -109,28 +111,69 @@ class CLAMClient:
         
         url - URL of the webservice
         user - username (or None)
+        realm - authentication realm
         password - password (or None)
         """
         
-        self.http = httplib2.Http()
+        #self.http = httplib2.Http()
         if url[-1] != '/': url += '/'
         self.url = url
         if user and password:
+            self.authenticated = True
             #for most things we use httplib2
-            self.http.add_credentials(user, password)
+            #self.http.add_credentials(user, password)
             
             #for file upload we use urllib2:
-            passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm() 
             # this creates a password manager
-            passman.add_password(None, url, user, password)
-            authhandler = urllib2.HTTPDigestAuthHandler(passman)
+            self.passman.add_password(None, url, user, password) #realm will be automagically detected
+            authhandler = urllib2.HTTPDigestAuthHandler(self.passman)
             opener = urllib2.build_opener(authhandler)
+            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
             urllib2.install_opener(opener)
+        else:
+            self.authenticated = False
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+            urllib2.install_opener(opener)
+    
+    
+    def request(self, url='', method = 'GET', data = None):        
+        if data: 
+            request = RequestWithMethod(self.url + url,data,method=method)
+        else:
+            request = RequestWithMethod(self.url + url,method=method)
+        try:
+            response = urllib2.urlopen(request)            
+        except urllib2.URLError, e :
+            try:
+                if e.code == '400':
+                    raise BadRequest()
+                elif e.code == '401':
+                    raise AuthRequired()
+                elif e.code == '403':        
+                    content = e.read()
+                    data = self._parse(content)
+                    if data:
+                        raise PermissionDenied(data)
+                    else:
+                        raise PermissionDenied(content)
+                elif e.code and data:
+                    raise NotFound(e.read())
+                elif e.code == '500':
+                    raise ServerError(e.read())
+                elif e.code == '408':
+                    raise TimeOut()            
+                else:
+                    raise
+            except AttributeError:
+                raise e          
+        return self._parse(response.read())        
+    
             
-            
-            
-    def request(self, url, method = 'GET', data = None):
+    def _request_httplib2(self, url, method = 'GET', data = None): #old, obsolete
         """Returns a CLAMData object if a proper CLAM XML response is received. Otherwise: returns True, on success, False on failure.  Raises an Exception on most HTTP errors!"""
+
         try:
             if data: 
                 response, content = self.http.request(self.url + url, method, data)
@@ -151,9 +194,20 @@ class CLAMClient:
             except:
                 raise
         except:
-            raise
+            raise    
 
-    def _parse(self, response, content):    
+    def _parse(self, content):    
+        if content.find('<clam') != -1:
+            data = CLAMData(content)
+            if data.errors:
+                error = data.parametererror()
+                if error:
+                    raise ParameterError(error)
+        else:
+            data = False
+        return data
+
+    def _parse_old(self, response, content):    
         if content.find('<clam') != -1:
             data = CLAMData(content)
             if data.errors:
@@ -177,7 +231,7 @@ class CLAMClient:
             raise ServerError(data)
         elif response['status'] == '408':
             raise TimeOut()
-        else:
+        else:            
             raise Exception("Server returned HTTP response " + response['status'])
         
         return data
@@ -332,15 +386,19 @@ class CLAMClient:
             else:
                 data[key] = value
         
+        opener = register_openers()
+        opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+        if self.authenticated:
+            opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
         datagen, headers = multipart_encode(data)
-
+                
         # Create the Request object
         request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
         try:
             xml = urllib2.urlopen(request).read()
         except urllib2.HTTPError, e:
             xml = e.read()        
-            
+        
         try:
             return self._parseupload(xml)
         except:
@@ -393,7 +451,8 @@ class CLAMClient:
             return self._parseupload(xml)
         except:
             raise
-               
+                
+
 
     def upload(self,project, inputtemplate, sourcefile, **kwargs):
         """Alias for addinputfile."""

@@ -16,6 +16,7 @@ import glob
 import os
 from sys import stdout,stderr
 import datetime
+from urllib2 import Request 
 
 LOG = stdout
 DEBUG = False
@@ -46,3 +47,14 @@ def printlog(msg):
 def printdebug(msg):
     global DEBUG
     if DEBUG: printlog("DEBUG: " + msg)
+
+
+class RequestWithMethod(Request):
+  def __init__(self, *args, **kwargs):
+    self._method = kwargs.get('method')
+    if self._method:
+        del kwargs['method']
+    Request.__init__(self, *args, **kwargs)
+
+  def get_method(self):
+    return self._method if self._method else super(RequestWithMethod, self).get_method()

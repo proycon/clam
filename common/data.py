@@ -17,7 +17,8 @@
 from lxml import etree as ElementTree
 from StringIO import StringIO
 import urllib2
-import httplib2
+
+
 import os.path
 import codecs
 try:
@@ -31,6 +32,8 @@ import clam.common.parameters
 import clam.common.status
 import clam.common.util
 import clam.common.viewers
+from clam.common.util import RequestWithMethod
+
 #clam.common.formats is deliberately imported _at the end_ 
 
 VERSION = '0.7.0'
@@ -40,12 +43,19 @@ class FormatError(Exception):
      def __init__(self, value):
          self.value = value
      def __str__(self):
-         return "Not a valid CLAM XML response"
+         return "Not a valid CLAM XML response"        
+        
+class HTTPError(Exception):
+    pass        
 
+
+class AuthenticationRequired(Exception):
+    pass
+    
 class CLAMFile:
     basedir = ''
     
-    def __init__(self, projectpath, filename, loadmetadata = True, user = None, password = None):
+    def __init__(self, projectpath, filename, loadmetadata = True):
         """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
         self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
         self.projectpath = projectpath
@@ -56,14 +66,12 @@ class CLAMFile:
                 self.loadmetadata()
             except IOError:
                 pass
-
-        if self.remote:                
-            self.http = httplib2.Http()
-            if user and password:
-                self.http.add_credentials(user, password)
+            except HTTPError:
+                pass
                 
         self.viewers = []
         self.converters = []
+        
                 
     def attachviewers(self, profiles):
         """Attach viewers *and converters* to file, automatically scan all profiles for outputtemplate or inputtemplate"""
@@ -110,18 +118,19 @@ class CLAMFile:
                 raise IOError(2, "No metadata found!")
         else:
             try:
-                response, xml = self.http.request(self.projectpath + self.basedir + '/' + self.filename + '/metadata')
+                response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))   
+                xml = response.read()
             except:
-                raise IOError(2, "Can't download metadata!")
+                raise HTTPError(2, "Can't download metadata for " + self.filename)
             
-            if response.status != 200: #TODO: Verify
-                    raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
+            #if response.status != 200: #TODO: Verify
+            #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
         
         #parse metadata
         self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
      
     def __iter__(self):
-        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first (a httplib2 limitation)."""
+        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first."""
         if not self.remote:
             if self.metadata and 'encoding' in self.metadata:
                 for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
@@ -129,15 +138,14 @@ class CLAMFile:
             else:
                 for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
-        else:
-            for line in self.readlines():
-                yield line
-        
-            #TODO LATER: Re-add streaming support with urllib2? (But mind the digest authentication!)
-            #req = self.opener(self.projectpath + basedir '/' + self.filename) #urllib2
-            #for line in req.readlines():
-            #    yield line
-            #req.close()
+        else:        
+            response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
+            for line in response.readlines():
+                if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
+                    yield unicode(line, self.metadata['encoding'])
+                else:
+                    yield line
+            
     
     def delete(self):
         """Delete this file"""
@@ -158,8 +166,8 @@ class CLAMFile:
                         os.unlink(linkf)
             
             return True
-        else:
-            httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename,'DELETE')
+        else:            
+            response = urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))   
             return True
          
 
@@ -171,18 +179,21 @@ class CLAMFile:
             else:
                return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
         else:
-            httpcode, content = self.http.request(self.projectpath + self.basedir + '/' + self.filename)
+            response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
+            content = response.read()
             if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
                 content = unicode(content, self.metadata['encoding'])
-            return content
+            return response
             
     def copy(self, target):
         if self.metadata and 'encoding' in self.metadata:
             f = codecs.open(target,'w', self.metadata['encoding'])
-            f.write(self.readlines())
+            for line in self:
+                f.write(line)
         else:
             f = open(target,'w')            
-            f.write(self.readlines())
+            for line in self:
+                f.write(line)
         f.close()                    
 
     def validate(self):
