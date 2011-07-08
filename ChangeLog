@@ -4,6 +4,7 @@
 - Added MySQL support for user database (untested)
 - Major fixes in authentication
 - Full support for authentication in CLAM Client API (urllib2 instead of httplib2)
+- Ability to view input files in output stage in webapp + style improvements in output stage
 - Better error feedback
 
 

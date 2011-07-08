@@ -871,7 +871,6 @@ class InputFileHandler(object):
 
     @requirelogin
     def GET(self, project, filename, user=None):    
-        raw = filename.split('/')
 
         viewer = None
         requestid = None

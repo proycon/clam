@@ -358,7 +358,7 @@
         
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:value-of select="@id" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
             </xsl:for-each>
             <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
             <xsl:if test="@template">
