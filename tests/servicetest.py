@@ -200,7 +200,7 @@ class ExtensiveServiceTest(unittest2.TestCase):
         self.assertTrue(success)   
         try:
             data = self.client.start(self.project, casesensitive='nonexistant')
-            self.assertTrue(False)
+            self.assertTrue(data)
         except ParameterError, e:
             self.assertTrue(True)    
             

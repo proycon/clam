@@ -145,29 +145,33 @@ class CLAMClient:
             request = RequestWithMethod(self.url + url,method=method)
         try:
             response = urllib2.urlopen(request)            
-        except urllib2.URLError, e :
+        except Exception, e:
             try:
-                if e.code == '400':
-                    raise BadRequest()
-                elif e.code == '401':
-                    raise AuthRequired()
-                elif e.code == '403':        
-                    content = e.read()
-                    data = self._parse(content)
-                    if data:
-                        raise PermissionDenied(data)
-                    else:
-                        raise PermissionDenied(content)
-                elif e.code and data:
-                    raise NotFound(e.read())
-                elif e.code == '500':
-                    raise ServerError(e.read())
-                elif e.code == '408':
-                    raise TimeOut()            
-                else:
-                    raise
+                statuscode = int(e.code)
             except AttributeError:
-                raise e          
+                raise e    
+                
+            
+            if statuscode == 400:
+                raise BadRequest()
+            elif statuscode == 401:
+                raise AuthRequired()
+            elif statuscode == 403:        
+                content = e.read()
+                data = self._parse(content)
+                if data:
+                    raise PermissionDenied(data)
+                else:
+                    raise PermissionDenied(content)
+            elif statuscode == 404 and data:
+                raise NotFound(e.read())
+            elif statuscode == 500:
+                raise ServerError(e.read())
+            elif statuscode == 408:
+                raise TimeOut()            
+            else:
+                raise
+      
         return self._parse(response.read())        
     
             
@@ -203,9 +207,9 @@ class CLAMClient:
                 error = data.parametererror()
                 if error:
                     raise ParameterError(error)
+            return data
         else:
-            data = False
-        return data
+            return True
 
     def _parse_old(self, response, content):    
         if content.find('<clam') != -1:
