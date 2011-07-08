@@ -4,9 +4,9 @@
 
 2) Install all dependencies (leave python-webpy out if it is too old or unavailable)
  DEBIAN/UBUNTU:
-  $ sudo apt-get install python-webpy python-lxml python-httplib2
+  $ sudo apt-get install python-webpy python-lxml python-httplib2 python-mysqldb
  FEDORA/OPENSUSE/CENTOS/RHEL:
-  # yum install python-webpy python-lxml python-httplib2
+  # yum install python-webpy python-lxml python-httplib2 python-mysqldb
  OTHERS?
   Please look for the appropriate packages in your distribution's repository or ports collection
    

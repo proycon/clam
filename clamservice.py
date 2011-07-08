@@ -101,7 +101,7 @@ def userdb_lookup_mysql(user, realm):
     #simple protection against mysql injection
     user = user.replace("'","") 
     user = user.replace(";","")
-    sql = "SELECT user, password FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
+    sql = "SELECT `user`, `password` FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
     cursor.execute(sql)
     password = None
     while True:

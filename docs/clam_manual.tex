@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.6.0}
+\title{CLAM Documentation \\ \small version 0.7.0}
 \author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
@@ -79,13 +79,14 @@ The following software is required to run CLAM. These will be available in any m
 \item python-webpy, version 0.33 or higher
 \item python-lxml, version 2 or higher
 \item python-httplib2
+\item python-mysqldb (optional, needed only for MySQL support)
 %\item python-libxslt1
 %\item python-django
 \end{itemize}
 
 On Debian or Ubuntu systems, the following should suffice to install these dependencies, provided that \texttt{python-webpy} has version 0.33 or above:
 
-\texttt{\$ sudo apt-get install python-webpy python-lxml python-httplib2 }
+\texttt{\$ sudo apt-get install python-webpy python-lxml python-httplib2 python-mysqldb}
 
 More detailed instructions, including for Mac OS X, can be found in the INSTALL file included with CLAM.
 
@@ -259,15 +260,14 @@ Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM 
 
 A list of users can be defined in \texttt{USERS} in the service configuration file. This is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, a string reprenting the security realm (by default the system ID), and the password. Projects will only be accessible and visible to their owners, unless no authentication is used at all, in which case everybody can see all projects.
 
+
 %You can mark certain users as being administrators using the \texttt{ADMINS} list. Administrators can see and modify all projects.
 
 User authentication is not mandatory, but for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
 
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you do not want the guest user to use.
 
-\begin{devnotes}
-At a later stage, OpenID support will be added.
-\end{devnotes}
+Rather than using \texttt{USERS} to define a user database in your service configuraton file, a more sophisticated method is available using MySQL. The configuration variable \texttt{USERS\_MYSQL} can be configured to point to a table in a MySQL database somewhere, the fields ``user'' and ``password'' in this table will subsequently be used to authenticate against, the password field is again a hashed password in the same fashion as in \texttt{USERS}.
 
 
 \subsection{Command Definition}
@@ -668,13 +668,15 @@ Now suppose there is another kind of mandatory input, a lexicon against which sp
 
 \subsection{Customising the web application}
 
-The CLAM web application offers a single uniform interface for all kinds of services. However, a certain degree of customisation is possible. One thing you may want is to include more HTML text on the pages, possibly enriched with images and hyperlinks to external sites. It is an ideal way to add extra instructions for your users. Doing this is very straightforward, by adding some custom HTML files to \texttt{static/custom/}, the HTML files should be named as followed, where SYSTEMID should be replaced by the ID of your system, as configured in your service configuration file.
+The CLAM web application offers a single uniform interface for all kinds of services. However, a certain degree of customisation is possible. One thing you may want is to include more HTML text on the pages, possibly enriched with images and hyperlinks to external sites. It is an ideal way to add extra instructions for your users. Doing this is very straightforward, by adding some custom HTML files to \texttt{static/custom/}, the HTML files should be named as follows, where SYSTEMID should be replaced by the ID of your system, as configured in your service configuration file.
 
 \begin{itemize}
-\item \texttt{static/custom/SYSTEMID_index.html} - This file will be included in the index view, the overview of all projects.
-\item \texttt{static/custom/SYSTEMID_projectstart.html} - This file will be included in the project view where the user can upload files and select parameters.
-\item \texttt{static/custom/SYSTEMID_projectdone.html} - This file will be included in the project view when the project is done and output is ready to be viewed/downloaded.
+\item \texttt{static/custom/SYSTEMID\_index.html} - This file will be included in the index view, the overview of all projects.
+\item \texttt{static/custom/SYSTEMID\_projectstart.html} - This file will be included in the project view where the user can upload files and select parameters.
+\item \texttt{static/custom/SYSTEMID\_projectdone.html} - This file will be included in the project view when the project is done and output is ready to be viewed/downloaded.
 \end{itemize}
+
+As the HTML pages will be embedded on the fly, take care \emph{not} to include any headers, only tags that go within the HTML \texttt{body} are permitted! Always use the UTF-8 encoding.
 
 A second kind of customisation is customisation of the style, this can be achieved by creating new CSS themes. CLAM gets shipped with the default ``classic'' style. Copy, rename and adapt \texttt{style/classic.css} to create your own style. And set \texttt{STYLE} accordingly in your service configuration file.
 
