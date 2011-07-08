@@ -292,10 +292,10 @@
         <table id="inputfiles" class="files">
             <thead>
                 <tr>
-                    <th>Input File</th>
-                    <th>Template</th>
-                    <th>Format</th>
-                    <th>Actions</th>
+                    <th style="width: 30%">Input File</th>
+                    <th style="width: 30%">Template</th>
+                    <th style="width: 30%">Format</th>
+                    <th style="width: 10%">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -312,10 +312,10 @@
         <table id="outputfiles" class="files">
             <thead>
                 <tr>
-                    <th>Output File</th>
-                    <th>Template</th>
-                    <th>Format</th>
-                    <th>Viewers</th>
+                    <th style="width: 35%">Output File</th>
+                    <th style="width: 25%">Template</th>
+                    <th style="width: 20%">Format</th>
+                    <th style="width: 25%">Viewers</th>
                 </tr>
             </thead>
             <tbody>
