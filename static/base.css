@@ -290,3 +290,6 @@ button#openeditor {
     color: white;
     font-weight: bold;
 }
+#toggleinputfiles {
+    float: right;
+}

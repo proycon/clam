@@ -3,6 +3,7 @@
 - Added support for a pre-authentication header (to be used with for example Shibboleth) (untested)
 - Added MySQL support for user database (untested)
 - Major fixes in authentication
+- Full support for authentication in CLAM Client API (urllib2 instead of httplib2)
 - Better error feedback
 
 

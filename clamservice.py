@@ -519,6 +519,10 @@ class Project(object):
         
 
         
+        inputpaths = []
+        if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
+            inputpaths = Project.inputindex(project, user)
+        
         if statuscode == clam.common.status.DONE:
             outputpaths = Project.outputindex(project, user)
             if self.exitstatus(project, user) != 0: #non-zero codes indicate errors!
@@ -527,10 +531,7 @@ class Project(object):
                 printlog("Child process failed, exited with non zero-exit code.")
         else:
             outputpaths = []        
-        if statuscode == clam.common.status.READY:
-            inputpaths = Project.inputindex(project, user)
-        else:
-            inputpaths = []      
+
         
         for parametergroup, parameterlist in parameters:
             for parameter in parameterlist:

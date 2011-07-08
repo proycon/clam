@@ -34,6 +34,13 @@
                 <xsl:apply-templates select="parameters"/>  
               </xsl:when>
               <xsl:when test="status/@code = 2">
+                <div id="input" class="box">
+                    <button id="toggleinputfiles">Show input files</button>  
+                    <div style="clear: both"></div>
+                    <div id="inputfilesarea" style="display: none">
+                        <xsl:apply-templates select="input"/>
+                    </div>
+                </div>
                 <xsl:apply-templates select="output"/>
               </xsl:when>
             </xsl:choose>

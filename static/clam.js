@@ -176,7 +176,10 @@ $(document).ready(function(){
    //Open in-browser editor
    $("#openeditor").click(function(event){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); })
 
-    
+   $('#toggleinputfiles').click(function(event) { 
+       $('#inputfilesarea').show(); 
+       $('#toggleinputfiles').hide();
+    } );
 
    //Submit data through in-browser editor
    $("#editorsubmit").click(function(event){         
