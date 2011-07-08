@@ -22,8 +22,8 @@ Example usage:
 >>> s = "Test file data"
 >>> f = StringIO(s)
 
->>> req = urllib2.Request("http://localhost:5000", f, \
-        {'Content-Length': len(s)})
+>>> req = urllib2.Request("http://localhost:5000", f,
+...                       {'Content-Length': str(len(s))})
 """
 
 import httplib, urllib2, socket
@@ -62,6 +62,8 @@ class _StreamingHTTPMixin:
         try:
             blocksize = 8192
             if hasattr(value, 'read') :
+                if hasattr(value, 'seek'):
+                    value.seek(0)
                 if self.debuglevel > 0:
                     print "sendIng a read()able"
                 data = value.read(blocksize)
@@ -69,6 +71,8 @@ class _StreamingHTTPMixin:
                     self.sock.sendall(data)
                     data = value.read(blocksize)
             elif hasattr(value, 'next'):
+                if hasattr(value, 'reset'):
+                    value.reset()
                 if self.debuglevel > 0:
                     print "sendIng an iterable"
                 for data in value:
@@ -170,23 +174,25 @@ if hasattr(httplib, 'HTTPS'):
             # body, that we've also specified Content-Length
             if req.has_data():
                 data = req.get_data()
-                if not hasattr(data, 'read') and hasattr(data, 'next'):
+                if hasattr(data, 'read') or hasattr(data, 'next'):
                     if not req.has_header('Content-length'):
                         raise ValueError(
                                 "No Content-Length specified for iterable body")
             return urllib2.HTTPSHandler.do_request_(self, req)
 
 
+def get_handlers():
+    handlers = [StreamingHTTPHandler, StreamingHTTPRedirectHandler]
+    if hasattr(httplib, "HTTPS"):
+        handlers.append(StreamingHTTPSHandler)
+    return handlers
+    
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
     opener object.
 
     Returns the created OpenerDirector object."""
-    handlers = [StreamingHTTPHandler, StreamingHTTPRedirectHandler]
-    if hasattr(httplib, "HTTPS"):
-        handlers.append(StreamingHTTPSHandler)
-
-    opener = urllib2.build_opener(*handlers)
+    opener = urllib2.build_opener(*get_handlers())
 
     urllib2.install_opener(opener)
 
