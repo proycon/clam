@@ -115,6 +115,27 @@ CUSTOM_FORMATS_MODULE = None
 #]
 
 # ======== PROFILE DEFINITIONS ===========
+output = OutputTemplate('log',PlainTextFormat,'Submission log',
+    SetMetaField('encoding','utf-8'),
+    ParameterMetaField('naam','naam'),
+    ParameterMetaField('voornaam','naam'),
+    ParameterMetaField('email','email'),
+    ParameterMetaField('adres','adres'),
+    ParameterMetaField('postcode','postcode'),
+    ParameterMetaField('woonplaats','woonplaats'),
+    ParameterMetaField('land','land'),
+    ParameterMetaField('categories','naam'),
+    ParameterMetaField('geslacht','geslacht'),
+    ParameterMetaField('leeftijd','leeftijd'),
+    ParameterMetaField('opleiding','opleiding'),
+    ParameterMetaField('moedertaal','moedertaal'),
+    ParameterMetaField('registreernaam','registreernaam'),
+    ParameterMetaField('anoniem','anoniem'),
+    ParameterMetaField('licentie','licentie'),
+    filename='log',
+    unique=True,
+)
+
 
 PROFILES = [ 
     Profile(
@@ -123,11 +144,7 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('log',PlainTextFormat,'Submission log',
-            SetMetaField('encoding','utf-8'),
-            filename='log',
-            unique=True,
-        ),
+        output
     ) ,
     Profile(
         InputTemplate('plaintext', PlainTextFormat,"Platte Tekst",  
@@ -136,11 +153,7 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('log',PlainTextFormat,'Submission log',
-            SetMetaField('encoding','utf-8'),
-            filename='log',
-            unique=True,
-        ),
+        output
     ) ,
     Profile(
         InputTemplate('msword', MSWordFormat,"Microsoft Word document",  
@@ -148,11 +161,7 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('log',PlainTextFormat,'Submission log',
-            SetMetaField('encoding','utf-8'),
-            filename='log',
-            unique=True,
-        ),
+        output
     ),
     Profile(
         InputTemplate('opendocument', OpenDocumentTextFormat,"OpenDocument Text (odt)",  
@@ -160,11 +169,8 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('log',PlainTextFormat,'Submission log',
-            SetMetaField('encoding','utf-8'),
-            filename='log',
-            unique=True,
-        ),
+        output
+
     ),
     Profile(
         InputTemplate('pdf', PDFFormat,"PDF",  
@@ -172,11 +178,7 @@ PROFILES = [
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('log',PlainTextFormat,'Submission log',
-            SetMetaField('encoding','utf-8'),
-            filename='log',
-            unique=True,
-        ),
+        output
     )         
 
     
@@ -233,7 +235,7 @@ PARAMETERS =  [
     ('Rechtspositie',[
         BooleanParameter(id='registreernaam',name='Ik wens in het corpus bij naam erkend worden als de auteur van de hierbij door mij gedoneerde teksten'),
         BooleanParameter(id='anoniem',name='Ik verkies anoniem te blijven', description='Vult u a.u.b. toch alle bovenstaande gegevens in, maar deze zullen niet in het corpus worden opgenomen'),
-        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')] ),
+        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='De volledige tekst van de overeenkomst is bovenaan deze pagina terug te vinden', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')] ),
     ])    
 ]
 

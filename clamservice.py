@@ -1361,7 +1361,7 @@ class InputFileHandler(object):
                     
                 if metadataerror:    
                     #output += "<metadataerror />" #This usually indicates an error in service configuration!
-                    fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + metadataerror + " (this usually indicates an error in service configuration!)</error>"
+                    fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + str(metadataerror) + " (this usually indicates an error in service configuration!)</error>"
                 elif validmeta:                    
                     #=========== Convert the uploaded file (if requested) ==============
                     

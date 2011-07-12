@@ -95,12 +95,17 @@ else:
 flog.write('SoNaR dankt u van harte voor uw bijdrage aan het Referentiecorpus van het hedendaags geschreven Nederlands!\n\n')
 flog.write('U heeft de volgende bestanden gedoneerd:\n')
 
+inputdir = None
 for inputfile in clamdata.input:    
-    inputfilepath = str(inputfile)    
+    inputfilepath = str(inputfile)  
+    inputdir  = os.path.dirname(inputfilepath)
     filename = os.path.basename(inputfilepath)
     clam.common.status.write(statusfile, "Processing " + filename)
-    shutils.copyfile(inputfilepath, submissiondir + filename)
+    shutils.movefile(inputfilepath, submissiondir + filename)
     flog.write('\t- ' + filename + '\n')
+
+if inputdir:
+    shutils.movefile(inputdir + '/.log.METADATA', submissiondir + 'metadata.xml')
 
 flog.write('\n')
 flog.write('De volgende overeenkomst is hierop van toepassing:\n\n')
