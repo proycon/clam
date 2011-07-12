@@ -118,6 +118,18 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
+        InputTemplate('archive', PlainTextFormat,"ZIP Archief",  
+            extension='.zip',
+            multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
+        ),
+        #------------------------------------------------------------------------------------------------------------------------
+        OutputTemplate('log',PlainTextFormat,'Submission log',
+            SetMetaField('encoding','utf-8'),
+            filename='log',
+            unique=True,
+        ),
+    ) ,
+    Profile(
         InputTemplate('plaintext', PlainTextFormat,"Platte Tekst",  
             ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','Unicode (UTF-8)'),('iso-8859-1','Latin1 (iso-8859-1)'),('iso-8859-15','Latin9 (iso-8859-15)'),('cp1250','CP1250')], value='utf-8'),
             extension='.txt',
@@ -198,7 +210,7 @@ COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUT
 
 PARAMETERS =  [ 
     ('Persoonlijke gegevens (ter administratie)', [ 
-        StringParameter(id='naam',name='Naam',description='Alleen indien u aanvinkt dat u als auteur van de door u gedoneerde tekst(en) in het corpus bekend wil staan, wordt uw naam in het corpus opgenomen!', required=True),
+        StringParameter(id='naam',name='Naam',description='Alleen indien u verderop aanvinkt dat u als auteur van de door u gedoneerde tekst(en) in het corpus bekend wil staan, wordt uw naam in het corpus opgenomen!', required=True),
         StringParameter(id='voornaam',name='Voornaam'),
         StringParameter(id='email',name='E-mail adres',description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!' ,required=True),
         StringParameter(id='adres',name='Straat en huisnummer', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),

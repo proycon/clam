@@ -132,3 +132,8 @@ class PDFFormat(CLAMMetaData):
 class OpenDocumentTextFormat(CLAMMetaData):    
     name = "Open Document Text Format"
     mimetype = 'application/vnd.oasis.opendocument.text'
+
+class ZIPFormat(CLAMMetaData):    
+    name = "ZIP Archive"
+    mimetype = 'application/zip'
+
