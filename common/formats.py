@@ -118,3 +118,17 @@ class TICCLShadowOutputXML(CLAMMetaData):
     name="Ticcl Shadow Output"
     mimetype='text/xml'
     scheme='' #TODO
+    
+class MSWordFormat(CLAMMetaData):    
+    attributes = {}    
+    name = "Microsoft Word format"
+    mimetype = 'application/msword'
+    scheme = '' #TODO    
+
+class PDFFormat(CLAMMetaData):    
+    name = "PDF"
+    mimetype = 'application/pdf'
+
+class OpenDocumentTextFormat(CLAMMetaData):    
+    name = "Open Document Text Format"
+    mimetype = 'application/vnd.oasis.opendocument.text'
