@@ -25,7 +25,7 @@ $(document).ready(function(){
             url: baseurl + "/static/custom/" + systemid + '_index.html',
             dataType: "html",
             success: function(data) {
-                $('#customtextindex').innerHTML = data;
+                $('#customtextindex').html(data);
             },
             error: function() {
                 $('#customtextindex').hide();
@@ -38,7 +38,7 @@ $(document).ready(function(){
             url: baseurl + "/static/custom/" + systemid + '_projectstart.html',
             dataType: "html",
             success: function(data) {
-                $('#customtextprojectstart').innerHTML = data;
+                $('#customtextprojectstart').html(data);
             },
             error: function() {
                 $('#customtextprojectstart').hide();
@@ -51,7 +51,7 @@ $(document).ready(function(){
             url: baseurl + "/static/custom/" + systemid + '_projectdone.html',
             dataType: "html",
             success: function(data) {
-                $('#customtextprojectdone').innerHTML = data;
+                $('#customtextprojectdone').html(data);
             },
             error: function() {
                 $('#customtextprojectdone').hide();
