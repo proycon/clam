@@ -98,6 +98,7 @@ class FoLiAXMLFormat(CLAMMetaData):
 
 
 class DCOIFormat(CLAMMetaData):    
+    attributes = {}    
     name = "DCOI format"
     mimetype = 'text/xml'
     scheme = '' #TODO
@@ -126,14 +127,17 @@ class MSWordFormat(CLAMMetaData):
     scheme = '' #TODO    
 
 class PDFFormat(CLAMMetaData):    
+    attributes = {}    
     name = "PDF"
     mimetype = 'application/pdf'
 
 class OpenDocumentTextFormat(CLAMMetaData):    
+    attributes = {}    
     name = "Open Document Text Format"
     mimetype = 'application/vnd.oasis.opendocument.text'
 
 class ZIPFormat(CLAMMetaData):    
+    attributes = {}    
     name = "ZIP Archive"
     mimetype = 'application/zip'
 

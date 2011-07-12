@@ -1414,9 +1414,11 @@ class InputFileHandler(object):
         
         if fatalerror:
             #fatal error return error message with 403 code
+            printlog('Fatal Error during upload: ' + fatalerror)
             raise web.webapi.Forbidden(head + fatalerror)
         elif errors:
             #parameter errors, return XML output with 403 code
+            printdebug('There were paramameter errors during upload!')
             raise web.webapi.Forbidden(output)
         else:
             #everything ok, return XML output with 200 code

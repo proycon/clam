@@ -139,7 +139,7 @@ output = OutputTemplate('log',PlainTextFormat,'Submission log',
 
 PROFILES = [ 
     Profile(
-        InputTemplate('archive', PlainTextFormat,"ZIP Archief",  
+        InputTemplate('archive', ZIPFormat,"ZIP Archief",  
             extension='.zip',
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
