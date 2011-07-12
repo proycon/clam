@@ -875,6 +875,8 @@ class InputFileHandler(object):
         viewer = None
         requestid = None
         
+        raw = filename.split('/')
+        
         if filename.strip('/') == "":
             #this is a request for the index
             raise web.webapi.Forbidden()
