@@ -19,6 +19,7 @@ from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
+from os import uname
 import sys
 
 REQUIRE_VERSION = 0.7
@@ -41,8 +42,21 @@ SYSTEM_DESCRIPTION = "Met dit systeem kunt u Nederlandstalige teksten doneren te
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/tmp/clam.projects/"
-
+host = uname()[1]
+if host == 'aurora' or host == 'roma': #proycon's laptop/server
+    ROOT = "/tmp/clam.projects/"
+    SUBMISSIONDIR = ROOT + "submissions/"
+else:
+    #Assuming ILK server
+    CLAMDIR = "/var/www/clam"
+    ROOT = "/var/www/clamdata/sonardropbox/"
+    HOST = 'webservices.ticc.uvt.nl'
+    PORT = 80
+    URLPREFIX = 'sonar'
+    WEBSERVICEGHOST = 'ws'
+    BINDIR = '/var/www/bin/'
+    SUBMISSIONDIR = "/var/www/clamdata/sonardropbox/submissions/"
+    
 #The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
 PORT= 8080
 
@@ -176,7 +190,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $SUBMISSIONDIR"
 
 # ======== PARAMETER DEFINITIONS ===========
 
@@ -190,13 +204,13 @@ PARAMETERS =  [
         StringParameter(id='adres',name='Straat en huisnummer', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
         StringParameter(id='postcode',name='Postcode', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
         StringParameter(id='woonplaats',name='Woonplaats', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
-        ChoiceParameter(id='land',name='Woonplaats', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',choices=[('B',u'België'),('NL','Nederland')],required=True),
+        ChoiceParameter(id='land',name='Land', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',choices=[('B',u'België'),('NL','Nederland')],required=True),
     ]),
     ('Tekstsoort',[
         ChoiceParameter(id='categories',name=u'Tekstcategoriën',description='',choices=
             [
                 ('WR-P-E-B','E-books (Elektronische boeken)'),
-            ], multiselect=True)
+            ], multi=True)
     ]),
     ('Extra gegevens ten behoeve van wetenschappelijk onderzoek', [
         ChoiceParameter(id='geslacht',name='Geslacht', description='Vul dit vrijblijvend in indien u wilt bijdragen aan taalkundig wetenschappelijk onderzoek. Dit wordt in het corpus opgenomen.',choices=[('na','Geen antwoord (anoniem)'),('m','Man'),('v','Vrouw')],required=True),
@@ -207,7 +221,7 @@ PARAMETERS =  [
     ('Rechtspositie',[
         BooleanParameter(id='registreernaam',name='Ik wens in het corpus bij naam erkend worden als de auteur van de hierbij door mij gedoneerde teksten'),
         BooleanParameter(id='anoniem',name='Ik verkies anoniem te blijven', description='Vult u a.u.b. toch alle bovenstaande gegevens in, maar deze zullen niet in het corpus worden opgenomen'),
-        BooleanParameter(id='rechtspositie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')] ),
+        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')] ),
     ])    
 ]
 
