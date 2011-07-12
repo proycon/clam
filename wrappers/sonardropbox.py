@@ -26,7 +26,7 @@ import os
 import codecs
 import re
 import string
-import shutils
+import shutil
 import glob
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.
@@ -56,13 +56,12 @@ clam.common.status.write(statusfile, "Processing your submission...")
 
 email = clamdata['email']
 #sanity check (prevent command line injection):
-expmail = re.compile('^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6}$')
+expmail = re.compile(r"(?:^|\s)[-a-z0-9_.]+@(?:[-a-z0-9]+\.)+[a-z]{2,6}(?:\s|$)",re.IGNORECASE)
 if not expmail.match(email):
     print >>sys.stderr,"Invalid e-mail address: " + email
     sys.exit(2)
 
-name = clamdata['name']
-name = name.replace('"','')
+
 
 submissionid = 0
 for d in glob.glob(submissiondir+'/*'):
@@ -86,11 +85,11 @@ os.mkdir(submissiondir)
 
 flog = codecs.open(outputdir + '/log','w','utf-8')
 if clamdata['geslacht'] == 'm':
-    flog.write('Geachte Heer ' + clamdata['name'] + '\n\n')
+    flog.write('Geachte Heer ' + clamdata['naam'] + '\n\n')
 elif clamdata['geslacht'] == 'v':
-    flog.write('Geachte Mevrouw ' + clamdata['name'] + '\n\n')
+    flog.write('Geachte Mevrouw ' + clamdata['naam'] + '\n\n')
 else:
-    flog.write('Geachte Heer/Mevrouw ' + clamdata['name'] + '\n\n')
+    flog.write('Geachte Heer/Mevrouw ' + clamdata['naam'] + '\n\n')
 
 flog.write('SoNaR dankt u van harte voor uw bijdrage aan het Referentiecorpus van het hedendaags geschreven Nederlands!\n\n')
 flog.write('U heeft de volgende bestanden gedoneerd:\n')
@@ -101,11 +100,11 @@ for inputfile in clamdata.input:
     inputdir  = os.path.dirname(inputfilepath)
     filename = os.path.basename(inputfilepath)
     clam.common.status.write(statusfile, "Processing " + filename)
-    shutils.movefile(inputfilepath, submissiondir + filename)
+    shutil.move(inputfilepath, submissiondir + filename)
     flog.write('\t- ' + filename + '\n')
 
 if inputdir:
-    shutils.movefile(inputdir + '/.log.METADATA', submissiondir + 'metadata.xml')
+    shutil.move(inputdir + '/.log.METADATA', submissiondir + 'metadata.xml')
 
 flog.write('\n')
 flog.write('De volgende overeenkomst is hierop van toepassing:\n\n')

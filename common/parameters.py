@@ -120,6 +120,20 @@ class AbstractParameter(object):
         return xml
         
     def __str__(self):
+        if self.value:
+            if isinstance(self.value, unicode):
+                return self.value.encode('utf-8')
+            return str(self.value)
+        else:
+            return ""
+            
+    def __unicode__(self):
+        if self.value:
+            return self.value            
+        else:
+            return u""
+
+    def __repr__(self):
         if self.error:
             error = " (ERROR: " + self.error + ")"
         else:
@@ -187,9 +201,9 @@ class AbstractParameter(object):
                     if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
                         if 'multi' in kwargs and kwargs['multi'] == '1':
                             if not 'value' in kwargs: kwargs['value'] = []
-                            kwargs['value'].append(subtag.attrib['id'])
+                            kwargs['value'].append(subtag.text)
                         else:
-                            kwargs['value'] = subtag.attrib['id']
+                            kwargs['value'] = subtag.text
 
             return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
         else:
