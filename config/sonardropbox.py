@@ -88,14 +88,14 @@ USERS = None #no user authentication/security (this is not recommended for produ
 #USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
-REQUIREMEMORY = 10
+#REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
-MAXLOADAVG = 1.0
+#MAXLOADAVG = 1.0
 
 #Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
-DISK = '/dev/sda1' #set this to the disk where ROOT is on
-MINDISKSPACE = 10
+#DISK = '/dev/sda1' #set this to the disk where ROOT is on
+#MINDISKSPACE = 10
 
 
 # ======== WEB-APPLICATION STYLING =============
@@ -204,7 +204,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $SUBMISSIONDIR"
+COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY " + SUBMISSIONDIR
 
 # ======== PARAMETER DEFINITIONS ===========
 
@@ -235,7 +235,7 @@ PARAMETERS =  [
     ('Rechtspositie',[
         BooleanParameter(id='registreernaam',name='Ik wens in het corpus bij naam erkend worden als de auteur van de hierbij door mij gedoneerde teksten'),
         BooleanParameter(id='anoniem',name='Ik verkies anoniem te blijven', description='Vult u a.u.b. toch alle bovenstaande gegevens in, maar deze zullen niet in het corpus worden opgenomen'),
-        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='De volledige tekst van de overeenkomst is bovenaan deze pagina terug te vinden', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')] ),
+        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='De volledige tekst van de overeenkomst is bovenaan deze pagina terug te vinden', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')],required=True ),
     ])    
 ]
 

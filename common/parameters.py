@@ -201,9 +201,9 @@ class AbstractParameter(object):
                     if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
                         if 'multi' in kwargs and kwargs['multi'] == '1':
                             if not 'value' in kwargs: kwargs['value'] = []
-                            kwargs['value'].append(subtag.text)
+                            kwargs['value'].append(subtag.attrib['id'])
                         else:
-                            kwargs['value'] = subtag.text
+                            kwargs['value'] = subtag.attrib['id']
 
             return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
         else:
@@ -334,7 +334,7 @@ class ChoiceParameter(AbstractParameter):
         self.showall = False
         self.multi = False
         if not 'value' in kwargs and not 'default' in kwargs:
-            self.value = self.choices[0][0] #no default specified, first choice is default
+            self.value = self.choices[0][0] #no default specified, first choice is default                
                 
         for key, value in kwargs.items():
             if key == 'multi': 
@@ -410,16 +410,6 @@ class ChoiceParameter(AbstractParameter):
         xml += "</" + self.__class__.__name__ + ">"
         return xml
         
-    def __str__(self):
-        if self.error:
-            error = " (ERROR: " + self.error + ")"
-        else:
-            error = ""
-        if self.value:
-            return self.__class__.__name__ + " " + self.id + ": " + ",".join(self.value) + error
-        else: 
-            return self.__class__.__name__ + " " + self.id + error        
-
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if self.multi: #multi parameters can be passed as  parameterid=choiceid1,choiceid2 or by setting parameterid[choiceid]=1 (or whatever other non-zero value)

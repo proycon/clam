@@ -560,6 +560,7 @@ class Project(object):
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
         if not self.exists(project, user):
+            if not user: user = 'anonymous'
             raise web.webapi.NotFound("Project " + project + " was not found for user " + user) #404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
