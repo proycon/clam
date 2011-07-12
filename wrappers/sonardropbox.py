@@ -65,9 +65,11 @@ if not expmail.match(email):
 
 submissionid = 0
 for d in glob.glob(submissiondir+'/*'):
-        if os.path.isdir(d) and d.strip('/').isdigit():
-            if int(d) > submissionid:
-                submissionid = int(d)
+        print >>sys.stderr,d
+        if os.path.isdir(d) and os.path.basename(d).strip('/').isdigit():
+            if int(os.path.basename(d).strip('/')) > submissionid:
+                submissionid = int(os.path.basename(d).strip('/'))
+print >>sys.stderr,"Submission ID: ", submissionid
 submissionid = str(submissionid + 1)
 
 license = clamdata['licentie']
