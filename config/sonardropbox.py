@@ -46,6 +46,7 @@ host = uname()[1]
 if host == 'aurora' or host == 'roma': #proycon's laptop/server
     ROOT = "/tmp/clam.projects/"
     SUBMISSIONDIR = ROOT + "submissions/"
+    CLAMDIR = "/home/proycon/work/clam"
 else:
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
@@ -204,7 +205,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY " + SUBMISSIONDIR
+COMMAND = CLAMDIR + "/wrappers/sonardropbox.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY " + SUBMISSIONDIR
 
 # ======== PARAMETER DEFINITIONS ===========
 
