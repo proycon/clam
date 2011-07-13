@@ -446,11 +446,19 @@ class CLAMClient:
             else:
                 data[key] = value
         
+                
+        opener = register_openers()
+        opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+        if self.authenticated:
+            opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
         datagen, headers = multipart_encode(data)
-
+        
         # Create the Request object
         request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        xml = urllib2.urlopen(request).read()
+        try:
+            xml = urllib2.urlopen(request).read()
+        except urllib2.HTTPError, e:
+            xml = e.read()        
         try:
             return self._parseupload(xml)
         except:
