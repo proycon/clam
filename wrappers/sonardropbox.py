@@ -107,8 +107,8 @@ for inputfile in clamdata.input:
     shutil.move(inputfilepath, submissiondir + filename)
     flog.write('\t- ' + filename + '\n')
 
-if inputdir:
-    shutil.move(inputdir + '/.log.METADATA', submissiondir + 'metadata.xml')
+
+shutil.move(outputdir + '/.log.METADATA', submissiondir + 'metadata.xml')
 
 flog.write('\n')
 flog.write('De volgende overeenkomst is hierop van toepassing:\n\n')
@@ -130,7 +130,10 @@ if RECIPIENTS:
 else:
     cc = ""
 
+
 os.system('mail "' + email + '" -s "SoNaR donatie" ' + cc + ' < ' + outputdir + '/log')
+
+shutil.move(outputdir + '/log', submissiondir + 'log')
 
 #A nice status message to indicate we're done
 clam.common.status.write(statusfile, "Done",100) # status update
