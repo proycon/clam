@@ -47,6 +47,7 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     ROOT = "/tmp/clam.projects/"
     SUBMISSIONDIR = ROOT + "submissions/"
     CLAMDIR = "/home/proycon/work/clam"
+    PORT= 8080
 else:
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
@@ -57,9 +58,7 @@ else:
     WEBSERVICEGHOST = 'ws'
     BINDIR = '/var/www/bin/'
     SUBMISSIONDIR = "/var/www/clamdata/sonardropbox/submissions/"
-    
-#The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
-PORT= 8080
+
 
 #The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
 #Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
