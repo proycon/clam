@@ -223,7 +223,31 @@ PARAMETERS =  [
     ('Tekstsoort',[
         ChoiceParameter(id='categories',name=u'Tekstcategoriën',description='',choices=
             [
+                ('WR-P-P-B','Boeken'),
+                ('WR-P-P-C','Brochures'),
+                ('WR-U-E-A','Chats'),
+                ('WR-P-P-O','Columns'),
+                ('WR-P-P-D','Digitale nieuwsbrieven'),
                 ('WR-P-E-B','E-books (Elektronische boeken)'),
+                ('WR-P-E-C','E-magazines (Digitale tijdschriften)'),
+                ('WR-U-E-B','E-mails'),
+                ('WR-P-P-P','Gedichten'),
+                ('WR-P-P-M','Gepubliceerde scripties'),
+                ('WR-P-P-E','Gidsen en handleidingen (Bijv. gebruikershandleidingen, instructies)'),
+                ('WR-P-E-A','Internetfora'),
+                ('WR-P-E-E','Nieuwsbrieven'),
+                ('WR-P-E-G','Ondertitels'),
+                ('WS-U-E-C','Oraties en redes'),
+                ('WR-P-E-F','Persberichten'),
+                ('WR-P-P-K','Rapporten'),
+                ('WR-P-P-A','Samenvattingen en abstracts'),
+                ('WR-U-P-A','Scripties (Bachelor- en Masterscripties)'),
+                ('WR-U-E-D','SMS'),
+                ('WS-U-E-B','Speeches en toespraken'),
+                ('WR-P-P-L','Surveys (Rapporten van grotere onderzoeken, gepubliceerd in boekvorm)'),
+                ('WR-P-E-L','Tweets'),
+                ('WR-P-E-I','Websites'),
+                ('WR-U-E-E','Werkstukken, essays, papers en andere opdrachten van studenten en scholieren'),
             ], multi=True)
     ]),
     ('Extra gegevens ten behoeve van wetenschappelijk onderzoek', [
