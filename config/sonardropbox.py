@@ -218,7 +218,7 @@ PARAMETERS =  [
         StringParameter(id='adres',name='Straat en huisnummer', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
         StringParameter(id='postcode',name='Postcode', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
         StringParameter(id='woonplaats',name='Woonplaats', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',required=True),
-        ChoiceParameter(id='land',name='Land', description='Enkel ter administratie. Wordt in geen geval in het corpus opgenomen!',choices=[('B',u'België'),('NL','Nederland')],required=True),
+        ChoiceParameter(id='land',name='Land', description='We registreren in het corpus of het Nederlandse dan wel Vlaamse teksten betreft.',choices=[('B',u'België'),('NL','Nederland')],required=True),
     ]),
     ('Tekstsoort',[
         ChoiceParameter(id='categories',name=u'Tekstcategoriën',description='',choices=
@@ -233,9 +233,9 @@ PARAMETERS =  [
         ChoiceParameter(id='moedertaal',name='Moedertaal', description='Vul dit vrijblijvend in indien u wilt bijdragen aan taalkundig wetenschappelijk onderzoek. Dit wordt in het corpus opgenomen.',choices=[('na','Geen antwoord (anoniem)'),('nederlands','Nederlands'),('niet-nederlands','Niet-Nederlands')],required=True),
     ]),
     ('Rechtspositie',[
-        BooleanParameter(id='registreernaam',name='Ik wens in het corpus bij naam erkend worden als de auteur van de hierbij door mij gedoneerde teksten'),
+        BooleanParameter(id='registreernaam',name='Ik wens in het corpus bij naam erkend te worden als de auteur van de hierbij door mij gedoneerde teksten'),
         BooleanParameter(id='anoniem',name='Ik verkies anoniem te blijven', description='Vult u a.u.b. toch alle bovenstaande gegevens in, maar deze zullen niet in het corpus worden opgenomen'),
-        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='De volledige tekst van de overeenkomst is bovenaan deze pagina terug te vinden', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')],required=True ),
+        ChoiceParameter(id='licentie',name='Ik accepteer mijn donatie onder de voorwaarden van de volgende overeenkomst',description='De volledige tekst van de overeenkomst is bovenaan deze pagina terug te vinden en wordt u per e-mail toegestuurd', choices=[('geen','geen acceptatie (Uw donatie is ongeldig!)'),('NL','Nederlandse overeenkomst'),('B','Belgische Overeenkomst')],required=True ),
     ])    
 ]
 
