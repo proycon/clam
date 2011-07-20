@@ -17,7 +17,8 @@ MANAGERS = ADMINS
 if uname()[1] == 'aurora' or uname()[1] == 'malaga':
     #proycon's laptop/server
     DOMAIN = 'webservices.ticc.uvt.nl'
-    ROOTDIR = '/home/proycon/work/clam/clamopener/'
+    BASEURL = 'http://' + DOMAIN + '/'
+    ROOTDIR = '/home/proycon/work/clam/clamopener/'    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -34,6 +35,7 @@ if uname()[1] == 'aurora' or uname()[1] == 'malaga':
 else:
     #assuming ILK server
     DOMAIN = 'webservices.ticc.uvt.nl'
+    BASEURL = 'http://' + DOMAIN + '/'
     ROOTDIR = ''
     DATABASES = {
         'default': {
