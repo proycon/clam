@@ -1,0 +1,48 @@
+body {
+    font-family: sans;
+    font-size: 10px;
+    background: url(back.jpg) center fixed;
+}
+
+#header {
+    text-align: center;
+}
+#header h1 {
+    color: white;
+    font-size: 250%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+#main {
+    width: 500px;
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 300px;
+    background: url(back2.png);
+    padding: 50px;
+    border-radius: 25px;
+}
+
+#form {
+    width: 400px;
+    margin-left: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+form label {
+    display: inline-block;
+    font-weight: bold;
+    width: 150px;    
+}
+form input {
+    width: 250px;
+}
+#submitbutton {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    display: block;
+    margin-top: 20px;    
+}

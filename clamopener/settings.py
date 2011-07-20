@@ -17,7 +17,7 @@ MANAGERS = ADMINS
 if uname()[1] == 'aurora' or uname()[1] == 'malaga':
     #proycon's laptop/server
     DOMAIN = 'webservices.ticc.uvt.nl'
-    ROOTDIR = '/home/proycon/clam/clamopener/'
+    ROOTDIR = '/home/proycon/work/clam/clamopener/'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -74,12 +74,12 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = ROOTDIR + 'style/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/style/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
