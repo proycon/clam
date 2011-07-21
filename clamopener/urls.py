@@ -7,8 +7,8 @@ from clamopener import settings
 
 urlpatterns = patterns('',
     # Example:
-    ('^/?$', 'clamopener.views.register' ),      
-    ('^activate/([0-9]+)/?$', 'clamopener.views.activate' ),     
+    ('^/?$', 'clamopener.clamusers.views.register' ),      
+    ('^activate/([0-9]+)/?$', 'clamopener.clamusers.views.activate' ),     
     #('^edit/', 'clamopener.views.edit' ),
     #(r'^admin/', include(admin.site.urls))
     (r'^style/(?P<path>.*)$', 'django.views.static.serve',

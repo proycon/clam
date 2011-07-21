@@ -1,5 +1,5 @@
 from django import forms
-from clamopener.models import CLAMUsers
+from clamopener.clamusers.models import CLAMUsers
 from django.core.validators import validate_email
 from clamopener import settings
 
