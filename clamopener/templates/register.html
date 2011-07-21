@@ -14,6 +14,7 @@
               <p>Your registration will be manually reviewed and approved. You will receive an e-mail when your account is active.</p>
               <div id="form">
                 <form method="post" action="/">
+                    {% csrf_token %}
                     {{ form }}
                     <input id="submitbutton" type="submit" value="Register" />                    
                 </form>

@@ -9,8 +9,9 @@
           <div id="header">
               <h1>Activation Form</h1>
           </div>
-          <div id="main">
+          <div id="main">              
               <form method="post" action=".">
+                {% csrf_token %}
                 Master password: <input type="password" name="pw" /><br />
                 <input type="submit" value="Activate user" />
               <form>
