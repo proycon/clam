@@ -1,6 +1,6 @@
 body {
     font-family: sans;
-    font-size: 10px;
+    font-size: 11px;
     background: url(back.jpg) center fixed;
 }
 
@@ -8,10 +8,23 @@ body {
     text-align: center;
 }
 #header h1 {
-    color: white;
+    color: #ffa861; 
     font-size: 250%;
     margin-top: 50px;
     margin-bottom: 50px;
+    background: url(back2.png);
+    border-radius: 25px;
+    display: block;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;    
+}
+
+a {
+    color: #ffa861; 
 }
 
 #main {
@@ -45,4 +58,32 @@ form input {
     text-align: center;
     display: block;
     margin-top: 20px;    
+}
+table#index {
+    width: 100%;
+}
+
+table th {
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+table td {
+    color: white;
+    font-size: 10px;
+}
+th.colname {
+    width: 30%;
+}
+th.coldsc {
+    width: 70%;
+}
+
+td.colname {
+    font-size: 12px;
+    font-weight: bold;    
+    vertical-align: top;
+}
+td.colname a {
+    text-decoration: none;
 }

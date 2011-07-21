@@ -13,7 +13,6 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-
 if uname()[1] == 'aurora' or uname()[1] == 'malaga':
     #proycon's laptop/server
     DOMAIN = 'webservices.ticc.uvt.nl'
@@ -32,6 +31,24 @@ if uname()[1] == 'aurora' or uname()[1] == 'malaga':
     REALM = 'CLAM-TICC'
     MASTER_PASSWORD = 'a965704891a834de6e704fccb2f9a95c'  #hashlib.md5('secret').hexdigest()
     FROMMAIL = 'proycon@anaproy.nl'
+    
+    SERVICES = [
+        {
+            'url': 'http://'  + DOMAIN + '/ucto/',
+            'name': 'Ucto Tokeniser',
+            'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
+        },    
+        {
+            'url': 'http://'  + DOMAIN + '/ucto/',
+            'name': 'Frog',
+            'description': "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+        },      
+        {
+            'url': 'http://'  + DOMAIN + '/valkuil/',
+            'name': 'Valkuil',
+            'description': "Valkuil is a Dutch spelling-corrector system."
+        }, 
+    ]
 else:
     #assuming ILK server
     DOMAIN = 'webservices.ticc.uvt.nl'
@@ -50,6 +67,25 @@ else:
     REALM = 'CLAM-TICC'
     MASTER_PASSWORD = 'a965704891a834de6e704fccb2f9a95c'  #hashlib.md5('secret').hexdigest()
     FROMMAIL = 'automailer@webservices.ticc.uvt.nl'
+    
+    SERVICES = [
+        {
+            'url': 'http://'  + DOMAIN + '/ucto/',
+            'name': 'Ucto Tokeniser',
+            'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
+        },    
+        {
+            'url': 'http://'  + DOMAIN + '/ucto/',
+            'name': 'Frog',
+            'description': "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+        },      
+        {
+            'url': 'http://'  + DOMAIN + '/valkuil/',
+            'name': 'Valkuil',
+            'description': "Valkuil is a Dutch spelling-corrector system."
+        }, 
+    ]
+    
     
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -125,4 +161,6 @@ INSTALLED_APPS = (
     #'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'clamopener.clamindex',
+    'clamopener.clamusers',
 )

@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.views.generic.simple import direct_to_template
 from clamopener import settings
 
 # Uncomment the next two lines to enable the admin:
@@ -7,7 +8,8 @@ from clamopener import settings
 
 urlpatterns = patterns('',
     # Example:
-    ('^/?$', 'clamopener.clamusers.views.register' ),      
+    ('^/?$', 'clamopener.clamindex.views.index' ),
+    ('^register/?$', 'clamopener.clamusers.views.register' ),      
     ('^activate/([0-9]+)/?$', 'clamopener.clamusers.views.activate' ),     
     #('^edit/', 'clamopener.views.edit' ),
     #(r'^admin/', include(admin.site.urls))
