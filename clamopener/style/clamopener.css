@@ -71,6 +71,7 @@ table th {
 table td {
     color: white;
     font-size: 10px;
+    padding-bottom: 10px;
 }
 th.colname {
     width: 30%;
