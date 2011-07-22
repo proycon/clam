@@ -176,7 +176,7 @@
                 </tr>
             </xsl:for-each>
         </xsl:when>
-        <xsl:when test="@showall = true">
+        <xsl:when test="@showall">
             <tr>
             <xsl:if test="@error"> 
              <xsl:attribute name="class">error</xsl:attribute>

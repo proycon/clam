@@ -338,10 +338,10 @@ class ChoiceParameter(AbstractParameter):
                 
         for key, value in kwargs.items():
             if key == 'multi': 
-                self.multi = value #boolean 
+                self.multi = bool(value) #boolean 
                 del kwargs[key]
             elif key == 'showall': 
-                self.showall = value #show all options at once (radio instead of a pull down) 
+                self.showall = bool(value) #show all options at once (radio instead of a pull down) 
                 del kwargs[key]
             elif key == 'delimiter': 
                 self.delimiter = value #char
@@ -390,7 +390,9 @@ class ChoiceParameter(AbstractParameter):
         xml += ' name="'+self.name + '"'
         xml += ' description="'+self.description + '"'
         if self.paramflag:
-            xml += ' flag="'+self.paramflag + '"'
+            xml += ' flag="'+self.paramflag + '"'        
+        if self.multi:
+            xml += ' multi="true"'
         for key, value in self.kwargs.items():    
             if key != 'choices' and key != 'default' and key != 'flag' and key != 'paramflag':
                 if isinstance(value, bool):
