@@ -19,7 +19,7 @@
                 <xsl:when test="status/@code = 0">  
                  <div id="customtextprojectstart" class="box"></div>
                 </xsl:when>
-                <xsl:when test="status/@code = 1">  
+                <xsl:when test="status/@code = 2">  
                  <div id="customtextprojectdone" class="box"></div>
                 </xsl:when>
             </xsl:choose>
