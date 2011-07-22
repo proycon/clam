@@ -1,3 +1,6 @@
+0.7.1) [July 2011]
+- Fixes in webapplication interface
+
 0.7.0) [July 2011]
 - Projects now stored on a per-user basis (no naming conflicts)
 - Added support for a pre-authentication header (to be used with for example Shibboleth) (untested)
