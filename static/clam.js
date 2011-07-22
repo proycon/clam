@@ -492,7 +492,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
             $(target).html(result);
-            if ((enableconverters) && ($(inputtemplate.converters))) {                
+            if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {                
                 var s = "Automatic conversion from other format? <select name=\"converter\">";
                 s += "<option value=\"\">No</option>";
                 for (var i = 0; i < inputtemplate.converters.length; i++) {
