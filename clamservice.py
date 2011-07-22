@@ -52,7 +52,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.7.0'
+VERSION = '0.7.1'
 
 DEBUG = False
     
