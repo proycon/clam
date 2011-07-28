@@ -131,7 +131,7 @@ def validate_users_mysql():
         port = int(settings.USERS_MYSQL['port'])
     else:
         port = 3306
-    if not 'user' in settings.USERS_MYSQL:
+    if 'user' in settings.USERS_MYSQL:
         user = settings.USERS_MYSQL['user']
     else:
         raise Exception("No MySQL user defined in USERS_MYSQL")
