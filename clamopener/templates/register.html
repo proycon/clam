@@ -13,7 +13,7 @@
               <p>Please register for an account to gain access to our webservices and webapplications.</p>
               <p>Your registration will be manually reviewed and approved. You will receive an e-mail when your account is active.</p>
               <div id="form">
-                <form method="post" action="/">
+                <form method="post" action="/register/">
                     {% csrf_token %}
                     {{ form }}
                     <input id="submitbutton" type="submit" value="Register" />                    
