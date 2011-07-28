@@ -10,7 +10,7 @@
               <h1>Activation Form</h1>
           </div>
           <div id="main">              
-              <form method="post" action=".">
+              <form method="post" action="/activate/{{ userid }}">
                 {% csrf_token %}
                 Master password: <input type="password" name="pw" /><br />
                 <input type="submit" value="Activate user" />

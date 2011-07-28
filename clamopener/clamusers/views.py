@@ -39,5 +39,5 @@ def activate(request, userid):
     else:
         c = RequestContext(request)
         c.update(csrf(request))
-        return render_to_response('activate.html',context_instance=c)
+        return render_to_response('activate.html',{'userid': userid},context_instance=c)
         
