@@ -32,6 +32,11 @@ SYSTEM_DESCRIPTION = 'Ucto is a unicode-compliant tokeniser. It takes input in t
 ROOT = path[0] + "/../ucto.clam/"
 PORT = 8080
 
+#Users and passwords
+USERS = None #Enable this instead if you want no authentication
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+
+
 # ================ Root directory for CLAM ===============
 host = uname()[1]
 if host == 'aurora' or host == 'roma': #proycon's laptop/server
@@ -48,12 +53,17 @@ else:
     PORT = 80
     URLPREFIX = 'ucto'
     WEBSERVICEGHOST = 'ws'
+    REALM = 'CLAM-TICC'
+    USERS_MYSQL = {
+        'host': 'stheno.uvt.nl',
+        'user': 'clamopener',
+        'password': '',
+        'database': 'clamopener',
+        'table': 'clamusers_clamusers',        
+    }
+    
 
 
-
-#Users and passwords
-USERS = None #Enable this instead if you want no authentication
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 
 #The system command. It is recommended you set this to small wrapper
