@@ -1,0 +1,30 @@
+<html>
+  <head>
+        <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/> 
+        <title>Webservice Registration</title>
+        <link rel="StyleSheet" href="/style/clamopener.css" type="text/css" /> 
+  </head>
+  <body>
+      <div id="container">
+          <div id="header">
+              <h1>CLAM Webservices</h1>
+          </div>
+          <div id="main">
+              <p>The following webservices are available on this domain.</p>
+              <p>You will need an account to access them, <a href="register/">register for an account</a> here.</p>
+              <table id="index">
+                <tr>
+                    <th class="colname">Service Name</th>                    
+                    <th class="coldesc">Description</th>
+                </tr>
+              {% for service in services %}
+                <tr>
+                    <td class="colname"><a href="{{ service.url }}">{{ service.name }}</a></td>
+                    <td class="coldesc">{{ service.description }}<br /><br /><a href="{{ service.url }}">{{ service.url }}</a></td>                
+                </tr>
+              {% endfor %}
+              </table>
+          </div>
+      </div>
+  </body>
+</html>
