@@ -1,5 +1,6 @@
 0.7.1) [July 2011]
 - Fixes in webapplication interface
+- Fix in archive uploading with subdirs
 
 0.7.0) [July 2011]
 - Projects now stored on a per-user basis (no naming conflicts)

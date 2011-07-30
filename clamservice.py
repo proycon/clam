@@ -1256,7 +1256,7 @@ class InputFileHandler(object):
                             colon = line.find(":")
                             if colon:
                                 subfile =  line[colon + 1:].strip()
-                        if subfile and os.path.exists(Project.path(project, user) + subfile):
+                        if subfile and os.path.isfile(Project.path(project, user) + subfile):
                             subfile_newname = clam.common.data.resolveinputfilename(os.path.basename(subfile), parameters, inputtemplate, nextseq+len(addedfiles), project) 
                             printdebug('(Extracted file ' + subfile + ', moving to input/' + subfile_newname+')')
                             os.rename(Project.path(project, user) + subfile, Project.path(project, user) + 'input/' +  subfile_newname)
