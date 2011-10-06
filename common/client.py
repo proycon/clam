@@ -167,6 +167,8 @@ class CLAMClient:
                 raise NotFound(e.read())
             elif statuscode == 500:
                 raise ServerError(e.read())
+            elif statuscode == 405:
+                raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)                
             elif statuscode == 408:
                 raise TimeOut()            
             else:
