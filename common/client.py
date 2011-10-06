@@ -153,7 +153,7 @@ class CLAMClient:
                 
             if statuscode >= 200 and statuscode < 300:
                 #this is no error!
-                pass
+                return True
             elif statuscode == 400:
                 raise BadRequest()
             elif statuscode == 401:
