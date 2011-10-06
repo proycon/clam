@@ -151,8 +151,10 @@ class CLAMClient:
             except AttributeError:
                 raise e    
                 
-            
-            if statuscode == 400:
+            if statuscode >= 200 and statuscode < 300:
+                #this is no error!
+                pass
+            elif statuscode == 400:
                 raise BadRequest()
             elif statuscode == 401:
                 raise AuthRequired()
