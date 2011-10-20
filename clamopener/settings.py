@@ -75,7 +75,7 @@ else:
             'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
         },    
         {
-            'url': 'http://'  + DOMAIN + '/ucto/',
+            'url': 'http://'  + DOMAIN + '/frog/',
             'name': 'Frog',
             'description': "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
         },      
