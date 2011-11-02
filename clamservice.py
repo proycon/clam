@@ -176,7 +176,7 @@ def requirelogin(f):
                         raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
                 args += (user,)
                 return f(*args, **kwargs)
-            elif settings.PREAUTHONLY:
+            elif settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
                 raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
         if settings.USERS or settings.USERS_MYSQL:
             return auth(f)(*args, **kwargs)
