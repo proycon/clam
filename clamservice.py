@@ -161,8 +161,9 @@ def requirelogin(f):
     global auth
     def wrapper(*args, **kwargs):
         printdebug("wrapper: "+ repr(f))   
-        if settings.PREAUTHHEADER:
+        if settings.PREAUTHHEADER:            
             user = web.ctx.env.get(settings.PREAUTHHEADER, '')
+            printdebug("Got pre-authenticated user: " + user)   
             if user:
                 if settings.PREAUTHMAPPING:
                     try:
@@ -171,9 +172,9 @@ def requirelogin(f):
                         raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
                 args += (user,)
                 return f(*args, **kwargs)
-            else:
+            elif settings.PREAUTHONLY:
                 raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
-        elif settings.USERS or settings.USERS_MYSQL:
+        if settings.USERS or settings.USERS_MYSQL:
             return auth(f)(*args, **kwargs)
         else:
             return f(*args, **kwargs)
@@ -1850,9 +1851,11 @@ def set_defaults(HOST = None, PORT = None):
     elif not 'REMOTEUSER' in settingkeys:
         settings.REMOTEUSER = None
     if not 'PREAUTHHEADER' in settingkeys:
-        settings.PREAUTHHEADER = None         
+        settings.PREAUTHHEADER = None     #The name of the header field containing the pre-authenticated username
     if not 'PREAUTHMAPPING' in settingkeys:
-        settings.PREAUTHMAPPING = None 
+        settings.PREAUTHMAPPING = None #A mapping from pre-authenticated usernames to built-in usernames
+    if not 'PREAUTHONLY' in settingkeys: #If set to False, CLAM defaults to normal authentication if the preauth header was not found
+        settings.PREAUTHONLY = False
     if not 'USERS_MYSQL' in settingkeys:
         settings.USERS_MYSQL = None
 
