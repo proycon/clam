@@ -41,6 +41,7 @@ import clam.common.digestauth
 import clam.common.data
 from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug
 import clam.config.defaults as settings #will be overridden by real settings later
+settings.STANDALONEURLPREFIX = ''
 
 try:
     import MySQLdb
@@ -62,7 +63,9 @@ settingsmodule = None #will be overwritten later
 
 setlog(sys.stdout)
 #Empty defaults
-#SYSTEM_ID = "clam"
+#SYSTEM_ID = "clam"nv pynv python
+#-*- coding:thon
+#-*- coding:
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
 #SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 #COMMAND = ""
@@ -191,15 +194,15 @@ class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     urls = (
-        '/', 'Index',
-        '/data.js', 'InterfaceData', #provides Javascript data for the web interface
-        '/style.css', 'StyleData', #provides stylesheet for the web interface
-        '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
+        settings.STANDALONEURLPREFIX + '/', 'Index',
+        settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
+        settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
+        settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
-        '/([A-Za-z0-9_]*)/?', 'Project',
-        '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-        '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
-        '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
     )
     
@@ -1795,6 +1798,8 @@ def set_defaults(HOST = None, PORT = None):
 
     #Default settings
     settingkeys = dir(settings)
+    
+    settings.STANDALONEURLPREFIX = ''
 
     if 'ROOT' in settingkeys and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
@@ -1990,7 +1995,9 @@ if __name__ == "__main__":
 
     if not fastcgi:
         if settings.URLPREFIX:
-            raise Exception("Can't use URLPREFIX when running in standalone mode!")
+            settings.STANDALONEURLPREFIX = settings.URLPREFIX
+            print >>sys.stderr,"WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?"
+            #raise Exception("Can't use URLPREFIX when running in standalone mode!")
         settings.URLPREFIX = '' #standalone server always runs at the root
 
     CLAMService('fastcgi' if fastcgi else '') #start
