@@ -236,6 +236,8 @@ class CLAMService(object):
         self.service.internalerror = web.debugerror
         self.mode = mode
         printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/')
+        if settings.FORCEURL:
+            printlog("Access using forced URL: " + settings.FORCEURL) 
         if mode == 'fastcgi':
             web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
             self.service.run()
@@ -279,6 +281,15 @@ class Index(object):
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
+
+        web.header('Content-Type', "text/xml; charset=UTF-8")
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False)
+        
+
+def getrooturl():
+    if settings.FORCEURL:
+        return settings.FORCEURL
+    else:
         url = 'http://' + settings.HOST
         if settings.PORT != 80:
             url += ':' + str(settings.PORT)
@@ -286,11 +297,8 @@ class Index(object):
             if settings.URLPREFIX[0] != '/':
                 url += '/'
             url += settings.URLPREFIX
-        if url[-1] == '/': url = url[:-1]
-
-        web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, url, -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False)
-        
+        if url[-1] == '/': url = url[:-1]    
+        return url
 
 
 class Project(object):
@@ -547,17 +555,10 @@ class Project(object):
 
         render = web.template.render(settings.CLAMDIR + '/templates')
         
-        url = 'http://' + settings.HOST
-        if settings.PORT != 80:
-            url += ':' + str(settings.PORT)
-        if settings.URLPREFIX and settings.URLPREFIX != '/':
-            if settings.URLPREFIX[0] != '/':
-                url += '/'
-            url += settings.URLPREFIX
-        if url[-1] == '/': url = url[:-1]
+        
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, url, statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False)
         
                     
     @requirelogin
@@ -576,16 +577,9 @@ class Project(object):
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
-        url = 'http://' + settings.HOST
-        if settings.PORT != 80:
-            url += ':' + str(settings.PORT)
-        if settings.URLPREFIX and settings.URLPREFIX != '/':
-            if settings.URLPREFIX[0] != '/':
-                url += '/'
-            url += settings.URLPREFIX
         if not user: user = 'anonymous'
         msg = "Project " + project + " has been created for user " + user
-        raise web.webapi.Created(msg, {'Location': url + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
+        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
 
     @requirelogin
     def POST(self, project, user=None):  
@@ -601,14 +595,6 @@ class Project(object):
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
                                                 
-        url = 'http://' + settings.HOST
-        if settings.PORT != 80:
-            url += ':' + str(settings.PORT)
-        if settings.URLPREFIX and settings.URLPREFIX != '/':
-            if settings.URLPREFIX[0] != '/':
-                url += '/'
-            url += settings.URLPREFIX
-        if url[-1] == '/': url = url[:-1]                                        
 
         if not sufficientresources():            
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAIABLE ***")
@@ -616,7 +602,7 @@ class Project(object):
             raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. Please try again later.")
 
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, url, printdebug)
+            matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
@@ -1455,16 +1441,8 @@ class InterfaceData(object):
                     inputtemplates_mem.append(inputtemplate)
                     inputtemplates.append( inputtemplate.json() )
 
-        url = 'http://' + settings.HOST
-        if settings.PORT != 80:
-            url += ':' + str(settings.PORT)
-        if settings.URLPREFIX and settings.URLPREFIX != '/':
-            if settings.URLPREFIX[0] != '/':
-                url += '/'
-            url += settings.URLPREFIX
-        if url[-1] == '/': url = url[:-1]
 
-        return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + url + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
+        return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
 class FoLiAXSL(object):
     """Provides Stylesheet"""
@@ -1788,6 +1766,7 @@ def usage():
         print >> sys.stderr, "\t-c            - Run in FastCGI mode"
         print >> sys.stderr, "\t-H [hostname] - Hostname"
         print >> sys.stderr, "\t-p [port]     - Port"
+        print >> sys.stderr, "\t-u [url]      - Force URL"
         print >> sys.stderr, "\t-h            - This help message"
         print >> sys.stderr, "\t-v            - Version information"
         print >> sys.stderr, "(Note: Do not invoke clamservice directly if you want to run in WSGI mode)"
@@ -1863,6 +1842,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.PREAUTHONLY = False
     if not 'USERS_MYSQL' in settingkeys:
         settings.USERS_MYSQL = None
+    if not 'FORCEURL' in settingkeys:
+        settings.FORCEURL = None
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
@@ -1902,11 +1883,11 @@ if __name__ == "__main__":
 
     settingsmodule = None
     fastcgi = False
-    PORT = HOST = None
-
+    PORT = HOST = FORCEURL = None
+    
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:v")
+        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:")
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err)
@@ -1926,6 +1907,8 @@ if __name__ == "__main__":
         elif o == '-h':
             usage()
             sys.exit(0)
+        elif o == '-u':
+            FORCEURL = a
         elif o == '-v':
             print "CLAM WebService version " + str(VERSION)
             sys.exit(0)
@@ -1973,6 +1956,9 @@ if __name__ == "__main__":
     if HOST:
         settings.HOST = HOST
     test_dirs()
+
+    if FORCEURL:
+        settings.FORCEURL = FORCEURL
 
     #fake command line options for web.py
     sys.argv = [ sys.argv[0] ] 
