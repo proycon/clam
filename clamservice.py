@@ -166,7 +166,7 @@ def requirelogin(f):
         printdebug("wrapper: "+ repr(f))   
         if settings.PREAUTHHEADER:            
             printdebug("Header debug: " + repr(web.ctx.env))
-            user = web.ctx.env.get('HTTP_' + settings.PREAUTHHEADER.upper(), '')
+            user = web.ctx.env.get(settings.PREAUTHHEADER, '')
             printdebug("Got pre-authenticated user: " + user)   
             if user:
                 if settings.PREAUTHMAPPING:
