@@ -166,17 +166,19 @@ def requirelogin(f):
         printdebug("wrapper: "+ repr(f))   
         if settings.PREAUTHHEADER:            
             printdebug("Header debug: " + repr(web.ctx.env))
-            user = web.ctx.env.get(settings.PREAUTHHEADER, '')
-            printdebug("Got pre-authenticated user: " + user)   
-            if user:
-                if settings.PREAUTHMAPPING:
-                    try:
-                        user = settings.PREAUTHMAPPING[user]
-                    except KeyError:
-                        raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
-                args += (user,)
-                return f(*args, **kwargs)
-            elif settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
+            for header in settings.PREAUTHHEADER:
+                if header:
+                    user = web.ctx.env.get(header, '')
+                    printdebug("Got pre-authenticated user: " + user)   
+                    if user:
+                        if settings.PREAUTHMAPPING:
+                            try:
+                                user = settings.PREAUTHMAPPING[user]
+                            except KeyError:
+                                raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
+                        args += (user,)
+                        return f(*args, **kwargs)
+            if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
                 raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
         if settings.USERS or settings.USERS_MYSQL:
             return auth(f)(*args, **kwargs)
@@ -1837,6 +1839,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.REMOTEUSER = None
     if not 'PREAUTHHEADER' in settingkeys:
         settings.PREAUTHHEADER = None     #The name of the header field containing the pre-authenticated username
+    else:
+        settings.PREAUTHHEADER = settings.PREAUTHHEADER.split(' ')        
     if not 'PREAUTHMAPPING' in settingkeys:
         settings.PREAUTHMAPPING = None #A mapping from pre-authenticated usernames to built-in usernames
     if not 'PREAUTHONLY' in settingkeys: #If set to False, CLAM defaults to normal authentication if the preauth header was not found
