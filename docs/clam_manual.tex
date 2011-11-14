@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\title{CLAM Documentation \\ \small version 0.7.1}
+\title{CLAM Documentation \\ \small version 0.7.3}
 \author{Maarten van Gompel \\ ILK Research Group \\ Tilburg center for Cognition and Communication \\ Tilburg University }
 
 \parindent=0pt %no paragraph indentation
@@ -251,7 +251,7 @@ When CLAM runs in an existing webserver without its own virtual host, it is ofte
 
 In order to keep server load manageable, three methods are configurable in the service configuration file. First, you can set the variable \texttt{REQUIREMEMORY} to the minumum amount of free memory that has to be available (in megabytes, and not considering swap memory!). If not enough memory is free, users will not be able to launch new processes, but will receive an HTTP 500 error instead. Second, there is the \texttt{MAXLOADAVG} variable; if the 5-minute load average exceeds this number, new processes will also be rejected. Third, there is \texttt{MINDISKSPACE} and \texttt{DISK}. This sets a constraint on the minimum amount of free disk space in megabytes on the specified DISK (for example: \texttt{/dev/sda1}), which should be the disk holding \texttt{ROOT}. If any of these values is set to zero, they are disabled. Note though that this makes your system vulnerable to denial-of-service attacks by possibly malicious users, especially if no user authentication is configured!
 
-If you for some reason do not want to make use of the web application in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want to make the webservice available at a different URL than the webapplication, then there is a small trick you can apply by setting \texttt{WEBSERVICEGHOST} to a prefix that the webservice will be made available on \emph{without} webapplicaiton support. If you set for example \texttt{WEBSERVICEGHOST = 'ws'} then there will be an additional webservice without webapplication interface running on \texttt{http://yourdomain.com/ws/}. This option is included to accomodate the wish to apply two distinct authentication schemes outside of CLAM. 
+If you for some reason do not want to make use of the web application in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want to make the webservice available at a different URL than the webapplication, then there is a small trick you can apply by setting \texttt{WEBSERVICEGHOST} to a prefix that the webservice will be made available on \emph{without} webapplication support. If you set for example \texttt{WEBSERVICEGHOST = 'ws'} then there will be an additional ``ghosted'' webservice without webapplication interface running on \texttt{http://yourdomain.com/ws/}. This option is included to accomodate the wish to apply two distinct authentication schemes outside of CLAM. 
 
 
 \subsection{User Authentication}
@@ -269,6 +269,7 @@ The ability to view and set parameters can be restricted to certain users. You c
 
 Rather than using \texttt{USERS} to define a user database in your service configuraton file, a more sophisticated method is available using MySQL. The configuration variable \texttt{USERS\_MYSQL} can be configured to point to a table in a MySQL database somewhere, the fields ``user'' and ``password'' in this table will subsequently be used to authenticate against, the password field is again a hashed password in the same fashion as in \texttt{USERS}.
 
+For advanced service providers wanting to use external authentication schemes, CLAM supports the \texttt{PREAUTHHEADER} configuration directive, the value of which is a string containing an HTTP header which CLAM may read to obtain the authanticated username. This should be set by an authentication system prior to passing control to CLAM. An example of such a system is Shibboleth. Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in user system, unless this is set to None. When such a scheme is used, proper care has to be taken to ensure that the HTTP headers can not be forged by end-users themselves! If usernames that come from external pre-authentication methods are different from those in the internal \texttt{USERS} map (if used at all), then an explicit mapping between the two may be specified in the \texttt{PREAUTHMAPPING} dictionary. Note that this pre-authentication mechanism never applies to the ``ghosted'' webservice, if enabled through \texttt{WEBSERVICEGHOST}. Only the regular authentication method is supported for the webservice ghost.
 
 \subsection{Command Definition}
 \label{sec:command}

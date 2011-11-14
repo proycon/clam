@@ -53,7 +53,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.7.2'
+VERSION = '0.7.3'
 
 DEBUG = False
     
@@ -164,7 +164,7 @@ def requirelogin(f):
     global auth
     def wrapper(*args, **kwargs):
         printdebug("wrapper: "+ repr(f))   
-        if settings.PREAUTHHEADER:            
+        if settings.PREAUTHHEADER and not f.im_class.GHOST:            
             printdebug("Header debug: " + repr(web.ctx.env))
             for header in settings.PREAUTHHEADER:
                 if header:
@@ -188,6 +188,8 @@ def requirelogin(f):
 
 
 class TestInterface(object):
+    GHOST = False
+    
     @requirelogin
     def GET(self, user = None):
         raise web.webapi.Forbidden('Test error response')
@@ -203,7 +205,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+        #settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
@@ -354,7 +356,7 @@ class Project(object):
             #project already exists, pass silently
             pass
 
-    @staticmethod
+    #@staticmethod
     #def access(project, user):
     #    """Checks whether the specified user has access to the project"""
     #    userfile = Project.path(project) + ".users"
@@ -680,6 +682,7 @@ class Project(object):
         return msg #200                
 
 class OutputFileHandler(object):
+    GHOST = False
 
     @requirelogin
     def GET(self, project, filename, user=None):    
@@ -859,10 +862,13 @@ class OutputFileHandler(object):
             web.header('Content-Type', contenttype)
             for line in open(path,'r'):
                 yield line
-        
+
+class OutputFileHandlerGhost(OutputFileHandler):
+    GHOST = True
 
 class InputFileHandler(object):
-
+    GHOST = False
+    
     @requirelogin
     def GET(self, project, filename, user=None):    
 
@@ -1427,10 +1433,13 @@ class InputFileHandler(object):
         #return [ subfile for subfile in subfiles ] #return only the files that actually exist
         
 
+class InputFileHandlerGhost(InputFileHandler):
+    GHOST = True
 
 
 class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
+    GHOST = False
 
     @requirelogin
     def GET(self, user=None):
@@ -1466,11 +1475,11 @@ class StyleData(object):
         
 class ProjectGhost(Project):
     GHOST=True
-    pass
+
 
 class IndexGhost(Index):
     GHOST=True
-    pass
+
         
 #class Uploader(object): #OBSOLETE!
 
@@ -1826,11 +1835,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.WEBSERVICEGHOST = False        
     elif settings.WEBSERVICEGHOST:
         CLAMService.urls = (
-            '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
-            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',
-            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
-            '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
+            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
+            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',    
+            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandlerGhost', #(also handles viewers, convertors, metadata, and archive download
+            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandlerGhost',
             #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
         ) + CLAMService.urls
     if not 'REMOTEHOST' in settingkeys:

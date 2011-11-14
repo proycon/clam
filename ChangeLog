@@ -1,3 +1,8 @@
+0.7.2-0.7.3) [November 2011]
+- Support for pre-authentication (now tested with Shibboleth at Max Planck Institute for Psycholinguistics, Nijmegen)
+- Support for running standalone but with urlprefix
+- Minor bugfixes
+
 0.7.1) [July 2011]
 - Fixes in webapplication interface
 - Fix in archive uploading with subdirs
