@@ -96,6 +96,6 @@ PROFILES = [
 PARAMETERS =  [ 
     ('Skip Components', [
 #        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multi=True ),        
-        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the     parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Parser')] ),
+        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[(('p','Skip dependency parser'),('n',"Don't skip anything")] ),
     ]), 
 ]
