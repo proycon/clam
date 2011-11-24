@@ -50,12 +50,12 @@ clam.common.status.write(statusfile, "Starting...")
 #assemble parameters for Frog:
 cmdoptions = ""
 
-if 'skip' in clamdata and clamdata['skip'] and clamdata['skip'] != 'n':
-    cmdoptions += ' --skip=' + "".join(clamdata['skip'])
+if 'skip' in clamdata and clamdata['skip']:
+    cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
-    os.system(bindir + "frog " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
+    os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
 
 clam.common.status.write(statusfile, "Done",100)       
 
