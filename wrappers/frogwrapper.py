@@ -31,7 +31,7 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 
-os.environ['PYTHONPATH'] = '/var/www/lib/python2.6/site-packages'
+os.environ['PYTHONPATH'] = '/var/www/lib/python2.6/site-packages/frog'
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
 bindir = sys.argv[1]
