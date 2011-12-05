@@ -53,7 +53,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.7.3'
+VERSION = '0.7.4'
 
 DEBUG = False
     
@@ -160,37 +160,69 @@ auth = lambda x: x
 
 #auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
 
-def requirelogin(f):
-    global auth
-    def wrapper(*args, **kwargs):
-        printdebug("wrapper: "+ repr(f))   
-        if settings.PREAUTHHEADER and not f.im_class.GHOST:            
-            printdebug("Header debug: " + repr(web.ctx.env))
-            for header in settings.PREAUTHHEADER:
-                if header:
-                    user = web.ctx.env.get(header, '')
-                    printdebug("Got pre-authenticated user: " + user)   
-                    if user:
-                        if settings.PREAUTHMAPPING:
-                            try:
-                                user = settings.PREAUTHMAPPING[user]
-                            except KeyError:
-                                raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
-                        args += (user,)
-                        return f(*args, **kwargs)
-            if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-                raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
-        if settings.USERS or settings.USERS_MYSQL:
-            return auth(f)(*args, **kwargs)
-        else:
-            return f(*args, **kwargs)
-    return wraps(f)(wrapper)
+#def requirelogin(f):
+#    global auth
+#    def wrapper(*args, **kwargs):
+#        printdebug("wrapper: "+ repr(f))   
+#        if settings.PREAUTHHEADER and not f.im_class.GHOST:            
+#            printdebug("Header debug: " + repr(web.ctx.env))
+#            for header in settings.PREAUTHHEADER:
+#                if header:
+#                    user = web.ctx.env.get(header, '')
+#                    printdebug("Got pre-authenticated user: " + user)   
+#                    if user:
+#                        if settings.PREAUTHMAPPING:
+#                            try:
+#                                user = settings.PREAUTHMAPPING[user]
+#                            except KeyError:
+#                                raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
+#                        args += (user,)
+#                        return f(*args, **kwargs)
+#            if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
+#                raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
+#        if settings.USERS or settings.USERS_MYSQL:
+#            return auth(f)(*args, **kwargs)
+#        else:
+#            return f(*args, **kwargs)
+#    return wraps(f)(wrapper)
+    
+    
+    
+class RequireLogin(object):
+    def __init__(self, **kwargs):
+        if 'ghost' in kwargs:
+            self.ghost = bool(kwargs['ghost'])
+    
+    def __call__(self,f):
+        global auth
+        def wrapper(*args, **kwargs):
+            printdebug("wrapper: "+ repr(f))   
+            if settings.PREAUTHHEADER and not self.ghost:            
+                printdebug("Header debug: " + repr(web.ctx.env))
+                for header in settings.PREAUTHHEADER:
+                    if header:
+                        user = web.ctx.env.get(header, '')
+                        printdebug("Got pre-authenticated user: " + user)   
+                        if user:
+                            if settings.PREAUTHMAPPING:
+                                try:
+                                    user = settings.PREAUTHMAPPING[user]
+                                except KeyError:
+                                    raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
+                            args += (user,)
+                            return f(*args, **kwargs)
+                if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
+                    raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
+            if settings.USERS or settings.USERS_MYSQL:
+                return auth(f)(*args, **kwargs)
+            else:
+                return f(*args, **kwargs)
+        return wraps(f)(wrapper)
 
 
 class TestInterface(object):
-    GHOST = False
     
-    @requirelogin
+    @RequireLogin()
     def GET(self, user = None):
         raise web.webapi.Forbidden('Test error response')
             
@@ -268,7 +300,7 @@ class CLAMService(object):
 class Index(object):
     GHOST = False
     
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
@@ -566,7 +598,7 @@ class Project(object):
         return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False)
         
                     
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
         if not self.exists(project, user):
@@ -578,7 +610,7 @@ class Project(object):
             return self.response(user, project, settings.PARAMETERS) #200
 
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
@@ -586,7 +618,7 @@ class Project(object):
         msg = "Project " + project + " has been created for user " + user
         raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):  
         global settingsmodule
         if not user: user = 'anonymous'
@@ -666,7 +698,7 @@ class Project(object):
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def DELETE(self, project, user=None):
         if not user: user = 'anonymous'
         if not self.exists(project, user):
@@ -684,7 +716,7 @@ class Project(object):
 class OutputFileHandler(object):
     GHOST = False
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def GET(self, project, filename, user=None):    
         raw = filename.split('/')
 
@@ -751,7 +783,7 @@ class OutputFileHandler(object):
             except UnicodeError:
                 raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
     
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def DELETE(self, project, filename, user=None):    
         """Delete an output file"""
         
@@ -869,7 +901,7 @@ class OutputFileHandlerGhost(OutputFileHandler):
 class InputFileHandler(object):
     GHOST = False
     
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def GET(self, project, filename, user=None):    
 
         viewer = None
@@ -914,7 +946,7 @@ class InputFileHandler(object):
 
 
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def DELETE(self, project, filename, user=None):    
         """Delete an input file"""
         
@@ -944,7 +976,7 @@ class InputFileHandler(object):
                 web.header('Content-Length',len(msg))
                 return msg #200
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def POST(self, project, filename, user=None): 
         """Add a new input file, this invokes the actual uploader"""
 
@@ -1441,7 +1473,7 @@ class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
     GHOST = False
 
-    @requirelogin
+    @RequireLogin(ghost=GHOST)
     def GET(self, user=None):
         web.header('Content-Type', 'application/javascript')
         
