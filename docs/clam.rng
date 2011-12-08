@@ -123,7 +123,7 @@
                                         <a:documentation>Boolean value set to "true" or "false", determining whether this input template is unique and can only be used for uploading one file, or whether multiple files can be uploaded through this input template<a:documentation>
                                     </attribute>
                                 </optional>                                
-                                <!-- TODO: PARAMETERS -->
+                                <ref name="parameters">
                                 <zeroOrMore>
                                     <element name="converter">
                                         <a:documentation>Makes a converter available for this specific input template. The text content of this element is the label users see when choosing a converter.<a:documentation>
@@ -184,6 +184,7 @@
                                         <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
                                     </attribute>
                                 </optional>   
+                                <ref name="parameters">
                                 <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->                         
                                 <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
                         </oneOrMore>
@@ -207,5 +208,72 @@
         </element>
     </optional>        
 </element>
+
+
+<define name="parameters">
+    <interleave>
+     <zeroOrMore>
+      <element name="BooleanParameter">
+         <a:documentation>A parameter taking a boolean value</a:documentation>
+         <ref name="commonparameterattribs" />
+         <optional><attribute name="reverse" /></optional>
+      </element>
+     </zeroOrMore>
+     <zeroOrMore>
+      <element name="StringParameter">
+         <a:documentation>A parameter taking a (short) string value</a:documentation>
+         <ref name="commonparameterattribs" />
+         <optional><attribute name="maxlength" /></optional>
+      </element>     
+     </zeroOrMore>
+     <zeroOrMore>
+      <element name="TextParameter">
+         <a:documentation>A parameter taking a longer textual value</a:documentation>
+         <ref name="commonparameterattribs" />
+         <optional><attribute name="maxlength" /></optional>
+      </element>     
+     </zeroOrMore>     
+     <zeroOrMore>
+      <element name="IntegerParameter">
+         <a:documentation>A parameter taking an integer number as value</a:documentation>
+         <ref name="commonparameterattribs" />
+         <optional><attribute name="minvalue" /></optional>
+         <optional><attribute name="maxvalue" /></optional>
+      </element>     
+     </zeroOrMore>    
+     <zeroOrMore>
+      <element name="FloatParameter">
+         <a:documentation>A parameter taking a floating point number as value</a:documentation>
+         <ref name="commonparameterattribs" />
+         <optional><attribute name="minvalue" /></optional>
+         <optional><attribute name="maxvalue" /></optional>         
+      </element>     
+     </zeroOrMore> 
+    <interleave>    
+</define>
+
+
+<define name="commonparameterattribs">
+    <attribute name="id">
+        <a:documentation>A unique identifier for this parameter</a:documentation>
+    </attribute>
+    <attribute name="name">
+        <a:documentation>The human readable name of the parameter</a:documentation>
+    </attribute>
+    <attribute name="description">
+        <a:documentation>A description clarifying the use of this parameter</a:documentation>
+    </attribute>    
+    <optional><attribute name="flag" /></optional>
+    <optional>
+        <attribute name="value">
+            <a:documentation>The selected value for this parameter</a:documentation>
+        </attribute>
+    </optional>
+    <optional>
+        <attribute name="error">
+            <a:documentation>If an error occurred validating this parameter, this will hold the error message</a:documentation>
+        </attribute>            
+    </optional>    
+</define>
 
 <!-- TODO: SCHEMA STILL IN DEVELOPMENT - NOT FINISHED YET! -->
