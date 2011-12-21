@@ -77,21 +77,22 @@
     <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
     
-    <xsl:if test="status/@code = 1">
-        <script type="text/javascript">
-            stage = 1;
-        </script>
-    </xsl:if>
-    <xsl:if test="status/@code = 0">
-        <script type="text/javascript">
-            stage = 0;
-        </script>
-    </xsl:if>
-    <xsl:if test="status/@code = 2">
-        <script type="text/javascript">
-            stage = 2;
-        </script>
-    </xsl:if>
+    <script type="text/javascript">
+        <xsl:if test="status/@code = 1">
+                stage = 1;
+        </xsl:if>
+        <xsl:if test="status/@code = 0">
+                stage = 0;
+        </xsl:if>
+        <xsl:if test="status/@code = 2">        
+                stage = 2;
+        </xsl:if>
+        <xsl:if test="/clam/@project">
+                project = '<xsl:value-of select="/clam/@project" />';
+        </xsl:if>
+    </script>
+            
+    
   </head>
 </xsl:template>
 

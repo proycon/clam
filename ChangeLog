@@ -1,3 +1,6 @@
+0.7.5) [December 2011]
+- Webapplication (client-side javascript) now always uses absolute instead of relative urls. Fixes some minor issues.
+
 0.7.4) [December 2011]
 - Improvement in authentication implementation
 

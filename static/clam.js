@@ -96,10 +96,10 @@ $(document).ready(function(){
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
             type: "PUT", 
-            url: $("#projectname").val() + "/", 
+            url: baseurl + '/' + $("#projectname").val() + "/", 
             dataType: "text", 
             success: function(response){ 
-                window.location.href = $("#projectname").val() + "/";
+                window.location.href = baseurl + '/' + $("#projectname").val() + "/";
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -116,10 +116,10 @@ $(document).ready(function(){
        $("#abortbutton").click(function(event){
          $.ajax({ 
             type: "DELETE", 
-            url: window.location.href, 
+            url: baseurl + '/' + project + '/', 
             dataType: "text", 
             success: function(response){ 
-                window.location.href = "/"; /* back to index - TODO: FIX, doesn't work with urlprefix! */
+                window.location.href = baseurl; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -135,7 +135,7 @@ $(document).ready(function(){
        $("#restartbutton").click(function(event){
          $.ajax({ 
             type: "DELETE", 
-            url: "output/" , 
+            url: baseurl + '/' + project + "/output/" , 
             dataType: "text", 
             success: function(xml){ 
                 window.location.href = ""; /* refresh */
@@ -152,7 +152,7 @@ $(document).ready(function(){
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(event){
-            window.location.href = "../"; /* refresh */
+            window.location.href = baseurl; /* refresh */
        });
    }  
    
@@ -204,7 +204,7 @@ $(document).ready(function(){
         addformdata('#editorparameters', data );
         $.ajax({ 
             type: "POST", 
-            url: "input/" + filename, 
+            url: baseurl + '/' + project + "/input/" + filename, 
             dataType: "xml", 
             data: data, 
             success: function(response){ 
@@ -234,7 +234,7 @@ $(document).ready(function(){
             
             $.ajax({ 
                 type: "POST", 
-                url: "input/" + filename, 
+                url: baseurl + '/' + project + "/input/" + filename, 
                 dataType: "xml", 
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
                 success: function(response){
@@ -252,14 +252,14 @@ $(document).ready(function(){
 
    //Upload through browser
    if ($('#uploadbutton')) {    
-       uploader = new AjaxUpload('uploadbutton', {action: 'input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
+       uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
             onChange: function(filename,extension){
                  var inputtemplate_id = $('#uploadinputtemplate').val();
                  var filename = validateuploadfilename(filename,inputtemplate_id);
                  if (!filename) {
                     return false;
                  } else {
-                     uploader._settings.action = 'input/' + filename
+                     uploader._settings.action = baseurl + '/' + project + '/input/' + filename
                      uploader._settings.data.inputtemplate = inputtemplate_id;
                      addformdata( '#uploadparameters', uploader._settings.data );
                  }
@@ -280,11 +280,11 @@ $(document).ready(function(){
    $('#inputsourceselect').click(function(event){ /* Doesn't exist???? */
         $.ajax({ 
                 type: "POST", 
-                url: "input/", 
+                url: baseurl + '/' + project + "/input/", 
                 //dataType: "xml", 
                 data: {'inputsource': $('#inputsource').val() }, 
                 success: function(response){
-                    window.location.href = ""; /* refresh */   
+                    window.location.href = baseurl + '/' + project + '/'; /* refresh */   
                 },
                 error: function(response, errortype){
                     alert(response);
@@ -297,17 +297,17 @@ $(document).ready(function(){
        $('#inputsourceprogress').show();
        $.ajax({
             type: "POST",
-            url: "input/",
+            url: baseurl + '/' + project + "/input/",
             data: {'inputsource': $('#uploadinputsource').val() }, 
             success: function(response){
                 //processuploadresponse(response, '#nonexistant');
-                window.location.href = ""; /* refresh */   
+                window.location.href = baseurl + '/' + project + '/'; /* refresh */   
             },
             error: function(response,errortype){
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
-                    window.location.href = ""; /* refresh */   
+                    window.location.href = baseurl + '/' + project + '/'; /* refresh */   
                 } else {
                     alert("Error, unable to add file ("+response.status+")");
                 }
@@ -395,7 +395,7 @@ function processuploadresponse(response, paramdiv) {
             
             //Add this file to the input table if it doesn't exist yet
             if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] )
+                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] )
             }
             
         }
@@ -522,7 +522,7 @@ function deleteinputfile(filename) {
     if (found >= 0) tableinputfiles.fnDeleteRow(found);
     $.ajax({ 
         type: "DELETE", 
-        url: "input/" + filename, 
+        url: baseurl + '/' + project + "/input/" + filename, 
         dataType: "xml"
     });    
 }
