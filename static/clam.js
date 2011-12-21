@@ -251,7 +251,7 @@ $(document).ready(function(){
     });
 
    //Upload through browser
-   if ($('#uploadbutton')) {    
+   if ($('#uploadbutton') && (typeof(project) != 'undefined') ) {    
        uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
             onChange: function(filename,extension){
                  var inputtemplate_id = $('#uploadinputtemplate').val();
