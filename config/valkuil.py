@@ -110,6 +110,17 @@ PROFILES = [
             filename='$INPUTSTRIPPEDFILENAME.xml',
             unique=True
         ),
+    ),
+    Profile(
+        InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA Document (tokenised)",  
+            extension='.xml',
+            unique=True
+        ),
+        #------------------------------------------------------------------------------------------------------------------------
+        OutputTemplate('foliaoutput',FoLiAXMLFormat,'FoLiA Document with spelling suggestions',
+            filename='$INPUTSTRIPPEDFILENAME.xml',
+            unique=True
+        ),
     ) 
 ]
 
