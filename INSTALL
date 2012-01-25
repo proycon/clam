@@ -1,6 +1,10 @@
 == INSTRUCTIONS FOR LINUX/BSD USERS ==
 
 1) Verify that the package version of python-webpy offered by your distribution is 0.33 or above, if not or not offered at all, we will install it later in step 4b
+ on debian-based systems (including Ubuntu):
+  $ dpkg -s python-webpy
+ on RPM-based systems:
+  $ rpm -q python-webpy
 
 2) Install all dependencies (leave python-webpy out if it is too old or unavailable)
  DEBIAN/UBUNTU:
