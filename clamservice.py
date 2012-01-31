@@ -757,7 +757,9 @@ class OutputFileHandler(object):
                 if viewer:                    
                     output = viewer.view(outputfile, **web.input())
                     if isinstance(output, web.template.TemplateResult):
-                       output =  output['__body__']                  
+                       output =  output['__body__']
+                    elif isinstance(output, str) or isinstance(output, unicode):
+                       output = output.split('\n')
                     for line in output:
                         yield line
                 else:
