@@ -55,15 +55,21 @@ if 'skip' in clamdata and clamdata['skip']:
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
+    print >>sys.stderr,"Processing " + os.path.basename(str(inputfile)) + "..."
     if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
         cmdoptions += ' -n'                
-    if 'docid' in inputfile.metadata and inputfile.metadata['docid']:
+    if 'docid' in inputfile.metadata and inputfile.metadata['docid']:                
         docid = inputfile.metadata['docid']
-    else:
-        docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])                
+        print >>sys.stderr,"\tDocID from metadata: " + docid
+    else:        
+        docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])
+        print >>sys.stderr,"\tDocID from filename: " + docid                        
     docid = docid.replace(' ','-')
-    docid = docid.replace('\'','')
-    docid = docid.replace('"','')        
+    docid = docid.replace("'",'')
+    docid = docid.replace('"','')
+    if not docid: 
+        docid = 'untitled'
+    print >>sys.stderr,"Invoking Frog'                    
     r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + os.path.basename(str(inputfile)) + ".xml' -o '" + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + ". Aborting"),100)
