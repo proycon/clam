@@ -31,7 +31,7 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 
-os.environ['PYTHONPATH'] = '/var/www/lib/python2.6/site-packages/frog'
+os.environ['PYTHONPATH'] = '/var/www/lib/python2.6/site-packages/frog' #Necessary for University of Tilburg servers (change or remove this in your own setup)
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
 bindir = sys.argv[1]
@@ -55,9 +55,23 @@ if 'skip' in clamdata and clamdata['skip']:
 
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
-    os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " > " + outputdir + os.path.basename(str(inputfile)) + '.frog.out')
+    if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
+        cmdoptions += ' -n'                
+    if clamdata['output'] == 'folia':
+        if 'docid' in inputfile.metadata:
+            docid = inputfile.metadata['docid']
+        else:
+            docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])                
+        docid = docid.replace(' ','-')
+        docid = docid.replace('\'','')
+        docid = docid.replace('"','')        
+        r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " -X '" + docid + "' -o '" + outputdir + os.path.basename(str(inputfile)) + '.xml\'')                
+    else:
+        r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " -o '" + outputdir + os.path.basename(str(inputfile)) + '.frog.out\'')
+    if (r != 0):
+        clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + ". Aborting"),100)
+        sys.exit(1)
 
 clam.common.status.write(statusfile, "Done",100)       
 
 sys.exit(0) #non-zero exit codes indicate an error! 
-

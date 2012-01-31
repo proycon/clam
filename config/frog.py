@@ -24,12 +24,14 @@ from sys import path
 from os import uname
 
 
-REQUIRE_VERSION = 0.5
+REQUIRE_VERSION = 0.7
+
+#THIS CONFIGURATION IS FOR FROG >= 0.12.10 ! OLDER VERSIONS WON'T WORK WITH IT!
 
 #============== General meta configuration =================
 SYSTEM_ID = "frog"
 SYSTEM_NAME = "Frog"
-SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
 
 # ================ Root directory for CLAM ===============
 host = uname()[1]
@@ -67,35 +69,49 @@ PROFILES = [
         InputTemplate('maininput', PlainTextFormat,"Text document", 
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
             StringParameter(id='author', name='Author', description='The author of the document (optional)'),
+            StringParameter(id='docid', name='Document ID', description='An ID for the document (optional, used with FoLiA XML output)'),
+            BooleanParameter(id='sentenceperline', name='One sentence per line?', description='If set, assume that this input file contains exactly one sentence per line'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='mswordconv',label='Convert from MS Word Document'),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
         ),
-        OutputTemplate('mainoutput', TadpoleFormat,"Tadpole Columned Output Format", 
-            SetMetaField('tokenisation','yes'),
-            SetMetaField('postagging','yes'),
-            SetMetaField('lemmatisation','yes'),
-            SetMetaField('morphologicalanalysis','yes'),
-            ParameterCondition(skip_contains='m',
-                then=SetMetaField('mwudetection','no'),
-                otherwise=SetMetaField('mwudetection','yes'), 
-            ),                        
-            ParameterCondition(skip_contains='p',
-                then=SetMetaField('parsing','no'),
-                otherwise=SetMetaField('parsing','yes'),
-            ),            
-            extension='.frog.out',
-            copymetadata=True,
-            multi=True,
-        ),        
+        ParameterCondition(output_equals='columns', then=
+            OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)", 
+                SetMetaField('tokenisation','yes'),
+                SetMetaField('postagging','yes'),
+                SetMetaField('lemmatisation','yes'),
+                SetMetaField('morphologicalanalysis','yes'),
+                ParameterCondition(skip_contains='m',
+                    then=SetMetaField('mwudetection','no'),
+                    otherwise=SetMetaField('mwudetection','yes'), 
+                ),                        
+                ParameterCondition(skip_contains='p',
+                    then=SetMetaField('parsing','no'),
+                    otherwise=SetMetaField('parsing','yes'),
+                ),            
+                extension='.frog.out',
+                copymetadata=True,
+                multi=True,
+            ),
+        ),
+        ParameterCondition(output_equals='folia', then=
+            OutputTemplate('mainoutput', FoLiAXMLFormat,"FoLiA Document", 
+                extension='.xml',
+                copymetadata=True,
+                multi=True,
+            ),
+        ),
     )
 ]
 
-PARAMETERS =  [ 
-    ('Skip Components', [
-#        ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser')], multi=True ),        
-         ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Skip dependency parser'),('n',"Don't skip anything")] ),
+PARAMETERS =  [
+    ('Output', [
+        ChoiceParameter('output', 'Output','Choose in what format you want your output delivered',choices=[('folia','FoLiA XML'),('columns','Plain-text columned format (legacy)')] ),
     ]), 
+    ('Modules', [
+        ChoiceParameter('skip', 'Skip modules','Are there any components you want to skip? Skipping the parser and chunker speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser'),('c','Chunker / Shallow parser')], multi=True ),        
+        #ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Skip dependency parser'),('n',"Don't skip anything")] ),
+    ]),     
 ]
