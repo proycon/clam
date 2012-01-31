@@ -1674,15 +1674,15 @@ class ParameterCondition(object):
                 if key[-10:] == '_notequals':
                     self.conditions.append( (key[:-10], value,lambda x,y: x != y, 'notequals') )
                 elif key[-12:] == '_greaterthan':
-                    self.conditions.append( (key[:-12], value,lambda x,y: x != None and x > y, 'greaterthan') )
+                    self.conditions.append( (key[:-12], value,lambda x,y: x != None and x != False and x > y, 'greaterthan') )
                 elif key[-17:] == '_greaterequalthan':
-                    self.conditions.append( (key[:-17],value, lambda x,y: x != None and x > y, 'greaterequalthan') )
+                    self.conditions.append( (key[:-17],value, lambda x,y: x != None and x != False and x > y, 'greaterequalthan') )
                 elif key[-9:] == '_lessthan':
-                    self.conditions.append( (key[:-9],value, lambda x,y: x != None and x >= y , 'lessthan' ) )
+                    self.conditions.append( (key[:-9],value, lambda x,y: x != None and x != False and x >= y , 'lessthan' ) )
                 elif key[-14:] == '_lessequalthan':
-                    self.conditions.append( (key[:-14], value,lambda x,y: x != None and x <= y, 'lessequalthan') )
+                    self.conditions.append( (key[:-14], value,lambda x,y: x != None and x != False and x <= y, 'lessequalthan') )
                 elif key[-9:] == '_contains':
-                    self.conditions.append( (key[:-9], value,lambda x,y: x != None and y in x, 'contains') )
+                    self.conditions.append( (key[:-9], value,lambda x,y: x != None and x != False and y in x, 'contains') )
                 elif key[-7:] == '_equals':
                     self.conditions.append( (key[:-7], value,lambda x,y: x != None and x == y, 'equals') )
                 elif key[-4:] == '_set':
