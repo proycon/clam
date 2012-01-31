@@ -17,6 +17,7 @@
 
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
@@ -94,7 +95,8 @@ PROFILES = [
             copymetadata=True,
             multi=True,
         ),
-        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document", 
+        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",
+            FoLiAViewer(), 
             extension='.xml',
             copymetadata=True,
             multi=True,

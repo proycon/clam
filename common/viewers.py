@@ -69,6 +69,19 @@ class FrogViewer(AbstractViewer):
         render = web.template.render('templates')
         return render.crudetableviewer( file, "\t")
 
+class FoLiAViewer(AbstractViewer):
+    id = 'foliaviewer'
+    name = "FoLiA Viewer"
+
+    def view(self, file, **kwargs):
+        xslfile = "static/folia.xsl"
+        xslt_doc = etree.parse(xslfile)
+        transform = etree.XSLT(xslt_doc)
+
+        f = file.open()
+        xml_doc = etree.parse(f.readlines())
+
+        return str(transform(xml_doc))
 
 
 class SoNaRViewer(AbstractViewer):
