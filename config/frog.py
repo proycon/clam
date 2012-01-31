@@ -77,7 +77,7 @@ PROFILES = [
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
         ),
-        OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)", 
+        OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)",  #named 'mainoutput' for legacy reasons
             SetMetaField('tokenisation','yes'),
             SetMetaField('postagging','yes'),
             SetMetaField('lemmatisation','yes'),
@@ -94,7 +94,7 @@ PROFILES = [
             copymetadata=True,
             multi=True,
         ),
-        OutputTemplate('mainoutput', FoLiAXMLFormat,"FoLiA Document", 
+        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document", 
             extension='.xml',
             copymetadata=True,
             multi=True,
