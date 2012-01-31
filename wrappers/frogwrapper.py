@@ -53,6 +53,10 @@ cmdoptions = ""
 if 'skip' in clamdata and clamdata['skip']:
     cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
 
+if os.path.isfile('/var/www/folia/converters/folia2html.xsl'): #ugly hard-coded path, I know..
+    os.symlink('/var/www/folia/converters/folia2html.xsl',outputdir + 'folia.xsl')  
+
+
 for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
     print >>sys.stderr,"Processing " + os.path.basename(str(inputfile)) + "..."
