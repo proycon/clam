@@ -58,7 +58,7 @@ for i, inputfile in enumerate(clamdata.input):
     if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
         cmdoptions += ' -n'                
     if clamdata['output'] == 'folia':
-        if 'docid' in inputfile.metadata:
+        if 'docid' in inputfile.metadata and inputfile.metadata['docid']:
             docid = inputfile.metadata['docid']
         else:
             docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])                
