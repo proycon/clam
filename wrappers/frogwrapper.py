@@ -57,17 +57,14 @@ for i, inputfile in enumerate(clamdata.input):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
     if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
         cmdoptions += ' -n'                
-    if clamdata['output'] == 'folia':
-        if 'docid' in inputfile.metadata and inputfile.metadata['docid']:
-            docid = inputfile.metadata['docid']
-        else:
-            docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])                
-        docid = docid.replace(' ','-')
-        docid = docid.replace('\'','')
-        docid = docid.replace('"','')        
-        r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " -X '" + docid + "' -o '" + outputdir + os.path.basename(str(inputfile)) + '.xml\'')                
+    if 'docid' in inputfile.metadata and inputfile.metadata['docid']:
+        docid = inputfile.metadata['docid']
     else:
-        r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " -o '" + outputdir + os.path.basename(str(inputfile)) + '.frog.out\'')
+        docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])                
+    docid = docid.replace(' ','-')
+    docid = docid.replace('\'','')
+    docid = docid.replace('"','')        
+    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + os.path.basename(str(inputfile)) + ".xml' -o '" + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + ". Aborting"),100)
         sys.exit(1)

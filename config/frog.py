@@ -31,7 +31,7 @@ REQUIRE_VERSION = 0.7
 #============== General meta configuration =================
 SYSTEM_ID = "frog"
 SYSTEM_NAME = "Frog"
-SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, Part-of-Speech tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
 
 # ================ Root directory for CLAM ===============
 host = uname()[1]
@@ -77,39 +77,33 @@ PROFILES = [
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
             multi=True,
         ),
-        ParameterCondition(output_equals='columns', then=
-            OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)", 
-                SetMetaField('tokenisation','yes'),
-                SetMetaField('postagging','yes'),
-                SetMetaField('lemmatisation','yes'),
-                SetMetaField('morphologicalanalysis','yes'),
-                ParameterCondition(skip_contains='m',
-                    then=SetMetaField('mwudetection','no'),
-                    otherwise=SetMetaField('mwudetection','yes'), 
-                ),                        
-                ParameterCondition(skip_contains='p',
-                    then=SetMetaField('parsing','no'),
-                    otherwise=SetMetaField('parsing','yes'),
-                ),            
-                extension='.frog.out',
-                copymetadata=True,
-                multi=True,
-            ),
+        OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)", 
+            SetMetaField('tokenisation','yes'),
+            SetMetaField('postagging','yes'),
+            SetMetaField('lemmatisation','yes'),
+            SetMetaField('morphologicalanalysis','yes'),
+            ParameterCondition(skip_contains='m',
+                then=SetMetaField('mwudetection','no'),
+                otherwise=SetMetaField('mwudetection','yes'), 
+            ),                        
+            ParameterCondition(skip_contains='p',
+                then=SetMetaField('parsing','no'),
+                otherwise=SetMetaField('parsing','yes'),
+            ),            
+            extension='.frog.out',
+            copymetadata=True,
+            multi=True,
         ),
-        ParameterCondition(output_equals='folia', then=
-            OutputTemplate('mainoutput', FoLiAXMLFormat,"FoLiA Document", 
-                extension='.xml',
-                copymetadata=True,
-                multi=True,
-            ),
-        ),
+        OutputTemplate('mainoutput', FoLiAXMLFormat,"FoLiA Document", 
+            extension='.xml',
+            copymetadata=True,
+            multi=True,
+        ),        
     )
 ]
 
 PARAMETERS =  [
-    ('Output', [
-        ChoiceParameter('output', 'Output','Choose in what format you want your output delivered',choices=[('folia','FoLiA XML'),('columns','Plain-text columned format (legacy)')] ),
-    ]), 
+
     ('Modules', [
         ChoiceParameter('skip', 'Skip modules','Are there any components you want to skip? Skipping the parser and chunker speeds up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser'),('c','Chunker / Shallow parser')], multi=True ),        
         #ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Skip dependency parser'),('n',"Don't skip anything")] ),
