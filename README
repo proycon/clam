@@ -15,7 +15,7 @@ CLAM is set up in a universal fashion, requiring minimal effort on the part of t
 
 CLAM is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users. 
 
-For installation instructions, make sure to read the provide 'INSTALL' file! For full documentation see the manual in docs/clam_manual.pdf , also assessible through the CLAM website at http://ilk.uvt.nl/clam . It is recommended to read this prior to starting with CLAM. 
+For installation instructions, make sure to read the provided 'INSTALL' file! For full documentation see the manual in docs/clam_manual.pdf , also assessible through the CLAM website at http://ilk.uvt.nl/clam . It is recommended to read this prior to starting with CLAM. 
 
 IMPORTANT NOTICE: Please always use git to obtain your copy of CLAM from this repository, allowing you to easily keep it up to date. Using the zip packages or tarballs, even though provided on github, is *discouraged* !
 
