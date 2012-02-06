@@ -11,4 +11,10 @@ CLAM is entirely written in Python, runs on UNIX-derived systems, and is availab
 
 For more documentation see the manual in docs/clam_manual.pdf
 
-*IMPORTANT NOTICE*: Please use git to obtain your copy of CLAM from this repository, allowing you to easily keep it up to date. Using the zip packages or tarballs is *discouraged* !  
+*IMPORTANT NOTICE*: Please always use git to obtain your copy of CLAM from this repository, allowing you to easily keep it up to date. Using the zip packages or tarballs, even though provided on github, is *discouraged* !  
+
+  $ git clone git://github.com/proycon/clam.git
+  
+And to keep it up to date, regularly check back on github for changes and obtain the latest using a simple:
+
+  clam$ git pull
