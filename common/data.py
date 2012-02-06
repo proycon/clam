@@ -1676,9 +1676,9 @@ class ParameterCondition(object):
                 elif key[-12:] == '_greaterthan':
                     self.conditions.append( (key[:-12], value,lambda x,y: x != None and x != False and x > y, 'greaterthan') )
                 elif key[-17:] == '_greaterequalthan':
-                    self.conditions.append( (key[:-17],value, lambda x,y: x != None and x != False and x > y, 'greaterequalthan') )
+                    self.conditions.append( (key[:-17],value, lambda x,y: x != None and x != False and x >= y, 'greaterequalthan') )
                 elif key[-9:] == '_lessthan':
-                    self.conditions.append( (key[:-9],value, lambda x,y: x != None and x != False and x >= y , 'lessthan' ) )
+                    self.conditions.append( (key[:-9],value, lambda x,y: x != None and x != False and x < y , 'lessthan' ) )
                 elif key[-14:] == '_lessequalthan':
                     self.conditions.append( (key[:-14], value,lambda x,y: x != None and x != False and x <= y, 'lessequalthan') )
                 elif key[-9:] == '_contains':
