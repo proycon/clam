@@ -19,6 +19,7 @@ import urllib2
 from urllib import urlencode
 
 from lxml import etree
+import csv
 
 class AbstractViewer(object):
 
@@ -53,17 +54,40 @@ class AbstractViewer(object):
 
 class SimpleTableViewer(AbstractViewer):
     id = 'tableviewer'
-    name = "Table viewer"
+    name = "Table viewer"    
 
+    def __init__(self, **kwargs):
+        if 'quotechar' in kwargs:
+            self.quotechar = kwargs['quotechar']
+            del kwargs['quotechar']
+        else:
+            self.quotechar = ''
+            
+        if 'delimiter' in kwargs:
+            self.delimiter = kwargs['delimiter']
+            del kwargs['delimiter']
+        else:
+            self.delimiter = '\t'         
+            
+        super(SimpleTableViewer,self).__init__(**kwargs)   
+                
+    def read(self, file):
+        file = csv.reader(open(file,'r'), delimiter=self.delimiter, quotechar=self.quotechar)        
+        for line in file:
+            yield line
+    
     def view(self,file,**kwargs):
-        render = web.template.render('templates')
-        return render.crudetableviewer( file, "\t")
+        render = web.template.render('templates') 
+        return render.crudetableviewer( file, self)
+
 
 
 
 class FrogViewer(AbstractViewer):
     id = 'frogviewer'
     name = "Frog Viewer"
+
+    
 
     def view(self,file,**kwargs):
         render = web.template.render('templates')

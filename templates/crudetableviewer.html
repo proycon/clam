@@ -1,4 +1,4 @@
-$def with (file, delimiter)
+$def with (file, tableviewer)
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=$file.metadata['encoding']" />
@@ -48,7 +48,7 @@ $def with (file, delimiter)
     <table>
     $for line in file:
         <tr>
-        $for field in line.strip('\n\t ').split(delimiter):
+        $for field in tableviewer.read(file):
             <td>$field.encode(file.metadata['encoding'])</td>
         </tr>
     </table>
