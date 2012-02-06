@@ -18,7 +18,7 @@
  $ mkdir ~/clam
  $ cd ~/clam
  
-4) Obtain CLAM from github
+4) Obtain CLAM from github using git:
  $ git clone git://github.com/proycon/clam.git
  
 4b) *ONLY IF* your distribution's python-webpy was too old or unavailable; grab it from github: 
@@ -37,6 +37,7 @@
  
  Navigate your browser to http://localhost:8080 and verify everything works
 
+Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository. 
 
 == INSTRUCTIONS FOR MAC OS X USERS ==
 
@@ -67,10 +68,10 @@
  $ mkdir ~/clam/
  $ cd ~/clam/
 
-5) Retrieve CLAM from github:
- $ git clone git://github.com/proycon/clam.git
+5) Retrieve CLAM from github using git:
+$ git clone git://github.com/proycon/clam.git
  
-6) Retrieve Web.py from github
+6) Retrieve Web.py from github using git:
  $ git clone git://github.com/webpy/webpy.git
  
  Set some symlinks so web.py can be found:
@@ -90,7 +91,9 @@ ERRORS?
 
  Change 'python' to 'python2.6' in the first line (hashbang) of clamservice.py and the wrapper script you want to use (i.e. clam/config/textstats.py), then try again:
  
+Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository.
 
 == INSTRUCTIONS FOR WINDOWS USERS == 
 
  1) Delete Windows and install a decent OS ;)
+ 
