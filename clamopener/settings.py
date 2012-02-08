@@ -53,7 +53,7 @@ else:
     #assuming ILK server
     DOMAIN = 'webservices.ticc.uvt.nl'
     BASEURL = 'http://' + DOMAIN + '/'
-    ROOTDIR = ''
+    ROOTDIR = '/var/www/clam/clamopener/'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
