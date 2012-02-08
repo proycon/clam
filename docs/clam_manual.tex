@@ -43,7 +43,7 @@ The Computational Linguistics Application Mediator (CLAM) allows you to quickly 
 
 CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of computational linguistic applications. These applications are treated as a black box, of which only the parameters, input formats, and output formats need to be described. The applications themselves need not be network-aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
 
-CLAM is entirely written in Python and is available as open source under the GNU Public License (v3). It is set up in a modular fashion and as such is easily extendable. It offers a rich API for writing clients and wrapper scripts.
+CLAM is entirely written in Python. It is set up in a modular fashion and as such is easily extendable. It offers a rich API for writing clients and wrapper scripts.
 
 The kind of applications that CLAM is intended for are Natural Language Processing applications, usually of a kind that do some processing on a text corpus. This corpus (any text file) can be uploaded by the user, or may be pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is subsequently made available through the webservice for viewing and downloading.
 
@@ -64,12 +64,11 @@ CLAM comes with an ample number of features, the most notable ones being:
 \item \textbf{Viewers} -- \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
 \end{itemize}
 
+In publication of research that makes use of this software, a citation should be given of: {\em ``Maarten van Gompel (2012). CLAM: Computational Linguistics Application Mediator. Documentation. ILK Technical Report 12-02. \\ Available from {\tt http://ilk.uvt.nl/downloads/pub/papers/ilk.1202.pdf}''}.
+
+CLAM is open-source software licensed under the GNU Public License v3, a copy of which can be found along with the software.
+
 This documentation is split into two parts: a chapter for service providers, people who want to build a CLAM Webservice around their tool, and a chapter for service clients, users wanting to write automated clients to communicate with the aforemented webservice.
-
-\begin{devnotes}
-Note that at this stage, CLAM is still under development. As such, this documentation is not complete yet, but is also a work in progress.
-\end{devnotes}
-
 
 \chapter{Documentation for Service Providers}
 
