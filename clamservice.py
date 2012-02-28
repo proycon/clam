@@ -190,29 +190,46 @@ auth = lambda x: x
     
 class RequireLogin(object):
     def __init__(self, **kwargs):
-        if 'ghost' in kwargs:
-            self.ghost = bool(kwargs['ghost'])
+        #if 'ghost' in kwargs:
+        #    self.ghost = bool(kwargs['ghost']) #NOT USED!!!!
+        pass
     
     def __call__(self,f):
         global auth
         def wrapper(*args, **kwargs):
-            printdebug("wrapper: "+ repr(f))   
-            if settings.PREAUTHHEADER and not self.ghost:            
-                printdebug("Header debug: " + repr(web.ctx.env))
-                for header in settings.PREAUTHHEADER:
-                    if header:
-                        user = web.ctx.env.get(header, '')
-                        printdebug("Got pre-authenticated user: " + user)   
-                        if user:
-                            if settings.PREAUTHMAPPING:
-                                try:
-                                    user = settings.PREAUTHMAPPING[user]
-                                except KeyError:
-                                    raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
-                            args += (user,)
-                            return f(*args, **kwargs)
-                if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-                    raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
+            printdebug("wrapper: "+ repr(f))
+            if settings.PREAUTHHEADER:            
+                DOAUTH = True
+                if settings.WEBSERVICEGHOST:
+                    prefix = settings.STANDALONEURLPREFIX
+                    if prefix:      
+                        prefix = '/' + prefix + '/' + settings.WEBSERVICEGHOST 
+                    else:
+                        prefix = '/' + settings.WEBSERVICEGHOST
+                    try:
+                        requesturl = web.ctx.env.get('PATH_INFO', '')
+                    except KeyError:
+                        printdebug("ERROR: No PATH_INFO found! Unable to authenticate")
+                    if requesturl == prefix or requesturl[:len(prefix) + 1] == prefix + '/':
+                        #ghost url accessed, no preauthheader authentication
+                        DOAUTH=False
+                        
+                if DOAUTH:                        
+                    printdebug("Header debug: " + repr(web.ctx.env))
+                    for header in settings.PREAUTHHEADER:
+                        if header:
+                            user = web.ctx.env.get(header, '')
+                            printdebug("Got pre-authenticated user: " + user)   
+                            if user:
+                                if settings.PREAUTHMAPPING:
+                                    try:
+                                        user = settings.PREAUTHMAPPING[user]
+                                    except KeyError:
+                                        raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")         
+                                args += (user,)
+                                return f(*args, **kwargs)
+                    if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
+                        raise web.webapi.Unauthorized("Expected pre-authenticated header not found") 
             if settings.USERS or settings.USERS_MYSQL:
                 return auth(f)(*args, **kwargs)
             else:
