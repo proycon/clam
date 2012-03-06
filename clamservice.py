@@ -201,11 +201,11 @@ class RequireLogin(object):
             if settings.PREAUTHHEADER:            
                 DOAUTH = True
                 if settings.WEBSERVICEGHOST:
-                    prefix = settings.STANDALONEURLPREFIX
-                    if prefix:      
-                        prefix = '/' + prefix + '/' + settings.WEBSERVICEGHOST 
-                    else:
-                        prefix = '/' + settings.WEBSERVICEGHOST
+                    #prefix = settings.STANDALONEURLPREFIX
+                    #if prefix:      
+                    #    prefix = '/' + prefix + '/' + settings.WEBSERVICEGHOST 
+                    #else:
+                    prefix = '/' + settings.WEBSERVICEGHOST
                     try:
                         requesturl = web.ctx.env.get('PATH_INFO', '')
                     except KeyError:
