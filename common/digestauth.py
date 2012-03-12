@@ -97,10 +97,10 @@ class auth(object):
             status = self.user_status.get(username, (self.tries, 0))
             if status[0] < 1 and time.time() < status[1]:
                 # User got the password wrong within the last (self.lockTime) seconds
-                print "AUTH DEBUG wrong pw 1"
+                print "AUTH DEBUG wrong pw within last locktime"
                 return self.denyForbidden()
             if status[0] < 1: 
-                print "AUTH DEBUG wrong pw 2"
+                print "AUTH DEBUG wrong pw, user may retry"
                 # User sent the wrong password, but more than (self.lockTime) seconds have passed, so give
                 # them another try.  However, send a 401 header so user's browser prompts for a password
                 # again.
@@ -108,11 +108,13 @@ class auth(object):
                 return self.send401UnauthorizedResponse()
             if self.requestDigestValid(reqHeaderDict, web.ctx.environ['REQUEST_METHOD']):
                 # User authenticated; forgive any past incorrect passwords and run the function we're decorating
+                print "AUTH DEBUG auth succesful"
                 self.user_status[username] = (self.tries, 0)
                 arguments += (username,) #added by proycon
                 return f(*arguments, **keywords)
             else:
                 # User entered the wrong password.  Deduct one try, and lock account if necessary
+                print "AUTH DEBUG wrong pw, one less try"
                 self.user_status[username] = (status[0] - 1, time.time() + self.lockTime)
                 self.logIncorrectPassword(username,  reqHeaderDict)
                 return self.send401UnauthorizedResponse()
