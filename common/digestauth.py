@@ -144,7 +144,7 @@ class auth(object):
             print "DEBUG directiveProper nc != 8"
             return False
         elif not (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri']))): 
-            print "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'"
+            print "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "i109
             return False
             
         return True
