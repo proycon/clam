@@ -129,7 +129,7 @@ class auth(object):
         """Verifies that the client's authentication header contained the required fields"""
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
-                print "DEBUGdirectiveProper: missing", variable
+                print "DEBUG sdirectiveProper: missing", variable
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ['HTTP_USER_AGENT'])
