@@ -129,14 +129,30 @@ class auth(object):
         """Verifies that the client's authentication header contained the required fields"""
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
-                print "DEBUG missing", variable
+                print "DEBUGdirectiveProper: missing", variable
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ['HTTP_USER_AGENT'])
-        return reqHeaderDict['realm'] == self.realm \
-            and (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque) \
-            and len(reqHeaderDict['nc']) == 8 \
-            and (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri'])))
+        
+        if reqHeaderDict['realm'] != self.realm:
+            print "DEBUG directiveProper: realm not matching got " + reqHeaderDict['realm'] + ' expected ' + self.realm
+            return False
+        elif not (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque):
+            print "DEBUG directiveProper: got opaque " + str(reqHeaderDict.get('opaque','')) + ' expected ' + str(self.opaque)
+            return False
+        elif len(reqHeaderDict['nc']) != 8:
+            print "DEBUG directiveProper nc != 8"
+            return False
+        elif not (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri']))): 
+            print "DEBUG mismatch in request paths, got " +  str(reqHeaderDict['uri']) + " instead of " + str(reqPath)
+            return False
+            
+        return True
+            
+        #return reqHeaderDict['realm'] == self.realm \
+        #    and (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque) \
+        #    and len(reqHeaderDict['nc']) == 8 \
+        #    and (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri'])))
 
 
     def requestDigestValid(self, reqHeaderDict, reqMethod):
