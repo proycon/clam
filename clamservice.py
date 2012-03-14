@@ -2032,23 +2032,25 @@ if __name__ == "__main__":
     elif 'PORT' in dir(settings):
         sys.argv.append(str(settings.PORT))
 
-    # Create decorator
-    #requirelogin = real_requirelogin #fool python :) 
-    #if USERS:
-    #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
-    if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM)
-    elif settings.USERS_MYSQL:
-        validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM)    
-        
-
     if not fastcgi:
         if settings.URLPREFIX:
             settings.STANDALONEURLPREFIX = settings.URLPREFIX
             print >>sys.stderr,"WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?"
             #raise Exception("Can't use URLPREFIX when running in standalone mode!")
         settings.URLPREFIX = '' #standalone server always runs at the root
+
+    # Create decorator
+    #requirelogin = real_requirelogin #fool python :) 
+    #if USERS:
+    #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
+    if settings.USERS:
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM, settings.STANDALONEURLPREFIX)
+    elif settings.USERS_MYSQL:
+        validate_users_mysql()
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM, settings.STANDALONEURLPREFIX)    
+        
+
+    
 
     CLAMService('fastcgi' if fastcgi else '') #start
 
@@ -2067,10 +2069,10 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM, settings.URLPREFIX)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM)            
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM, settings.URLPREFIX)            
 
     service = CLAMService('wsgi')
     return service.application

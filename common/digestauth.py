@@ -22,7 +22,7 @@ class MalformedAuthenticationHeader(Exception): pass
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
-    def __init__(self,  getHA1,  realm="Protected",  tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
+    def __init__(self,  getHA1,  realm="Protected",  urlprefix = None, tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
         """Creates a decorator specific to a particular web application. 
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user
@@ -38,6 +38,7 @@ class auth(object):
         self.getHA1,  self.realm,  self.tolerateIE,  self.nonceSkip = (getHA1,  realm,  tolerateIE,  nonceSkip)
         self.lockTime,  self.tries,  self.nonceLife,  self.domain = (lockTime,  tries - 1,  nonceLife,  domain)
         self.unauthHTML = unauthHTML or self.g401HTML.replace("$redirecturl",  redirectURL)
+        self.urlprefix = urlprefix
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
         self.opaque = "%032x" % random.getrandbits(128)
@@ -125,8 +126,16 @@ class auth(object):
         pass  # Do your own logging here
 
 
-    def directiveProper(self,  reqHeaderDict, reqPath):
+    def directiveProper(self,  reqHeaderDict, reqPath, urlprefix = ""):
         """Verifies that the client's authentication header contained the required fields"""
+        if urlprefix:
+            if urlprefix[0] != '/':
+                urlprefix = '/' + urlprefix
+            if urlprefix[-1] == '/':
+                urlprefix = urlprefix[:-1]
+        else:
+            urlprefix = ""
+        
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
                 print "DEBUG sdirectiveProper: missing", variable
@@ -143,8 +152,10 @@ class auth(object):
         elif len(reqHeaderDict['nc']) != 8:
             print "DEBUG directiveProper nc != 8"
             return False
-        elif not (reqHeaderDict['uri'] == reqPath or (standardsUncompliant and "?" in reqPath and reqPath.startswith(reqHeaderDict['uri']))): 
+        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == '/' + urlprefix + reqPath or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith('/' + urlprefix + reqHeaderDict['uri'])) )): 
             print "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'"
+            if urlprefix:
+                print "..or instead of '" + '/' + urlprefix + str(reqPath) + "'"            
             return False
             
         return True
