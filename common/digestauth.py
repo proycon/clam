@@ -126,13 +126,13 @@ class auth(object):
         pass  # Do your own logging here
 
 
-    def directiveProper(self,  reqHeaderDict, reqPath, urlprefix = ""):
+    def directiveProper(self,  reqHeaderDict, reqPath):
         """Verifies that the client's authentication header contained the required fields"""
-        if urlprefix:
-            if urlprefix[0] != '/':
-                urlprefix = '/' + urlprefix
-            if urlprefix[-1] == '/':
-                urlprefix = urlprefix[:-1]
+        if self.urlprefix:
+            if self.urlprefix[0] != '/':
+                urlprefix = '/' + self.urlprefix
+            if self.urlprefix[-1] == '/':
+                urlprefix = self.urlprefix[:-1]
         else:
             urlprefix = ""
         
