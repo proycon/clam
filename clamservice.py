@@ -2044,10 +2044,10 @@ if __name__ == "__main__":
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM, settings.STANDALONEURLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, settings.STANDALONEURLPREFIX)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM, settings.STANDALONEURLPREFIX)    
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, settings.STANDALONEURLPREFIX)    
         
 
     
@@ -2069,10 +2069,10 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, realm= settings.REALM, settings.URLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, settings.URLPREFIX)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, realm= settings.REALM, settings.URLPREFIX)            
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, settings.URLPREFIX)            
 
     service = CLAMService('wsgi')
     return service.application
