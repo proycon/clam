@@ -152,10 +152,10 @@ class auth(object):
         elif len(reqHeaderDict['nc']) != 8:
             print "DEBUG directiveProper nc != 8"
             return False
-        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == '/' + urlprefix + reqPath or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith('/' + urlprefix + reqHeaderDict['uri'])) )): 
+        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )): 
             print "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'"
             if urlprefix:
-                print "..or instead of '" + '/' + urlprefix + str(reqPath) + "'"            
+                print "..or instead of '" + urlprefix + str(reqPath) + "'"            
             return False
             
         return True
