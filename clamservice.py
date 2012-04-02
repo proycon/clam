@@ -2044,10 +2044,10 @@ if __name__ == "__main__":
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, settings.STANDALONEURLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.STANDALONEURLPREFIX)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, settings.STANDALONEURLPREFIX)    
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.STANDALONEURLPREFIX)    
         
 
     

@@ -22,7 +22,7 @@ class MalformedAuthenticationHeader(Exception): pass
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
-    def __init__(self,  getHA1,  realm="Protected",  urlprefix = None, tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
+    def __init__(self,  getHA1,  realm="Protected",  printdebug = None, urlprefix = None, tolerateIE = True, redirectURL = '/newuser',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
         """Creates a decorator specific to a particular web application. 
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user
@@ -38,11 +38,12 @@ class auth(object):
         self.getHA1,  self.realm,  self.tolerateIE,  self.nonceSkip = (getHA1,  realm,  tolerateIE,  nonceSkip)
         self.lockTime,  self.tries,  self.nonceLife,  self.domain = (lockTime,  tries - 1,  nonceLife,  domain)
         self.unauthHTML = unauthHTML or self.g401HTML.replace("$redirecturl",  redirectURL)
+        self.printdebug = printdebug
         self.urlprefix = urlprefix
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
         self.opaque = "%032x" % random.getrandbits(128)
-        print "DEBUG generated opaque: " + str(self.opaque)
+        if printdebug: printdebug("DEBUG generated opaque: " + str(self.opaque))
         self.webpy2 = web.__version__.startswith('0.2')
     g401HTML = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -62,46 +63,46 @@ class auth(object):
             requestHeader = web.ctx.environ.get('HTTP_AUTHORIZATION', None)
             if not requestHeader:
                 # client has failed to include an authentication header; send a 401 response
-                print "AUTH DEBUG norequestheader"
+                if self.printdebug: self.printdebug("AUTH DEBUG norequestheader")
                 return self.send401UnauthorizedResponse()
             if requestHeader[0:7] != "Digest ":
                 # client has attempted to use something other than Digest authenication; deny
-                print "AUTH DEBUG badrequest"
+                if self.printdebug: self.printdebug("AUTH DEBUG badrequest")
                 return self.denyBadRequest()
             reqHeaderDict = parseAuthHeader(requestHeader)
             if not self.directiveProper(reqHeaderDict, web.ctx.fullpath):
-                print "AUTH DEBUG notdirectiveproper"
+                if self.printdebug: self.printdebug("AUTH DEBUG notdirectiveproper")
                 # Something is wrong with the authentication header
                 if reqHeaderDict.get('opaque',self.opaque) != self.opaque:
                     # Didn't send back the correct "opaque;" probably, our server restarted.  Just send
                     # them another authentication header with the correct opaque field.
-                    print "AUTH DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'"                    
+                    if self.printdebug: self.printdebug("AUTH DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'")                    
                     return self.send401UnauthorizedResponse()
                 else:
                     # Their header had a more fundamental problem.  Something is fishy.  Deny access.
                     return self.denyBadRequest("Authorization Request Header does not conform to RFC 2617 section 3.2.2")
             # if user sent a "logout" nonce, make them type in the password again
             if len(reqHeaderDict.nonce) != 34:
-                print "DEBUG logoutnonce"
+                if printdebug: printdebug("DEBUG logoutnonce")
                 return self.send401UnauthorizedResponse()
             nonceReaction = self.outstandingNonces.nonceState(reqHeaderDict,  self.nonceSkip)
             if nonceReaction == 2:
                 # Client sent a nonce we've never heard of before
-                print "AUTH DEBUG unknownnonce"
+                if self.printdebug: self.printdebug("AUTH DEBUG unknownnonce")
                 return self.denyBadRequest()
             if nonceReaction == 3:
                 # Client sent an old nonce.  Give the client a new one, and ask to authenticate again before continuing.
-                print "AUTH DEBUG oldnonce"
+                if self.printdebug: self.printdebug("AUTH DEBUG oldnonce")
                 return self.send401UnauthorizedResponse(stale=True)
             username = reqHeaderDict.username    
-            print "AUTH DEBUG user="+username
+            if self.printdebug: self.printdebug("AUTH DEBUG user="+username)
             status = self.user_status.get(username, (self.tries, 0))
             if status[0] < 1 and time.time() < status[1]:
                 # User got the password wrong within the last (self.lockTime) seconds
-                print "AUTH DEBUG wrong pw within last locktime"
+                if self.printdebug: self.printdebug("AUTH DEBUG wrong pw within last locktime")
                 return self.denyForbidden()
             if status[0] < 1: 
-                print "AUTH DEBUG wrong pw, user may retry"
+                if self.printdebug: self.printdebug("AUTH DEBUG wrong pw, user may retry")
                 # User sent the wrong password, but more than (self.lockTime) seconds have passed, so give
                 # them another try.  However, send a 401 header so user's browser prompts for a password
                 # again.
@@ -109,13 +110,13 @@ class auth(object):
                 return self.send401UnauthorizedResponse()
             if self.requestDigestValid(reqHeaderDict, web.ctx.environ['REQUEST_METHOD']):
                 # User authenticated; forgive any past incorrect passwords and run the function we're decorating
-                print "AUTH DEBUG auth succesful"
+                if self.printdebug: self.printdebug( "AUTH DEBUG auth succesful")
                 self.user_status[username] = (self.tries, 0)
                 arguments += (username,) #added by proycon
                 return f(*arguments, **keywords)
             else:
                 # User entered the wrong password.  Deduct one try, and lock account if necessary
-                print "AUTH DEBUG wrong pw, one less try"
+                if self.printdebug: self.printdebug( "AUTH DEBUG wrong pw, one less try")
                 self.user_status[username] = (status[0] - 1, time.time() + self.lockTime)
                 self.logIncorrectPassword(username,  reqHeaderDict)
                 return self.send401UnauthorizedResponse()
@@ -138,24 +139,24 @@ class auth(object):
         
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
-                print "DEBUG sdirectiveProper: missing", variable
+                if self.printdebug: self.printdebug( "DEBUG directiveProper: missing " + variable)
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ['HTTP_USER_AGENT'])
         
         if reqHeaderDict['realm'] != self.realm:
-            print "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'"
+            if self.printdebug: self.printdebug( "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'")
             return False
         elif not (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque):
-            print "DEBUG directiveProper: got opaque '" + str(reqHeaderDict.get('opaque','')) + "' expected '" + str(self.opaque) + '"'
+            if self.printdebug: self.printdebug( "DEBUG directiveProper: got opaque '" + str(reqHeaderDict.get('opaque','')) + "' expected '" + str(self.opaque) + '"')
             return False
         elif len(reqHeaderDict['nc']) != 8:
-            print "DEBUG directiveProper nc != 8"
+            if self.printdebug: self.printdebug( "DEBUG directiveProper nc != 8")
             return False
         elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )): 
-            print "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'"
+            if self.printdebug: self.printdebug( "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'")
             if urlprefix:
-                print "..or instead of '" + urlprefix + str(reqPath) + "'"            
+                if self.printdebug: self.printdebug( "..or instead of '" + urlprefix + str(reqPath) + "'")            
             return False
             
         return True
