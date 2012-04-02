@@ -46,7 +46,7 @@ def printlog(msg):
 
 def printdebug(msg):
     global DEBUG
-    if DEBUG: printlog("DEBUG: " + msg)
+    if DEBUG: sys.stderr.write("CLAM DEBUG: " + msg + "\n")
 
 
 class RequestWithMethod(Request):
