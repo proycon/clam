@@ -2069,10 +2069,10 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, settings.URLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, settings.URLPREFIX)            
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.URLPREFIX)            
 
     service = CLAMService('wsgi')
     return service.application

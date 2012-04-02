@@ -43,7 +43,7 @@ class auth(object):
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
         self.opaque = "%032x" % random.getrandbits(128)
-        if printdebug: printdebug("DEBUG generated opaque: " + str(self.opaque))
+        if self.printdebug: self.printdebug("DEBUG generated opaque: " + str(self.opaque))
         self.webpy2 = web.__version__.startswith('0.2')
     g401HTML = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
