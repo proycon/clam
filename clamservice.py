@@ -2056,9 +2056,11 @@ if __name__ == "__main__":
 
 def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""
-    global settingsmodule, auh
+    global settingsmodule, auth
     #import_string = "import " + settingsmodule + " as settings"
     #exec import_string
+    printdebug("Initialising WSGI service")
+
 
 
     globals()['settings'] = settings_module
@@ -2070,10 +2072,12 @@ def run_wsgi(settings_module):
 
     if settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX)
+        printdebug("Initialised authentication")    
     elif settings.USERS_MYSQL:
         validate_users_mysql()
         auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.URLPREFIX)            
-
+        printdebug("Initialised MySQL authentication")
+        
     service = CLAMService('wsgi')
     return service.application
 
