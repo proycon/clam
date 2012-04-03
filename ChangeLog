@@ -1,3 +1,6 @@
+0.7.6) [April 2012]
+- Various fixes in authentication mechanism and ghosting
+
 0.7.5) [December 2011]
 - Webapplication (client-side javascript) now always uses absolute instead of relative urls. Fixes some minor issues.
 
