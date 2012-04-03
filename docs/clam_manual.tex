@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.5.3} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.7.6} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -129,7 +129,7 @@ In order to run CLAM in Apache, you have to install and configure several files.
 \begin{enumerate}
 \item Install \texttt{mod\_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
 \item Next we need to write a simple WSGI-script, which is a Python script that will be invoked by the webserver. Copy \texttt{clam/config/example.wsgi} to something like  \texttt{clam/config/yourservice.wsgi} and adapt the script. If CLAM is not installed in a standard location where Python can find it, make sure to explicitly specify its parent directory according to the instructions in the example.
-\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
+\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own. Also make sure \texttt{CLAMDIR} is properly set in your service configuration file.
 \item Configure Apache to let it know about WSGI and your service. I assume the reader is acquainted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
 
 \begin{verbatim}
@@ -137,7 +137,7 @@ In order to run CLAM in Apache, you have to install and configure several files.
  WSGIDaemonProcess yourservice user=proycon group=users \
      home=/path/to/clam threads=15 maximum-requests=10000
  WSGIProcessGroup yourservice
-
+ WSGIPassAuthorization On
  Alias /yourservice/static /path/to/clam/static/
  <Directory /path/to/clam/static/>
     Order deny,allow
@@ -145,12 +145,14 @@ In order to run CLAM in Apache, you have to install and configure several files.
  </Directory>
 \end{verbatim}
 
-The WSGIDaemonProcess directive goes on online, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. 
+The \texttt{WSGIDaemonProcess} directive goes on one line, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. You can either let CLAM handle authentication (HTTP Digest Authentication), in which case you need to set \texttt{WSGIPassAuthorization On}, as by default it is disabled, or you can let Apache itself handle authentication.
 
 \item Restart Apache
 \end{enumerate}
 
 Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}. Important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes, and maximum-requests can also be configured to optimise performance and system resources according to your needs.
+
+
 
 
 \subsection{Using CLAM with nginx}
@@ -214,6 +216,21 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
 \subsection{Using CLAM with other webservers}
 
 You are not limited to using either Apache with WSGI or nginx with FastCGI; we tested only these two. It should also be possible to get CLAM working on other Unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
+
+
+\subsection{Troubleshooting}
+
+You may possibly encounter one of the following issues when attempting to access your CLAM service through a browser:
+
+\begin{enumerate}
+\item \textbf{Apache gives an Internal Server Error (HTTP 500)} -- Check your Apache error log to see what happened. For additional debug output by CLAM, set \texttt{DEBUG=True} in your CLAM service configuration file. 
+\item \textbf{I get an empty white page} -- There is probably an error in loading the XSL stylesheet that renders the web application. Please use Firefox to verify, instead of Google Chrome or Internet Explorer, as it provides more detailed error output on XSLT transformations.
+\item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that renders the web-application can not be loaded. This is most likely due to a mismatch in URLs. The URL at which the webservice is accessed has to correspond with the URL configured in the service configuration file. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
+\item \textbf{I get an error ``No template named response''} -- Check whether CLAMDIR is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
+\item \textbf{I'm using CLAM through Apache and WSGI, but authentication does not work and I am always logged in as anonymous} -- Check that \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and \texttt{USERS} is configured in your service configuration file.
+\end{enumerate}
+
+Note that we strongly recommend developing your services using the built-in webserver, and migrating to Apache, nginx or another webserver, when deploying your final service.
 
 \section{Architecture}
 
