@@ -32,6 +32,8 @@ from clam.common.data import *
 from clam.common.formats import *
 import clam.common.status
 
+import time
+
 class AuthServiceTest(unittest2.TestCase):
     """Test basic operations with authentication"""
 
@@ -49,7 +51,12 @@ class AuthServiceTest(unittest2.TestCase):
 
     def test3_project(self):
         """No Access Test - No project state retrieval with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.get, 'basicservicetest')        
+        self.assertRaises( PermissionDenied, self.client.get, 'basicservicetest')
+        
+    def test4_wait(self):
+        """No Access Test - Waiting 30s for lock to expire"""
+        time.sleep(30)
+        self.assertTrue(True)        
         
 class BasicServiceTest(unittest2.TestCase):
     """Test basic operations with authentication"""
