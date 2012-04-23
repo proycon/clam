@@ -91,6 +91,22 @@ class BasicServiceTest(unittest2.TestCase):
         self.assertTrue(data.parameters)        
         self.assertTrue(isinstance(data.input,list))        
         
+    def test2_3b_combo(self): 
+        """Basic Service Test - Simple combined run"""
+        projectname = 'basicservicetest' + str(random.getrandbits(64))
+        success = self.client.create(projectname)
+        self.assertTrue(success)
+        
+        data = self.client.get(projectname)
+        self.assertTrue(data.system_id == "textstats")
+        self.assertTrue(data.profiles)
+        self.assertTrue(data.parameters)        
+        self.assertTrue(isinstance(data.input,list))        
+        
+        success = self.client.delete(projectname)
+        self.assertTrue(success)
+     
+     
     def test2_4_upload(self):
         """Basic Service Test - File upload with extension"""
         f = codecs.open('/tmp/servicetest.txt','w','utf-8')
