@@ -228,6 +228,10 @@ class BooleanParameter(AbstractParameter):
 
     def set(self, value = True):
         """Set the boolean parameter"""
+        if value is True or value == 1 or ( (isinstance(value, str) or isinstance(value, unicode)) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ): 
+            value = True
+        else:
+            value = False            
         return super(BooleanParameter,self).set(value)
 
     def unset(self):
@@ -247,7 +251,7 @@ class BooleanParameter(AbstractParameter):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if not self.id in postdata:
             return None
-        elif self.id in postdata and ( (isinstance(postdata[self.id], bool) and postdata[self.id]) or postdata[self.id] == 1 or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
+        elif self.id in postdata and ( (isinstance(postdata[self.id], bool) and postdata[self.id]) or postdata[self.id] == 1 or postdata[self.id] == '1'  or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
             return True #postdata[self.id]        
         else: 
             return False
