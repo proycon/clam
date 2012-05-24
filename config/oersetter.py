@@ -113,7 +113,7 @@ PROFILES = [
             CharEncodingConverter(id='latin15',label='Converteer van Latin-9',charset='iso-8859-15'),
             PDFtoTextConverter(id='pdfconv',label='Converteer van PDF Document'),
             MSWordConverter(id='docconv',label='Converteer van MS Word Document'),
-            extension='.nl.txt',
+            extension='.fy.txt',
             #filename='filename.txt',
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),    

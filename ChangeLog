@@ -1,3 +1,6 @@
+0.7.7) [May 2012]
+- Important fix in handling of boolean parameters
+
 0.7.6) [April 2012]
 - Various fixes in authentication mechanism and ghosting
 
