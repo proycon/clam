@@ -1459,7 +1459,7 @@ class OutputTemplate(object):
 
     def xml(self, indent = ""):
         """Produce Template XML"""
-        xml = indent + "<OutputTemplate id=\"" + self.id + "\" format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
+        xml = indent + u"<OutputTemplate id=\"" + self.id + "\" format=\"" + self.formatclass.__name__ + "\"" + " label=\"" + self.label + "\""
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
