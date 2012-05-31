@@ -104,7 +104,7 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
-        InputTemplate('input-fr', PlainTextFormat,"Friese tekst / Fryske tekst",  
+        InputTemplate('input-fy', PlainTextFormat,"Friese tekst / Fryske tekst",  
             StaticParameter(id='encoding',name='Encoding',description='De encoding van de tekst / De encoding fan de tekst', value='utf-8'),  
             ChoiceParameter(id='language',name='Language',description='De taal van de tekst / De sprake fan de tekst', choices=[('nl',u"Nederlânsk / Nederlands"),('fy','Frysk / Fries')]),
             #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
@@ -138,7 +138,7 @@ PROFILES = [
             #filename='filename.txt',
             multi=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),    
-        OutputTemplate('output-nl',PlainTextFormat,'Friese vertaling / Fryske oersetting',
+        OutputTemplate('output-fy',PlainTextFormat,'Friese vertaling / Fryske oersetting',
             SetMetaField('encoding','utf-8'),
             SetMetaField('language','fy'),
             extension='.fy.txt',
@@ -147,6 +147,10 @@ PROFILES = [
     )     
      
 ]
+
+
+MTSYSTEM_NLFY = '/path/to/mt_fryskeakademy-nl-fy.py'
+MTSYSTEM_FYNL = '/path/to/mt_fryskeakademy-fy-nl.py'
 
 # ======== COMMAND ===========
 
@@ -164,11 +168,11 @@ PROFILES = [
 #                        should output status messages. 
 #     $DATAFILE        - Filename of the clam.xml file describing the 
 #                        system and chosen configuration.
-#     $USERNAME        - The username of the currently logged in user
+#     $USERNAME        - The username of the currently logged in userassociative creed
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/oersetter.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = sys.path[0] + "/wrappers/oersetter.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY " + MTSYSTEM_NLFY + ' ' + MTSYSTEM_FYNL
 
 # ======== PARAMETER DEFINITIONS ===========
 
