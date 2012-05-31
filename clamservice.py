@@ -1898,8 +1898,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.REMOTEUSER = None
     if not 'PREAUTHHEADER' in settingkeys:
         settings.PREAUTHHEADER = None     #The name of the header field containing the pre-authenticated username
-    else:
-        settings.PREAUTHHEADER = settings.PREAUTHHEADER.split(' ')        
+    elif isinstance(settings.PREAUTHHEADER,str):
+        settings.PREAUTHHEADER = settings.PREAUTHHEADER.split(' ')
+    else:         
+        settings.PREAUTHHEADER = None
     if not 'PREAUTHMAPPING' in settingkeys:
         settings.PREAUTHMAPPING = None #A mapping from pre-authenticated usernames to built-in usernames
     if not 'PREAUTHONLY' in settingkeys: #If set to False, CLAM defaults to normal authentication if the preauth header was not found
