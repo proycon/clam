@@ -6,16 +6,12 @@ import sys
 from setuptools import setup
 
 os.chdir(os.path.dirname(sys.argv[0]))
-if not os.path.exists('clam') and not os.path.exists('.readysetup'):
-    print >>sys.stderr, "Running setup for first time, preparing source tree"
-    os.mkdir('clam')
-    os.system('mv * clam/ 2> /dev/null')
-    os.system('mv clam/README clam/docs clam/setup.py clam/AUTHORS clam/COPYING clam/INSTALL  clam/ChangeLog . ')
-    open('.readysetup','w')
-elif not os.path.exists('.readysetup'):
-    print >>sys.stderr, "Not ready for setup. Please obtain sources anew."
-    sys.exit(2)
-
+print >>sys.stderr, "Preparing build"
+if not os.path.exists('build'): os.mkdir('build')   
+os.chdir('build')
+if not os.path.exists('clam'): os.mkdir('clam')
+os.system('cp -Rpdf ../* clam/')
+os.unlink('setup.py')
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
