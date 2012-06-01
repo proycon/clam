@@ -41,6 +41,12 @@ setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
+    entry_points = {
+        'console_scripts': [
+            'clamservice = clam.startclamservice:main',
+            'startclamservice = clam.startclamservice:main', #alias 
+        ]
+    },
     package_data = {'clam':['static/*','templates/*'] },
     install_requires=['web.py >= 0.33','lxml >= 2.2']
 )

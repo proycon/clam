@@ -1832,7 +1832,9 @@ def usage():
         print >> sys.stderr, "\t-u [url]      - Force URL"
         print >> sys.stderr, "\t-h            - This help message"
         print >> sys.stderr, "\t-v            - Version information"
-        print >> sys.stderr, "(Note: Do not invoke clamservice directly if you want to run in WSGI mode)"
+        print >> sys.stderr, "(Note: Running clamservice directly from the command line uses the built-in"
+        print >> sys.stderr, "web-server. This is great for development purposes but not recommended"
+        print >> sys.stderr, "for production use. Use the WSGI interface with for instance Apache instead.)"
 
 
 def set_defaults(HOST = None, PORT = None):
@@ -1842,8 +1844,8 @@ def set_defaults(HOST = None, PORT = None):
     settingkeys = dir(settings)
     
     settings.STANDALONEURLPREFIX = ''
-
-    if 'ROOT' in settingkeys and not settings.ROOT[-1] == "/":
+    
+    if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
     if not 'USER' in settingkeys:
         settings.USER = None
@@ -1940,6 +1942,7 @@ def test_dirs():
             warning("No parameters specified in settings module!")
     if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER:
             warning("No user authentication enabled, this is not recommended for production environments!")
+
 
 
 if __name__ == "__main__":
@@ -2084,3 +2087,4 @@ def run_wsgi(settings_module):
     return service.application
 
 
+    
