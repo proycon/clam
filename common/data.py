@@ -1580,17 +1580,16 @@ class OutputTemplate(object):
                 if not self.filename and self.removeextensions:
                     #Remove unwanted extensions
                     if self.removeextensions is True:
-                        #Remove any extension
-                        raw = filename.split('.')[:-1]
-                        if raw:
-                            filename = '.'.join(raw)
+                        #Remove any and all extensions
+                        filename = filename.split('.')[0]
                     elif isinstance(self.removeextensions, list):
                         #Remove specified extension
                         for ext in self.removeextensions:  
-                            if (ext[0] != '.'and filename[-len(ext) - 1:] == '.' + ext):
-                                filename = filename[:-len(ext) - 1]
-                            elif (ext[0] == '.' and filename[-len(ext):] == ext):
-                                filename = filename[:-len(ext)]
+                            if ext:
+                                if (ext[0] != '.' and filename[-len(ext) - 1:] == '.' + ext):
+                                    filename = filename[:-len(ext) - 1]
+                                elif (ext[0] == '.' and filename[-len(ext):] == ext):
+                                    filename = filename[:-len(ext)]
                                 
                                     
                 if self.extension and not self.filename:
