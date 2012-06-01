@@ -47,6 +47,6 @@ setup(
             'startclamservice = clam.startclamservice:main', #alias 
         ]
     },
-    package_data = {'clam':['static/*','static/tableimages/*','templates/*'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*'] },
     install_requires=['web.py >= 0.33','lxml >= 2.2']
 )
