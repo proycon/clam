@@ -11,7 +11,7 @@ if not os.path.exists('build'): os.mkdir('build')
 os.chdir('build')
 if not os.path.exists('clam'): os.mkdir('clam')
 os.system('cp -Rpdf ../* clam/')
-os.unlink('setup.py')
+os.unlink('clam/setup.py')
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
