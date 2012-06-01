@@ -26,7 +26,7 @@ setup(
     keywords = "clam webservice rest nlp computational_linguistics rest",
     url = "http://ilk.uvt.nl/clam",
     packages=['clam','clam.common','clam.config','clam.external','clam.external.poster','clam.wrappers'],
-    long_description=read('README'),
+    long_description=read('../README'),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
