@@ -15,8 +15,8 @@ def main():
         os.environ['PYTHONPATH'] = sys.path[0] + '/..'
         import clam
 
-    clamdir = os.path.dirname(clam.__file__)
-    return os.system(PYTHONBIN + ' ' + clamdir + '/clamservice.py ' + ' '.join(sys.argv[1:]))
+    os.chdir(os.path.dirname(clam.__file__))
+    return os.system(PYTHONBIN + ' ./clamservice.py ' + ' '.join(sys.argv[1:]))
         
 if __name__ == '__main__':
     sys.exit(main())
