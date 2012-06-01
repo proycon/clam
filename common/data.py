@@ -1587,8 +1587,11 @@ class OutputTemplate(object):
                     elif isinstance(self.removeextensions, list):
                         #Remove specified extension
                         for ext in self.removeextensions:  
-                            if (ext[0] != '.'and filename[-len(ext) - 1:] == '.' + ext) or (ext[0] == '.' and filename[-len(ext):] == ext):
+                            if (ext[0] != '.'and filename[-len(ext) - 1:] == '.' + ext):
                                 filename = filename[:-len(ext) - 1]
+                            elif (ext[0] == '.' and filename[-len(ext):] == ext):
+                                filename = filename[:-len(ext)]
+                                
                                     
                 if self.extension and not self.filename:
                     filename += '.' + self.extension   
