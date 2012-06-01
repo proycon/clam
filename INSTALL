@@ -1,4 +1,28 @@
-== INSTRUCTIONS FOR LINUX/BSD USERS ==
+
+== INSTRUCTIONS USING EASY INSTALL ==
+
+Easy install is part of the Python setup tools and can install CLAM globally on your system for you. This is the easiest method of installing CLAM, as it will automatically fetch and install any dependencies.  This procedure downloads CLAM for you, rather than using a pre-downloaded archive! 
+
+$ sudo easy_install clam
+
+(sudo/root access is needed to install globally. For installation in a local custom path, use -d, this owever complicates matters as you need to take care to add these local directories to your python library path:
+
+$ easy_install -d /path/to/dir clam
+
+If easy_install is not yet installed on your system, install it using:
+ on debian-based linux systems (including Ubuntu):
+  $ apt-get install python-setuptools
+ on RPM-based linux systems:
+  $ yum install python-setuptools
+ on MacOS X:
+  (follow the manual steps below instead)
+
+If you installed using this method, then you can (globally) launch a clam webservice using the development server as follows:
+
+$ clamservice 
+
+
+== MANUAL INSTRUCTIONS FOR LINUX/BSD USERS ==
 
 1) Verify that the package version of python-webpy offered by your distribution is 0.33 or above, if not or not offered at all, we will install it later in step 4b
  on debian-based systems (including Ubuntu):
@@ -39,7 +63,7 @@
 
 Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository. 
 
-== INSTRUCTIONS FOR MAC OS X USERS ==
+== MANUAL INSTRUCTIONS FOR MAC OS X USERS ==
 
 
 1) Install the Apple Developer Tools (available as a seperate install
