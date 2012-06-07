@@ -6,19 +6,21 @@ import sys
 from setuptools import setup
 
 os.chdir(os.path.dirname(sys.argv[0]))
-print >>sys.stderr, "Preparing build"
-if not os.path.exists('build'): os.mkdir('build')   
-os.chdir('build')
-if not os.path.exists('clam'): os.mkdir('clam')
-os.system('cp -Rpdf ../* clam/ 2> /dev/null')
-os.unlink('clam/setup.py')
+if not os.path.exists('clam'):   
+    print >>sys.stderr, "Preparing build"
+    if not os.path.exists('build'): os.mkdir('build')   
+    os.chdir('build')
+    if not os.path.exists('clam'): os.mkdir('clam')
+    os.system('cp -Rpdf ../* clam/ 2> /dev/null')
+    os.system('mv -f clam/setup.py .')
+    os.system('cp -f clam/README .')  
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "CLAM",
-    version = "0.7.8",
+    version = "0.7.8.1",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
