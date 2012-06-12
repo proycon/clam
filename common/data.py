@@ -173,17 +173,18 @@ class CLAMFile:
 
     def readlines(self):
         """Loads all in memory"""
-        if not self.remote:
-            if self.metadata and 'encoding' in self.metadata:
-               return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
-            else:
-               return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
-        else:
-            response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
-            content = response.read()
-            if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
-                content = unicode(content, self.metadata['encoding'])
-            return response
+        #if not self.remote:
+        #    if self.metadata and 'encoding' in self.metadata:
+        #       return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
+        #    else:
+        #       return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
+        #else:
+        #    response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
+        #    content = response.read()
+        #    if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
+        #        content = unicode(content, self.metadata['encoding'])
+        #    return response
+        return list(iter(self))
             
     def copy(self, target):
         if self.metadata and 'encoding' in self.metadata:
