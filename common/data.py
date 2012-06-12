@@ -139,7 +139,8 @@ class CLAMFile:
                 for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:        
-            response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
+            fullpath = self.projectpath + self.basedir + '/' + self.filename
+            response = urllib2.urlopen(urllib2.Request( fullpath))      
             for line in response.readlines():
                 if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
                     yield unicode(line, self.metadata['encoding'])
