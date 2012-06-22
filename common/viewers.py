@@ -26,7 +26,8 @@ class AbstractViewer(object):
 
     id = 'abstractviewer' #you may insert another meaningful ID here, no spaces or special chars!
     name = "Unspecified Viewer" 
-
+    mimetype = 'text/html'
+    
     def __init__(self, **kwargs):
         self.embed = False #Embed external sites as opposed to redirecting?
         for key, value in kwargs.items():
@@ -105,14 +106,13 @@ class FoLiAViewer(AbstractViewer):
 
         #f = file.open()
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
-        web.header('Content-Type', 'text/html')
         return str(transform(xml_doc))
 
 
 class SoNaRViewer(AbstractViewer):
     id = 'sonarviewer'
     name = "SoNaR Viewer"
-
+    
     def view(self, file, **kwargs):
         xslfile = os.path.dirname(__file__) + "/../static/sonar.xsl"
         xslt_doc = etree.parse(xslfile)
@@ -120,7 +120,7 @@ class SoNaRViewer(AbstractViewer):
 
         #f = file.open()
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
-        web.header('Content-Type', 'text/html')
+        
         return str(transform(xml_doc))
 
 

@@ -772,6 +772,7 @@ class OutputFileHandler(object):
                     if v.id == requestid:
                         viewer = v
                 if viewer:                    
+                    web.header('Content-Type', viewer.mimetype)
                     output = viewer.view(outputfile, **web.input())
                     if isinstance(output, web.template.TemplateResult):
                        output =  output['__body__']
