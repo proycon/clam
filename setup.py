@@ -20,7 +20,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.7.8.1",
+    version = "0.7.8.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
