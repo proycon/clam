@@ -102,7 +102,7 @@ class FoLiAViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        f = file.open()
+        #f = file.open()
         xml_doc = etree.parse(f.readlines())
 
         return str(transform(xml_doc))
@@ -117,7 +117,7 @@ class SoNaRViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        f = file.open()
+        #f = file.open()
         xml_doc = etree.parse(f.readlines())
 
         return str(transform(xml_doc))
