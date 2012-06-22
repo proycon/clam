@@ -20,77 +20,190 @@
             </xsl:otherwise>
         </xsl:choose>
         <style type="text/css">
-            div.tokenannotations { display: none; }
-            body {
-                background: #424242;
-                font-size: 14px;
-            }
-            body, p, h1,h2,h3,h4,h5 {
-                font-family: sans-serif;                
-            }
-            div.text {
-                margin-left: 340px;
-                margin-right: auto;
-                width: 60%;
-                padding: 20px;
-                background: white;
-                border: solid 1px black;
-            }
-            pre.gap {
-                display: block;
-                background: white;
-                border: #fff solid dashed;
-                padding: 5px;
-            }
-            div.tokenannotations {
-                font-family: sans-serif;
-                font-size: 14px;
-            }
-            span.word:hover {
-                background: #A5C5D1;
-            }
-            span.word:hover div.tokenannotations { 
-                display: block; 
-                position: fixed;
-                width: 320px; 
-                left: 5px;
-                top: 5px;
-                background: #b4d4d1; /*#FCFFD0;*/
-                opacity: 0.9; filter: alpha(opacity = 90); 
-                border: 1px solid #628f8b; 
-                padding: 5px; 
-                text-decoration: none;
-            }
-            dt {
-                font-weight: bold;
-                width: 90%;
-            }
-            dd {
-                width: 90%;
-                font-weight: normal;
-            }
-            dd.errors {
-                color: red;
-            }
-            div.figure {
-                text-align: center;
-            }
-            div.caption {
-                font-style: italic;
-                text-align: center;
-            }
+            				body {
+					/*background: #222222;*/
+					background: #b7c8c7;
+					font-family: sans-serif;
+					font-size: 12px;
+					margin-bottom:240px;
+				}
+
+				div.text {
+					width: 700px;
+					margin-top: 50px;
+					margin-left: auto;
+					margin-right: auto;
+					padding: 10px;    
+					padding-left: 50px;
+					padding-right: 50px;
+					text-align: left;
+					background: white;
+					border: 2px solid black;
+				}
+
+				div.div {
+					padding-left: 0px;
+					padding-top: 10px;
+					padding-bottom: 10px;    
+				}
+
+				#metadata {
+					font-family: sans-serif;
+					width: 700px;
+					font-size: 90%;
+					margin-left: auto;
+					margin-right: auto;
+					margin-top: 5px;
+					margin-bottom: 5px;
+					background: #b4d4d1; /*#FCFFD0;*/
+					border: 1px solid #628f8b;
+					width: 40%;
+					padding: 5px;
+				}
+				#metadata table {
+					text-align: left;
+				}
+
+				#text {
+					border: 1px solid #628f8b;
+					width: 60%; 
+					max-width: 1024px;
+					background: white;
+					padding: 20px;
+					padding-right: 100px; 
+					margin-top: 5px;
+					margin-left: auto; 
+					margin-right: auto; 
+					color: #222;
+				}
+				.s {
+					background: white;
+					display: inline;
+					border-left: 1px white solid;
+					border-right: 1px white solid;
+				}
+				.s:hover {
+					background: #e7e8f8;
+					border-left: 1px blue solid;
+					border-right: 1px blue solid;
+				}
+				.word { 
+					display: inline; 
+					color: black; 
+					position: relative; 
+					text-decoration: none; 
+					z-index: 24; 
+				}
+				#text {
+					border: 1px solid #628f8b;
+					width: 60%; 
+					max-width: 1024px;
+					background: white;
+					padding: 20px;
+					padding-right: 100px; 
+					margin-top: 5px;
+					margin-left: auto; 
+					margin-right: auto; 
+					color: #222;
+				}
+
+				.word { 
+					display: inline; 
+					color: black; 
+					position: relative; 
+					text-decoration: none; 
+					z-index: 24;
+				}
+				
+				.t {
+					display: inline;
+					text-decoration: none;
+					z-index: 24;
+				}
+
+				.word>.attributes { display: none; font-size: 12px; font-weight: normal; }
+				.word:hover { 
+					/*text-decoration: underline;*/ 
+					z-index: 25;
+				}
+				.word:hover>.t {
+					background: #bfc0ed;
+					text-decoration: underline;
+				}
+				
+				.word:hover>.attributes { 
+					display: block; 
+					position: absolute;
+					width: 320px; 
+					font-size: 12px;
+					left: 2em; 
+					top: 2em;
+					background: #b4d4d1; /*#FCFFD0;*/
+					opacity: 0.9; filter: alpha(opacity = 90); 
+					border: 1px solid #628f8b; 
+					padding: 5px; 
+					text-decoration: none !important;
+				}
+				.attributes dt {
+					color: #254643;
+					font-weight: bold;
+				}
+				.attributes dd {
+					color: black;
+					font-family: monospace;
+				}
+				.attributes .wordid {
+					display: inline-block:
+					width: 100%;
+					font-size: 75%;
+					color: #555;
+					font-family: monospace;
+					text-align: center;
+				}
+				.event {
+					padding: 10px;
+					border: 1px solid #4f7d87;
+				}
+				.gap pre {
+					padding: 5px;
+					background: #ddd;
+					border: 1px dashed red;
+				}           
+				span.attrlabel {
+					display: inline-block;
+					color: #254643;
+					font-weight: bold;
+					width: 90px;				
+				}	
+				span.attrvalue {
+					font-weight: 12px;
+					font-family: monospace;
+				}
+				div#iewarning {
+					width: 90%;
+					padding: 10px;
+					color: red;
+					font-size: 16px;
+					font-weight: bold;
+					text-align: center;					
+				}	
+
         </style>
-        <link rel="StyleSheet" href="style.css" type="text/css" />
   </head>
-  <body>     
-   <xsl:apply-templates select="folia:text" />    
-  </body>
+    <body>
+    	<xsl:comment><![CDATA[[if lte IE 10]>
+		<div id="iewarning">
+			The FoLiA viewer does not work properly with Internet Explorer, please consider upgrading to Mozilla Firefox or Google Chrome instead. 
+		</div>
+		<![endif]]]></xsl:comment>       
+        <xsl:apply-templates />
+    </body> 
   </html>
 </xsl:template>
 
-<xsl:template match="/folia:FoLiA/folia:text">
+<xsl:template match="folia:text">
  <div class="text">
-   <xsl:apply-templates />  
+ 	<xsl:apply-templates />
  </div>
 </xsl:template>
 
@@ -165,7 +278,7 @@
 
 <xsl:template match="folia:w">
 <xsl:if test="not(ancestor::folia:original) and not(ancestor::folia:suggestion) and not(ancestor::folia:alternative)">
-<span id="{@xml:id}" class="word"><xsl:value-of select=".//folia:t[1]"/><xsl:call-template name="tokenannotations" /></span>
+<span id="{@xml:id}" class="word"><span class="t"><xsl:value-of select=".//folia:t[1]"/></span><xsl:call-template name="tokenannotations" /></span>
 <xsl:choose>
    <xsl:when test="@space = 'no'"></xsl:when>
    <xsl:otherwise>
@@ -176,50 +289,42 @@
 </xsl:template>
 
 <xsl:template name="tokenannotations">
- <div id="TOKENANNOTATIONS.{@xml:id}" class="tokenannotations">
-    <dl>
-        <dt>ID</dt>
-        <dd><xsl:value-of select="@xml:id" /></dd>        
-        <xsl:if test="folia:phon">
-            <dt>Phonetics</dt>
-            <dd><xsl:value-of select="folia:phon/@class" /></dd>
-        </xsl:if>
+ <span class="attributes">
+ 	<span class="attrlabel">ID</span><span class="attrvalue"><xsl:value-of select="@xml:id" /></span><br />
+	<xsl:if test="folia:phon">
+        	<span class="attrlabel">Phonetics</span><span class="attrvalue"><xsl:value-of select="folia:phon/@class" /></span><br />
+    </xsl:if>
         <xsl:if test="folia:pos">
-            <dt>PoS</dt>
-            <dd><xsl:value-of select="folia:pos/@class" /></dd>
+        	<span class="attrlabel">PoS</span><span class="attrvalue"><xsl:value-of select="folia:pos/@class" /></span><br />
         </xsl:if>
         <xsl:if test="folia:lemma">
-            <dt>Lemma</dt>
-            <dd><xsl:value-of select="folia:lemma/@class" /></dd>
+			<span class="attrlabel">Lemma</span><span class="attrvalue"><xsl:value-of select="folia:lemma/@class" /></span><br />
         </xsl:if>
         <xsl:if test="folia:sense">
-            <dt>Sense</dt>
-            <dd><xsl:value-of select="folia:sense/@class" /></dd>
+			<span class="attrlabel">Sense</span><span class="attrvalue"><xsl:value-of select="folia:sense/@class" /></span><br />
         </xsl:if>
         <xsl:if test="folia:subjectivity">
-            <dt>Subjectivity</dt>
-            <dd><xsl:value-of select="folia:subjectivity/@class" /></dd>
+			<span class="attrlabel">Subjectivity</span><span class="attrvalue"><xsl:value-of select="folia:subjectivity/@class" /></span><br />
         </xsl:if>
         <xsl:if test="folia:errordetection[@errors='yes']">
-            <dt>Error detection</dt>
-            <dd class="errors">There may be errors!</dd>
+			<span class="attrlabel">Error detection</span><span class="attrvalue">Possible errors</span><br />        
         </xsl:if>
         <xsl:if test="folia:correction">
             <xsl:if test="folia:correction/folia:suggestion/folia:t">
-                <dt>Suggestion(s) for text correction</dt>
-                <xsl:for-each select="folia:correction/folia:suggestion/folia:t">
-                    <dd><xsl:value-of select="." /></dd>
-                </xsl:for-each>
+            	<span class="attrlabel">Suggestion(s) for text correction</span><span class="attrvalue"><xsl:for-each select="folia:correction/folia:suggestion/folia:t">
+                    <em><xsl:value-of select="." /></em><xsl:text> </xsl:text>
+                </xsl:for-each></span><br />        
             </xsl:if>
             <xsl:if test="folia:correction/folia:original/folia:t">
-                <dt>Original pre-corrected text</dt>
+            	<span class="attrlabel">Original pre-corrected text</span>
+            	<span class="attrvalue">                
                 <xsl:for-each select="folia:correction/folia:original/folia:t[1]">
-                    <dd class="errors"><xsl:value-of select="." /></dd>
-                </xsl:for-each>                
+                    <em><xsl:value-of select="." /></em><xsl:text> </xsl:text>
+                </xsl:for-each>      
+                </span><br />            
             </xsl:if>            
         </xsl:if>
-    </dl>
- </div>
+ </span>
 </xsl:template>
 
 <xsl:template match="folia:whitespace">

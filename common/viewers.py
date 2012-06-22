@@ -98,7 +98,7 @@ class FoLiAViewer(AbstractViewer):
     name = "FoLiA Viewer"
 
     def view(self, file, **kwargs):
-        xslfile = "static/folia.xsl"
+        xslfile = os.path.dirname(clam.__file__) + "/../static/folia.xsl"
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
@@ -113,7 +113,7 @@ class SoNaRViewer(AbstractViewer):
     name = "SoNaR Viewer"
 
     def view(self, file, **kwargs):
-        xslfile = "static/sonar.xsl"
+        xslfile = os.path.dirname(clam.__file__) + "/../static/sonar.xsl"
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
