@@ -52,15 +52,15 @@ else:
     HOST = 'webservices.ticc.uvt.nl'
     PORT = 80
     URLPREFIX = 'ucto'
-    WEBSERVICEGHOST = 'ws'
-    REALM = 'CLAM-TICC'
-    USERS_MYSQL = {
-        'host': 'stheno.uvt.nl',
-        'user': 'clamopener',
-        'password': '',
-        'database': 'clamopener',
-        'table': 'clamusers_clamusers',        
-    }
+    #WEBSERVICEGHOST = 'ws'
+    #REALM = 'CLAM-TICC'
+    #USERS_MYSQL = {
+    #    'host': 'stheno.uvt.nl',
+    #    'user': 'clamopener',
+    #    'password': '',
+    #    'database': 'clamopener',
+    #    'table': 'clamusers_clamusers',        
+    #}
     
 
 
