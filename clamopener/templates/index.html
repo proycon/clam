@@ -20,7 +20,14 @@
               {% for service in services %}
                 <tr>
                     <td class="colname"><a href="{{ service.url }}">{{ service.name }}</a></td>
-                    <td class="coldesc">{{ service.description }}<br /><br /><a href="{{ service.url }}">{{ service.url }}</a></td>                
+                    <td class="coldesc">{{ service.description }}
+                    <br /><br />
+                    Webservice: <a href="{{ service.url }}">{{ service.url }}</a>
+                    <br /><br />
+                    {% if service.website %} 
+                    Homepage: <a href="{{ service.website }}">{{ service.website }}</a>
+                    {% endif %}
+                    </td>
                 </tr>
               {% endfor %}
               </table>
