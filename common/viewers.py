@@ -20,6 +20,7 @@ from urllib import urlencode
 import os.path
 from lxml import etree
 import csv
+from StringIO import StringIO
 
 class AbstractViewer(object):
 
@@ -103,7 +104,7 @@ class FoLiAViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        xml_doc = etree.parse("".join(file.readlines()))
+        xml_doc = etree.parse(StringIO("".join(file.readlines())))
 
         return str(transform(xml_doc))
 
@@ -118,7 +119,7 @@ class SoNaRViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        xml_doc = etree.parse("".join(file.readlines()))
+        xml_doc = etree.parse(StringIO("".join(file.readlines())))
 
         return str(transform(xml_doc))
 
