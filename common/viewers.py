@@ -105,7 +105,7 @@ class FoLiAViewer(AbstractViewer):
 
         #f = file.open()
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
-
+        web.header('Content-Type', 'text/html')
         return str(transform(xml_doc))
 
 
@@ -120,7 +120,7 @@ class SoNaRViewer(AbstractViewer):
 
         #f = file.open()
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
-
+        web.header('Content-Type', 'text/html')
         return str(transform(xml_doc))
 
 
