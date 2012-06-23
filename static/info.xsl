@@ -155,8 +155,18 @@ data = clamclient.get(project)
 clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilename)
 
 
-<em>#Start project execution with custom parameters. Parameters are specified as keyword arguments, the following are available:</em>
+<em>#Start project execution with custom parameters. Parameters are specified as Python keyword arguments <tt>(parameterid=value)</tt></em>
+<xsl:for-each select="//parameters/parametergroup/*">
+<em>#<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
+<xsl:if test="name() = 'ChoiceParameter'">
+	<em>#	valid choices for this parameter: </em>
+	<xsl:for-each select="choice">
+		<em>#	<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em> 
+	</xsl:for-each>	
+</xsl:if>
+</xsl:for-each>
 data = clamclient.start(project)
+
 
 <em>#Always check for parameter errors! Don't just assume everything went well! Use startsafe() instead of start</em>
 <em>#to simply raise exceptions on parameter errors.</em>
