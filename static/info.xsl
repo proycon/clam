@@ -311,7 +311,7 @@ clamclient.delete(project)
 	</li>
 </xsl:template>
 
-<xsl:template match="converter|viewer|project">
+<xsl:template match="converter|viewer|project|meta|inputsource">
 </xsl:template>
 
 </xsl:stylesheet>
