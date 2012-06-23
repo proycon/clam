@@ -158,7 +158,7 @@ clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilenam
 <em>#Start project execution with custom parameters. Parameters are specified as Python keyword arguments <tt>(parameterid=value)</tt></em>
 <xsl:for-each select="//parameters/parametergroup/*">
 <em>#<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
-<xsl:if test="@required = 'yes'">
+<xsl:if test="@required = 'true'">
 	<em>#	this parameter is REQUIRED! </em>	
 </xsl:if>
 <xsl:if test="name() = 'ChoiceParameter'">
@@ -167,7 +167,7 @@ clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilenam
 		<em>#	<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em> 
 	</xsl:for-each>	
 </xsl:if>
-<xsl:if test="@multi = 'yes'">
+<xsl:if test="@multi = 'true'">
 	<em>#	Multiple choices may be combined for this parameter </em>	
 </xsl:if>
 </xsl:for-each>
@@ -312,10 +312,10 @@ clamclient.delete(project)
 
 <xsl:template match="ChoiceParameter|choiceparameter">  <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (multiple-choice parameter) -  <xsl:value-of select="@description" />
-	<xsl:if test="@required = 'yes'">
+	<xsl:if test="@required = 'true'">
 		<strong>Note: This is a required parameter!</strong>
 	</xsl:if>		
-	<xsl:if test="@multi = 'yes'">
+	<xsl:if test="@multi = 'true'">
 		<strong>Note: Multiple values may be specified similtaneously for this parameter</strong>
 	</xsl:if>
 	<br />Available value choices:		
