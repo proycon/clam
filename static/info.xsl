@@ -123,7 +123,7 @@
     	<div class="box">
     	 <h3>CLAM Client API for Python</h3>
     	 <p>
-    	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a skeleton Python script you can use as a template for your client to communicate with this webservice:
+    	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a <em>skeleton</em> Python script you can use as a <em>template</em> for your client to communicate with this webservice.
     	 </p>
     	 
 <pre class="pythoncode">
