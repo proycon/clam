@@ -135,13 +135,14 @@
 <strong>import</strong> sys
 <strong>import</strong> time
 
-<em>#create client, connect to server, url is the full URL to the base of your webservice.</em>
-clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>")
+<em>#create client, connect to server.</em>
+<em>#the latter two arguments are required for authenticated webservices, they can be omitted otherwise</em>
+clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
 
 <em>#Set a project name (it is recommended to include a sufficiently random naming component here, to allow for concurrent uses of the same client)</em>
 project = "projectname" + str(random.getrandbits(64))
 
-<em>#Now we call the webservice and create the project (in this and subsequent methods of clamclient, exceptions will be raised on errors)</em>
+<em>#Now we call the webservice and create the project (in this and subsequent methods of clamclient, exceptions will be raised on errors).</em>
 clamclient.create(project)
 
 <em>#Get project status and specification</em>
