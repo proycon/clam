@@ -148,14 +148,31 @@ clamclient.create(project)
 data = clamclient.get(project)
 
 
-<em>#Add one or more input files according to a specific input template. The following input templates are defined:</em>
+<em>#Add one or more input files according to a specific input template. The following input templates are defined,</em>
+<em>each may allow for extra parameters to be specified, this is done in the form of Python keyword arguments to the <tt>addinputfile()</tt> method, (parameterid=value)</em>
 <xsl:for-each select="//InputTemplate">
 <em>#inputtemplate="<xsl:value-of select="@id" />" #<xsl:value-of select="@label" /> (<xsl:value-of select="@format" />)</em>
+<em>#	The following parameters may be specified for this input template:</em>
+<xsl:for-each select="./*">
+<em>#		<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
+<xsl:if test="@required = 'true'">
+	<em>#		this parameter is REQUIRED! </em>	
+</xsl:if>
+<xsl:if test="name() = 'ChoiceParameter'">
+	<em>#		valid choices for this parameter: </em>
+	<xsl:for-each select="choice">
+		<em>#			<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em> 
+	</xsl:for-each>	
+</xsl:if>
+<xsl:if test="@multi = 'true'">
+	<em>#		Multiple choices may be combined for this parameter as a comma separated list </em>	
+</xsl:if>
+</xsl:for-each>
 </xsl:for-each>
 clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilename)
 
 
-<em>#Start project execution with custom parameters. Parameters are specified as Python keyword arguments <tt>(parameterid=value)</tt></em>
+<em>#Start project execution with custom parameters. Parameters are specified as Python keyword arguments to the <tt>start()</tt> method <tt>(parameterid=value)</tt></em>
 <xsl:for-each select="//parameters/parametergroup/*">
 <em>#<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
 <xsl:if test="@required = 'true'">
@@ -168,7 +185,7 @@ clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilenam
 	</xsl:for-each>	
 </xsl:if>
 <xsl:if test="@multi = 'true'">
-	<em>#	Multiple choices may be combined for this parameter </em>	
+	<em>#	Multiple choices may be combined for this parameter as a comma separated list </em>	
 </xsl:if>
 </xsl:for-each>
 data = clamclient.start(project)
@@ -316,7 +333,7 @@ clamclient.delete(project)
 		<strong>Note: This is a required parameter!</strong>
 	</xsl:if>		
 	<xsl:if test="@multi = 'true'">
-		<strong>Note: Multiple values may be specified similtaneously for this parameter</strong>
+		<strong>Note: Multiple values may be combined for this parameter as a comma separated list</strong>
 	</xsl:if>
 	<br />Available value choices:		
 	<ul>
