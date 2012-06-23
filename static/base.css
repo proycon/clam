@@ -293,3 +293,24 @@ button#openeditor {
 #toggleinputfiles {
     float: right;
 }
+
+pre.pythoncode em {
+	color: #2f7b11;
+	display: block;
+	margin: 0px; 
+}
+
+pre.pythoncode strong {
+}
+
+#restspec tt {
+	color: #4b6f4a;
+	font-weight: bold;	
+}
+#restspec ol>li {
+	margin-top: 10px;
+}
+#restspec tt em {
+	color: #818252;	
+	
+}

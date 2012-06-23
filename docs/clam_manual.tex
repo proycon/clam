@@ -757,9 +757,12 @@ This section will be expanded at a later stage
 
 \chapter{Documentation for Service Clients}
 
-Being a RESTful webservice, automated clients can communicate with CLAM. In writing such clients, python users can benefit from the CLAM Client API, which in addition to the CLAM Data API provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Of course clients can also be written without the Client API, and in other programming languages. For this refer to Appendix~\ref{ap:restspec}, which provides a full specification of the RESTful API.
+CLAM is designed as a RESTful webservice, which implies that usage of the four HTTP verbs (GET/POST/PUT/DELETE) on pre-defined URLs is how you can communicate with a CLAM webservice. The webservice will in turn respond with standard HTTP response codes and, where applicable, in CLAM XML format.
 
-Whereever possible, the CLAM Client API returns a CLAMData instance as response.
+When writing a client for a CLAM webservice, Python users benefit greatly from the CLAM Client API, which in addition to the CLAM Data API provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Both are shipped as an integral part of CLAM by default. Using this API greatly facilitates writing a client for your webservice in a limited amount of time, so it is an approach to be recommended. Nevertheless, there are many valid reasons one might wish to write a client from scratch, not least as this allows you to use any programming language of your choice, or better integrate a CLAM webservice as a part of an existing application.
+
+Appendix~\ref{ap:restspec} of this documentation provides a full specification of the RESTful API, which will provide the technical details necessary for an implementation of a client.
+
 
 Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/~mvgompel/clamapi}/.
 

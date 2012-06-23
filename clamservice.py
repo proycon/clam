@@ -53,7 +53,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.7.8'
+VERSION = '0.7.9'
 
 DEBUG = False
     
@@ -249,6 +249,7 @@ class CLAMService(object):
 
     urls = (
         settings.STANDALONEURLPREFIX + '/', 'Index',
+        settings.STANDALONEURLPREFIX + '/info/?', 'Info',
         settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -337,7 +338,33 @@ class Index(object):
 
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False)
+    
+class Info(object):    
+    GHOST = False
+    @RequireLogin(ghost=GHOST)
+    def GET(self, user = None):
+        """Get list of projects"""
+        projects = []
+        if not user: user = 'anonymous'
+        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
+            if os.path.isdir(f):
+                d = datetime.datetime.fromtimestamp(os.stat(f)[8])  
+                project = os.path.basename(f)
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+
+        errors = "no"
+        errormsg = ""
+
+        corpora = CLAMService.corpusindex()
+
+        render = web.template.render(settings.CLAMDIR + '/templates')
+
+
+        web.header('Content-Type', "text/xml; charset=UTF-8")
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True)
+    
+
         
 
 def getrooturl():
@@ -1532,6 +1559,8 @@ class ProjectGhost(Project):
 class IndexGhost(Index):
     GHOST=True
 
+class InfoGhost(Info):
+    GHOST=True
         
 #class Uploader(object): #OBSOLETE!
 
@@ -1890,6 +1919,7 @@ def set_defaults(HOST = None, PORT = None):
     elif settings.WEBSERVICEGHOST:
         CLAMService.urls = (
             settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
+            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/info/?', 'InfoGhost',
             settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',    
             settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandlerGhost', #(also handles viewers, convertors, metadata, and archive download
             settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandlerGhost',
