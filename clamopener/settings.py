@@ -62,25 +62,25 @@ else:
         {
             'url': 'http://'  + DOMAIN + '/ucto/',
             'name': 'Ucto Tokeniser',
-            'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
+            'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages.",
             'website': 'http://ilk.uvt.nl/ucto/',
         },    
         {
             'url': 'http://'  + DOMAIN + '/frog/',
             'name': 'Frog',
-            'description': "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+            'description': "Frog is a suite containing a tokeniser, PoS-tagger, lemmatiser, morphological analyser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole.",
             'website': 'http://ilk.uvt.nl/frog/',
         },      
         {
             'url': 'http://'  + DOMAIN + '/valkuil/',
             'name': 'Valkuil',
-            'description': "Valkuil is a Dutch spelling-corrector system."
+            'description': "Valkuil is a Dutch spelling-corrector system.",
             'website': 'http://valkuil.net',
         },     
         {
             'url': 'http://'  + DOMAIN + '/oersetter/',
             'name': 'Oersetter',
-            'description': "Oersetter is a Frisian-Dutch, Dutch-Frisian Machine Translation system"
+            'description': "Oersetter is a Frisian-Dutch, Dutch-Frisian Machine Translation system",
             'website': 'http://oersetter.nl',
         },     
     ]
