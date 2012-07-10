@@ -80,16 +80,17 @@ while not done:
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
-            print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + str(d)+"s) "
+            print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s) "
             done = True
             break    
     except OSError: #no such process
-        print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + str(d)+"s)"
+        print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s)"
         statuscode = 1
         done = True        
         break         
 
     if done: break    
+    
     abortchecktime += d
     if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
         abortchecktime = 0                
