@@ -676,11 +676,11 @@ class Project(object):
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
                                                 
-
-        if not sufficientresources():            
-            printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAIABLE ***")
+        sufresources, resmsg = sufficientresources()
+        if not sufresources:            
+            printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
             #TODO: Use 503 instead of 500 (but 503 not implemented in web.py)
-            raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. Please try again later.")
+            raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.")
 
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
@@ -1820,7 +1820,7 @@ def sufficientresources():
                     cached = float(line[9:].replace('kB','').strip()) #in kB
             f.close()
             if settings.REQUIREMEMORY * 1024 > memfree + cached:
-                return False                                
+                return False, str(settings.REQUIREMEMORY * 1024) + " kB memory is required but only " + str(memfree + cached) + " is available."                            
     if settings.MAXLOADAVG > 0:
         if not os.path.exists('/proc/loadavg'):
             printlog("WARNING: No /proc/loadavg available on your system! Not Linux? Skipping load average check!")
@@ -1830,7 +1830,7 @@ def sufficientresources():
             loadavg = float(line.split(' ')[0])
             f.close()
             if settings.MAXLOADAVG < loadavg:
-                return False
+                return False, "System load too high: " + str(loadavg) + ", max is " + str(setting.MAXLOADAVG)   
     if settings.MINDISKSPACE and settings.DISK:
         dffile = '/tmp/df.' + str("%034x" % random.getrandbits(128))
         ret = os.system('df -m ' + settings.DISK + " | gawk '{ print $4; }'  > " + dffile)
@@ -1841,14 +1841,14 @@ def sufficientresources():
                 f.close()
                 if free < settings.MINDISKFREE:
                     os.unlink(dffile)
-                    return False
+                    return False, "Not enough diskspace, " + str(free) + " MB free, need at least " + str(settings.MINDISKFREE) + " MB"
             except:
                 printlog("WARNING: df " + settings.DISK + " failed (unexpected format). Skipping disk space check!")                                                
                 os.unlink(dffile)
 
         else:
             printlog("WARNING: df " + settings.DISK + " failed. Skipping disk space check!")        
-    return True
+    return True, ""
         
 
 
