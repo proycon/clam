@@ -56,7 +56,7 @@ process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
 begintime = datetime.datetime.now()
 if process:
     pid = process.pid
-    print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid)
+    print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")"
     sys.stderr.flush()
     f = open(projectdir + '.pid','w')
     f.write(str(pid))
@@ -75,8 +75,7 @@ idle = 0
 done = False
 
 while not done:    
-    duration = datetime.datetime.now() - begintime
-    d = duration.microseconds / 1000000.0    
+    d = (datetime.datetime.now() - begintime).total_seconds()        
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
@@ -122,7 +121,7 @@ f.write(str(statuscode))
 f.close()
 os.unlink(projectdir + '.pid')
 
-d = duration.microseconds / 1000000.0  
+d = (datetime.datetime.now() - begintime).total_seconds()
 print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s"
  
 sys.exit(statuscode)
