@@ -72,19 +72,24 @@ else:
 #intervalf = lambda s: min(s/10.0, 15)
 abortchecktime = 0
 idle = 0
+done = False
 
-while True:    
+while not done:    
     duration = datetime.datetime.now() - begintime
-    d = duration.microseconds / 1000000.0
+    d = duration.microseconds / 1000000.0    
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
             print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + str(d)+"s) "
-            break
+            done = True
+            break    
     except OSError: #no such process
         print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + str(d)+"s)"
         statuscode = 1
+        done = True        
         break         
+
+    if done: break    
     abortchecktime += d
     if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
         abortchecktime = 0                
