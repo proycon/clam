@@ -74,8 +74,11 @@ abortchecktime = 0
 idle = 0
 done = False
 
+def total_seconds(delta):
+    return delta.days * 86400 + delta.seconds + (delta.microseconds / 1000000.0)
+
 while not done:    
-    d = (datetime.datetime.now() - begintime).total_seconds()        
+    d = total_seconds(datetime.datetime.now() - begintime)        
     try:
         returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
         if returnedpid != 0:
@@ -121,7 +124,7 @@ f.write(str(statuscode))
 f.close()
 os.unlink(projectdir + '.pid')
 
-d = (datetime.datetime.now() - begintime).total_seconds()
+d = total_seconds(datetime.datetime.now() - begintime)
 print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s"
  
 sys.exit(statuscode)
