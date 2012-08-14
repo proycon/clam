@@ -1830,7 +1830,7 @@ def sufficientresources():
             loadavg = float(line.split(' ')[0])
             f.close()
             if settings.MAXLOADAVG < loadavg:
-                return False, "System load too high: " + str(loadavg) + ", max is " + str(settingS.MAXLOADAVG)   
+                return False, "System load too high: " + str(loadavg) + ", max is " + str(settings.MAXLOADAVG)   
     if settings.MINDISKSPACE and settings.DISK:
         dffile = '/tmp/df.' + str("%034x" % random.getrandbits(128))
         ret = os.system('df -m ' + settings.DISK + " | gawk '{ print $4; }'  > " + dffile)
