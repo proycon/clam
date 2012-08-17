@@ -81,7 +81,7 @@ for i, inputfile in enumerate(clamdata.inputfiles('foliainput')):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)))
     
     print >>sys.stderr,"Invoking Frog"                  
-    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -x " + str(inputfile) + " -X " + outputdir + os.path.basename(str(inputfile)) + " -o " + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
+    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -x '" + str(inputfile) + "' -X '" + outputdir + os.path.basename(str(inputfile)) + "' -o '" + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (FoLiA). Aborting"),100)
         sys.exit(1)    
