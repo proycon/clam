@@ -101,7 +101,36 @@ PROFILES = [
             copymetadata=True,
             multi=True,
         ),        
-    )
+    ),
+    Profile(
+        InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA XML document", 
+            multi=True,
+        ),
+        OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)",  #named 'mainoutput' for legacy reasons
+            SetMetaField('tokenisation','yes'),
+            SetMetaField('postagging','yes'),
+            SetMetaField('lemmatisation','yes'),
+            SetMetaField('morphologicalanalysis','yes'),
+            ParameterCondition(skip_contains='m',
+                then=SetMetaField('mwudetection','no'),
+                otherwise=SetMetaField('mwudetection','yes'), 
+            ),                        
+            ParameterCondition(skip_contains='p',
+                then=SetMetaField('parsing','no'),
+                otherwise=SetMetaField('parsing','yes'),
+            ),            
+            extension='.frog.out',
+            copymetadata=True,
+            multi=True,
+        ),
+        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",
+            FoLiAViewer(), 
+            extension='.xml',
+            copymetadata=True,
+            multi=True,
+        ),        
+    ),    
+    
 ]
 
 PARAMETERS =  [
