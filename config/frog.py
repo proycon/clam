@@ -125,7 +125,6 @@ PROFILES = [
         ),
         OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",
             FoLiAViewer(), 
-            extension='.xml',
             copymetadata=True,
             multi=True,
         ),        
