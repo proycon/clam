@@ -13,7 +13,7 @@ if not os.path.exists('clam'):
     if not os.path.exists('clam'): os.mkdir('clam')
     os.system('cp -Rpdfv ../*py ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
     os.system('mv -f clam/setup.py .')
-    os.system('cp -f clam/README clam/INSTALL clam/ChangeLog clam/COPYING .')  
+    os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')  
    
 
 def read(fname):
