@@ -56,36 +56,40 @@ if 'skip' in clamdata and clamdata['skip']:
 
 for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
-    
+        
     print >>sys.stderr,"Processing " + os.path.basename(str(inputfile)) + "..."
+    outputstem = os.path.basename(str(inputfile))
+    if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]     
     if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
         cmdoptions += ' -n'                
     if 'docid' in inputfile.metadata and inputfile.metadata['docid']:                
         docid = inputfile.metadata['docid']
         print >>sys.stderr,"\tDocID from metadata: " + docid
     else:        
-        docid = ".".join(os.path.basename(str(inputfile)).split('.')[:-1])
+        docid = outputstem
         print >>sys.stderr,"\tDocID from filename: " + docid                        
     docid = docid.replace(' ','-')
     docid = docid.replace("'",'')
     docid = docid.replace('"','')
     if not docid: 
         docid = 'untitled'
-    print >>sys.stderr,"Invoking Frog"                  
-    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + os.path.basename(str(inputfile)) + ".xml' -o '" + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
+        
+    print >>sys.stderr,"Invoking Frog"          
+    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (plain text). Aborting"),100)
         sys.exit(1)
 
 for i, inputfile in enumerate(clamdata.inputfiles('foliainput')):
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)))
+    outputstem = os.path.basename(str(inputfile))
+    if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]
     
     print >>sys.stderr,"Invoking Frog"                  
-    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -x '" + str(inputfile) + "' -X '" + outputdir + os.path.basename(str(inputfile)) + "' -o '" + outputdir + os.path.basename(str(inputfile)) + ".frog.out'")                    
+    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -x '" + str(inputfile) + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (FoLiA). Aborting"),100)
         sys.exit(1)    
-
 
 clam.common.status.write(statusfile, "Done",100)       
 
