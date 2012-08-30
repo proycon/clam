@@ -1594,7 +1594,7 @@ class OutputTemplate(object):
                                     filename = filename[:-len(ext)]
                                 
                                     
-                if self.extension and not self.filename:
+                if self.extension and not self.filename and filename[-len(self.extension) - 1:] != '.' + self.extension: #(also prevents duplicate extensions)
                     filename += '.' + self.extension   
                     
                 
