@@ -19,6 +19,9 @@ RelaxNG schema for CLAM XML
 
 <start>
 	<element name="clam" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/annotation/0.9">
+		<attribute name="id">
+		    <a:documentation>The ID of the webservice</a:documentation>
+		</attribute>	
 		<attribute name="version">
 		    <a:documentation>Defines the version of CLAM used</a:documentation>
 		</attribute>
@@ -48,15 +51,16 @@ RelaxNG schema for CLAM XML
 		        <zeroOrMore>
 		            <element name="project">
 		                <a:documentation>Link to one of the available projects.</a:documentation>
-		                <attribute name="type" xmlns="http://www.w3.org/1999/xlink">
+		                <attribute name="type" ns="http://www.w3.org/1999/xlink">
 		                    <a:documentation>XLink type, always "simple"</a:documentation>    
 		                </attribute>
-		                <attribute name="href" xmlns="http://www.w3.org/1999/xlink">
+		                <attribute name="href" ns="http://www.w3.org/1999/xlink">
 		                    <a:documentation>XLink reference to the URL of the project. URL holds the CLAM XML document for the project</a:documentation>    
 		                </attribute>                        
 		                <attribute name="time">
 		                    <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>    
-		                </attribute>
+		                </attribute>		                
+		                <text />
 		            </element>
 		        </zeroOrMore>
 		    </element>
@@ -204,12 +208,12 @@ RelaxNG schema for CLAM XML
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
 		                                </attribute>
 		                            </optional>   
-		                            <interleave>
-		                            	<zeroOrMore>
-		                            		<ref name="parametercondition" />
-		                            		<ref name="meta" />
-		                            	</zeroOrMore>
-									</interleave>                
+									<zeroOrMore>
+										<choice>
+											<ref name="parametercondition" />
+											<ref name="meta" />
+										</choice>
+									</zeroOrMore>            
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
 		                        </element>
 		                    </oneOrMore>
@@ -231,6 +235,12 @@ RelaxNG schema for CLAM XML
 		            </element>
 		        </zeroOrMore>
 		    </element>
+		    <optional>
+		    	<element name="inputsources">
+		    		<text />
+		    		<!-- TODO -->
+		    	</element>
+		    </optional>
 		</optional>        
 	</element>
 </start>
@@ -239,6 +249,10 @@ RelaxNG schema for CLAM XML
 <define name="parameters">
     <interleave>
      <zeroOrMore>
+      <element name="StaticParameter">
+         <a:documentation>A dummy parameter taking a fixed value</a:documentation>
+         <ref name="commonparameterattribs" />
+      </element>     
       <element name="BooleanParameter">
          <a:documentation>A parameter taking a boolean value</a:documentation>
          <ref name="commonparameterattribs" />
@@ -283,9 +297,13 @@ RelaxNG schema for CLAM XML
      			<attribute name="multi">
      				<a:documentation>Attribute expressing whether multiple choices are allowed similtaneously. Value can be 'true' or 'false'</a:documentation>
      			</attribute>
+     		</optional>
+     		<optional>
      			<attribute name="showall">
      				<a:documentation>Attribute affecting presentation, if set to 'true' options are presented as checkboxes or radiobuttons instead of a pull-down list.</a:documentation>
      			</attribute>
+     		</optional>
+			<optional>     		
      			<attribute name="delimiter">
      				<a:documentation>The delimiter between multiple values, as propagated to the command line. Only applicable if multi=true</a:documentation>
      			</attribute>
@@ -338,17 +356,19 @@ RelaxNG schema for CLAM XML
 	  	<attribute name="id">
 			<a:documentation>The ID of the metadata field</a:documentation>
 		</attribute>
-		<attribute name="operator">
-			<a:documentation>The operator for this metadata field. Can be 'set' in which case the value of the metadata field is simply set to the value specified in textbody of this element. If set to 'unset', the body should be empty and it will unset this metadata field if present. If set to 'copy', the body contains the ID of a parameter from the inputtemplate in the form templateid.parameterid , whose value will be copied. If set to 'parameter', the body contains the ID of a global parameter, whose value will be copied. The default operator is 'set', in which case the operator attribute can be simply omitted.</a:documentation>
-		</attribute>
+		<optional>
+			<attribute name="operator">
+				<a:documentation>The operator for this metadata field. Can be 'set' in which case the value of the metadata field is simply set to the value specified in textbody of this element. If set to 'unset', the body should be empty and it will unset this metadata field if present. If set to 'copy', the body contains the ID of a parameter from the inputtemplate in the form templateid.parameterid , whose value will be copied. If set to 'parameter', the body contains the ID of a global parameter, whose value will be copied. The default operator is 'set', in which case the operator attribute can be simply omitted.</a:documentation>
+			</attribute>
+		</optional>
 		<text />
 	</element>
 </define>
 
 
-<define name="conditions">
-	<interleave>
-		<oneOrMore>
+<define name="conditions">		
+	<oneOrMore>
+		<choice>
 			<element name="equals">
 				<a:documentation>A condition that matches if the parameter's value equals the value of this element.</a:documentation>
 			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
@@ -374,7 +394,7 @@ RelaxNG schema for CLAM XML
 			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
 			  	<text />
 			</element>
-				<element name="greaterequalthan">
+			<element name="greaterequalthan">
 				<a:documentation>A condition that matches if the parameter's value is greater or equal than the value of this element.</a:documentation>
 			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
 			  	<text />
@@ -393,8 +413,8 @@ RelaxNG schema for CLAM XML
 				<a:documentation>Create a disjunction of conditions</a:documentation>
 				<ref name="conditions" />
 			</element>
-		</oneOrMore>
-	</interleave>
+		</choice>
+	</oneOrMore>		
 </define>
 
 <define name="parametercondition">	
@@ -406,22 +426,25 @@ RelaxNG schema for CLAM XML
 		</element>
 		<element name="then">
 		<a:documentation>Meta fields or further parameter conditions to apply when the conditions match</a:documentation>
-			<oneOrMore>
-				<ref name="parametercondition" />
-				<ref name="meta" />
-			</oneOrMore> 
+			<zeroOrMore>
+				<choice>
+					<ref name="parametercondition" />
+					<ref name="meta" />
+				</choice>
+			</zeroOrMore>
 		</element>
 		<optional>			
 			<element name="else">
 				<a:documentation>Meta fields or further parameter conditions to apply when the conditions do not match</a:documentation>
-				<oneOrMore>
-					<ref name="parametercondition" />
-					<ref name="meta" />
-				</oneOrMore>
+				<zeroOrMore>
+					<choice>
+						<ref name="parametercondition" />
+						<ref name="meta" />
+					</choice>
+				</zeroOrMore>
 			</element>
 		</optional>
 	</element>
 </define>
 
-<!-- TODO: SCHEMA STILL IN DEVELOPMENT - NOT FINISHED YET! -->
 </grammar>
