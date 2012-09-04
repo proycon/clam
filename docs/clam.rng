@@ -143,6 +143,7 @@ RelaxNG schema for CLAM XML
 		                                </attribute>
 		                            </optional>                                
 		                            <ref name="parameters" />
+		                            <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->
 		                            <zeroOrMore>
 		                                <element name="converter">
 		                                    <a:documentation>Makes a converter available for this specific input template. The text content of this element is the label users see when choosing a converter.</a:documentation>
@@ -203,8 +204,8 @@ RelaxNG schema for CLAM XML
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
 		                                </attribute>
 		                            </optional>   
-		                            <ref name="parameters" />
-		                            <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->                         
+		                            
+		                            <!-- TODO: META tags -->                         
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
 		                        </element>
 		                    </oneOrMore>
