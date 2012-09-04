@@ -204,8 +204,12 @@ RelaxNG schema for CLAM XML
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
 		                                </attribute>
 		                            </optional>   
-		                            
-		                            <!-- TODO: META tags -->                         
+		                            <interleave>
+		                            	<zeroOrMore>
+		                            		<ref name="parametercondition" />
+		                            		<ref name="meta" />
+		                            	</zeroOrMore>
+									</interleave>                
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
 		                        </element>
 		                    </oneOrMore>
@@ -326,6 +330,97 @@ RelaxNG schema for CLAM XML
             <a:documentation>If an error occurred validating this parameter, this will hold the error message</a:documentation>
         </attribute>            
     </optional>    
+</define>
+
+<define name="meta">
+	<element name="meta">
+		<a:documentation>A metadata field for the output template</a:documentation>
+	  	<attribute name="id">
+			<a:documentation>The ID of the metadata field</a:documentation>
+		</attribute>
+		<attribute name="operator">
+			<a:documentation>The operator for this metadata field. Can be 'set' in which case the value of the metadata field is simply set to the value specified in textbody of this element. If set to 'unset', the body should be empty and it will unset this metadata field if present. If set to 'copy', the body contains the ID of a parameter from the inputtemplate in the form templateid.parameterid , whose value will be copied. If set to 'parameter', the body contains the ID of a global parameter, whose value will be copied. The default operator is 'set', in which case the operator attribute can be simply omitted.</a:documentation>
+		</attribute>
+		<text />
+	</element>
+</define>
+
+
+<define name="conditions">
+	<interleave>
+		<oneOrMore>
+			<element name="equals">
+				<a:documentation>A condition that matches if the parameter's value equals the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>
+			<element name="notequals">
+				<a:documentation>A condition that matches if the parameter's value does not equal the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>			
+			<element name="lessthan">
+				<a:documentation>A condition that matches if the parameter's value is less than the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>
+			<element name="lessequalthan">
+				<a:documentation>A condition that matches if the parameter's value is less or equal than the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>	
+			<element name="greaterthan">
+				<a:documentation>A condition that matches if the parameter's value is greater than the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>
+				<element name="greaterequalthan">
+				<a:documentation>A condition that matches if the parameter's value is greater or equal than the value of this element.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>
+			<element name="contains">
+				<a:documentation>A condition that matches if the parameter's value contains the value of this element. Useful for applying to choice parameters.</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>			
+			<element name="set">
+				<a:documentation>YET TO BE DOCUMENTED</a:documentation>
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<text />
+			</element>				
+			<element name="disjunction">
+				<a:documentation>Create a disjunction of conditions</a:documentation>
+				<ref name="conditions" />
+			</element>
+		</oneOrMore>
+	</interleave>
+</define>
+
+<define name="parametercondition">	
+	<element name="parametercondition">
+		<a:documentation>A parametercondition conditions metadata for outputtemplate on global parameters or parameters from input templates</a:documentation>
+		<element name="if">
+			<a:documentation>One or more conditions, applied conjunctively</a:documentation>
+			<ref name="conditions" />
+		</element>
+		<element name="then">
+		<a:documentation>Meta fields or further parameter conditions to apply when the conditions match</a:documentation>
+			<oneOrMore>
+				<ref name="parametercondition" />
+				<ref name="meta" />
+			</oneOrMore> 
+		</element>
+		<optional>			
+			<element name="else">
+				<a:documentation>Meta fields or further parameter conditions to apply when the conditions do not match</a:documentation>
+				<oneOrMore>
+					<ref name="parametercondition" />
+					<ref name="meta" />
+				</oneOrMore>
+			</element>
+		</optional>
+	</element>
 </define>
 
 <!-- TODO: SCHEMA STILL IN DEVELOPMENT - NOT FINISHED YET! -->
