@@ -1,213 +1,234 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<element name="clam" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/annotation/0.9">
-    <attribute name="version">
-        <a:documentation>Defines the version of CLAM used</a:documentation>
-    </attribute>
-    <attribute name="baseurl">
-        <a:documentation>Defines the root URL of the CLAM service</a:documentation>
-    </attribute>
-    <attribute name="name">
-        <a:documentation>Defines a human readable name of the CLAM service</a:documentation>
-    </attribute>
-    <optional>
-        <attribute name="user">
-            <a:documentation>The username of the logged-in user. Defaults to 'anonymous' if no authentication is enabled.</a:documentation>
-        </attribute>
-    </optional>
-    <optional>
-        <attribute name="project">
-            <a:documentation>The ID of the project this CLAM document is representing. If not present, then the CLAM XML file represents a more general state of the system and provides a listing of projects</a:documentation>
-        </attribute>
-    </optional>
-    <element name="description">
-        <a:documentation>A human readable description of the service.</a:documentation>
-        <text />
-    </element>
-    <optional>
-        <element name="projects">
-            <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>
-            <zeroOrMore>
-                <element name="project">
-                    <a:documentation>Link to one of the available projects.</a:documentation>
-                    <attribute name="type" xmlns="http://www.w3.org/1999/xlink">
-                        <a:documentation>XLink type, always "simple"</a:documentation>    
-                    </attribute>
-                    <attribute name="href" xmlns="http://www.w3.org/1999/xlink">
-                        <a:documentation>XLink reference to the URL of the project. URL holds the CLAM XML document for the project</a:documentation>    
-                    </attribute>                        
-                    <attribute name="time">
-                        <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>    
-                    </attribute>
-                </element>
-            </zeroOrMore>
-        </element>
-    </optional>
-    <optional>
-        <element name="status">
-            <a:documentation>Provides the status of a project</a:documentation>
-            <attribute name="code">
-                <a:documentation>The status code represents the state the project is in: 0 = staging, accepting input, 1 = running, 2 = completed, presenting output<a:documentation>
-            </attribute>
-            <attribute name="message">
-                <a:documentation>A human-readable description of the global status (depending on the status code)</a:documentation>
-            </attribute>
-            <attribute name="completion">
-                <a:documentation>An integer value between 0 and 100 representing the level of completion of the run. Differs only when the project is in state 1. In state 0, value is always 0. In state 2, value is always 100.</a:documentation>
-            </attribute>
-            <attribute name="errors">
-                <a:documentation>Indicates whether an error occured. Value is "yes" or "no". Your system should always check if "no" was returned when expected! Otherwise there may be parameter errors, the exact errors can then be found in the parameters block.</a:documentation>
-            </attribute>
-            <attribute name="errormsg">
-                <a:documentation>A human readable error message. Empty if no errors occurred.<a:documentation>
-            </attribute>
-            <zeroOrMore>
-                <element name="log">
-                    <a:documentation>Contains a log message from the actual underlying system. The element body contains the log message text.<a:documentation>
-                    <attribute name="completion">
-                        <a:documentation>An integer value between 0 and 100 representing the level of completion at the time of loggin. Differs only when the project is in state 1. In state 0, value is always 0. In state 2, value is always 100.</a:documentation>
-                    </attribute>   
-                    <attribute name="time">
-                        <a:documentation>Time of the log message. Free format.</a:documentation>    
-                    </attribute>                 
-                    <text />
-                <element>
-            <zeroOrMore>
-        </element>
-    </optional>
-    <optional>
-        <element name="profiles">
-            <a:documentation>Specifies the profiles accepted by this webservice. Profiles describe the input that the system can take and the output it will produce given that input and the configured parameters.</a:documentation>    
-            <oneOrMore>
-                <element name="profile">
-                    <element name="input">
-                        <a:documentation>The input portion of a profile. Contains Input Templates. </a:documentation>    
-                        <zeroOrMore>
-                            <element name="InputTemplate">
-                                <a:documentation>An Input Template can be seen like an input 'slot' for a file of a particular type and with specific metadata.</a:documentation>                                 
-                                <attribute name="id">
-                                    <a:documentation>A unique identifier (string) for this input template</a:documentation>
-                                </attribute>                                   
-                                <attribute name="format">
-                                    <a:documentation>The format associated with this input slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
-                                </attribute>                                                                   
-                                <attribute name="label">
-                                    <a:documentation>The human readable label associated with this input template. Users use this information to select their desired input template in the interface, so it should be a clear label.</a:documentation>
-                                </attribute>             
-                                <optional>                                                                                      
-                                    <attribute name="mimetype">
-                                        <a:documentation>If there is a mime-type associated with the chosen format for this input template, it will be represented here.</a:documentation>
-                                    </attribute>                                                                                                                                   
-                                <optional>
-                                <optional>
-                                    <attribute name="schema">
-                                        <a:documentation>If there is a validation schema associated with the chosen format for this input template, it will be represented here.</a:documentation>
-                                    </attribute>                                                                                                                                   
-                                </optional>
-                                <optional>
-                                    <attribute name="filename">
-                                        <a:documentation>If set, any uploaded file for this input template will obtain this exact filename</a:documentation>
-                                    </attribute>
-                                </optional>
-                                <optional>
-                                    <attribute name="extension">
-                                        <a:documentation>If set, this is the extension that is required and automatically added for files uploaded using this input template</a:documentation>
-                                    </attribute>
-                                </optional>                                
-                                <optional>
-                                    <attribute name="optional">
-                                        <a:documentation>Boolean value set to "true" or "false", determining whether this input template must be used (false) for this profile to work or is optional (true)</a:documentation>
-                                    </attribute>
-                                </optional>                  
-                                <optional>
-                                    <attribute name="unique">
-                                        <a:documentation>Boolean value set to "true" or "false", determining whether this input template is unique and can only be used for uploading one file, or whether multiple files can be uploaded through this input template<a:documentation>
-                                    </attribute>
-                                </optional>                                
-                                <ref name="parameters">
-                                <zeroOrMore>
-                                    <element name="converter">
-                                        <a:documentation>Makes a converter available for this specific input template. The text content of this element is the label users see when choosing a converter.<a:documentation>
-                                        <attribute name="id">
-                                            <a:documentation>The ID of the converter.</a:documentation>
-                                        </attribute>
-                                        <text />
-                                    </element>
-                                </zeroOrMore>
-                                <zeroOrMore>
-                                    <element name="inputsource">
-                                        <a:documentation>Predefined input data that can go in this input template. The element text contains the label users will see when selecting a pre-defined input source<a:documentation>
-                                        <attribute name="id">
-                                            <a:documentation>The ID of the input source.</a:documentation>
-                                        </attribute>
-                                        <text />
-                                    </element>
-                                </zeroOrMore>
-                            </element>
-                        </zeroOrMore>
-                    </element>
-                    <element name="output">
-                        <a:documentation>The output portion of a profile. Contains Output Templates. </a:documentation>    
-                        <oneOrMore>
-                            <element name="OutputTemplate">
-                                <a:documentation>An Output Template can be seen like an output 'slot'. If all input conditions have been met, a file corresponding to each output template will be outputted.</a:documentation>                                 
-                                <attribute name="id">
-                                    <a:documentation>A unique identifier (string) for this output template</a:documentation>
-                                </attribute>                                   
-                                <attribute name="format">
-                                    <a:documentation>The format associated with this output slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
-                                </attribute>                                                                   
-                                <attribute name="label">
-                                    <a:documentation>The human readable label associated with this output template.</a:documentation>
-                                </attribute>             
-                                <optional>                                                                                      
-                                    <attribute name="mimetype">
-                                        <a:documentation>If there is a mime-type associated with the chosen format for this output template, it will be represented here.</a:documentation>
-                                    </attribute>                                                                                                                                   
-                                <optional>
-                                <optional>
-                                    <attribute name="schema">
-                                        <a:documentation>If there is a validation schema associated with the chosen format for this output template, it will be represented here.</a:documentation>
-                                    </attribute>                                                                                                                                   
-                                </optional>
-                                <optional>
-                                    <attribute name="filename">
-                                        <a:documentation>The exact filename of the output file produced by this template.</a:documentation>
-                                    </attribute>
-                                </optional>
-                                <optional>
-                                    <attribute name="extension">
-                                        <a:documentation>The extension that this output file will obtain, the other filename will be inherited from its input.</a:documentation>
-                                    </attribute>
-                                </optional>                                   
-                                <optional>
-                                    <attribute name="unique">
-                                        <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
-                                    </attribute>
-                                </optional>   
-                                <ref name="parameters">
-                                <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->                         
-                                <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
-                        </oneOrMore>
-                    </element>
-                </element>
-            </oneOrMore>
-        </element>
-        <element name="parameters">
-            <a:documentation>Specification of parameters to the system</a:documentation>
-            <zeroOrMore>
-                <element name="parametergroup">
-                    <a:documentation>Parameters must be grouped, allowing a nice division of different kinds of parameters</a:documentation>
-                    <attribute name="name">
-                        <a:documentation>A human readable name for the parameter group</a:documentation>
-                    </attribute>
-                    <zeroOrMore>
-                        
-                    </zeroOrMore>
-                </element>
-            </zeroOrMore>
-        </element>
-    </optional>        
-</element>
+
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/annotation/0.9">
+<!--
+RelaxNG schema for CLAM XML
+    by Maarten van Gompel
+	Centre for Language Studies
+	Radboud University
+    
+    http://ilk.uvt.nl/clam
+    http://github.com/proycon/clam   
+        
+    Validation examples:
+     $ xmllint ‒‒relaxng clam.rng clamresponse.xml     
+     $ jing clam.rng clamresponse.xml
+    
+    Licensed under the GNU General Public License v3
+-->
+
+<start>
+	<element name="clam" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/annotation/0.9">
+		<attribute name="version">
+		    <a:documentation>Defines the version of CLAM used</a:documentation>
+		</attribute>
+		<attribute name="baseurl">
+		    <a:documentation>Defines the root URL of the CLAM service</a:documentation>
+		</attribute>
+		<attribute name="name">
+		    <a:documentation>Defines a human readable name of the CLAM service</a:documentation>
+		</attribute>
+		<optional>
+		    <attribute name="user">
+		        <a:documentation>The username of the logged-in user. Defaults to 'anonymous' if no authentication is enabled.</a:documentation>
+		    </attribute>
+		</optional>
+		<optional>
+		    <attribute name="project">
+		        <a:documentation>The ID of the project this CLAM document is representing. If not present, then the CLAM XML file represents a more general state of the system and provides a listing of projects</a:documentation>
+		    </attribute>
+		</optional>
+		<element name="description">
+		    <a:documentation>A human readable description of the service.</a:documentation>
+		    <text />
+		</element>
+		<optional>
+		    <element name="projects">
+		        <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>
+		        <zeroOrMore>
+		            <element name="project">
+		                <a:documentation>Link to one of the available projects.</a:documentation>
+		                <attribute name="type" xmlns="http://www.w3.org/1999/xlink">
+		                    <a:documentation>XLink type, always "simple"</a:documentation>    
+		                </attribute>
+		                <attribute name="href" xmlns="http://www.w3.org/1999/xlink">
+		                    <a:documentation>XLink reference to the URL of the project. URL holds the CLAM XML document for the project</a:documentation>    
+		                </attribute>                        
+		                <attribute name="time">
+		                    <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>    
+		                </attribute>
+		            </element>
+		        </zeroOrMore>
+		    </element>
+		</optional>
+		<optional>
+		    <element name="status">
+		        <a:documentation>Provides the status of a project</a:documentation>
+		        <attribute name="code">
+		            <a:documentation>The status code represents the state the project is in: 0 = staging, accepting input, 1 = running, 2 = completed, presenting output</a:documentation>
+		        </attribute>
+		        <attribute name="message">
+		            <a:documentation>A human-readable description of the global status (depending on the status code)</a:documentation>
+		        </attribute>
+		        <attribute name="completion">
+		            <a:documentation>An integer value between 0 and 100 representing the level of completion of the run. Differs only when the project is in state 1. In state 0, value is always 0. In state 2, value is always 100.</a:documentation>
+		        </attribute>
+		        <attribute name="errors">
+		            <a:documentation>Indicates whether an error occured. Value is "yes" or "no". Your system should always check if "no" was returned when expected! Otherwise there may be parameter errors, the exact errors can then be found in the parameters block.</a:documentation>
+		        </attribute>
+		        <attribute name="errormsg">
+		            <a:documentation>A human readable error message. Empty if no errors occurred.</a:documentation>
+		        </attribute>
+		        <zeroOrMore>
+		            <element name="log">
+		                <a:documentation>Contains a log message from the actual underlying system. The element body contains the log message text.</a:documentation>
+		                <attribute name="completion">
+		                    <a:documentation>An integer value between 0 and 100 representing the level of completion at the time of loggin. Differs only when the project is in state 1. In state 0, value is always 0. In state 2, value is always 100.</a:documentation>
+		                </attribute>   
+		                <attribute name="time">
+		                    <a:documentation>Time of the log message. Free format.</a:documentation>    
+		                </attribute>                 
+		                <text />
+		            </element>
+		        </zeroOrMore>
+		    </element>
+		</optional>
+		<optional>
+		    <element name="profiles">
+		        <a:documentation>Specifies the profiles accepted by this webservice. Profiles describe the input that the system can take and the output it will produce given that input and the configured parameters.</a:documentation>    
+		        <oneOrMore>
+		            <element name="profile">
+		                <element name="input">
+		                    <a:documentation>The input portion of a profile. Contains Input Templates. </a:documentation>    
+		                    <zeroOrMore>
+		                        <element name="InputTemplate">
+		                            <a:documentation>An Input Template can be seen like an input 'slot' for a file of a particular type and with specific metadata.</a:documentation>                                 
+		                            <attribute name="id">
+		                                <a:documentation>A unique identifier (string) for this input template</a:documentation>
+		                            </attribute>                                   
+		                            <attribute name="format">
+		                                <a:documentation>The format associated with this input slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
+		                            </attribute>                                                                   
+		                            <attribute name="label">
+		                                <a:documentation>The human readable label associated with this input template. Users use this information to select their desired input template in the interface, so it should be a clear label.</a:documentation>
+		                            </attribute>             
+		                            <optional>                                                                                      
+		                                <attribute name="mimetype">
+		                                    <a:documentation>If there is a mime-type associated with the chosen format for this input template, it will be represented here.</a:documentation>
+		                                </attribute>                                                                                                                                   
+		                            </optional>
+		                            <optional>
+		                                <attribute name="schema">
+		                                    <a:documentation>If there is a validation schema associated with the chosen format for this input template, it will be represented here.</a:documentation>
+		                                </attribute>                                                                                                                                   
+		                            </optional>
+		                            <optional>
+		                                <attribute name="filename">
+		                                    <a:documentation>If set, any uploaded file for this input template will obtain this exact filename</a:documentation>
+		                                </attribute>
+		                            </optional>
+		                            <optional>
+		                                <attribute name="extension">
+		                                    <a:documentation>If set, this is the extension that is required and automatically added for files uploaded using this input template</a:documentation>
+		                                </attribute>
+		                            </optional>                                
+		                            <optional>
+		                                <attribute name="optional">
+		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this input template must be used (false) for this profile to work or is optional (true)</a:documentation>
+		                                </attribute>
+		                            </optional>                  
+		                            <optional>
+		                                <attribute name="unique">
+		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this input template is unique and can only be used for uploading one file, or whether multiple files can be uploaded through this input template</a:documentation>
+		                                </attribute>
+		                            </optional>                                
+		                            <ref name="parameters" />
+		                            <zeroOrMore>
+		                                <element name="converter">
+		                                    <a:documentation>Makes a converter available for this specific input template. The text content of this element is the label users see when choosing a converter.</a:documentation>
+		                                    <attribute name="id">
+		                                        <a:documentation>The ID of the converter.</a:documentation>
+		                                    </attribute>
+		                                    <text />
+		                                </element>
+		                            </zeroOrMore>
+		                            <zeroOrMore>
+		                                <element name="inputsource">
+		                                    <a:documentation>Predefined input data that can go in this input template. The element text contains the label users will see when selecting a pre-defined input source</a:documentation>
+		                                    <attribute name="id">
+		                                        <a:documentation>The ID of the input source.</a:documentation>
+		                                    </attribute>
+		                                    <text />
+		                                </element>
+		                            </zeroOrMore>
+		                        </element>
+		                    </zeroOrMore>
+		                </element>
+		                <element name="output">
+		                    <a:documentation>The output portion of a profile. Contains Output Templates. </a:documentation>    
+		                    <oneOrMore>
+		                        <element name="OutputTemplate">
+		                            <a:documentation>An Output Template can be seen like an output 'slot'. If all input conditions have been met, a file corresponding to each output template will be outputted.</a:documentation>                                 
+		                            <attribute name="id">
+		                                <a:documentation>A unique identifier (string) for this output template</a:documentation>
+		                            </attribute>                                   
+		                            <attribute name="format">
+		                                <a:documentation>The format associated with this output slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
+		                            </attribute>                                                                   
+		                            <attribute name="label">
+		                                <a:documentation>The human readable label associated with this output template.</a:documentation>
+		                            </attribute>             
+		                            <optional>                                                                                      
+		                                <attribute name="mimetype">
+		                                    <a:documentation>If there is a mime-type associated with the chosen format for this output template, it will be represented here.</a:documentation>
+		                                </attribute>                                                                                                                                   
+		                            </optional>
+		                            <optional>
+		                                <attribute name="schema">
+		                                    <a:documentation>If there is a validation schema associated with the chosen format for this output template, it will be represented here.</a:documentation>
+		                                </attribute>                                                                                                                                   
+		                            </optional>
+		                            <optional>
+		                                <attribute name="filename">
+		                                    <a:documentation>The exact filename of the output file produced by this template.</a:documentation>
+		                                </attribute>
+		                            </optional>
+		                            <optional>
+		                                <attribute name="extension">
+		                                    <a:documentation>The extension that this output file will obtain, the other filename will be inherited from its input.</a:documentation>
+		                                </attribute>
+		                            </optional>                                   
+		                            <optional>
+		                                <attribute name="unique">
+		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
+		                                </attribute>
+		                            </optional>   
+		                            <ref name="parameters" />
+		                            <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->                         
+		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
+		                        </element>
+		                    </oneOrMore>
+		                </element>
+		            </element>
+		        </oneOrMore>
+		    </element>
+		    <element name="parameters">
+		        <a:documentation>Specification of parameters to the system</a:documentation>
+		        <zeroOrMore>
+		            <element name="parametergroup">
+		                <a:documentation>Parameters must be grouped, allowing a nice division of different kinds of parameters</a:documentation>
+		                <attribute name="name">
+		                    <a:documentation>A human readable name for the parameter group</a:documentation>
+		                </attribute>
+		                <zeroOrMore>
+		                    <ref name="parameters" />
+		                </zeroOrMore>
+		            </element>
+		        </zeroOrMore>
+		    </element>
+		</optional>        
+	</element>
+</start>
 
 
 <define name="parameters">
@@ -248,8 +269,38 @@
          <optional><attribute name="minvalue" /></optional>
          <optional><attribute name="maxvalue" /></optional>         
       </element>     
+     </zeroOrMore>
+     <zeroOrMore>
+     	<element name="ChoiceParameter">
+     		<a:documentation>A parameter taking selecting one or more predefined options as value</a:documentation>
+     		<ref name="commonparameterattribs" />
+     		<optional>
+     			<attribute name="multi">
+     				<a:documentation>Attribute expressing whether multiple choices are allowed similtaneously. Value can be 'true' or 'false'</a:documentation>
+     			</attribute>
+     			<attribute name="showall">
+     				<a:documentation>Attribute affecting presentation, if set to 'true' options are presented as checkboxes or radiobuttons instead of a pull-down list.</a:documentation>
+     			</attribute>
+     			<attribute name="delimiter">
+     				<a:documentation>The delimiter between multiple values, as propagated to the command line. Only applicable if multi=true</a:documentation>
+     			</attribute>
+     		</optional>
+     		<oneOrMore>
+     			<element name="choice">
+     				    <attribute name="id">
+        					<a:documentation>The ID of a choice attribute. This is the value that will be used to identify the choice.</a:documentation>
+    					</attribute>
+    					<optional>
+    						<attribute name="selected">
+    							<a:documentation>Determines whether the choice is selected or not. Value is 1 or 0. Multiple selections are only allowed if multi=true</a:documentation>
+    						</attribute>
+    					</optional>
+						<text />    					
+     			</element>
+     		</oneOrMore>
+     	</element>
      </zeroOrMore> 
-    <interleave>    
+    </interleave>    
 </define>
 
 
@@ -277,3 +328,4 @@
 </define>
 
 <!-- TODO: SCHEMA STILL IN DEVELOPMENT - NOT FINISHED YET! -->
+</grammar>

@@ -341,7 +341,7 @@ class ChoiceParameter(AbstractParameter):
             self.value = self.choices[0][0] #no default specified, first choice is default                
                 
         for key, value in kwargs.items():
-            if key == 'multi': 
+            if key == 'multi':                 
                 self.multi = bool(value) #boolean 
                 del kwargs[key]
             elif key == 'showall': 
