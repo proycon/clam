@@ -48,13 +48,15 @@ clamdata = clam.common.data.getclamdata(datafile)
 clam.common.status.write(statusfile, "Starting...")
 
 #assemble parameters for Frog:
-cmdoptions = ""
-
-if 'skip' in clamdata and clamdata['skip']:
-    cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
 
 
 for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
+    cmdoptions = " --max-parser-tokens=200"
+
+    if 'skip' in clamdata and clamdata['skip']:
+        cmdoptions += ' --skip=' + "".join(clamdata['skip'])  
+    
+    
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
         
     print >>sys.stderr,"Processing " + os.path.basename(str(inputfile)) + "..."
@@ -81,6 +83,12 @@ for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
         sys.exit(1)
 
 for i, inputfile in enumerate(clamdata.inputfiles('foliainput')):
+    cmdoptions = " --max-parser-tokens=200"
+
+    if 'skip' in clamdata and clamdata['skip']:
+        cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
+
+    
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)))
     outputstem = os.path.basename(str(inputfile))
     if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]
