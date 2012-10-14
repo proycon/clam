@@ -1,0 +1,84 @@
+---
+layout: ilkng
+title: CLAM
+subtitle: Computational Linguistics Application Mediator
+keywords: clam, webservice, rest, restful, nlp, computational linguistics, clarin
+description: CLAM allows you to quickly and transparently transform your Natural Language Processing application into a RESTful webservice, with which both human end-users as well as automated clients can interact. 
+lang: en
+homelabel: Home
+sourcelabel: Source
+documentationlabel: Documentation
+---
+
+<div class="leftbox">
+
+<p><strong>CLAM</strong> allows you to quickly and transparently transform your Natural Language Processing application into a <a href="http://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a> webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around the system, allowing end-users or automated clients to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application once it is completed.</p>
+
+<p><strong>CLAM</strong> is set up in a universal fashion, requiring minimal effort on the part of the service developer. Your actual NLP application is treated as a black box, of which only the parameters, input formats and output formats need to be described. Your application itself needs not be network aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.</p>
+
+<p><strong>CLAM</strong> is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users.</p>
+
+<p><strong>CLAM</strong> is free software; you can redistribute it and/or modify it under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a> as published by the <a href="http://www.fsf.org/">Free Software Foundation</a>.</p>
+
+<p><strong>CLAM</strong> is written by Maarten van Gompel. Its development and support is funded by the <a href="http://www.clarin.nl">NWO CLARIN-NL</a> programme.</p>
+
+</div>
+
+
+<div class="rightbox">
+<h2>Documentation</h2>
+
+Please consult the CLAM Manual for extensive documentation:
+
+<ul>
+	<li><a href="https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf">CLAM Manual</a (PDF)></li>
+</ul>
+
+</div>
+
+<div class="rightbox">
+
+<h2>Download and installation</h2>
+
+CLAM is maintained at <a href="http://github.com/proycon/clam">github</a>. To install the software, follow one of these routes:
+
+<ul>
+<li>Easy installation from the Python Package Index: <tt>$ sudo easy_install clam</tt></li>
+<li>Manual tarball download from Python Package Index: <a href="http://pypi.python.org/pypi/CLAM/">download</a></li>
+<li>Do a git clone: <tt>$ git clone git://github.com/proycon/clam.git</tt> <strong>(recommended if you are setting up your own service)</strong></li>
+</ul>
+
+<p>
+Please consult the <a href="https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf">CLAM Manual</a> for further instructions. After reading the manual, it is recommended to watch the CLAM tutorial videos at the bottom of this page.
+</p>
+
+<p>
+For additional support and announcements please join the <a href="https://lists.uvt.nl/mailman/listinfo/clam">CLAM Mailing List</a>
+</p>
+
+</div>
+
+<div class="rightbox">
+
+<img src="architecture.png" alt="CLAM architecture" />
+
+<p>CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The application itself can remain untouched and unaware of CLAM. The scheme on the right illustrates the various layers.</p>
+
+<p>Read more in the CLAM Manual and also see the <a href="clam_poster.png">CLAM poster</a> presented at CLIN 21.</p>
+</div>
+
+
+<h2 style="clear:both; margin-top: 20px;">Instruction videos</h2>
+
+<div style="margin-top: 20px;">
+
+<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/embed/T9B3wKLLXYo" frameborder="0" allowfullscreen></iframe>
+
+<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/embed/jLQN_X8sinA" frameborder="0" allowfullscreen></iframe>
+
+<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/embed/ydbAUJPowrQ" frameborder="0" allowfullscreen></iframe>
+
+<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/embed/guvtndqjVds" frameborder="0" allowfullscreen></iframe>
+
+
+</div>

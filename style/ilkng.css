@@ -1,0 +1,136 @@
+body {
+	font-family: Ubuntu, "Lucida Grande",Calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 13px;
+	background: url(back.png);
+	margin: 0;
+	padding: 0;
+}
+
+
+a:link {
+	color: #FF0000;
+	text-decoration: none;
+}
+a:visited {
+	color: #02325A;
+    text-decoration: none;
+}
+a:hover {
+	color: #FF0000;
+	text-decoration: underline;
+}
+
+#header {
+	padding: 0px;
+	margin: 0px;
+	width: 100%;
+	height: 90px;
+	background: white;
+	text-align: left;
+}
+
+#navigator {
+	background: black;
+	color: white;
+	height: 20px;
+	vertical-align: middle;
+}
+#navigator  ul {
+    border: 0 none;
+    list-style: none outside none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+#navigator  li {
+	display: inline;
+	margin-left: 10px;
+}
+
+
+#navigator a {
+	font-weight: bold;
+	color: white;
+}
+
+#navigator a:hover {
+	font-weight: bold;
+	color: #f9ff93;	
+	text-decoration: underline;
+}
+
+
+#header h1, #title  {
+	font-family: Ubuntu, "Lucida Grande",Calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+
+#subtitle {
+	font-family: Ubuntu, "Lucida Grande",Calibri, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 20px;
+	color: #444;
+}
+
+
+#logo {
+	float: right;
+	display: inline-block;
+	background: url(rulogo.png);
+	width: 475px;
+	height: 80px;
+	min-width: 475px;
+	min-height: 80px;
+}
+
+#icon {
+	display: inline-block;
+	background: url(icon.png);	
+	width: 121px;
+	height: 80px;
+	min-width: 121px;
+	min-height: 80px;	
+}
+
+#content {
+	background: white;
+	margin-left: auto;
+	margin-right: auto;
+	width: 70%;	
+	margin-top: 10px;
+}
+
+.leftbox, .rightbox {
+	background: white;
+	width: 45%;	
+	-moz-box-shadow: 10px 10px 5px #555;
+	-webkit-box-shadow: 10px 10px 5px #555;
+	box-shadow: 10px 10px 5px #555;
+	padding: 15px;
+	border: #aaa solid 1px;
+	margin-bottom:20px;
+}
+
+#footer {
+	width: 100%;
+	display: block;
+	min-height: 20px;
+	text-align: center;
+}
+
+.leftbox {
+	float: left;
+}
+
+.rightbox {
+	float: right;
+}
+
+#langbox {
+	float: right;
+}
+#langbox img {
+	border: 2px white solid;
+	margin-bottom: 2px;
+}
