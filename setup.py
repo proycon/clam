@@ -5,7 +5,11 @@ import os
 import sys
 from setuptools import setup
 
-os.chdir(os.path.dirname(sys.argv[0]))
+try:
+   os.chdir(os.path.dirname(sys.argv[0]))
+except:
+   pass
+
 if not os.path.exists('clam'):   
     print >>sys.stderr, "Preparing build"
     if not os.path.exists('build'): os.mkdir('build')   
@@ -21,7 +25,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.7.8.3",
+    version = "0.7.8.4",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
