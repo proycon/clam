@@ -77,7 +77,7 @@ for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
         docid = 'untitled'
         
     print >>sys.stderr,"Invoking Frog"          
-    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
+    r = os.system(bindir + "frog -c " + bindir + "../etc/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (plain text). Aborting"),100)
         sys.exit(1)
