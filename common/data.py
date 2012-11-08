@@ -305,24 +305,31 @@ class CLAMData(object):
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
     XML responses. Its member variables are: 
 
-        status          - Contains any of clam.common.status.*
-        statusmessage   - The latest status message (string)
-        completion      - An integer between 0 and 100 indicating
+        * ``baseurl``         - The base URL to the service (string)
+        * ``projecturl``      - The full URL to the selected project, if any  (string)
+        * ``status``          - Can be: ``clam.common.status.READY`` (1), ``clam.common.status.RUNNING`` (2), or ``clam.common.status.DONE`` (3)
+        * ``statusmessage``   - The latest status message (string)
+        * ``completion``      - An integer between 0 and 100 indicating
                           the percentage towards completion.
-        parameters      - List of parameters (but use the methods instead)        
-        profiles        - List of profiles ([ Profile ])
-        input           - List of input files  ([ CLAMInputFile ])
-        output          - List of output files ([ CLAMOutputFile ])
-        projects        - List of projects ([ string ])
-        corpora         - List of pre-installed corpora
-        errors          - Boolean indicating whether there are errors in parameter specification
-        errormsg        - String containing an error message
+        * ``parameters``      - List of parameters (but use the methods instead)        
+        * ``profiles``        - List of profiles ([ Profile ])
+        * ``input``           - List of input files  ([ CLAMInputFile ]); use ``inputfiles()`` instead for easier access
+        * ``output``          - List of output files ([ CLAMOutputFile ])
+        * ``projects``        - List of project IDs ([ string ])
+        * ``corpora``         - List of pre-installed corpora
+        * ``errors``          - Boolean indicating whether there are errors in parameter specification
+        * ``errormsg``        - String containing an error message
 
     Note that depending on the current status of the project, not all may be available.
     """
 
     def __init__(self, xml, localroot = False):
-        """Pass an xml string containing the full response. It will be automatically parsed."""
+        """Initialises a CLAMData object by passing pass a string containing the full CLAM XML response. It will be automatically parsed. This is usually not called directly but instantiated in system wrapper scripts using::
+            
+            data = clam.common.data.getclamdata("clam.xml")
+
+        Or ``CLAMCLient`` is used, most responses are ``CLAMData`` instances.
+        """
         self.xml = xml
         
         self.system_id = ""
@@ -370,7 +377,7 @@ class CLAMData(object):
 
 
     def parseresponse(self, xml, localroot = False):
-        """The parser, there's usually no need to call this directly"""
+        """Parses CLAM XML, there's usually no need to call this directly"""
         global VERSION
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
@@ -475,7 +482,7 @@ class CLAMData(object):
             raise
 
     def __setitem__(self, id, value):
-        """Set the value of the specified parameter"""
+        """Set the value of the specified global parameter"""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:
@@ -528,6 +535,7 @@ class CLAMData(object):
         raise Exception("No such input template!")
     
     def inputfile(self, inputtemplate=None):
+        """Return the inputfile for the specified inputtemplate, if ``inputtemplate=None``, inputfile is returned regardless of inputtemplate. This function may only return 1 and returns an error when multiple input files can be returned, use ``inputfiles()`` instead."""
         inputfiles = list(self.inputfiles(inputtemplate))
         if len(inputfiles) < 1:
             raise Exception("No such input file")
@@ -537,6 +545,7 @@ class CLAMData(object):
 
 
     def inputfiles(self, inputtemplate=None):
+        """Generator yielding all inputfiles for the specified inputtemplate, if ``inputtemplate=None``, inputfiles are returned regardless of inputtemplate."""
         if isinstance(inputtemplate, InputTemplate):
             #ID suffices:
             inputtemplate = inputtemplate.id

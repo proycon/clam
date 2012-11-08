@@ -268,8 +268,10 @@ class CLAMService(object):
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             error("Specified root path " + settings.ROOT + " not found")
-        elif not settings.COMMAND.split(" ")[0] or os.system("which " + settings.COMMAND.split(" ")[0] + "> /dev/null 2> /dev/null") != 0:
-            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found or without execute permission")
+        elif not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0]): 
+            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
+        elif not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
+            error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")            
         elif not settings.PROFILES:
             error("No profiles were defined in settings module!")
         elif not settings.PARAMETERS:

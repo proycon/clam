@@ -45,7 +45,14 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     BINDIR = '/usr/local/bin/'
     #URLPREFIX = 'ucto'
     VALKUILDIR = '/home/proycon/work/valkuil/'
-else:
+elif host == 'applejack': #Nijmegen
+    CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam
+    ROOT = "/scratch2/www/webservices-lst/live/writable/valkuil/"
+    HOST = "webservices-lst.science.ru.nl"
+    PORT = 80
+    URLPREFIX = "valkuil"
+    BINDIR = "/vol/customopt/uvt-ru/bin/"    
+elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg        
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
     ROOT = "/var/www/clamdata/valkuil/"
@@ -55,6 +62,8 @@ else:
     WEBSERVICEGHOST = 'ws'
     BINDIR = '/var/www/bin/'
     VALKUILDIR = '/var/www/valkuil/'
+else:
+    raise Exception("I don't know where I'm running from! Got " + host)    
 
 # ======== AUTHENTICATION & SECURITY ===========
 

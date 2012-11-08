@@ -109,10 +109,9 @@ class CLAMClient:
     def __init__(self, url, user=None, password=None):
         """Initialise the CLAM client (does not actually connect yet)
         
-        url - URL of the webservice
-        user - username (or None)
-        realm - authentication realm
-        password - password (or None)
+        * ``url`` - URL of the webservice
+        * ``user`` - username (or None if no authentication is needed)
+        * ``password`` - password (or None if not authentication is needed)
         """
         
         #self.http = httplib2.Http()

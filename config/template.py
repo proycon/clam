@@ -166,6 +166,8 @@ PARAMETERS =  [
 #The dispatcher to use (defaults to clamdispatcher.py), you almost never want to change this
 #DISPATCHER = 'clamdispatcher.py' 
 
+#DISPATCHER_POLLINTERVAL = 30 #interval at which the dispatcher polls for resource consumption (default: 30 secs) 
+
 #Run background process on a remote host? Then set the following (leave the lambda in):
 #REMOTEHOST = lambda: return 'some.remote.host'
 #REMOTEUSER = 'username'

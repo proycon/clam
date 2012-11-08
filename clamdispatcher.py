@@ -22,10 +22,16 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.6.0'
+VERSION = '0.7.0'
 
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+
+
+def mem(pid, size="rss"):
+    """memory sizes: rss, rsz, vsz."""
+    return int(os.popen('ps -p %d -o %s | tail -1' % (pid, size)).read())
+
 
 if len(sys.argv) < 4:
     print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py settingsmodule projectdir cmd arg1 arg2 ..."
@@ -49,6 +55,12 @@ elif not os.path.isdir(projectdir):
 
 exec "import " + settingsmodule + " as settings"
 settingkeys = dir(settings)
+if not 'DISPATCHER_POLLINTERVAL' in settings:
+    settings.DISPATCHER_POLLINTERVAL = 30
+if not 'DISPATCHER_MAXRESMEM' in settings:
+    settings.DISPATCHER_MAXRESMEM = 0
+if not 'DISPATCHER_MAXTIME' in settings:
+    settings.DISPATCHER_MAXTIME = 0
 
 print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
 
@@ -71,8 +83,10 @@ else:
     
 #intervalf = lambda s: min(s/10.0, 15)
 abortchecktime = 0
+abort = False
 idle = 0
 done = False
+lastpolltime = datetime.datetime.now()
 
 def total_seconds(delta):
     return delta.days * 86400 + delta.seconds + (delta.microseconds / 1000000.0)
@@ -96,7 +110,9 @@ while not done:
     if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
         abortchecktime = 0                
         if os.path.exists(projectdir + '.abort'):
-            print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON USER SIGNAL! (" + str(d)+"s)"
+            abort = True
+        if abort:
+            print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)"
             running = True
             while running:
                 os.system("kill -15 " + str(pid))
@@ -118,6 +134,19 @@ while not done:
     else:
         idle += 1
         time.sleep(1)
+
+    if settings.DISPATCHER_MAXRESMEM > 0 and total_seconds(datetime.datetime.now() - lastpolltime) >= settings.DISPATCHER_POLLINTERVAL:
+        resmem = mem(pid)
+        if resmem > settings.DISPATCHER_MAXRESMEM * 1024: 
+            print >>sys.stderr, "[CLAM Dispatcher] PROCESS EXCEEDS MAXIMUM RESIDENT MEMORY USAGE (" + str(resmem) + ' >= ' + str(settings.DISPATCHER_MAXRESMEM) + ')... ABORTING'
+            abort = True
+            abortchecktime = lastpolltime
+            statuscode = 2
+        lastpolltime = datetime.datetime.now()
+    elif settings.DISPATCHER_MAXTIME > 0 and d > settings.DISPATCHER_MAXTIME:
+        print >>sys.stderr, "[CLAM Dispatcher] PROCESS TIMED OUT.. NO COMPLETION WITHIN " + str(d) + " SECONDS ... ABORTING"        
+        abort = True
+        statuscode = 3
     
 f = open(projectdir + '.done','w')
 f.write(str(statuscode))
