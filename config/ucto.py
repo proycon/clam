@@ -20,7 +20,7 @@ from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
 from sys import path 
-from os import uname
+from os import uname, environ
 
 REQUIRE_VERSION = 0.7
 
@@ -51,6 +51,13 @@ elif host == 'applejack': #Nijmegen
     PORT = 80
     URLPREFIX = "ucto"
     BINDIR = "/vol/customopt/uvt-ru/bin/"    
+    USERS_MYSQL = {
+        'host': 'mysql-clamopener.science.ru.nl', 
+        'user': 'clamopener',        
+        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
+        'database': 'clamopener',
+        'table': 'clamusers_clamusers'
+    }
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg    
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"

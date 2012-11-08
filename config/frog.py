@@ -22,8 +22,8 @@ from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
 from sys import path 
-from os import uname
-
+from os import uname, environ
+from base64 import b64decode as D
 
 REQUIRE_VERSION = 0.7
 
@@ -33,6 +33,9 @@ REQUIRE_VERSION = 0.7
 SYSTEM_ID = "frog"
 SYSTEM_NAME = "Frog"
 SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, Part-of-Speech tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
+
+
+
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
@@ -48,7 +51,14 @@ elif host == 'applejack': #Nijmegen
     HOST = "webservices-lst.science.ru.nl"
     PORT = 80
     URLPREFIX = "frog"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"    
+    BINDIR = "/vol/customopt/uvt-ru/bin/"
+    USERS_MYSQL = {
+        'host': 'mysql-clamopener.science.ru.nl', 
+        'user': 'clamopener',        
+        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
+        'database': 'clamopener',
+        'table': 'clamusers_clamusers'
+    }
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
@@ -60,13 +70,7 @@ elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomi
     BINDIR = "/var/www/bin/"
 else:
     raise Exception("I don't know where I'm running from! Got " + host)
-
-#=========== Definition of users and passwords =====================
-
-#Users and passwords
-
-USERS = None #Enable this instead if you want no authentication
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+ 
 
 
 
