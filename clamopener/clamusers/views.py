@@ -8,6 +8,7 @@ from django.core.context_processors import csrf
 from django.template import RequestContext
 import hashlib
 
+
 def register(request):    
     if request.method == 'POST': # If the form has been submitted...        
         form = RegisterForm(request.POST) # A form bound to the POST data
