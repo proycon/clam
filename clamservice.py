@@ -2060,6 +2060,11 @@ if __name__ == "__main__":
             setdebug(True)
     except:    
         pass
+    try: 
+        if settings.LOGFILE:
+            setlogfile(settings.LOGFILE)
+    except:
+        pass
 
     test_version()
     set_defaults(HOST,PORT)
@@ -2118,6 +2123,11 @@ def run_wsgi(settings_module):
             DEBUG = True
             setdebug(True)
     except:    
+        pass
+    try: 
+        if settings.LOGFILE:
+            setlogfile(settings.LOGFILE)
+    except:
         pass
     
     test_version()

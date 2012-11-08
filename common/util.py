@@ -19,6 +19,7 @@ import datetime
 from urllib2 import Request 
 
 LOG = stdout
+DEBUGLOG = stderr
 DEBUG = False
 
 def globsymlinks(pattern, recursion=True):
@@ -45,9 +46,13 @@ def printlog(msg):
     if LOG: LOG.write("------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
 
 def printdebug(msg):
-    global DEBUG
-    if DEBUG: stderr.write("CLAM DEBUG: " + msg + "\n")
+    global DEBUG, DEBUGLOG
+    if DEBUG: DEBUGLOG.write("CLAM DEBUG: " + msg + "\n")
 
+def setlogfile(filename):
+    global LOG, DEBUGLOG
+    LOG = DEBUGLOG = open(filename,'w')
+    
 
 class RequestWithMethod(Request):
   def __init__(self, *args, **kwargs):
