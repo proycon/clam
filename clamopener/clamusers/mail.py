@@ -5,7 +5,7 @@ from subprocess import Popen,PIPE
 
 class SendmailBackend(BaseEmailBackend):
     def __init__(self, fail_silently=False, **kwargs):
-        super(EmailBackend, self).__init__(fail_silently=fail_silently)
+        super(SendmailBackend, self).__init__(fail_silently=fail_silently)
         self._lock = threading.RLock()
 
     def open(self):
