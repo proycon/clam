@@ -6,7 +6,6 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     ('Maarten van Gompel', 'proycon@anaproy.nl'),
     ('Antal van den Bosch', 'Antal.vdnBosch@uvt.nl'),
-    ('Martin Reynaert', 'reynaert@uvt.nl'),
 )
 
 
@@ -28,8 +27,8 @@ if uname()[1] == 'aurora' or uname()[1] == 'malaga':
             'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
         }
     }
-    REALM = 'CLAM-TICC'
-    MASTER_PASSWORD = 'a965704891a834de6e704fccb2f9a95c'  #hashlib.md5('secret').hexdigest()
+    REALM = ''
+    MASTER_PASSWORD = '' #hashlib.md5('secret').hexdigest()
     FROMMAIL = 'proycon@anaproy.nl'
     
     SERVICES = [
@@ -39,24 +38,23 @@ if uname()[1] == 'aurora' or uname()[1] == 'malaga':
             'description': "Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages."
         },    
     ]
-else:
-    #assuming ILK server
-    DOMAIN = 'webservices.ticc.uvt.nl'
+elif uname()[1] == "applejack":
+    DOMAIN = 'webservices-lst.science.ru.nl'
     BASEURL = 'http://' + DOMAIN + '/'
-    ROOTDIR = '/var/www/clam/clamopener/'
+    ROOTDIR = '/scratch2/www/webservices-lst/live/repo/clam/clamopener/'
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+            'ENGINE': 'mysql',  #'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
             'NAME': 'clamopener',             # Or path to database file if using sqlite3.
             'USER': 'clamopener',            # Not used with sqlite3.
             'PASSWORD': '',                  # Not used with sqlite3.
-            'HOST': 'stheno.uvt.nl',         # Set to empty string for localhost. Not used with sqlite3.
+            'HOST': '',         # Set to empty string for localhost. Not used with sqlite3.
             'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
         }
     }
-    REALM = 'CLAM-TICC'
-    MASTER_PASSWORD = 'a965704891a834de6e704fccb2f9a95c'  #hashlib.md5('secret').hexdigest()
-    FROMMAIL = 'automailer@webservices.ticc.uvt.nl'
+    REALM = ''
+    MASTER_PASSWORD = ''  #hashlib.md5('secret').hexdigest()
+    FROMMAIL = 'automailer@webservices-lst.science.ru.nl'
     
     SERVICES = [
         {
@@ -78,12 +76,20 @@ else:
             'website': 'http://valkuil.net',
         },     
         {
+            'url': 'http://'  + DOMAIN + '/fowlt/',
+            'name': 'Fowlt',
+            'description': "Fowlt is an English spelling-corrector system.",
+            'website': 'http://fowlt.net',
+        },     
+        {
             'url': 'http://'  + DOMAIN + '/oersetter/',
             'name': 'Oersetter',
             'description': "Oersetter is a Frisian-Dutch, Dutch-Frisian Machine Translation system",
             'website': 'http://oersetter.nl',
         },     
     ]
+else:
+	raise Exception("Don't know where I'm running from!")
     
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
