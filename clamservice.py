@@ -98,13 +98,13 @@ def userdb_lookup_dict(user, realm):
 
 def userdb_lookup_mysql(user, realm):
     printdebug("Looking up user " + user + " in MySQL")
-    host,port, mysqluser,passwd, database, table = validate_users_mysql()
+    host,port, mysqluser,passwd, database, table, userfield, passwordfield = validate_users_mysql()
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
     #simple protection against mysql injection
     user = user.replace("'","") 
     user = user.replace(";","")
-    sql = "SELECT `user`, `password` FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
+    sql = "SELECT `" + userfield + "`, `" + passwordfield + "` FROM `" + table + "` WHERE user='" + user + "' LIMIT 1"
     cursor.execute(sql)
     password = None
     while True:
@@ -150,7 +150,15 @@ def validate_users_mysql():
         table = settings.USERS_MYSQL['table']
     else:
         raise Exception("No MySQL table defined in USERS_MYSQL")   
-    return host,port, user,password, database, table
+    if 'userfield' in settings.USERS_MYSQL:
+        userfield = settings.USERS_MYSQL['userfield']
+    else:
+        userfield = "username"
+    if 'passwordfield' in settings.USERS_MYSQL:
+        passwordfield = settings.USERS_MYSQL['passwordfield']
+    else:
+        passwordfield = "password"
+    return host,port, user,password, database, table, userfield, passwordfield
 
 #requirelogin = lambda x: x
 #if settings.USERS:
