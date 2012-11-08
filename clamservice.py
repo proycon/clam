@@ -1976,6 +1976,22 @@ def test_dirs():
     if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER:
             warning("No user authentication enabled, this is not recommended for production environments!")
 
+def test_version():
+    global VERSION
+    #Check version
+    req = str(settings.REQUIRE_VERSION).split('.')
+    ver = str(VERSION).split('.')
+
+    uptodate = True
+    for i in range(0,len(req)):
+        if i < len(ver):
+            if req[i] > ver[i]:
+                uptodate = False
+                break
+            elif ver[i] > req[i]:
+                break
+    if not uptodate:
+        error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
 
 
 if __name__ == "__main__":
@@ -2037,23 +2053,15 @@ if __name__ == "__main__":
 
     import_string = "import " + settingsmodule + " as settings"
     exec import_string
+    
+    try:
+        if settings.DEBUG:
+            DEBUG = True
+            setdebug(True)
+    except:    
+        pass
 
-    #Check version
-    req = str(settings.REQUIRE_VERSION).split('.')
-    ver = str(VERSION).split('.')
-
-    uptodate = True
-    for i in range(0,len(req)):
-        if i < len(ver):
-            if req[i] > ver[i]:
-                uptodate = False
-                break
-            elif ver[i] > req[i]:
-                break
-    if not uptodate:
-        error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
-
-
+    test_version()
     set_defaults(HOST,PORT)
     if HOST:
         settings.HOST = HOST
@@ -2104,6 +2112,15 @@ def run_wsgi(settings_module):
     globals()['settings'] = settings_module
     settingsmodule = settings_module.__name__
     
+        
+    try:
+        if settings.DEBUG:
+            DEBUG = True
+            setdebug(True)
+    except:    
+        pass
+    
+    test_version()
     setlog(None)
     set_defaults(None,None)
     test_dirs()
