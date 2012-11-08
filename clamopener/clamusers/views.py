@@ -52,7 +52,7 @@ def report(request):
     else:
         s = "(no pending accounts found)"
         
-    send_mail('[' + settings.DOMAIN + '] Report of pending accounts' , s , settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
+    send_mail('[' + settings.DOMAIN + '] Report of pending accounts' , s , settings.FROMMAIL, [ x[1] for x in settings.ADMINS ] , fail_silently=False)
 
 
 
