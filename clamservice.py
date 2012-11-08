@@ -99,7 +99,7 @@ def userdb_lookup_dict(user, realm):
 def userdb_lookup_mysql(user, realm):
     printdebug("Looking up user " + user + " in MySQL")
     host,port, mysqluser,passwd, database, table = validate_users_mysql()
-    db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf-8', use_unicode=True)
+    db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
     #simple protection against mysql injection
     user = user.replace("'","") 
