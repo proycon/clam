@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     ('^/?$', 'clamopener.clamindex.views.index' ),
     ('^register/?$', 'clamopener.clamusers.views.register' ),      
     ('^activate/([0-9]+)/?$', 'clamopener.clamusers.views.activate' ),     
+    ('^report/?$', 'clamopener.clamusers.views.report' ),     
     #('^edit/', 'clamopener.views.edit' ),
     #(r'^admin/', include(admin.site.urls))
     (r'^style/(?P<path>.*)$', 'django.views.static.serve',

@@ -13,7 +13,7 @@ def register(request):
         form = RegisterForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             clamuser = form.save()
-            send_mail('[' + settings.DOMAIN + '] Registration request from ' + clamuser.username + ' pending approval' , 'The following accounts is pending approval:\n\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk), settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
+            send_mail('[' + settings.DOMAIN + '] Registration request from ' + clamuser.username + ' pending approval' , 'The following new account is pending approval:\n\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk), settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
             return render_to_response('submitted.html')            
     else:
         c = RequestContext(request)
@@ -41,3 +41,23 @@ def activate(request, userid):
         c.update(csrf(request))
         return render_to_response('activate.html',{'userid': userid},context_instance=c)
         
+def report(request):
+    s = "The following accounts are pending approval:\n\n"
+    report = []             
+    for clamuser in CLAMUsers.objects.filter(active=0):
+        report.append('Username: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk))
+    
+    if report:
+        s = "\n\n".join(report)
+    else:
+        s = "(no pending accounts found)"
+        
+    send_mail('[' + settings.DOMAIN + '] Report of pending accounts' , s , settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
+
+
+
+
+
+
+
+
