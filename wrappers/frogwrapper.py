@@ -31,13 +31,16 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 
-os.environ['PYTHONPATH'] = bindir + '/../lib/python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor) '/site-packages/frog' #Necessary for University of Tilburg servers (change or remove this in your own setup)
+
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
 bindir = sys.argv[1]
 datafile = sys.argv[2]
 statusfile = sys.argv[3]
 outputdir = sys.argv[4]
+
+
+os.environ['PYTHONPATH'] = bindir + '/../lib/python' + str(sys.version_info.major) + '.' + str(sys.version_info.minor) + '/site-packages/frog' #Necessary for University of Tilburg servers (change or remove this in your own setup)
 
 #Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml))
 clamdata = clam.common.data.getclamdata(datafile)
