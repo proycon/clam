@@ -55,11 +55,11 @@ elif not os.path.isdir(projectdir):
 
 exec "import " + settingsmodule + " as settings"
 settingkeys = dir(settings)
-if not 'DISPATCHER_POLLINTERVAL' in settings:
+if not 'DISPATCHER_POLLINTERVAL' in settingkeys:
     settings.DISPATCHER_POLLINTERVAL = 30
-if not 'DISPATCHER_MAXRESMEM' in settings:
+if not 'DISPATCHER_MAXRESMEM' in settingkeys:
     settings.DISPATCHER_MAXRESMEM = 0
-if not 'DISPATCHER_MAXTIME' in settings:
+if not 'DISPATCHER_MAXTIME' in settingkeys:
     settings.DISPATCHER_MAXTIME = 0
 
 print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
