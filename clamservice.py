@@ -141,15 +141,15 @@ def validate_users_mysql():
     if 'password' in settings.USERS_MYSQL:
         password = settings.USERS_MYSQL['password']
     else:
-        raise Exception("No MySQL user defined in USERS_MYSQL")            
+        raise Exception("No MySQL password defined in USERS_MYSQL")            
     if 'database' in settings.USERS_MYSQL:
         database = settings.USERS_MYSQL['database']
     else:
-        raise Exception("No MySQL user defined in USERS_MYSQL")     
+        raise Exception("No MySQL database defined in USERS_MYSQL")     
     if 'table' in settings.USERS_MYSQL:
         table = settings.USERS_MYSQL['table']
     else:
-        raise Exception("No MySQL user defined in USERS_MYSQL")   
+        raise Exception("No MySQL table defined in USERS_MYSQL")   
     return host,port, user,password, database, table
 
 #requirelogin = lambda x: x

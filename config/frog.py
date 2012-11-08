@@ -59,6 +59,7 @@ elif host == 'applejack': #Nijmegen
         'database': 'clamopener',
         'table': 'clamusers_clamusers'
     }
+    REALM = "WEBSERVICES-LST"
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
