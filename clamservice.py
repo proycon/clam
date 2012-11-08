@@ -2102,7 +2102,7 @@ if __name__ == "__main__":
 
 def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""
-    global settingsmodule, auth
+    global settingsmodule, auth, DEBUG
     #import_string = "import " + settingsmodule + " as settings"
     #exec import_string
     printdebug("Initialising WSGI service")
