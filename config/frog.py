@@ -35,7 +35,7 @@ SYSTEM_NAME = "Frog"
 SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, Part-of-Speech tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
 
 
-
+USERS = None
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
