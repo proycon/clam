@@ -34,7 +34,7 @@ SYSTEM_ID = "frog"
 SYSTEM_NAME = "Frog"
 SYSTEM_DESCRIPTION = "Frog is a suite containing a tokeniser, Part-of-Speech tagger, lemmatiser, morphological analyser, shallow parser, and dependency parser for Dutch, developed at Tilburg University. It is the successor of Tadpole."
 
-# ================ Root directory for CLAM ===============
+# ================ Server specific configuration for CLAM ===============
 host = uname()[1]
 if host == 'aurora' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
@@ -42,7 +42,14 @@ if host == 'aurora' or host == 'roma': #proycon's laptop/server
     PORT = 9001
     BINDIR = "/usr/local/bin/"
     #URLPREFIX = 'frog'
-else:
+elif host == 'applejack': #Nijmegen
+    CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
+    ROOT = "/scratch2/www/webservices-lst/live/writable/frog/"
+    HOST = "webservices-lst.science.ru.nl"
+    PORT = 80
+    URLPREFIX = "frog"
+    BINDIR = "/vol/customopt/uvt-ru/bin/"    
+elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
     ROOT = "/var/www/clamdata/frog/"
@@ -51,6 +58,8 @@ else:
     URLPREFIX = 'frog'
     WEBSERVICEGHOST = 'ws'
     BINDIR = "/var/www/bin/"
+else:
+    raise Exception("I don't know where I'm running from! Got " + host)
 
 #=========== Definition of users and passwords =====================
 

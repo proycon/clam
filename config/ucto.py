@@ -22,7 +22,7 @@ from clam.common.digestauth import pwhash
 from sys import path 
 from os import uname
 
-REQUIRE_VERSION = 0.6
+REQUIRE_VERSION = 0.7
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Ucto Tokeniser"
@@ -37,14 +37,21 @@ USERS = None #Enable this instead if you want no authentication
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 
-# ================ Root directory for CLAM ===============
+# ================ Server specific configurations for CLAM ===============
 host = uname()[1]
 if host == 'aurora' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/ucto.clam/"
     PORT = 9001
     BINDIR = "/usr/local/bin/"
-else:
+elif host == 'applejack': #Nijmegen
+    CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
+    ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
+    HOST = "webservices-lst.science.ru.nl"
+    PORT = 80
+    URLPREFIX = "ucto"
+    BINDIR = "/vol/customopt/uvt-ru/bin/"    
+elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg    
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
     BINDIR = "/var/www/bin/"
@@ -61,7 +68,8 @@ else:
     #    'database': 'clamopener',
     #    'table': 'clamusers_clamusers',        
     #}
-    
+else:
+    raise Exception("I don't know where I'm running from! Got " + host)    
 
 
 
