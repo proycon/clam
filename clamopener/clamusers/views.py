@@ -54,6 +54,7 @@ def report(request):
         
     send_mail('[' + settings.DOMAIN + '] Report of pending accounts' , s , settings.FROMMAIL, [ x[1] for x in settings.ADMINS ] , fail_silently=False)
 
+    return "DONE"
 
 
 
