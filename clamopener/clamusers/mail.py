@@ -37,8 +37,7 @@ class SendmailBackend(BaseEmailBackend):
         if not email_message.recipients():
             return False
         try:
-            ps = Popen(["sendmail"]+list(email_message.recipients()), \
-                       stdin=PIPE)
+            ps = Popen(["/usr/sbin/sendmail"]+list(email_message.recipients()), stdin=PIPE)
             ps.stdin.write(email_message.message().as_string())
             ps.stdin.flush()
             ps.stdin.close()
