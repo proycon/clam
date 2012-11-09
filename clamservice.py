@@ -2103,10 +2103,10 @@ if __name__ == "__main__":
     #if USERS:
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.STANDALONEURLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.STANDALONEURLPREFIX, True, "","Unauthorized",8)
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.STANDALONEURLPREFIX)    
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.STANDALONEURLPREFIX,True,"","Unauthorized",8)    
         
 
     
@@ -2144,11 +2144,11 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX)
+        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",8)
         printdebug("Initialised authentication")    
     elif settings.USERS_MYSQL:
         validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.URLPREFIX)            
+        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",8)            
         printdebug("Initialised MySQL authentication")
         
     service = CLAMService('wsgi')
