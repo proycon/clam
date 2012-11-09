@@ -61,7 +61,7 @@ elif host == 'applejack': #Nijmegen
         'table': 'clamusers_clamusers'
     }
     REALM = "WEBSERVICES-LST"
-    DIGESTOPAQUE = D(open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip())
+    DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
