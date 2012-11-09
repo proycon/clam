@@ -43,7 +43,7 @@ class auth(object):
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
         if staticopaque:
-            if self.printdebug: self.printdebug("DEBUG set opaque from settings: '" + str(staticopaque)) + "'"
+            if self.printdebug: self.printdebug("DEBUG set opaque from settings: '" + str(staticopaque) + "'")
             self.opaque = staticopaque
         else:
             if self.printdebug: self.printdebug("DEBUG generated opaque: '" + str(self.opaque)+ "'")  
