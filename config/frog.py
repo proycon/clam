@@ -39,11 +39,12 @@ USERS = None
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
-if host == 'aurora' or host == 'roma': #proycon's laptop/server
+if host == 'galactica' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/frog.clam/"
     PORT = 9001
     BINDIR = "/usr/local/bin/"
+    USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
     #URLPREFIX = 'frog'
 elif host == 'applejack': #Nijmegen
     CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
@@ -61,6 +62,7 @@ elif host == 'applejack': #Nijmegen
     }
     DEBUG = True
     REALM = "WEBSERVICES-LST"
+    DIGESTOPAQUE = D(open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip())
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"

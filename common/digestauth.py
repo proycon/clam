@@ -22,7 +22,7 @@ class MalformedAuthenticationHeader(Exception): pass
 
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
-    def __init__(self,  getHA1,  realm="Protected",  printdebug = None, urlprefix = None, tolerateIE = True, redirectURL = '/',  unauthHTML = None,  nonceSkip = 0,  lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
+    def __init__(self,  getHA1,  realm="Protected",  printdebug = None, urlprefix = None, tolerateIE = True, redirectURL = '/',  unauthHTML = None,  nonceSkip = 0, staticopaque=None, lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
         """Creates a decorator specific to a particular web application. 
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user
@@ -42,7 +42,10 @@ class auth(object):
         self.urlprefix = urlprefix
         self.outstandingNonces = NonceMemory()
         self.user_status = {}
-        self.opaque = "%032x" % random.getrandbits(128)
+        if staticopaque:
+            self.opaque = staticopaque
+        else:
+            self.opaque = "%032x" % random.getrandbits(128)
         if self.printdebug: self.printdebug("DEBUG generated opaque: " + str(self.opaque))
         self.webpy2 = web.__version__.startswith('0.2')
     g401HTML = """
