@@ -94,7 +94,8 @@ class auth(object):
             if nonceReaction == 2:
                 # Client sent a nonce we've never heard of before
                 if self.printdebug: self.printdebug("AUTH DEBUG unknownnonce")
-                return self.denyBadRequest()
+                #return self.send401UnauthorizedResponse() #test
+                return self.denyBadRequest() #original
             if nonceReaction == 3:
                 # Client sent an old nonce.  Give the client a new one, and ask to authenticate again before continuing.
                 if self.printdebug: self.printdebug("AUTH DEBUG oldnonce")
