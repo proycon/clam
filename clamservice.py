@@ -1887,8 +1887,8 @@ def set_defaults(HOST = None, PORT = None):
     
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
-    if not 'USER' in settingkeys:
-        settings.USER = None
+    if not 'USERS' in settingkeys:
+        settings.USERS = None
     if not 'ADMINS' in settingkeys:
         settings.ADMINS = []
     if not 'PROJECTS_PUBLIC' in settingkeys:
