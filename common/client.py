@@ -5,16 +5,18 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Client --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
+#       http://proycon.github.com/clam
+#
+#       Centre for Language Studies
+#       Radboud University Nijmegen
+#
 #       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       Tilburg University
 #       
 #       Licensed under GPLv3
 #
 ###############################################################
 
-import codecs
 import os.path
 #import httplib2
 import urllib2
@@ -130,6 +132,7 @@ class CLAMClient:
 
     
     def initauth(self, doauth = True):
+        """Initialise authentication, for internal use"""
         global VERSION
         if doauth:
             #for file upload we use urllib2:
@@ -149,6 +152,8 @@ class CLAMClient:
     
     
     def request(self, url='', method = 'GET', data = None):        
+        """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use them instead"""
+        
         if self.authenticated: self.initauth(url)
         if data: 
             request = RequestWithMethod(self.url + url,data,method=method)
@@ -191,7 +196,7 @@ class CLAMClient:
     
             
     def _request_httplib2(self, url, method = 'GET', data = None): #old, obsolete
-        """Returns a CLAMData object if a proper CLAM XML response is received. Otherwise: returns True, on success, False on failure.  Raises an Exception on most HTTP errors!"""
+        """Returns a CLAMData object if a proper CLAM XML response is received. Otherwise: returns True, on success, False on failure.  Raises an Exception on most HTTP errors! For internal use"""
 
         try:
             if data: 
@@ -216,6 +221,7 @@ class CLAMClient:
             raise    
 
     def _parse(self, content):    
+        """Parses CLAM XML data. For internal use."""
         if content.find('<clam') != -1:
             data = CLAMData(content)
             if data.errors:
@@ -275,13 +281,20 @@ class CLAMClient:
             
 
     def create(self,project):
-        """Create a new project"""
+        """Create a new project::
+        
+           client.create("myprojectname")
+        """
         return self.request(project + '/', 'PUT')
     
 
     def start(self, project, **parameters):
-        """Start a run. 'project' is the ID of the project, and **parameters are keyword arguments for
-        the global parameters. Returns a CLAMData object or raises exceptions. Note that no exceptions are raised on parameter errors, you have to check for those manually! (Use startsafe instead if want Exceptions on parameter errors)"""
+        """Start a run. ``project`` is the ID of the project, and ``parameters`` are keyword arguments for
+        the global parameters. Returns a ``CLAMData`` object or raises exceptions. Note that no exceptions are raised on parameter errors, you have to check for those manually! (Use startsafe instead if want Exceptions on parameter errors)::
+        
+            response = client.start("myprojectname", parameter1="blah", parameterX=4.2)
+            
+        """
         auth = None
         if 'auth' in parameters:
             auth = parameters['auth']
@@ -290,8 +303,12 @@ class CLAMClient:
         return self.request(project + '/', 'POST', urlencode(parameters))        
         
     def startsafe(self, project, **parameters):
-        """Start a run. 'project' is the ID of the project, and **parameters are keyword arguments for
-        the global parameters. Returns a CLAMData object or raises exceptions. This version, unlike start(), raises Exceptions (ParameterError) on parameter errors"""
+        """Start a run. ``project`` is the ID of the project, and ``parameters`` are keyword arguments for
+        the global parameters. Returns a ``CLAMData`` object or raises exceptions. This version, unlike ``start()``, raises Exceptions (``ParameterError``) on parameter errors.
+        
+            response = client.startsafe("myprojectname", parameter1="blah", parameterX=4.2)
+        
+        """
         
         try:
             data = self.start(project, **parameters)
@@ -305,22 +322,34 @@ class CLAMClient:
         
 
     def delete(self,project):
-        """aborts AND deletes a project"""
+        """aborts AND deletes a project::
+        
+            client.delete("myprojectname")
+        """
         return self.request(project + '/', 'DELETE')
 
     def abort(self, project): #alias
-        """aborts AND deletes a project (alias of delete() )"""    
+        """aborts AND deletes a project (alias of delete() )::
+        
+            client.abort("myprojectname")
+        """    
         return self.abort(project)
 
 
     def downloadarchive(self, project, targetfile, format = 'zip'):
-        """Download all output files as a single archive
+        """Download all output files as a single archive:
         
-        format - the format of the archive, can be 'zip','gz','bz2'
+        * *targetfile* - path for the new local file to be written 
+        * *format* - the format of the archive, can be 'zip','gz','bz2'
+            
+        Example::
+            
+            client.downloadarchive("myproject","allresults.zip","zip")
         
         """
-        #TODO: Redo
-        req = urllib2.urlopen(self.url + project + '/output/?format=' + format) #TODO: Auth support
+        #MAYBE TODO: Redo??
+        
+        req = urllib2.urlopen(self.url + project + '/output/?format=' + format) 
         CHUNK = 16 * 1024
         while True:
             chunk = req.read(CHUNK)
@@ -329,7 +358,13 @@ class CLAMClient:
 
 
     def getinputfilename(self, inputtemplate, filename):        
-        """Determine the final filename for an input file given an inputtemplate and a given filename. """
+        """Determine the final filename for an input file given an inputtemplate and a given filename. 
+        
+        Example::
+            
+            filenameonserver = client.getinputfilename("someinputtemplate","/path/to/local/file")
+        
+        """
         if inputtemplate.filename:
             filename = inputtemplate.filename
         elif inputtemplate.extension: 
@@ -343,6 +378,7 @@ class CLAMClient:
         return filename
 
     def _parseupload(self, node):
+        """Parse CLAM Upload XML Responses. For internal use"""
         if not isinstance(node,ElementTree._Element):
             try:
                 node = ElementTree.parse(StringIO(node)).getroot() 
@@ -374,10 +410,20 @@ class CLAMClient:
         sourcefile - The file you want to add: either an instance of 'file' or a string containing a filename 
         
         Keyword arguments (optional but recommended!):
-            filename - the filename on the server (will be same as sourcefile if not specified)
-            metadata - A metadata object.
-            metafile - A metadata file (filename)
-            Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
+            * ``filename`` - the filename on the server (will be same as sourcefile if not specified)
+            * ``metadata`` - A metadata object.
+            * ``metafile`` - A metadata file (filename)
+        
+        Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
+        
+        Example::
+            
+            client.addinputfile("myproject", "someinputtemplate", "/path/to/local/file")
+            
+        With metadata, assuming such metadata parameters are defined::
+            
+            client.addinputfile("myproject", "someinputtemplate", "/path/to/local/file", parameter1="blah", parameterX=3.5)
+            
         """
         if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
             data = self.get(project) #causes an extra query to server
@@ -431,11 +477,21 @@ class CLAMClient:
         inputtemplate - The input template you want to use to add this file (InputTemplate instance)
         contents - The contents for the file to add (string)
         
-        Keyword arguments (optional but recommended!):
-            filename - the filename on the server (mandatory!)
-            metadata - A metadata object.
-            metafile - A metadata file (filename)
-            Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
+        Keyword arguments:
+            * filename - the filename on the server (mandatory!)
+            * metadata - A metadata object.
+            * metafile - A metadata file (filename)
+            
+        Any other keyword arguments will be passed as metadata and matched with the input template's parameters.
+        
+        Example::
+            
+            client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt")
+            
+        With metadata, assuming such metadata parameters are defined::
+            
+            client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))            
+        
         """
         if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
             data = self.get(project) #causes an extra query to server
@@ -482,6 +538,6 @@ class CLAMClient:
 
 
     def upload(self,project, inputtemplate, sourcefile, **kwargs):
-        """Alias for addinputfile."""
+        """Alias for ``addinputfile()``"""
         return self.addinputfile(project, inputtemplate,sourcefile, **kwargs)
 

@@ -5,10 +5,13 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Webservice --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
+#       http://proycon.github.com/clam
+#
+#       Centre for Language Studies
+#       Radboud University Nijmegen
+#
 #       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       Tilburg University
 #       
 #       Licensed under GPLv3
 #
@@ -56,7 +59,7 @@ class CustomForbidden(web.webapi.HTTPError):
 try:
     import MySQLdb
 except ImportError:
-    print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql "
+    print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication"
 
 #Maybe for later: HTTPS support
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"

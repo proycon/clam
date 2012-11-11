@@ -5,10 +5,13 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Data API - Common data structures --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
+#       http://proycon.github.com/clam
+#
+#       Centre for Language Studies
+#       Radboud University Nijmegen
+#
 #       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       Tilburg University
 #       
 #       Licensed under GPLv3
 #
@@ -52,7 +55,7 @@ class HTTPError(Exception):
 class AuthenticationRequired(Exception):
     pass
     
-class CLAMFile:
+class CLAMFile:    
     basedir = ''
     
     def __init__(self, projectpath, filename, loadmetadata = True):
@@ -188,6 +191,7 @@ class CLAMFile:
         return list(iter(self))
             
     def copy(self, target):
+        """Copy or download this file to a new local file""" 
         if self.metadata and 'encoding' in self.metadata:
             f = codecs.open(target,'w', self.metadata['encoding'])
             for line in self:
@@ -312,10 +316,10 @@ class CLAMData(object):
         * ``completion``      - An integer between 0 and 100 indicating
                           the percentage towards completion.
         * ``parameters``      - List of parameters (but use the methods instead)        
-        * ``profiles``        - List of profiles ([ Profile ])
-        * ``input``           - List of input files  ([ CLAMInputFile ]); use ``inputfiles()`` instead for easier access
-        * ``output``          - List of output files ([ CLAMOutputFile ])
-        * ``projects``        - List of project IDs ([ string ])
+        * ``profiles``        - List of profiles (``[ Profile ]``)
+        * ``input``           - List of input files  (``[ CLAMInputFile ]``); use ``inputfiles()`` instead for easier access
+        * ``output``          - List of output files (``[ CLAMOutputFile ]``)
+        * ``projects``        - List of project IDs (``[ string ]``)
         * ``corpora``         - List of pre-installed corpora
         * ``errors``          - Boolean indicating whether there are errors in parameter specification
         * ``errormsg``        - String containing an error message
