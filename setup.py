@@ -31,7 +31,7 @@ setup(
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
     license = "GPL",
     keywords = "clam webservice rest nlp computational_linguistics rest",
-    url = "http://ilk.uvt.nl/clam",
+    url = "http://proycon.github.com/clam",
     packages=['clam','clam.common','clam.config','clam.external','clam.external.poster','clam.wrappers'],
     long_description=read('README'),
     classifiers=[
