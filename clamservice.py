@@ -43,6 +43,16 @@ from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebu
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
+
+
+class CustomForbidden(web.webapi.HTTPError):
+     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the """
+     
+     def __init__(self, message="forbidden"):
+         status = "403 Forbidden"
+         headers = {'Content-Type': 'text/html'}         
+         web.webapi.HTTPError.__init__(self, status, headers, message)    
+         
 try:
     import MySQLdb
 except ImportError:
@@ -249,7 +259,7 @@ class TestInterface(object):
     
     @RequireLogin()
     def GET(self, user = None):
-        raise web.webapi.Forbidden('Test error response')
+        raise CustomForbidden('Test error response')
             
 
 class CLAMService(object):
@@ -422,10 +432,10 @@ class Project(object):
         """Create project skeleton if it does not already exist (static method)"""
         if not user: user = 'anonymous'
         if not Project.validate(project):
-            raise web.webapi.Forbidden('Invalid project ID')
+            raise CustomForbidden('Invalid project ID')
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists") 
         if not project:
-            raise web.webapi.Forbidden('No project name') 
+            raise CustomForbidden('No project name') 
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
             os.mkdir(settings.ROOT + "projects/" + user)
@@ -698,10 +708,10 @@ class Project(object):
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise web.webapi.Forbidden(unicode(self.response(user, project, parameters)))
+            raise CustomForbidden(unicode(self.response(user, project, parameters)))
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise web.webapi.Forbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
+            raise CustomForbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
         else:
             #write clam.xml output file
             render = web.template.render(settings.CLAMDIR + '/templates')
@@ -926,7 +936,7 @@ class OutputFileHandler(object):
                 if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
                     os.unlink(Project.path(project, user) + "output/" + project + ".zip")
             else:
-                raise web.webapi.Forbidden('Invalid archive format') #TODO: message won't show
+                raise CustomForbidden('Invalid archive format') #TODO: message won't show
 
             path = Project.path(project, user) + "output/" + project + "." + format
             
@@ -968,7 +978,7 @@ class InputFileHandler(object):
         
         if filename.strip('/') == "":
             #this is a request for the index
-            raise web.webapi.Forbidden()
+            raise CustomForbidden()
         if len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'input/' +  "/".join(raw[:-1])):
@@ -1061,7 +1071,7 @@ class InputFileHandler(object):
                                     inputtemplate = t
                                     break                    
                 if not inputsource:
-                    raise web.webapi.Forbidden("No such inputsource exists")
+                    raise CustomForbidden("No such inputsource exists")
                 if not inputtemplate:
                     for profile in settings.PROFILES:
                         for t in profile.input:
@@ -1088,7 +1098,7 @@ class InputFileHandler(object):
                 else:
                     assert False                    
             else:
-                raise web.webapi.Forbidden("No filename or inputsource specified")
+                raise CustomForbidden("No filename or inputsource specified")
         else:
             #Simply forward to addfile
             return self.addfile(project,filename,user, postdata)
@@ -1137,7 +1147,7 @@ class InputFileHandler(object):
             
         for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
             if inputtemplate.unique:
-                raise web.webapi.Forbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
+                raise CustomForbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
             else:
                 if seq >= nextseq:
                     nextseq = seq + 1 #next available sequence number
@@ -1157,20 +1167,20 @@ class InputFileHandler(object):
         else:    
             if inputtemplate.filename:
                 if filename != inputtemplate.filename:
-                    raise web.webapi.Forbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+                    raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
                 #TODO LATER: add support for calling this with an actual number instead of #
             if inputtemplate.extension:
                 if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
                     #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                     filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
                 else:
-                    raise web.webapi.Forbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
+                    raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
             
         if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
-            raise web.webapi.Forbidden("Adding files for this inputtemplate must proceed through inputsource") #403
+            raise CustomForbidden("Adding files for this inputtemplate must proceed through inputsource") #403
             
         if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
-                raise web.webapi.Forbidden("Invalid converter specified: " + postdata['converter']) #403
+                raise CustomForbidden("Invalid converter specified: " + postdata['converter']) #403
 
         #Very simple security, prevent breaking out the input dir
         filename = filename.replace("..","")
@@ -1207,10 +1217,10 @@ class InputFileHandler(object):
                     if s.id.lower() == postdata['inputsource'].lower():
                         inputsource = s
                 if not inputsource:
-                    raise web.webapi.Forbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
+                    raise CustomForbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
             sourcefile = os.path.basename(inputsource.path)
         else:
-            raise web.webapi.Forbidden("No file, url or contents specified!")
+            raise CustomForbidden("No file, url or contents specified!")
             
 
 
@@ -1409,7 +1419,7 @@ class InputFileHandler(object):
                             f.write(postdata['contents'])
                             f.close()
                         except UnicodeError:
-                            raise web.webapi.Forbidden("Input file " + str(filename) + " is not in the expected encoding!")
+                            raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
                     elif 'inputsource' in postdata and postdata['inputsource']:                
                         #Copy (symlink!) from preinstalled data
                         os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
@@ -1504,11 +1514,11 @@ class InputFileHandler(object):
         if fatalerror:
             #fatal error return error message with 403 code
             printlog('Fatal Error during upload: ' + fatalerror)
-            raise web.webapi.Forbidden(head + fatalerror)
+            raise CustomForbidden(head + fatalerror)
         elif errors:
             #parameter errors, return XML output with 403 code
             printdebug('There were paramameter errors during upload!')
-            raise web.webapi.Forbidden(output)
+            raise CustomForbidden(output)
         else:
             #everything ok, return XML output with 200 code
             return output
