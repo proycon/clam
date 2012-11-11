@@ -46,7 +46,7 @@ settings.STANDALONEURLPREFIX = ''
 
 
 class CustomForbidden(web.webapi.HTTPError):
-     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the """
+     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the standard?"""
      
      def __init__(self, message="forbidden"):
          status = "403 Forbidden"
