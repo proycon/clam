@@ -119,25 +119,37 @@ class CLAMClient:
         self.url = url
         if user and password:
             self.authenticated = True
-            #for most things we use httplib2
-            #self.http.add_credentials(user, password)
-            
+            #for most things we use httplib2, no we don't anymore
+            #self.http.add_credentials(user, password)     
+            self.user = user
+            self.password = password       
+            initauth( self.authenticated)
+        else:
+            self.authenticated = False
+            initauth( self.authenticated)
+
+    
+    def initauth(self, doauth = True):
+        global VERSION
+        if doauth:
             #for file upload we use urllib2:
             self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm() 
             # this creates a password manager
-            self.passman.add_password(None, url, user, password) #realm will be automagically detected
+            self.passman.add_password(None, self.url, self.user, self.password) #realm will be automagically detected
             authhandler = urllib2.HTTPDigestAuthHandler(self.passman)
             opener = urllib2.build_opener(authhandler)
             opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
+            urllib2.install_opener(opener)            
         else:
-            self.authenticated = False
             opener = urllib2.build_opener()
             opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
+            urllib2.install_opener(opener)            
+            
+        
     
     
     def request(self, url='', method = 'GET', data = None):        
+        if self.authenticated: initauth(url)
         if data: 
             request = RequestWithMethod(self.url + url,data,method=method)
         else:
