@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CLAM Client API &mdash; CLAM 0.5-alpha1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.5-alpha1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CLAM 0.5-alpha1 documentation" href="index.html" />
+    <link rel="next" title="CLAM Formats" href="converters.html" />
+    <link rel="prev" title="Welcome to CLAM’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="converters.html" title="CLAM Formats"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to CLAM’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CLAM 0.5-alpha1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="clam-client-api">
+<h1>CLAM Client API<a class="headerlink" href="#clam-client-api" title="Permalink to this headline">¶</a></h1>
+<p>The CLAM Client API enables users to quickly write clients to interact with CLAM webservices of any kind. It is an abstraction layer over all lower-level network communication. Consult also the CLAM Data API, as responses returned by the webservice are almost always instantiated as CLAMData objects in the client.</p>
+<span class="target" id="module-common.client"></span><dl class="exception">
+<dt id="common.client.AuthRequired">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">AuthRequired</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.AuthRequired" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.BadRequest">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">BadRequest</tt><a class="headerlink" href="#common.client.BadRequest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="common.client.CLAMClient">
+<em class="property">class </em><tt class="descclassname">common.client.</tt><tt class="descname">CLAMClient</tt><big>(</big><em>url</em>, <em>user=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="common.client.CLAMClient.abort">
+<tt class="descname">abort</tt><big>(</big><em>project</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>aborts AND deletes a project (alias of delete() ):</p>
+<p>client.abort(&#8220;myprojectname&#8221;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.addinput">
+<tt class="descname">addinput</tt><big>(</big><em>project</em>, <em>inputtemplate</em>, <em>contents</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.addinput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an input file to the CLAM service. Explictly providing the contents as a string</p>
+<p>project - the ID of the project you want to add the file to.
+inputtemplate - The input template you want to use to add this file (InputTemplate instance)
+contents - The contents for the file to add (string)</p>
+<dl class="docutils">
+<dt>Keyword arguments:</dt>
+<dd><ul class="first last simple">
+<li>filename - the filename on the server (mandatory!)</li>
+<li>metadata - A metadata object.</li>
+<li>metafile - A metadata file (filename)</li>
+</ul>
+</dd>
+</dl>
+<p>Any other keyword arguments will be passed as metadata and matched with the input template&#8217;s parameters.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">addinput</span><span class="p">(</span><span class="s">&quot;myproject&quot;</span><span class="p">,</span> <span class="s">&quot;someinputtemplate&quot;</span><span class="p">,</span> <span class="s">&quot;This is a test.&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&quot;test.txt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With metadata, assuming such metadata parameters are defined:</p>
+<div class="highlight-python"><pre>client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))            </pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.addinputfile">
+<tt class="descname">addinputfile</tt><big>(</big><em>project</em>, <em>inputtemplate</em>, <em>sourcefile</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.addinputfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add/upload an input file to the CLAM service.</p>
+<p>project - the ID of the project you want to add the file to.
+inputtemplate - The input template you want to use to add this file (InputTemplate instance)
+sourcefile - The file you want to add: either an instance of &#8216;file&#8217; or a string containing a filename</p>
+<dl class="docutils">
+<dt>Keyword arguments (optional but recommended!):</dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal"><span class="pre">filename</span></tt> - the filename on the server (will be same as sourcefile if not specified)</li>
+<li><tt class="docutils literal"><span class="pre">metadata</span></tt> - A metadata object.</li>
+<li><tt class="docutils literal"><span class="pre">metafile</span></tt> - A metadata file (filename)</li>
+</ul>
+</dd>
+</dl>
+<p>Any other keyword arguments will be passed as metadata and matched with the input template&#8217;s parameters.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">addinputfile</span><span class="p">(</span><span class="s">&quot;myproject&quot;</span><span class="p">,</span> <span class="s">&quot;someinputtemplate&quot;</span><span class="p">,</span> <span class="s">&quot;/path/to/local/file&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With metadata, assuming such metadata parameters are defined:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">addinputfile</span><span class="p">(</span><span class="s">&quot;myproject&quot;</span><span class="p">,</span> <span class="s">&quot;someinputtemplate&quot;</span><span class="p">,</span> <span class="s">&quot;/path/to/local/file&quot;</span><span class="p">,</span> <span class="n">parameter1</span><span class="o">=</span><span class="s">&quot;blah&quot;</span><span class="p">,</span> <span class="n">parameterX</span><span class="o">=</span><span class="mf">3.5</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.create">
+<tt class="descname">create</tt><big>(</big><em>project</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new project:</p>
+<p>client.create(&#8220;myprojectname&#8221;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.delete">
+<tt class="descname">delete</tt><big>(</big><em>project</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>aborts AND deletes a project:</p>
+<p>client.delete(&#8220;myprojectname&#8221;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.downloadarchive">
+<tt class="descname">downloadarchive</tt><big>(</big><em>project</em>, <em>targetfile</em>, <em>format='zip'</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.downloadarchive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download all output files as a single archive:</p>
+<ul class="simple">
+<li><em>targetfile</em> - path for the new local file to be written</li>
+<li><em>format</em> - the format of the archive, can be &#8216;zip&#8217;,&#8217;gz&#8217;,&#8217;bz2&#8217;</li>
+</ul>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">client</span><span class="o">.</span><span class="n">downloadarchive</span><span class="p">(</span><span class="s">&quot;myproject&quot;</span><span class="p">,</span><span class="s">&quot;allresults.zip&quot;</span><span class="p">,</span><span class="s">&quot;zip&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.get">
+<tt class="descname">get</tt><big>(</big><em>project</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the project status. Returns CLAMData instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.getinputfilename">
+<tt class="descname">getinputfilename</tt><big>(</big><em>inputtemplate</em>, <em>filename</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.getinputfilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the final filename for an input file given an inputtemplate and a given filename.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">filenameonserver</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getinputfilename</span><span class="p">(</span><span class="s">&quot;someinputtemplate&quot;</span><span class="p">,</span><span class="s">&quot;/path/to/local/file&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.index">
+<tt class="descname">index</tt><big>(</big><big>)</big><a class="headerlink" href="#common.client.CLAMClient.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get index of projects. Returns CLAMData instance. Use CLAMData.projects for the index of projects.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.initauth">
+<tt class="descname">initauth</tt><big>(</big><em>doauth=True</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.initauth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise authentication, for internal use</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.request">
+<tt class="descname">request</tt><big>(</big><em>url=''</em>, <em>method='GET'</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use them instead</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.start">
+<tt class="descname">start</tt><big>(</big><em>project</em>, <em>**parameters</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a run. <tt class="docutils literal"><span class="pre">project</span></tt> is the ID of the project, and <tt class="docutils literal"><span class="pre">parameters</span></tt> are keyword arguments for
+the global parameters. Returns a <tt class="docutils literal"><span class="pre">CLAMData</span></tt> object or raises exceptions. Note that no exceptions are raised on parameter errors, you have to check for those manually! (Use startsafe instead if want Exceptions on parameter errors):</p>
+<p>response = client.start(&#8220;myprojectname&#8221;, parameter1=&#8221;blah&#8221;, parameterX=4.2)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.startsafe">
+<tt class="descname">startsafe</tt><big>(</big><em>project</em>, <em>**parameters</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.startsafe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a run. <tt class="docutils literal"><span class="pre">project</span></tt> is the ID of the project, and <tt class="docutils literal"><span class="pre">parameters</span></tt> are keyword arguments for
+the global parameters. Returns a <tt class="docutils literal"><span class="pre">CLAMData</span></tt> object or raises exceptions. This version, unlike <tt class="docutils literal"><span class="pre">start()</span></tt>, raises Exceptions (<tt class="docutils literal"><span class="pre">ParameterError</span></tt>) on parameter errors.</p>
+<p>response = client.startsafe(&#8220;myprojectname&#8221;, parameter1=&#8221;blah&#8221;, parameterX=4.2)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.client.CLAMClient.upload">
+<tt class="descname">upload</tt><big>(</big><em>project</em>, <em>inputtemplate</em>, <em>sourcefile</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <tt class="docutils literal"><span class="pre">addinputfile()</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.NoConnection">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">NoConnection</tt><a class="headerlink" href="#common.client.NoConnection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="common.client.NotFound">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">NotFound</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.NotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 404 - Not Found Errors</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.ParameterError">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">ParameterError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.ParameterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.PermissionDenied">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">PermissionDenied</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.PermissionDenied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.ServerError">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">ServerError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.ServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.client.TimeOut">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">TimeOut</tt><a class="headerlink" href="#common.client.TimeOut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="common.client.UploadError">
+<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">UploadError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.UploadError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to CLAM&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="converters.html"
+                        title="next chapter">CLAM Formats</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/client.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="converters.html" title="CLAM Formats"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to CLAM’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">CLAM 0.5-alpha1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Maarten van Gompel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

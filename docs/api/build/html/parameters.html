@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CLAM Parameters &mdash; CLAM 0.5-alpha1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.5-alpha1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CLAM 0.5-alpha1 documentation" href="index.html" />
+    <link rel="next" title="CLAM Viewerss" href="viewers.html" />
+    <link rel="prev" title="CLAM Formats" href="formats.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="viewers.html" title="CLAM Viewerss"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="formats.html" title="CLAM Formats"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CLAM 0.5-alpha1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-common.parameters">
+<span id="clam-parameters"></span><h1>CLAM Parameters<a class="headerlink" href="#module-common.parameters" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="common.parameters.AbstractParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">AbstractParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class from which all parameter classes have to be derived.</p>
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.access">
+<tt class="descname">access</tt><big>(</big><em>user</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.access" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method checks if the given user has access to see/set this parameter, based on the denyusers and/or allowusers option.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.allowusers">
+<tt class="descname">allowusers</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.allowusers" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can restrict this parameter to only be available to certain users, set the usernames you want to allow here, all others are denied</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.compilearg">
+<tt class="descname">compilearg</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method compiles the parameter into syntax that can be used on the shell, such as for example: &#8211;paramflag=value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.denyusers">
+<tt class="descname">denyusers</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.denyusers" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can restrict this parameter to only be available to certain users, set the usernames you want to deny access here, all others are allowed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.description">
+<tt class="descname">description</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>A clear description for this parameter, which the user will see</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.error">
+<tt class="descname">error</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this parameter has any validation errors, this will be set to an error message (by default set to None, meaning no error)</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="common.parameters.AbstractParameter.fromxml">
+<em class="property">static </em><tt class="descname">fromxml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.fromxml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Parameter instance (of any class derived from AbstractParameter!) given its XML description. Node can be a string containing XML or an lxml _Element</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.id">
+<tt class="descname">id</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A unique alphanumeric ID</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A representational name for this parameter, which the user will see</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="common.parameters.AbstractParameter.paramflag">
+<tt class="descname">paramflag</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.paramflag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The parameter flag that will be used when this parameter is passed on the commandline (using COMMAND= and $PARAMETERS) (by default set to None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.set">
+<tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.validate">
+<tt class="descname">validate</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate the parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.valuefrompostdata">
+<tt class="descname">valuefrompostdata</tt><big>(</big><em>postdata</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.xml">
+<tt class="descname">xml</tt><big>(</big><em>indent=''</em><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods renders an XML representation of this parameter, along with 
+its selected value, and feedback on validation errors</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.BooleanParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">BooleanParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parameter that takes a Boolean (True/False) value.</p>
+<dl class="method">
+<dt id="common.parameters.BooleanParameter.compilearg">
+<tt class="descname">compilearg</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.BooleanParameter.set">
+<tt class="descname">set</tt><big>(</big><em>value=True</em><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the boolean parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.BooleanParameter.unset">
+<tt class="descname">unset</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.unset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.BooleanParameter.valuefrompostdata">
+<tt class="descname">valuefrompostdata</tt><big>(</big><em>postdata</em><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.ChoiceParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">ChoiceParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.ChoiceParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choice parameter, users have to choose one of the available values, or multiple values if instantiated with multi=True.</p>
+<dl class="method">
+<dt id="common.parameters.ChoiceParameter.compilearg">
+<tt class="descname">compilearg</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.ChoiceParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.ChoiceParameter.validate">
+<tt class="descname">validate</tt><big>(</big><em>values</em><big>)</big><a class="headerlink" href="#common.parameters.ChoiceParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.ChoiceParameter.valuefrompostdata">
+<tt class="descname">valuefrompostdata</tt><big>(</big><em>postdata</em><big>)</big><a class="headerlink" href="#common.parameters.ChoiceParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.ChoiceParameter.xml">
+<tt class="descname">xml</tt><big>(</big><em>indent=''</em><big>)</big><a class="headerlink" href="#common.parameters.ChoiceParameter.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods renders an XML representation of this parameter, along with 
+its selected value, and feedback on validation errors</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.FloatParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">FloatParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="common.parameters.FloatParameter.validate">
+<tt class="descname">validate</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.FloatParameter.valuefrompostdata">
+<tt class="descname">valuefrompostdata</tt><big>(</big><em>postdata</em><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.IntegerParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">IntegerParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="common.parameters.IntegerParameter.set">
+<tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.IntegerParameter.validate">
+<tt class="descname">validate</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.IntegerParameter.valuefrompostdata">
+<tt class="descname">valuefrompostdata</tt><big>(</big><em>postdata</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.StaticParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">StaticParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.StaticParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a parameter that can&#8217;t be changed (it&#8217;s a bit of a contradiction, I admit). But useful for some metadata specifications.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.StringParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">StringParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.StringParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>String Parameter, taking a text value, presented as a one line input box</p>
+<dl class="method">
+<dt id="common.parameters.StringParameter.compilearg">
+<tt class="descname">compilearg</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.StringParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="common.parameters.StringParameter.validate">
+<tt class="descname">validate</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.StringParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.parameters.TextParameter">
+<em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">TextParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.TextParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text Parameter, taking a text value, presented as a multiline input box</p>
+<dl class="method">
+<dt id="common.parameters.TextParameter.compilearg">
+<tt class="descname">compilearg</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.TextParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="formats.html"
+                        title="previous chapter">CLAM Formats</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="viewers.html"
+                        title="next chapter">CLAM Viewerss</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/parameters.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="viewers.html" title="CLAM Viewerss"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="formats.html" title="CLAM Formats"
+             >previous</a> |</li>
+        <li><a href="index.html">CLAM 0.5-alpha1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Maarten van Gompel.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
