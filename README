@@ -15,11 +15,11 @@ CLAM is set up in a universal fashion, requiring minimal effort on the part of t
 
 CLAM is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users. 
 
-For installation instructions, make sure to read the provided 'INSTALL' file! For full documentation see the manual in docs/clam_manual.pdf , also accessible through the CLAM website at http://ilk.uvt.nl/clam . It is recommended to read this prior to starting with CLAM. 
+For installation instructions, make sure to read the provided 'INSTALL' file! For full documentation see the manual in docs/clam_manual.pdf , also accessible through the CLAM website at http://proycon.github.com/clam . It is recommended to read this prior to starting with CLAM. 
 
 
 
-IMPORTANT NOTICE: It's discouraged to download the zip packages or tarballs from github, either properly use git instead, or install CLAM from the Python Package Index (http://pypi.python.org/pypi), through easy_install . Using git and github, or the Python Package Index, you can easily keep clam up to date, for developers of new webservices, the git/github approach is the recommended one. To obtain CLAM from github:
+IMPORTANT NOTICE: It's discouraged to download the zip packages or tarballs from github, either properly use git instead, or install CLAM from the Python Package Index (http://pypi.python.org/pypi/CLAM), through easy_install . Using git and github, or the Python Package Index, you can easily keep clam up to date, for developers of new webservices, the git/github approach is the recommended one. To obtain CLAM from github:
 
   $ git clone git://github.com/proycon/clam.git
   

@@ -15,8 +15,8 @@ if not os.path.exists('clam'):
     if not os.path.exists('build'): os.mkdir('build')   
     os.chdir('build')
     if not os.path.exists('clam'): os.mkdir('clam')
-    os.system('cp -Rpdfv ../*py ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
-    os.system('mv -f clam/setup.py .')
+    os.system('cp -Rpdfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
+    os.system('mv -f clam/setup.py clam/setup.cfg .')
     os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')  
    
 
@@ -50,6 +50,6 @@ setup(
             'startclamservice = clam.startclamservice:main', #alias 
         ]
     },
-    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/*'] },
     install_requires=['web.py >= 0.33','lxml >= 2.2']
 )
