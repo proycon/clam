@@ -76,11 +76,31 @@ This documentation is split into two parts: a chapter for service providers, peo
 
 CLAM is written in Python 2.5, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver; no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver. Supported are: Apache, nginx or lighthttpd, though others may work too.
 
- Note that the software is designed for Unix-based systems (e.g. Linux or BSD) only. It also has been verified to run on Mac OS X.
+The software is designed for Unix-based systems (e.g. Linux or BSD) only. It also has been verified to run on Mac OS X. Windows is not supported.
 
 \subsection{Installation}
 
-The following software is required to run CLAM. These will be available in any modern Linux or BSD distribution:
+CLAM is available from the Python Package Index, or directly from github (\url{http://github.com/proycon/clam}. Using the Python Package Index, installation is easy on Debian/Ubuntu based Linux distributions:
+
+\begin{verbatim}
+$ sudo easy_install clam
+\end{verbatim}
+
+If easy\_install is not yet available on your system, install it as follows on Debian/Ubuntu based distribution: 
+
+\begin{verbatim}
+  $ sudo apt-get install python-setuptools
+\end{verbatim}
+
+Or for Red Hat/Fedora/CentOS:
+
+\begin{verbatim}
+  # yum install python-setuptools
+\end{verbatim}
+
+After installation, CLAM is installed alongside all other Python packages, usually in a path such as \texttt{/usr/lib/python2.7/dist-packages}. The exact path and your Python version may differ.
+ 
+The following software is required to run CLAM, the \emph{easy install} process should obtain and install these dependencies automatically, except for Python itself:
 
 \begin{itemize}
 \item python 2.5 (or a higher 2.x version)
@@ -90,10 +110,6 @@ The following software is required to run CLAM. These will be available in any m
 %\item python-libxslt1
 %\item python-django
 \end{itemize}
-
-On Debian or Ubuntu systems, the following should suffice to install these dependencies, provided that \texttt{python-webpy} has version 0.33 or above:
-
-\texttt{\$ sudo apt-get install python-webpy python-lxml python-mysqldb}
 
 More detailed instructions, including for Mac OS X, can be found in the INSTALL file included with CLAM.
 
@@ -119,7 +135,7 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 Starting the service in stand-alone mode is done by launching clamservice.py with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use. The below example shows how to launch the supplied ``Text Statistics'' demo-service:
 
-\texttt{\$ ./clamservice.py clam.config.textstats}
+\texttt{\$ clamservice clam.config.textstats}
 
 Setting up the service to be used with an already existing webserver requires some additional work. This is explained below for Apache and nginx:
 
@@ -789,11 +805,7 @@ clamdata = clam.common.data.getclamdata(datafile)
 
 The first statements parse the command line arguments. The last statement returns a CLAMData instance, containing all data your wrapper might need.
 
-For an extensive overview of the CLAMData class, we at this stage refer to the CLAM Data API Documentation at \url{http://ilk.uvt.nl/~mvgompel/clamapi/}.
-
-\begin{devnotes}
-This section will be expanded at a later stage
-\end{devnotes}
+For an extensive overview of the \texttt{CLAMData} class, we refer to the CLAM Data API Documentation at \url{http://packages.python.org/CLAM}.
 
 
 \chapter{Documentation for Service Clients}
@@ -804,13 +816,9 @@ When writing a client for a CLAM webservice, Python users benefit greatly from t
 
 Appendix~\ref{ap:restspec} of this documentation provides a full specification of the RESTful API, which will provide the technical details necessary for an implementation of a client. Moreover, each CLAM service offers an automatically tailored RESTful specification specific to the service, and example client code in Python, by pointing your browser to your service on the path \texttt{/info/}.
 
-Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/~mvgompel/clamapi}/.
+Users of the CLAM Client API can study the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://packages.python.org/CLAM} .
 
 There is also a generic CLAM Client, \texttt{clam/clamclient.py}, which offers a command line interface to \emph{any} CLAM service.
-
-\begin{devnotes}
-More elaborate documentation yet to be written..
-\end{devnotes}
 
 \appendix
 \chapter{RESTful specification}
