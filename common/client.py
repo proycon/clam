@@ -123,10 +123,10 @@ class CLAMClient:
             #self.http.add_credentials(user, password)     
             self.user = user
             self.password = password       
-            initauth( self.authenticated)
+            self.initauth( self.authenticated)
         else:
             self.authenticated = False
-            initauth( self.authenticated)
+            self.initauth( self.authenticated)
 
     
     def initauth(self, doauth = True):
@@ -149,7 +149,7 @@ class CLAMClient:
     
     
     def request(self, url='', method = 'GET', data = None):        
-        if self.authenticated: initauth(url)
+        if self.authenticated: self.initauth(url)
         if data: 
             request = RequestWithMethod(self.url + url,data,method=method)
         else:
