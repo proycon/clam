@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.7.6} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.8} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -105,6 +105,8 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 
 \begin{itemize}
 \item \texttt{clamservice.py} -- The webservice itself, the command to be invoked to start it.
+\item \texttt{clamclient.py} -- A very generic CLAM client, to be used from the command-line
+\item \texttt{clamdispatcher.py} -- The default dispatcher for launching wrapper scripts
 \item \texttt{config/} -- The directory containing service configuration files. Place you service configuration here.
 \item \texttt{config/textstats.py} -- An example configuration.
 \item \texttt{common/} -- Common Python modules for CLAM.
@@ -123,7 +125,7 @@ Setting up the service to be used with an already existing webserver requires so
 
 \subsection{Using CLAM with Apache 2}
 
-In order to run CLAM in Apache, you have to install and configure several files. We will be using WSGI, an interface between Apache and Python. Follow the instructions:
+In order to run CLAM in Apache, you have to install and configure several files. We will be using WSGI, through \texttt{mod\_wsgi}, an interface between Apache and Python. Follow the instructions:
 
 \begin{enumerate}
 \item Install \texttt{mod\_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
@@ -144,15 +146,14 @@ In order to run CLAM in Apache, you have to install and configure several files.
  </Directory>
 \end{verbatim}
 
-The \texttt{WSGIDaemonProcess} directive goes on one line, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. You can either let CLAM handle authentication (HTTP Digest Authentication), in which case you need to set \texttt{WSGIPassAuthorization On}, as by default it is disabled, or you can let Apache itself handle authentication.
+The \texttt{WSGIDaemonProcess} directive goes on one line, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. You can either let CLAM handle authentication (\emph{HTTP Digest Authentication}), in which case you need to set \texttt{WSGIPassAuthorization On}, as by default it is disabled, or you can let Apache itself handle authentication.
 
 \item Restart Apache
 \end{enumerate}
 
-Note that we run WSGI in Daemon mode. For the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}. Important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes, and maximum-requests can also be configured to optimise performance and system resources according to your needs.
+Note that we run WSGI in Daemon mode using the \texttt{WSGIDaemonProcess} and \texttt{WSGIProcessGroup} directives, as opposed to embedded mode. This is the recommended way of running CLAM. Whenever any code changes are made, simply \texttt{touch} the WSGI file (updating its modification time), and the changes will be immediately available. Embedded mode would require an apache restart when modifications are made, and it may also lead to problems with the HTTP Digest Authentication as authentication keys (nonces) may not be retainable in memory due to constant reloads. For authentication the line \texttt{WSGIPassAuthorization On} is vital, as otherwise user credentials will never each CLAM.
 
-
-
+ or the specific options to the WSGIDaemonProcess directive you can check \url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}. Important settings are the user and group the daemon will run as, the home directory it will run in. The number of threads, processes, and maximum-requests can also be configured to optimise performance and system resources according to your needs.
 
 \subsection{Using CLAM with nginx}
 
@@ -275,25 +276,65 @@ When CLAM runs in an existing webserver without its own virtual host, it is ofte
 
 In order to keep server load manageable, three methods are configurable in the service configuration file. First, you can set the variable \texttt{REQUIREMEMORY} to the minumum amount of free memory that has to be available (in megabytes, and not considering swap memory!). If not enough memory is free, users will not be able to launch new processes, but will receive an HTTP 500 error instead. Second, there is the \texttt{MAXLOADAVG} variable; if the 5-minute load average exceeds this number, new processes will also be rejected. Third, there is \texttt{MINDISKSPACE} and \texttt{DISK}. This sets a constraint on the minimum amount of free disk space in megabytes on the specified DISK (for example: \texttt{/dev/sda1}), which should be the disk holding \texttt{ROOT}. If any of these values is set to zero, they are disabled. Note though that this makes your system vulnerable to denial-of-service attacks by possibly malicious users, especially if no user authentication is configured!
 
+Extra resource control is handled by the CLAM Dispatcher; a small program that launches and monitors your wrapper script. In your service configuration file you can configure the variable \texttt{DISPATCHER\_MAXRESMEM} and \texttt{DISPATCHER\_MAXTIME}. The former is the maximum memory consumption of your process, in megabytes. The latter is the maximum run-time of your process in seconds. Programs that exceed this limit will be automatically aborted. The dispatcher will check with a certain interval, configured in \texttt{DISPATCHER\_POLLINTERVAL} (in seconds), if the limits have been exceeded and will take necessary action.  
+  
+
 If you for some reason do not want to make use of the web application in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want to make the webservice available at a different URL than the webapplication, then there is a small trick you can apply by setting \texttt{WEBSERVICEGHOST} to a prefix that the webservice will be made available on \emph{without} webapplication support. If you set for example \texttt{WEBSERVICEGHOST = 'ws'} then there will be an additional ``ghosted'' webservice without webapplication interface running on \texttt{http://yourdomain.com/ws/}. This option is included to accomodate the wish to apply two distinct authentication schemes outside of CLAM. 
 
 
 \subsection{User Authentication}
 
-Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. 
+Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Digest Authentication, which as opposed to HTTP Basic Authentication computes a hash of the username and password client-side and transmits that hash, rather than a plaintext password. User passwords are therefore only available to CLAM in hashed form. User authentication is not mandatory, but for any world-accessible environment it is most strongly recommended, for obvious security reasons. 
 
-A list of users can be defined in \texttt{USERS} in the service configuration file. This is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, a string reprenting the security realm (by default the system ID), and the password. Projects will only be accessible and visible to their owners, unless no authentication is used at all, in which case everybody can see all projects.
+A list of user accounts and passwords can be defined in \texttt{USERS} in the service configuration file itself. This is a simple method allowing you to quickly define users, but it is not a very scalable method. The \texttt{USERS} variable is a dictionary of usernames mapped to an md5 hash computed on the basis of the username, a string representing the security realm (by default the system ID), and the password. Projects will only be accessible and visible to their owners, unless no authentication is used at all, in which case everybody can see all projects. An example of a configuration with plain text password, converted on the fly to hashes, is found below:
 
+\begin{verbatim}
+    USERS = {
+        'bob': pwhash('bob', SYSTEM_ID, 'secret'), 
+		'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
+    }
+\end{verbatim}
+
+However, computing hashes on-the-fly like in the above example is quite insecure and not recommended. You should pre-compute the hashes add those instead:
+
+\begin{verbatim}
+    USERS = {
+        'bob': '6d72b6376858cf3c618c826fab1b0109',
+		'alice': 'e445370f57e19a8bfa454404ba3892cc',
+    }
+\end{verbatim}
+
+This precomputation can be done in an interactive python session, executed from the CLAM directory. Make sure to change \texttt{yourconfig} in the below example to your actual service configuration file:
+
+\begin{verbatim}
+$ python
+>>> from clam.common.digestauth import pwhash
+>>> import clam.config.yourconfig as settings
+>>> pwhash('alice', settings.SYSTEM_ID, 'secret')
+'e445370f57e19a8bfa454404ba3892cc'
+\end{verbatim}
 
 %You can mark certain users as being administrators using the \texttt{ADMINS} list. Administrators can see and modify all projects.
 
-User authentication is not mandatory, but for any world-accessible environment it is most strongly recommended, for obvious security reasons. Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
+Extra security may also be provided on a more global webserver level, rather than in CLAM itself.
 
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=} to set this. See section \ref{sec:parameters}. A common use would be to define one user to be the guest user, for instance the user named ``guest'', and set \texttt{denyusers=['guest']} on the parameters you do not want the guest user to use.
 
-Rather than using \texttt{USERS} to define a user database in your service configuraton file, a more sophisticated method is available using MySQL. The configuration variable \texttt{USERS\_MYSQL} can be configured to point to a table in a MySQL database somewhere, the fields ``user'' and ``password'' in this table will subsequently be used to authenticate against, the password field is again a hashed password in the same fashion as in \texttt{USERS}.
+Rather than using \texttt{USERS} to define a user database in your service configuration file, a more sophisticated method is available using MySQL. The configuration variable \texttt{USERS\_MYSQL} can be configured, instead of \texttt{USERS}, to point to a table in a MySQL database somewhere; the fields ``username'' and ``password'' in this table will subsequently be used to authenticate against. Custom field names are also possible. This approach allows you to use existing MySQL-based user databases. The password field is again a hashed password in the same fashion as in \texttt{USERS}, so it never contains a plaintext password. \texttt{USERS\_MYSQL} is set as a Python dictionary with the following configurable keys:
 
-For advanced service providers wanting to use external authentication schemes, CLAM supports the \texttt{PREAUTHHEADER} configuration directive, the value of which is a string containing an HTTP header which CLAM may read to obtain the authanticated username. This should be set by an authentication system prior to passing control to CLAM. An example of such a system is Shibboleth. Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in user system, unless this is set to None. When such a scheme is used, proper care has to be taken to ensure that the HTTP headers can not be forged by end-users themselves! If usernames that come from external pre-authentication methods are different from those in the internal \texttt{USERS} map (if used at all), then an explicit mapping between the two may be specified in the \texttt{PREAUTHMAPPING} dictionary. Note that this pre-authentication mechanism never applies to the ``ghosted'' webservice, if enabled through \texttt{WEBSERVICEGHOST}. Only the regular authentication method is supported for the webservice ghost.
+\begin{verbatim}
+    USERS_MYSQL = {
+        'host': 'localhost',  #(default)
+        'user': 'mysql_user',        
+        'password': 'secret_mysql_password',
+        'database': 'clamopener',
+        'table': 'clamusers_clamusers',
+        'userfield': 'username',      #(default)
+        'passwordfield': 'password',  #(default)
+    }
+\end{verbatim}
+
+For advanced service providers wanting to use external authentication schemes, CLAM supports the \texttt{PREAUTHHEADER} configuration directive, the value of which is a string containing an HTTP header which CLAM may read to obtain the authenticated username. This should be set by an authentication system prior to passing control to CLAM. An example of such a system is Shibboleth. Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in user system, unless this is set to None. When such a scheme is used, proper care has to be taken to ensure that the HTTP headers can not be forged by end-users themselves! If usernames that come from external pre-authentication methods are different from those in the internal \texttt{USERS} map (if used at all), then an explicit mapping between the two may be specified in the \texttt{PREAUTHMAPPING} dictionary. Note that this pre-authentication mechanism never applies to the ``ghosted'' webservice, if enabled through \texttt{WEBSERVICEGHOST}. Only the regular authentication method is supported for the webservice ghost.
 
 \subsection{Command Definition}
 \label{sec:command}
@@ -718,7 +759,7 @@ The wrapper script takes the arguments as specified in \texttt{COMMAND} in the s
 \item The wrapper script is always started with the current working directory set to the selected project directory.
 \end{itemize}
 
-The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and make all parameters and input files (with metadata) directly accessible.
+The wrapper script can be written in any language. Python developers will have the big advantage that they can directly tie into the CLAM Data API, which handles things such as reading the \texttt{clam.xml} data file, and makes all parameters and input files (with metadata) directly accessible.
 
 \subsection{CLAM Data API}
 
@@ -761,8 +802,7 @@ CLAM is designed as a RESTful webservice, which implies that usage of the four H
 
 When writing a client for a CLAM webservice, Python users benefit greatly from the CLAM Client API, which in addition to the CLAM Data API provides a friendly high-level interface for communication with a CLAM webservice and the handling of its data. Both are shipped as an integral part of CLAM by default. Using this API greatly facilitates writing a client for your webservice in a limited amount of time, so it is an approach to be recommended. Nevertheless, there are many valid reasons one might wish to write a client from scratch, not least as this allows you to use any programming language of your choice, or better integrate a CLAM webservice as a part of an existing application.
 
-Appendix~\ref{ap:restspec} of this documentation provides a full specification of the RESTful API, which will provide the technical details necessary for an implementation of a client.
-
+Appendix~\ref{ap:restspec} of this documentation provides a full specification of the RESTful API, which will provide the technical details necessary for an implementation of a client. Moreover, each CLAM service offers an automatically tailored RESTful specification specific to the service, and example client code in Python, by pointing your browser to your service on the path \texttt{/info/}.
 
 Users of the CLAM Client API are best off by studying the example client provided with CLAM: \texttt{clam/clients/textstats.py}. This client is heavily commented. Moreover, an API reference can be found at \url{http://ilk.uvt.nl/~mvgompel/clamapi}/.
 
@@ -771,7 +811,6 @@ There is also a generic CLAM Client, \texttt{clam/clamclient.py}, which offers a
 \begin{devnotes}
 More elaborate documentation yet to be written..
 \end{devnotes}
-
 
 \appendix
 \chapter{RESTful specification}

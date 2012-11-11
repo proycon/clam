@@ -1,8 +1,21 @@
-0.7.10) [Nov 2012]
+(for a complete and exact overview, consult 'git log')
+
+0.8.0) [Nov 2012]
 - Authentication fixes/improvements: Allowing nonceskip, added DIGESTOPAQUE
+- Client fix: digest authentication reinitialised with every call (was occassionaly lost)
 - Mysql authentication fixes
 - Clamopener integration
 - External log support
+
+0.7.9) [Oct/Nov 2012]
+- Dispatcher monitors resource use (memory/run time) and may abort processes.
+
+0.7.8) [Aug/Sep 2012]
+- Fix regarding duplicate extensions
+- Service for Frog updated for latest Frog version
+- Added to Python Package Index
+- Added RelaxNG schema for CLAM XML
+- Dispatcher fixes
 
 0.7.7) [May 2012]
 - Important fix in handling of boolean parameters
