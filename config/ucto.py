@@ -21,6 +21,7 @@ from clam.common.converters import *
 from clam.common.digestauth import pwhash
 from sys import path 
 from os import uname, environ
+from base64 import b64decode as D
 
 REQUIRE_VERSION = 0.7
 
