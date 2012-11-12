@@ -43,7 +43,7 @@ class AbstractViewer(object):
         """Returns the view itself, in xhtml (it's recommended to use web.py's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
         url = self.url(file) + urlencode(kwargs)
         if url: #is the resource external?
-            if self.embedded:
+            if self.embed:
                 #fetch
                 req = urllib2.urlopen(url)
                 for line in req.readlines():
@@ -105,7 +105,7 @@ class FoLiAViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        xml_doc = etree.parse(StringIO("".join(file.readlines())))
+        xml_doc = etree.fromstring("".join(file.readlines()))
         return str(transform(xml_doc))
 
 
