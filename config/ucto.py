@@ -40,11 +40,11 @@ USERS = None #Enable this instead if you want no authentication
 
 # ================ Server specific configurations for CLAM ===============
 host = uname()[1]
-if host == 'aurora' or host == 'roma': #proycon's laptop/server
+if host == 'galactica' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/ucto.clam/"
     PORT = 9001
-    BINDIR = "/usr/local/bin/"
+    BINDIR = "/home/proycon/local/bin/"
 elif host == 'applejack': #Nijmegen
     CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
     ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
@@ -160,7 +160,7 @@ PROFILES = [
 
 PARAMETERS =  [ 
     ('Tokenisation options', [
-        BooleanParameter('xml','FoLiA XML Output','Output FoLiA XML (preliminary!)'),
+        BooleanParameter('xml','FoLiA XML Output','Output FoLiA XML',value=True),
         BooleanParameter('verbose','Verbose tokeniser output','Outputs token types per token, one token per line',paramflag='-V',forbid=['sentenceperline','xml'] ),
         BooleanParameter('sentenceperline','Sentence per line','Output each sentence on a single line. Does not work in verbose or XML mode.', paramflag='-n', forbid=['verbose','xml']),    
         BooleanParameter('lowercase','Lowercase','Convert text to lowercase',forbid=['uppercase', 'xml'], paramflag='-l'),

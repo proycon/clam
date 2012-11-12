@@ -292,13 +292,13 @@ def processparameters(postdata, parameters, user=None):
         
         #solve dependency issues now all values have been set:
         for parameter in tempparlist:    
-            if parameter.hasvalue and (parameter.forbid or parameter.require):
+            if parameter.constrainable() and (parameter.forbid or parameter.require):
                 for parameter2 in tempparlist:
-                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.hasvalue:
+                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.constrainable():
                         parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
                         clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
                         errors = True
-                    if parameter.require and parameter2.id in parameter.require and not parameter2.hasvalue:
+                    if parameter.require and parameter2.id in parameter.require and not parameter2.constrainable():
                         parameter.error = parameter2.error = "Parameter '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
                         clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
                         errors = True                     

@@ -44,7 +44,7 @@
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value">1</xsl:attribute>
-        <xsl:if test="@value = 1">
+        <xsl:if test="@value = 1 or @value = 'True'">
             <xsl:attribute name="checked">checked</xsl:attribute>     
         </xsl:if>
     </xsl:element>

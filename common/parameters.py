@@ -78,6 +78,10 @@ class AbstractParameter(object):
             else:
                 raise Exception("Unknown attribute specified for parameter: " + key + "=" + str(value))
 
+    def constrainable(self):
+        """Should this  parameter be used in checking contraints?"""
+        return self.hasvalue
+
     def validate(self,value):
         """Validate the parameter"""
         self.error = None #reset error
@@ -226,6 +230,11 @@ class BooleanParameter(AbstractParameter):
 
         super(BooleanParameter,self).__init__(id,name,description, **kwargs)
 
+
+    def constrainable(self):
+        """Should this parameter be used in checking contraints?"""
+        return self.value
+
     def set(self, value = True):
         """Set the boolean parameter"""
         if value is True or value == 1 or ( (isinstance(value, str) or isinstance(value, unicode)) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ): 
@@ -250,7 +259,7 @@ class BooleanParameter(AbstractParameter):
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
         if not self.id in postdata:
-            return None
+            return False #False instead of None
         elif self.id in postdata and ( (isinstance(postdata[self.id], bool) and postdata[self.id]) or postdata[self.id] == 1 or postdata[self.id] == '1'  or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
             return True #postdata[self.id]        
         else: 
@@ -271,9 +280,9 @@ class StringParameter(AbstractParameter):
     """String Parameter, taking a text value, presented as a one line input box"""
     
     def __init__(self, id, name, description = '', **kwargs):
-        """Keyword arguments:
+        """Keyword arguments::
         
-        maxlength - The maximum length of the value, in number of characters
+            ``maxlength`` - The maximum length of the value, in number of characters
         """
         
         self.maxlength = 0 #unlimited
@@ -483,6 +492,9 @@ class IntegerParameter(AbstractParameter):
               
         super(IntegerParameter,self).__init__(id,name,description, **kwargs)
 
+    def constrainable(self):
+        """Should this parameter be used in checking contraints?"""
+        return self.value
 
     def validate(self, value):
         self.error = None
@@ -538,6 +550,11 @@ class FloatParameter(AbstractParameter):
                 del kwargs[key]
 
         super(FloatParameter,self).__init__(id,name,description, **kwargs)
+
+    def constrainable(self):
+        """Should this parameter be used in checking contraints?"""
+        return self.value
+    
 
     def validate(self, value):
         self.error = None
