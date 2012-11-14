@@ -35,7 +35,7 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.8.0'
+VERSION = '0.8.1'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
@@ -223,7 +223,7 @@ class CLAMClient:
     def _parse(self, content):    
         """Parses CLAM XML data. For internal use."""
         if content.find('<clam') != -1:
-            data = CLAMData(content)
+            data = CLAMData(content,self)
             if data.errors:
                 error = data.parametererror()
                 if error:
@@ -234,7 +234,7 @@ class CLAMClient:
 
     def _parse_old(self, response, content):    
         if content.find('<clam') != -1:
-            data = CLAMData(content)
+            data = CLAMData(content,self)
             if data.errors:
                 error = data.parametererror()
                 if error:

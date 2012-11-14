@@ -39,7 +39,7 @@ from clam.common.util import RequestWithMethod
 
 #clam.common.formats is deliberately imported _at the end_ 
 
-VERSION = '0.8.0'
+VERSION = '0.8.1'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
@@ -58,7 +58,7 @@ class AuthenticationRequired(Exception):
 class CLAMFile:    
     basedir = ''
     
-    def __init__(self, projectpath, filename, loadmetadata = True):
+    def __init__(self, projectpath, filename, loadmetadata = True, client = None):
         """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
         self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
         self.projectpath = projectpath
@@ -74,6 +74,7 @@ class CLAMFile:
                 
         self.viewers = []
         self.converters = []
+        self.client = client
         
                 
     def attachviewers(self, profiles):
@@ -120,11 +121,14 @@ class CLAMFile:
             else:
                 raise IOError(2, "No metadata found!")
         else:
+            if self.client: self.client.initauth()
             try:
                 response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))   
                 xml = response.read()
             except:
-                raise HTTPError(2, "Can't download metadata for " + self.filename)
+                extramsg = ""
+                if not self.client: extramsg = "No client was associated with this CLAMFile, associating a client is necessary when authentication is needed"
+                raise HTTPError(2, "Can't download metadata for " + self.filename + ". " + extramsg)
             
             #if response.status != 200: #TODO: Verify
             #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
@@ -143,6 +147,7 @@ class CLAMFile:
                     yield line
         else:        
             fullpath = self.projectpath + self.basedir + '/' + self.filename
+            if self.client: self.client.initauth()
             response = urllib2.urlopen(urllib2.Request( fullpath))      
             for line in response.readlines():
                 if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
@@ -171,6 +176,7 @@ class CLAMFile:
             
             return True
         else:            
+            if self.client: self.client.initauth()
             response = urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))   
             return True
          
@@ -225,7 +231,7 @@ def getclamdata(filename):
     f = open(filename,'r')
     xml = f.read(os.path.getsize(filename))
     f.close()
-    return CLAMData(xml, True)
+    return CLAMData(xml, None, True)
     
     
 def processparameter(postdata, parameter, user=None):
@@ -327,7 +333,7 @@ class CLAMData(object):
     Note that depending on the current status of the project, not all may be available.
     """
 
-    def __init__(self, xml, localroot = False):
+    def __init__(self, xml, client=None, localroot = False):
         """Initialises a CLAMData object by passing pass a string containing the full CLAM XML response. It will be automatically parsed. This is usually not called directly but instantiated in system wrapper scripts using::
             
             data = clam.common.data.getclamdata("clam.xml")
@@ -375,6 +381,9 @@ class CLAMData(object):
         
         #: String containing an error message if an error occured
         self.errormsg = ""
+
+        self.client = client
+
 
         self.parseresponse(xml, localroot)
         
