@@ -348,7 +348,7 @@ class CLAMClient:
         
         """
         #MAYBE TODO: Redo??
-        
+        self.initauth()
         req = urllib2.urlopen(self.url + project + '/output/?format=' + format) 
         CHUNK = 16 * 1024
         while True:

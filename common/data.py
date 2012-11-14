@@ -64,6 +64,7 @@ class CLAMFile:
         self.projectpath = projectpath
         self.filename = filename
         self.metadata = None
+        self.client = client
         if loadmetadata:
             try:
                 self.loadmetadata()
@@ -74,7 +75,6 @@ class CLAMFile:
                 
         self.viewers = []
         self.converters = []
-        self.client = client
         
                 
     def attachviewers(self, profiles):
