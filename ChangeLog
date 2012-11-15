@@ -1,5 +1,9 @@
 (for a complete and exact overview, consult 'git log')
 
+0.8.1) [Nov 2012]
+- Client fixes for digest authentication, CLAMFile now support authentication by binding to client
+- Fix in web-app, return to index and abort should redirect properly to index now
+
 0.8.0) [Nov 2012]
 - Authentication fixes/improvements: Allowing nonceskip, added DIGESTOPAQUE
 - Client fix: digest authentication reinitialised with every call (was occassionaly lost)

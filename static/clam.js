@@ -119,7 +119,7 @@ $(document).ready(function(){
             url: baseurl + '/' + project + '/', 
             dataType: "text", 
             success: function(response){ 
-                window.location.href = baseurl; /* back to index */
+                window.location.href = baseurl + '/'; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -152,7 +152,7 @@ $(document).ready(function(){
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(event){
-            window.location.href = baseurl; /* refresh */
+            window.location.href = baseurl + '/'; /* refresh */
        });
    }  
    
