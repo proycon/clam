@@ -1,5 +1,5 @@
 from django import forms
-from clamopener.clamusers.models import CLAMUsers
+from clamopener.clamusers.models import CLAMUsers, PendingUsers
 from django.core.validators import validate_email
 from clamopener import settings
 
@@ -17,7 +17,7 @@ class RegisterForm(forms.ModelForm):
     password2 = forms.CharField(label="Password (again)",  widget=forms.PasswordInput, max_length = 60, required=True )    
         
     class Meta:
-        model = CLAMUsers
+        model = PendingUsers
         fields = ('username', 'fullname', 'institution','mail','password')
         widgets = {
             'password': forms.PasswordInput,

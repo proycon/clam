@@ -1,7 +1,7 @@
 from django.shortcuts import render_to_response
 from clamopener import settings
 from clamopener.clamusers.forms import RegisterForm
-from clamopener.clamusers.models import CLAMUsers
+from clamopener.clamusers.models import CLAMUsers,PendingUsers
 from django.http import HttpResponse, HttpResponseForbidden,HttpResponseNotFound
 from django.core.mail import send_mail
 from django.core.context_processors import csrf
@@ -27,10 +27,10 @@ def activate(request, userid):
     if request.method == 'POST':
         if hashlib.md5(request.POST['pw']).hexdigest() == settings.MASTER_PASSWORD:            
             try:
-                clamuser = CLAMUsers.objects.get(pk=int(userid))
+                pendinguser = PendingUsers.objects.get(pk=int(userid))
             except:
                 return HttpResponseNotFound("No such user", content_type="text/plain")    
-            clamuser.active = True
+            clamuser = CLAMUsers(username=pendinguser.username, password=pendinguser.password,fullname=pendinguser.fullname, institution=pendinguser.institution, mail=pendinguser.mail,active=True)
             clamuser.save()
             send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has been reviewed and activated.', settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
             return HttpResponse("Succesfully activated", content_type="text/plain")
@@ -39,20 +39,18 @@ def activate(request, userid):
     
     else:
         try:
-            clamuser = CLAMUsers.objects.get(pk=int(userid))
+            pendinguser = PendingUsers.objects.get(pk=int(userid))
         except:
-            return HttpResponseNotFound("No such user", content_type="text/plain")    
-        if clamuser.active:
-            return HttpResponse("User is already active")
-        else:
-            c = RequestContext(request)
-            c.update(csrf(request))
-            return render_to_response('activate.html',{'userid': userid},context_instance=c)
+            return HttpResponseNotFound("No such pending user, has probably already been activated", content_type="text/plain")    
+        
+        c = RequestContext(request)
+        c.update(csrf(request))
+        return render_to_response('activate.html',{'userid': userid},context_instance=c)
         
 def report(request):
     s = "The following accounts are pending approval:\n\n"
     report = []             
-    for clamuser in CLAMUsers.objects.filter(active=0):
+    for clamuser in PendingUsers.objects.filter(active=0):
         report.append('Username: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk))
     
     if report:
