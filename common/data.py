@@ -456,13 +456,13 @@ class CLAMData(object):
                      if filenode.tag == 'file':
                          for n in filenode:
                             if n.tag == 'name':
-                                self.input.append( CLAMInputFile( self.projecturl, n.text ) )
+                                self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client) )
             elif node.tag == 'output': 
                  for filenode in node:
                      if filenode.tag == 'file':
                         for n in filenode:
                             if n.tag == 'name':
-                                self.output.append( CLAMOutputFile( self.projecturl, n.text ) )
+                                self.output.append( CLAMOutputFile( self.projecturl, n.text, True, self.client ) )
             elif node.tag == 'projects':
                  self.projects = []
                  for projectnode in node:
