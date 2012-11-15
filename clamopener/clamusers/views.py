@@ -30,7 +30,7 @@ def activate(request, userid):
                 clamuser = CLAMUsers.objects.get(pk=int(userid))
             except:
                 return HttpResponseNotFound("No such user", content_type="text/plain")    
-            clamuser.activated = True
+            clamuser.active = True
             clamuser.save()
             send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has been reviewed and activated.', settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
             return HttpResponse("Succesfully activated", content_type="text/plain")
@@ -39,9 +39,9 @@ def activate(request, userid):
     
     else:
         try:
-            clamuser = CLAMUsers.objects.get(userid=userid)
+            clamuser = CLAMUsers.objects.get(pk=int(userid))
         except:
-            return HttpResponse("No such user")
+            return HttpResponseNotFound("No such user", content_type="text/plain")    
         if clamuser.active:
             return HttpResponse("User is already active")
         else:
