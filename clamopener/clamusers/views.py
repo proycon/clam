@@ -38,9 +38,16 @@ def activate(request, userid):
             return HttpResponseForbidden("Invalid password, not activated", content_type="text/plain")
     
     else:
-        c = RequestContext(request)
-        c.update(csrf(request))
-        return render_to_response('activate.html',{'userid': userid},context_instance=c)
+        try:
+            clamuser = CLAMUsers.objects.get(userid=userid)
+        except:
+            return HttpResponse("No such user")
+        if clamuser.active:
+            return HttpResponse("User is already active")
+        else:
+            c = RequestContext(request)
+            c.update(csrf(request))
+            return render_to_response('activate.html',{'userid': userid},context_instance=c)
         
 def report(request):
     s = "The following accounts are pending approval:\n\n"
