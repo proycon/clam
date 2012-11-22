@@ -148,7 +148,7 @@ class auth(object):
                 if self.printdebug: self.printdebug( "DEBUG directiveProper: missing " + variable)
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
-        standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ['HTTP_USER_AGENT'])
+        standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
         
         if reqHeaderDict['realm'] != self.realm:
             if self.printdebug: self.printdebug( "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'")
