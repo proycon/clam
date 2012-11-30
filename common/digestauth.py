@@ -72,7 +72,7 @@ class auth(object):
                 return self.send401UnauthorizedResponse()
             if requestHeader[0:7] != "Digest ":
                 # client has attempted to use something other than Digest authenication; deny
-                if self.printdebug: self.printdebug("AUTH DEBUG badrequest")
+                if self.printdebug: self.printdebug("AUTH DEBUG badrequest: no digest auth used")
                 return self.denyBadRequest()
             reqHeaderDict = parseAuthHeader(requestHeader)
             if not self.directiveProper(reqHeaderDict, web.ctx.fullpath):
@@ -85,6 +85,7 @@ class auth(object):
                     return self.send401UnauthorizedResponse()
                 else:
                     # Their header had a more fundamental problem.  Something is fishy.  Deny access.
+                    if self.printdebug: self.printdebug("AUTH DEBUG bad request: not conforming to RFC 2617 ")
                     return self.denyBadRequest("Authorization Request Header does not conform to RFC 2617 section 3.2.2")
             # if user sent a "logout" nonce, make them type in the password again
             if len(reqHeaderDict.nonce) != 34:
@@ -148,7 +149,9 @@ class auth(object):
                 if self.printdebug: self.printdebug( "DEBUG directiveProper: missing " + variable)
                 return False
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
-        standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
+        #standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
+        standardsUncompliant = True #Support crappy (Microsoft) software by default, regardless of uyser agent.
+        
         
         if reqHeaderDict['realm'] != self.realm:
             if self.printdebug: self.printdebug( "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'")
