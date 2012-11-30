@@ -152,7 +152,7 @@ class auth(object):
         #standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
         standardsUncompliant = True #Support crappy (Microsoft) software by default, regardless of uyser agent.
         if standardsUncompliant and '?' in reqPath:
-            reqPath = reqPath.split()[0]
+            reqPath = reqPath.split('?')[0]
                 
         
         if reqHeaderDict['realm'] != self.realm:
