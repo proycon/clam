@@ -151,7 +151,9 @@ class auth(object):
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         #standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
         standardsUncompliant = True #Support crappy (Microsoft) software by default, regardless of uyser agent.
-        
+        if standardsUncompliant and '?' in reqPath:
+            reqPath = reqPath.split()[0]
+                
         
         if reqHeaderDict['realm'] != self.realm:
             if self.printdebug: self.printdebug( "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'")
@@ -162,7 +164,7 @@ class auth(object):
         elif len(reqHeaderDict['nc']) != 8:
             if self.printdebug: self.printdebug( "DEBUG directiveProper nc != 8")
             return False
-        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )): 
+        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath):  # or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )): 
             if self.printdebug: self.printdebug( "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'")
             if urlprefix:
                 if self.printdebug: self.printdebug( "..or instead of '" + urlprefix + str(reqPath) + "'")            
