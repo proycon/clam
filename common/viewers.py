@@ -95,6 +95,27 @@ class FrogViewer(AbstractViewer):
         render = web.template.render('templates')
         return render.crudetableviewer( file, "\t")
 
+class XSLTViewer(AbstractViewer):
+    id = 'xsltviewer'
+    name = "Viewer"
+
+    def __init__(self, **kwargs):
+        if 'file' in kwargs:
+            self.xslfile = kwargs['file']
+            del kwargs['file']
+        else:
+            raise Exception("XSLTViewer expect file= parameter with XSL file")    
+            
+        super(XSLTViewer,self).__init__(**kwargs)   
+
+    def view(self, file, **kwargs):        
+        xslt_doc = etree.parse(self.xslfile)
+        transform = etree.XSLT(xslt_doc)
+
+        #f = file.open()
+        xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        return str(transform(xml_doc))
+
 class FoLiAViewer(AbstractViewer):
     id = 'foliaviewer'
     name = "FoLiA Viewer"
@@ -122,6 +143,8 @@ class SoNaRViewer(AbstractViewer):
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
         
         return str(transform(xml_doc))
+
+
 
 
 
