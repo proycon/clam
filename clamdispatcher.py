@@ -45,7 +45,7 @@ offset = 0
 if '/' in sys.argv[1]:
     for path in sys.argv[1].split(':'):
         sys.path.append(path)
-    offset + 1
+    offset = 1
       
 settingsmodule = sys.argv[1+offset]
 projectdir = sys.argv[2+offset]
