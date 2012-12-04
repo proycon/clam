@@ -35,10 +35,10 @@ def mem(pid, size="rss"):
 
 if len(sys.argv) < 4:
     print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ..."
-    f = open(projectdir + '.done','w')
+    f = open('.done','w')
     f.write(str(1))
     f.close()
-    os.unlink(projectdir + '.pid')    
+    if os.path.exists('.pid'): os.unlink('.pid')    
     sys.exit(1)
 
 offset = 0
