@@ -97,7 +97,7 @@ class FrogViewer(AbstractViewer):
 
 class XSLTViewer(AbstractViewer):
     id = 'xsltviewer'
-    name = "Viewer"
+    name = "XML Viewer"
 
     def __init__(self, **kwargs):
         if 'file' in kwargs:
