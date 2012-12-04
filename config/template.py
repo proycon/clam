@@ -169,6 +169,7 @@ PARAMETERS =  [
 #DISPATCHER_POLLINTERVAL = 30   #interval at which the dispatcher polls for resource consumption (default: 30 secs)
 #DISPATCHER_MAXRESMEM = 0    #maximum consumption of resident memory (in megabytes), processes that exceed this will be automatically aborted. (0 = unlimited, default)
 #DISPATCHER_MAXTIME = 0      #maximum number of seconds a process may run, it will be aborted if this duration is exceeded.   (0=unlimited, default)
+#DISPATCHER_PYTHONPATH = []        #list of extra directories to add to the python path prior to launch of dispatcher
 
 #Run background process on a remote host? Then set the following (leave the lambda in):
 #REMOTEHOST = lambda: return 'some.remote.host'

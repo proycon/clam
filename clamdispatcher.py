@@ -22,7 +22,7 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.7.0'
+VERSION = '0.8.2'
 
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
@@ -34,15 +34,21 @@ def mem(pid, size="rss"):
 
 
 if len(sys.argv) < 4:
-    print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py settingsmodule projectdir cmd arg1 arg2 ..."
+    print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ..."
     sys.exit(1)
 
-settingsmodule = sys.argv[1]
-projectdir = sys.argv[2]
+offset = 0
+if '/' in sys.argv[1]:
+    for path in sys.argv[1].split(':'):
+        sys.path.append(path)
+    offset + 1
+      
+settingsmodule = sys.argv[1+offset]
+projectdir = sys.argv[2+offset]
 if projectdir[-1] != '/':
     projectdir += '/'
 
-cmd = " ".join(sys.argv[3:])
+cmd = " ".join(sys.argv[3+offset:])
 
 print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
 

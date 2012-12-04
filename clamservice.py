@@ -66,7 +66,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.8.1'
+VERSION = '0.8.2'
 
 DEBUG = False
     
@@ -746,7 +746,17 @@ class Project(object):
             #TODO: protect against insertion
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
-            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' +  settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
+                        
+            pythonpath = ''
+            try:
+                pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
+            except:
+                pass
+            if pythonpath:
+                pythonpath = settings.__path__ + ':' + pythonpath
+            else:
+                pythonpath = settings.__path__                            
+            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
