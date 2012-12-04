@@ -140,4 +140,11 @@ class ZIPFormat(CLAMMetaData):
     attributes = {}    
     name = "ZIP Archive"
     mimetype = 'application/zip'
+    
+class XMLStyleSheet(CLAMMetaData):
+    attributes = {}
+    name = "XML Stylesheet"
+    mimetype ='application/xslt+xml'
+    
+    
 
