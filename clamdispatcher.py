@@ -35,6 +35,10 @@ def mem(pid, size="rss"):
 
 if len(sys.argv) < 4:
     print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ..."
+    f = open(projectdir + '.done','w')
+    f.write(str(1))
+    f.close()
+    os.unlink(projectdir + '.pid')    
     sys.exit(1)
 
 offset = 0
@@ -54,9 +58,17 @@ print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.now().strf
 
 if not cmd:
     print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: No command specified!"
+    f = open(projectdir + '.done','w')
+    f.write(str(1))
+    f.close()
+    os.unlink(projectdir + '.pid')    
     sys.exit(1)
 elif not os.path.isdir(projectdir):
     print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist"
+    f = open(projectdir + '.done','w')
+    f.write(str(1))
+    f.close()
+    os.unlink(projectdir + '.pid')
     sys.exit(1)
 
 exec "import " + settingsmodule + " as settings"
