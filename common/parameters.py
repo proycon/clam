@@ -503,8 +503,10 @@ class IntegerParameter(AbstractParameter):
         except:
             self.error = "Not a number"
             return False
-        if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
-            return True
+        if self.minvalue == self.maxvalue and self.maxvalue == 0:
+            return True #no restraints
+        elif (self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue) ) :
+            return True        
         else:
             self.error = "Number must be a whole number between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False
@@ -563,7 +565,9 @@ class FloatParameter(AbstractParameter):
         except:
             self.error = "Not a valid number"
             return False
-        if ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
+        if self.minvalue == self.maxvalue and self.maxvalue == 0:
+            return True #no restraints
+        elif ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
             return True
         else:
             self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
