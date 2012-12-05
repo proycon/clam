@@ -92,7 +92,7 @@ def main():
     
     clampath = clam.__path__[0]
     
-    if os.path.exists(clampath + '/config/template.py') and os.path.exists(clampath + '/wrappers/template.py'):        
+    if not os.path.exists(clampath + '/config/template.py') or not os.path.exists(clampath + '/wrappers/template.py'):        
         print >>sys.stderr, "ERROR: Templates not found. Unable to create new project"
         sys.exit(2)
     
