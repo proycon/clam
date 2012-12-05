@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.8} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.8.2} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -72,7 +72,7 @@ CLAM is open-source software licensed under the GNU Public License v3, a copy of
 
 CLAM and this documentation are intended for \emph{1)} service providers; people who want to build a CLAM Webservice around their tool and/or people wanting to set up existing CLAM services on their server, and \emph{2)} webservice users; people who want to write automated clients to communicate with CLAM webservices.
 
-On the part of these users, a certain level of technical expertise is required and assumed, such as familiarity with UNIX/Linux systems and programming. 
+On the part of these users, a certain level of technical expertise is required and assumed, such as familiarity with UNIX/Linux systems, software development (programming) and system administration.  
 
 This documentation is split into two parts: a chapter for service providers, people who want to build a CLAM Webservice around their tool, and a chapter for service clients, users wanting to write automated clients to communicate with the aforemented webservice.
 
@@ -84,7 +84,7 @@ This documentation is not intended for end-users using only the web application 
 
 CLAM is written in Python 2.6, and is built on the webpy framework. It can run stand-alone thanks to the built-in cherrypy webserver; no additional webserver is needed to test your service. In production environments, it is however strongly recommended that CLAM is integrated into a real webserver. Supported are: Apache, nginx or lighthttpd, though others may work too.
 
-The software is designed for Unix-based systems (e.g. Linux or BSD) only. It also has been verified to run on Mac OS X. Windows is not supported.
+The software is designed for Unix-based systems (e.g. Linux or BSD) only. It also has been verified to run on Mac OS X, although this is less well supported and more difficult to install. Windows is not supported at all, and never will be.
 
 \subsection{Installation}
 
@@ -108,6 +108,8 @@ Or for Red Hat/Fedora/CentOS:
   # yum install python-setuptools
 \end{verbatim}
 
+For other Linux distributions, and for Mac OS X with homebrew, fink, or macports, a similar package should exist. 
+
 After installation, CLAM is installed globally alongside all other Python packages, usually in a path such as \texttt{/usr/lib/python2.7/dist-packages}. The exact path and your Python version may differ. You can verify the availability of CLAM by opening an interactive Python interpreter and writing: `'\texttt{import clam}''
 
 If you do not have root access on your system and instead want to install CLAM locally in your home directory's python package directory, then invoke \texttt{easy\_install} with the \texttt{--user} flag. This will install CLAM in a path such as \texttt{~/.local/lib/python2.7/site-packages}.
@@ -118,27 +120,23 @@ $ easy_install --user clam
 
 Alternatively, other custom paths can be specified using the \texttt{--prefix} flag, but this forces to user to manually ensure this target directory is part of the user's \texttt{\$PYTHONPATH}.
 
-
 \subsubsection{Installation Details} 
  
-The following software is required to run CLAM, the \emph{easy install} process should obtain and install all of these dependencies automatically, except for Python itself:
+The following software is required to run CLAM, the \emph{easy install} process explained above should obtain and install all of these dependencies automatically, except for Python itself:
 
 \begin{itemize}
-\item python 2.6 (or a higher 2.x version, 2.5 may also work but is less tested)
+\item python 2.6 (or a higher 2.x version, 2.5 may also work but is less tested. However, note that CLAM does not support 3.x yet)
 \item python-webpy, version 0.33 or higher
 \item python-lxml, version 2 or higher
 \item python-mysqldb (optional, needed only for MySQL support)
-%\item python-libxslt1
-%\item python-django
 \end{itemize}
-
-More detailed instructions, including for Mac OS X, can be found in the INSTALL file included with CLAM.
 
 For development and testing, each CLAM webservice can run stand-alone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 
-If you want to run in the supplied test units, an additional dependency is needed: python-unittest2.
+If you want to run in the supplied test units, an additional dependency is needed: \texttt{python-unittest2}.
 
-To install CLAM, simply uncompress the clam software archive in any desired target location. The following files may be of particular interest:
+
+If you look in the directory where CLAM has been installed,tThe following files may be of particular interest:
 
 \begin{itemize}
 \item \texttt{clamservice.py} -- The webservice itself, the command to be invoked to start it.
@@ -151,21 +149,26 @@ To install CLAM, simply uncompress the clam software archive in any desired targ
 \item \texttt{common/format.py} -- Format-type definitions.
 \item \texttt{common/data.py} -- CLAM Data API.
 \item \texttt{common/client.py} -- CLAM Client API.
-\item \texttt{static/style.css} -- The styling for visualisation.
+\item \texttt{static/style.css} -- The styling for visualisation, you can copy this to create your own styles.
 \end{itemize}
 
-Starting the service in stand-alone mode is done by launching clamservice.py with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use. The below example shows how to launch the supplied ``Text Statistics'' demo-service:
+Starting the service in stand-alone mode is done by launching \texttt{clamservice} (or \texttt{clamservice.py}) with the name of your service configuration. This standalone mode is intended primarily for development purposes and not recommended for production use. The below example shows how to launch the supplied ``Text Statistics'' demo-service:
 
 \texttt{\$ clamservice clam.config.textstats}
 
-Setting up the service to be used with an already existing webserver requires some additional work. This is explained below for Apache and nginx:
+Setting up the service to be used with an already existing webserver requires some additional work. This is explained in later sections for Apache and nginx.
 
+\subsubsection{Git \& Github}
 
-%\subsubsection{Github}
+Though the Python Package Index is now the recommended way of installing and maintaining CLAM up to date, all CLAM code is hosted on github and can be cloned directly from its git repository at \texttt{http://github.com/proycon/clam}, using \texttt{git}. Cloning this CLAM repository is done as follows:
 
-%Though the Python Package Index is the recommended way of installing and maintaining CLAM up to date nowadays. CLAM is hosted on github and  
+\begin{verbatim}
+$ git clone git://github.com/proycon/clam.git
+\end{verbatim}
  
+This will create a directory \texttt{clam} in your current working directory. To install CLAM globally or in your local Python packages, then you can use the included \texttt{setup.py} script. Alternatively, you may work directly from this checked out copy. The advantage of this would be that you have easier access to the sources of CLAM and can more easily modify them. Moreover, not having a global installation allows you to run different versions of CLAM concurrently, although it is still always recommended to keep your CLAM copy up to date. Using git and github is also strongly encouraged if you are a developer seeking to improve CLAM itself, and possibly sending in patches.
 
+Especially people migrating from earlier versions of CLAM may have already adopted this way of working. Do note that if you do not use \texttt{setup.py} then the commands \texttt{clamservice} and \texttt{clamnewproject} are only available as \texttt{clamservice.py} and \texttt{clamnewproject.py} from within the \texttt{clam} directory. 
 
 \subsection{Using CLAM with Apache 2}
 
@@ -300,6 +303,26 @@ A CLAM webservice needs the following three components from the service develope
 
 The wrapper script is not strictly mandatory if the NLP application can be directly invoked by CLAM. However, for more complex applications, writing a wrapper script is strongly recommended, as it offers more flexibility and better integration, and allows you to keep the actual NLP application unmodified. The wrapper scripts can be seen as the ``glue'' between CLAM and your application, taking care of any translation steps.
 
+\section{Beginning a new CLAM project}
+
+You start a new CLAM project using the \texttt{clamnewproject} tool. It takes one argument: an identifier for your system. This identifier is for internal use and for use in filenames and may not contain any spaces or other special characters. Mind that this ID is case sensitive, so it is recommended to keep it all lower case. Example:
+
+\begin{verbatim}
+$ clamnewproject myfirstproject 
+\end{verbatim}
+
+The tool will create a directory named after the identifier, in which two template files are created which are similarly named after the chosen identifier. Both are Python scripts:
+
+\begin{enumerate}
+\item \texttt{myfirstproject.py} - Service Configuration FIle
+\item \texttt{myfirstproject-wrapper.py} - System Wrapper Script.
+\end{enumerate}
+
+These template files need to be edited for your particular application. They are heavily commented to guide you. 
+
+You can choose not to make use of the system wrapper script and instead either write one from scratch in another language of your choice, or directly let CLAM invoke your application.
+
+The next section will provide a detailed overview on the various ways to configure the service configuration file, and the section thereafter will deal with the system wrapper file.
 
 \section{Service configuration}
 \label{sec:serviceconfig}
@@ -1016,5 +1039,6 @@ To be written still...
 
 
 \end{document}
+
 
 
