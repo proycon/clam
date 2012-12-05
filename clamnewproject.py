@@ -32,15 +32,17 @@ import getopt
 
 def usage():
         print >> sys.stderr, "Syntax: clamnewproject.py system_id"
-        print >> sys.stderr, "Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, for internal use only, no spaces allowed."        
+        print >> sys.stderr, "Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, this ID is for internal use only and will be used in various filenames, no spaces or other special characters allowed."        
         print >> sys.stderr, "Options:"
         print >> sys.stderr, "\t-d [dir]      - Directory prefix, rather than in current working directory"
-        print >> sys.stderr, "\t-n [name]     - A human-readable name"
-        print >> sys.stderr, "\t-H [hostname] - Hostname"
-        print >> sys.stderr, "\t-p [port]     - Port"
-        print >> sys.stderr, "\t-u [url]      - Force URL"
-        print >> sys.stderr, "\t-f            - Force use of a directory that already exists"            
+        print >> sys.stderr, "\t-f            - Force use of a directory that already exists"
         print >> sys.stderr, "\t-h            - This help message"
+        print >> sys.stderr, "Configuration shortcuts:"
+        print >> sys.stderr, "\t-n [name]     - A human-readable name. Shortcut option, can be also set in service configuration file later."
+        print >> sys.stderr, "\t-H [hostname] - Hostname. Shortcut option, can be also set in service configuration file later. "
+        print >> sys.stderr, "\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later."
+        print >> sys.stderr, "\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later."
+                            
         
         
 
@@ -50,8 +52,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     sysid = sys.argv[1]
-    if ' ' in sysid or '/' in sysid or "'" in sysid or '"' in sysid:
-        print >>sys.stderr, "Invalid characters in system ID"
+    if ' ' in sysid or '.' in sysid or '-' in sysid or ',' in sysid or ':' in sysid or ':' in sysid or '(' in sysid or ')' in sysid or '/' in sysid or "'" in sysid or '"' in sysid:
+        print >>sys.stderr, "Invalid characters in system ID. Only alphanumerics and underscores are allowed."
         sys.exit(2)        
     
     PORT = HOST = FORCEURL = None
