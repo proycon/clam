@@ -31,7 +31,7 @@ except ImportError:
 import getopt
 
 def usage():
-        print >> sys.stderr, "Syntax: clamnewproject.py system_id"
+        print >> sys.stderr, "Syntax: clamnewproject.py system_id [options]"
         print >> sys.stderr, "Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, this ID is for internal use only and will be used in various filenames, no spaces or other special characters allowed."        
         print >> sys.stderr, "Options:"
         print >> sys.stderr, "\t-d [dir]      - Directory prefix, rather than in current working directory"
@@ -45,7 +45,7 @@ def usage():
 
                             
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 2 or sys.argv[1][0] == '-':
         usage()
         sys.exit(1)
 
@@ -62,7 +62,7 @@ def main():
     name = ""
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hd:cH:p:u:fn:")
+        opts, args = getopt.getopt(sys.argv[2:], "hd:cH:p:u:fn:")
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err)
@@ -118,7 +118,7 @@ def main():
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
                 line =  "SYSTEM_ID = \"" + sysid + "\""
-            elif name and line[:12] == "SYSTEM_NAME =":
+            elif name and line[:13] == "SYSTEM_NAME =":
                 line = "SYSTEM_NAME = \"" + name + "\"\n"
             elif HOST and line[:7] == "#HOST =":
                 line = "HOST = \"" + HOST + "\"\n"
