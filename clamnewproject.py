@@ -116,17 +116,17 @@ def main():
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
                 line =  "SYSTEM_ID = \"" + sysid + "\""
-            elif name and line[:6] == "NAME =":
-                line = "NAME = \"" + name + "\"\n"
+            elif name and line[:12] == "SYSTEM_NAME =":
+                line = "SYSTEM_NAME = \"" + name + "\"\n"
             elif HOST and line[:7] == "#HOST =":
                 line = "HOST = \"" + HOST + "\"\n"
             elif PORT and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
                 line = "PORT = \"" + str(PORT) + "\"\n"
             elif line[:6] == "ROOT =":
-                line = "ROOT = \"" + dir + "\"\n"
+                line = "ROOT = \"" + dir + "/userdata\"\n"
             elif line[:10] == "#CLAMDIR =":       
                 clamdir = os.path.dirname(clam.__file__)
-                line = "CLAMDIR = \"" + clamdir + "\" #(automatically detected)\n"
+                line = "#CLAMDIR = \"" + clamdir + "\" #(automatically detected)\n"            
             elif FORCEURL and line[:9] == '#FORCEURL': 
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
             elif line[:9] == "COMMAND =":                
@@ -152,11 +152,12 @@ def main():
     else:
         url = "http://"    
         if HOST:
-            url = HOST
+            url += HOST
         else:
-            url = os.uname()[1]
+            url += os.uname()[1]
         if PORT:
             url += ':' + str(PORT)
+        url += '/'
          
     print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url
     
