@@ -1,7 +1,7 @@
 
 == INSTRUCTIONS USING EASY INSTALL ==
 
-Easy install is part of the Python setup tools and can install CLAM globally on your system for you. This is the easiest method of installing CLAM, as it will automatically fetch and install any dependencies.  This procedure downloads CLAM for you, rather than using a pre-downloaded archive! 
+Easy install is part of the Python setup tools and can install CLAM globally on your system for you from the Python Package Index. This is the easiest method of installing CLAM, as it will automatically fetch and install any dependencies.  This procedure downloads CLAM for you, rather than using a pre-downloaded archive! 
 
 $ sudo easy_install clam
 

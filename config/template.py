@@ -3,15 +3,21 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Service Configuration File --
+# -- Service Configuration File (Template) --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
+#       Centre for Language Studies
+#       Radboud University Nijmegen
+#
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
+#
+#       http://proycon.github.com/clam
 #       
 #       Licensed under GPLv3
 #
 ###############################################################
+
+#Consult the CLAM  
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -21,7 +27,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.6
+REQUIRE_VERSION = 0.8
 
 # ======== GENERAL INFORMATION ===========
 
@@ -35,7 +41,7 @@ SYSTEM_ID = ""
 SYSTEM_NAME = ""
 
 #An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
-SYSTEM_DESCRIPTION = ""
+SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 # ======== LOCATION ===========
 
@@ -54,8 +60,13 @@ PORT= 8080
 #doesn't run at the root of the server, you can specify a URL prefix here:
 #URLPREFIX = "/myservice/"
 
+#Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures: 
+#FORCEURL = "http://myclamservice.com"    
+
 #The location of where CLAM is installed (will be determined automatically if not set)
 #CLAMDIR = "/path/to/clam"
+
+
 
 # ======== AUTHENTICATION & SECURITY ===========
 
@@ -86,7 +97,7 @@ MINDISKSPACE = 10
 
 # ======== WEB-APPLICATION STYLING =============
 
-#Choose a style (has to be defined as a CSS file in style/ ). You can copy, rename and adapt it to make your own style
+#Choose a style (has to be defined as a CSS file in clam/style/ ). You can copy, rename and adapt it to make your own style
 STYLE = 'classic'
 
 # ======== ENABLED FORMATS ===========
@@ -104,8 +115,8 @@ CUSTOM_FORMATS_MODULE = None
 
 PROFILES = [ 
     Profile(
-        InputTemplate('replace-with-a-unique-identifier', PlainTextFormat,"Replace with human label for this input temlate",  
-            #StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+        InputTemplate('replace-with-a-unique-identifier', PlainTextFormat,"Replace with human label for this input template",  
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'), #note that encoding is required if you work with PlainTextFormat  
             #ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
             #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
@@ -117,8 +128,8 @@ PROFILES = [
             unique=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this input temlate',
-            SetMetaField('encoding','ascii'),
+        OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this input template',
+            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat  
             extension='.stats',
             multi=True
         ),
