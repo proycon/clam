@@ -42,11 +42,9 @@ def usage():
         print >> sys.stderr, "\t-H [hostname] - Hostname. Shortcut option, can be also set in service configuration file later. "
         print >> sys.stderr, "\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later."
         print >> sys.stderr, "\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later."
-                            
-        
-        
 
-if __name__ == "__main__":
+                            
+def main():
     if len(sys.argv) < 2:
         usage()
         sys.exit(1)
@@ -163,6 +161,5 @@ if __name__ == "__main__":
     print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url
     
     
-    
-    
-    
+if __name__ == "__main__":
+    main()
