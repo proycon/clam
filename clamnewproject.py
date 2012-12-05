@@ -54,7 +54,9 @@ def main():
         print >>sys.stderr, "Invalid characters in system ID. Only alphanumerics and underscores are allowed."
         sys.exit(2)        
     
-    PORT = HOST = FORCEURL = None
+    
+    HOST = FORCEURL = None
+    PORT = 8080
     dirprefix = os.getcwd()
     force = False
     name = ""
@@ -155,7 +157,7 @@ def main():
             url += HOST
         else:
             url += os.uname()[1]
-        if PORT:
+        if PORT and PORT != 80:
             url += ':' + str(PORT)
         url += '/'
          
