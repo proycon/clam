@@ -35,7 +35,7 @@ from functools import wraps
 
 if __name__ == "__main__":
     sys.path.append(sys.path[0] + '/..')
-    os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+    #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 import clam.common.status 
 import clam.common.parameters
@@ -1894,6 +1894,7 @@ def usage():
         print >> sys.stderr, "\t-p [port]     - Port"
         print >> sys.stderr, "\t-u [url]      - Force URL"
         print >> sys.stderr, "\t-h            - This help message"
+        print >> sys.stderr, "\t-P [path]     - Python Path from which the settings module can be imported"
         print >> sys.stderr, "\t-v            - Version information"
         print >> sys.stderr, "(Note: Running clamservice directly from the command line uses the built-in"
         print >> sys.stderr, "web-server. This is great for development purposes but not recommended"
@@ -2035,10 +2036,10 @@ if __name__ == "__main__":
     settingsmodule = None
     fastcgi = False
     PORT = HOST = FORCEURL = None
-    
+    PYTHONPATH = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:")
+        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:P:")
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err)
@@ -2055,6 +2056,8 @@ if __name__ == "__main__":
             HOST = a
         elif o == '-p':
             PORT = int(a)
+        elif o == '-P':
+            PYTHONPATH = a
         elif o == '-h':
             usage()
             sys.exit(0)
@@ -2083,7 +2086,9 @@ if __name__ == "__main__":
 
     
 
-
+    if PYTHONPATH:
+        sys.path.append(PYTHONPATH)
+        
     import_string = "import " + settingsmodule + " as settings"
     exec import_string
     

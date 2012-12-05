@@ -161,7 +161,7 @@ def main():
             url += ':' + str(PORT)
         url += '/'
          
-    print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url
+    print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url + ". The webservice should be started from the directory you are in now."
     
     
 if __name__ == "__main__":
