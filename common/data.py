@@ -1160,6 +1160,10 @@ class InputTemplate(object):
             xml +=" unique=\"yes\""
         else:
             xml +=" unique=\"no\""
+        if self.acceptarchive:
+            xml +=" acceptarchive=\"yes\""
+        else:
+            xml +=" acceptarchive=\"no\""            
         xml += ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+"\t") + "\n"
@@ -1192,6 +1196,11 @@ class InputTemplate(object):
                 kwargs['unique'] = True
             else:
                 kwargs['unique'] = False
+        if 'acceptarchive' in node.attrib:
+            if node.attrib['acceptarchive'].lower() == 'yes' or node.attrib['acceptarchive'].lower() == 'true' or node.attrib['acceptarchive'].lower() == '1':
+                kwargs['acceptarchive'] = True
+            else:
+                kwargs['acceptarchive'] = False
             
         #find formatclass
         if format in vars(clam.common.formats):
@@ -1223,6 +1232,8 @@ class InputTemplate(object):
             d['filename'] = self.filename
         if self.extension:
             d['extension'] = self.extension
+        if self.acceptarchive:
+            d['acceptarchive'] = self.acceptarchive
         #d['parameters'] = {}
 
         #The actual parameters are included as XML, and transformed by clam.js using XSLT (parameter.xsl) to generate the forms

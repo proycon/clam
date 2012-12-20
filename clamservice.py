@@ -30,6 +30,10 @@ import re
 import urllib2
 import getopt
 import time
+try:
+    import json
+except ImportError: #fallback for Python2.5
+    import simplejson as json  
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -66,7 +70,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.8.2'
+VERSION = '0.8.3'
 
 DEBUG = False
     
@@ -276,7 +280,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
-        #settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
@@ -1096,7 +1100,8 @@ class InputFileHandler(object):
                         filename = inputtemplate.filename
                     else:
                         filename = os.path.basename(inputsource.path)                
-                    return self.addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputtemplate.id}, inputsource)
+                    xml,_ = addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputtemplate.id}, inputsource)
+                    return xml
                 elif inputsource.isdir():
                     if inputtemplate.filename:
                         filename = inputtemplate.filename
@@ -1105,7 +1110,7 @@ class InputFileHandler(object):
                             filename = os.path.basename(f)                          
                         if f[0] != '.':
                             tmpinputsource = clam.common.data.InputSource(id='tmp',label='tmp',path=f, metadata=inputsource.metadata)
-                            self.addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputtemplate.id}, tmpinputsource)
+                            addfile(project, filename, user, {'inputsource':'tmp', 'inputtemplate': inputtemplate.id}, tmpinputsource)
                             #WARNING: Output is dropped silently here!
                     return "" #200
                 else:
@@ -1114,427 +1119,10 @@ class InputFileHandler(object):
                 raise CustomForbidden("No filename or inputsource specified")
         else:
             #Simply forward to addfile
-            return self.addfile(project,filename,user, postdata)
+            xml,_ = addfile(project,filename,user, postdata)
+            return xml
         
         
-    def addfile(self, project, filename, user, postdata, inputsource=None):
-        """Add a new input file, this invokes the actual uploader"""
-
-        inputtemplate = None
-        metadata = None
-            
-        
-        if 'inputtemplate' in postdata:
-            #An input template must always be provided            
-            for profile in settings.PROFILES:
-                for t in profile.input:
-                    if t.id == postdata['inputtemplate']:
-                        inputtemplate = t
-            if not inputtemplate:
-                #Inputtemplate not found, send 404
-                printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-                raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-        else:
-            #Check if the specified filename can be uniquely associated with an inputtemplate
-            for profile in settings.PROFILES:
-                for t in profile.input:
-                    if t.filename == filename:
-                        if inputtemplate:
-                            #we found another one, not unique!! reset and break
-                            inputtemplate = None
-                            break
-                        else:
-                            #good, we found one, don't break cause we want to make sure there is only one
-                            inputtemplate = t                        
-            if not inputtemplate:
-                printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
-                raise web.webapi.NotFound("No inputtemplate specified nor auto-detected for this filename!")
-                
-            
-            
-        #See if other previously uploaded input files use this inputtemplate
-        if inputtemplate.unique:
-            nextseq = 0 #unique
-        else:
-            nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
-            
-        for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
-            if inputtemplate.unique:
-                raise CustomForbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
-            else:
-                if seq >= nextseq:
-                    nextseq = seq + 1 #next available sequence number
-            
-
-        if not filename: #Actually, I don't think this can occur at this stage, but we'll leave it in to be sure
-            if inputtemplate.filename:
-                filename = inputtemplate.filename
-            elif inputtemplate.extension: 
-                filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) + '.' + inputtemplate.extension
-            else:
-                filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
-                
-        #Make sure filename matches (only if not an archive)
-        if inputtemplate.acceptarchive and (filename[-7:].lower() == '.tar.gz' or filename[-8:].lower() == '.tar.bz2' or filename[-4:].lower() == '.zip'):                
-            pass
-        else:    
-            if inputtemplate.filename:
-                if filename != inputtemplate.filename:
-                    raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
-                #TODO LATER: add support for calling this with an actual number instead of #
-            if inputtemplate.extension:
-                if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
-                    #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
-                    filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
-                else:
-                    raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
-            
-        if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
-            raise CustomForbidden("Adding files for this inputtemplate must proceed through inputsource") #403
-            
-        if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
-                raise CustomForbidden("Invalid converter specified: " + postdata['converter']) #403
-
-        #Very simple security, prevent breaking out the input dir
-        filename = filename.replace("..","")
-
-
-        #Create the project (no effect if already exists)
-        Project.create(project, user)        
-
-
-        
-        
-        web.header('Content-Type', "text/xml; charset=UTF-8")
-        head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        head += "<clamupload>\n"
-        
-        
-        
-        if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
-            printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
-            sourcefile = postdata['file'].filename
-        elif 'url' in postdata and postdata['url']:
-            #Download from URL
-            printlog("Adding web-based URL " + postdata['url'] + " to input files")
-            sourcefile = postdata['url']    
-        elif 'contents' in postdata and postdata['contents']:
-            #In message
-            printlog("Adding file " + filename + " with explicitly provided contents to input files")
-            sourcefile = "editor"
-        elif 'inputsource' in postdata and postdata['inputsource']:
-            printlog("Adding file " + filename + " from preinstalled data to input files")
-            if not inputsource:
-                inputsource = None                    
-                for s in inputtemplate.inputsources:
-                    if s.id.lower() == postdata['inputsource'].lower():
-                        inputsource = s
-                if not inputsource:
-                    raise CustomForbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
-            sourcefile = os.path.basename(inputsource.path)
-        else:
-            raise CustomForbidden("No file, url or contents specified!")
-            
-
-
-          
-        #============================ Generate metadata ========================================
-        printdebug('(Generating and validating metadata)')
-        if ('metafile' in postdata and (not isinstance(postdata['metafile'], dict) or len(postdata['metafile']) > 0)):
-            #an explicit metadata file was provided, upload it:
-            printlog("Metadata explicitly provided in file, uploading...")          
-            try:
-                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'])
-                errors, parameters = inputtemplate.validate(metadata, user)
-                validmeta = True
-            except Exception, e:
-                printlog("Uploaded metadata is invalid! " + str(e))          
-                metadata = None
-                errors = True
-                parameters = []
-                validmeta = False            
-        elif 'metadata' in postdata and postdata['metadata']:
-            printlog("Metadata explicitly provided in message, uploading...")
-            try:
-                metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
-                errors, parameters = inputtemplate.validate(metadata, user)
-                validmeta = True
-            except:
-                printlog("Uploaded metadata is invalid!")          
-                metadata = None
-                errors = True
-                parameters = []
-                validmeta = False 
-        elif 'inputsource' in postdata and postdata['inputsource']:
-            printlog("Getting metadata from inputsource, uploading...")
-            if inputsource.metadata:
-                printlog("DEBUG: Validating metadata from inputsource")
-                metadata = inputsource.metadata
-                errors, parameters = inputtemplate.validate(metadata, user)
-                validmeta = True
-            else:
-                printlog("DEBUG: No metadata provided with inputsource, looking for metadata files..")
-                metafilename = os.path.dirname(inputsource.path) 
-                if metafilename: metafilename += '/'
-                metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'            
-                if os.path.exists(metafilename):
-                    try:
-                        metadata = clam.common.data.CLAMMetaData.fromxml(open(metafilename,'r').readlines())
-                        errors, parameters = inputtemplate.validate(metadata, user)
-                        validmeta = True
-                    except:
-                        printlog("Uploaded metadata is invalid!")          
-                        metadata = None
-                        errors = True
-                        parameters = []
-                        validmeta = False             
-                else:
-                     raise web.webapi.InternalError("No metadata found nor specified for inputsource " + inputsource.id )
-        else:
-            errors, parameters = inputtemplate.validate(postdata, user)
-            validmeta = True #will be checked later
-
-
-        #  ----------- Check if archive are allowed -------------
-        archive = False
-        addedfiles = []  
-        if not errors and inputtemplate.acceptarchive:
-            printdebug('(Archive test)')
-            # -------- Are we an archive? If so, determine what kind
-            archivetype = None
-            if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
-                uploadname = sourcefile.lower()
-                archivetype = None
-                if uploadname[-4:] == '.zip':
-                    archivetype = 'zip'
-                elif uploadname[-7:] == '.tar.gz':
-                    archivetype = 'tar.gz'
-                elif uploadname[-8:] == '.tar.bz2':
-                    archivetype = 'tar.bz2'
-                    
-                # NOT ACTUAL ARCHIVES
-                #elif uploadname[-4:] == '.bz2':
-                #    archivetype = 'bz2'
-                #elif uploadname[-3:] == '.gz':
-                #    archivetype = 'gz' 
-            
-            if archivetype:     
-                # =============== upload archive ======================
-                #random name
-                archive = "%032x" % random.getrandbits(128) + '.' + archivetype
-                    
-                #Upload file from client to server
-                printdebug('(Archive transfer starting)')
-                f = open(Project.path(project,user) + archive,'wb')
-                for line in postdata['file'].file:
-                    f.write(line)
-                f.close()
-                printdebug('(Archive transfer completed)')
-                # =============== Extract archive ======================
-                
-                #Determine extraction command
-                if archivetype == 'zip':
-                    cmd = 'unzip -u'
-                elif archivetype == 'tar':
-                    cmd = 'tar -xvf'
-                elif archivetype == 'tar.gz':
-                    cmd = 'tar -xvzf'
-                elif archivetype == 'tar.bz2':
-                    cmd = 'tar -xvjf'
-                else:
-                    raise Exception("Invalid archive format: " + archivetype) #invalid archive, shouldn't happend
-
-                #invoke extractor
-                printlog("Extracting '" + archive + "'" )            
-                try:
-                    process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                except:
-                    raise web.webapi.InternalError("Unable to extract archive")       
-                out, err = process.communicate() #waits for process to end 
-
-
-                #Read filename results
-                              
-                firstline = True
-                for line in out.split("\n"):    
-                    line = line.strip()        
-                    if line:
-                        printdebug('(Extraction output: ' + line+')')
-                        subfile = None
-                        if archivetype[0:3] == 'tar':
-                            subfile = line
-                        elif archivetype == 'zip' and not firstline: #firstline contains archive name itself, skip it
-                            colon = line.find(":")
-                            if colon:
-                                subfile =  line[colon + 1:].strip()
-                        if subfile and os.path.isfile(Project.path(project, user) + subfile):
-                            subfile_newname = clam.common.data.resolveinputfilename(os.path.basename(subfile), parameters, inputtemplate, nextseq+len(addedfiles), project) 
-                            printdebug('(Extracted file ' + subfile + ', moving to input/' + subfile_newname+')')
-                            os.rename(Project.path(project, user) + subfile, Project.path(project, user) + 'input/' +  subfile_newname)
-                            addedfiles.append(subfile_newname)
-                    firstline = False
-                                        
-                #all done, remove archive
-                os.unlink(Project.path(project, user) + archive)
-                
-        if not archive:
-            addedfiles = [clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)]
-
-        fatalerror = None                
-        
-        
-        output = head
-        for filename in addedfiles:
-            output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"            
-                        
-            if not errors:
-                output += "<parameters errors=\"no\">"
-            else:
-                output += "<parameters errors=\"yes\">"
-            for parameter in parameters:
-                output += parameter.xml()
-            output += "</parameters>"
-            
-
-            
-            if not errors:
-                if not archive:
-                    #============================ Transfer file ========================================
-                    printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
-                    if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
-                        #Upload file from client to server
-                        f = open(Project.path(project, user) + 'input/' + filename,'wb')
-                        for line in postdata['file'].file:
-                            f.write(line) #encoding unaware, seems to solve big-file upload problem
-                        f.close()
-                    elif 'url' in postdata and postdata['url']:
-                        #Download file from 3rd party server to CLAM server
-                        try:
-                            req = urllib2.urlopen(postdata['url'])
-                        except:
-                            raise web.webapi.NotFound()
-                        CHUNK = 16 * 1024
-                        f = open(Project.path(project, user) + 'input/' + filename,'wb')
-                        while True:
-                            chunk = req.read(CHUNK)
-                            if not chunk: break
-                            f.write(chunk)     
-                        f.close()
-                    elif 'contents' in postdata and postdata['contents']:  
-                        #grab encoding
-                        encoding = 'utf-8'
-                        for p in parameters:
-                            if p.id == 'encoding':
-                                encoding = p.value                        
-                        #Contents passed in POST message itself
-                        try:
-                            f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
-                            f.write(postdata['contents'])
-                            f.close()
-                        except UnicodeError:
-                            raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
-                    elif 'inputsource' in postdata and postdata['inputsource']:                
-                        #Copy (symlink!) from preinstalled data
-                        os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
-                    
-                    printdebug('(File transfer completed)')
-                    
-                
-            
-                #Create a file object
-                file = clam.common.data.CLAMInputFile(Project.path(project, user), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
-                
-                
-                
-                #============== Generate metadata ==============
-
-                metadataerror = None
-                if not metadata and not errors: #check if it has not already been set in another stage
-                    #for newly generated metadata
-                    try:
-                        #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
-                        validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
-                        if validmeta:
-                            #And we tie it to the CLAMFile object
-                            file.metadata = metadata
-                            #Add inputtemplate ID to metadata
-                            metadata.inputtemplate = inputtemplate.id
-                        else:
-                            metadataerror = "Undefined error"
-                    except ValueError, msg:
-                        validmeta = False
-                        metadataerror = msg
-                    except KeyError, msg:
-                        validmeta = False
-                        metadataerror = msg
-                elif validmeta:
-                    #for explicitly uploaded metadata
-                    metadata.file = file
-                    file.metadata = metadata
-                    metadata.inputtemplate = inputtemplate.id
-                    
-                if metadataerror:    
-                    #output += "<metadataerror />" #This usually indicates an error in service configuration!
-                    fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + str(metadataerror) + " (this usually indicates an error in service configuration!)</error>"
-                elif validmeta:                    
-                    #=========== Convert the uploaded file (if requested) ==============
-                    
-                    conversionerror = False
-                    if 'converter' in postdata and postdata['converter']:
-                        for c in inputtemplate.converters:
-                            if c.id == postdata['converter']:
-                                converter = c
-                                break
-                        if converter: #(should always be found, error already provided earlier if not)
-                            try:
-                                success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
-                            except:
-                                success = False
-                            if not success:
-                                conversionerror = True
-                                fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
-                
-                    #====================== Validate the file itself ====================
-                    if not conversionerror:
-                        valid = file.validate()        
-                        
-                        if valid:                       
-                            output += "<valid>yes</valid>"                
-                                            
-                            #Great! Everything ok, save metadata
-                            metadata.save(Project.path(project, user) + 'input/' + file.metafilename())
-                            
-                            #And create symbolic link for inputtemplates
-                            linkfilename = os.path.dirname(filename) 
-                            if linkfilename: linkfilename += '/'
-                            linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
-                            os.symlink(Project.path(project, user) + 'input/' + filename, Project.path(project, user) + 'input/' + linkfilename)
-                        else:
-                            #Too bad, everything worked out but the file itself doesn't validate.
-                            #output += "<valid>no</valid>"
-                            fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
-                        
-                            #remove upload
-                            os.unlink(Project.path(project, user) + 'input/' + filename)
-            
-            
-            output += "</upload>\n"       
-
-        output += "</clamupload>"
-        
-        
-        
-        if fatalerror:
-            #fatal error return error message with 403 code
-            printlog('Fatal Error during upload: ' + fatalerror)
-            raise CustomForbidden(head + fatalerror)
-        elif errors:
-            #parameter errors, return XML output with 403 code
-            printdebug('There were paramameter errors during upload!')
-            raise CustomForbidden(output)
-        else:
-            #everything ok, return XML output with 200 code
-            return output
 
 
     def extract(self,project,filename, archivetype):
@@ -1545,6 +1133,447 @@ class InputFileHandler(object):
         #return [ subfile for subfile in subfiles ] #return only the files that actually exist
         
 
+def addfile(project, filename, user, postdata, inputsource=None):
+    """Add a new input file, this invokes the actual uploader"""
+
+    inputtemplate = None
+    metadata = None
+        
+    
+    if 'inputtemplate' in postdata:
+        #An input template must always be provided            
+        for profile in settings.PROFILES:
+            for t in profile.input:
+                if t.id == postdata['inputtemplate']:
+                    inputtemplate = t
+        if not inputtemplate:
+            #Inputtemplate not found, send 404
+            printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
+            raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
+    else:
+        #Check if the specified filename can be uniquely associated with an inputtemplate
+        for profile in settings.PROFILES:
+            for t in profile.input:
+                if t.filename == filename:
+                    if inputtemplate:
+                        #we found another one, not unique!! reset and break
+                        inputtemplate = None
+                        break
+                    else:
+                        #good, we found one, don't break cause we want to make sure there is only one
+                        inputtemplate = t                        
+        if not inputtemplate:
+            printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
+            raise web.webapi.NotFound("No inputtemplate specified nor auto-detected for this filename!")
+            
+        
+        
+    #See if other previously uploaded input files use this inputtemplate
+    if inputtemplate.unique:
+        nextseq = 0 #unique
+    else:
+        nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
+        
+    for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
+        if inputtemplate.unique:
+            raise CustomForbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
+        else:
+            if seq >= nextseq:
+                nextseq = seq + 1 #next available sequence number
+        
+
+    if not filename: #Actually, I don't think this can occur at this stage, but we'll leave it in to be sure
+        if inputtemplate.filename:
+            filename = inputtemplate.filename
+        elif inputtemplate.extension: 
+            filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) + '.' + inputtemplate.extension
+        else:
+            filename = str(nextseq) +'-' + str("%034x" % random.getrandbits(128)) 
+            
+    #Make sure filename matches (only if not an archive)
+    if inputtemplate.acceptarchive and (filename[-7:].lower() == '.tar.gz' or filename[-8:].lower() == '.tar.bz2' or filename[-4:].lower() == '.zip'):                
+        pass
+    else:    
+        if inputtemplate.filename:
+            if filename != inputtemplate.filename:
+                raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+            #TODO LATER: add support for calling this with an actual number instead of #
+        if inputtemplate.extension:
+            if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
+                #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
+                filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
+            else:
+                raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
+        
+    if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
+        raise CustomForbidden("Adding files for this inputtemplate must proceed through inputsource") #403
+        
+    if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:            
+            raise CustomForbidden("Invalid converter specified: " + postdata['converter']) #403
+
+    #Very simple security, prevent breaking out the input dir
+    filename = filename.replace("..","")
+
+
+    #Create the project (no effect if already exists)
+    Project.create(project, user)        
+
+
+    
+    
+    web.header('Content-Type', "text/xml; charset=UTF-8")
+    head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    head += "<clamupload>\n"
+    if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+        printlog("Adding client-side file " + postdata['file'].filename + " to input files")            
+        sourcefile = postdata['file'].filename
+    elif 'url' in postdata and postdata['url']:
+        #Download from URL
+        printlog("Adding web-based URL " + postdata['url'] + " to input files")
+        sourcefile = postdata['url']    
+    elif 'contents' in postdata and postdata['contents']:
+        #In message
+        printlog("Adding file " + filename + " with explicitly provided contents to input files")
+        sourcefile = "editor"
+    elif 'inputsource' in postdata and postdata['inputsource']:
+        printlog("Adding file " + filename + " from preinstalled data to input files")
+        if not inputsource:
+            inputsource = None                    
+            for s in inputtemplate.inputsources:
+                if s.id.lower() == postdata['inputsource'].lower():
+                    inputsource = s
+            if not inputsource:
+                raise CustomForbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
+        sourcefile = os.path.basename(inputsource.path)
+    elif 'data' in web.ctx and web.ctx['data']:        
+        #XHR POST, data in bodys
+        printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST") #(temporarily held in memory, not suitable for huge files)              
+        sourcefile = postdata['filename']           
+    else:
+        raise CustomForbidden("No file, url or contents specified!")
+        
+
+
+      
+    #============================ Generate metadata ========================================
+    printdebug('(Generating and validating metadata)')
+    if ('metafile' in postdata and (not isinstance(postdata['metafile'], dict) or len(postdata['metafile']) > 0)):
+        #an explicit metadata file was provided, upload it:
+        printlog("Metadata explicitly provided in file, uploading...")          
+        try:
+            metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'])
+            errors, parameters = inputtemplate.validate(metadata, user)
+            validmeta = True
+        except Exception, e:
+            printlog("Uploaded metadata is invalid! " + str(e))          
+            metadata = None
+            errors = True
+            parameters = []
+            validmeta = False            
+    elif 'metadata' in postdata and postdata['metadata']:
+        printlog("Metadata explicitly provided in message, uploading...")
+        try:
+            metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
+            errors, parameters = inputtemplate.validate(metadata, user)
+            validmeta = True
+        except:
+            printlog("Uploaded metadata is invalid!")          
+            metadata = None
+            errors = True
+            parameters = []
+            validmeta = False 
+    elif 'inputsource' in postdata and postdata['inputsource']:
+        printlog("Getting metadata from inputsource, uploading...")
+        if inputsource.metadata:
+            printlog("DEBUG: Validating metadata from inputsource")
+            metadata = inputsource.metadata
+            errors, parameters = inputtemplate.validate(metadata, user)
+            validmeta = True
+        else:
+            printlog("DEBUG: No metadata provided with inputsource, looking for metadata files..")
+            metafilename = os.path.dirname(inputsource.path) 
+            if metafilename: metafilename += '/'
+            metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'            
+            if os.path.exists(metafilename):
+                try:
+                    metadata = clam.common.data.CLAMMetaData.fromxml(open(metafilename,'r').readlines())
+                    errors, parameters = inputtemplate.validate(metadata, user)
+                    validmeta = True
+                except:
+                    printlog("Uploaded metadata is invalid!")          
+                    metadata = None
+                    errors = True
+                    parameters = []
+                    validmeta = False             
+            else:
+                 raise web.webapi.InternalError("No metadata found nor specified for inputsource " + inputsource.id )
+    else:
+        errors, parameters = inputtemplate.validate(postdata, user)
+        validmeta = True #will be checked later
+
+
+    #  ----------- Check if archive are allowed -------------
+    archive = False
+    addedfiles = []  
+    if not errors and inputtemplate.acceptarchive:
+        printdebug('(Archive test)')
+        # -------- Are we an archive? If so, determine what kind
+        archivetype = None
+        if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+            uploadname = sourcefile.lower()
+            archivetype = None
+            if uploadname[-4:] == '.zip':
+                archivetype = 'zip'
+            elif uploadname[-7:] == '.tar.gz':
+                archivetype = 'tar.gz'
+            elif uploadname[-8:] == '.tar.bz2':
+                archivetype = 'tar.bz2'
+                
+            # NOT ACTUAL ARCHIVES
+            #elif uploadname[-4:] == '.bz2':
+            #    archivetype = 'bz2'
+            #elif uploadname[-3:] == '.gz':
+            #    archivetype = 'gz' 
+        
+        if archivetype:     
+            # =============== upload archive ======================
+            #random name
+            archive = "%032x" % random.getrandbits(128) + '.' + archivetype
+                
+            #Upload file from client to server
+            printdebug('(Archive transfer starting)')
+            f = open(Project.path(project,user) + archive,'wb')
+            for line in postdata['file'].file:
+                f.write(line)
+            f.close()
+            printdebug('(Archive transfer completed)')
+            # =============== Extract archive ======================
+            
+            #Determine extraction command
+            if archivetype == 'zip':
+                cmd = 'unzip -u'
+            elif archivetype == 'tar':
+                cmd = 'tar -xvf'
+            elif archivetype == 'tar.gz':
+                cmd = 'tar -xvzf'
+            elif archivetype == 'tar.bz2':
+                cmd = 'tar -xvjf'
+            else:
+                raise Exception("Invalid archive format: " + archivetype) #invalid archive, shouldn't happend
+
+            #invoke extractor
+            printlog("Extracting '" + archive + "'" )            
+            try:
+                process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            except:
+                raise web.webapi.InternalError("Unable to extract archive")       
+            out, err = process.communicate() #waits for process to end 
+
+
+            #Read filename results
+                          
+            firstline = True
+            for line in out.split("\n"):    
+                line = line.strip()        
+                if line:
+                    printdebug('(Extraction output: ' + line+')')
+                    subfile = None
+                    if archivetype[0:3] == 'tar':
+                        subfile = line
+                    elif archivetype == 'zip' and not firstline: #firstline contains archive name itself, skip it
+                        colon = line.find(":")
+                        if colon:
+                            subfile =  line[colon + 1:].strip()
+                    if subfile and os.path.isfile(Project.path(project, user) + subfile):
+                        subfile_newname = clam.common.data.resolveinputfilename(os.path.basename(subfile), parameters, inputtemplate, nextseq+len(addedfiles), project) 
+                        printdebug('(Extracted file ' + subfile + ', moving to input/' + subfile_newname+')')
+                        os.rename(Project.path(project, user) + subfile, Project.path(project, user) + 'input/' +  subfile_newname)
+                        addedfiles.append(subfile_newname)
+                firstline = False
+                                    
+            #all done, remove archive
+            os.unlink(Project.path(project, user) + archive)
+            
+    if not archive:
+        addedfiles = [clam.common.data.resolveinputfilename(filename, parameters, inputtemplate, nextseq, project)]
+
+    fatalerror = None                
+    
+    jsonoutput = {'success': False if errors else True}
+    
+    output = head
+    for filename in addedfiles:
+        output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"            
+                    
+        if not errors:
+            output += "<parameters errors=\"no\">"
+        else:
+            output += "<parameters errors=\"yes\">"
+            jsonoutput['error'] = 'There were parameter errors, file not uploaded: '
+        for parameter in parameters:
+            output += parameter.xml()
+            if parameter.error:
+                jsonoutput['error'] += parameter.error + ". "
+        output += "</parameters>"
+        
+
+        
+        if not errors:
+            if not archive:
+                #============================ Transfer file ========================================
+                printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
+                if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                    #Upload file from client to server
+                    f = open(Project.path(project, user) + 'input/' + filename,'wb')
+                    for line in postdata['file'].file:
+                        f.write(line) #encoding unaware, seems to solve big-file upload problem
+                    f.close()
+                elif 'url' in postdata and postdata['url']:
+                    #Download file from 3rd party server to CLAM server
+                    try:
+                        req = urllib2.urlopen(postdata['url'])
+                    except:
+                        raise web.webapi.NotFound()
+                    CHUNK = 16 * 1024
+                    f = open(Project.path(project, user) + 'input/' + filename,'wb')
+                    while True:
+                        chunk = req.read(CHUNK)
+                        if not chunk: break
+                        f.write(chunk)     
+                    f.close()
+                elif 'contents' in postdata and postdata['contents']:  
+                    #grab encoding
+                    encoding = 'utf-8'
+                    for p in parameters:
+                        if p.id == 'encoding':
+                            encoding = p.value                        
+                    #Contents passed in POST message itself
+                    try:
+                        f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
+                        f.write(postdata['contents'])
+                        f.close()
+                    except UnicodeError:
+                        raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
+                elif 'data' in web.ctx and web.ctx['data']:
+                    encoding = 'utf-8'
+                    for p in parameters:
+                        if p.id == 'encoding':
+                            encoding = p.value                        
+                    try:
+                        f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
+                        f.write(web.ctx['data'])
+                        f.close()
+                    except UnicodeError:
+                        raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")                        
+                elif 'inputsource' in postdata and postdata['inputsource']:                
+                    #Copy (symlink!) from preinstalled data
+                    os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
+                
+                printdebug('(File transfer completed)')
+                
+            
+        
+            #Create a file object
+            file = clam.common.data.CLAMInputFile(Project.path(project, user), filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+            
+            
+            
+            #============== Generate metadata ==============
+
+            metadataerror = None
+            if not metadata and not errors: #check if it has not already been set in another stage
+                #for newly generated metadata
+                try:
+                    #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+                    validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
+                    if validmeta:
+                        #And we tie it to the CLAMFile object
+                        file.metadata = metadata
+                        #Add inputtemplate ID to metadata
+                        metadata.inputtemplate = inputtemplate.id
+                    else:
+                        metadataerror = "Undefined error"
+                except ValueError, msg:
+                    validmeta = False
+                    metadataerror = msg
+                except KeyError, msg:
+                    validmeta = False
+                    metadataerror = msg
+            elif validmeta:
+                #for explicitly uploaded metadata
+                metadata.file = file
+                file.metadata = metadata
+                metadata.inputtemplate = inputtemplate.id
+                
+            if metadataerror:    
+                #output += "<metadataerror />" #This usually indicates an error in service configuration!
+                fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + str(metadataerror) + " (this usually indicates an error in service configuration!)</error>"
+                jsonoutput['error'] = "Metadata could not be generated! " + str(metadataerror) + "  (this usually indicates an error in service configuration!)"
+            elif validmeta:                    
+                #=========== Convert the uploaded file (if requested) ==============
+                
+                conversionerror = False
+                if 'converter' in postdata and postdata['converter']:
+                    for c in inputtemplate.converters:
+                        if c.id == postdata['converter']:
+                            converter = c
+                            break
+                    if converter: #(should always be found, error already provided earlier if not)
+                        try:
+                            success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
+                        except:
+                            success = False
+                        if not success:
+                            conversionerror = True
+                            fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
+                            jsonoutput['error'] = "The file could not be converted"
+                            jsonoutput['success'] = False
+                            
+                #====================== Validate the file itself ====================
+                if not conversionerror:
+                    valid = file.validate()        
+                    
+                    if valid:                       
+                        output += "<valid>yes</valid>"                
+                                        
+                        #Great! Everything ok, save metadata
+                        metadata.save(Project.path(project, user) + 'input/' + file.metafilename())
+                        
+                        #And create symbolic link for inputtemplates
+                        linkfilename = os.path.dirname(filename) 
+                        if linkfilename: linkfilename += '/'
+                        linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
+                        os.symlink(Project.path(project, user) + 'input/' + filename, Project.path(project, user) + 'input/' + linkfilename)
+                    else:
+                        #Too bad, everything worked out but the file itself doesn't validate.
+                        #output += "<valid>no</valid>"
+                        fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
+                        jsonoutput['errors'] = "The file " + filename + " did not validate, it is not in the proper expected format."
+                        jsonoutput['success'] = False
+                        #remove upload
+                        os.unlink(Project.path(project, user) + 'input/' + filename)
+        
+        
+        output += "</upload>\n"       
+
+    output += "</clamupload>"
+    
+    
+    
+    if fatalerror:
+        #fatal error return error message with 403 code
+        printlog('Fatal Error during upload: ' + fatalerror)
+        raise CustomForbidden(head + fatalerror)
+    elif errors:
+        #parameter errors, return XML output with 403 code
+        printdebug('There were paramameter errors during upload!')
+        raise CustomForbidden(output)
+    else:
+        #everything ok, return XML output and JSON output (caller decides) 
+        jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
+        return output, json.dumps(jsonoutput)
+
+
 class InputFileHandlerGhost(InputFileHandler):
     GHOST = True
 
@@ -1553,7 +1582,7 @@ class InterfaceData(object):
     """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
     GHOST = False
 
-    @RequireLogin(ghost=GHOST)
+    #@RequireLogin(ghost=GHOST) (may be loaded before authentication)
     def GET(self, user=None):
         web.header('Content-Type', 'application/javascript')
         
@@ -1594,6 +1623,26 @@ class IndexGhost(Index):
 
 class InfoGhost(Info):
     GHOST=True
+
+
+class Uploader(object): 
+    """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML"""
+    GHOST=False
+    
+    @RequireLogin(ghost=GHOST)
+    def POST(self, project, user=None):
+        postdata = web.input(file={},qqfile={})
+        if 'filename' in postdata:
+            filename = postdata['filename']
+        else:
+            printdebug('No filename passed')
+            raise CustomForbidden()
+        xmlresult,jsonresult = addfile(project,filename,user, postdata)
+        return jsonresult
+        
+        
+
+        
         
 #class Uploader(object): #OBSOLETE!
 

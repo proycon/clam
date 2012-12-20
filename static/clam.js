@@ -2,7 +2,8 @@
 
 $(document).ready(function(){
    if (typeof(inputtemplates) == 'undefined') {
-        alert("System error: data.js not properly loaded?");
+   		//something went wrong during loading, probably authentication issues, reload page
+        window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
 
    if (typeof(stage) != 'undefined') {
@@ -251,29 +252,40 @@ $(document).ready(function(){
     });
 
    //Upload through browser
-   if ($('#uploadbutton') && (typeof(project) != 'undefined') ) {    
-       uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
-            onChange: function(filename,extension){
-                 var inputtemplate_id = $('#uploadinputtemplate').val();
-                 var filename = validateuploadfilename(filename,inputtemplate_id);
-                 if (!filename) {
-                    return false;
-                 } else {
-                     uploader._settings.action = baseurl + '/' + project + '/input/' + filename
-                     uploader._settings.data.inputtemplate = inputtemplate_id;
-                     addformdata( '#uploadparameters', uploader._settings.data );
-                 }
-            },
-            onSubmit: function(){
-                $('#clientupload').hide();
-                $('#uploadprogress').show();           
+   if ($('#fineuploadarea') && (typeof(project) != 'undefined') ) {		
+        $('#fineuploadarea').fineUploader({        
+        	//element: $('#fineuploadarea')[0],     
+            request: {
+            	endpoint:  baseurl + '/' + project + '/upload/',
             },  
-            onComplete: function(file, response){
-                processuploadresponse(response, '#uploadparameters');
-                $('#uploadprogress').hide();
-                $('#clientupload').show();
-            }       
-        }); 
+            params: {},
+            text: { uploadButton: "Upload a file" } ,
+            multiple: true,
+            forceMultipart: true,
+            autoUpload: true, 
+            debug: true
+        }).on('submit', function(event, id, fileName) {
+		    	var inputtemplate_id = $('#uploadinputtemplate').val();
+		    	if (inputtemplate_id == "") {
+		    		alert("Please select a desired input type first");
+		    		return false;
+		    	}
+		    	var params = {'inputtemplate': inputtemplate_id, 'filename': fileName}		    		
+		    	addformdata( '#uploadparameters', params );		 
+		    	$(this).fineUploader('setParams',params); 		    	
+		        $('#clientupload').hide();
+		        $('#uploadprogress').show(); 
+		}).on('complete', function(event, id, fileName, responseJSON) {
+		        processuploadresponse(responseJSON.xml, '#uploadparameters');
+		        $('#uploadprogress').hide();
+		        $('#clientupload').show();			
+		}).on('click',function(){
+		    	var inputtemplate_id = $('#uploadinputtemplate').val();
+		    	if (inputtemplate_id == "") {
+		    		alert("Please select a desired input type first");
+		    		return false;
+		    	}		
+		});       
    }
 
 
@@ -288,7 +300,7 @@ $(document).ready(function(){
                 },
                 error: function(response, errortype){
                     alert(response);
-                }                
+                }          
         });     
    });
    
