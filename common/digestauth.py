@@ -151,8 +151,11 @@ class auth(object):
         # IE doesn't send "opaque" and does not include GET parameters in the Digest field
         #standardsUncompliant = self.tolerateIE and ("MSIE" in web.ctx.environ.get('HTTP_USER_AGENT',""))
         standardsUncompliant = True #Support crappy (Microsoft) software by default, regardless of uyser agent.
-        if standardsUncompliant and '?' in reqPath:
-            reqPath = reqPath.split('?')[0]
+        if standardsUncompliant:
+            if '?' in reqHeaderDict['uri']:
+                reqHeaderDict['uri'] = reqHeaderDict['uri'].split('?')[0]
+            if '?' in reqPath:
+                reqPath = reqPath.split('?')[0]
                 
         
         if reqHeaderDict['realm'] != self.realm:
