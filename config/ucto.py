@@ -46,10 +46,18 @@ if host == 'galactica' or host == 'roma': #proycon's laptop/server
     PORT = 9001
     BINDIR = "/home/proycon/local/bin/"
 elif host == 'applejack': #Nijmegen
-    CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-    ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
-    HOST = "webservices-lst.science.ru.nl"
-    PORT = 80
+    if not 'CLAMTEST' in environ:
+        #live production environment
+        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
+        ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
+        HOST = "webservices-lst.science.ru.nl"
+        PORT = 80    
+    else:
+        #test environment
+        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
+        ROOT = "/scratch2/www/webservices-lst/test/writable/ucto/"
+        HOST = "webservices-lst.science.ru.nl"
+        PORT = 81        
     URLPREFIX = "ucto"
     BINDIR = "/vol/customopt/uvt-ru/bin/"    
     USERS_MYSQL = {

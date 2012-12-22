@@ -47,10 +47,16 @@ if host == 'galactica' or host == 'roma': #proycon's laptop/server
     USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
     #URLPREFIX = 'frog'
 elif host == 'applejack': #Nijmegen
-    CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-    ROOT = "/scratch2/www/webservices-lst/live/writable/frog/"
-    HOST = "webservices-lst.science.ru.nl"
-    PORT = 80
+    if not 'CLAMTEST' in environ:
+        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
+        ROOT = "/scratch2/www/webservices-lst/live/writable/frog/"
+        HOST = "webservices-lst.science.ru.nl"
+        PORT = 80
+    else:
+        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
+        ROOT = "/scratch2/www/webservices-lst/test/writable/frog/"
+        HOST = "webservices-lst.science.ru.nl"
+        PORT = 81
     URLPREFIX = "frog"
     BINDIR = "/vol/customopt/uvt-ru/bin/"
     USERS_MYSQL = {
