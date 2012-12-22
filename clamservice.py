@@ -1629,7 +1629,7 @@ class Uploader(object):
     """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML"""
     GHOST=False
     
-    @RequireLogin(ghost=GHOST)
+    #@RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
         postdata = web.input(file={},qqfile={})
         if 'filename' in postdata:
