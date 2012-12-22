@@ -1,13 +1,13 @@
-$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, ghost, info)
+$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, ghost, info, uploadkey)
 <?xml version="1.0" encoding="UTF-8" ?>
 $if info:
 	<?xml-stylesheet type="text/xsl" href="$url/static/info.xsl"?>
 $elif not ghost:
     <?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
 $if project and user:
-    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" user="$user" baseurl="$url" uploadkey="$uploadkey">
 $elif project:
-    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url">
+    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" project="$project" baseurl="$url" uploadkey="$uploadkey">
 $elif user:
     <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" user="$user" baseurl="$url">
 $else:

@@ -47,7 +47,7 @@ if host == 'galactica' or host == 'roma': #proycon's laptop/server
     BINDIR = "/home/proycon/local/bin/"
 elif host == 'applejack': #Nijmegen
     if not 'CLAMTEST' in environ:
-        #live production environment
+        #live production environment/
         CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
         ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
         HOST = "webservices-lst.science.ru.nl"

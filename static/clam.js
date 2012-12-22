@@ -16,6 +16,10 @@ $(document).ready(function(){
                 parametersxsl = xml;
             }
        });
+      if (stage == 1) {
+       		$('#progressbar').progress({value: progress});
+       		setTimeout(sreayHi,30000);
+       }
     }
 
    
@@ -269,8 +273,8 @@ $(document).ready(function(){
 		    	if (inputtemplate_id == "") {
 		    		alert("Please select a desired input type first");
 		    		return false;
-		    	}
-		    	var params = {'inputtemplate': inputtemplate_id, 'filename': fileName}		    		
+		    	}		    		
+		    	var params = {'inputtemplate': inputtemplate_id, 'filename': fileName, 'user':user, 'uploadkey':uploadkey  }		    		
 		    	addformdata( '#uploadparameters', params );		 
 		    	$(this).fineUploader('setParams',params); 		    	
 		        $('#clientupload').hide();
@@ -560,3 +564,11 @@ function setlocalinputsource(selector, target) {
     }
 }
 
+function pollstatus() {
+}
+
+function updatestatus() {
+	if (progress > 0) {
+		$('#progressbar').progressbar( "option", "value", progress );
+	}
+}

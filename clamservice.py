@@ -27,6 +27,7 @@ import sys
 import datetime
 import random
 import re
+import hashlib
 import urllib2
 import getopt
 import time
@@ -365,7 +366,7 @@ class Index(object):
 
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None)
     
 class Info(object):    
     GHOST = False
@@ -666,7 +667,7 @@ class Project(object):
         
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Uploader.uploadkey(user,project))
         
                     
     @RequireLogin(ghost=GHOST)
@@ -1626,22 +1627,39 @@ class InfoGhost(Info):
 
 
 class Uploader(object): 
-    """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML"""
+    """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML. Unfortunately, normal digest authentication does not work well with the uploader, so we implement a simple key check based on hashed username, projectname and a secret key that is communicated as a JS variable in the interface ."""
     GHOST=False
     
-    #@RequireLogin(ghost=GHOST)
-    def POST(self, project, user=None):
+    #@RequireLogin(ghost=GHOST) #No auth, see description in docstring above
+    def POST(self, project, user=None):        
         postdata = web.input(file={},qqfile={})
+        if 'user' in postdata:
+            user = user['user']
+        else:
+            return "{success: false, error: 'No user specified'}"
         if 'filename' in postdata:
             filename = postdata['filename']
         else:
             printdebug('No filename passed')
-            raise CustomForbidden()
-        xmlresult,jsonresult = addfile(project,filename,user, postdata)
-        return jsonresult
+            return "{success: false, error: 'No filename passed'}"            
+        if 'uploadkey' in postdata:
+            uploadkey = postdata['uploadkey']
+        else:
+            return "{success: false, error: 'No uploadkey given'}"        
+        if uploadkey != getuploadkey(user,project):
+            return "{success: false, error: 'Invalid uploadkey given'}"    
+        if not os.path.exists(Project.path(project, user)):
+            return "{success: false, error: 'Destination does not exist'}"
+        else:
+            xmlresult,jsonresult = addfile(project,filename,user, postdata)
+            return jsonresult
         
-        
-
+    @staticmethod
+    def getuploadkey(user,project):
+        if not user: user = 'anonymous'
+        h = hashlib.md5()
+        h.update(user+ ':' + settings.PRIVATEUPLOADKEY + ':' + project)
+        return h.hexdigest()
         
         
 #class Uploader(object): #OBSOLETE!
@@ -2028,6 +2046,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.USERS_MYSQL = None
     if not 'FORCEURL' in settingkeys:
         settings.FORCEURL = None
+    if not 'PRIVATEUPLOADKEY' in settingkeys:
+        settings.PRIVATEUPLOADKEY = "%032x" % random.getrandbits(128)
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')

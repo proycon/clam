@@ -73,7 +73,7 @@
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
     <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js"></script>
-    <!--<script type="text/javascript" src="/static/jquery-ui-1.8.1.custom.min.js"></script>-->
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.fineuploader-3.1.min.js"></script>
     <!--<script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>-->    
@@ -82,6 +82,7 @@
     <script type="text/javascript">
         <xsl:if test="status/@code = 1">
                 stage = 1;
+                progress = 0;
         </xsl:if>
         <xsl:if test="status/@code = 0">
                 stage = 0;
@@ -90,7 +91,10 @@
                 stage = 2;
         </xsl:if>
         <xsl:if test="/clam/@project">
-                project = '<xsl:value-of select="/clam/@project" />';
+                project = '<xsl:value-of select="/clam/@project" />';                
+        </xsl:if>
+        <xsl:if test="/clam/@uploadkey">
+        		uploadkey = '<xsl:value-of select="/clam/@uploadkey" />';
         </xsl:if>
     </script>
             
@@ -124,21 +128,15 @@
       <xsl:when test="@code = 1">
         <div class="running"><xsl:value-of select="@message"/><input id="abortbutton" type="button" value="Abort and delete project" /></div>
         <xsl:choose>
-         <xsl:when test="@completion > 75">
-           <div id="progressbar">
-                <span id="progressvalue"><xsl:attribute name="style">width: <xsl:value-of select="@completion"/>%;</xsl:attribute><xsl:value-of select="@completion"/>%</span>
-           </div>
-         </xsl:when>
          <xsl:when test="@completion > 0">
            <div id="progressbar">
-                <span id="progressvalue"><xsl:attribute name="style">width: <xsl:value-of select="@completion"/>%;</xsl:attribute></span><xsl:value-of select="@completion"/>%
            </div>
          </xsl:when>
          <xsl:otherwise>
            <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
          </xsl:otherwise>
         </xsl:choose>
-        <p>You may safely close your browser or shut down your computer during this process, the system will keep running and be available when you return another time.</p>
+        <p>You may safely close your browser or shut down your computer during this process, the system will keep running on the server and is available when you return another time.</p>
         <xsl:call-template name="log" />
       </xsl:when>
       <xsl:when test="@code = 2">
