@@ -272,8 +272,15 @@
                 <div id="clientupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
                     <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for this type of file:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><em>Select a type first</em></div>
-                    <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text> <div id="fineuploadarea"></div>                    
-                    <!--<input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />-->
+                    <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text> 
+                    <xsl:choose>
+                    <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
+                    	<input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />
+                    </xsl:when>
+                    <xsl:otherwise>
+                    	<div id="fineuploadarea"></div>
+                    </xsl:otherwise>                    
+                    </xsl:choose>
                 </div>
                 <div id="uploadprogress">
                         <strong>Upload in progress... Please wait...</strong><br />

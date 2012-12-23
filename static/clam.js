@@ -296,6 +296,33 @@ $(document).ready(function(){
 		});       
    }
 
+   //simpleupload:
+   if ($('#uploadbutton') && (typeof(project) != 'undefined') ) {    
+       uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
+            onChange: function(filename,extension){
+                 var inputtemplate_id = $('#uploadinputtemplate').val();
+                 var filename = validateuploadfilename(filename,inputtemplate_id);
+                 if (!filename) {
+                    return false;
+                 } else {
+                     uploader._settings.action = baseurl + '/' + project + '/input/' + filename
+                     uploader._settings.data.inputtemplate = inputtemplate_id;
+                     addformdata( '#uploadparameters', uploader._settings.data );
+                 }
+            },
+            onSubmit: function(){
+                $('#clientupload').hide();
+                $('#uploadprogress').show();           
+            },  
+            onComplete: function(file, response){
+                processuploadresponse(response, '#uploadparameters');
+                $('#uploadprogress').hide();
+                $('#clientupload').show();
+            }       
+        }); 
+   }
+
+	
 
    $('#inputsourceselect').click(function(event){ /* Doesn't exist???? */
         $.ajax({ 
