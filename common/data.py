@@ -396,8 +396,9 @@ class CLAMData(object):
         if root.tag != 'clam':
             raise FormatError()
             
-        if root.attrib['version'][0:3] != VERSION[0:3]:
-            raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])                    
+        #if root.attrib['version'][0:3] != VERSION[0:3]:
+        #    raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])
+                                
         self.system_id = root.attrib['id']
         self.system_name = root.attrib['name']        
         if 'project' in root.attrib:

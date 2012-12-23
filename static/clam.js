@@ -96,7 +96,7 @@ $(document).ready(function(){
     });
 
 
-   //Create a new project
+   //Create a new project'
        if ($("#startprojectbutton").length) {
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
