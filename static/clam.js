@@ -583,7 +583,7 @@ function pollstatus() {
                 if (response.statuscode != 1) {
                 	window.location.href = baseurl + '/' + project + '/'; /* refresh */
                 } else {
-                	if (completion > 0) {
+                	if (response.completion > 0) {
                 		progress = response.completion;                		
                 		$('#progressbar').progressbar( "option", "value", progress );
                 		var statuslogcontent = "";
