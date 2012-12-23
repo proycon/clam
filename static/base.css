@@ -2,19 +2,12 @@ body {
     background: #e6dcca;
     font-family: sans-serif;
     font-size: 12px;
+    margin: 0px;
 }
 
 #header {
-    margin: 5px;
-    width: 97%;
-    background: #ceb383;
-    border: 1px none #ca9c4d;
-    padding: 10px;
-    text-align: center;
-    border-radius: 12px; /* general CSS3 */
-    -moz-border-radius: 12px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 12px; /* CSS3 for Safari */
-
+	text-align: center;
+	padding: 10px;
 }
 
 #header h1 {
@@ -42,7 +35,6 @@ body {
 
 
 div.box {
-    width: 97%;
     clear: both;
     margin: 5px;
     padding: 10px;
@@ -177,8 +169,22 @@ table.files li {
 }
 
 
+#tabs {
+    background: #c9bea8;
+}
+#tabs ol {
+    margin: 0px;
+    padding: 0px;
+}
+#tabs li {
+	display: inline-block;
+    margin: 0px;
+    padding: 3px;
+    background: #c9bea8;
+}
+
+
 #footer {
-    width: 97%;
     margin: 5px;
     font-family: monospace;
     font-size: 80%;
@@ -313,4 +319,14 @@ pre.pythoncode strong {
 #restspec tt em {
 	color: #818252;	
 	
+}
+#actions {
+	width: 25%;
+	float: right;
+}
+#statusmessage {
+	width: 70%;
+}
+#errorbox {
+	width: 70%;
 }

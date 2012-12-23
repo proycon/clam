@@ -1,7 +1,14 @@
 body {
-    background: #e6dcca;
+    background: #E6DCCA;
     font-family: sans-serif;
     font-size: 12px;
+}
+#container {
+	background: #cfbf9d;
+	border-radius: 12px;
+    -moz-border-radius: 12px; /* CSS3 for older Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    padding-bottom: 2px;	
 }
 
 #status p {
@@ -12,18 +19,24 @@ body {
 
 h2 {
     font-size: 120%;
-    color: #ac8644;
+    color: #a6956f;
     text-decoration: small-caps;  
-    border-bottom:  1px solid #ca9c4d;
+    border-bottom:  1px solid #a6956f;
 }
 h3 {
     margin-left: 5px;
     font-size: 100%;
-    color: #ac8644;
+    color: #a6956f;
     text-decoration: small-caps;  
-    border-bottom:  1px solid #ca9c4d;
+    border-bottom:  1px solid #a6956f;
 }
-
+#header {
+	background: #cfbf9d;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;    
+    margin-bottom:5px;
+}
 #header h1 {
     color: white;
 }
@@ -37,10 +50,10 @@ h3 {
 }
 
 div.box {
-    -moz-border-radius: 12px; /* CSS3 for Mozilla */
+	border-radius: 12px;
+    -moz-border-radius: 12px; /* CSS3 for older Mozilla */
     -webkit-border-radius: 12px; /* CSS3 for Safari */
     background: #f6f6f6;
-    border: 1px solid #ca9c4d;
 }
 
 table.files, table#projects {
@@ -108,4 +121,54 @@ input.uploadbutton {
 #progressvalue {
     background: gray;
     color: white;
+}
+
+#tabs {
+	background: #E6DCCA;
+}
+
+
+#tabs li.active {
+	background: #cfbf9d;
+	color: white;
+	text-decoration: underline;
+	border:#cfbf9d solid 1px;
+	font-size: 100%;
+}
+
+#tabs li.disabled {
+	background: #bfbfbf;
+	color: white;	
+	border:#bfbfbf solid 1px;
+}
+
+#tabs li {
+	font-size: 90%;
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;	
+	border: #cbc3b1 solid 1px;
+	background: #cbc3b1;
+	color: white;
+	padding-left: 5px;
+	padding-right: 5px;
+	font-weight: bold;
+	cursor: pointer;
+}
+#tabs a, #tabs a:visited {
+	color: white;
+	text-decoration: none;
+}
+#tabs a:hover {
+	color: #fffeb9;
+	text-decoration: none;
+}
+#status .error {
+	margin: 2px;
+	width: 70%; 
+}
+a {
+	color: #574b32;
+}
+a:visited {
+	color: #6d6450;
 }

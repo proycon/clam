@@ -17,8 +17,8 @@ $(document).ready(function(){
             }
        });
       if (stage == 1) {
-       		$('#progressbar').progress({value: progress});
-       		setTimeout(sreayHi,30000);
+       		$('#progressbar').progressbar({value: progress});
+       		setTimeout(pollstatus,2000);
        }
     }
 
@@ -265,7 +265,7 @@ $(document).ready(function(){
             params: {},
             text: { uploadButton: "Upload a file" } ,
             multiple: true,
-            forceMultipart: true,
+            //forceMultipart: true,
             autoUpload: true, 
             debug: true
         }).on('submit', function(event, id, fileName) {
@@ -274,7 +274,7 @@ $(document).ready(function(){
 		    		alert("Please select a desired input type first");
 		    		return false;
 		    	}		    		
-		    	var params = {'inputtemplate': inputtemplate_id, 'filename': fileName, 'user':user, 'uploadkey':uploadkey  }		    		
+		    	var params = {inputtemplate: inputtemplate_id, filename: fileName, user:user, accesstoken:accesstoken  }		    		
 		    	addformdata( '#uploadparameters', params );		 
 		    	$(this).fineUploader('setParams',params); 		    	
 		        $('#clientupload').hide();
@@ -565,10 +565,32 @@ function setlocalinputsource(selector, target) {
 }
 
 function pollstatus() {
+	$.ajax({
+		type: 'GET',
+		url: baseurl + '/' + project + "/status/",
+		dataType: 'json', 
+		data: {accesstoken: accesstoken, user: user},
+		success: function(response){
+                if (response.statuscode != 1) {
+                	window.location.href = baseurl + '/' + project + '/'; /* refresh */
+                } else {
+                	if (completion > 0) {
+                		progress = response.completion;                		
+                		$('#progressbar').progressbar( "option", "value", progress );
+                		var statuslogcontent = "";
+                		for (var i = 0; i < response.statuslog.length - 1; i++) {
+                			var msg = response.statuslog[i][0];
+                			var t = response.statuslog[i][1];
+                			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
+                		}                 		                		
+                		$('#statuslogtable').html(statuslogcontent);
+                	}                	
+                }
+                setTimeout(pollstatus,2000);                   
+        },
+        error: function(response,errortype){
+        	alert("Error obtaining status");
+        },        
+	});	
 }
 
-function updatestatus() {
-	if (progress > 0) {
-		$('#progressbar').progressbar( "option", "value", progress );
-	}
-}

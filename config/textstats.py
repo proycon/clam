@@ -22,7 +22,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.5
+REQUIRE_VERSION = 0.9
 
 # ======== GENERAL INFORMATION ===========
 
@@ -61,7 +61,7 @@ PROJECTS_PUBLIC = False
 REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 1.0
+MAXLOADAVG = 4.0
 
 
 # ======== WEB-APPLICATION STYLING =============

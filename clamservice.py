@@ -71,7 +71,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.8.3'
+VERSION = '0.9.0'
 
 DEBUG = False
     
@@ -281,6 +281,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/status/?', 'Status', #returns status information in JSON, for web interface
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
@@ -366,7 +367,7 @@ class Index(object):
 
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS)
     
 class Info(object):    
     GHOST = False
@@ -390,7 +391,7 @@ class Info(object):
 
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True)
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS)
     
 
         
@@ -487,7 +488,8 @@ class Project(object):
         else:
             return 0
 
-    def running(self,project, user):
+    @staticmethod
+    def running(project, user):
         return os.path.isfile(Project.path(project, user) + ".pid") and not os.path.isfile(Project.path(project, user) + ".done")
         
     
@@ -500,7 +502,8 @@ class Project(object):
             time.sleep(1)
         return True
 
-    def done(self,project,user):
+    @staticmethod
+    def done(project,user):
         return os.path.isfile(Project.path(project, user) + ".done")
 
     def exitstatus(self, project, user):
@@ -515,7 +518,8 @@ class Project(object):
         printdebug("Checking if project " + project + " exists for " + user)  
         return os.path.isdir(Project.path(project, user))
 
-    def statuslog(self,project, user):
+    @staticmethod
+    def statuslog(project, user):
         statuslog = []
         statusfile = Project.path(project,user) + ".status"
         totalcompletion = 0
@@ -553,16 +557,17 @@ class Project(object):
             statuslog.reverse()
         return statuslog, totalcompletion
 
-    def status(self, project, user):
+    @staticmethod
+    def status(project, user):
         global DATEMATCH
-        if self.running(project, user):
-            statuslog, completion = self.statuslog(project, user)
+        if Project.running(project, user):
+            statuslog, completion = Project.statuslog(project, user)
             if statuslog:
                 return (clam.common.status.RUNNING, statuslog[0][0],statuslog, completion)
             else:
                 return (clam.common.status.RUNNING, "The system is running",  [], 0) #running
-        elif self.done(project, user):
-            statuslog, completion = self.statuslog(project, user)
+        elif Project.done(project, user):
+            statuslog, completion = Project.statuslog(project, user)
             if statuslog:
                 return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
             else:
@@ -667,7 +672,7 @@ class Project(object):
         
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Uploader.uploadkey(user,project))
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS)
         
                     
     @RequireLogin(ghost=GHOST)
@@ -794,6 +799,14 @@ class Project(object):
         web.header('Content-Type', 'text/plain')
         web.header('Content-Length',len(msg))
         return msg #200                
+
+    @staticmethod
+    def getaccesstoken(user,project):
+        if not user: user = 'anonymous'
+        h = hashlib.md5()
+        h.update(user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project)
+        return h.hexdigest()
+
 
 class OutputFileHandler(object):
     GHOST = False
@@ -1611,7 +1624,7 @@ class StyleData(object):
 
     def GET(self):
         web.header('Content-Type', 'text/css')
-
+        yield "//" + settings.STYLE + '.css\n' 
         for line in codecs.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r','utf-8'):
             yield line
         
@@ -1634,32 +1647,48 @@ class Uploader(object):
     def POST(self, project, user=None):        
         postdata = web.input(file={},qqfile={})
         if 'user' in postdata:
-            user = user['user']
+            user = postdata['user']
         else:
-            return "{success: false, error: 'No user specified'}"
+            user = 'anonymous'            
         if 'filename' in postdata:
             filename = postdata['filename']
         else:
             printdebug('No filename passed')
             return "{success: false, error: 'No filename passed'}"            
-        if 'uploadkey' in postdata:
-            uploadkey = postdata['uploadkey']
+        if 'accesstoken' in postdata:
+            accesstoken = postdata['accesstoken']
         else:
-            return "{success: false, error: 'No uploadkey given'}"        
-        if uploadkey != getuploadkey(user,project):
-            return "{success: false, error: 'Invalid uploadkey given'}"    
+            return "{success: false, error: 'No accesstoken given'}"        
+        if accesstoken != Project.getaccesstoken(user,project):
+            return "{success: false, error: 'Invalid accesstoken given'}"    
         if not os.path.exists(Project.path(project, user)):
             return "{success: false, error: 'Destination does not exist'}"
         else:
             xmlresult,jsonresult = addfile(project,filename,user, postdata)
             return jsonresult
         
-    @staticmethod
-    def getuploadkey(user,project):
-        if not user: user = 'anonymous'
-        h = hashlib.md5()
-        h.update(user+ ':' + settings.PRIVATEUPLOADKEY + ':' + project)
-        return h.hexdigest()
+
+
+class Status(object): 
+    #@RequireLogin(ghost=GHOST) #No auth, see description in docstring above
+    def GET(self, project, user=None):    
+        postdata = web.input(file={},qqfile={})
+        if 'user' in postdata:
+            user = postdata['user']
+        else:
+            user = 'anonymous'               
+        if 'accesstoken' in postdata:
+            accesstoken = postdata['accesstoken']
+        else:
+            return "{success: false, error: 'No accesstoken given'}"        
+        if accesstoken != Project.getaccesstoken(user,project):
+            return "{success: false, error: 'Invalid accesstoken given'}"    
+        if not os.path.exists(Project.path(project, user)):
+            return "{success: false, error: 'Destination does not exist'}"
+        
+        statuscode, statusmsg, statuslog, completion = Project.status(project,user)
+        return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
+
         
         
 #class Uploader(object): #OBSOLETE!
@@ -2046,8 +2075,10 @@ def set_defaults(HOST = None, PORT = None):
         settings.USERS_MYSQL = None
     if not 'FORCEURL' in settingkeys:
         settings.FORCEURL = None
-    if not 'PRIVATEUPLOADKEY' in settingkeys:
-        settings.PRIVATEUPLOADKEY = "%032x" % random.getrandbits(128)
+    if not 'PRIVATEACCESSTOKEN' in settingkeys:
+        settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
+    if not 'INTERFACEOPTIONS' in settingkeys:
+        settings.INTERFACEOPTIONS = ""
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
