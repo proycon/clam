@@ -257,7 +257,7 @@ function initclam() {
     });
 
    //Upload through browser
-   if ($('#fineuploadarea') && (typeof(project) != 'undefined') ) {		
+   if ( (typeof($('#fineuploadarea')[0]) == 'undefined') && (typeof(project) != 'undefined') ) {		
         $('#fineuploadarea').fineUploader({        
         	//element: $('#fineuploadarea')[0],     
             request: {
@@ -297,7 +297,7 @@ function initclam() {
    }
 
    //simpleupload:
-   if ($('#uploadbutton') && (typeof(project) != 'undefined') ) {    
+   if ( (typeof($('#uploadbutton')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {    
        uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
             onChange: function(filename,extension){
                  var inputtemplate_id = $('#uploadinputtemplate').val();
