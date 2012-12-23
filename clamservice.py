@@ -1340,14 +1340,25 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 archivetype = 'zip'
             elif uploadname[-7:] == '.tar.gz':
                 archivetype = 'tar.gz'
+            elif uploadname[-4:] == '.tar':
+                archivetype = 'tar'                
             elif uploadname[-8:] == '.tar.bz2':
                 archivetype = 'tar.bz2'
-                
-            # NOT ACTUAL ARCHIVES
-            #elif uploadname[-4:] == '.bz2':
-            #    archivetype = 'bz2'
-            #elif uploadname[-3:] == '.gz':
-            #    archivetype = 'gz' 
+            xhrpost = False
+        elif 'accesstoken' in postdata and 'filename' in postdata:
+            xhrpost = True
+            if postdata['filename'][-7:].lower() == '.tar.gz':          
+                uploadname = sourcefile.lower()
+                archivetype = 'tar.gz'
+            elif postdata['filename'][-8:].lower() == '.tar.bz2':
+                uploadname = sourcefile.lower()
+                archivetype = 'tar.bz2'
+            elif postdata['filename'][-4:].lower() == '.tar':
+                uploadname = sourcefile.lower()
+                archivetype = 'tar'                        
+            elif postdata['filename'][-4:].lower() == '.zip':
+                uploadname = sourcefile.lower()
+                archivetype = 'zip'     
         
         if archivetype:     
             # =============== upload archive ======================
@@ -1356,10 +1367,15 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 
             #Upload file from client to server
             printdebug('(Archive transfer starting)')
-            f = open(Project.path(project,user) + archive,'wb')
-            for line in postdata['file'].file:
-                f.write(line)
-            f.close()
+            if not xhrpost:
+                f = open(Project.path(project,user) + archive,'wb')
+                for line in postdata['file'].file:
+                    f.write(line)
+                f.close()
+            elif xhrpost:
+                f = open(Project.path(project,user) + archive,'wb')
+                f.write(web.ctx['data'])
+                f.close()
             printdebug('(Archive transfer completed)')
             # =============== Extract archive ======================
             
@@ -1413,8 +1429,9 @@ def addfile(project, filename, user, postdata, inputsource=None):
 
     fatalerror = None                
     
-    jsonoutput = {'success': False if errors else True}
-    
+    jsonoutput = {'success': False if errors else True, 'isarchive': archive}
+        
+        
     output = head
     for filename in addedfiles:
         output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"            

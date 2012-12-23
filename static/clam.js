@@ -282,6 +282,10 @@ $(document).ready(function(){
 		        $('#uploadprogress').show(); 
 		        return true;
 		}).on('complete', function(event, id, fileName, responseJSON) {
+				if (responseJSON.isarchive) {
+					window.location.href = baseurl + '/' + project + '/'; /* just refresh page */
+					return true;
+				} 
 		        processuploadresponse(responseJSON.xml, '#uploadparameters');
 		        $('#uploadprogress').hide();
 		        $('#clientupload').show();			
@@ -474,9 +478,10 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
         $(target).html("");
     } else {
         $(target).find('.error').each(function(){ $(this).html(''); }); 
-        inputtemplate = getinputtemplate(id);
+        var inputtemplate = getinputtemplate(id);
         if (inputtemplate) {
             var xmldoc;
+            var result;
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)                
                 if (parametersxmloverride == undefined) {
@@ -510,6 +515,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 result = "<strong>Error: Unable to render parameter form!</strong>";
             }
             $(target).html(result);
+
             if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {                
                 var s = "Automatic conversion from other format? <select name=\"converter\">";
                 s += "<option value=\"\">No</option>";
@@ -518,6 +524,9 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 }
                 s += "</select><br />";
                 $(target).prepend(s);
+            }
+            if (inputtemplate.acceptarchive) {
+            	$(target).prepend("This input template also accepts archives (zip, tar.gz, tar.bz2) containing multiple files of exactly this specific type.<br />");
             }
         } else {
             $(target).html("<strong>Error: Selected input template is invalid!</strong>");
