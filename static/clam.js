@@ -277,7 +277,7 @@ $(document).ready(function(){
 		    	}		    		
 		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken  }		    		
 		    	addformdata( '#uploadparameters', params );		 
-		    	$(this).fineUploader('setParams',params); 		    	
+		    	$(this).fineUploader('setParams',params); 		    			    	
 		        $('#clientupload').hide();
 		        $('#uploadprogress').show(); 
 		        return true;
@@ -526,7 +526,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 $(target).prepend(s);
             }
             if (inputtemplate.acceptarchive) {
-            	$(target).prepend("This input template also accepts archives (zip, tar.gz, tar.bz2) containing multiple files of exactly this specific type.<br />");
+            	$(target).prepend("For easy mass upload, this input template also accepts <strong>archives</strong> (<tt>zip, tar.gz, tar.bz2</tt>) containing multiple files of exactly this specific type.<br />");
             }
         } else {
             $(target).html("<strong>Error: Selected input template is invalid!</strong>");

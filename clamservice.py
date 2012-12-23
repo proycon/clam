@@ -1492,7 +1492,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                             encoding = p.value                        
                     try:
                         f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
-                        f.write(web.ctx['data'])
+                        f.write(unicode(web.ctx['data'],encoding))
                         f.close()
                     except UnicodeError:
                         raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")                        
