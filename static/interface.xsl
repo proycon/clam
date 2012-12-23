@@ -87,13 +87,15 @@
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
-    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
-    <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js"></script>
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
+    
+    <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
+	<link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
+
     <xsl:choose>
      <xsl:when test="contains(/clam/@interfaceoptions,'simplepolling')">
     	<script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
