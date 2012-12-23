@@ -180,6 +180,33 @@ input.uploadbutton {
 	font-weight: normal;
 	font-size: 12px;
 }
+
+input#abortbutton, input#restartbutton {
+	background: #880000;
+	padding: 2px;
+	color: white;
+	font-weight: normal;
+	font-size: 11px;
+	width: 180px;
+	border: none;
+	cursor: pointer;
+}
+input#abortbutton:hover, input#restartbutton:hover {
+	background: #EE0000;	
+}
+
 input.uploadbutton:hover {
+	background: #AA0000;
+}
+
+div#startbutton input {
+	background: #880000;
+	padding: 14px;
+	color: white;
+	font-weight: bold;
+	font-size: 26px;
+}
+
+div#startbutton input:hover {
 	background: #AA0000;
 }
