@@ -278,8 +278,7 @@ $(document).ready(function(){
 		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken  }		    		
 		    	addformdata( '#uploadparameters', params );		 
 		    	$(this).fineUploader('setParams',params); 		    			    	
-		        $('#clientupload').hide();
-		        $('#uploadprogress').show(); 
+		         
 		        return true;
 		}).on('complete', function(event, id, fileName, responseJSON) {
 				if (responseJSON.isarchive) {
@@ -287,8 +286,7 @@ $(document).ready(function(){
 					return true;
 				} 
 		        processuploadresponse(responseJSON.xml, '#uploadparameters');
-		        $('#uploadprogress').hide();
-		        $('#clientupload').show();			
+			
 		}).on('click',function(){
 		    	var inputtemplate_id = $('#uploadinputtemplate').val();
 		    	if (inputtemplate_id == "") {
