@@ -25,6 +25,7 @@ import clam.common.status
 
 
 
+
 if __name__ == "__main__":
 
     #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
@@ -59,11 +60,11 @@ if __name__ == "__main__":
                 docid = inputfile.metadata['documentid']
             if not docid:
                 docid = "untitled"                
-            os.system(bindir + 'ucto -L ' + language + ' -x ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.xml')
+            os.system(bindir + 'ucto -L ' + language + ' -x ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.xml')
         elif clamdata['verbose']:
-            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.vtok')
+            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.vtok')
         else:
-            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename + '.tok')
+            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.tok')
 
     #A nice status message to indicate we're done
     clam.common.status.write(statusfile, "Done",100) # status update
