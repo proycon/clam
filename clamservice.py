@@ -934,7 +934,7 @@ class OutputFileHandler(object):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
-            raise web.forbidden()
+            raise CustomForbidden('Another compression is already running') 
         else:
             data = web.input()
             if 'format' in data:
