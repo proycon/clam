@@ -262,9 +262,9 @@ $(document).ready(function(){
         	//element: $('#fineuploadarea')[0],     
             request: {
             	endpoint:  baseurl + '/' + project + '/upload/',
+            	inputName: 'filename',
             },  
-            params: {},
-            text: { uploadButton: "Upload a file" } ,
+            text: { uploadButton: "Upload a file" } ,            
             multiple: true,
             //forceMultipart: true,
             autoUpload: true, 
@@ -275,11 +275,12 @@ $(document).ready(function(){
 		    		alert("Please select a desired input type first");
 		    		return false;
 		    	}		    		
-		    	var params = {inputtemplate: inputtemplate_id, filename: fileName, user:user, accesstoken:accesstoken  }		    		
+		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken  }		    		
 		    	addformdata( '#uploadparameters', params );		 
 		    	$(this).fineUploader('setParams',params); 		    	
 		        $('#clientupload').hide();
 		        $('#uploadprogress').show(); 
+		        return true;
 		}).on('complete', function(event, id, fileName, responseJSON) {
 		        processuploadresponse(responseJSON.xml, '#uploadparameters');
 		        $('#uploadprogress').hide();
