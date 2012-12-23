@@ -123,12 +123,14 @@ PROFILES = [
             MSWordConverter(id='mswordconv',label='Convert from MS Word Document'),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1 (iso-8859-1)',charset='iso-8859-1'),
             CharEncodingConverter(id='latin9',label='Convert from Latin-9 (iso-8859-15)',charset='iso-8859-15'),
+            extension='txt',
             multi=True,
         ),
         ParameterCondition(xml=True,
         then=OutputTemplate('foliatokoutput', FoLiAXMLFormat, "Tokenised Text Document (FoLiA XML)",
                 SetMetaField('tokenisation','ucto'),
                 copymetadata=True,
+                removeextension='txt',
                 extension='xml',
                 multi=True,                
              ),
@@ -144,6 +146,7 @@ PROFILES = [
                     then=SetMetaField('uppercase','yes')
                 ),
                 copymetadata=True,
+                removeextension='txt',
                 extension='vtok',
                 multi=True,
             ),
@@ -158,6 +161,7 @@ PROFILES = [
                     then=SetMetaField('uppercase','yes')
                 ),
                 copymetadata=True,
+                removeextension='txt',
                 extension='tok',
                 multi=True,
             )

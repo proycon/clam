@@ -308,23 +308,20 @@
  			<xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
 
             <h3>Add input from browser</h3>
-            <p>You can create and add new files from within your browser: <button id="openeditor">Open Live Editor</button></p>
-
-            <div id="editormask" class="mask"></div>
-            <a name="editor"></a>
-            <div id="editor">
-                <h3>Add input from browser</h3>
-                    <table>
-                     <tr><th><label for="editorcontents">Input:</label></th><td><textarea id="editorcontents"></textarea></td></tr>                     
-                     <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
-                      <select id="editorinputtemplate" class="inputtemplates"></select>
-                     </td></tr>
-                     <tr><th><label for="editorparameters">Parameters:</label></th><td>
-                        <div id="editorparameters" class="parameters"><em>Select a type first</em></div>
-                     </td></tr>
-                     <tr><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
-                     <tr><th></th><td class="buttons"><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /> <button id="canceleditor">Cancel</button></td></tr>
-                    </table>
+            <p>You can create and add new files on the spot from within your browser. Type your text, choose the desired input type, fill the necessary parameters and choose a filename. Press <em>"Add to files"</em> when all done.</p>
+            
+			<div id="editor">                            
+                <table>
+                 <tr><th><label for="editorcontents">Input text:</label></th><td><textarea id="editorcontents"></textarea></td></tr>                     
+                 <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
+                  <select id="editorinputtemplate" class="inputtemplates"></select>
+                 </td></tr>
+                 <tr><th><label for="editorparameters">Parameters:</label></th><td>
+                    <div id="editorparameters" class="parameters"><em>Select a type first</em></div>
+                 </td></tr>
+                 <tr><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
+                 <tr><th></th><td><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
+                </table>
             </div>
             
             </xsl:if>

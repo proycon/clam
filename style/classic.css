@@ -172,3 +172,14 @@ a {
 a:visited {
 	color: #6d6450;
 }
+
+input.uploadbutton {
+	background: #880000;
+	padding: 7px;
+	color: white;
+	font-weight: normal;
+	font-size: 12px;
+}
+input.uploadbutton:hover {
+	background: #AA0000;
+}

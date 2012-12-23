@@ -212,11 +212,12 @@ $(document).ready(function(){
             url: baseurl + '/' + project + "/input/" + filename, 
             dataType: "xml", 
             data: data, 
-            success: function(response){ 
+            success: function(response){            
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
                 $('#editorfilename').val('');
-                $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); 
+                $(document).scrollTop( $("#header").offset().top ); 
+                //$("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); 
             },            
             error: function(response, errortype){
                 processuploadresponse(response.responseXML, '#editorparameters');
@@ -224,7 +225,7 @@ $(document).ready(function(){
         });            
         return true;
    });
-   $("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); return false; });
+   //$("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); return false; });
 
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
