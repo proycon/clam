@@ -1486,16 +1486,9 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     except UnicodeError:
                         raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
                 elif 'data' in web.ctx and web.ctx['data']:
-                    encoding = 'utf-8'
-                    for p in parameters:
-                        if p.id == 'encoding':
-                            encoding = p.value                        
-                    try:
-                        f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
-                        f.write(unicode(web.ctx['data'],encoding))
-                        f.close()
-                    except UnicodeError:
-                        raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")                        
+                    f = open(Project.path(project, user) + 'input/' + filename,'w')
+                    f.write(web.ctx['data'])
+                    f.close()                                            
                 elif 'inputsource' in postdata and postdata['inputsource']:                
                     #Copy (symlink!) from preinstalled data
                     os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
