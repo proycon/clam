@@ -257,7 +257,7 @@ function initclam() {
     });
 
    //Upload through browser
-   if ( (typeof($('#fineuploadarea')[0]) == 'undefined') && (typeof(project) != 'undefined') ) {		
+   if ( (typeof($('#fineuploadarea')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {		
         $('#fineuploadarea').fineUploader({        
         	//element: $('#fineuploadarea')[0],     
             request: {
