@@ -144,7 +144,14 @@
 		<xsl:if test="contains(/clam/@interfaceoptions,'simpleupload')">
 			simpleupload = true;
 		</xsl:if>				
-			               
+		
+		window.onload = function(){
+			if ( (typeof(initclam) == 'undefined') || (typeof($) == 'undefined') )  {
+				window.location.reload();
+			} else { 
+				initclam();
+			}
+		};        
 		                
     </script>
             

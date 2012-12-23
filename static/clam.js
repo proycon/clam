@@ -1,6 +1,6 @@
 
 
-$(document).ready(function(){
+function initclam() {
    if (typeof(inputtemplates) == 'undefined') {
    		//something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
@@ -363,7 +363,7 @@ $(document).ready(function(){
        });
    });
 
-});  //ready
+}  //initclam
 
 
 function addformdata(parent, data) {
