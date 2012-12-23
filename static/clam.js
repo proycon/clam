@@ -584,16 +584,16 @@ function pollstatus() {
                 	window.location.href = baseurl + '/' + project + '/'; /* refresh */
                 } else {
                 	if (response.completion > 0) {
-                		progress = response.completion;                		
-                		$('#progressbar').progressbar( "option", "value", progress );
-                		var statuslogcontent = "";
-                		for (var i = 0; i < response.statuslog.length - 1; i++) {
-                			var msg = response.statuslog[i][0];
-                			var t = response.statuslog[i][1];
-                			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
-                		}                 		                		
-                		$('#statuslogtable').html(statuslogcontent);
-                	}                	
+                		progress = response.completion;
+                		$('#progressbar').progressbar( "option", "value", progress );        
+                	}        		
+            		var statuslogcontent = "";
+            		for (var i = 0; i < response.statuslog.length - 1; i++) {
+            			var msg = response.statuslog[i][0];
+            			var t = response.statuslog[i][1];
+            			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
+            		}                 		                		
+            		$('#statuslogtable').html(statuslogcontent);
                 }
                 setTimeout(pollstatus,2000);                   
         },
