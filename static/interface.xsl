@@ -220,14 +220,12 @@
     </div>
 </xsl:template>
 
-<xsl:template name="log">
-     <xsl:if test="log">
+<xsl:template name="log">    
         <div id="statuslog">
             <table id="statuslogtable">
                 <xsl:apply-templates select="log" />
             </table>
-        </div>
-     </xsl:if>
+        </div>     
 </xsl:template>
 
 <xsl:template match="/clam/status/log">
