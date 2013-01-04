@@ -815,7 +815,7 @@ class ZipHandler(object): #archive download
     
     @RequireLogin(ghost=GHOST)
     def GET(self, project, filename, user=None):    
-        for line in self.getarchive(project, user,'zip'):
+        for line in OutputFileHandler.getarchive(project, user,'zip'):
                 yield line
     
 class TarGZHandler(object):  #archive download
@@ -823,7 +823,7 @@ class TarGZHandler(object):  #archive download
     
     @RequireLogin(ghost=GHOST)
     def GET(self, project, filename, user=None):    
-        for line in self.getarchive(project, user,'tar.gz'):
+        for line in OutputFileHandler.getarchive(project, user,'tar.gz'):
                 yield line
 
 
@@ -832,7 +832,7 @@ class TarBZ2Handler(object):  #archive download
     
     @RequireLogin(ghost=GHOST)
     def GET(self, project, filename, user=None):    
-        for line in self.getarchive(project, user,'tar.bz2'):
+        for line in OutputFileHandler.getarchive(project, user,'tar.bz2'):
                 yield line    
 
 class OutputFileHandler(object):
@@ -960,8 +960,9 @@ class OutputFileHandler(object):
             os.unlink(Project.path(project, user) + ".done")                       
         if os.path.exists(Project.path(project, user) + ".status"):
             os.unlink(Project.path(project, user) + ".status")        
-
-    def getarchive(self, project, user, format=None):
+    
+    @staticmethod
+    def getarchive(project, user, format=None):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
