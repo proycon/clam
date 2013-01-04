@@ -814,7 +814,7 @@ class ZipHandler(object): #archive download
     GHOST = False
     
     @RequireLogin(ghost=GHOST)
-    def GET(self, project, filename, user=None):    
+    def GET(self, project, user=None):    
         for line in OutputFileHandler.getarchive(project, user,'zip'):
                 yield line
     
@@ -822,7 +822,7 @@ class TarGZHandler(object):  #archive download
     GHOST = False
     
     @RequireLogin(ghost=GHOST)
-    def GET(self, project, filename, user=None):    
+    def GET(self, project, user=None):    
         for line in OutputFileHandler.getarchive(project, user,'tar.gz'):
                 yield line
 
@@ -831,7 +831,7 @@ class TarBZ2Handler(object):  #archive download
     GHOST = False
     
     @RequireLogin(ghost=GHOST)
-    def GET(self, project, filename, user=None):    
+    def GET(self, project, user=None):    
         for line in OutputFileHandler.getarchive(project, user,'tar.bz2'):
                 yield line    
 
