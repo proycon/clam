@@ -283,6 +283,9 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/status/?', 'Status', #returns status information in JSON, for web interface
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/zip/?', 'ZipHandler', #(also handles viewers, convertors, metadata, and archive download
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/gz/?', 'TarGZHandler', #(also handles viewers, convertors, metadata, and archive download
+        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/bz2/?', 'TarBZ2Handler', #(also handles viewers, convertors, metadata, and archive download
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
         #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
@@ -807,6 +810,30 @@ class Project(object):
         h.update(user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project)
         return h.hexdigest()
 
+class ZipHandler(object): #archive download
+    GHOST = False
+    
+    @RequireLogin(ghost=GHOST)
+    def GET(self, project, filename, user=None):    
+        for line in self.getarchive(project, user,'zip'):
+                yield line
+    
+class TarGZHandler(object):  #archive download
+    GHOST = False
+    
+    @RequireLogin(ghost=GHOST)
+    def GET(self, project, filename, user=None):    
+        for line in self.getarchive(project, user,'tar.gz'):
+                yield line
+
+
+class TarBZ2Handler(object):  #archive download
+    GHOST = False
+    
+    @RequireLogin(ghost=GHOST)
+    def GET(self, project, filename, user=None):    
+        for line in self.getarchive(project, user,'tar.bz2'):
+                yield line    
 
 class OutputFileHandler(object):
     GHOST = False
@@ -883,6 +910,7 @@ class OutputFileHandler(object):
                 raise web.webapi.NotFound()
             except UnicodeError:
                 raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
+            
     
     @RequireLogin(ghost=GHOST)
     def DELETE(self, project, filename, user=None):    
@@ -933,17 +961,18 @@ class OutputFileHandler(object):
         if os.path.exists(Project.path(project, user) + ".status"):
             os.unlink(Project.path(project, user) + ".status")        
 
-    def getarchive(self, project, user):
+    def getarchive(self, project, user, format=None):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
             raise CustomForbidden('Another compression is already running') 
         else:
-            data = web.input()
-            if 'format' in data:
-                format = data['format']
-            else:
-                format = 'zip' #default
+            if not format:
+                data = web.input()
+                if 'format' in data:
+                    format = data['format']
+                else:
+                    format = 'zip' #default
 
             #validation, security
             contentencoding = None

@@ -383,7 +383,7 @@
 <xsl:template match="/clam/output">
     <div id="output" class="box">
         <h2>Output files</h2>
-        <p>(Download all as archive: <a href="output/?format=zip">zip</a> | <a href="output/?format=tar.gz">tar.gz</a> | <a href="output/?format=tar.bz2">tar.bz2</a>)</p>
+        <p>(Download all as archive: <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)</p>
         <table id="outputfiles" class="files">
             <thead>
                 <tr>
