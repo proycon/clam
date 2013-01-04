@@ -817,9 +817,11 @@ class OutputFileHandler(object):
 
         viewer = None
         requestid = None
+        requestarchive = False
         
         if filename.strip('/') == "":
             #this is a request for everything
+            requestarchive = True
             for line in self.getarchive(project, user):
                 yield line
         elif len(raw) >= 2:
@@ -828,10 +830,11 @@ class OutputFileHandler(object):
                 filename = "/".join(raw[:-1])
                 requestid = raw[-1].lower()                        
 
-        try:
-            outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
-        except:
-            raise web.webapi.NotFound()
+        if not requestarchive:
+            try:
+                outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
+            except:
+                raise web.webapi.NotFound()
             
         if requestid:
             if requestid == 'metadata':
@@ -868,7 +871,7 @@ class OutputFileHandler(object):
                             yield line
                     else:
                         raise web.webapi.NotFound("No such viewer or converter:" + requestid)
-        else:
+        elif not requestarchive:
             #normal request - return file contents
             if outputfile.metadata:
                 for header, value in outputfile.metadata.httpheaders():
