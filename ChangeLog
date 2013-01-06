@@ -1,5 +1,12 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.0) [Jan 2013]
+- Brand new web-application interface! Smoother & prettier!
+- New uploader, supporting multiple files at once
+- Fixed support for archive uploading and archive upload now shows in interface
+- Fixed archive downloading (with REST API change)
+- Unicode fix in XSLTViewer
+
 0.8.2) [Dec 2012]
 - Added clamnewproject
 - Fixes in prameter handling
