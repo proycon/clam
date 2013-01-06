@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.8.2} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.9.0} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -136,7 +136,7 @@ For development and testing, each CLAM webservice can run stand-alone on any TCP
 If you want to run in the supplied test units, an additional dependency is needed: \texttt{python-unittest2}.
 
 
-If you look in the directory where CLAM has been installed,tThe following files may be of particular interest:
+If you look in the directory where CLAM has been installed, the following files may be of particular interest:
 
 \begin{itemize}
 \item \texttt{clamservice.py} -- The webservice itself, the command to be invoked to start it.
@@ -311,14 +311,14 @@ You start a new CLAM project using the \texttt{clamnewproject} tool. It takes on
 $ clamnewproject myfirstproject 
 \end{verbatim}
 
-The tool will create a directory named after the identifier, in which two template files are created which are similarly named after the chosen identifier. Both are Python scripts:
+The tool will create a directory named after the identifier, in which two template files are created which are similarly named after the chosen identifier. Both are Python scripts which you are expected to edit:
 
 \begin{enumerate}
 \item \texttt{myfirstproject.py} - Service Configuration FIle
 \item \texttt{myfirstproject-wrapper.py} - System Wrapper Script.
 \end{enumerate}
 
-These template files need to be edited for your particular application. They are heavily commented to guide you. 
+These template files then need to be edited for your particular application. They are heavily commented to guide you. 
 
 You can choose not to make use of the system wrapper script and instead either write one from scratch in another language of your choice, or directly let CLAM invoke your application.
 
@@ -748,7 +748,6 @@ Viewers can be included in output templates. Include them directly after any met
 To be completed still...
 \end{devnotes}
 
-
 \subsection{Working with pre-installed data}
 
 Rather than letting users upload files, CLAM also offers the possibility of pre-installing input data on the server. This feature is ideally suited for dealing with data for a demo, or for offering a selection of pre-installed corpora that are too big to transfer over network. Furthermore, pre-installed data is also suited in situations where you want the user to be able to choose from several pre-installed resources, such as lexicons, grammars, etc., instead of having to upload files they may not have available.
@@ -811,7 +810,20 @@ The CLAM web application offers a single uniform interface for all kinds of serv
 
 As the HTML pages will be embedded on the fly, take care \emph{not} to include any headers, only tags that go within the HTML \texttt{body} are permitted! Always use the UTF-8 encoding.
 
-A second kind of customisation is customisation of the style, this can be achieved by creating new CSS themes. CLAM gets shipped with the default ``classic'' style. Copy, rename and adapt \texttt{style/classic.css} to create your own style. And set \texttt{STYLE} accordingly in your service configuration file.
+A second kind of customisation is customisation of the style, this can be achieved by creating new CSS themes. CLAM gets shipped with the default ``classic'' style (which did receive a significant overhaul in CLAM 0.9). Copy, rename and adapt \texttt{style/classic.css} to create your own style. And set \texttt{STYLE} accordingly in your service configuration file.
+
+In your service configuration file you can set a variable \texttt{INTERFACEOPTIONS}, this string is a space-separated list in which you can use the following directives to customise certain aspects of the web-interface:
+
+\begin{itemize}
+\item \texttt{simpleupload} -- Use the simple uploader instead of the more advanced javascript-based. The simple uploader does not support multiple files but does provide full HTTP Digest Security whereas the default and more advanced uploader relies on a less sophisticated security mechanism.
+\item \texttt{simplepolling} -- Uses a simpler polling mechanism in the stage in which CLAM awaits the completion of a procress. This method simply refreshes the page periodically, whilst the default method is asynchronous but relies on a less sophisticated security mechanism. 
+\item \texttt{secureonly} -- Equals to \texttt{simpleupload} and \texttt{simplepolling}, forcing only methods that fully support HTTP Digest Authentication.
+\item \texttt{disablefileupload} -- Disables the file uploader in the interface (do note that this is merely cosmetic and not a security mechanism, the RESTful webservice API will continue to support file uploads).
+\item \texttt{inputfromweb} -- Enables downloading an input file from the web (do note that this is merely cosmetic and not a security mechanism, the RESTUL webservice API always supports this regardless of visibility in the interface).
+\item \texttt{disableliveinput} -- Disables adding input through the live in-browser editor. 
+\end{itemize}
+
+
 
 \section{Wrapper script}
 
