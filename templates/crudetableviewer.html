@@ -46,10 +46,10 @@ $def with (file, tableviewer)
     <h1>$file.filename.encode(file.metadata['encoding'])</h1>
 
     <table>
-    $for line in file:
+    	$for line in tableviewer.read(file):
         <tr>
-        $for field in tableviewer.read(file):
-            <td>$field.encode(file.metadata['encoding'])</td>
+        	$for field in line:
+           		<td>$field.encode(file.metadata['encoding'])</td>
         </tr>
     </table>
 </div>
