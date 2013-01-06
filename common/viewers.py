@@ -74,7 +74,7 @@ class SimpleTableViewer(AbstractViewer):
         super(SimpleTableViewer,self).__init__(**kwargs)   
                 
     def read(self, file):
-        file = csv.reader(open(file,'r'), delimiter=self.delimiter, quotechar=self.quotechar)        
+        file = csv.reader(file, delimiter=self.delimiter, quotechar=self.quotechar)        
         for line in file:
             yield line
     
@@ -134,6 +134,7 @@ class FoLiAViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
+        
         xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
         return str(transform(xml_doc))
 
