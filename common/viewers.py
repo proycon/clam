@@ -113,7 +113,15 @@ class XSLTViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        lines = file.readlines()
+        if lines:
+            if isinstance(lines[0], unicode):
+                xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
+            else:        
+                xml_doc = etree.parse(StringIO("".join(lines) ))
+        else:
+            return "(no data)" 
+        
         return str(transform(xml_doc))
 
 class FoLiAViewer(AbstractViewer):
