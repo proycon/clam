@@ -92,22 +92,22 @@ else:
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND =  CLAMDIR + "/wrappers/timblwrapper.py " + BINDIR + " $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
+COMMAND =  CLAMDIR + "/wrappers/timblwrapper.py $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
 
 
 PROFILES = [
     Profile(
         InputTemplate('traindata', PlainTextFormat,"Training data (plain-text, space-separated)", 
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','so-8859-15 (Latin9)'),('ascii','ASCII')]),  
+            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','so-8859-15 (Latin9)'),('ascii','ASCII')]),  
             extension='train',
         ),
         InputTemplate('testdata', PlainTextFormat,"Test data (plain-text, space-separated)", 
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','iso-8859-15 (Latin9)'),('ascii','ASCII')]),  
+            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','iso-8859-15 (Latin9)'),('ascii','ASCII')]),  
             extension='test',
             multi=True,
         ),
         OutputTemplate('out', PlainTextFormat, "Classifier Output",
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
+            CopyMetaField('encoding','traindata.encoding'),
             extension='timblout',
         ),
     ),
@@ -124,10 +124,10 @@ PARAMETERS =  [
         BooleanParameter('leaveoneout', 'Leave-one-out', 'Test using leave-one-out instead of test file', paramflag='-t leave_one_out'),
     ]),
     ('Input  Format', [
-        ChoiceParameter('F','Input Format','Input format for training and test files',choices=[('Compact','Compact'),('C4.5','C4.5'),('ARFF','ARFF'),('Columns','Columns'),('Tabbed','Tabbed')], default='Columns'),
+        ChoiceParameter('F','Input Format','Input format for training and test files',choices=[('Compact','Compact'),('C4.5','C4.5'),('ARFF','ARFF'),('Columns','Columns'),('Tabbed','Tabbed')], default='Columns',paramflag='-F'),
     ]),   
     ('Output Options', [        
-        ChoiceParameter('v', 'Verbosity Level', 'Verbosity level', multichoice=True, choices=[('o','Show all options set'),('b','Show node/branch count and branching factor'), ('f','Show calculated feature weights'), ('p','Show Value Difference matrices'), ('e', 'Show exact matches'), ('as', 'Show advances statistics (memory consuming)'), ('cm','Show confusion matrix (memory consuming)'),('cs','Show per class statistics (memory consuming)'),('cf','Add confidence to output file'),('di','Add distance to output file'),('db','Add distribution of best matches to output file'),('md','Add matching depth to output file'),('k','Add summary for all k neighbours'),('n','Add nearest neighbours to output file')], paramflag='-v', delimiter='+'),
+        ChoiceParameter('v', 'Verbosity Level', 'Verbosity level', multi=True, choices=[('o','Show all options set'),('b','Show node/branch count and branching factor'), ('f','Show calculated feature weights'), ('p','Show Value Difference matrices'), ('e', 'Show exact matches'), ('as', 'Show advances statistics (memory consuming)'), ('cm','Show confusion matrix (memory consuming)'),('cs','Show per class statistics (memory consuming)'),('cf','Add confidence to output file'),('di','Add distance to output file'),('db','Add distribution of best matches to output file'),('md','Add matching depth to output file'),('k','Add summary for all k neighbours'),('n','Add nearest neighbours to output file')], paramflag='-v', delimiter='+'),
     ]),
 ]
 
