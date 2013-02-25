@@ -71,7 +71,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.0'
+VERSION = '0.9.1'
 
 DEBUG = False
     
@@ -116,7 +116,11 @@ def userdb_lookup_dict(user, realm):
 
 def userdb_lookup_mysql(user, realm):
     printdebug("Looking up user " + user + " in MySQL")
-    host,port, mysqluser,passwd, database, table, userfield, passwordfield = validate_users_mysql()
+    host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()
+    if denylist and user in denylist:
+        raise KeyError
+    if accesslist and not (user in accesslist):
+        raise KeyError        
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
     #simple protection against mysql injection
@@ -176,7 +180,15 @@ def validate_users_mysql():
         passwordfield = settings.USERS_MYSQL['passwordfield']
     else:
         passwordfield = "password"
-    return host,port, user,password, database, table, userfield, passwordfield
+    if 'accesslist' in settings.USERS_MYSQL:
+        accesslist = settings.USERS_MYSQL['accesslist']
+    else:
+        accesslist = []
+    if 'denylist' in settings.USERS_MYSQL:
+        denylist = settings.USERS_MYSQL['denylist']
+    else:
+        denylist = []
+    return host,port, user,password, database, table, userfield, passwordfield,accesslist, denylist
 
 #requirelogin = lambda x: x
 #if settings.USERS:

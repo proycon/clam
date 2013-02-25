@@ -1,5 +1,8 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.1) [Feb 2013]
+- Support for accesslist and denylist with MySQL authentication
+
 0.9.0) [Jan 2013]
 - Brand new web-application interface! Smoother & prettier!
 - New uploader (fineuploader), supporting multiple files at once

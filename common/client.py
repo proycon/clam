@@ -35,7 +35,7 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.9.0'
+VERSION = '0.9.1'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
