@@ -2089,7 +2089,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'STYLE' in settingkeys:
         settings.STYLE = 'classic'
     if not 'CLAMDIR' in settingkeys:
-        settings.CLAMDIR = os.path.dirname(sys.argv[0])
+        settings.CLAMDIR = os.path.dirname(__file__)
     if not 'DISPATCHER' in settingkeys:
         settings.DISPATCHER = 'clamdispatcher.py'
     if not 'REALM' in settingkeys:

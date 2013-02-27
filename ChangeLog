@@ -2,6 +2,7 @@
 
 0.9.1) [Feb 2013]
 - Support for accesslist and denylist with MySQL authentication
+- Better autodetection of CLAMDIR
 
 0.9.0) [Jan 2013]
 - Brand new web-application interface! Smoother & prettier!
