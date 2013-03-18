@@ -13,7 +13,7 @@
 
 from lxml import etree as ElementTree
 from StringIO import StringIO
-
+from clam.common.util import xmlescape
 
 class AbstractParameter(object):
     """This is the base class from which all parameter classes have to be derived."""
@@ -102,8 +102,8 @@ class AbstractParameter(object):
         its selected value, and feedback on validation errors"""
         xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'        
-        xml += ' name="'+self.name + '"'
-        xml += ' description="'+self.description + '"'
+        xml += ' name="'+xmlescape(self.name) + '"'
+        xml += ' description="'+xmlescape(self.description) + '"'
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'
         for key, v in self.kwargs.items():    
@@ -111,15 +111,15 @@ class AbstractParameter(object):
                 if isinstance(v, bool):
                     xml += ' ' + key + '="' + str(int(v))+ '"'                    
                 elif isinstance(v, list):
-                    xml += ' ' + key + '="'+",".join(v)+ '"'        
+                    xml += ' ' + key + '="'+xmlescape(",".join(v))+ '"'        
                 elif isinstance(v, unicode) or isinstance(v, str)  :
-                    xml += ' ' + key + '="'+v+ '"'        
+                    xml += ' ' + key + '="'+xmlescape(v)+ '"'        
                 else:
-                    xml += ' ' + key + '="'+str(v)+ '"'        
+                    xml += ' ' + key + '="'+xmlescape(str(v))+ '"'        
         if self.hasvalue:
-            xml += ' value="'+unicode(self.value) + '"'
+            xml += ' value="'+xmlescape(unicode(self.value)) + '"'
         if self.error:
-            xml += ' error="'+self.error + '"'
+            xml += ' error="'+xmlescape(self.error) + '"'
         xml += " />"
         return xml
         
@@ -400,8 +400,8 @@ class ChoiceParameter(AbstractParameter):
         its selected value, and feedback on validation errors"""
         xml = indent + "<" + self.__class__.__name__
         xml += ' id="'+self.id + '"'
-        xml += ' name="'+self.name + '"'
-        xml += ' description="'+self.description + '"'
+        xml += ' name="'+xmlescape(self.name) + '"'
+        xml += ' description="'+xmlescape(self.description) + '"'
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'        
         if self.multi:
@@ -413,15 +413,15 @@ class ChoiceParameter(AbstractParameter):
                 elif isinstance(value, list):
                     xml += ' ' + key + '="'+",".join(value)+ '"'        
                 else:
-                    xml += ' ' + key + '="'+value+ '"'
+                    xml += ' ' + key + '="'+xmlescape(value)+ '"'
         if self.error:
              xml += ' error="'+self.error + '"'               
         xml += ">"
         for key, value in self.choices:
             if self.value == key or (isinstance(self.value ,list) and key in self.value):
-                xml += " <choice id=\""+key+"\" selected=\"1\">" + value + "</choice>"        
+                xml += " <choice id=\""+key+"\" selected=\"1\">" + xmlescape(value) + "</choice>"        
             else:
-                xml += " <choice id=\""+key+"\">" + value + "</choice>"
+                xml += " <choice id=\""+key+"\">" + xmlescape(value) + "</choice>"
         xml += "</" + self.__class__.__name__ + ">"
         return xml
         

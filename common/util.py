@@ -52,7 +52,41 @@ def printdebug(msg):
 def setlogfile(filename):
     global LOG, DEBUGLOG
     LOG = DEBUGLOG = open(filename,'w')
+
+def xmlescape(s):        
+    begin = -1
+    s2 = ""
+    for i,c in enumerate(s):
+        if c == '&':
+            begin = i
+        elif c == ';':
+            if begin > -1:
+                s2 += s[begin:i+1]
+                begin = -1
+            else: 
+                s2 += c            
+        elif c == ' ':            
+            if begin != -1:
+                s2 += "&amp;" + s[begin+1:i+1]
+                begin = -1
+            else:
+                s2 += c            
+        elif c == '<':
+                s2 += "&lt;"
+        elif c == '>':
+                s2 += "&gt;"
+        elif c == '"':
+                s2 += "&quot;"                
+        elif begin == -1:                            
+            s2 += c
+    if begin != -1:
+        s2 += "&amp;" + s[begin+1:]        
+    s = s2    
+    return s
     
+        
+    
+        
 
 class RequestWithMethod(Request):
   def __init__(self, *args, **kwargs):

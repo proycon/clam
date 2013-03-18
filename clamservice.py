@@ -47,7 +47,7 @@ import clam.common.parameters
 import clam.common.formats
 import clam.common.digestauth
 import clam.common.data
-from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug
+from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug, xmlescape
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
@@ -1602,7 +1602,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                             success = False
                         if not success:
                             conversionerror = True
-                            fatalerror = "<error type=\"conversion\">The file " + filename + " could not be converted</error>"
+                            fatalerror = "<error type=\"conversion\">The file " + xmlescape(filename) + " could not be converted</error>"
                             jsonoutput['error'] = "The file could not be converted"
                             jsonoutput['success'] = False
                             
@@ -1624,8 +1624,8 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     else:
                         #Too bad, everything worked out but the file itself doesn't validate.
                         #output += "<valid>no</valid>"
-                        fatalerror = "<error type=\"validation\">The file " + filename + " did not validate, it is not in the proper expected format.</error>"
-                        jsonoutput['errors'] = "The file " + filename + " did not validate, it is not in the proper expected format."
+                        fatalerror = "<error type=\"validation\">The file " + xmlescape(filename) + " did not validate, it is not in the proper expected format.</error>"
+                        jsonoutput['errors'] = "The file " + filename.replace("'","") + " did not validate, it is not in the proper expected format."
                         jsonoutput['success'] = False
                         #remove upload
                         os.unlink(Project.path(project, user) + 'input/' + filename)

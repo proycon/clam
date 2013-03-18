@@ -848,7 +848,7 @@ class CLAMProvenanceData(object):
     def xml(self, indent = ""):
         xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">"
         for filename, metadata in self.inputfiles:
-            xml += indent + " <inputfile name=\"" + filename + "\">"
+            xml += indent + " <inputfile name=\"" + clam.common.util.xmlescape(filename) + "\">"
             xml += metadata.xml(indent + " ") + "\n"
             xml += indent +  " </inputfile>\n"            
         if self.parameters:
@@ -1004,7 +1004,7 @@ class CLAMMetaData(object):
         xml += ">\n"
 
         for key, value in self.data.items():
-            xml += indent + "  <meta id=\""+key+"\">"+str(value)+"</meta>\n"
+            xml += indent + "  <meta id=\""+clam.common.util.xmlescape(key)+"\">"+clam.common.util.xmlescape(str(value))+"</meta>\n"
 
         if self.provenance:        
             xml += self.provenance.xml(indent + "  ")
@@ -1170,7 +1170,7 @@ class InputTemplate(object):
             xml += parameter.xml(indent+"\t") + "\n"
         if self.converters:
             for converter in self.converters:
-                xml += indent + "\t<converter id=\""+converter.id+"\">"+converter.label+"</converter>"
+                xml += indent + "\t<converter id=\""+converter.id+"\">"+clam.common.util.xmlescape(converter.label)+"</converter>"
         if self.inputsources:
             for inputsource in self.inputsources:
                 xml += inputsource.xml(indent+"\t")
@@ -1499,11 +1499,11 @@ class OutputTemplate(object):
         if self.formatclass.mimetype:
             xml +=" mimetype=\""+self.formatclass.mimetype+"\""
         if self.formatclass.schema:
-            xml +=" schema=\""+self.formatclass.schema+"\""
+            xml +=" schema=\""+clam.common.util.xmlescape(self.formatclass.schema)+"\""
         if self.filename:
-            xml +=" filename=\""+self.filename+"\""
+            xml +=" filename=\""+clam.common.util.xmlescape(self.filename)+"\""
         if self.extension:
-            xml +=" extension=\""+self.extension+"\""            
+            xml +=" extension=\""+clam.common.util.xmlescape(self.extension)+"\""            
         if self.unique:
             xml +=" unique=\"yes\""
         else:
@@ -1786,7 +1786,7 @@ class ParameterCondition(object):
     def xml(self, indent = ""):
         xml = indent + "<parametercondition>\n" + indent + " <if>\n"
         for key, value, evalf, operator in self.conditions:
-            xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + str(value) + "</" + operator + ">\n"
+            xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + clam.common.util.xmlescape(str(value)) + "</" + operator + ">\n"
         xml += indent + " </if>\n" + indent + " <then>\n"
         xml += self.then.xml(indent + "\t") + "\n"
         xml += indent + " </then>\n"
