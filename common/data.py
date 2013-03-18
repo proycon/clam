@@ -39,7 +39,7 @@ from clam.common.util import RequestWithMethod
 
 #clam.common.formats is deliberately imported _at the end_ 
 
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
