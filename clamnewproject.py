@@ -142,6 +142,7 @@ def main():
 
     if not os.path.exists(dir + '/' + sysid + '-wrapper.py'):
         shutil.copyfile(clampath + '/wrappers/template.py', dir + '/' + sysid + '-wrapper.py')
+        os.chmod(dir + '/' + sysid + '-wrapper.py', 0755)
     else:
         print >>sys.stderr, "WARNING: System wrapper file " + dir + '/' + sysid + '-wrapper.py already seems to exists, defiantly refusing to overwrite'
         sys.exit(2)

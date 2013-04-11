@@ -8,14 +8,14 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
 #This is a test wrapper, meant to illustrate how easy it is to set
 #up a wrapper script for your system using Python and the CLAM Client API.
-#We make use of the XML configuration file that CLAM outputs, rather than 
+#We make use of the XML configuration file that CLAM outputs, rather than
 #passing all parameters on the command line.
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
@@ -47,15 +47,15 @@ clamdata = clam.common.data.getclamdata(datafile)
 clam.common.status.write(statusfile, "Starting...")
 
 #SOME EXAMPLES (uncomment and adapt what you need)
-    
-#-- Iterate over all input files? -- 
+
+#-- Iterate over all input files? --
 
 #for inputfile in clamdata.input
 #   inputtemplate = inputfile.metadata.inputtemplate
 #   inputfilepath = str(inputfile)
 #   encoding = inputfile.metadata['encoding'] #Example showing how to obtain metadata parameters
 
-#-- Grab a specific input file? (by input template) -- 
+#-- Grab a specific input file? (by input template) --
 #inputfile = clamdata.inputfile('replace-with-inputtemplate-id')
 #inputfilepath = str(inputfile)
 

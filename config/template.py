@@ -130,8 +130,9 @@ PROFILES = [
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this input template',
             SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.stats',
-            multi=True
+            extension='.stats', #set an extension or set a filename:
+            #filename='filename.stats',
+            unique=True
         ),
     )
 ]
