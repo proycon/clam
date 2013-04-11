@@ -10,22 +10,22 @@ try:
 except:
    pass
 
-if not os.path.exists('clam'):   
+if not os.path.exists('clam'):
     print >>sys.stderr, "Preparing build"
-    if not os.path.exists('build'): os.mkdir('build')   
+    if not os.path.exists('build'): os.mkdir('build')
     os.chdir('build')
     if not os.path.exists('clam'): os.mkdir('clam')
     os.system('cp -Rpdfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
     os.system('mv -f clam/setup.py clam/setup.cfg .')
-    os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')  
-   
+    os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "CLAM",
-    version = "0.9.2.1",
+    version = "0.9.2.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
@@ -48,7 +48,7 @@ setup(
         'console_scripts': [
             'clamservice = clam.startclamservice:main',
             'startclamservice = clam.startclamservice:main', #alias
-            'clamnewproject = clam.clamnewproject:main', #alias 
+            'clamnewproject = clam.clamnewproject:main', #alias
         ]
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf'] },

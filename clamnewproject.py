@@ -12,7 +12,7 @@
 #
 #       Induction for Linguistic Knowledge Research Group
 #       Tilburg University
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -32,7 +32,7 @@ import getopt
 
 def usage():
         print >> sys.stderr, "Syntax: clamnewproject.py system_id [options]"
-        print >> sys.stderr, "Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, this ID is for internal use only and will be used in various filenames, no spaces or other special characters allowed."        
+        print >> sys.stderr, "Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, this ID is for internal use only and will be used in various filenames, no spaces or other special characters allowed."
         print >> sys.stderr, "Options:"
         print >> sys.stderr, "\t-d [dir]      - Directory prefix, rather than in current working directory"
         print >> sys.stderr, "\t-f            - Force use of a directory that already exists"
@@ -43,7 +43,7 @@ def usage():
         print >> sys.stderr, "\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later."
         print >> sys.stderr, "\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later."
 
-                            
+
 def main():
     if len(sys.argv) < 2 or sys.argv[1][0] == '-':
         usage()
@@ -52,15 +52,15 @@ def main():
     sysid = sys.argv[1]
     if ' ' in sysid or '.' in sysid or '-' in sysid or ',' in sysid or ':' in sysid or ':' in sysid or '(' in sysid or ')' in sysid or '/' in sysid or "'" in sysid or '"' in sysid:
         print >>sys.stderr, "Invalid characters in system ID. Only alphanumerics and underscores are allowed."
-        sys.exit(2)        
-    
-    
+        sys.exit(2)
+
+
     HOST = FORCEURL = None
     PORT = 8080
     dirprefix = os.getcwd()
     force = False
     name = ""
-    
+
     try:
         opts, args = getopt.getopt(sys.argv[2:], "hd:cH:p:u:fn:")
     except getopt.GetoptError, err:
@@ -91,15 +91,15 @@ def main():
             sys.exit(2)
 
 
-    
+
     clampath = clam.__path__[0]
-    
-    if not os.path.exists(clampath + '/config/template.py') or not os.path.exists(clampath + '/wrappers/template.py'):        
+
+    if not os.path.exists(clampath + '/config/template.py') or not os.path.exists(clampath + '/wrappers/template.py'):
         print >>sys.stderr, "ERROR: Templates not found. Unable to create new project"
         sys.exit(2)
-    
+
     dir = dirprefix + "/" +sysid
-        
+
     if os.path.exists(dir):
         if not force:
             print >>sys.stderr, "ERROR: Directory " +dir + " already exists.. Unable to make new CLAM project. Add -f (force) if you want to continue nevertheless "
@@ -107,7 +107,7 @@ def main():
     else:
         print >>sys.stderr, "Making project directory " + dir
         os.mkdir(dir)
-    
+
     if not os.path.exists(dir+ "/__init__.py"):
         f = open(dir+ "/__init__.py",'w')
         f.close()
@@ -126,20 +126,20 @@ def main():
                 line = "PORT = \"" + str(PORT) + "\"\n"
             elif line[:6] == "ROOT =":
                 line = "ROOT = \"" + dir + "/userdata\"\n"
-            elif line[:10] == "#CLAMDIR =":       
+            elif line[:10] == "#CLAMDIR =":
                 clamdir = os.path.dirname(clam.__file__)
-                line = "#CLAMDIR = \"" + clamdir + "\" #(automatically detected)\n"            
-            elif FORCEURL and line[:9] == '#FORCEURL': 
+                line = "#CLAMDIR = \"" + clamdir + "\" #(automatically detected)\n"
+            elif FORCEURL and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
-            elif line[:9] == "COMMAND =":                
-                line = "COMMAND = \"" + dir + "/" + sysid + "-wrapper.py\" $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\n"                
+            elif line[:9] == "COMMAND =":
+                line = "COMMAND = \"" + dir + "/" + sysid + "-wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             fout.write(line)
         fin.close()
         fout.close()
     else:
         print >>sys.stderr, "WARNING: Service configuration file " + dir + '/' + sysid + ".py already seems to exists, courageously refusing to overwrite"
         sys.exit(2)
-    
+
     if not os.path.exists(dir + '/' + sysid + '-wrapper.py'):
         shutil.copyfile(clampath + '/wrappers/template.py', dir + '/' + sysid + '-wrapper.py')
     else:
@@ -148,11 +148,11 @@ def main():
 
     print >>sys.stderr, "Your new CLAM project has been set up!"
     print >>sys.stderr, "WHAT'S NEXT? Now you can edit your service configuration file " +  dir + '/' + sysid + ".py and your system wrapper script " +   dir + '/' + sysid + "-wrapper.py . Consult the CLAM Documentation and/or instruction videos on http://proycon.github.com/clam for further details."
-    
+
     if FORCEURL:
         url = FORCEURL
     else:
-        url = "http://"    
+        url = "http://"
         if HOST:
             url += HOST
         else:
@@ -160,9 +160,9 @@ def main():
         if PORT and PORT != 80:
             url += ':' + str(PORT)
         url += '/'
-         
+
     print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + " " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url + "."
-    
-    
+
+
 if __name__ == "__main__":
     main()

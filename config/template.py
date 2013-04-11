@@ -12,12 +12,12 @@
 #       Universiteit van Tilburg
 #
 #       http://proycon.github.com/clam
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
-#Consult the CLAM  
+#Consult the CLAM
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -27,7 +27,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.8
+REQUIRE_VERSION = 0.9
 
 # ======== GENERAL INFORMATION ===========
 
@@ -56,12 +56,12 @@ PORT= 8080
 #Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
 #HOST = 'localhost'
 
-#If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it 
+#If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it
 #doesn't run at the root of the server, you can specify a URL prefix here:
 #URLPREFIX = "/myservice/"
 
-#Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures: 
-#FORCEURL = "http://myclamservice.com"    
+#Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
+#FORCEURL = "http://myclamservice.com"
 
 #The location of where CLAM is installed (will be determined automatically if not set)
 #CLAMDIR = "/path/to/clam"
@@ -73,7 +73,7 @@ PORT= 8080
 #Users and passwords
 
 #set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
-#REALM = SYSTEM_ID 
+#REALM = SYSTEM_ID
 
 USERS = None #no user authentication/security (this is not recommended for production environments!)
 
@@ -113,10 +113,10 @@ CUSTOM_FORMATS_MODULE = None
 
 # ======== PROFILE DEFINITIONS ===========
 
-PROFILES = [ 
+PROFILES = [
     Profile(
-        InputTemplate('replace-with-a-unique-identifier', PlainTextFormat,"Replace with human label for this input template",  
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'), #note that encoding is required if you work with PlainTextFormat  
+        InputTemplate('replace-with-a-unique-identifier', PlainTextFormat,"Replace with human label for this input template",
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'), #note that encoding is required if you work with PlainTextFormat
             #ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
             #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
@@ -129,11 +129,11 @@ PROFILES = [
         ),
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this input template',
-            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat  
+            SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
             extension='.stats',
             multi=True
         ),
-    ) 
+    )
 ]
 
 # ======== COMMAND ===========
@@ -143,14 +143,14 @@ PROFILES = [
 #absolute paths is preferred. The current working directory will be
 #set to the project directory.
 #
-#You can make use of the following special variables, 
+#You can make use of the following special variables,
 #which will be automatically set by CLAM:
 #     $INPUTDIRECTORY  - The directory where input files are uploaded.
 #     $OUTPUTDIRECTORY - The directory where the system should output
 #                        its output files.
-#     $STATUSFILE      - Filename of the .status file where the system 
-#                        should output status messages. 
-#     $DATAFILE        - Filename of the clam.xml file describing the 
+#     $STATUSFILE      - Filename of the .status file where the system
+#                        should output status messages.
+#     $DATAFILE        - Filename of the clam.xml file describing the
 #                        system and chosen configuration.
 #     $USERNAME        - The username of the currently logged in user
 #                        (set to "anonymous" if there is none)
@@ -162,8 +162,8 @@ COMMAND = sys.path[0] + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE 
 
 #The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 
-PARAMETERS =  [ 
-    ('Group title', [ 
+PARAMETERS =  [
+    ('Group title', [
         #BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
         #ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
         #StringParameter(id='author',name='Author',description='Sign output metadata with the specified author name',maxlength=255),
@@ -175,7 +175,7 @@ PARAMETERS =  [
 # ======== DISPATCHING (ADVANCED! YOU CAN SAFELY SKIP THIS!) ========
 
 #The dispatcher to use (defaults to clamdispatcher.py), you almost never want to change this
-#DISPATCHER = 'clamdispatcher.py' 
+#DISPATCHER = 'clamdispatcher.py'
 
 #DISPATCHER_POLLINTERVAL = 30   #interval at which the dispatcher polls for resource consumption (default: 30 secs)
 #DISPATCHER_MAXRESMEM = 0    #maximum consumption of resident memory (in megabytes), processes that exceed this will be automatically aborted. (0 = unlimited, default)
