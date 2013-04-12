@@ -265,6 +265,12 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI. With
 You are not limited to using either Apache with WSGI or nginx with FastCGI; we tested only these two. It should also be possible to get CLAM working on other Unix based webservers, such as for example lighttpd. Although we have no CLAM-specific instructions, you may find instructions for WebPy, the framework CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 
+
+
+
+
+
+
 \subsection{Troubleshooting}
 
 You may possibly encounter one of the following issues when attempting to access your CLAM service through a browser:
@@ -402,6 +408,31 @@ Rather than using \texttt{USERS} to define a user database in your service confi
 \end{verbatim}
 
 For advanced service providers wanting to use external authentication schemes, CLAM supports the \texttt{PREAUTHHEADER} configuration directive, the value of which is a string containing an HTTP header which CLAM may read to obtain the authenticated username. This should be set by an authentication system prior to passing control to CLAM. An example of such a system is Shibboleth. Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in user system, unless this is set to None. When such a scheme is used, proper care has to be taken to ensure that the HTTP headers can not be forged by end-users themselves! If usernames that come from external pre-authentication methods are different from those in the internal \texttt{USERS} map (if used at all), then an explicit mapping between the two may be specified in the \texttt{PREAUTHMAPPING} dictionary. Note that this pre-authentication mechanism never applies to the ``ghosted'' webservice, if enabled through \texttt{WEBSERVICEGHOST}. Only the regular authentication method is supported for the webservice ghost.
+
+The below example shows an Apache configuration for a proxy/entry server that forwards to another server on which a CLAM service runs, mediated through Shibboleth:
+
+\begin{verbatim}
+   <Location /yourclamservice>
+        AuthType shibboleth
+        ShibRequireSession On
+        ShibUseHeaders On
+        require valid-user
+        ProxyPass http://realserver/yourclamservice
+        ProxyPassReverse http://realserver/yourclamservice
+   </Location>
+\end{verbatim}
+
+The actual server, if it runs Apache, must always contain the directive \texttt{WSGIPassAuthorization On}.
+
+The CLAM service configuration file can in turn be restricted to \emph{only} except Shibboleth authenticated users using the following settings:
+
+\begin{verbatim}
+PREAUTHHEADER = 'HTTP_EDUPERSONPRINCIPALNAME'
+PREAUTHONLY = True
+\end{verbatim}
+
+Replace \texttt{HTTP\_EDUPERSONPRINCIPALNAME} with the proper HTTP header, this is just an example in a CLARIN-NL context.
+
 
 \subsection{Command Definition}
 \label{sec:command}
