@@ -1217,7 +1217,20 @@ def addfile(project, filename, user, postdata, inputsource=None):
             #Inputtemplate not found, send 404
             printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
             raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-    else:
+
+    inputtemplate = ""
+    #See if an inputtemplate is explicitly specified in the filename
+    if '/' in filename.strip('/'):
+        raw = filename.split('/')
+        inputtemplate = None
+        for profile in settings.PROFILES:
+            for it in profile.input:
+                if it.id == raw[0]:
+                    inputtemplate = it
+                    break
+        if inputtemplate:
+            filename = raw[1]
+    if not inputtemplate:
         #Check if the specified filename can be uniquely associated with an inputtemplate
         for profile in settings.PROFILES:
             for t in profile.input:
