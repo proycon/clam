@@ -12,7 +12,7 @@
 #
 #       Induction for Linguistic Knowledge Research Group
 #       Tilburg University
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -37,27 +37,27 @@ import clam.common.util
 import clam.common.viewers
 from clam.common.util import RequestWithMethod
 
-#clam.common.formats is deliberately imported _at the end_ 
+#clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.2'
+VERSION = '0.9.3'
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
      def __init__(self, value):
          self.value = value
      def __str__(self):
-         return "Not a valid CLAM XML response"        
-        
+         return "Not a valid CLAM XML response"
+
 class HTTPError(Exception):
-    pass        
+    pass
 
 
 class AuthenticationRequired(Exception):
     pass
-    
-class CLAMFile:    
+
+class CLAMFile:
     basedir = ''
-    
+
     def __init__(self, projectpath, filename, loadmetadata = True, client = None):
         """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
         self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
@@ -72,11 +72,11 @@ class CLAMFile:
                 pass
             except HTTPError:
                 pass
-                
+
         self.viewers = []
         self.converters = []
-        
-                
+
+
     def attachviewers(self, profiles):
         """Attach viewers *and converters* to file, automatically scan all profiles for outputtemplate or inputtemplate"""
         if self.metadata:
@@ -102,14 +102,14 @@ class CLAMFile:
             if template and template.converters:
                 for converter in template.converters:
                     self.converters.append(converter)
-                    
+
     def metafilename(self):
         """Returns the filename for the meta file (not full path). Only used for local files."""
-        metafilename = os.path.dirname(self.filename) 
+        metafilename = os.path.dirname(self.filename)
         if metafilename: metafilename += '/'
         metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
         return metafilename
-                
+
     def loadmetadata(self):
         """Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled."""
         if not self.remote:
@@ -123,19 +123,19 @@ class CLAMFile:
         else:
             if self.client: self.client.initauth()
             try:
-                response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))   
+                response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))
                 xml = response.read()
             except:
                 extramsg = ""
                 if not self.client: extramsg = "No client was associated with this CLAMFile, associating a client is necessary when authentication is needed"
                 raise HTTPError(2, "Can't download metadata for " + self.filename + ". " + extramsg)
-            
+
             #if response.status != 200: #TODO: Verify
             #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
-        
+
         #parse metadata
         self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
-     
+
     def __iter__(self):
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first."""
         if not self.remote:
@@ -145,17 +145,17 @@ class CLAMFile:
             else:
                 for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
-        else:        
+        else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
             if self.client: self.client.initauth()
-            response = urllib2.urlopen(urllib2.Request( fullpath))      
+            response = urllib2.urlopen(urllib2.Request( fullpath))
             for line in response.readlines():
                 if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
                     yield unicode(line, self.metadata['encoding'])
                 else:
                     yield line
-            
-    
+
+
     def delete(self):
         """Delete this file"""
         if not self.remote:
@@ -163,23 +163,23 @@ class CLAMFile:
                 return False
             else:
                 os.unlink(self.projectpath + self.basedir + '/' + self.filename)
-            
+
             #Remove metadata
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
             if os.path.exists(metafile):
                 os.unlink(metafile)
-            
+
             #also remove any .*.INPUTTEMPLATE.* links that pointed to this file: simply remove all dead links
             for linkf,realf in clam.common.util.globsymlinks(self.projectpath + self.basedir + '/.*.INPUTTEMPLATE.*'):
                     if not os.path.exists(realf):
                         os.unlink(linkf)
-            
+
             return True
-        else:            
+        else:
             if self.client: self.client.initauth()
-            response = urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))   
+            response = urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
             return True
-         
+
 
     def readlines(self):
         """Loads all in memory"""
@@ -189,24 +189,24 @@ class CLAMFile:
         #    else:
         #       return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
         #else:
-        #    response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))      
+        #    response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))
         #    content = response.read()
         #    if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
         #        content = unicode(content, self.metadata['encoding'])
         #    return response
         return list(iter(self))
-            
+
     def copy(self, target):
-        """Copy or download this file to a new local file""" 
+        """Copy or download this file to a new local file"""
         if self.metadata and 'encoding' in self.metadata:
             f = codecs.open(target,'w', self.metadata['encoding'])
             for line in self:
                 f.write(line)
         else:
-            f = open(target,'w')            
+            f = open(target,'w')
             for line in self:
                 f.write(line)
-        f.close()                    
+        f.close()
 
     def validate(self):
         """Validate this file. Returns a boolean."""
@@ -221,7 +221,7 @@ class CLAMFile:
 
 class CLAMInputFile(CLAMFile):
     basedir = "input"
-    
+
 class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
@@ -232,12 +232,12 @@ def getclamdata(filename):
     xml = f.read(os.path.getsize(filename))
     f.close()
     return CLAMData(xml, None, True)
-    
-    
+
+
 def processparameter(postdata, parameter, user=None):
     errors = False
     commandlineparam = ""
-    
+
     if parameter.access(user):
         try:
             postvalue = parameter.valuefrompostdata(postdata)
@@ -245,10 +245,10 @@ def processparameter(postdata, parameter, user=None):
             clam.common.util.printlog("Invalid value, unable to interpret parameter " + parameter.id + ", ...")
             parameter.error = "Invalid value, unable to interpret"
             return True, parameter, ''
-        
+
         if not (postvalue is None):
             clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue))
-            if parameter.set(postvalue): #may generate an error in parameter.error                            
+            if parameter.set(postvalue): #may generate an error in parameter.error
                 p = parameter.compilearg()
                 if p:
                     commandlineparam = p
@@ -262,18 +262,18 @@ def processparameter(postdata, parameter, user=None):
             errors = True
 
     return errors, parameter, commandlineparam
-    
+
 def processparameters(postdata, parameters, user=None):
         #we're going to modify parameter values, this we can't do
         #on the global variable, that won't be thread-safe, we first
-        #make a (shallow) copy and act on that  
-        
+        #make a (shallow) copy and act on that
+
         commandlineparams = [] #for $PARAMETERS
         errors = False
-        
+
         newparameters = [] #in same style as input (i.e. with or without groups)
-        tempparlist = [] #always a list of parameters        
-        
+        tempparlist = [] #always a list of parameters
+
         if all([isinstance(x,tuple) for x in parameters ]):
             for parametergroup, parameterlist in parameters:
                 newparameterlist = []
@@ -283,7 +283,7 @@ def processparameters(postdata, parameters, user=None):
                     newparameterlist.append(parameter)
                     tempparlist.append(parameter)
                     if commandlineparam:
-                        commandlineparams.append(commandlineparam)                    
+                        commandlineparams.append(commandlineparam)
                 newparameters.append( (parametergroup, newparameterlist) )
         elif all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters]):
             for parameter in parameters:
@@ -291,13 +291,13 @@ def processparameters(postdata, parameters, user=None):
                 errors = errors or error
                 newparameters.append(copy(parameter))
                 if commandlineparam:
-                    commandlineparams.append(commandlineparam)                    
+                    commandlineparams.append(commandlineparam)
             tempparlist = newparameters
         else:
             raise Exception("Invalid parameters")
-        
+
         #solve dependency issues now all values have been set:
-        for parameter in tempparlist:    
+        for parameter in tempparlist:
             if parameter.constrainable() and (parameter.forbid or parameter.require):
                 for parameter2 in tempparlist:
                     if parameter.forbid and parameter2.id in parameter.forbid and parameter2.constrainable():
@@ -307,13 +307,13 @@ def processparameters(postdata, parameters, user=None):
                     if parameter.require and parameter2.id in parameter.require and not parameter2.constrainable():
                         parameter.error = parameter2.error = "Parameter '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
                         clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
-                        errors = True                     
-                                                    
+                        errors = True
+
         return errors, newparameters, commandlineparams
 
 class CLAMData(object):
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
-    XML responses. Its member variables are: 
+    XML responses. Its member variables are:
 
         * ``baseurl``         - The base URL to the service (string)
         * ``projecturl``      - The full URL to the selected project, if any  (string)
@@ -321,7 +321,7 @@ class CLAMData(object):
         * ``statusmessage``   - The latest status message (string)
         * ``completion``      - An integer between 0 and 100 indicating
                           the percentage towards completion.
-        * ``parameters``      - List of parameters (but use the methods instead)        
+        * ``parameters``      - List of parameters (but use the methods instead)
         * ``profiles``        - List of profiles (``[ Profile ]``)
         * ``input``           - List of input files  (``[ CLAMInputFile ]``); use ``inputfiles()`` instead for easier access
         * ``output``          - List of output files (``[ CLAMOutputFile ]``)
@@ -335,50 +335,50 @@ class CLAMData(object):
 
     def __init__(self, xml, client=None, localroot = False):
         """Initialises a CLAMData object by passing pass a string containing the full CLAM XML response. It will be automatically parsed. This is usually not called directly but instantiated in system wrapper scripts using::
-            
+
             data = clam.common.data.getclamdata("clam.xml")
 
         Or ``CLAMCLient`` is used, most responses are ``CLAMData`` instances.
         """
         self.xml = xml
-        
+
         self.system_id = ""
         self.system_name = ""
-        
+
         #: String containing the base URL of the webserivice
         self.baseurl = ''
-        
+
         #: String containing the full URL to the project, if a project was indeed selected
         self.projecturl = ''
-        
+
         #: The current status of the service, returns clam.common.status.READY (1), clam.common.status.RUNNING (2), or clam.common.status.DONE (3)
         self.status = clam.common.status.READY
-        
+
         #: The current status of the service in a human readable message
         self.statusmessage = ""
         self.completion = 0
-        
+
         #: This contains a list of (parametergroup, [parameters]) tuples.
         self.parameters = []
 
-        #: List of profiles ([ Profile ])    
+        #: List of profiles ([ Profile ])
         self.profiles = []
-        
+
         #:  List of pre-installed corpora
         self.corpora = []
-        
+
         #: List of output files ([ CLAMInputFile ])
         self.input = []
-        
+
         #: List of output files ([ CLAMOutputFile ])
         self.output = []
-        
+
         #: List of projects ([ string ])
         self.projects = None
-        
+
         #: Boolean indicating whether there are errors in parameter specification
-        self.errors = False        
-        
+        self.errors = False
+
         #: String containing an error message if an error occured
         self.errormsg = ""
 
@@ -386,7 +386,7 @@ class CLAMData(object):
 
 
         self.parseresponse(xml, localroot)
-        
+
 
 
     def parseresponse(self, xml, localroot = False):
@@ -395,12 +395,12 @@ class CLAMData(object):
         root = ElementTree.parse(StringIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
-            
+
         #if root.attrib['version'][0:3] != VERSION[0:3]:
         #    raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])
-                                
+
         self.system_id = root.attrib['id']
-        self.system_name = root.attrib['name']        
+        self.system_name = root.attrib['name']
         if 'project' in root.attrib:
             self.project = root.attrib['project']
         else:
@@ -412,7 +412,7 @@ class CLAMData(object):
                     self.remote = False
                     self.projecturl = '' #relative directory (assume CWD is project directory, as is the case when wrapper scripts are called)
                 elif localroot: #explicit
-                    self.remote = False 
+                    self.remote = False
                     self.projecturl = localroot + '/' + self.project + '/' #explicit directory
                 else:
                     self.remote = True #no directory: remote URL
@@ -438,7 +438,7 @@ class CLAMData(object):
                 for parametergroupnode in node:
                     if parametergroupnode.tag == 'parametergroup':
                         parameterlist = []
-                        for parameternode in parametergroupnode:        
+                        for parameternode in parametergroupnode:
                             if parameternode.tag in vars(clam.common.parameters):
                                 parameterlist.append(vars(clam.common.parameters)[parameternode.tag].fromxml(parameternode))
                             else:
@@ -448,7 +448,7 @@ class CLAMData(object):
                 for corpusnode in node:
                     if corpusnode.tag == 'corpus':
                         self.corpora.append(corpusnode.value)
-            elif node.tag == 'profiles':        
+            elif node.tag == 'profiles':
                 for subnode in node:
                     if subnode.tag == 'profile':
                         self.profiles.append(Profile.fromxml(subnode))
@@ -458,7 +458,7 @@ class CLAMData(object):
                          for n in filenode:
                             if n.tag == 'name':
                                 self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client) )
-            elif node.tag == 'output': 
+            elif node.tag == 'output':
                  for filenode in node:
                      if filenode.tag == 'file':
                         for n in filenode:
@@ -469,7 +469,7 @@ class CLAMData(object):
                  for projectnode in node:
                     if projectnode.tag == 'project':
                         self.projects.append(projectnode.text)
-    
+
     def commandlineargs(self):
         commandlineargs = []
         for parametergroup, parameters in self.parameters:
@@ -478,17 +478,17 @@ class CLAMData(object):
                 if p:
                     commandlineargs.append(p)
         return " ".join(commandlineargs)
-                
 
-    def parameter(self, id):                                 
+
+    def parameter(self, id):
         """Return the specified global parameter (the entire object, not just the value)"""
         for parametergroup, parameters in self.parameters:
             for parameter in parameters:
                 if parameter.id == id:
                     return parameter
         raise KeyError("No such parameter exists: " + id )
-        
-    def __getitem__(self, id):                                 
+
+    def __getitem__(self, id):
         """Return the value of the specified global parameter"""
         try:
             return self.parameter(id).value
@@ -503,7 +503,7 @@ class CLAMData(object):
                     parameter.set(value)
                     return True
         raise KeyError
-        
+
     def __contains__(self, id):
         """Check if a global parameter with the specified ID exists. Returns a boolean."""
         for parametergroup, parameters in self.parameters:
@@ -511,7 +511,7 @@ class CLAMData(object):
                 if parameter.id == id:
                     return True
         return False
-        
+
     def parametererror(self):
         """Return the first parameter error, or False if there is none"""
         for parametergroup, parameters in self.parameters:
@@ -531,30 +531,30 @@ class CLAMData(object):
                     else:
                         paramdict[parameter.id] = parameter.value
         return paramdict
-        
-        
+
+
     def inputtemplates(self):
         """Return all input templates as a list (of InputTemplate instances)"""
         l = []
         for profile in self.profiles:
             l += profile.input
         return l
-        
+
     def inputtemplate(self,id):
         """Return the inputtemplate with the specified ID. This is used to resolve a inputtemplate ID to an InputTemplate object instance"""
         for profile in self.profiles:
             for inputtemplate in profile.input:
                 if inputtemplate.id == id:
-                    return inputtemplate            
+                    return inputtemplate
         raise Exception("No such input template!")
-    
+
     def inputfile(self, inputtemplate=None):
         """Return the inputfile for the specified inputtemplate, if ``inputtemplate=None``, inputfile is returned regardless of inputtemplate. This function may only return 1 and returns an error when multiple input files can be returned, use ``inputfiles()`` instead."""
         inputfiles = list(self.inputfiles(inputtemplate))
         if len(inputfiles) < 1:
             raise Exception("No such input file")
         elif len(inputfiles) > 1:
-            raise Exception("Multiple input files matched. Use inputfiles() instead!")        
+            raise Exception("Multiple input files matched. Use inputfiles() instead!")
         return inputfiles[0]
 
 
@@ -566,11 +566,11 @@ class CLAMData(object):
         for inputfile in self.input:
             if not inputtemplate or inputfile.metadata.inputtemplate == inputtemplate:
                 yield inputfile
-            
-            
-                
-            
-        
+
+
+
+
+
 
 
 def sanitizeparameters(parameters):
@@ -579,54 +579,54 @@ def sanitizeparameters(parameters):
         d = {}
         for x in parameters:
             if isinstance(x,tuple) and len(x) == 2:
-                for parameter in x[1]:  
+                for parameter in x[1]:
                     d[parameter.id] = parameter
             elif isinstance(x, clam.common.parameters.AbstractParameter):
                 d[x.id] = x
         return d
     else:
         return parameters
-    
+
 
 
 def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl,printdebug=None):
     """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
-    
+
     parameters = sanitizeparameters(parameters)
-    
+
     matched = []
-    for profile in profiles:        
+    for profile in profiles:
         if profile.match(projectpath, parameters)[0]:
             matched.append(profile)
-            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)            
+            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)
     return matched
 
 
 
-        
-        
+
+
 
 class Profile(object):
     def __init__(self, *args):
         """Create a Profile. Arguments can be of class InputTemplate, OutputTemplate or ParameterCondition"""
-    
+
         self.input = []
         self.output = []
-    
+
         for arg in args:
-            if isinstance(arg, InputTemplate):    
+            if isinstance(arg, InputTemplate):
                 self.input.append(arg)
-            elif isinstance(arg, OutputTemplate):    
+            elif isinstance(arg, OutputTemplate):
                 self.output.append(arg)
             elif isinstance(arg, ParameterCondition):
                 self.output.append(arg)
-                    
+
         #Check for orphan OutputTemplates. OutputTemplates must have a parent (only outputtemplates with filename, unique=True may be parentless)
         for o in self.output:
             if isinstance(o, ParameterCondition):
                 for o in o.allpossibilities():
                     if not o:
-                       continue 
+                       continue
                     if not isinstance(o, OutputTemplate):
                         raise Exception("ParameterConditions in profiles must always evaluate to OutputTemplate, not " + o.__class__.__name__ + "!")
                     parent = o._findparent(self.input)
@@ -641,27 +641,27 @@ class Profile(object):
 
         #Sanity check (note: does not consider ParameterConditions!)
         for o in self.output:
-            for o2 in self.output:                
+            for o2 in self.output:
                 if not isinstance(o, ParameterCondition) and not isinstance(o2, ParameterCondition) and o.id != o2.id:
                     if o.filename == o2.filename:
                         if not o.filename:
                             #no filename specified (which means it's inherited from parent as is)
                             if o.extension == o2.extension: #extension is the same (or both none)
                                 if o.parent == o2.parent:
-                                    raise Exception("Output templates '" + o.id + "' and '" + o2.id + "' describe identically named output files, this is not possible. They define no filename and no extension (or equal extension) so both inherit the same filename from the same parent. Use filename= or extension= to distinguish the two.")                            
-                        else: 
+                                    raise Exception("Output templates '" + o.id + "' and '" + o2.id + "' describe identically named output files, this is not possible. They define no filename and no extension (or equal extension) so both inherit the same filename from the same parent. Use filename= or extension= to distinguish the two.")
+                        else:
                             raise Exception("Output templates '" + o.id + "' and '" + o2.id + "' describe identically named output files, this is not possible. Use filename= or extension= to distinguish the two.")
-                    
-        
-        
 
-    def match(self, projectpath, parameters):            
+
+
+
+    def match(self, projectpath, parameters):
         """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
         parameters = sanitizeparameters(parameters)
 
         mandatory_absent = [] #list of input templates that are missing but mandatory
         optional_absent = [] #list of absent but optional input templates
-                        
+
         #check if profile matches inputdata (if there are no inputtemplate, this always matches intentionally!)
         for inputtemplate in self.input:
             if not inputtemplate.matchingfiles(projectpath):
@@ -669,16 +669,16 @@ class Profile(object):
                     optional_absent.append(inputtemplate)
                 else:
                     mandatory_absent.append(inputtemplate)
-        
+
         if mandatory_absent:
             return False, mandatory_absent
-        
+
         #check if output is produced
         outputproduced = False
         if not self.output: return False, mandatory_absent
         for outputtemplate in self.output:
             if isinstance(outputtemplate, ParameterCondition):
-                outputtemplate = outputtemplate.evaluate(parameters)                
+                outputtemplate = outputtemplate.evaluate(parameters)
             if not outputtemplate:
                 continue
             assert isinstance(outputtemplate, OutputTemplate)
@@ -687,7 +687,7 @@ class Profile(object):
                     return True, optional_absent
             else:
                 return True, optional_absent
-                          
+
         return False, optional_absent
 
     def matchingfiles(self, projectpath):
@@ -707,34 +707,34 @@ class Profile(object):
                 assert isinstance(o, OutputTemplate)
                 outputtemplates.append(o)
         return outputtemplates
-            
+
 
     def generate(self, projectpath, parameters, serviceid, servicename,serviceurl):
         """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
 
         #Make dictionary of parameters
         parameters = sanitizeparameters(parameters)
-                
+
         match, optional_absent = self.match(projectpath, parameters) #Does the profile match?
         if match:
-        
+
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
 
             inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
             for seqnr, filename, inputtemplate in inputfiles:
                 inputfiles_full.append(CLAMInputFile(projectpath, filename))
-                                        
+
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
                     outputtemplate = outputtemplate.evaluate(parameters)
-                    
+
                 #generate output files
-                if outputtemplate:                
-                    if isinstance(outputtemplate, OutputTemplate):                    
+                if outputtemplate:
+                    if isinstance(outputtemplate, OutputTemplate):
                         #generate provenance data
-                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)                    
-                        
+                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)
+
                         create = True
                         if outputtemplate.parent:
                             if outputtemplate._getparent(self) in optional_absent:
@@ -742,10 +742,10 @@ class Profile(object):
 
                         if create:
                             for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
-                                clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)                            
-                                metafilename = os.path.dirname(outputfilename) 
+                                clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)
+                                metafilename = os.path.dirname(outputfilename)
                                 if metafilename: metafilename += '/'
-                                metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'                                                        
+                                metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'
                                 f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
                                 f.write(metadata.xml())
                                 f.close()
@@ -767,26 +767,26 @@ class Profile(object):
         xml += indent + " </output>\n"
         xml += indent + "</profile>"
         return xml
-        
+
     def out(self, indent = ""):
-        o = indent + "Profile" 
+        o = indent + "Profile"
         o += indent + "\tInput"
         for inputtemplate in self.input:
-            o += inputtemplate.out(indent +"\t") + "\n"            
+            o += inputtemplate.out(indent +"\t") + "\n"
         o += indent + "\tOutput"
         for outputtemplate in self.output:
             o += outputtemplate.out(indent +"\t") + "\n"
 
         return o
-        
+
     @staticmethod
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
-            
+            node = ElementTree.parse(StringIO(node)).getroot()
+
         args = []
-            
+
         if node.tag == 'profile':
             for node in node:
                 if node.tag == 'input':
@@ -798,24 +798,24 @@ class Profile(object):
                         if subnode.tag.lower() == 'outputtemplate':
                             args.append(OutputTemplate.fromxml(subnode))
                         elif subnode.tag.lower() == 'parametercondition':
-                            args.append(ParameterCondition.fromxml(subnode))    
+                            args.append(ParameterCondition.fromxml(subnode))
         return Profile(*args)
-    
+
 
 
 
 class RawXMLProvenanceData(object):
     def __init__(self, data):
         self.data = data
-    
+
     def xml(self):
         if isinstance(self.data, ElementTree._Element):
             return ElementTree.tostring(self.data, pretty_print = True)
         else:
             return self.data
-    
+
 class CLAMProvenanceData(object):
-    
+
     def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None, timestamp = None):
         self.serviceid = serviceid
         self.servicename = servicename
@@ -825,32 +825,32 @@ class CLAMProvenanceData(object):
         if parameters:
             if isinstance(parameters, dict):
                 assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters.values()])
-                self.parameters = parameters    
+                self.parameters = parameters
             else:
                 assert all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters])
-                self.parameters = parameters  
-        else: 
+                self.parameters = parameters
+        else:
             self.parameters = []
-    
+
         if timestamp:
             self.timestamp = int(float(timestamp))
         else:
             self.timestamp = time.time()
-            
+
         assert isinstance(inputfiles, list)
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
             self.inputfiles = [ (x.filename, x.metadata) for x in inputfiles ] #list of (filename, CLAMMetaData) objects of all input files
         else:
             assert (all([ isinstance(x, tuple) and len(x) == 2 and isinstance(x[1], CLAMMetaData) for x in inputfiles ]))
             self.inputfiles = inputfiles
-        
-        
+
+
     def xml(self, indent = ""):
         xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">"
         for filename, metadata in self.inputfiles:
             xml += indent + " <inputfile name=\"" + clam.common.util.xmlescape(filename) + "\">"
             xml += metadata.xml(indent + " ") + "\n"
-            xml += indent +  " </inputfile>\n"            
+            xml += indent +  " </inputfile>\n"
         if self.parameters:
             xml += indent + " <parameters>\n"
             if isinstance(self.parameters, dict):
@@ -867,7 +867,7 @@ class CLAMProvenanceData(object):
     def fromxml(node):
         """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag == 'provenance':
             if node.attrib['type'] == 'clam':
                 serviceid = node.attrib['id']
@@ -896,7 +896,7 @@ class CLAMProvenanceData(object):
                 return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters, timestamp)
             else:
                 raise NotImplementedError
-            
+
 
 
 
@@ -908,7 +908,7 @@ class CLAMMetaData(object):
 
     mimetype = "text/plain" #No mimetype by default
     schema = ""
-    
+
 
     def __init__(self, file, **kwargs):
 
@@ -919,13 +919,13 @@ class CLAMMetaData(object):
             self.file = None
         else:
             raise Exception("Invalid file argument for CLAMMetaData")
-            
-            
 
-        self.file = file #will be used for reading inline metadata, can be None if no file is associated        
+
+
+        self.file = file #will be used for reading inline metadata, can be None if no file is associated
         if self.file:
             self.file.metadata = self
-        
+
         self.provenance = None
 
         self.inputtemplate = None
@@ -940,7 +940,7 @@ class CLAMMetaData(object):
                 if isinstance(value, InputTemplate):
                     self.inputtemplate = value.id
                 else:
-                    self.inputtemplate = value                    
+                    self.inputtemplate = value
             else:
                 self[key] = value
         if self.attributes:
@@ -948,7 +948,7 @@ class CLAMMetaData(object):
                 for key, value in kwargs.items():
                     if not key in self.attributes:
                         raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes. (format: " + self.__class__.__name__ + ", file: " + str(file) + ")")
-                                        
+
             for key, valuerange in self.attributes.items():
                 if isinstance(valuerange,list):
                     if not key in self and not False in valuerange :
@@ -957,10 +957,10 @@ class CLAMMetaData(object):
                         raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key])) + " (format: " + self.__class__.__name__ + ", file: " + str(file) + ")"
                 elif valuerange is False: #Any value is allowed, and this attribute is not required
                     pass #nothing to do
-                elif valuerange is True: #Any value is allowed, this attribute is *required*    
+                elif valuerange is True: #Any value is allowed, this attribute is *required*
                     if not key in self:
                         raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
-                elif valuerange: #value is a single specific unconfigurable value 
+                elif valuerange: #value is a single specific unconfigurable value
                     self[key] = valuerange
 
     def __getitem__(self, key):
@@ -984,7 +984,7 @@ class CLAMMetaData(object):
             if isinstance(maxvalues, list):
                 if not value in maxvalues:
                     raise ValueError("Invalid value '" + str(value) + "' for metadata field '" + key + "'")
-            
+
         assert not isinstance(value, list)
         self.data[key] = value
 
@@ -1006,9 +1006,9 @@ class CLAMMetaData(object):
         for key, value in self.data.items():
             xml += indent + "  <meta id=\""+clam.common.util.xmlescape(key)+"\">"+clam.common.util.xmlescape(str(value))+"</meta>\n"
 
-        if self.provenance:        
+        if self.provenance:
             xml += self.provenance.xml(indent + "  ")
-        
+
         xml += indent +  "</CLAMMetaData>"
         return xml
 
@@ -1016,56 +1016,56 @@ class CLAMMetaData(object):
         f = codecs.open(filename,'w','utf-8')
         f.write(self.xml())
         f.close()
-        
+
     def validate(self):
         #Should be overridden by subclasses
         return True
-        
+
     def loadinlinemetadata(self):
         #Read inline metadata, can be overridden by subclasses
         pass
-        
+
     def saveinlinemetadata(self):
         #Save inline metadata, can be overridden by subclasses
         pass
-    
-    @staticmethod    
+
+    @staticmethod
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag == 'CLAMMetaData':
             format = node.attrib['format']
-            
+
             formatclass = None
             if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
                 formatclass = vars(clam.common.formats)[format]
             if not formatclass:
                 d = vars(clam.common.formats)
                 raise Exception("Format class " + format + " not found!")
-            
-            data = {}    
+
+            data = {}
             if 'inputtemplate' in node.attrib:
                 data['inputtemplate'] = node.attrib['inputtemplate']
             if 'inputtemplatelabel' in node.attrib:
                 data['inputtemplatelabel'] = node.attrib['inputtemplatelabel']
 
-                
-            
+
+
             for subnode in node:
                 if subnode.tag == 'meta':
                     key = subnode.attrib['id']
                     value = subnode.text
                     data[key] = value
-                elif subnode.tag == 'provenance':                
+                elif subnode.tag == 'provenance':
                     data['provenance'] = CLAMProvenanceData.fromxml(subnode)
             return formatclass(file, **data)
-        else:    
-            raise Exception("Invalid CLAM Metadata!")        
-            
+        else:
+            raise Exception("Invalid CLAM Metadata!")
+
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples. Should be overridden in sub-classes!"""
-        yield ("Content-Type", self.mimetype)            
+        yield ("Content-Type", self.mimetype)
 
 class CMDIMetaData(CLAMMetaData):
     #TODO LATER: implement
@@ -1074,11 +1074,11 @@ class CMDIMetaData(CLAMMetaData):
 
 
 
-    
-    
 
 
-    
+
+
+
 
 class InputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
@@ -1092,7 +1092,7 @@ class InputTemplate(object):
         self.converters = []
         self.viewers = [] #TODO Later: Support viewers in InputTemplates?
         self.inputsources = []
-        
+
         self.unique = True #may mark input/output as unique
 
         self.optional = False #Output templates that are derived from optional Input Templates are conditional on the optional input file being presented!
@@ -1103,17 +1103,17 @@ class InputTemplate(object):
         self.acceptarchive = False #Accept and auto-extract archives
 
         for key, value in kwargs.items():
-            if key == 'unique':   
+            if key == 'unique':
                 self.unique = bool(value)
-            elif key == 'multi':   
+            elif key == 'multi':
                 self.unique = not bool(value)
-            elif key == 'optional':   
+            elif key == 'optional':
                 self.optional = bool(value)
             elif key == 'filename':
                 self.filename = value # use '#' to insert a number in multi mode (will happen server-side!)
             elif key == 'extension':
                 if value[0] == '.': #without dot
-                    self.extension = value[1:]        
+                    self.extension = value[1:]
                 else:
                     self.extension = value
             elif key == 'acceptarchive':
@@ -1125,7 +1125,7 @@ class InputTemplate(object):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
         if self.unique and self.acceptarchive:
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', acceptarchive demands multi=True")
-            
+
 
         for arg in args:
             if isinstance(arg, clam.common.parameters.AbstractParameter):
@@ -1138,8 +1138,8 @@ class InputTemplate(object):
                 self.inputsources.append(arg)
             else:
                 raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting Parameter, Converter, Viewer or InputSource.")
-            
-        if self.onlyinputsource and not self.inputsources: 
+
+        if self.onlyinputsource and not self.inputsources:
             raise Exception("No input sources defined for input template " + id + ", but onlyinputsource=True")
 
     def xml(self, indent = ""):
@@ -1164,7 +1164,7 @@ class InputTemplate(object):
         if self.acceptarchive:
             xml +=" acceptarchive=\"yes\""
         else:
-            xml +=" acceptarchive=\"no\""            
+            xml +=" acceptarchive=\"no\""
         xml += ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+"\t") + "\n"
@@ -1181,9 +1181,9 @@ class InputTemplate(object):
     def fromxml(node):
         """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         assert(node.tag.lower() == 'inputtemplate')
-       
+
         id = node.attrib['id']
         format = node.attrib['format']
         label = node.attrib['label']
@@ -1202,7 +1202,7 @@ class InputTemplate(object):
                 kwargs['acceptarchive'] = True
             else:
                 kwargs['acceptarchive'] = False
-            
+
         #find formatclass
         if format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
@@ -1219,11 +1219,11 @@ class InputTemplate(object):
                 pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
             else:
                 raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
-                            
-        return InputTemplate(id,formatcls,label, *args, **kwargs)     
+
+        return InputTemplate(id,formatcls,label, *args, **kwargs)
 
 
-            
+
     def json(self):
         """Produce a JSON representation for the web interface"""
         d = { 'id': self.id, 'format': self.formatclass.__name__,'label': self.label, 'mimetype': self.formatclass.mimetype,  'schema': self.formatclass.schema }
@@ -1257,46 +1257,46 @@ class InputTemplate(object):
         """Does the specified metadata match this template? returns (success,metadata,parameters)"""
         assert isinstance(metadata, self.formatclass)
         return self.generate(metadata,user)
-        
+
     def matchingfiles(self, projectpath):
         """Checks if the input conditions are satisfied, i.e the required input files are present. We use the symbolic links .*.INPUTTEMPLATE.id.seqnr to determine this. Returns a list of matching results (seqnr, filename, inputtemplate)."""
         results = []
-                
+
         if projectpath[-1] == '/':
              inputpath = projectpath + 'input/'
         else:
              inputpath = projectpath + '/input/'
-             
+
         for linkf,realf in clam.common.util.globsymlinks(inputpath + '/.*.INPUTTEMPLATE.' + self.id + '.*'):
             seqnr = int(linkf.split('.')[-1])
             results.append( (seqnr, realf[len(inputpath):], self) )
         results = sorted(results)
-        if self.unique and len(results) != 1: 
+        if self.unique and len(results) != 1:
             return []
         else:
             return results
 
-                
-                
-    def validate(self, postdata, user = None):            
+
+
+    def validate(self, postdata, user = None):
         clam.common.util.printdebug("Validating inputtemplate " + self.id + "...")
-        errors, parameters, _  = processparameters(postdata, self.parameters, user)        
+        errors, parameters, _  = processparameters(postdata, self.parameters, user)
         return errors, parameters
-        
+
 
 
 
     def generate(self, file, validatedata = None,  inputdata=None, user = None):
         """Convert the template into instantiated metadata, validating the data in the process and returning errors otherwise. inputdata is a dictionary-compatible structure, such as the relevant postdata. Return (success, metadata, parameters), error messages can be extracted from parameters[].error. Validatedata is a (errors,parameters) tuple that can be passed if you did validation in a prior stage, if not specified, it will be done automatically."""
-        
+
         metadata = {}
-        
+
         if not validatedata:
             assert inputdata
             errors,parameters = self.validate(inputdata,user)
         else:
             errors, parameters = validatedata
-                
+
         #scan errors and set metadata
         success = True
         for parameter in parameters:
@@ -1305,15 +1305,15 @@ class InputTemplate(object):
                 success = False
             else:
                 metadata[parameter.id] = parameter.value
- 
+
         if not success:
             metadata = None
         else:
             try:
                 metadata = self.formatclass(file, **metadata)
             except:
-                raise                
-                
+                raise
+
         return success, metadata, parameters
 
 
@@ -1329,18 +1329,18 @@ class AbstractMetaField(object): #for OutputTemplate only
         if not self.value:
             xml += " />"
         else:
-            xml += ">" + self.value + "</meta>" 
+            xml += ">" + self.value + "</meta>"
         return xml
 
     @staticmethod
     def fromxml(node):
         """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag.lower() != 'meta':
             raise Exception("Expected meta tag but got '" + node.tag + "' instead")
-       
-        key = node.attrib['id']        
+
+        key = node.attrib['id']
         if node.text:
             value = node.text
         else:
@@ -1357,25 +1357,25 @@ class AbstractMetaField(object): #for OutputTemplate only
         elif operator == 'parameter':
             cls = ParameterMetaField
         return cls(key, value)
-        
-            
+
+
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         #in most cases we're only interested in 'data'
         raise Exception("Always override this method in inherited classes! Return True if data is modified, False otherwise")
-    
 
-class SetMetaField(AbstractMetaField): 
+
+class SetMetaField(AbstractMetaField):
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         data[self.key] = self.value
         return True
-        
+
     def xml(self, indent=""):
         return super(SetMetaField,self).xml('set', indent)
-        
+
 class UnsetMetaField(AbstractMetaField):
     def xml(self, indent = ""):
         return super(UnsetMetaField,self).xml('unset', indent)
-        
+
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         if self.key in data and (not self.value or (self.value and data[self.key] == self.value)):
             del data[self.key]
@@ -1385,10 +1385,10 @@ class UnsetMetaField(AbstractMetaField):
 class CopyMetaField(AbstractMetaField):
     """In CopyMetaField, the value is in the form of templateid.keyid, denoting where to copy from. If not keyid but only a templateid is
     specified, the keyid of the metafield itself will be assumed."""
-    
+
     def xml(self, indent = ""):
         return super(CopyMetaField,self).xml('copy', indent)
-    
+
     def resolve(self, data, parameters, parentfile, relevantinputfiles):
         raw = self.value.split('.')
         if len(raw) == 1:
@@ -1399,27 +1399,27 @@ class CopyMetaField(AbstractMetaField):
             copykey = raw[1]
         else:
             raise Exception("Can't parse CopyMetaField value " + self.value)
-        
+
         #find relevant inputfile
         edited = False
         for inputtemplate, f in relevantinputfiles:
             if inputtemplate.id == copytemplate:
                 if f.metadata and copykey in f.metadata:
-                    data[self.key] = f.metadata[copykey]                    
+                    data[self.key] = f.metadata[copykey]
                     edited = True
         return edited
-        
+
 class ParameterMetaField(AbstractMetaField):
     def xml(self, indent=""):
         return super(ParameterMetaField,self).xml('parameter', indent)
-    
+
     def resolve(self, data, parameters, parentfile, relevantinputfiles): #TODO: Verify
         if self.value in parameters:
             data[self.key] = parameters[self.value]
             return True
         else:
             return False
-        
+
 class OutputTemplate(object):
     def __init__(self, id, formatclass, label, *args, **kwargs):
         assert (issubclass(formatclass, CLAMMetaData))
@@ -1441,15 +1441,15 @@ class OutputTemplate(object):
                 self.viewers.append(arg)
             else:
                 raise ValueError("Unexpected argument for OutputTemplate " + id + ", expecting MetaField, ParameterCondition, Viewer or Converter")
-            
-        
+
+
         self.unique = True #mark input/output as unique, as opposed to multiple files
 
         self.filename = None
         self.extension = None
-        
+
         self.removeextensions = [] #Remove extensions
-        
+
         self.parent = None
         self.copymetadata = False #copy metadata from parent (if set)
 
@@ -1503,7 +1503,7 @@ class OutputTemplate(object):
         if self.filename:
             xml +=" filename=\""+clam.common.util.xmlescape(self.filename)+"\""
         if self.extension:
-            xml +=" extension=\""+clam.common.util.xmlescape(self.extension)+"\""            
+            xml +=" extension=\""+clam.common.util.xmlescape(self.extension)+"\""
         if self.unique:
             xml +=" unique=\"yes\""
         else:
@@ -1514,14 +1514,14 @@ class OutputTemplate(object):
 
         xml += indent + "</OutputTemplate>"
         return xml
-    
-    @staticmethod    
+
+    @staticmethod
     def fromxml(node):
         """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         assert(node.tag.lower() == 'outputtemplate')
-        
+
         id = node.attrib['id']
         format = node.attrib['format']
         label = node.attrib['label']
@@ -1535,7 +1535,7 @@ class OutputTemplate(object):
                 kwargs['unique'] = True
             else:
                 kwargs['unique'] = False
-            
+
         #find formatclass
         if format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
@@ -1549,24 +1549,24 @@ class OutputTemplate(object):
             elif subnode.tag == 'converter':
                 pass #TODO: Reading converters from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'viewer':
-                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)                
-            else:            
-                args.append(AbstractMetaField.fromxml(subnode))        
-            
-        return OutputTemplate(id,formatcls,label, *args, **kwargs)     
+                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
+            else:
+                args.append(AbstractMetaField.fromxml(subnode))
+
+        return OutputTemplate(id,formatcls,label, *args, **kwargs)
 
 
-            
+
     def __eq__(self, other):
         return other.id == self.id
-    
+
     def _findparent(self, inputtemplates):
         """Find the most suitable parent, that is: the first matching unique/multi inputtemplate"""
         for inputtemplate in inputtemplates:
             if self.unique == inputtemplate.unique:
                 return inputtemplate.id
         return None
-                
+
     def _getparent(self, profile):
         """Resolve a parent ID"""
         assert (self.parent)
@@ -1575,25 +1575,25 @@ class OutputTemplate(object):
                 return inputtemplate
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
-    def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None): 
+    def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None):
         """Yields (outputfilename, metadata) tuples"""
-        
+
         project = os.path.basename(projectpath)
-        
+
         if self.parent:
             #We have a parent, infer the correct filename
-            
+
             #copy filename from parent
             parent = self._getparent(profile)
-            
+
             #get input files for the parent InputTemplate
             parentinputfiles = parent.matchingfiles(projectpath)
             if not parentinputfiles:
                 raise Exception("OutputTemplate '"+self.id + "' has parent '" + self.parent + "', but no matching input files were found!")
-                
+
             #Do we specify a full filename?
             for seqnr, inputfilename, inputtemplate in parentinputfiles:
-                
+
                 if self.filename:
                     filename = self.filename
                     parentfile = CLAMInputFile(projectpath, inputfilename)
@@ -1602,17 +1602,17 @@ class OutputTemplate(object):
                     parentfile = CLAMInputFile(projectpath, inputfilename)
                 else:
                     raise Exception("OutputTemplate '"+self.id + "' has no parent nor filename defined!")
-            
+
                 #Make actual CLAMInputFile objects of ALL relevant input files, that is: all unique=True files and all unique=False files with the same sequence number
                 relevantinputfiles = []
                 for seqnr2, inputfilename2, inputtemplate2 in inputfiles:
                     if seqnr2 == 0 or seqnr2 == seqnr:
                         relevantinputfiles.append( (inputtemplate2, CLAMInputFile(projectpath, inputfilename2)) )
-                        
+
                 #resolve # in filename (done later)
                 #if not self.unique:
                 #    filename.replace('#',str(seqnr))
-            
+
                 if not self.filename and self.removeextensions:
                     #Remove unwanted extensions
                     if self.removeextensions is True:
@@ -1620,36 +1620,36 @@ class OutputTemplate(object):
                         filename = filename.split('.')[0]
                     elif isinstance(self.removeextensions, list):
                         #Remove specified extension
-                        for ext in self.removeextensions:  
+                        for ext in self.removeextensions:
                             if ext:
                                 if (ext[0] != '.' and filename[-len(ext) - 1:] == '.' + ext):
                                     filename = filename[:-len(ext) - 1]
                                 elif (ext[0] == '.' and filename[-len(ext):] == ext):
                                     filename = filename[:-len(ext)]
-                                
-                                    
+
+
                 if self.extension and not self.filename and filename[-len(self.extension) - 1:] != '.' + self.extension: #(also prevents duplicate extensions)
-                    filename += '.' + self.extension   
-                    
-                
+                    filename += '.' + self.extension
+
+
                 #Now we create the actual metadata
                 metadata = self.generatemetadata(parameters, parentfile, relevantinputfiles, provenancedata)
-                
+
                 #Resolve filename
                 filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr, project, inputfilename)
-                                            
+
                 yield filename, metadata
-                
-        elif self.unique and self.filename:            
+
+        elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
 
             metadata = self.generatemetadata(parameters, None, [], provenancedata)
-            
+
             filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0, project, None)
 
-            
+
             yield filename, metadata
-            
+
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
@@ -1659,19 +1659,19 @@ class OutputTemplate(object):
         assert isinstance(provenancedata,CLAMProvenanceData) or provenancedata == None
 
         data = {}
-        
+
         if self.copymetadata:
-            #Copy parent metadata  
+            #Copy parent metadata
             for key, value in parentfile.metadata.items():
                 data[key] = value
-        
+
         for metafield in self.metafields:
             if isinstance(metafield, ParameterCondition):
                 metafield = metafield.evaluate(parameters)
                 if not metafield:
                     continue
             assert(isinstance(metafield, AbstractMetaField))
-            metafield.resolve(data, parameters, parentfile, relevantinputfiles)        
+            metafield.resolve(data, parameters, parentfile, relevantinputfiles)
 
         if provenancedata:
             data['provenance'] = provenancedata
@@ -1699,13 +1699,13 @@ class ParameterCondition(object):
                 if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
                     self.then = value
                 else:
-                    raise Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")                    
+                    raise Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")
             elif key == 'else' or key == 'otherwise':
                 if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
-                    self.otherwise = value                    
+                    self.otherwise = value
                 else:
                     raise Exception("Value of 'else=' must be InputTemplate, OutputTemplate or ParameterCondition!")
-                    
+
             elif key == 'disjunction' or key == 'or':
                 self.disjunction = value
             else:
@@ -1798,14 +1798,14 @@ class ParameterCondition(object):
         return xml
 
     @staticmethod
-    def fromxml(node):    
-        """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""    
+    def fromxml(node):
+        """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot() 
+            node = ElementTree.parse(StringIO(node)).getroot()
         assert(node.tag.lower() == 'parametercondition')
-        
+
         kwargs = {}
-        
+
         found = False
         for node in node:
             if node.tag == 'if':
@@ -1817,15 +1817,15 @@ class ParameterCondition(object):
                     kwargs[parameter + '_' + operator] = value
                     found = True
             elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
-                #interpret statements:        
+                #interpret statements:
                 for subnode in node: #TODO LATER: Support for multiple statement in then=, else= ?
                     if subnode.tag.lower() == 'parametercondition':
                         kwargs[node.tag] = ParameterCondition.fromxml(subnode)
-                    elif subnode.tag == 'meta':                
+                    elif subnode.tag == 'meta':
                         #assume metafield?
-                        kwargs[node.tag] = AbstractMetaField.fromxml(subnode)                
+                        kwargs[node.tag] = AbstractMetaField.fromxml(subnode)
                     elif subnode.tag.lower() == 'outputtemplate':
-                        kwargs[node.tag] = OutputTemplate.fromxml(subnode) 
+                        kwargs[node.tag] = OutputTemplate.fromxml(subnode)
         if not found:
             raise Exception("No condition found in ParameterCondition!")
         return ParameterCondition(**kwargs)
@@ -1840,14 +1840,14 @@ class InputSource(object):
             self.label = kwargs['label']
         else:
             raise Exception("No label specified for InputSource")
-        
+
         if 'path' in kwargs:
             self.path = kwargs['path']
             if not os.path.exists(self.path):
                 raise Exception("No such file or directory for InputSource: " + self.path)
         else:
             raise Exception("No path specified for InputSource")
-        
+
         if 'defaultmetadata' in kwargs:
             self.metadata = kwargs['defaultmetadata']
             assert isinstance(self.metadata, CLAMMetaData)
@@ -1856,19 +1856,19 @@ class InputSource(object):
             assert isinstance(self.metadata, CLAMMetaData)
         else:
             self.metadata = None
-            
+
         if 'inputtemplate' in kwargs:
             self.inputtemplate = kwargs['inputtemplate']
         else:
             self.inputtemplate = None
-            
-        
-            
-    
+
+
+
+
     def isfile(self):
         return os.path.isfile(self.path)
-        
-    
+
+
     def isdir(self):
         return os.path.isdir(self.path)
 
@@ -1879,35 +1879,35 @@ class InputSource(object):
     def check(self):
         """Checks if this inputsource is usable in INPUTSOURCES"""
         if not self.inputtemplate:
-            raise Exception("Input source has no input template")        
+            raise Exception("Input source has no input template")
 
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
         #parameters are local
         if filename.find('$') != -1:
-            for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):                            
+            for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):
                 if parameter and parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
-                if project: filename = filename.replace('$PROJECT', project)            
+                if project: filename = filename.replace('$PROJECT', project)
                 if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
-        
-        #BACKWARD COMPATIBILITY:    
+
+        #BACKWARD COMPATIBILITY:
         if not inputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
-                
+
         clam.common.util.printdebug("Determined input filename: " + filename)
-                
+
         return filename
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
         #MAYBE TODO: make more efficient
         if filename.find('$') != -1:
-            for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
+            for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
                 if parameter and parameter.hasvalue:
                     filename = filename.replace('$' + parameter.id, str(parameter.value))
             if filename.find('$') != -1:
-                for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):                            
+                for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
                     if value != None:
                         filename = filename.replace('$' + id, str(value))
             if filename.find('$') != -1:
@@ -1922,18 +1922,18 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
                     filename = filename.replace('$INPUTFILENAME', inputfilename)
                     filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
                     filename = filename.replace('$INPUTEXTENSION', inputextension)
-                if project: filename = filename.replace('$PROJECT', project)            
+                if project: filename = filename.replace('$PROJECT', project)
                 if not outputtemplate.unique:
-                    filename = filename.replace('$SEQNR', str(nextseq))            
+                    filename = filename.replace('$SEQNR', str(nextseq))
 
-        #BACKWARD COMPATIBILITY:    
+        #BACKWARD COMPATIBILITY:
         if not outputtemplate.unique:
             if '#' in filename: #resolve number in filename
                 filename = filename.replace('#',str(nextseq))
-            
+
         clam.common.util.printdebug("Determined output filename: " + filename)
-                
+
         return filename
-    
- 
+
+
 import clam.common.formats #yes, this is deliberately placed at the end!
