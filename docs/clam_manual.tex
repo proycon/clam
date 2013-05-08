@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.9.0} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.9.3} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -990,6 +990,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \hline
 \multicolumn{2}{|c|}{\textbf{Add/upload a new input file}} \\
 \hline
+\textbf{URL} & \texttt{/[project]/input/[filename]} or \texttt{/[project]/input/[inputtemplate]/[filename]}\\
 \textbf{Method} & \texttt{POST} \\
 \textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 

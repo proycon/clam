@@ -12,8 +12,10 @@ except ImportError:
 
 
 def pwhash(user, realm, password):
-    #computes a password hash for a given user and plaintext password
+    #computes a password hash for a given user and plaintext password (HA1)
     return md5(user + ':' + realm + ':' + password).hexdigest()
+
+
 
 class MalformedAuthenticationHeader(Exception): pass
 
@@ -23,7 +25,7 @@ class MalformedAuthenticationHeader(Exception): pass
 class auth(object):
     """A decorator class implementing digest authentication (RFC 2617)"""
     def __init__(self,  getHA1,  realm="Protected",  printdebug = None, urlprefix = None, tolerateIE = True, redirectURL = '/unauth',  unauthHTML = None,  nonceSkip = 0, staticopaque=None, lockTime = 20,  nonceLife = 350,  tries=3,  domain=[]):
-        """Creates a decorator specific to a particular web application. 
+        """Creates a decorator specific to a particular web application.
             getHA1: a function taking the arguments (username, realm), and returning digestauth.H(username:realm:password), or
                             throwing KeyError if no such user
             realm: the authentication "realm"
@@ -46,9 +48,9 @@ class auth(object):
             if self.printdebug: self.printdebug("DEBUG set opaque from settings: '" + str(staticopaque) + "'")
             self.opaque = staticopaque
         else:
-            if self.printdebug: self.printdebug("DEBUG generated opaque: '" + str(self.opaque)+ "'")  
+            if self.printdebug: self.printdebug("DEBUG generated opaque: '" + str(self.opaque)+ "'")
             self.opaque = "%032x" % random.getrandbits(128)
-        
+
         self.webpy2 = web.__version__.startswith('0.2')
     g401HTML = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -81,7 +83,7 @@ class auth(object):
                 if reqHeaderDict.get('opaque',self.opaque) != self.opaque:
                     # Didn't send back the correct "opaque;" probably, our server restarted.  Just send
                     # them another authentication header with the correct opaque field.
-                    if self.printdebug: self.printdebug("AUTH DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'")                    
+                    if self.printdebug: self.printdebug("AUTH DEBUG incorrect opaque: '"+ str(reqHeaderDict.get('opaque',self.opaque)) + "' should be '" + str(self.opaque) + "'")
                     return self.send401UnauthorizedResponse()
                 else:
                     # Their header had a more fundamental problem.  Something is fishy.  Deny access.
@@ -101,14 +103,14 @@ class auth(object):
                 # Client sent an old nonce.  Give the client a new one, and ask to authenticate again before continuing.
                 if self.printdebug: self.printdebug("AUTH DEBUG oldnonce")
                 return self.send401UnauthorizedResponse(stale=True)
-            username = reqHeaderDict.username    
+            username = reqHeaderDict.username
             if self.printdebug: self.printdebug("AUTH DEBUG user="+username)
             status = self.user_status.get(username, (self.tries, 0))
             if status[0] < 1 and time.time() < status[1]:
                 # User got the password wrong within the last (self.lockTime) seconds
                 if self.printdebug: self.printdebug("AUTH DEBUG wrong pw within last locktime")
                 return self.denyForbidden()
-            if status[0] < 1: 
+            if status[0] < 1:
                 if self.printdebug: self.printdebug("AUTH DEBUG wrong pw, user may retry")
                 # User sent the wrong password, but more than (self.lockTime) seconds have passed, so give
                 # them another try.  However, send a 401 header so user's browser prompts for a password
@@ -143,7 +145,7 @@ class auth(object):
                 urlprefix = self.urlprefix[:-1]
         else:
             urlprefix = ""
-        
+
         for variable in ['username','realm','nonce','uri','response','cnonce','nc']:
             if variable not in reqHeaderDict:
                 if self.printdebug: self.printdebug( "DEBUG directiveProper: missing " + variable)
@@ -156,8 +158,8 @@ class auth(object):
                 reqHeaderDict['uri'] = reqHeaderDict['uri'].split('?')[0]
             if '?' in reqPath:
                 reqPath = reqPath.split('?')[0]
-                
-        
+
+
         if reqHeaderDict['realm'] != self.realm:
             if self.printdebug: self.printdebug( "DEBUG directiveProper: realm not matching got '" + reqHeaderDict['realm'] + "' expected '" + self.realm + "'")
             return False
@@ -167,14 +169,14 @@ class auth(object):
         elif len(reqHeaderDict['nc']) != 8:
             if self.printdebug: self.printdebug( "DEBUG directiveProper nc != 8")
             return False
-        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath):  # or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )): 
+        elif not (reqHeaderDict['uri'] == reqPath or reqHeaderDict['uri'] == urlprefix + reqPath):  # or (standardsUncompliant and "?" in reqPath and (reqPath.startswith(reqHeaderDict['uri']) or reqPath.startswith(urlprefix + reqHeaderDict['uri'])) )):
             if self.printdebug: self.printdebug( "DEBUG mismatch in request paths, got '" +  str(reqHeaderDict['uri']) + "' instead of '" + str(reqPath) + "'")
             if urlprefix:
-                if self.printdebug: self.printdebug( "..or instead of '" + urlprefix + str(reqPath) + "'")            
+                if self.printdebug: self.printdebug( "..or instead of '" + urlprefix + str(reqPath) + "'")
             return False
-            
+
         return True
-            
+
         #return reqHeaderDict['realm'] == self.realm \
         #    and (standardsUncompliant or reqHeaderDict.get('opaque','') == self.opaque) \
         #    and len(reqHeaderDict['nc']) == 8 \
@@ -202,9 +204,9 @@ class auth(object):
     def send401UnauthorizedResponse(self,  stale=False):
         web.ctx.status = "401 Unauthorized"
         nonce = self.outstandingNonces.getNewNonce(self.nonceLife)
-        challengeList = [ "realm=%s" % quoteIt(self.realm), 
-                                   self.domain and ('domain=%s' % quoteIt(" ".join(self.domain))) or '', 
-                                   'qop="auth",nonce=%s,opaque=%s' % tuple(map(quoteIt, [nonce, self.opaque])), 
+        challengeList = [ "realm=%s" % quoteIt(self.realm),
+                                   self.domain and ('domain=%s' % quoteIt(" ".join(self.domain))) or '',
+                                   'qop="auth",nonce=%s,opaque=%s' % tuple(map(quoteIt, [nonce, self.opaque])),
                                    stale and 'stale="true"' or '']
         web.header("WWW-Authenticate", "Digest " + ",".join(x for x in challengeList if x))
         web.header("Content-Type","text/html")
@@ -257,8 +259,8 @@ class auth(object):
             # First time: send a 401 giving the user the fake "logout" nonce
             web.ctx.status = "401 Unauthorized"
             nonce = "%032x" % random.getrandbits(136)
-            challengeList = [ "realm=%s" % quoteIt(self.realm), 
-                               'qop="auth",nonce=%s,opaque=%s' % tuple(map(quoteIt, [nonce, self.opaque])), 
+            challengeList = [ "realm=%s" % quoteIt(self.realm),
+                               'qop="auth",nonce=%s,opaque=%s' % tuple(map(quoteIt, [nonce, self.opaque])),
                                 'stale="true"']
             web.header("WWW-Authenticate", "Digest " + ",".join(x for x in challengeList if x))
 

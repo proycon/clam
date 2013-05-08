@@ -8,10 +8,10 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
-# This is a very generic CLAM command-line client, useable with 
+# This is a very generic CLAM command-line client, useable with
 # any CLAM Service. It provides a simple and fairly low-level
 # command-line interface.
 #
@@ -26,7 +26,7 @@ os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 from clam.common.client import CLAMClient, NotFound, PermissionDenied, ServerError, AuthRequired
 from clam.common.data import ParameterCondition
 
-VERSION = '0.5'
+VERSION = '0.9'
 
 def usage():
     print >>sys.stderr, "clamclient.py [[options]] [url] [command] [command-arguments]"
@@ -50,7 +50,7 @@ def usage():
     print >>sys.stderr, " input  [project] - Get a list of input files"
     print >>sys.stderr, " output [project] - Get a list of output files"
     print >>sys.stderr, " xml              - Get service specification and project list in CLAM XML"
-    print >>sys.stderr, " xml    [project] - Get entire project state in CLAM XML"        
+    print >>sys.stderr, " xml    [project] - Get entire project state in CLAM XML"
     #print >>sys.stderr, " download [project] [filename]"
     #print >>sys.stderr, "\t Download the specified output file (with metadata)"
     print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
@@ -60,11 +60,11 @@ def usage():
     print >>sys.stderr, "\t View the metadata parameters in the requested inputtemplate"
     #print >>sys.stderr, " metadata [project] [filename]"
     #print >>sys.stderr, "\t View the metadata of the specified file"
-    
+
 
 
 if __name__ == "__main__":
-    
+
     username = password = None
     parameters = {}
     begin = 0
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         elif o[0] == '-' and len(o) > 1 and o[1] != '-':
             usage()
             print "ERROR: Unknown option: ", o
-            sys.exit(2)            
+            sys.exit(2)
         elif o[:2] == '--':
             if len(rawargs) > i + 1:
                 parameters[o[2:]] = rawargs[i+1]
@@ -93,7 +93,7 @@ if __name__ == "__main__":
             else:
                 parameters[o[2:]] = True
                 begin = i+1
-    
+
     if len(rawargs) > begin:
         url = rawargs[begin]
     else:
@@ -104,21 +104,21 @@ if __name__ == "__main__":
         print "ERROR: URL expected"
         usage()
         sys.exit(2)
-    
+
     client = CLAMClient(url, username,password)
 
-    if len(rawargs) > begin + 1:    
+    if len(rawargs) > begin + 1:
         command = rawargs[begin+1]
         args = rawargs[begin+2:]
     else:
         command = 'info'
         args = []
-    
+
     if command == 'info' and len(args) > 1:
         command = 'get'
 
-    
-    try:        
+
+    try:
         data = None
         if command in ['info','index','projects','inputtemplates','parameters','profiles']:
             data = client.index()
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         elif command == 'delete' or command == 'abort':
             if len(args) != 1:
                 print >>sys.stderr, "Expected project ID"
-                sys.exit(2)            
+                sys.exit(2)
             client.delete(args[0])
         elif command == 'reset':
             if len(args) != 1:
@@ -150,8 +150,9 @@ if __name__ == "__main__":
         elif command == 'upload':
             if len(args) < 3:
                 print >>sys.stderr, "Expected: project inputtemplate file "
-                sys.exit(2)        
-            data = client.get(args[0])
+                sys.exit(2)
+            project = args[0]
+            data = client.get(project)
             try:
                 inputtemplate = data.inputtemplate(args[1])
             except:
@@ -161,12 +162,12 @@ if __name__ == "__main__":
             if not os.path.isfile(filepath):
                 print >>sys.stderr, "File does not exist: " + filepath
                 sys.exit(2)
-            client.upload(project,inputtemplate, filepath, **parameters)                            
+            client.upload(project,inputtemplate, filepath, **parameters)
         else:
             print >>sys.stderr,"Unknown command: " + command
             sys.exit(1)
-        
-        
+
+
         if data:
             if command == 'xml':
                 print data.xml
@@ -179,7 +180,7 @@ if __name__ == "__main__":
                     print "\tUser:        " + username
                 if command == 'get':
                     print "\tProject:     " + data.project
-            if command in ['info','projects','index']: 
+            if command in ['info','projects','index']:
                 print "Projects"
                 for project in data.projects:
                     print "\t" + project
@@ -188,7 +189,7 @@ if __name__ == "__main__":
                 print "\tStatus: " + str(data.status) #TODO: nicer messages
                 print "\tStatus Message: " + data.statusmessage
                 print "\tCompletion: " + str(data.completion) + "%"
-            if command in ['info','profiles']: 
+            if command in ['info','profiles']:
                 print "Profiles:" #TODO: Implement
                 for i, profile in enumerate(data.profiles):
                     print "\tProfile " + str(i+1)
@@ -205,12 +206,12 @@ if __name__ == "__main__":
             if command == 'inputtemplates':
                 print "Input templates:"
                 for template in data.input:
-                    print "\t\t" + template.id + " - " + template.label            
+                    print "\t\t" + template.id + " - " + template.label
             if command == 'inputtemplate':
                 try:
                     inputtemplate = data.inputtemplate(args[0])
                 except:
-                    print >>sys.stderr, "No such inputtemplate"                
+                    print >>sys.stderr, "No such inputtemplate"
                     sys.exit(1)
                 print "Inputtemplate parameters:"
                 for parameter in inputtemplate.parameters:
@@ -218,13 +219,13 @@ if __name__ == "__main__":
                 print "Inputtemplate converters:"
                 for c in inputtemplate.converters:
                     print "\t\t" + c.id + " - " + c.label #VERIFY: unicode support?
-            if command in ['info','parameters']: 
+            if command in ['info','parameters']:
                 print "Global Parameters:"
                 for group, parameters in data.parameters:
                     print "\t" + group
                     for parameter in parameters:
                         print "\t\t" + str(parameter) #VERIFY: unicode support?
-            if command in ['get','input'] and data.input: 
+            if command in ['get','input'] and data.input:
                 print "Input files:"
                 for f in data.input:
                     print "\t" + f.filename + "\t" + str(f),
@@ -232,22 +233,22 @@ if __name__ == "__main__":
                         print "\t" + f.metadata.inputtemplate
                     else:
                         print
-            if command in ['get','output'] and data.output: 
+            if command in ['get','output'] and data.output:
                 print "Output files:"
                 for f in data.output:
-                    print "\t" + f.filename + "\t" + str(f), 
+                    print "\t" + f.filename + "\t" + str(f),
                     if f.metadata and f.metadata.provenance and f.metadata.provenance.outputtemplate_id:
                         print "\t" + f.metadata.provenance.outputtemplate_id
                     else:
-                        print 
+                        print
 
-    except NotFound: 
+    except NotFound:
         print >>sys.stderr, "Not Found (404)"
-    except PermissionDenied: 
+    except PermissionDenied:
         print >>sys.stderr, "Permission Denied (403)"
-    except ServerError: 
+    except ServerError:
         print >>sys.stderr, "Server Error! (500)"
-    except AuthRequired: 
-        print >>sys.stderr, "Authorization required (401)"      
-        
+    except AuthRequired:
+        print >>sys.stderr, "Authorization required (401)"
+
 

@@ -25,7 +25,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.9.3",
+    version = "0.9.4",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
@@ -52,5 +52,5 @@ setup(
         ]
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf'] },
-    install_requires=['web.py >= 0.33','lxml >= 2.2']
+    install_requires=['web.py >= 0.33','lxml >= 2.2','pycurl']
 )

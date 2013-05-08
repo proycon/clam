@@ -28,6 +28,7 @@ Example usage:
 
 import httplib, urllib2, socket
 from httplib import NotConnected
+import traceback #DEBUG
 
 __all__ = ['StreamingHTTPConnection', 'StreamingHTTPRedirectHandler',
         'StreamingHTTPHandler', 'register_openers']
@@ -57,6 +58,7 @@ class _StreamingHTTPMixin:
         #
         # NOTE: we DO propagate the error, though, because we cannot simply
         #       ignore the error... the caller will know if they can retry.
+
         if self.debuglevel > 0:
             print "send:", repr(value)
         try:
@@ -81,8 +83,14 @@ class _StreamingHTTPMixin:
                 self.sock.sendall(value)
         except socket.error, v:
             if v[0] == 32:      # Broken pipe
+                if self.debuglevel > 0:
+                    print "broken pipe"
                 self.close()
             raise
+
+
+        if self.debuglevel > 0:
+            print "done sending"
 
 class StreamingHTTPConnection(_StreamingHTTPMixin, httplib.HTTPConnection):
     """Subclass of `httplib.HTTPConnection` that overrides the `send()` method
@@ -186,7 +194,7 @@ def get_handlers():
     if hasattr(httplib, "HTTPS"):
         handlers.append(StreamingHTTPSHandler)
     return handlers
-    
+
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
     opener object.

@@ -18,14 +18,16 @@
 ###############################################################
 
 import os.path
+import sys
 #import httplib2
 import urllib2
 from urllib import urlencode
+import pycurl
 from lxml import etree as ElementTree
 from StringIO import StringIO
-
+import base64
 from clam.external.poster.encode import multipart_encode
-from clam.external.poster.streaminghttp import register_openers
+from clam.external.poster.streaminghttp import register_openers, StreamingHTTPHandler
 
 
 
@@ -35,7 +37,7 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.9.3'
+VERSION = '0.9.4'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
@@ -125,16 +127,18 @@ class CLAMClient:
             #self.http.add_credentials(user, password)
             self.user = user
             self.password = password
-            self.initauth( self.authenticated)
+            self.initauth()
         else:
             self.authenticated = False
-            self.initauth( self.authenticated)
+            self.user = None
+            self.password = None
+            self.initauth()
 
 
-    def initauth(self, doauth = True):
+    def initauth(self):
         """Initialise authentication, for internal use"""
         global VERSION
-        if doauth:
+        if self.authenticated:
             #for file upload we use urllib2:
             self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
             # this creates a password manager
@@ -154,7 +158,7 @@ class CLAMClient:
     def request(self, url='', method = 'GET', data = None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use them instead"""
 
-        if self.authenticated: self.initauth(url)
+        if self.authenticated: self.initauth()
         if data:
             request = RequestWithMethod(self.url + url,data,method=method)
         else:
@@ -431,15 +435,15 @@ class CLAMClient:
         elif not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
-        if not isinstance(sourcefile, file):
-            sourcefile = open(sourcefile,'r')
+        if isinstance(sourcefile, file):
+            sourcefile = sourcefile.name
 
         if 'filename' in kwargs:
             filename = self.getinputfilename(inputtemplate, kwargs['filename'])
         else:
-            filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
+            filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile) )
 
-        data = {"file": sourcefile, 'inputtemplate': inputtemplate.id}
+        data = {"file": (pycurl.FORM_FILE, sourcefile) , 'inputtemplate': inputtemplate.id}
         for key, value in kwargs.items():
             if key == 'filename':
                 pass #nothing to do
@@ -451,18 +455,69 @@ class CLAMClient:
             else:
                 data[key] = value
 
-        opener = register_openers()
-        opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        if self.authenticated:
-            opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
-        datagen, headers = multipart_encode(data)
+
+        #streamhandler = StreamingHTTPHandler(debuglevel=6)
+        #if self.authenticated:
+        #    opener = urllib2.build_opener(streamhandler, urllib2.HTTPDigestAuthHandler(self.passman))
+        #else:
+        #    opener = urllib2.build_opener(streamhandler)
+        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+        #urllib2.install_opener(opener)
+
+        #opener = register_openers() #for streaming upload (poster)
+        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+        #if self.authenticated:
+        #    opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
+        #    pass
+        #urllib2.install_opener(opener)
+
+        #if self.authenticated:
+        #    request = urllib2.Request(self.url + project + '/input/' + filename, "")
+        #    response = urllib2.urlopen(request)
+        #    print dir(request)
+        #    print request.headers
+
+
+        #datagen, headers = multipart_encode(data)
 
         # Create the Request object
-        request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        try:
-            xml = urllib2.urlopen(request).read()
-        except urllib2.HTTPError, e:
-            xml = e.read()
+        #request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
+        #print dir(request)
+        #print request.headers
+        #print request.get_header("Authorization")
+        #try:
+        #    response = urllib2.urlopen(request)
+        #    xml = response.read()
+        #except urllib2.HTTPError, e:
+        #    xml = e.read()
+
+
+        buf = StringIO()
+        # Initialize pycurl
+        c = pycurl.Curl()
+        c.setopt(pycurl.URL, self.url + project + '/input/' + filename)
+        fields = list(data.items())
+        c.setopt(c.HTTPPOST, fields)
+        c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
+        c.setopt(c.USERPWD, self.user + ':' + self.password)
+        c.setopt(c.WRITEFUNCTION, buf.write)
+        c.perform()
+        code = c.getinfo(c.HTTP_CODE)
+        if code == 200:
+            xml = buf.getvalue()
+        elif code == 400:
+            raise BadRequest()
+        elif code == 401:
+            raise AuthRequired()
+        elif code == 403:
+            raise PermissionDenied()
+        elif code == 404:
+            raise NotFound()
+        elif code == 500:
+            raise ServerError()
+        else:
+            raise UploadError()
+        c.close()
 
         try:
             return self._parseupload(xml)
