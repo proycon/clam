@@ -26,7 +26,12 @@ $ clamservice -H localhost -p 8080 clam.config.textstats
  
  Navigate your browser to http://localhost:8080 and verify everything works
 
+
+
+If any problems occur during installation regarding pycurl, then install the pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
+
 Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository. 
+
 
  
 == MANUAL INSTRUCTIONS FOR MAC OS X USERS ==
@@ -45,15 +50,13 @@ Note: It is important to regularly keep CLAM up to date as fixes and improvement
 
 4) Open a Terminal and install the following dependencies:
  Macports:
-  $ sudo port install py26-lxml        (or py25-lxml)
-  $ sudo port install py26-httplib2    (or py25-httplib2)
+  $ sudo port install py26-lxml        (or py25, py27)
+  $ sudo port install py26-curl        
   $ sudo port install git-core
  Fink:
   $ sudo fink install lxml-py26  (or lxml-py27 or lxml-py25 depending on your python version)
-  $ sudo fink install httplib2-py26 (or httplib2-py27 or httplib2-py25)
-   (NOTE: httplib2-py27 does not seem to exist yet at this time of writing, so we recommend using Python 2.6 with fink!)
+  $ sudo fink install pycurl-py26
   $ sudo fink install git
-
 
 4) Make and go to a directory where you want to add clam
  $ mkdir ~/clam/
