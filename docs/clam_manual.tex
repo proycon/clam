@@ -14,7 +14,7 @@
         Radboud University Nijmegen.}}
 
 \title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.9.3} \\ \vspace*{0.5cm}{\huge Documentation}\\
+{\bf \small version 0.9.4} \\ \vspace*{0.5cm}{\huge Documentation}\\
 \vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
 
 \parindent=0pt %no paragraph indentation
@@ -128,13 +128,13 @@ The following software is required to run CLAM, the \emph{easy install} process 
 \item python 2.6 (or a higher 2.x version, 2.5 may also work but is less tested. However, note that CLAM does not support 3.x yet)
 \item python-webpy, version 0.33 or higher
 \item python-lxml, version 2 or higher
+\item python-pycurl
 \item python-mysqldb (optional, needed only for MySQL support)
 \end{itemize}
 
 For development and testing, each CLAM webservice can run stand-alone on any TCP port of your choice (make sure the port is open in your firewall) using the built-in webserver. For production environments, it is strongly recommended you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 
 If you want to run in the supplied test units, an additional dependency is needed: \texttt{python-unittest2}.
-
 
 If you look in the directory where CLAM has been installed, the following files may be of particular interest:
 
