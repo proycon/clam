@@ -156,7 +156,7 @@ class CLAMClient:
 
 
     def request(self, url='', method = 'GET', data = None):
-        """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use them instead"""
+        """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
         if self.authenticated: self.initauth()
         if data:
@@ -199,33 +199,8 @@ class CLAMClient:
         return self._parse(response.read())
 
 
-    def _request_httplib2(self, url, method = 'GET', data = None): #old, obsolete
-        """Returns a CLAMData object if a proper CLAM XML response is received. Otherwise: returns True, on success, False on failure.  Raises an Exception on most HTTP errors! For internal use"""
-
-        try:
-            if data:
-                response, content = self.http.request(self.url + url, method, data)
-            else:
-                response, content = self.http.request(self.url + url, method)
-        except:
-            raise NoConnection()
-        try:
-            return self._parse(response, content)
-        except TimeOut:
-            #Do it again once
-            try:
-                if data:
-                    response, content = self.http.request(self.url + url, method, data)
-                else:
-                    response, content = self.http.request(self.url + url, method)
-                return self._parse(response, content)
-            except:
-                raise
-        except:
-            raise
-
     def _parse(self, content):
-        """Parses CLAM XML data. For internal use."""
+        """Parses CLAM XML data and returns a ``CLAMData`` object. For internal use. Raises `ParameterError` exception on parameter errors."""
         if content.find('<clam') != -1:
             data = CLAMData(content,self)
             if data.errors:
@@ -236,44 +211,12 @@ class CLAMClient:
         else:
             return True
 
-    def _parse_old(self, response, content):
-        if content.find('<clam') != -1:
-            data = CLAMData(content,self)
-            if data.errors:
-                error = data.parametererror()
-                if error:
-                    raise ParameterError(error)
-        else:
-            data = False
-
-        if response['status'] == '200' or response['status'] == '201' or response['status'] == '202':
-            if not data: data = True
-        elif response['status'] == '400':
-            raise BadRequest()
-        elif response['status'] == '401':
-            raise AuthRequired()
-        elif response['status'] == '403' and data:
-            raise PermissionDenied(data)
-        elif response['status'] == '404' and data:
-            raise NotFound(content)
-        elif response['status'] == '500':
-            raise ServerError(data)
-        elif response['status'] == '408':
-            raise TimeOut()
-        else:
-            raise Exception("Server returned HTTP response " + response['status'])
-
-        return data
-
-
-
-
     def index(self):
-        """Get index of projects. Returns CLAMData instance. Use CLAMData.projects for the index of projects."""
+        """Get index of projects. Returns a ``CLAMData`` instance. Use CLAMData.projects for the index of projects."""
         return self.request('')
 
     def get(self, project):
-        """Query the project status. Returns CLAMData instance."""
+        """Query the project status. Returns a ``CLAMData`` instance or raises an exception according to the returned HTTP Status code"""
         try:
             data = self.request(project + '/')
         except:
@@ -407,11 +350,11 @@ class CLAMClient:
 
 
     def addinputfile(self, project, inputtemplate, sourcefile, **kwargs):
-        """Add/upload an input file to the CLAM service.
+        """Add/upload an input file to the CLAM service. Supports proper file upload streaming.
 
         project - the ID of the project you want to add the file to.
         inputtemplate - The input template you want to use to add this file (InputTemplate instance)
-        sourcefile - The file you want to add: either an instance of 'file' or a string containing a filename
+        sourcefile - The file you want to add: string containing a filename (or instance of ``file``)
 
         Keyword arguments (optional but recommended!):
             * ``filename`` - the filename on the server (will be same as sourcefile if not specified)
@@ -526,7 +469,7 @@ class CLAMClient:
 
 
     def addinput(self, project, inputtemplate, contents, **kwargs):
-        """Add an input file to the CLAM service. Explictly providing the contents as a string
+        """Add an input file to the CLAM service. Explictly providing the contents as a string. This is not suitable for large files as the contents are kept in memory! Use ``addinputfile()`` instead for large files.
 
         project - the ID of the project you want to add the file to.
         inputtemplate - The input template you want to use to add this file (InputTemplate instance)

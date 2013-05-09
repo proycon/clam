@@ -49,10 +49,12 @@ class FormatError(Exception):
          return "Not a valid CLAM XML response"
 
 class HTTPError(Exception):
+    """This Exception is raised when certain data (such a metadata), can't be retrieved over HTTP"""
     pass
 
 
 class AuthenticationRequired(Exception):
+    """This Exception is raised when authentication is required but has not been provided"""
     pass
 
 class CLAMFile:
@@ -104,14 +106,14 @@ class CLAMFile:
                     self.converters.append(converter)
 
     def metafilename(self):
-        """Returns the filename for the meta file (not full path). Only used for local files."""
+        """Returns the filename for the metadata file (not full path). Only used for local files."""
         metafilename = os.path.dirname(self.filename)
         if metafilename: metafilename += '/'
         metafilename += '.' + os.path.basename(self.filename) + '.METADATA'
         return metafilename
 
     def loadmetadata(self):
-        """Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled."""
+        """Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled. Works both locally as well as for clients connecting to a CLAM service."""
         if not self.remote:
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
             if os.path.exists(metafile):
@@ -574,7 +576,7 @@ class CLAMData(object):
 
 
 def sanitizeparameters(parameters):
-    #Make dictionary of parameters
+    """Construct a dictionary of parameters, for internal use only"""
     if not isinstance(parameters,dict):
         d = {}
         for x in parameters:
@@ -656,7 +658,7 @@ class Profile(object):
 
 
     def match(self, projectpath, parameters):
-        """Check if the profile matches all inputdata *and* produces output given the set parameters. Return boolean"""
+        """Check if the profile matches all inputdata *and* produces output given the set parameters. Returns a boolean"""
         parameters = sanitizeparameters(parameters)
 
         mandatory_absent = [] #list of input templates that are missing but mandatory
@@ -815,6 +817,7 @@ class RawXMLProvenanceData(object):
             return self.data
 
 class CLAMProvenanceData(object):
+    """Holds provenance data"""
 
     def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None, timestamp = None):
         self.serviceid = serviceid
@@ -846,6 +849,7 @@ class CLAMProvenanceData(object):
 
 
     def xml(self, indent = ""):
+        """Serialise provenance data to XML. This is included in CLAM Metadata files"""
         xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">"
         for filename, metadata in self.inputfiles:
             xml += indent + " <inputfile name=\"" + clam.common.util.xmlescape(filename) + "\">"
@@ -865,7 +869,7 @@ class CLAMProvenanceData(object):
 
     @staticmethod
     def fromxml(node):
-        """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an etree._Element."""
+        """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element."""
         if not isinstance(node,ElementTree._Element):
             node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag == 'provenance':
@@ -911,7 +915,18 @@ class CLAMMetaData(object):
 
 
     def __init__(self, file, **kwargs):
+        """Create metadata for an instance of ``CLAMFile``
 
+        * ``file`` - Instance of ``CLAMFile`` to which the metadata applies
+
+        The keyword arguments express key/value pairs that constitute the metadata. Special keyword arguments are:
+
+        * ``provenance`` - An instance ``CLAMProvenanceData``
+        * ``inputtemplate`` - A string containing the ID of the input template
+
+        CLAMMetaData acts like a dictionary in many regards.
+
+        """
 
         if isinstance(file, CLAMFile):
             self.file = file
@@ -964,18 +979,23 @@ class CLAMMetaData(object):
                     self[key] = valuerange
 
     def __getitem__(self, key):
+        """Retrieve a metadata field"""
         return self.data[key]
 
     def __contains__(self, key):
+        """Check is a metadata field exists"""
         return key in self.data
 
     def items(self):
+        """Returns all items as (key, value) tuples"""
         return self.data.items()
 
     def __iter__(self):
+        """Iterate over all (key, value) tuples"""
         return iter(self.data)
 
     def __setitem__(self, key, value):
+        """Set a metadata field to a specific value"""
         if self.attributes != None and not key in self.attributes:
             if not self.allowcustomattributes:
                 raise KeyError("Trying to set metadata field '" + key + "', but no custom attributes are allowed by the format")
@@ -1013,19 +1033,23 @@ class CLAMMetaData(object):
         return xml
 
     def save(self, filename):
+        """Save metadata to XML file"""
         f = codecs.open(filename,'w','utf-8')
         f.write(self.xml())
         f.close()
 
     def validate(self):
+        """Validate the metadata"""
         #Should be overridden by subclasses
         return True
 
     def loadinlinemetadata(self):
+        """Not implemented"""
         #Read inline metadata, can be overridden by subclasses
         pass
 
     def saveinlinemetadata(self):
+        """Not implemented"""
         #Save inline metadata, can be overridden by subclasses
         pass
 
@@ -1068,6 +1092,7 @@ class CLAMMetaData(object):
         yield ("Content-Type", self.mimetype)
 
 class CMDIMetaData(CLAMMetaData):
+    """Direct CMDI Metadata support, not implemented yet, reserved for future use"""
     #TODO LATER: implement
     pass
 
@@ -1081,6 +1106,8 @@ class CMDIMetaData(CLAMMetaData):
 
 
 class InputTemplate(object):
+    """This class represents an input template. A slot with a certain format and function to which input files can be uploaded"""
+
     def __init__(self, id, formatclass, label, *args, **kwargs):
         assert (issubclass(formatclass, CLAMMetaData))
         assert (not '/' in id and not '.' in id)
@@ -1279,6 +1306,7 @@ class InputTemplate(object):
 
 
     def validate(self, postdata, user = None):
+        """Validate posted data  against the inputtemplate"""
         clam.common.util.printdebug("Validating inputtemplate " + self.id + "...")
         errors, parameters, _  = processparameters(postdata, self.parameters, user)
         return errors, parameters
@@ -1318,11 +1346,14 @@ class InputTemplate(object):
 
 
 class AbstractMetaField(object): #for OutputTemplate only
+    """This abstract class is the basis for derived classes representing metadata fields of particular types. A metadata field is in essence a (key, value) pair. These classes are used in output templates (described by the XML tag ``meta``). They are not used by ``CLAMMetaData``"""
+
     def __init__(self,key,value=None):
         self.key = key
         self.value = value
 
     def xml(self, operator='set', indent = ""):
+        """Serialize the metadata field to XML"""
         xml = indent + "<meta id=\"" + self.key + "\"";
         if operator != 'set':
             xml += " operator=\"" + operator + "\""
