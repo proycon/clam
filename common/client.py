@@ -330,7 +330,7 @@ class CLAMClient:
                 assert isinstance(value, CLAMMetaData)
                 data['metadata'] =  value.xml()
             elif key == 'metafile':
-                data['metafile'] = open(value,'r')
+                data['metafile'] = (pycurl.FORM_FILE, value)  #open(value,'r')
             else:
                 data[key] = value
 
