@@ -45,14 +45,14 @@ def usage():
     print >>sys.stderr, " info   [project] - Get all info of a project, including full service specification "
     print >>sys.stderr, " create [project] - Create a new empty project with the specified ID"
     print >>sys.stderr, " delete [project] - Delete the specified project (aborts any run)"
-    print >>sys.stderr, " reset  [project] - Delete a project's output and reset"
+    #print >>sys.stderr, " reset  [project] - Delete a project's output and reset"
     print >>sys.stderr, " status [project] - Get a project's status"
     print >>sys.stderr, " input  [project] - Get a list of input files"
     print >>sys.stderr, " output [project] - Get a list of output files"
     print >>sys.stderr, " xml              - Get service specification and project list in CLAM XML"
     print >>sys.stderr, " xml    [project] - Get entire project state in CLAM XML"
-    #print >>sys.stderr, " download [project] [filename]"
-    #print >>sys.stderr, "\t Download the specified output file (with metadata)"
+    print >>sys.stderr, " download [project] [filename]"
+    print >>sys.stderr, "\t Download the specified output file (with metadata)"
     print >>sys.stderr, " upload   [project] [inputtempate] [file] [[metadata]]"
     print >>sys.stderr, "\t Upload the specified file from client to server. Metadata is either"
     print >>sys.stderr, "\t a file, or a space-sperated set of --key=value parameters."
@@ -137,11 +137,11 @@ if __name__ == "__main__":
                 print >>sys.stderr, "Expected project ID"
                 sys.exit(2)
             client.delete(args[0])
-        elif command == 'reset':
-            if len(args) != 1:
-                print >>sys.stderr, "Expected project ID"
-                sys.exit(2)
-            client.reset(args[0])
+        #elif command == 'reset':
+        #    if len(args) != 1:
+        #        print >>sys.stderr, "Expected project ID"
+        #        sys.exit(2)
+        #    client.reset(args[0])
         elif command == 'xml':
             if len(args) ==1:
                 data = client.get(args[0])
@@ -163,6 +163,18 @@ if __name__ == "__main__":
                 print >>sys.stderr, "File does not exist: " + filepath
                 sys.exit(2)
             client.upload(project,inputtemplate, filepath, **parameters)
+        elif command == 'download':
+            if len(args) < 2:
+                print >>sys.stderr, "Expected: project file "
+                sys.exit(2)
+
+            project = args[0]
+            filepath = args[1]
+            if len(args) == 3:
+                targetfile = args[2]
+            else:
+                targetfile = os.path.basename(filepath)
+            client.download(project, filepath, targetfile)
         else:
             print >>sys.stderr,"Unknown command: " + command
             sys.exit(1)
