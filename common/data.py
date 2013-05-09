@@ -106,9 +106,9 @@ class TimeOut(Exception):
     def __str__(self):
         return "Connection with server timed-out"
 
-def processhttpcode(code):
+def processhttpcode(code, allowcodes=[]):
     if not isinstance(code, int): code = int(code)
-    if code >= 200 and code <= 299:
+    if (code >= 200 and code <= 299) or code in allowcodes:
         return code
     elif code == 400:
         raise BadRequest()

@@ -381,7 +381,7 @@ class CLAMClient:
         c.setopt(c.USERPWD, self.user + ':' + self.password)
         c.setopt(c.WRITEFUNCTION, buf.write)
         c.perform()
-        code = processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
+        code = processhttpcode(c.getinfo(c.HTTP_CODE),[403]) #raises exception when not successful
         xml = buf.getvalue()
         c.close()
 
