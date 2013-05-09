@@ -81,7 +81,7 @@
 <dl class="method">
 <dt id="common.client.CLAMClient.addinput">
 <tt class="descname">addinput</tt><big>(</big><em>project</em>, <em>inputtemplate</em>, <em>contents</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.addinput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an input file to the CLAM service. Explictly providing the contents as a string</p>
+<dd><p>Add an input file to the CLAM service. Explictly providing the contents as a string. This is not suitable for large files as the contents are kept in memory! Use <tt class="docutils literal"><span class="pre">addinputfile()</span></tt> instead for large files.</p>
 <p>project - the ID of the project you want to add the file to.
 inputtemplate - The input template you want to use to add this file (InputTemplate instance)
 contents - The contents for the file to add (string)</p>
@@ -100,17 +100,17 @@ contents - The contents for the file to add (string)</p>
 </pre></div>
 </div>
 <p>With metadata, assuming such metadata parameters are defined:</p>
-<div class="highlight-python"><pre>client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))            </pre>
+<div class="highlight-python"><pre>client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))</pre>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.client.CLAMClient.addinputfile">
 <tt class="descname">addinputfile</tt><big>(</big><em>project</em>, <em>inputtemplate</em>, <em>sourcefile</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.addinputfile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add/upload an input file to the CLAM service.</p>
+<dd><p>Add/upload an input file to the CLAM service. Supports proper file upload streaming.</p>
 <p>project - the ID of the project you want to add the file to.
 inputtemplate - The input template you want to use to add this file (InputTemplate instance)
-sourcefile - The file you want to add: either an instance of &#8216;file&#8217; or a string containing a filename</p>
+sourcefile - The file you want to add: string containing a filename (or instance of <tt class="docutils literal"><span class="pre">file</span></tt>)</p>
 <dl class="docutils">
 <dt>Keyword arguments (optional but recommended!):</dt>
 <dd><ul class="first last simple">
@@ -162,7 +162,7 @@ sourcefile - The file you want to add: either an instance of &#8216;file&#8217; 
 <dl class="method">
 <dt id="common.client.CLAMClient.get">
 <tt class="descname">get</tt><big>(</big><em>project</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Query the project status. Returns CLAMData instance.</p>
+<dd><p>Query the project status. Returns a <tt class="docutils literal"><span class="pre">CLAMData</span></tt> instance or raises an exception according to the returned HTTP Status code</p>
 </dd></dl>
 
 <dl class="method">
@@ -178,19 +178,19 @@ sourcefile - The file you want to add: either an instance of &#8216;file&#8217; 
 <dl class="method">
 <dt id="common.client.CLAMClient.index">
 <tt class="descname">index</tt><big>(</big><big>)</big><a class="headerlink" href="#common.client.CLAMClient.index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get index of projects. Returns CLAMData instance. Use CLAMData.projects for the index of projects.</p>
+<dd><p>Get index of projects. Returns a <tt class="docutils literal"><span class="pre">CLAMData</span></tt> instance. Use CLAMData.projects for the index of projects.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.client.CLAMClient.initauth">
-<tt class="descname">initauth</tt><big>(</big><em>doauth=True</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.initauth" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">initauth</tt><big>(</big><big>)</big><a class="headerlink" href="#common.client.CLAMClient.initauth" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise authentication, for internal use</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.client.CLAMClient.request">
 <tt class="descname">request</tt><big>(</big><em>url=''</em>, <em>method='GET'</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use them instead</p>
+<dd><p>Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead</p>
 </dd></dl>
 
 <dl class="method">

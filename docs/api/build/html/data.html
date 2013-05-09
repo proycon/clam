@@ -60,7 +60,8 @@
 <span class="target" id="module-common.data"></span><dl class="class">
 <dt id="common.data.AbstractMetaField">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">AbstractMetaField</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#common.data.AbstractMetaField" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="staticmethod">
+<dd><p>This abstract class is the basis for derived classes representing metadata fields of particular types. A metadata field is in essence a (key, value) pair. These classes are used in output templates (described by the XML tag <tt class="docutils literal"><span class="pre">meta</span></tt>). They are not used by <tt class="docutils literal"><span class="pre">CLAMMetaData</span></tt></p>
+<dl class="staticmethod">
 <dt id="common.data.AbstractMetaField.fromxml">
 <em class="property">static </em><tt class="descname">fromxml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#common.data.AbstractMetaField.fromxml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element.</p>
@@ -74,18 +75,20 @@
 <dl class="method">
 <dt id="common.data.AbstractMetaField.xml">
 <tt class="descname">xml</tt><big>(</big><em>operator='set'</em>, <em>indent=''</em><big>)</big><a class="headerlink" href="#common.data.AbstractMetaField.xml" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Serialize the metadata field to XML</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="exception">
 <dt id="common.data.AuthenticationRequired">
 <em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">AuthenticationRequired</tt><a class="headerlink" href="#common.data.AuthenticationRequired" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This Exception is raised when authentication is required but has not been provided</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="common.data.CLAMData">
-<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMData</tt><big>(</big><em>xml</em>, <em>localroot=False</em><big>)</big><a class="headerlink" href="#common.data.CLAMData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMData</tt><big>(</big><em>xml</em>, <em>client=None</em>, <em>localroot=False</em><big>)</big><a class="headerlink" href="#common.data.CLAMData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
 XML responses. Its member variables are:</p>
 <blockquote>
@@ -253,7 +256,7 @@ XML responses. Its member variables are:</p>
 
 <dl class="class">
 <dt id="common.data.CLAMFile">
-<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em><big>)</big><a class="headerlink" href="#common.data.CLAMFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em>, <em>client=None</em><big>)</big><a class="headerlink" href="#common.data.CLAMFile" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="common.data.CLAMFile.attachviewers">
 <tt class="descname">attachviewers</tt><big>(</big><em>profiles</em><big>)</big><a class="headerlink" href="#common.data.CLAMFile.attachviewers" title="Permalink to this definition">¶</a></dt>
@@ -280,19 +283,19 @@ XML responses. Its member variables are:</p>
 <dl class="method">
 <dt id="common.data.CLAMFile.loadmetadata">
 <tt class="descname">loadmetadata</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMFile.loadmetadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled.</p>
+<dd><p>Load metadata for this file. This is usually called automatically upon instantiation, except if explicitly disabled. Works both locally as well as for clients connecting to a CLAM service.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMFile.metafilename">
 <tt class="descname">metafilename</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMFile.metafilename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the filename for the meta file (not full path). Only used for local files.</p>
+<dd><p>Returns the filename for the metadata file (not full path). Only used for local files.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMFile.readlines">
 <tt class="descname">readlines</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMFile.readlines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads all in memory</p>
+<dd><p>Loads all lines in memory</p>
 </dd></dl>
 
 <dl class="method">
@@ -305,7 +308,7 @@ XML responses. Its member variables are:</p>
 
 <dl class="class">
 <dt id="common.data.CLAMInputFile">
-<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMInputFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em><big>)</big><a class="headerlink" href="#common.data.CLAMInputFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMInputFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em>, <em>client=None</em><big>)</big><a class="headerlink" href="#common.data.CLAMInputFile" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.data.CLAMInputFile.basedir">
 <tt class="descname">basedir</tt><em class="property"> = 'input'</em><a class="headerlink" href="#common.data.CLAMInputFile.basedir" title="Permalink to this definition">¶</a></dt>
@@ -342,12 +345,14 @@ XML responses. Its member variables are:</p>
 <dl class="method">
 <dt id="common.data.CLAMMetaData.items">
 <tt class="descname">items</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMMetaData.items" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns all items as (key, value) tuples</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMMetaData.loadinlinemetadata">
 <tt class="descname">loadinlinemetadata</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMMetaData.loadinlinemetadata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Not implemented</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="common.data.CLAMMetaData.mimetype">
@@ -357,12 +362,14 @@ XML responses. Its member variables are:</p>
 <dl class="method">
 <dt id="common.data.CLAMMetaData.save">
 <tt class="descname">save</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#common.data.CLAMMetaData.save" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Save metadata to XML file</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMMetaData.saveinlinemetadata">
 <tt class="descname">saveinlinemetadata</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMMetaData.saveinlinemetadata" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Not implemented</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="common.data.CLAMMetaData.schema">
@@ -372,7 +379,8 @@ XML responses. Its member variables are:</p>
 <dl class="method">
 <dt id="common.data.CLAMMetaData.validate">
 <tt class="descname">validate</tt><big>(</big><big>)</big><a class="headerlink" href="#common.data.CLAMMetaData.validate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Validate the metadata</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMMetaData.xml">
@@ -384,7 +392,7 @@ XML responses. Its member variables are:</p>
 
 <dl class="class">
 <dt id="common.data.CLAMOutputFile">
-<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMOutputFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em><big>)</big><a class="headerlink" href="#common.data.CLAMOutputFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMOutputFile</tt><big>(</big><em>projectpath</em>, <em>filename</em>, <em>loadmetadata=True</em>, <em>client=None</em><big>)</big><a class="headerlink" href="#common.data.CLAMOutputFile" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.data.CLAMOutputFile.basedir">
 <tt class="descname">basedir</tt><em class="property"> = 'output'</em><a class="headerlink" href="#common.data.CLAMOutputFile.basedir" title="Permalink to this definition">¶</a></dt>
@@ -395,23 +403,26 @@ XML responses. Its member variables are:</p>
 <dl class="class">
 <dt id="common.data.CLAMProvenanceData">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CLAMProvenanceData</tt><big>(</big><em>serviceid</em>, <em>servicename</em>, <em>serviceurl</em>, <em>outputtemplate_id</em>, <em>outputtemplate_label</em>, <em>inputfiles</em>, <em>parameters=None</em>, <em>timestamp=None</em><big>)</big><a class="headerlink" href="#common.data.CLAMProvenanceData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="staticmethod">
+<dd><p>Holds provenance data</p>
+<dl class="staticmethod">
 <dt id="common.data.CLAMProvenanceData.fromxml">
 <em class="property">static </em><tt class="descname">fromxml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#common.data.CLAMProvenanceData.fromxml" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an etree._Element.</p>
+<dd><p>Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.data.CLAMProvenanceData.xml">
 <tt class="descname">xml</tt><big>(</big><em>indent=''</em><big>)</big><a class="headerlink" href="#common.data.CLAMProvenanceData.xml" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Serialise provenance data to XML. This is included in CLAM Metadata files</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.data.CMDIMetaData">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">CMDIMetaData</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.data.CMDIMetaData" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Direct CMDI Metadata support, not implemented yet, reserved for future use</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="common.data.CopyMetaField">
@@ -439,7 +450,8 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <dl class="exception">
 <dt id="common.data.HTTPError">
 <em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">HTTPError</tt><a class="headerlink" href="#common.data.HTTPError" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>This Exception is raised when certain data (such a metadata), can&#8217;t be retrieved over HTTP</p>
+</dd></dl>
 
 <dl class="class">
 <dt id="common.data.InputSource">
@@ -470,7 +482,8 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <dl class="class">
 <dt id="common.data.InputTemplate">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">InputTemplate</tt><big>(</big><em>id</em>, <em>formatclass</em>, <em>label</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.data.InputTemplate" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="staticmethod">
+<dd><p>This class represents an input template. A slot with a certain format and function to which input files can be uploaded</p>
+<dl class="staticmethod">
 <dt id="common.data.InputTemplate.fromxml">
 <em class="property">static </em><tt class="descname">fromxml</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#common.data.InputTemplate.fromxml" title="Permalink to this definition">¶</a></dt>
 <dd><p>Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element.</p>
@@ -503,7 +516,8 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <dl class="method">
 <dt id="common.data.InputTemplate.validate">
 <tt class="descname">validate</tt><big>(</big><em>postdata</em>, <em>user=None</em><big>)</big><a class="headerlink" href="#common.data.InputTemplate.validate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Validate posted data  against the inputtemplate</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="common.data.InputTemplate.xml">
@@ -608,7 +622,7 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <dl class="method">
 <dt id="common.data.Profile.match">
 <tt class="descname">match</tt><big>(</big><em>projectpath</em>, <em>parameters</em><big>)</big><a class="headerlink" href="#common.data.Profile.match" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if the profile matches all inputdata <em>and</em> produces output given the set parameters. Return boolean</p>
+<dd><p>Check if the profile matches all inputdata <em>and</em> produces output given the set parameters. Returns a boolean</p>
 </dd></dl>
 
 <dl class="method">
@@ -712,7 +726,8 @@ the clam.xml file from your system wrapper. It returns a CLAMData instance.</p>
 <dl class="function">
 <dt id="common.data.sanitizeparameters">
 <tt class="descclassname">common.data.</tt><tt class="descname">sanitizeparameters</tt><big>(</big><em>parameters</em><big>)</big><a class="headerlink" href="#common.data.sanitizeparameters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Construct a dictionary of parameters, for internal use only</p>
+</dd></dl>
 
 </div>
 

@@ -78,6 +78,12 @@
 <dd><p>This method compiles the parameter into syntax that can be used on the shell, such as for example: &#8211;paramflag=value</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="common.parameters.AbstractParameter.constrainable">
+<tt class="descname">constrainable</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.AbstractParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this  parameter be used in checking contraints?</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="common.parameters.AbstractParameter.denyusers">
 <tt class="descname">denyusers</tt><em class="property"> = None</em><a class="headerlink" href="#common.parameters.AbstractParameter.denyusers" title="Permalink to this definition">¶</a></dt>
@@ -157,6 +163,12 @@ its selected value, and feedback on validation errors</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="common.parameters.BooleanParameter.constrainable">
+<tt class="descname">constrainable</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="common.parameters.BooleanParameter.set">
 <tt class="descname">set</tt><big>(</big><em>value=True</em><big>)</big><a class="headerlink" href="#common.parameters.BooleanParameter.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the boolean parameter</p>
@@ -209,6 +221,12 @@ its selected value, and feedback on validation errors</p>
 <dt id="common.parameters.FloatParameter">
 <em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">FloatParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
+<dt id="common.parameters.FloatParameter.constrainable">
+<tt class="descname">constrainable</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="common.parameters.FloatParameter.validate">
 <tt class="descname">validate</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.FloatParameter.validate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -225,6 +243,12 @@ its selected value, and feedback on validation errors</p>
 <dt id="common.parameters.IntegerParameter">
 <em class="property">class </em><tt class="descclassname">common.parameters.</tt><tt class="descname">IntegerParameter</tt><big>(</big><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
+<dt id="common.parameters.IntegerParameter.constrainable">
+<tt class="descname">constrainable</tt><big>(</big><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="common.parameters.IntegerParameter.set">
 <tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#common.parameters.IntegerParameter.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
