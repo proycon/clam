@@ -37,11 +37,93 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 from clam.common.util import RequestWithMethod
-from clam.common.client import processhttpcode
 
 #clam.common.formats is deliberately imported _at the end_
 
 VERSION = '0.9.4'
+
+
+class BadRequest(Exception):
+     def __init__(self):
+        pass
+     def __str__(self):
+        return "Bad Request"
+
+class NotFound(Exception):
+    """Raised on 404 - Not Found Errors"""
+    def __init__(self, msg=""):
+        self.msg = msg
+    def __str__(self):
+        return "Not Found: " +  self.msg
+
+class PermissionDenied(Exception):
+    """Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
+    def __init__(self, msg = ""):
+        self.msg = msg
+    def __str__(self):
+        if isinstance(clam.common.data,CLAMData):
+            return "Permission Denied"
+        else:
+            return "Permission Denied: " + self.msg
+
+class ServerError(Exception):
+    """Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side."""
+    def __init__(self, msg = ""):
+        self.msg = msg
+    def __str__(self):
+        return "Server Error: " + self.msg
+
+class AuthRequired(Exception):
+    """Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
+    def __init__(self, msg = ""):
+        self.msg = msg
+    def __str__(self):
+        return "Authorization Required: " + self.msg
+
+class NoConnection(Exception):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "Can't establish a connection with the server"
+
+
+class UploadError(Exception):
+    def __init__(self, msg = ""):
+        self.msg = msg
+    def __str__(self):
+        return "Error during Upload: " + self.msg
+
+class ParameterError(Exception):
+    """Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly."""
+    def __init__(self, msg = ""):
+        self.msg = msg
+    def __str__(self):
+        return "Error setting parameter: " + self.msg
+
+class TimeOut(Exception):
+    def __init__(self):
+        pass
+    def __str__(self):
+        return "Connection with server timed-out"
+
+def processhttpcode(code):
+    if not isinstance(code, int): code = int(code)
+    if code >= 200 and code <= 299:
+        return code
+    elif code == 400:
+        raise BadRequest()
+    elif code == 401:
+        raise AuthRequired()
+    elif code == 403:
+        raise PermissionDenied()
+    elif code == 404:
+        raise NotFound()
+    elif code == 500:
+        raise ServerError()
+    else:
+        raise UploadError()
+
+
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
@@ -205,7 +287,7 @@ class CLAMFile:
     def copy(self, target):
         """Copy or download this file to a new local file"""
         if self.remote:
-            url = self.projectpath + self.basedir + '/' + self.filename
+            url = self.projectpath + '/' + self.basedir + '/' + self.filename
             f = open(target,'wb')
             c = pycurl.Curl()
             c.setopt(pycurl.URL, url)
