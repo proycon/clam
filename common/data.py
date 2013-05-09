@@ -37,6 +37,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 from clam.common.util import RequestWithMethod
+from clam.common.client import processhttpcode
 
 #clam.common.formats is deliberately imported _at the end_
 
@@ -51,8 +52,10 @@ class FormatError(Exception):
 
 class HTTPError(Exception):
     """This Exception is raised when certain data (such a metadata), can't be retrieved over HTTP"""
-    pass
-
+    def __init__(self, code):
+        self.code = code
+    def __str__(self):
+        return "HTTP Error " + str(self.code)
 
 class AuthenticationRequired(Exception):
     """This Exception is raised when authentication is required but has not been provided"""
@@ -211,13 +214,7 @@ class CLAMFile:
                 c.setopt(c.USERPWD, self.client.user + ':' + self.client.password)
             c.setopt(c.WRITEDATA, f)
             c.perform()
-            code = int(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
-            if code >= 200 and code <= 299:
-                pass
-            elif code == 401:
-                raise AuthenticationRequired()
-            else:
-                raise HTTPError(code)
+            processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
             c.close()
         else:
             if self.metadata and 'encoding' in self.metadata:
