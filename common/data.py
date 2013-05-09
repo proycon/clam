@@ -30,6 +30,7 @@ except ImportError:
     import json
 import time
 from copy import copy
+import pycurl
 
 import clam.common.parameters
 import clam.common.status
@@ -200,14 +201,34 @@ class CLAMFile:
 
     def copy(self, target):
         """Copy or download this file to a new local file"""
-        if self.metadata and 'encoding' in self.metadata:
-            f = codecs.open(target,'w', self.metadata['encoding'])
-            for line in self:
-                f.write(line)
+        if self.remote:
+            url = self.projectpath + self.basedir + '/' + self.filename
+            f = open(target,'wb')
+            c = pycurl.Curl()
+            c.setopt(pycurl.URL, url)
+            if self.client and self.client.authenticated:
+                c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
+                c.setopt(c.USERPWD, self.client.user + ':' + self.client.password)
+            c.setopt(c.WRITEDATA, f)
+            c.perform()
+            code = int(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
+            if code >= 200 and code <= 299:
+                pass
+            elif code == 401:
+                raise AuthenticationRequired()
+            else:
+                raise HTTPError(code)
+            c.close()
+            f.close()
         else:
-            f = open(target,'w')
-            for line in self:
-                f.write(line)
+            if self.metadata and 'encoding' in self.metadata:
+                f = codecs.open(target,'w', self.metadata['encoding'])
+                for line in self:
+                    f.write(line)
+            else:
+                f = open(target,'w')
+                for line in self:
+                    f.write(line)
         f.close()
 
     def validate(self):

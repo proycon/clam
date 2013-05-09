@@ -445,9 +445,20 @@ class CLAMClient:
         c.setopt(c.USERPWD, self.user + ':' + self.password)
         c.setopt(c.WRITEFUNCTION, buf.write)
         c.perform()
-        code = c.getinfo(c.HTTP_CODE)
-        if code == 200:
-            xml = buf.getvalue()
+        code = self._processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
+        xml = buf.getvalue()
+        c.close()
+
+        try:
+            return self._parseupload(xml)
+        except:
+            raise
+
+
+    def _processhttpcode(self, code):
+        if not isinstance(code, int): code = int(code)
+        if code >= 200 and code <= 299:
+            return code
         elif code == 400:
             raise BadRequest()
         elif code == 401:
@@ -460,13 +471,6 @@ class CLAMClient:
             raise ServerError()
         else:
             raise UploadError()
-        c.close()
-
-        try:
-            return self._parseupload(xml)
-        except:
-            raise
-
 
     def addinput(self, project, inputtemplate, contents, **kwargs):
         """Add an input file to the CLAM service. Explictly providing the contents as a string. This is not suitable for large files as the contents are kept in memory! Use ``addinputfile()`` instead for large files.
