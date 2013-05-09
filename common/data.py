@@ -134,10 +134,7 @@ class FormatError(Exception):
 
 class HTTPError(Exception):
     """This Exception is raised when certain data (such a metadata), can't be retrieved over HTTP"""
-    def __init__(self, code):
-        self.code = code
-    def __str__(self):
-        return "HTTP Error " + str(self.code)
+    pass
 
 class AuthenticationRequired(Exception):
     """This Exception is raised when authentication is required but has not been provided"""
