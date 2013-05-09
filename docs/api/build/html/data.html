@@ -81,10 +81,21 @@
 </dd></dl>
 
 <dl class="exception">
+<dt id="common.data.AuthRequired">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">AuthRequired</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.AuthRequired" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="common.data.AuthenticationRequired">
 <em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">AuthenticationRequired</tt><a class="headerlink" href="#common.data.AuthenticationRequired" title="Permalink to this definition">¶</a></dt>
 <dd><p>This Exception is raised when authentication is required but has not been provided</p>
 </dd></dl>
+
+<dl class="exception">
+<dt id="common.data.BadRequest">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">BadRequest</tt><a class="headerlink" href="#common.data.BadRequest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="class">
 <dt id="common.data.CLAMData">
@@ -449,7 +460,7 @@ specified, the keyid of the metafield itself will be assumed.</p>
 
 <dl class="exception">
 <dt id="common.data.HTTPError">
-<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">HTTPError</tt><a class="headerlink" href="#common.data.HTTPError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">HTTPError</tt><big>(</big><em>code</em><big>)</big><a class="headerlink" href="#common.data.HTTPError" title="Permalink to this definition">¶</a></dt>
 <dd><p>This Exception is raised when certain data (such a metadata), can&#8217;t be retrieved over HTTP</p>
 </dd></dl>
 
@@ -527,6 +538,17 @@ specified, the keyid of the metafield itself will be assumed.</p>
 
 </dd></dl>
 
+<dl class="exception">
+<dt id="common.data.NoConnection">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">NoConnection</tt><a class="headerlink" href="#common.data.NoConnection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="common.data.NotFound">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">NotFound</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.NotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 404 - Not Found Errors</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="common.data.OutputTemplate">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">OutputTemplate</tt><big>(</big><em>id</em>, <em>formatclass</em>, <em>label</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.data.OutputTemplate" title="Permalink to this definition">¶</a></dt>
@@ -589,6 +611,12 @@ specified, the keyid of the metafield itself will be assumed.</p>
 
 </dd></dl>
 
+<dl class="exception">
+<dt id="common.data.ParameterError">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">ParameterError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.ParameterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="common.data.ParameterMetaField">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">ParameterMetaField</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#common.data.ParameterMetaField" title="Permalink to this definition">¶</a></dt>
@@ -602,6 +630,12 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <tt class="descname">xml</tt><big>(</big><em>indent=''</em><big>)</big><a class="headerlink" href="#common.data.ParameterMetaField.xml" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="exception">
+<dt id="common.data.PermissionDenied">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">PermissionDenied</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.PermissionDenied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)</p>
 </dd></dl>
 
 <dl class="class">
@@ -660,6 +694,12 @@ specified, the keyid of the metafield itself will be assumed.</p>
 
 </dd></dl>
 
+<dl class="exception">
+<dt id="common.data.ServerError">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">ServerError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.ServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="common.data.SetMetaField">
 <em class="property">class </em><tt class="descclassname">common.data.</tt><tt class="descname">SetMetaField</tt><big>(</big><em>key</em>, <em>value=None</em><big>)</big><a class="headerlink" href="#common.data.SetMetaField" title="Permalink to this definition">¶</a></dt>
@@ -674,6 +714,11 @@ specified, the keyid of the metafield itself will be assumed.</p>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="exception">
+<dt id="common.data.TimeOut">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">TimeOut</tt><a class="headerlink" href="#common.data.TimeOut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="class">
 <dt id="common.data.UnsetMetaField">
@@ -690,12 +735,22 @@ specified, the keyid of the metafield itself will be assumed.</p>
 
 </dd></dl>
 
+<dl class="exception">
+<dt id="common.data.UploadError">
+<em class="property">exception </em><tt class="descclassname">common.data.</tt><tt class="descname">UploadError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.data.UploadError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="function">
 <dt id="common.data.getclamdata">
 <tt class="descclassname">common.data.</tt><tt class="descname">getclamdata</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#common.data.getclamdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function reads the CLAM Data from an XML file. Use this to read
 the clam.xml file from your system wrapper. It returns a CLAMData instance.</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="common.data.processhttpcode">
+<tt class="descclassname">common.data.</tt><tt class="descname">processhttpcode</tt><big>(</big><em>code</em><big>)</big><a class="headerlink" href="#common.data.processhttpcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="common.data.processparameter">

@@ -57,18 +57,7 @@
   <div class="section" id="clam-client-api">
 <h1>CLAM Client API<a class="headerlink" href="#clam-client-api" title="Permalink to this headline">¶</a></h1>
 <p>The CLAM Client API enables users to quickly write clients to interact with CLAM webservices of any kind. It is an abstraction layer over all lower-level network communication. Consult also the CLAM Data API, as responses returned by the webservice are almost always instantiated as CLAMData objects in the client.</p>
-<span class="target" id="module-common.client"></span><dl class="exception">
-<dt id="common.client.AuthRequired">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">AuthRequired</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.AuthRequired" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="common.client.BadRequest">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">BadRequest</tt><a class="headerlink" href="#common.client.BadRequest" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="class">
+<span class="target" id="module-common.client"></span><dl class="class">
 <dt id="common.client.CLAMClient">
 <em class="property">class </em><tt class="descclassname">common.client.</tt><tt class="descname">CLAMClient</tt><big>(</big><em>url</em>, <em>user=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
@@ -146,6 +135,12 @@ sourcefile - The file you want to add: string containing a filename (or instance
 </dd></dl>
 
 <dl class="method">
+<dt id="common.client.CLAMClient.download">
+<tt class="descname">download</tt><big>(</big><em>project</em>, <em>filename</em>, <em>targetfilename</em>, <em>loadmetadata=False</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download an output file</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="common.client.CLAMClient.downloadarchive">
 <tt class="descname">downloadarchive</tt><big>(</big><em>project</em>, <em>targetfile</em>, <em>format='zip'</em><big>)</big><a class="headerlink" href="#common.client.CLAMClient.downloadarchive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Download all output files as a single archive:</p>
@@ -216,45 +211,6 @@ the global parameters. Returns a <tt class="docutils literal"><span class="pre">
 </dd></dl>
 
 </dd></dl>
-
-<dl class="exception">
-<dt id="common.client.NoConnection">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">NoConnection</tt><a class="headerlink" href="#common.client.NoConnection" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="exception">
-<dt id="common.client.NotFound">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">NotFound</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.NotFound" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised on 404 - Not Found Errors</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="common.client.ParameterError">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">ParameterError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.ParameterError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="common.client.PermissionDenied">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">PermissionDenied</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.PermissionDenied" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="common.client.ServerError">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">ServerError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.ServerError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side.</p>
-</dd></dl>
-
-<dl class="exception">
-<dt id="common.client.TimeOut">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">TimeOut</tt><a class="headerlink" href="#common.client.TimeOut" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="exception">
-<dt id="common.client.UploadError">
-<em class="property">exception </em><tt class="descclassname">common.client.</tt><tt class="descname">UploadError</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#common.client.UploadError" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 
