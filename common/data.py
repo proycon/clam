@@ -140,7 +140,7 @@ class CLAMFile:
         self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
 
     def __iter__(self):
-        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first."""
+        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first. Use ``copy()`` instead if you want to download a large remote file."""
         if not self.remote:
             if self.metadata and 'encoding' in self.metadata:
                 for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
@@ -185,7 +185,7 @@ class CLAMFile:
 
 
     def readlines(self):
-        """Loads all in memory"""
+        """Loads all lines in memory"""
         #if not self.remote:
         #    if self.metadata and 'encoding' in self.metadata:
         #       return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
@@ -219,7 +219,6 @@ class CLAMFile:
             else:
                 raise HTTPError(code)
             c.close()
-            f.close()
         else:
             if self.metadata and 'encoding' in self.metadata:
                 f = codecs.open(target,'w', self.metadata['encoding'])
