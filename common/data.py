@@ -281,10 +281,13 @@ class CLAMFile:
         #    return response
         return list(iter(self))
 
-    def copy(self, target):
+    def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""
         if self.remote:
-            url = self.projectpath + '/' + self.basedir + '/' + self.filename
+            if self.projectpath.endswith('/'):
+                url = self.projectpath + self.basedir + '/' + self.filename
+            else:
+                url = self.projectpath + '/' + self.basedir + '/' + self.filename
             f = open(target,'wb')
             c = pycurl.Curl()
             c.setopt(pycurl.URL, url)
@@ -292,6 +295,9 @@ class CLAMFile:
                 c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
                 c.setopt(c.USERPWD, self.client.user + ':' + self.client.password)
             c.setopt(c.WRITEDATA, f)
+            c.setopt(c.USERAGENT, "CLAMCLientAPI-" + VERSION)
+            c.setopt(c.CONNECTTIMEOUT, 60)
+            c.setopt(c.TIMEOUT, timeout)
             c.perform()
             processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
             c.close()
