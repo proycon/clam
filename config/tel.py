@@ -99,14 +99,14 @@ PROFILES = [
             unique=True
         ),
         OutputTemplate('lemmafreqlist',CSVFormat,"Lemma Frequency list",
-            filename='lemmafreqlist.tsv'
+            filename='lemmafreqlist.tsv',
             unique=True
         ),
         OutputTemplate('lemmaposfreqlist',CSVFormat,"Lemma+PoS Frequency list",
-            filename='lemmaposfreqlist.tsv'
+            filename='lemmaposfreqlist.tsv',
             unique=True
         ),
-
+    )
 ]
 
 PARAMETERS =  [

@@ -85,6 +85,10 @@ class TadpoleFormat(CLAMMetaData):
     name = "Tadpole Columned Output Format"
     mimetype = 'text/plain'
 
+class CSVFormat(CLAMMetaData):
+    name = "Comma separated file"
+    mimetype = 'text/csv'
+
 class UndefinedXMLFormat(CLAMMetaData):
     name = "Undefined XML Format"
     mimetype = 'text/xml'
