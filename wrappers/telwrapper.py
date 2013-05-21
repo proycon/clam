@@ -61,6 +61,12 @@ if 'n' in clamdata and clamdata['n']:
 
 r = os.system("tel " + opts + " " + " ".join(inputfiles))
 
+os.rename(inputdir + "/current.wordfreqlist.tsv", outputdir + "/wordfreqlist.tsv")
+os.rename(inputdir + "/current.lemmafreqlist.tsv", outputdir + "/lemmafreqlist.tsv")
+os.rename(inputdir + "/current.lemmaposfreqlist.tsv", outputdir + "/lemmaposfreqlist.tsv")
+
+
+
 clam.common.status.write(statusfile, "Done",100)
 
 sys.exit(r) #non-zero exit codes indicate an error!
