@@ -35,10 +35,11 @@ import clam.common.formats
 
 
 #this script takes three arguments: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
-inputdir = sys.argv[1]
-datafile = sys.argv[2]
-statusfile = sys.argv[3]
-outputdir = sys.argv[4]
+bindir = sys.argv[1]
+inputdir = sys.argv[2]
+datafile = sys.argv[3]
+statusfile = sys.argv[4]
+outputdir = sys.argv[5]
 
 
 
