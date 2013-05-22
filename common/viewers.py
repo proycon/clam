@@ -80,7 +80,8 @@ class SimpleTableViewer(AbstractViewer):
             file = csv.reader(file, delimiter=self.delimiter)
         try:
             for line in file:
-                yield [ unicode(x,'utf-8') for x in line ]
+                unicodeline = [ unicode(x,'utf-8') for x in line ]
+                yield unicodeline.encode('utf-8')
         except UnicodeError, UnicodeEncoderError:
             yield ("Unable to visualise due to unicode error",)
 
