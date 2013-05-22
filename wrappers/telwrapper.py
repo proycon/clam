@@ -60,11 +60,11 @@ if 'lowercase' in clamdata and clamdata['lowercase']:
 if 'n' in clamdata and clamdata['n']:
     opts += " -n " + str(clamdata['n'])
 
-r = os.system("tel " + opts + " " + " ".join(inputfiles))
+r = os.system("tel -o clam " + opts + " " + " ".join(inputfiles))
 
-os.rename(inputdir + "/current.wordfreqlist.tsv", outputdir + "/wordfreqlist.tsv")
-os.rename(inputdir + "/current.lemmafreqlist.tsv", outputdir + "/lemmafreqlist.tsv")
-os.rename(inputdir + "/current.lemmaposfreqlist.tsv", outputdir + "/lemmaposfreqlist.tsv")
+os.rename(inputdir + "/clam.wordfreqlist.tsv", outputdir + "/wordfreqlist.tsv")
+os.rename(inputdir + "/clam.lemmafreqlist.tsv", outputdir + "/lemmafreqlist.tsv")
+os.rename(inputdir + "/clam.lemmaposfreqlist.tsv", outputdir + "/lemmaposfreqlist.tsv")
 
 
 
