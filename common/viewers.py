@@ -81,7 +81,7 @@ class SimpleTableViewer(AbstractViewer):
         for line in file:
             try:
                 yield line
-            except UnicodeError:
+            except UnicodeError, UnicodeEncoderError:
                 yield unicode(line, 'utf-8')
 
     def view(self,file,**kwargs):
