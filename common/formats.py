@@ -86,6 +86,7 @@ class TadpoleFormat(CLAMMetaData):
     mimetype = 'text/plain'
 
 class CSVFormat(CLAMMetaData):
+    attributes = {'encoding':True,'language':False }
     name = "Comma separated file"
     mimetype = 'text/csv'
 
