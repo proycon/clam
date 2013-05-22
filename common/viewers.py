@@ -78,11 +78,11 @@ class SimpleTableViewer(AbstractViewer):
             file = csv.reader(file, delimiter=self.delimiter, quotechar=self.quotechar)
         else:
             file = csv.reader(file, delimiter=self.delimiter)
-        for line in file:
-            try:
+        try:
+            for line in file:
                 yield line
-            except UnicodeError, UnicodeEncoderError:
-                yield unicode(line, 'utf-8')
+        except UnicodeError, UnicodeEncoderError:
+            yield "Unable to visualise due to unicode error"
 
     def view(self,file,**kwargs):
         render = web.template.render('templates')
