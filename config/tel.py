@@ -92,17 +92,20 @@ PROFILES = [
     Profile(
         InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA XML document",
             extension='.xml',
-            multi=True,
+            multi=True
         ),
         OutputTemplate('wordfreqlist',CSVFormat,"Frequency list",
+            SimpleTableViewer(),
             filename='output.wordfreqlist.tsv',
             unique=True
         ),
         OutputTemplate('lemmafreqlist',CSVFormat,"Lemma Frequency list",
+            SimpleTableViewer(),
             filename='output.lemmafreqlist.tsv',
             unique=True
         ),
         OutputTemplate('lemmaposfreqlist',CSVFormat,"Lemma+PoS Frequency list",
+            SimpleTableViewer(),
             filename='output.lemmaposfreqlist.tsv',
             unique=True
         ),
