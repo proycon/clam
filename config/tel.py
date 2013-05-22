@@ -95,15 +95,15 @@ PROFILES = [
             multi=True,
         ),
         OutputTemplate('wordfreqlist',CSVFormat,"Frequency list",
-            filename='wordfreqlist.tsv',
+            filename='output.wordfreqlist.tsv',
             unique=True
         ),
         OutputTemplate('lemmafreqlist',CSVFormat,"Lemma Frequency list",
-            filename='lemmafreqlist.tsv',
+            filename='output.lemmafreqlist.tsv',
             unique=True
         ),
         OutputTemplate('lemmaposfreqlist',CSVFormat,"Lemma+PoS Frequency list",
-            filename='lemmaposfreqlist.tsv',
+            filename='output.lemmaposfreqlist.tsv',
             unique=True
         ),
     )
