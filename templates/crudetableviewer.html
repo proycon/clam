@@ -49,10 +49,7 @@ $def with (file, tableviewer)
     	$for line in tableviewer.read(file):
         <tr>
             $for field in line:
-                $try:
-               		<td>$field.encode(file.metadata['encoding'])</td>
-                $except UnicodeError, UnicodeEncodeError:
-               		<td>Could not encode field</td>
+                <td>$field.encode(file.metadata['encoding'])</td>
         </tr>
     </table>
 </div>
