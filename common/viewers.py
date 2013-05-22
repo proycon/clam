@@ -5,7 +5,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -25,9 +25,9 @@ from StringIO import StringIO
 class AbstractViewer(object):
 
     id = 'abstractviewer' #you may insert another meaningful ID here, no spaces or special chars!
-    name = "Unspecified Viewer" 
+    name = "Unspecified Viewer"
     mimetype = 'text/html'
-    
+
     def __init__(self, **kwargs):
         self.embed = False #Embed external sites as opposed to redirecting?
         for key, value in kwargs.items():
@@ -56,7 +56,7 @@ class AbstractViewer(object):
 
 class SimpleTableViewer(AbstractViewer):
     id = 'tableviewer'
-    name = "Table viewer"    
+    name = "Table viewer"
 
     def __init__(self, **kwargs):
         if 'quotechar' in kwargs:
@@ -64,25 +64,28 @@ class SimpleTableViewer(AbstractViewer):
             del kwargs['quotechar']
         else:
             self.quotechar = ''
-            
+
         if 'delimiter' in kwargs:
             self.delimiter = kwargs['delimiter']
             del kwargs['delimiter']
         else:
-            self.delimiter = '\t'         
-            
-        super(SimpleTableViewer,self).__init__(**kwargs)   
-                
+            self.delimiter = '\t'
+
+        super(SimpleTableViewer,self).__init__(**kwargs)
+
     def read(self, file):
         if self.quotechar:
             file = csv.reader(file, delimiter=self.delimiter, quotechar=self.quotechar)
-        else:        
+        else:
             file = csv.reader(file, delimiter=self.delimiter)
         for line in file:
-            yield line
-    
+            try:
+                yield line
+            except UnicodeError:
+                yield unicode(line, 'utf-8')
+
     def view(self,file,**kwargs):
-        render = web.template.render('templates') 
+        render = web.template.render('templates')
         return render.crudetableviewer( file, self)
 
 
@@ -92,7 +95,7 @@ class FrogViewer(AbstractViewer):
     id = 'frogviewer'
     name = "Frog Viewer"
 
-    
+
 
     def view(self,file,**kwargs):
         render = web.template.render('templates')
@@ -107,11 +110,11 @@ class XSLTViewer(AbstractViewer):
             self.xslfile = kwargs['file']
             del kwargs['file']
         else:
-            raise Exception("XSLTViewer expect file= parameter with XSL file")    
-            
-        super(XSLTViewer,self).__init__(**kwargs)   
+            raise Exception("XSLTViewer expect file= parameter with XSL file")
 
-    def view(self, file, **kwargs):        
+        super(XSLTViewer,self).__init__(**kwargs)
+
+    def view(self, file, **kwargs):
         xslt_doc = etree.parse(self.xslfile)
         transform = etree.XSLT(xslt_doc)
 
@@ -120,11 +123,11 @@ class XSLTViewer(AbstractViewer):
         if lines:
             if isinstance(lines[0], unicode):
                 xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
-            else:        
+            else:
                 xml_doc = etree.parse(StringIO("".join(lines) ))
         else:
-            return "(no data)" 
-        
+            return "(no data)"
+
         return str(transform(xml_doc))
 
 class FoLiAViewer(AbstractViewer):
@@ -137,7 +140,7 @@ class FoLiAViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        
+
         xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
         return str(transform(xml_doc))
 
@@ -145,7 +148,7 @@ class FoLiAViewer(AbstractViewer):
 class SoNaRViewer(AbstractViewer):
     id = 'sonarviewer'
     name = "SoNaR Viewer"
-    
+
     def view(self, file, **kwargs):
         xslfile = os.path.dirname(__file__) + "/../static/sonar.xsl"
         xslt_doc = etree.parse(xslfile)
@@ -153,7 +156,7 @@ class SoNaRViewer(AbstractViewer):
 
         #f = file.open()
         xml_doc = etree.parse(StringIO("".join(file.readlines())))
-        
+
         return str(transform(xml_doc))
 
 
