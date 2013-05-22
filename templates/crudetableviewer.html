@@ -52,7 +52,7 @@ $def with (file, tableviewer)
                 $try:
                		<td>$field.encode(file.metadata['encoding'])</td>
                 $except UnicodeError, UnicodeEncodeError:
-               		<td>$field.encode('utf-8')</td>
+               		<td>Could not encode field</td>
         </tr>
     </table>
 </div>
