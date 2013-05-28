@@ -808,9 +808,9 @@ class Project(object):
             except:
                 pass
             if pythonpath:
-                pythonpath = os.path.dirname(settings.__file__) + '/..:' + pythonpath
+                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
             else:
-                pythonpath = os.path.dirname(settings.__file__) + '/..'
+                pythonpath = os.path.dirname(settings.__file__)
             cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
