@@ -469,18 +469,24 @@ class Project(object):
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
             os.mkdir(settings.ROOT + "projects/" + user)
+            if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project): #verify:
+                raise CustomForbidden("Directory " + settings.ROOT + "projects/" + user + '/' + project + " could not be created succesfully")
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project)
+        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input/'):
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/input")
+            if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input'):
+                raise CustomForbidden("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully")
+        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output/'):
             os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/output")
+            if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
+                raise CustomForbidden("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully")
             #if not settings.PROJECTS_PUBLIC:
             #    f = codecs.open(settings.ROOT + "projects/" + user + '/' + project + '/.users','w','utf-8')
             #    f.write(user + "\n")
             #    f.close()
-        else:
-            #project already exists, pass silently
-            pass
+
 
     #@staticmethod
     #def access(project, user):
