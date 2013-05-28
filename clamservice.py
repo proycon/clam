@@ -71,7 +71,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 
 DEBUG = False
 
@@ -807,10 +807,12 @@ class Project(object):
                 pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
             except:
                 pass
-            if pythonpath:
-                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
+            if PYTHONPATH:
+                pythonpath = os.path.dirname(settings.__file__) + '/..:' + PYTHONPATH
+            elif pythonpath:
+                pythonpath = os.path.dirname(settings.__file__) + '/..:' + pythonpath
             else:
-                pythonpath = os.path.dirname(settings.__file__)
+                pythonpath = os.path.dirname(settings.__file__) + '/..'
             cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:

@@ -22,7 +22,7 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.9.4'
+VERSION = '0.9.5'
 
 sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
@@ -43,6 +43,7 @@ if len(sys.argv) < 4:
 
 offset = 0
 if '/' in sys.argv[1]:
+    os.environ['PYTHONPATH'] = sys.argv[1]
     for path in sys.argv[1].split(':'):
         print >>sys.stderr,"[CLAM Dispatcher] Adding to PYTHONPATH: " + path
         sys.path.append(path)
