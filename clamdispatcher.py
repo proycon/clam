@@ -76,6 +76,9 @@ try:
     exec "import " + settingsmodule + " as settings"
 except ImportError:
     print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module"
+    f = open(projectdir + '.done','w')
+    f.write(str(1))
+    f.close()
     sys.exit(1)
 
 settingkeys = dir(settings)
