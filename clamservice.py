@@ -517,7 +517,23 @@ class Project(object):
 
     @staticmethod
     def running(project, user):
-        return os.path.isfile(Project.path(project, user) + ".pid") and not os.path.isfile(Project.path(project, user) + ".done")
+        pidfile = Project.path(project, user) + '.pid'
+        if os.path.isfile(pidfile) and not os.path.isfile(Project.path(project, user) + ".done"):
+            f = open(pidfile,'r')
+            pid = int(f.read(os.path.getsize(pidfile)))
+            f.close()
+            try:
+                os.kill(pid, 0) #raises error if pid doesn't exist
+                return True
+            except:
+                f = open(Project.path(project, user) + ".done", 'w')
+                f.write(str(1) )
+                f.close()
+                os.unlink(pidfile)
+                return False
+        else:
+            return False
+
 
 
     def abort(self, project, user):
