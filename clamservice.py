@@ -807,9 +807,7 @@ class Project(object):
                 pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
             except:
                 pass
-            if PYTHONPATH:
-                pythonpath = os.path.dirname(settings.__file__) + '/..:' + PYTHONPATH
-            elif pythonpath:
+            if pythonpath:
                 pythonpath = os.path.dirname(settings.__file__) + '/..:' + pythonpath
             else:
                 pythonpath = os.path.dirname(settings.__file__) + '/..'
@@ -1160,7 +1158,6 @@ class InputFileHandler(object):
         #TODO LATER: re-add support for archives?
 
         Project.create(project, user)
-
         postdata = web.input(file={})
 
         if filename == '':
