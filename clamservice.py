@@ -1159,6 +1159,8 @@ class InputFileHandler(object):
 
         #TODO LATER: re-add support for archives?
 
+        Project.create(project, user)
+
         postdata = web.input(file={})
 
         if filename == '':
