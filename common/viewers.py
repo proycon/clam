@@ -74,10 +74,17 @@ class SimpleTableViewer(AbstractViewer):
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
-        if self.quotechar:
-            file = csv.reader(file, delimiter=self.delimiter, quotechar=self.quotechar)
+        #Load all in memory to prevent unicode issues (not ideal)
+        data = file.readlines()
+        if any( ( isinstance(x, unicode) for x in data ) ):
+            data = u"\n".join(data)
+            data = data.encode('utf-8')
         else:
-            file = csv.reader(file, delimiter=self.delimiter)
+            data = "\n".join(data)
+        if self.quotechar:
+            file = csv.reader(StringIO(data), delimiter=self.delimiter, quotechar=self.quotechar)
+        else:
+            file = csv.reader(StringIO(data), delimiter=self.delimiter)
         for line in file:
             yield [ unicode(x,'utf-8') for x in line ] #todo, can't really assume utf-8
 
