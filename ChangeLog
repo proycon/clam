@@ -2,9 +2,11 @@
 
 0.9.4) [May 2013]
 - Fixed streaming upload in CLAM Client (addinputfile()), now using pycurl)
+(major refactoring)
 - (0.9.4.1) Added download method in CLAM Client (through CLAMFile.copy(), now
-also using pycurl)
+also using pycurl, major refactoring)
 - (0.9.4.1) Added 'download' command in clamclient.py
+- (0.9.4.3) fix in unicode handling in table viewer [July 2013]
 
 0.9.3) [May 2013]
 - Fix in free disk space check
@@ -17,8 +19,9 @@ also using pycurl)
 - Better autodetection of CLAMDIR
 
 0.9.0) [Jan 2013]
-- Brand new web-application interface! Smoother & prettier!
-- New uploader (fineuploader), supporting multiple files at once
+- Brand new web-application interface! Smoother & prettier! Major refactoring
+- New uploader (fineuploader), supporting multiple files at once, major
+refactoring
 - Fixed support for archive uploading and archive upload now shows in interface
 - Fixed archive downloading (with REST API change)
 - Unicode fix in XSLTViewer
