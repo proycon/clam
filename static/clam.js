@@ -108,7 +108,7 @@ function initclam() {
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
-                    alert("Unable to create project. Do not use spaces or special characters in the ID, only underscores and alphanumeric characters are allowed (" +  response.status +")");   
+                    alert("Unable to create project, the server returned an error (HTTP " + response.status + "). Did you perhaps use spaces or special characters in the ID? Only underscores and alphanumeric characters are allowed.");   
                 }
             }
          });
