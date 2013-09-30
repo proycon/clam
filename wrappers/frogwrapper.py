@@ -8,14 +8,14 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
 #This is a test wrapper, meant to illustrate how easy it is to set
 #up a wrapper script for your system using Python and the CLAM Client API.
-#We make use of the XML configuration file that CLAM outputs, rather than 
+#We make use of the XML configuration file that CLAM outputs, rather than
 #passing all parameters on the command line.
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
@@ -57,30 +57,30 @@ for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
     cmdoptions = " --max-parser-tokens=200"
 
     if 'skip' in clamdata and clamdata['skip']:
-        cmdoptions += ' --skip=' + "".join(clamdata['skip'])  
-    
-    
+        cmdoptions += ' --skip=' + "".join(clamdata['skip'])
+
+
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
-        
+
     print >>sys.stderr,"Processing " + os.path.basename(str(inputfile)) + "..."
     outputstem = os.path.basename(str(inputfile))
-    if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]     
+    if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]
     if 'sentenceperline' in inputfile.metadata and inputfile.metadata['sentenceperline']:
-        cmdoptions += ' -n'                
-    if 'docid' in inputfile.metadata and inputfile.metadata['docid']:                
+        cmdoptions += ' -n'
+    if 'docid' in inputfile.metadata and inputfile.metadata['docid']:
         docid = inputfile.metadata['docid']
         print >>sys.stderr,"\tDocID from metadata: " + docid
-    else:        
+    else:
         docid = outputstem
-        print >>sys.stderr,"\tDocID from filename: " + docid                        
+        print >>sys.stderr,"\tDocID from filename: " + docid
     docid = docid.replace(' ','-')
     docid = docid.replace("'",'')
     docid = docid.replace('"','')
-    if not docid: 
+    if not docid:
         docid = 'untitled'
-        
-    print >>sys.stderr,"Invoking Frog"          
-    r = os.system(bindir + "frog -c " + bindir + "../etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
+
+    print >>sys.stderr,"Invoking Frog"
+    r = os.system(bindir + "frog -c " + bindir + "../etc/frog/frog.cfg " + cmdoptions + " -t " + str(inputfile) + " --id='" + docid + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (plain text). Aborting"),100)
         sys.exit(1)
@@ -89,19 +89,19 @@ for i, inputfile in enumerate(clamdata.inputfiles('foliainput')):
     cmdoptions = " --max-parser-tokens=200"
 
     if 'skip' in clamdata and clamdata['skip']:
-        cmdoptions += ' --skip=' + "".join(clamdata['skip'])    
+        cmdoptions += ' --skip=' + "".join(clamdata['skip'])
 
-    
+
     clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)))
     outputstem = os.path.basename(str(inputfile))
     if outputstem[-4:] == '.xml' or outputstem[-4:] == '.txt': outputstem = outputstem[:-4]
-    
-    print >>sys.stderr,"Invoking Frog"                  
-    r = os.system(bindir + "frog -c /var/www/etc/frog/frog.cfg " + cmdoptions + " -x '" + str(inputfile) + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")                    
+
+    print >>sys.stderr,"Invoking Frog"
+    r = os.system(bindir + "frog -c " + bindir + "../etc/frog/frog.cfg " + cmdoptions + " -x '" + str(inputfile) + "' -X '" + outputdir + outputstem + ".xml' -o '" + outputdir + outputstem + ".frog.out'")
     if (r != 0):
         clam.common.status.write(statusfile, "Frog returned with an error whilst processing " + os.path.basename(str(inputfile) + " (FoLiA). Aborting"),100)
-        sys.exit(1)    
+        sys.exit(1)
 
-clam.common.status.write(statusfile, "Done",100)       
+clam.common.status.write(statusfile, "Done",100)
 
-sys.exit(0) #non-zero exit codes indicate an error! 
+sys.exit(0) #non-zero exit codes indicate an error!

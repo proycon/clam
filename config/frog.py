@@ -9,7 +9,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -21,7 +21,7 @@ from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path 
+from sys import path
 from os import uname, environ
 from base64 import b64decode as D
 
@@ -60,8 +60,8 @@ elif host == 'applejack': #Nijmegen
     URLPREFIX = "frog"
     BINDIR = "/vol/customopt/uvt-ru/bin/"
     USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl', 
-        'user': 'clamopener',        
+        'host': 'mysql-clamopener.science.ru.nl',
+        'user': 'clamopener',
         'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
         'database': 'clamopener',
         'table': 'clamusers_clamusers'
@@ -69,18 +69,9 @@ elif host == 'applejack': #Nijmegen
     DEBUG = False
     REALM = "WEBSERVICES-LST"
     DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
-    #Assuming ILK server
-    CLAMDIR = "/var/www/clam"
-    ROOT = "/var/www/clamdata/frog/"
-    HOST = 'webservices.ticc.uvt.nl'
-    PORT = 80
-    URLPREFIX = 'frog'
-    WEBSERVICEGHOST = 'ws'
-    BINDIR = "/var/www/bin/"
 else:
     raise Exception("I don't know where I'm running from! Got " + host)
- 
+
 
 
 
@@ -90,8 +81,8 @@ COMMAND = CLAMDIR +  "/wrappers/frogwrapper.py " + BINDIR + " $DATAFILE $STATUSF
 
 PROFILES = [
     Profile(
-        InputTemplate('maininput', PlainTextFormat,"Text document", 
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+        InputTemplate('maininput', PlainTextFormat,"Text document",
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             StringParameter(id='author', name='Author', description='The author of the document (optional)'),
             StringParameter(id='docid', name='Document ID', description='An ID for the document (optional, used with FoLiA XML output)'),
             BooleanParameter(id='sentenceperline', name='One sentence per line?', description='If set, assume that this input file contains exactly one sentence per line'),
@@ -109,28 +100,28 @@ PROFILES = [
             SetMetaField('morphologicalanalysis','yes'),
             ParameterCondition(skip_contains='m',
                 then=SetMetaField('mwudetection','no'),
-                otherwise=SetMetaField('mwudetection','yes'), 
-            ),                        
+                otherwise=SetMetaField('mwudetection','yes'),
+            ),
             ParameterCondition(skip_contains='p',
                 then=SetMetaField('parsing','no'),
                 otherwise=SetMetaField('parsing','yes'),
             ),
-            removeextensions=['.txt','.xml'],            
+            removeextensions=['.txt','.xml'],
             extension='.frog.out',
             copymetadata=True,
             multi=True,
         ),
         OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",
-            FoLiAViewer(), 
+            FoLiAViewer(),
             removeextensions=['.txt'],
             extension='.xml',
             copymetadata=True,
             multi=True,
-        ),        
+        ),
     ),
     Profile(
         InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA XML document",
-            extension='.xml', 
+            extension='.xml',
             multi=True,
         ),
         OutputTemplate('mainoutput', TadpoleFormat,"Frog Columned Output (legacy)",  #named 'mainoutput' for legacy reasons
@@ -140,31 +131,31 @@ PROFILES = [
             SetMetaField('morphologicalanalysis','yes'),
             ParameterCondition(skip_contains='m',
                 then=SetMetaField('mwudetection','no'),
-                otherwise=SetMetaField('mwudetection','yes'), 
-            ),                        
+                otherwise=SetMetaField('mwudetection','yes'),
+            ),
             ParameterCondition(skip_contains='p',
                 then=SetMetaField('parsing','no'),
                 otherwise=SetMetaField('parsing','yes'),
-            ),            
+            ),
             removeextensions=['.xml','.txt'],
             extension='.frog.out',
             copymetadata=True,
             multi=True,
         ),
-        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",                    
+        OutputTemplate('foliaoutput', FoLiAXMLFormat,"FoLiA Document",
             FoLiAViewer(),
-            extension='.xml', 
+            extension='.xml',
             copymetadata=True,
             multi=True,
-        ),        
-    ),    
-    
+        ),
+    ),
+
 ]
 
 PARAMETERS =  [
 
     ('Modules', [
-        ChoiceParameter('skip', 'Skip modules','Are there any components you want to skip? Skipping components you do not need may speed up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser'),('c','Chunker / Shallow parser'),('n','Named Entity Recognition')], multi=True ),        
+        ChoiceParameter('skip', 'Skip modules','Are there any components you want to skip? Skipping components you do not need may speed up the process considerably.',paramflag='--skip=',choices=[('t','Tokeniser'),('m','Multi-Word Detector'),('p','Parser'),('c','Chunker / Shallow parser'),('n','Named Entity Recognition')], multi=True ),
         #ChoiceParameter('skip', 'Skip Components','Are there any components you want to skip? Skipping the parser speeds up the process considerably.',paramflag='--skip=',choices=[('p','Skip dependency parser'),('n',"Don't skip anything")] ),
-    ]),     
+    ]),
 ]
