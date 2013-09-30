@@ -3,6 +3,7 @@
 0.9.6) [Sep 2013]
 - Fix starting to an already running project. Now responds with a redirect to
 prevent form resubmission.
+- Default nonce life is now two hours to prevent losing sessions after 5 mins
 
 0.9.5) [Aug 2013]
 
