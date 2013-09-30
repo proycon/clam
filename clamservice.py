@@ -748,14 +748,13 @@ class Project(object):
         #if user and not Project.access(project, user):
         #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
 
-        #Generate arguments based on POSTed parameters
-        commandlineparams = []
-        postdata = web.input()
-
         statuscode, _, _, _  = self.status(project, user)
         if statuscode != clam.common.status.READY:
             web.seeother(getrooturl() + '/' + project)
 
+        #Generate arguments based on POSTed parameters
+        commandlineparams = []
+        postdata = web.input()
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
 
