@@ -750,7 +750,7 @@ class Project(object):
 
         statuscode, _, _, _  = self.status(project, user)
         if statuscode != clam.common.status.READY:
-            web.seeother(getrooturl() + '/' + project)
+            raise web.seeother(getrooturl() + '/' + project)
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
