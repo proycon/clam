@@ -1,5 +1,11 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.6) [Sep 2013]
+- Fix starting to an already running project. Now responds with a redirect to
+prevent form resubmission.
+
+0.9.5) [Aug 2013]
+
 0.9.4) [May 2013]
 - Fixed streaming upload in CLAM Client (addinputfile()), now using pycurl)
 (major refactoring)

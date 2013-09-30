@@ -71,7 +71,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.5'
+VERSION = '0.9.6'
 
 DEBUG = False
 
@@ -751,6 +751,11 @@ class Project(object):
         #Generate arguments based on POSTed parameters
         commandlineparams = []
         postdata = web.input()
+
+        statuscode, _, _, _  = self.status(project, user)
+        if statuscode != clam.common.status.READY:
+            web.seeother(getrooturl() + '/' + project)
+
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
 
