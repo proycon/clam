@@ -1,5 +1,11 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.7) [Oct 2013]
+- Fixed filename constraint (filename=) bug as reported by Eric Auer
+- Fixed dispatcher executabe issue as reported by Dirk Roorda, now a proper
+executable through setuptools
+- updated tests
+
 0.9.6) [Sep 2013]
 - Fix starting to an already running project. Now responds with a redirect to
 prevent form resubmission.
