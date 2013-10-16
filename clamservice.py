@@ -1302,7 +1302,8 @@ def addfile(project, filename, user, postdata, inputsource=None):
     else:
         if inputtemplate.filename:
             if filename != inputtemplate.filename:
-                raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+                filename = inputtemplate.filename
+                #raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
             #TODO LATER: add support for calling this with an actual number instead of #
         if inputtemplate.extension:
             if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
