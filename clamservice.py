@@ -2148,7 +2148,14 @@ def set_defaults(HOST = None, PORT = None):
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(os.path.abspath(__file__))
     if not 'DISPATCHER' in settingkeys:
-        settings.DISPATCHER = 'clamdispatcher'
+        r = os.system('which clamdispatcher')
+        if r == 0:
+            settings.DISPATCHER = 'clamdispatcher'
+        elif os.path.exists(settings.CLAMDIR + '/clamdispatcher.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/clamdispatcher.py')[stat.ST_MODE]:
+            settings.DISPATCHER = settings.CLAMDIR + '/clamdispatcher.py'
+        else:
+            print >>sys.stderr, "WARNING: clamdispatcher not found!!"
+            settings.DISPATCHER = 'clamdispatcher'
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:
