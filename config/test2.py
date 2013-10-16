@@ -60,35 +60,35 @@ PROFILES = [
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='docconv',label='Convert from MS Word Document'),
-            extension='.txt',
-            multi=True
+            filename="input.txt",
+            multi=False
         ),
         OutputTemplate('statsbydoc',PlainTextFormat,'Document Statistics',
             SetMetaField('encoding','ascii'),
             extension='.stats',
-            multi=True
+            multi=False
         ),
         OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ',
             CopyMetaField('language','textinput.language'),
             CopyMetaField('encoding','textinput.encoding'),
             extension='.freqlist',
-            multi=True
+            multi=False
         ),
         OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
             SetMetaField('encoding','utf-8'),
             filename='overall.stats',
-            unique=True
+            unique=False
         ),
         OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
             filename='overall.freqlist',
-            unique=True
+            unique=False
         ),
         ParameterCondition(createlexicon=True,
             then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 SetMetaField('encoding','utf-8'),
                 filename='overall.lexikon',
-                unique=True
+                unique=False
             )
         )
     )
