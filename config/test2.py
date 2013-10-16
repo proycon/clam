@@ -112,7 +112,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/tests/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
+COMMAND = sys.path[0] + "/wrappers/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY $PARAMETERS > $OUTPUTDIRECTORY/log"
 
 #The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS =  [
