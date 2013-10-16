@@ -8,7 +8,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -19,7 +19,7 @@ import time
 import glob
 import random
 import codecs
-import unittest2
+import unittest
 
 #We may need to do some path magic in order to find the clam.* imports
 
@@ -33,9 +33,9 @@ from clam.common.formats import *
 import clam.common.status
 
 
-class BasicServiceTest(unittest2.TestCase):
+class BasicServiceTest(unittest.TestCase):
     """Test basic operations"""
-    
+
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
         self.client = CLAMClient(self.url)
@@ -52,20 +52,20 @@ class BasicServiceTest(unittest2.TestCase):
         """Basic Service Test - Project creation"""
         success = self.client.create('basicservicetest')
         self.assertTrue(success)
-        
+
     def test2_2_create(self):
         """Basic Service Test - Project availability in index"""
         data = self.client.index()
         self.assertTrue('basicservicetest' in data.projects)
-    
+
     def test2_3_create(self):
         """Basic Service Test - Project state retrieval"""
         data = self.client.get('basicservicetest')
         self.assertTrue(data.system_id == "textstats")
         self.assertTrue(data.profiles)
-        self.assertTrue(data.parameters)        
-        self.assertTrue(isinstance(data.input,list))        
-        
+        self.assertTrue(data.parameters)
+        self.assertTrue(isinstance(data.input,list))
+
     def test2_4_upload(self):
         """Basic Service Test - File upload with extension"""
         f = codecs.open('/tmp/servicetest.txt','w','utf-8')
@@ -73,17 +73,17 @@ class BasicServiceTest(unittest2.TestCase):
         f.close()
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
-        self.assertTrue(success)        
-        
+        self.assertTrue(success)
+
     def test2_5_upload(self):
         """Basic Service Test - File upload verification"""
         data = self.client.get('basicservicetest')
         found = False
         for f in data.input:
             if f.filename == 'servicetest.txt':
-                found = True    
-        self.assertTrue(found)        
-        
+                found = True
+        self.assertTrue(found)
+
     def test2_6_deletion(self):
         """Basic Service Test - File Deletion"""
         data = self.client.get('basicservicetest')
@@ -91,9 +91,9 @@ class BasicServiceTest(unittest2.TestCase):
         for f in data.input:
             if f.filename == 'servicetest.txt':
                 success = f.delete()
-        self.assertTrue(success)        
-      
-                
+        self.assertTrue(success)
+
+
     def test2_7_upload(self):
         """Basic Service Test - File upload without extension"""
         f = codecs.open('/tmp/servicetest','w','utf-8')
@@ -101,9 +101,9 @@ class BasicServiceTest(unittest2.TestCase):
         f.close()
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='fr')
-        self.assertTrue(success)   
-               
-        
+        self.assertTrue(success)
+
+
     def test2_8_upload(self):
         """Basic Service Test - File upload verification + metadata check"""
         data = self.client.get('basicservicetest')
@@ -111,10 +111,10 @@ class BasicServiceTest(unittest2.TestCase):
         for f in data.input:
             if f.filename == 'servicetest.txt':
                 f.loadmetadata()
-                self.assertTrue(f.metadata)  
-                found = True    
-        self.assertTrue(found)   
-        
+                self.assertTrue(f.metadata)
+                found = True
+        self.assertTrue(found)
+
     def test2_9_deletion(self):
         """Basic Service Test - File Deletion"""
         data = self.client.get('basicservicetest')
@@ -122,8 +122,8 @@ class BasicServiceTest(unittest2.TestCase):
         for f in data.input:
             if f.filename == 'servicetest.txt':
                 success = f.delete()
-        self.assertTrue(success)         
-    
+        self.assertTrue(success)
+
     def test2_A_metadataerror(self):
         """Basic Service Test - Upload with parameter errors"""
         data = self.client.get('basicservicetest')
@@ -135,7 +135,7 @@ class BasicServiceTest(unittest2.TestCase):
             self.assertTrue(True)
 
     def test2_B_metadata(self):
-        """Basic Service Test - Upload with explicit metadata file"""            
+        """Basic Service Test - Upload with explicit metadata file"""
         f = codecs.open('/tmp/servicetest.txt','w','utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
@@ -150,14 +150,14 @@ class BasicServiceTest(unittest2.TestCase):
         f.close()
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr', metafile='/tmp/servicetest.txt.METADATA')
-        self.assertTrue(success)     
+        self.assertTrue(success)
 
     def test2_C_delete(self):
         """Basic Service Test - Project deletion"""
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
-        
-class ExtensiveServiceTest(unittest2.TestCase):
+
+class ExtensiveServiceTest(unittest.TestCase):
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
         self.client = CLAMClient(self.url)
@@ -166,23 +166,23 @@ class ExtensiveServiceTest(unittest2.TestCase):
         f = codecs.open('/tmp/servicetest.txt','w','utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
-        
-        
+
+
     def test1_simplerun(self):
         """Extensive Service Test - Full simple run"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
-        self.assertTrue(success)    
+        self.assertTrue(success)
         data = self.client.start(self.project)
-        self.assertTrue(data)    
-        self.assertFalse(data.errors)    
+        self.assertTrue(data)
+        self.assertFalse(data.errors)
         while data.status != clam.common.status.DONE:
             time.sleep(1) #wait 1 second before polling status
-            data = self.client.get(self.project) #get status again  
+            data = self.client.get(self.project) #get status again
         self.assertFalse(data.errors)
         self.assertTrue(isinstance(data.output, list))
         self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])        
+        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])
         for outputfile in data.output:
             if outputfile.filename == 'servicetest.txt.freqlist':
                 outputfile.loadmetadata()
@@ -197,47 +197,47 @@ class ExtensiveServiceTest(unittest2.TestCase):
         """Extensive Service Test - Global parameter error"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
-        self.assertTrue(success)   
+        self.assertTrue(success)
         try:
             data = self.client.start(self.project, casesensitive='nonexistant')
             self.assertTrue(data)
         except ParameterError, e:
-            self.assertTrue(True)    
-            
+            self.assertTrue(True)
+
     def test3_conditionaloutput(self):
         """Extensive Service Test - Output conditional on parameter"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
-        self.assertTrue(success)    
+        self.assertTrue(success)
         data = self.client.start(self.project, createlexicon=True)
-        self.assertTrue(data)    
-        self.assertFalse(data.errors)    
+        self.assertTrue(data)
+        self.assertFalse(data.errors)
         while data.status != clam.common.status.DONE:
             time.sleep(1) #wait 1 second before polling status
-            data = self.client.get(self.project) #get status again  
+            data = self.client.get(self.project) #get status again
         self.assertFalse(data.errors)
         self.assertTrue(isinstance(data.output, list))
         self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
-        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])        
-        self.assertTrue('overall.lexicon' in [ x.filename for x in data.output ])        
+        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])
+        self.assertTrue('overall.lexicon' in [ x.filename for x in data.output ])
         for outputfile in data.output:
             if outputfile.filename == 'servicetest.txt.freqlist':
                 outputfile.loadmetadata()
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'freqlistbydoc')
             if outputfile.filename == 'servicetest.txt.stats':
                 outputfile.loadmetadata()
-                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')            
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
             if outputfile.filename == 'overall.lexicon':
                 outputfile.loadmetadata()
-                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')            
-        
+                self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')
+
     def tearDown(self):
         success = self.client.delete(self.project)
 
-        
-            
-        
-class ArchiveUploadTest(unittest2.TestCase):
+
+
+
+class ArchiveUploadTest(unittest.TestCase):
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
         self.client = CLAMClient(self.url)
@@ -259,22 +259,22 @@ class ArchiveUploadTest(unittest2.TestCase):
         """Archive Upload Test - ZIP file"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.zip', language='fr')
-        self.assertTrue(success)    
-        data = self.client.get(self.project) #get status again  
+        self.assertTrue(success)
+        data = self.client.get(self.project) #get status again
         self.assertTrue('servicetest.txt' in [ x.filename for x in data.input ])
         self.assertTrue('servicetest2.txt' in [ x.filename for x in data.input ])
         self.assertTrue('servicetest3.txt' in [ x.filename for x in data.input ])
-        
+
     def test2_targz(self):
         """Archive Upload Test - TAR.GZ file"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.tar.gz', language='fr')
-        self.assertTrue(success)    
-        data = self.client.get(self.project) #get status again  
+        self.assertTrue(success)
+        data = self.client.get(self.project) #get status again
         self.assertTrue('servicetest.txt' in [ x.filename for x in data.input ])
         self.assertTrue('servicetest2.txt' in [ x.filename for x in data.input ])
         self.assertTrue('servicetest3.txt' in [ x.filename for x in data.input ])
-        
+
     def tearDown(self):
-        success = self.client.delete(self.project)        
-        
+        success = self.client.delete(self.project)
+

@@ -19,7 +19,7 @@ import time
 import glob
 import random
 import codecs
-import unittest2
+import unittest
 
 #We may need to do some path magic in order to find the clam.* imports
 
@@ -34,7 +34,7 @@ import clam.common.status
 
 import time
 
-class AuthServiceTest(unittest2.TestCase):
+class AuthServiceTest(unittest.TestCase):
     """Test basic operations with authentication"""
 
     def setUp(self):
@@ -58,7 +58,7 @@ class AuthServiceTest(unittest2.TestCase):
         time.sleep(30)
         self.assertTrue(True)
 
-class BasicServiceTest(unittest2.TestCase):
+class BasicServiceTest(unittest.TestCase):
     """Test basic operations with authentication"""
 
     def setUp(self):
@@ -198,7 +198,7 @@ class BasicServiceTest(unittest2.TestCase):
         success = self.client.delete('basicservicetest')
         self.assertTrue(success)
 
-class ExtensiveServiceTest(unittest2.TestCase):
+class ExtensiveServiceTest(unittest.TestCase):
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
         self.client = CLAMClient(self.url,'proycon','secret')
@@ -278,7 +278,7 @@ class ExtensiveServiceTest(unittest2.TestCase):
 
 
 
-class ArchiveUploadTest(unittest2.TestCase):
+class ArchiveUploadTest(unittest.TestCase):
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
         self.client = CLAMClient(self.url,'proycon','secret')
