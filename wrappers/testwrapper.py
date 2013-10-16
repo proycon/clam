@@ -8,14 +8,14 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
 #This is a test wrapper, meant to illustrate how easy it is to set
 #up a wrapper script for your system using Python and the CLAM Client API.
-#We make use of the XML configuration file that CLAM outputs, rather than 
+#We make use of the XML configuration file that CLAM outputs, rather than
 #passing all parameters on the command line.
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
@@ -65,14 +65,14 @@ for parametergroup, parameters in clamdata.parameters:
             print "\t" + parameter.name + ": " + str(parameter.value)
 
 #Query a specific parameter:
-print "\tYour favourite colour is " + clamdata['colourchoice'].value
+print "\tYour favourite colour is " + clamdata['colourchoice']
 
-print "INPUT FILES:"    
+print "INPUT FILES:"
 
 #Iterate over all inputfiles:
 for inputfile in clamdata.input:
     print "\t" + str(inputfile)
-    if isinstance(inputfile.format, clam.common.formats.PlainTextFormat) or isinstance(inputfile.format, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
+    if isinstance(inputfile.metadata, clam.common.formats.PlainTextFormat) or isinstance(inputfile.metadata, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
         print "\tProcessing " + str(inputfile)
         clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
         #invoke 'rev' through the shell to reverse the input
@@ -81,7 +81,7 @@ for inputfile in clamdata.input:
         print "\tSkipping " + str(inputfile)
         clam.common.status.write(statusfile, "Skipping " + os.path.basename(str(inputfile)) + ", invalid format")
 
-clam.common.status.write(statusfile, "Done",100)       
+clam.common.status.write(statusfile, "Done",100)
 
-sys.exit(0) #non-zero exit codes indicate an error! 
+sys.exit(0) #non-zero exit codes indicate an error!
 

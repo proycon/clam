@@ -21,6 +21,7 @@ import web
 import shutil
 import os
 import codecs
+import stat
 import subprocess
 import glob
 import sys
@@ -71,7 +72,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 DEBUG = False
 
@@ -815,7 +816,12 @@ class Project(object):
                 pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
             else:
                 pythonpath = os.path.dirname(settings.__file__)
-            cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
+
+            #if settings.DISPATCHER == 'clamdispatcher' and os.path.exists(settings.CLAMDIR + '/' + settings.DISPATCHER + '.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/' + settings.DISPATCHER+'.py')[stat.ST_MODE]:
+            #    #backward compatibility for old configurations without setuptools
+            #    cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + '.py'
+            #else:
+            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
@@ -2142,7 +2148,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(os.path.abspath(__file__))
     if not 'DISPATCHER' in settingkeys:
-        settings.DISPATCHER = 'clamdispatcher.py'
+        settings.DISPATCHER = 'clamdispatcher'
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:

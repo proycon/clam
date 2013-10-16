@@ -40,7 +40,7 @@ from clam.common.util import RequestWithMethod
 
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 
 class BadRequest(Exception):

@@ -25,7 +25,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.9.6",
+    version = "0.9.7",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
@@ -49,6 +49,7 @@ setup(
             'clamservice = clam.startclamservice:main',
             'startclamservice = clam.startclamservice:main', #alias
             'clamnewproject = clam.clamnewproject:main', #alias
+            'clamdispatcher = clam.clamdispatcher:main'
         ]
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf'] },
