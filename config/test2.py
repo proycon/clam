@@ -35,7 +35,7 @@ SYSTEM_DESCRIPTION = "This is a test case for CLAM."
 
 #The root directory for CLAM, all project files, (input & output) and
 #pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = sys.path[0] + "/clamtestroot/"
+ROOT = "/tmp/clamtestroot/"
 
 #The URL of the system
 #URL = "http://localhost:8080"
@@ -77,18 +77,18 @@ PROFILES = [
         OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
             SetMetaField('encoding','utf-8'),
             filename='overall.stats',
-            unique=False
+            unique=True
         ),
         OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
             filename='overall.freqlist',
-            unique=False
+            unique=True
         ),
         ParameterCondition(createlexicon=True,
             then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 SetMetaField('encoding','utf-8'),
                 filename='overall.lexikon',
-                unique=False
+                unique=True
             )
         )
     )
@@ -117,13 +117,13 @@ COMMAND = sys.path[0] + "/tests/testwrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRE
 #The parameters are subdivided into several group. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
 PARAMETERS =  [
     ('Main', [
-        BooleanParameter('boolean','-b','Boolean','To be or not to be? That is the question'),
-        IntegerParameter('integer','-i','Integer','Integer between zero and ten',minvalue=0, maxvalue=10),
-        FloatParameter('float','-f','Float','Float between 0.0 and 1.0',minvalue=0.0, maxvalue=1.0),
-        StringParameter('string','-s','String','Enter a word',maxlength=10),
-        TextParameter('text','-t','String','Text'),
-        ChoiceParameter('colourchoice','-c','Choice','Favourite colour',choices=[('red','red'),('green','green'),('blue','blue')]),
-        ChoiceParameter('cities','-C', 'Visited cities', 'What cities have you visited?', choices=[('amsterdam', 'Amsterdam'), ('ny', 'New York'), ('london', 'London'), ('paris','Paris')], multi=True)
+        BooleanParameter('boolean','Boolean','To be or not to be? That is the question',paramflag='-b'),
+        IntegerParameter('integer','Integer','Integer between zero and ten',minvalue=0, maxvalue=10, paramflag='-i'),
+        FloatParameter('float','Float','Float between 0.0 and 1.0',minvalue=0.0, maxvalue=1.0, paramflag='-f'),
+        StringParameter('string','String','Enter a word',maxlength=10, paramflag='-s'),
+        TextParameter('text','String','Text', paramflag='-t'),
+        ChoiceParameter('colourchoice','Choice','Favourite colour',choices=[('red','red'),('green','green'),('blue','blue')], paramflag='-c'),
+        ChoiceParameter('cities', 'Visited cities', 'What cities have you visited?', choices=[('amsterdam', 'Amsterdam'), ('ny', 'New York'), ('london', 'London'), ('paris','Paris')], multi=True, paramflag='-C')
     ] )
 ]
 
