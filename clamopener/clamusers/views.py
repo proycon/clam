@@ -78,7 +78,7 @@ def userlist(request):
         s = "The following accounts are active:\n\n"
         report = []
         for clamuser in CLAMUsers.objects.filter(active=1):
-            report.append('ID: ' + clamuser.pk + '\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo change password go to: ' + settings.BASEURL + 'changepw/' + str(clamuser.pk))
+            report.append('ID: ' + str(clamuser.pk) + '\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo change password go to: ' + settings.BASEURL + 'changepw/' + str(clamuser.pk))
 
         if report:
             s = "\n\n".join(report)
@@ -95,7 +95,7 @@ def report(request):
     s = "The following accounts are pending approval:\n\n"
     report = []
     for clamuser in PendingUsers.objects.filter(active=0):
-        report.append('ID: ' + clamuser.pk + '\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk))
+        report.append('ID: ' + str(clamuser.pk) + '\nUsername: ' + clamuser.username + '\nFull name: '  +clamuser.fullname + '\nInstitution: ' + clamuser.institution + '\nMail: ' + clamuser.mail + '\n\nTo approve this user go to: ' + settings.BASEURL + 'activate/' + str(clamuser.pk))
 
     if report:
         s = "\n\n".join(report)
