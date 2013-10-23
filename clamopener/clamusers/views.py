@@ -32,7 +32,7 @@ def activate(request, userid):
                 return HttpResponseNotFound("No such user", content_type="text/plain")
             clamuser = CLAMUsers(username=pendinguser.username, password=pendinguser.password,fullname=pendinguser.fullname, institution=pendinguser.institution, mail=pendinguser.mail,active=True)
             clamuser.save()
-            send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has been reviewed and activated.', settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
+            send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has been reviewed and activated.\n\n(this is an automated message)', settings.FROMMAIL, [clamuser.mail] + [ x[1] for x in settings.ADMINS ] , fail_silently=False)
             return HttpResponse("Succesfully activated", content_type="text/plain")
         else:
             return HttpResponseForbidden("Invalid password, not activated", content_type="text/plain")
@@ -57,7 +57,7 @@ def changepw(request, userid):
         if ((hashlib.md5(request.POST['pw']).hexdigest() == clamuser.password) or (hashlib.md5(request.POST['pw']).hexdigest() == settings.MASTER_PASSWORD)):
             clamuser.password=hashlib.md5(request.POST['newpw']).hexdigest()
             clamuser.save()
-            #send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has had its password changed to: ' + request.POST['newpw'], settings.FROMMAIL, [clamuser.mail] , fail_silently=False)
+            send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has had its password changed to: ' + request.POST['newpw'] + ".\n\n(this is an automated message)", settings.FROMMAIL, [clamuser.mail] , fail_silently=False)
             return HttpResponse("Password changed", content_type="text/plain")
         else:
             return HttpResponseForbidden("Current password is invalid", content_type="text/plain")
