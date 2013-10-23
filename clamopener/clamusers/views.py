@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from clamopener import settings
-from clamopener.clamusers.forms import RegisterForm
+from clamopener.clamusers.forms import RegisterForm, pwhash
 from clamopener.clamusers.models import CLAMUsers,PendingUsers
 from django.http import HttpResponse, HttpResponseForbidden,HttpResponseNotFound
 from django.core.mail import send_mail
@@ -54,8 +54,8 @@ def changepw(request, userid):
             clamuser = CLAMUsers.objects.get(pk=int(userid))
         except:
             return HttpResponseNotFound("No such user", content_type="text/plain")
-        if ((hashlib.md5(request.POST['pw']).hexdigest() == clamuser.password) or (hashlib.md5(request.POST['pw']).hexdigest() == settings.MASTER_PASSWORD)):
-            clamuser.password=hashlib.md5(request.POST['newpw']).hexdigest()
+        if ((pwhash(clamuser.username,request.POST['pw']) == clamuser.password) or (hashlib.md5(request.POST['pw']).hexdigest() == settings.MASTER_PASSWORD)):
+            clamuser.password=pwhash(clamuser.username,request.POST['newpw'])
             clamuser.save()
             send_mail('Webservice account on ' + settings.DOMAIN , 'Dear ' + clamuser.fullname + '\n\nYour webservice account on ' + settings.DOMAIN + ' has had its password changed to: ' + request.POST['newpw'] + ".\n\n(this is an automated message)", settings.FROMMAIL, [clamuser.mail] , fail_silently=False)
             return HttpResponse("Password changed", content_type="text/plain")
@@ -71,6 +71,7 @@ def changepw(request, userid):
         c = RequestContext(request)
         c.update(csrf(request))
         return render_to_response('changepw.html',{'userid': userid},context_instance=c)
+
 
 
 def userlist(request):
