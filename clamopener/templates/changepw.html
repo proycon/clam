@@ -10,7 +10,7 @@
               <h1>Change Password Form</h1>
           </div>
           <div id="main">              
-              <form method="post" action="/activate/{{ userid }}">
+              <form method="post" action="/changepw/{{ userid }}">
                 {% csrf_token %}
                 Current password: <input type="password" name="pw" /><br />
                 New password: <input type="password" name="newpw" /><br />
