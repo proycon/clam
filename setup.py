@@ -15,7 +15,7 @@ if not os.path.exists('clam'):
     if not os.path.exists('build'): os.mkdir('build')
     os.chdir('build')
     if not os.path.exists('clam'): os.mkdir('clam')
-    os.system('cp -Rpdfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
+    os.system('cp -Rpfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clampopener ../external ../wrappers ../docs clam/')
     os.system('mv -f clam/setup.py clam/setup.cfg .')
     os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')
 
@@ -25,7 +25,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.9.7.1",
+    version = "0.9.7.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully fledged RESTful webservices."),
