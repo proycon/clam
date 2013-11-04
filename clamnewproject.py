@@ -147,8 +147,10 @@ def main():
         print >>sys.stderr, "WARNING: System wrapper file " + dir + '/' + sysid + '-wrapper.py already seems to exists, defiantly refusing to overwrite'
         sys.exit(2)
 
-    print >>sys.stderr, "Your new CLAM project has been set up!"
-    print >>sys.stderr, "WHAT'S NEXT? Now you can edit your service configuration file " +  dir + '/' + sysid + ".py and your system wrapper script " +   dir + '/' + sysid + "-wrapper.py . Consult the CLAM Documentation and/or instruction videos on http://proycon.github.com/clam for further details."
+    s = "Your new CLAM project has been set up!\n"
+    s += "WHAT'S NEXT? Now you can edit your service configuration file " +  dir + '/' + sysid + ".py and your system wrapper script " +   dir + '/' + sysid + "-wrapper.py . Consult the CLAM Documentation and/or instruction videos on http://proycon.github.com/clam for further details.\n\n"
+
+    print >>sys.stderr, s
 
     if FORCEURL:
         url = FORCEURL
@@ -162,7 +164,14 @@ def main():
             url += ':' + str(PORT)
         url += '/'
 
-    print >>sys.stderr, "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + " " + sysid + '.' + sysid , " after which you can point your browser or CLAM client to " + url + "."
+    s2 = "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid , " after which you can point your browser or CLAM client to " + url + ".\n\n"
+    print >>sys.stderr, s2
+
+    print >>sys.stderr, "All of this information can be read in the " + dir + "/INSTRUCTIONS file"
+
+    with open(dir + "/INSTRUCTIONS") as f:
+        f.write(s + s2)
+
 
 
 if __name__ == "__main__":

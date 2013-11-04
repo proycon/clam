@@ -24,7 +24,7 @@ import time
 
 VERSION = '0.9.7'
 
-#sys.path.append(sys.path[0] + '/..')
+sys.path.append(sys.path[0] + '/..')
 #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 
@@ -78,8 +78,8 @@ def main():
 
     try:
         exec "import " + settingsmodule + " as settings"
-    except ImportError:
-        print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule
+    except ImportError as e:
+        print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e)
         f = open(projectdir + '.done','w')
         f.write(str(1))
         f.close()
