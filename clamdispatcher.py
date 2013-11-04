@@ -80,6 +80,7 @@ def main():
         exec "import " + settingsmodule + " as settings"
     except ImportError as e:
         print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e)
+        print >>sys.stderr, "[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)"
         f = open(projectdir + '.done','w')
         f.write(str(1))
         f.close()
