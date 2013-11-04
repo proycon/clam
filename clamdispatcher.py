@@ -22,7 +22,7 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.9.7'
+VERSION = '0.9.8'
 
 sys.path.append(sys.path[0] + '/..')
 #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
