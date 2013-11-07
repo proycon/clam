@@ -63,8 +63,7 @@ def usage():
 
 
 
-if __name__ == "__main__":
-
+def main():
     username = password = None
     parameters = {}
     begin = 0
@@ -264,3 +263,5 @@ if __name__ == "__main__":
         print >>sys.stderr, "Authorization required (401)"
 
 
+if __name__ == "__main__":
+    main()
