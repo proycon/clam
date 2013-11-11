@@ -5,22 +5,13 @@
 \usepackage{hyperref}
 \usepackage{supertabular}
 
-\author{Maarten van Gompel \\
-	Center for Language Studies \\
-	Radboud University Nijmegen \\ \\
-    {\small P.O. Box 9103, NL-6500 HD Nijmegen, The Netherlands} \\ \\         
-    URL: http://proycon.github.com/clam} 
-        
-        %\thanks{This document is available from
-	    %http://ilk.uvt.nl/downloads/pub/papers/ilk.1202.pdf. All rights reserved, Tilburg University and 
-        %Radboud University Nijmegen.}
+\author{Maarten van Gompel}
 
-\title{{\huge CLAM: Computational Linguistics Application Mediator} \\ \vspace*{0.5cm}
-{\bf \small version 0.9.7} \\ \vspace*{0.5cm}{\huge Documentation}\\}
-%\vspace*{1cm} {\it ILK Technical Report -- ILK 12-02}}
+\title{CLAM: Computational Linguistics Application Mediator. Documentation}
 
 \parindent=0pt %no paragraph indentation
 \parskip=12pt %paragraph skip
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
 
 \newenvironment{devnotes}
 {\newpage
@@ -36,7 +27,42 @@
 \begin{document}
 \sffamily
 
-\maketitle
+\begin{titlepage}
+\begin{center}
+%\textsc{\large Language and Speech Technology\\ Technical Report Series}\\[1.5cm] 
+%\textsc{Report Number LST-13-03}\\[0.5cm] 
+\vspace{3cm}  %PRERELEASE
+
+\HRule \\[0.5cm]
+{ \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
+{\bf \small version 0.9.8} \\[0.5cm]
+{ \Large \bfseries Documentation}\\[0.5cm]
+{\large \emph{Maarten van Gompel}}\\[0.5cm]
+\HRule \\[1.0cm]
+
+\emph{November 7th, 2013} \\[0.5cm] 
+\includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
+\end{center}
+%\vspace{1cm}
+\vspace{3cm} %PRERELEASE
+
+\begin{minipage}{0.6\textwidth}
+\begin{flushleft}
+Language and Speech Technology PI Group \\
+Centre for Language Studies \\
+Radboud University Nijmegen \\
+P.O. Box 9103 \\
+NL-6500 HD Nijmegen \\
+The Netherlands \\
+http://www.ru.nl/lst \\[0.3cm]
+%Series editors: \\
+%\hspace{0.5cm}\emph{Nelleke Oostdijk}   \\
+%\hspace{0.5cm}\emph{Antal van den Bosch}  \\
+%\hspace{0.5cm}\emph{David van Leeuwen}  \\
+\end{flushleft}
+\end{minipage}
+
+\end{titlepage}
 \tableofcontents
 
 \chapter{Introduction} 
@@ -66,7 +92,7 @@ CLAM comes with an ample number of features, the most notable ones being:
 \item \textbf{Viewers} -- \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
 \end{itemize}
 
-In publication of research that makes use of this software, a citation should be given of: {\em ``Maarten van Gompel (2012). CLAM: Computational Linguistics Application Mediator. Documentation. ILK Technical Report 12-02. \\ Available from {\tt http://ilk.uvt.nl/downloads/pub/papers/ilk.1202.pdf}''}.
+In publication of research that makes use of this software, a citation should be given of: {\em ``Maarten van Gompel (2012). CLAM: Computational Linguistics Application Mediator. Documentation. ILK Technical Report 12-02.''}.
 
 CLAM is open-source software licensed under the GNU Public License v3, a copy of which can be found along with the software.
 
