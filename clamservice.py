@@ -1553,12 +1553,14 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 #============================ Transfer file ========================================
                 printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
                 if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                    printdebug('(Receiving data by uploading file)')
                     #Upload file from client to server
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
                     for line in postdata['file'].file:
                         f.write(line) #encoding unaware, seems to solve big-file upload problem
                     f.close()
                 elif 'url' in postdata and postdata['url']:
+                    printdebug('(Receiving data via url)')
                     #Download file from 3rd party server to CLAM server
                     try:
                         req = urllib2.urlopen(postdata['url'])
@@ -1571,7 +1573,12 @@ def addfile(project, filename, user, postdata, inputsource=None):
                         if not chunk: break
                         f.write(chunk)
                     f.close()
+                elif 'inputsource' in postdata and postdata['inputsource']:
+                    #Copy (symlink!) from preinstalled data
+                    printdebug('(Creating symlink to file ' + inputsource.path + ' <- ' + Project.path(project,user) + '/input/ ' + filename + ')')
+                    os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
                 elif 'contents' in postdata and postdata['contents']:
+                    printdebug('(Receiving data via from contents variable)')
                     #grab encoding
                     encoding = 'utf-8'
                     for p in parameters:
@@ -1585,12 +1592,10 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     except UnicodeError:
                         raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
                 elif 'data' in web.ctx and web.ctx['data']:
+                    printdebug('(Receiving data directly from context)')
                     f = open(Project.path(project, user) + 'input/' + filename,'w')
                     f.write(web.ctx['data'])
                     f.close()
-                elif 'inputsource' in postdata and postdata['inputsource']:
-                    #Copy (symlink!) from preinstalled data
-                    os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
 
                 printdebug('(File transfer completed)')
 
