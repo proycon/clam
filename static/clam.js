@@ -23,7 +23,13 @@ function initclam() {
     }
 
    
-   //set custom text
+   //set custom text, this hack is needed because XSLT 1.0 can't get the job
+   //done alone 
+   if ($('#customhtml').length > 0) {
+       $('#customhtml').html($('#customhtml').text().replace('&lt;','<').replace('&gt;','>') );
+   }
+
+   /*
    if ($('#customtextindex').length > 0) {
        $.ajax({
             type: "GET",
@@ -63,7 +69,7 @@ function initclam() {
             }
        });              
    }
-    
+    */
     
    //Create lists of all possible inputtemplates (aggregated over all profiles)
    var inputtemplate_options = "<option value=\"\">Select a filetype...</option>";

@@ -1,4 +1,4 @@
-$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, ghost, info, accesstoken, interfaceoptions)
+$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, ghost, info, accesstoken, interfaceoptions, customhtml)
 <?xml version="1.0" encoding="UTF-8" ?>
 $if info:
 	<?xml-stylesheet type="text/xsl" href="$url/static/info.xsl"?>
@@ -13,6 +13,12 @@ $elif user:
 $else:
     <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url" interfaceoptions="$interfaceoptions">
  <description>$:system_description</description>
+$if customhtml:
+        <customhtml>
+        <![CDATA[
+        $:customhtml 
+        ]]>
+        </customhtml>
 $if not project:
         <projects>
         $for p, time in projects:
