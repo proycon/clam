@@ -381,10 +381,9 @@ class Index(object):
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
-
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX)
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -411,7 +410,7 @@ class Info(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"")
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -687,11 +686,15 @@ class Project(object):
 
         statuscode, statusmsg, statuslog, completion = self.status(project, user)
 
-
+        customhtml = ""
+        if statuscode == clam.common.status.READY:
+            customhtml = settings.CUSTOMHTML_PROJECTSTART
 
         inputpaths = []
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
             inputpaths = Project.inputindex(project, user)
+
+
 
         if statuscode == clam.common.status.DONE:
             outputpaths = Project.outputindex(project, user)
@@ -699,6 +702,7 @@ class Project(object):
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
                 printlog("Child process failed, exited with non zero-exit code.")
+            customhtml = settings.CUSTOMHTML_PROJECTDONE
         else:
             outputpaths = []
 
@@ -717,7 +721,7 @@ class Project(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml)
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -1553,12 +1557,14 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 #============================ Transfer file ========================================
                 printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
                 if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                    printdebug('(Receiving data by uploading file)')
                     #Upload file from client to server
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
                     for line in postdata['file'].file:
                         f.write(line) #encoding unaware, seems to solve big-file upload problem
                     f.close()
                 elif 'url' in postdata and postdata['url']:
+                    printdebug('(Receiving data via url)')
                     #Download file from 3rd party server to CLAM server
                     try:
                         req = urllib2.urlopen(postdata['url'])
@@ -1571,7 +1577,12 @@ def addfile(project, filename, user, postdata, inputsource=None):
                         if not chunk: break
                         f.write(chunk)
                     f.close()
+                elif 'inputsource' in postdata and postdata['inputsource']:
+                    #Copy (symlink!) from preinstalled data
+                    printdebug('(Creating symlink to file ' + inputsource.path + ' <- ' + Project.path(project,user) + '/input/ ' + filename + ')')
+                    os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
                 elif 'contents' in postdata and postdata['contents']:
+                    printdebug('(Receiving data via from contents variable)')
                     #grab encoding
                     encoding = 'utf-8'
                     for p in parameters:
@@ -1585,12 +1596,10 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     except UnicodeError:
                         raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
                 elif 'data' in web.ctx and web.ctx['data']:
+                    printdebug('(Receiving data directly from context)')
                     f = open(Project.path(project, user) + 'input/' + filename,'w')
                     f.write(web.ctx['data'])
                     f.close()
-                elif 'inputsource' in postdata and postdata['inputsource']:
-                    #Copy (symlink!) from preinstalled data
-                    os.symlink(inputsource.path, Project.path(project, user) + 'input/' + filename)
 
                 printdebug('(File transfer completed)')
 
@@ -2198,6 +2207,24 @@ def set_defaults(HOST = None, PORT = None):
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
+    if not 'CUSTOMHTML_INDEX' in settingkeys:
+        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html'):
+            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html','r','utf-8') as f:
+                settings.CUSTOMHTML_INDEX = f.read()
+        else:
+            settings.CUSTOMHTML_INDEX = ""
+    if not 'CUSTOMHTML_PROJECTSTART' in settingkeys:
+        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
+            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r','utf-8') as f:
+                settings.CUSTOMHTML_PROJECTSTART = f.read()
+        else:
+            settings.CUSTOMHTML_PROJECTSTART = ""
+    if not 'CUSTOMHTML_PROJECTDONE' in settingkeys:
+        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
+            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r','utf-8') as f:
+                settings.CUSTOMHTML_PROJECTDONE = f.read()
+        else:
+            settings.CUSTOMHTML_PROJECTDONE = ""
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
