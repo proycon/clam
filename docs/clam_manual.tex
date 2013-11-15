@@ -35,12 +35,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.8} \\[0.5cm]
+{\bf \small version 0.9.8.3} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 7th, 2013} \\[0.5cm] 
+\emph{November 15th, 2013} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 %\vspace{1cm}
@@ -862,15 +862,23 @@ Now suppose there is another kind of mandatory input, a lexicon against which sp
 
 \subsection{Customising the web application}
 
-The CLAM web application offers a single uniform interface for all kinds of services. However, a certain degree of customisation is possible. One thing you may want is to include more HTML text on the pages, possibly enriched with images and hyperlinks to external sites. It is an ideal way to add extra instructions for your users. Doing this is very straightforward, by adding some custom HTML files to \texttt{static/custom/}, the HTML files should be named as follows, where SYSTEMID should be replaced by the ID of your system, as configured in your service configuration file.
+The CLAM web application offers a single uniform interface for all kinds of
+services. However, a certain degree of customisation is possible. One thing you
+may want is to include more HTML text on the pages, possibly enriched with
+images and hyperlinks to external sites. It is an ideal way to add extra
+instructions for your users. You may do so using the following variables in the
+service configuration file:
+
 
 \begin{itemize}
-\item \texttt{static/custom/SYSTEMID\_index.html} - This file will be included in the index view, the overview of all projects.
-\item \texttt{static/custom/SYSTEMID\_projectstart.html} - This file will be included in the project view where the user can upload files and select parameters.
-\item \texttt{static/custom/SYSTEMID\_projectdone.html} - This file will be included in the project view when the project is done and output is ready to be viewed/downloaded.
+\item \texttt{CUSTOMHTML\_INDEX} - This text will be included in the index view, the overview of all projects.
+\item \texttt{CUSTOMHTML\_PROJECTSTART} - This text will be included in the project view where the user can upload files and select parameters.
+\item \texttt{CUSTOMHTML\_PROJECTDONE} - This text will be included in the project view when the project is done and output is ready to be viewed/downloaded.
 \end{itemize}
 
-As the HTML pages will be embedded on the fly, take care \emph{not} to include any headers, only tags that go within the HTML \texttt{body} are permitted! Always use the UTF-8 encoding.
+As the HTML text will be embedded on the fly, take care \emph{not} to include
+any headers, only tags that go within the HTML \texttt{body} are permitted!
+Always use the UTF-8 encoding and well-formed xhtml syntax.
 
 A second kind of customisation is customisation of the style, this can be achieved by creating new CSS themes. CLAM gets shipped with the default ``classic'' style (which did receive a significant overhaul in CLAM 0.9). Copy, rename and adapt \texttt{style/classic.css} to create your own style. And set \texttt{STYLE} accordingly in your service configuration file.
 
