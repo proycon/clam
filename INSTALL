@@ -1,42 +1,89 @@
+(NOTE: PLEASE CONSULT THE CLAM MANUAL FOR MORE DETAILED INSTRUCTIONS ON INSTALLATION!)
 
-PLEASE CONSULT THE CLAM MANUAL FOR MORE DETAILED INSTRUCTIONS ON INSTALLATION!
+CLAM INSTALLATION ON LINUX
+==============================
 
+Easy install is part of the Python setup tools and can install CLAM globally on
+your system for you from the Python Package Index. This is the easiest method
+of installing CLAM, as it will automatically fetch and install any
+dependencies.  This procedure downloads CLAM for you automatically.
 
-== INSTRUCTIONS USING EASY INSTALL ==
+ $ sudo easy_install clam
 
-Easy install is part of the Python setup tools and can install CLAM globally on your system for you from the Python Package Index. This is the easiest method of installing CLAM, as it will automatically fetch and install any dependencies.  This procedure downloads CLAM for you, rather than using a pre-downloaded archive! 
+If you already downloaded CLAM manually (from github), you can do:
 
-$ sudo easy_install clam
+ $ sudo ./setup.py install
 
-(sudo/root access is needed to install globally. For installation in a local custom path, use -d, this owever complicates matters as you need to take care to add these local directories to your python library path:
-
-$ easy_install -d /path/to/dir clam
-
-If easy_install is not yet installed on your system, install it using:
- on debian-based linux systems (including Ubuntu):
-  $ apt-get install python-setuptools
- on RPM-based linux systems:
+If easy_install is not yet installed on your system, install it using: 
+ on debian-based linux systems (including Ubuntu): 
+  $ apt-get install python-setuptools 
+  
+on RPM-based linux systems: 
   $ yum install python-setuptools
- on MacOS X:
-  (follow the manual steps below instead)
 
-If you installed using this method, then you can (globally) launch a clam webservice using the development server as follows:
+on MacOS X: (follow the manual steps further down this document)
+
+Note that sudo/root access is needed to install globally. Ask your system administrator
+to install it.  Alternatively, you can install in a local custom path  using the
+-d flag, this however complicates matters as you need to take care to add these
+local directories to your python library path:
+
+ $ easy_install -d /path/to/dir clam
+
+RUNNING A TEST WEBSERVICE
+===========================
+
+If you installed CLAM using the above method, then you can launch a clam test
+webservice using the development server as follows:
 
 $ clamservice -H localhost -p 8080 clam.config.textstats
  
- Navigate your browser to http://localhost:8080 and verify everything works
+Navigate your browser to http://localhost:8080 and verify everything works
+
+If any problems occur during installation regarding pycurl, then install the
+pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
+
+Note: It is important to regularly keep CLAM up to date as fixes and
+improvements are implemented on a regular basis. Update CLAM using: 
+
+ $ easy_install -U clam
+
+
+INSTALLING A PARTICULAR CLAM WEBSERVICE FOR PRODUCTION USE
+===========================================================
+
+When installating a particular CLAM webservice on a new server, it is first
+necessary to edit the service configuration file of the webservice and make
+sure all the paths in there are set correctly for the new server. Of interest
+is in particular the ROOT path, which is where user data will be stored, this
+directory must exist and be writable by the webserver.
+
+For testing, the built-in development server can be used. Suppose the
+webservice configuration is in /path/to/mywebservice/ and is called
+mywebservice.py, then the development server can be started as follows:
+
+ $ clamservice -P /path/to/mywebservice mywebservice
+
+For production, however, it is strongly recommended to embed CLAM in Apache.
+This is the typically task of a system administrator, as certain skills are
+necessary and assumed.
+
+Embedding CLAM in Apache is accomplished through WSGI, for which you need to
+have the package libapache2-mod-wsgi installed (Debian/Ubuntu).  Next it
+involves the writing of a small WSGI script and adaptation of the Apache
+configuration to load this script. All this is explained in detail in the CLAM
+Manual, obtainable from http://proycon.github.io/clam/ . 
 
 
 
-If any problems occur during installation regarding pycurl, then install the pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
-
-Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository. 
 
 
- 
-== MANUAL INSTRUCTIONS FOR MAC OS X USERS ==
+MANUAL CLAM INSTALLATION ON MAC OS X
+==================================
 
-(Note: These instructions may a bit outdated and lengty, but should work. The recommended route however is to install the python setuptools and then use easy_install as per the above instructions. )
+(Note: These instructions may a bit outdated and lengthy, but should work. The
+recommended route however is to install the python setuptools and then use
+easy_install as per the above instructions. )
 
 1) Install the Apple Developer Tools (available as a seperate install
     on the Apple installation DVD) as well as X11 if it's not installed
@@ -81,13 +128,20 @@ $ git clone git://github.com/proycon/clam.git
  Navigate your browser too to http://localhost:8080 and verify everything works
 
 ERRORS?
- Error importing lxml even though you succesfully installed it? There may be multiple pythons on your machine, python may not be the same as python2.6 or python2.5. Try python2.6 or python2.5 explicitly:
-
- Change 'python' to 'python2.6' in the first line (hashbang) of clamservice.py and the wrapper script you want to use (i.e. clam/config/textstats.py), then try again:
+ Error importing lxml even though you succesfully installed it? There may be
+ multiple pythons on your machine, python may not be the same as python2.6 or
+ python2.5. Try python2.6 or python2.5 explicitly: Change 'python' to
+ 'python2.6' in the first line (hashbang) of clamservice.py and the wrapper
+ script you want to use (i.e. clam/config/textstats.py), then try again:
  
-Note: It is important to regularly keep CLAM up to date as fixes and improvements are implemented on a regular basis. Simply issue a 'git pull' in your CLAM directory to obtain the latest modifications from the github repository.
+Note: It is important to regularly keep CLAM up to date as fixes and
+improvements are implemented on a regular basis. Simply issue a 'git pull' in
+your CLAM directory to obtain the latest modifications from the github
+repository.
 
-== INSTRUCTIONS FOR WINDOWS USERS == 
 
- 1) Delete Windows and install a decent OS ;)
+CLAM INSTALLATION ON WINDOWS
+==============================
+
+ Not supported, delete Windows and install a decent OS ;)
  

@@ -35,12 +35,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.8.3} \\[0.5cm]
+{\bf \small version 0.9.8.4} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 15th, 2013} \\[0.5cm] 
+\emph{November 7th, 2013} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 %\vspace{1cm}
@@ -200,30 +200,92 @@ Especially people migrating from earlier versions of CLAM may have already adopt
 
 \subsection{Using CLAM with Apache 2}
 
-In order to run CLAM in Apache, you have to install and configure several files. We will be using WSGI, through \texttt{mod\_wsgi}, an interface between Apache and Python. The following instructions assume you are at least basically familiar with Apache 2 configuration and Linux server administration in general:
+In order to run a CLAM webservice in Apache, you have to install and configure
+several files. We will be using WSGI, through \texttt{mod\_wsgi}, an interface
+between Apache and Python. The following instructions assume you are at least
+basically familiar with Apache 2 configuration and Linux server administration
+in general.
 
 \begin{enumerate}
-\item Install \texttt{mod\_wsgi} for Apache 2, if not already present on the system. In Debian and Ubuntu this is available as a package named \texttt{libapache2-mod-wsgi}.
-\item Next we need to write a simple WSGI-script, which is a Python script that will be invoked by the webserver. Copy \texttt{clam/config/example.wsgi} to something like  \texttt{clam/config/yourservice.wsgi} and adapt the script. If CLAM is not installed in a standard location where Python can find it, make sure to explicitly specify its parent directory according to the instructions in the example.
-\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own. Also make sure \texttt{CLAMDIR} is properly set in your service configuration file.
-\item Configure Apache to let it know about WSGI and your service. I assume the reader is acquainted with basic Apache configuration and will only elaborate on the specifics for CLAM. Adapt and add the following to any of your sites in \texttt{/etc/apache2/sites-enabled} (or optionally directly in \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is assumed you configured your service configuration file with \texttt{URLPREFIX} set to \emph{``yourservice''}.
+    \item Install \texttt{mod\_wsgi} for Apache 2, if not already
+    present on the system. In Debian and Ubuntu this is available as a package
+    named \texttt{libapache2-mod-wsgi}.  
+  
+    \item Next we need to write a simple
+    WSGI-script, which is a Python script that will be invoked by the
+    webserver. An example script can be copied from
+    \url{https://github.com/proycon/clam/blob/master/config/example.wsgi} and
+    is shown in full below. Copy this to somewhere like
+    \texttt{yourwebservice.wsgi} and adapt the script. If CLAM is not installed in a standard location
+    where Python can find it, make sure to explicitly specify its parent
+    directory according to the instructions in the example.
 
 \begin{verbatim}
- WSGIScriptAlias /yourservice /path/to/clam/config/yourservice.wsgi/
- WSGIDaemonProcess yourservice user=proycon group=users \
-     home=/path/to/clam threads=15 maximum-requests=10000
+#!/usr/bin/env python
+import sys
+import os
+
+#** If CLAM is not by default in your PYTHONPATH, you need 
+#to specify the directory that contains the
+#subdirectory 'clam' here (and uncomment all lines): **
+#CLAMPARENTDIR = '/path/to/clam' 
+#sys.path.append(CLAMPARENTDIR)
+#os.environ['PYTHONPATH'] = CLAMPARENTDIR
+
+#this is the directory that contains your service configuration file
+WEBSERVICEDIR = '/path/to/yourwebservice/' 
+sys.path.append(WEBSERVICEDIR)
+os.environ['PYTHONPATH'] = WEBSERVICEDIR #+':' + CLAMPARENTDIR
+
+import yourwebservice #** import your configuration module here! **
+import clam.clamservice
+application = clam.clamservice.run_wsgi(yourwebservice)
+\end{verbatim}
+ 
+\item Configure your service configuration file as explained in
+  Section~\ref{sec:serviceconfig}. Take special note of
+  Subsection~\label{sec:sadmin} where you are instructed to configure the
+  hostname, port, and optionally a URL prefix to use if the service is not
+  assigned a virtualhost of its own. If CLAM is not installed in a default
+  location, make sure \texttt{CLAMDIR} is properly set.
+\item Configure Apache to let it know about WSGI and your service. I assume the
+  reader is acquainted with basic Apache configuration and will only elaborate
+  on the specifics for CLAM. Adapt and add the following to any of your sites
+  in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
+  \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is
+  assumed you configured your service configuration file with
+  \texttt{URLPREFIX} set to \emph{``yourservice''}.
+
+\begin{verbatim}
+ WSGIScriptAlias /yourwebservice \
+  /path/to/yourwebservice/yourwebservice.wsgi/
+ WSGIDaemonProcess yourwebservice user=username group=groupname \
+     home=/path/to/yourwebservice threads=15 maximum-requests=10000
  WSGIProcessGroup yourservice
  WSGIPassAuthorization On
- Alias /yourservice/static /path/to/clam/static/
+ Alias /yourwebservice/static /path/to/clam/static/ 
  <Directory /path/to/clam/static/>
     Order deny,allow
     Allow from all
  </Directory>
 \end{verbatim}
 
-The \texttt{WSGIDaemonProcess} directive goes on one line, but was wrapped here for presentational purposes. Needless to say, all paths need to be adapted according to your setup and the configuration can be extended further as desired, with for example extra authentication or more restrictive access. You can either let CLAM handle authentication (\emph{HTTP Digest Authentication}), in which case you need to set \texttt{WSGIPassAuthorization On}, as by default it is disabled, or you can let Apache itself handle authentication and not use CLAM's authentication mechanism.
+The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directivse go on
+one line, but were wrapped here
+for presentational purposes. Needless to say, all paths need to be adapted
+according to your setup and the configuration can be extended further as
+desired, \texttt{/path/to/clam/static/} should be changed to where CLAM is
+installed and the \texttt{static} dir is found. Dependening on your
+installation and versions, this will be a directory like: \\
+\texttt{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
 
-\item Restart Apache
+\item It is always recommended to add some form of authentication or more restrictive
+  access. You can either let CLAM handle authentication (\emph{HTTP Digest
+  Authentication}), in which case you need to set \texttt{WSGIPassAuthorization
+  On}, as by default it is disabled, or you can let Apache itself handle
+  authentication and not use CLAM's authentication mechanism.  
+
+\item Restart Apache. 
 \end{enumerate}
 
 Note that we run WSGI in Daemon mode using the \texttt{WSGIDaemonProcess} and \texttt{WSGIProcessGroup} directives, as opposed to embedded mode. This is the recommended way of running CLAM. Whenever any code changes are made, simply \texttt{touch} the WSGI file (updating its modification time), and the changes will be immediately available. Embedded mode would require an apache restart when modifications are made, and it may also lead to problems with the HTTP Digest Authentication as authentication keys (nonces) may not be retainable in memory due to constant reloads. Again I'd like to emphasise tht for authentication the line \texttt{WSGIPassAuthorization On} is vital, as otherwise user credentials will never each CLAM.
