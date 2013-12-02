@@ -6,6 +6,7 @@
  - (0.9.8.1) Now installs clamclient as proper CLI tool and shipped more extra's in python egg
  - (0.9.8.2) Fixed issue in copying from inputsource
  - (0.9.8.3) Better support for custom html in web app, now through directives in service configuration
+ - (0.9.8.5) Re-added return to index button in interface
 
 0.9.7) [Oct 2013]
 - Fixed filename constraint (filename=) bug as reported by Eric Auer

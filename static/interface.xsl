@@ -219,7 +219,7 @@
       </xsl:when>
       <xsl:when test="@code = 2">
         <div id="actions">
-        	<input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
+            <input id="indexbutton" type="button" value="Done, return to project index" /><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
         </div>     
         <xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">
