@@ -421,8 +421,11 @@ def getrooturl():
     if settings.FORCEURL:
         return settings.FORCEURL
     else:
-        url = 'http://' + settings.HOST
-        if settings.PORT != 80:
+        if settings.PORT == 443:
+            url = 'https://' + settings.HOST
+        else:
+            url = 'http://' + settings.HOST
+        if settings.PORT != 80 and settings.PORT != 443:
             url += ':' + str(settings.PORT)
         if settings.URLPREFIX and settings.URLPREFIX != '/':
             if settings.URLPREFIX[0] != '/':
