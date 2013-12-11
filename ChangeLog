@@ -7,7 +7,7 @@
  - (0.9.8.2) Fixed issue in copying from inputsource
  - (0.9.8.3) Better support for custom html in web app, now through directives in service configuration
  - (0.9.8.5) Re-added return to index button in interface
- - (0.9.8.6) HTTPS now properly recognised when port is explicitly set to 443
+ - (0.9.8.7) HTTPS now properly recognised when port is explicitly set to 443
 
 0.9.7) [Oct 2013]
 - Fixed filename constraint (filename=) bug as reported by Eric Auer
