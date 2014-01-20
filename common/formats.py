@@ -190,3 +190,8 @@ class GifImageFormat(CLAMMetaData):
     attributes = {}
     name ="Gif Image"
     mimetype = 'image/gif'
+
+class TiffImageFormat(CLAMMetaData):
+    attributes = {}
+    name ="Tiff Image"
+    mimetype = 'image/tiff'
