@@ -235,7 +235,7 @@ function initclam() {
 
    //Download and add from URL
    $('#urluploadsubmit').click(function(event){
-            var filename = validateuploadfilename($('#urluploadfile').val(),$('#urluploadinputtemplate').val());
+            var filename = validateuploadfilename($('#urluploadfile').val().split('/').reverse()[0] ,$('#urluploadinputtemplate').val());
             if (!filename) {
                alert("Please specify a filename");
                return false;

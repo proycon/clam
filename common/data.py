@@ -2031,6 +2031,7 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, proje
 
         clam.common.util.printdebug("Determined input filename: " + filename)
 
+
         return filename
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):

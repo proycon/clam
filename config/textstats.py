@@ -9,7 +9,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -51,9 +51,9 @@ USERS = None #no user authentication
 #USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
 
 ADMINS = ['admin'] #Define which of the above users are admins
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!!
 
-#Do you want all projects to be public to all users? Otherwise projects are 
+#Do you want all projects to be public to all users? Otherwise projects are
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
@@ -74,6 +74,10 @@ STYLE = 'classic'
 #Here you can specify an extra formats module
 CUSTOM_FORMATS_MODULE = None
 
+# ======= INTERFACE OPTIONS ===========
+
+#allow CLAM to download its input from a user-specified url
+INTERFACEOPTIONS = "inputfromweb"
 
 # ======== PREINSTALLED DATA ===========
 
@@ -83,17 +87,17 @@ CUSTOM_FORMATS_MODULE = None
 
 # ======== PROFILE DEFINITIONS ===========
 
-PROFILES = [ 
+PROFILES = [
     Profile(
-        InputTemplate('textinput', PlainTextFormat,"Input text document",  
-            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+        InputTemplate('textinput', PlainTextFormat,"Input text document",
+            StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
             IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
             MSWordConverter(id='docconv',label='Convert from MS Word Document'),
-            #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),            
+            #InputSource(id='sampledoc', label="Sample Document", path=ROOT+'/inputsources/sampledoc.txt', metadata=PlainTextFormat(None, encoding='utf-8',language='en')),
             extension='.txt',
             multi=True,
             acceptarchive=True,
@@ -104,38 +108,38 @@ PROFILES = [
             extension='.stats',
             multi=True
         ),
-        OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
-            CopyMetaField('language','textinput.language'), 
-            CopyMetaField('encoding','textinput.encoding'), 
+        OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ',
+            CopyMetaField('language','textinput.language'),
+            CopyMetaField('encoding','textinput.encoding'),
             SimpleTableViewer(),
             extension='.freqlist',
             multi=True
         ),
         OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
             SetMetaField('encoding','ascii'),
-            ParameterCondition(author_set=True, 
-                then=ParameterMetaField('author','author'), 
+            ParameterCondition(author_set=True,
+                then=ParameterMetaField('author','author'),
             ),
             filename='overall.stats',
             unique=True
-        ), 
+        ),
         OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
-            ParameterCondition(author_set=True, 
-                then=ParameterMetaField('author','author'), 
+            ParameterCondition(author_set=True,
+                then=ParameterMetaField('author','author'),
             ),
             SimpleTableViewer(),
             filename='overall.freqlist',
             unique=True
-        ), 
-        ParameterCondition(createlexicon=True, 
+        ),
+        ParameterCondition(createlexicon=True,
             then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 SetMetaField('encoding','utf-8'),
                 filename='overall.lexicon',
                 unique=True
-            )            
+            )
         )
-    ) 
+    )
 ]
 
 # ======== COMMAND ===========
@@ -145,14 +149,14 @@ PROFILES = [
 #absolute paths is preferred. The current working directory will be
 #set to the project directory.
 #
-#You can make use of the following special variables, 
+#You can make use of the following special variables,
 #which will be automatically set by CLAM:
 #     $INPUTDIRECTORY  - The directory where input files are uploaded.
 #     $OUTPUTDIRECTORY - The directory where the system should output
 #                        its output files.
-#     $STATUSFILE      - Filename of the .status file where the system 
-#                        should output status messages. 
-#     $DATAFILE        - Filename of the clam.xml file describing the 
+#     $STATUSFILE      - Filename of the .status file where the system
+#                        should output status messages.
+#     $DATAFILE        - Filename of the clam.xml file describing the
 #                        system and chosen configuration.
 #     $USERNAME        - The username of the currently logged in user
 #                        (set to "anonymous" if there is none)
@@ -163,8 +167,8 @@ COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIR
 # ======== PARAMETER DEFINITIONS ===========
 
 #The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
-PARAMETERS =  [ 
-    ('Main', [ 
+PARAMETERS =  [
+    ('Main', [
         BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
         ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
         IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),
