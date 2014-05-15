@@ -25,7 +25,7 @@ function initclam() {
    
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
    //done alone in all browsers
-   if ($('#customhtml').html().search("&lt;") != 1) {
+   if ($('#customhtml') && $('#customhtml').html().search("&lt;") != 1) {
        var lt = new RegExp("&lt;", 'g');  i
        var gt = new RegExp("&gt;", 'g');  i
        var s = $('#customhtml').html()

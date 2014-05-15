@@ -97,22 +97,23 @@
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js"></script>
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js"></script>
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
+
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js" />
+    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js" />
     
-    <script type="text/javascript" src="{/clam/@baseurl}/data.js"></script>
-	<link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
+    <script type="text/javascript" src="{/clam/@baseurl}/data.js" />
 
     <xsl:choose>
      <xsl:when test="contains(/clam/@interfaceoptions,'simplepolling')">
-    	<script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js"></script>
+         <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js" />
      </xsl:when>
      <xsl:otherwise>    
-    	<script type="text/javascript" src="{/clam/@baseurl}/static/jquery.fineuploader-3.1.min.js"></script>
+         <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.fineuploader-3.1.min.js" />
      </xsl:otherwise>
     </xsl:choose>
-    <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js"></script>
+    <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js" />
     
     <script type="text/javascript">
         <xsl:if test="status/@code = 1">
@@ -153,15 +154,6 @@
 			simpleupload = true;
 		</xsl:if>				
 		
-        
-        //window.onload = function(){
-        //	if ( (typeof(initclam) == 'undefined') || (typeof($) == 'undefined') )  {
-        //		window.location.reload();
-        //	} else { 
-        //		initclam();
-        //	}
-        //}; 
-
         $(document).ready(function() {
             if ( (typeof(initclam) == 'undefined') )  {
                 alert("Error loading clam.js . Try refreshing the page?");
