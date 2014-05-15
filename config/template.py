@@ -105,6 +105,11 @@ STYLE = 'classic'
 #Here you can specify an extra formats module
 CUSTOM_FORMATS_MODULE = None
 
+# ======= INTERFACE OPTIONS ===========
+
+#Here you can specify additional interface options (space separated list), see the documentation for all allowed options
+#INTERFACEOPTIONS = "inputfromweb" #allow CLAM to download its input from a user-specified url
+
 # ======== PREINSTALLED DATA ===========
 
 #INPUTSOURCES = [

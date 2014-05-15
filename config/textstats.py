@@ -79,6 +79,11 @@ CUSTOM_FORMATS_MODULE = None
 #allow CLAM to download its input from a user-specified url
 INTERFACEOPTIONS = "inputfromweb"
 
+
+CUSTOMHTML_INDEX = "<p>This is a <strong>CLAM</strong> demo</p>"
+#CUSTOMHTML_PROJECTSTART = ""
+#CUSTOMHTML_PROJECTDONE = ""
+
 # ======== PREINSTALLED DATA ===========
 
 #INPUTSOURCES = [

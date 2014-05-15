@@ -24,9 +24,14 @@ function initclam() {
 
    
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
-   //done alone 
-   if ($('#customhtml').length > 0) {
-       $('#customhtml').html($('#customhtml').text().replace('&lt;','<').replace('&gt;','>') );
+   //done alone in all browsers
+   if ($('#customhtml').html().search("&lt;") != 1) {
+       var lt = new RegExp("&lt;", 'g');  i
+       var gt = new RegExp("&gt;", 'g');  i
+       var s = $('#customhtml').html()
+       s = s.replace(lt,'<')
+       s = s.replace(gt,'>');
+       $('#customhtml').html(s);
    }
 
    /*

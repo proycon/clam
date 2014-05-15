@@ -94,7 +94,7 @@
       <meta http-equiv="refresh" content="2" />            
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js"></script>
@@ -153,13 +153,22 @@
 			simpleupload = true;
 		</xsl:if>				
 		
-		window.onload = function(){
-			if ( (typeof(initclam) == 'undefined') || (typeof($) == 'undefined') )  {
-				window.location.reload();
-			} else { 
-				initclam();
-			}
-		};        
+        
+        //window.onload = function(){
+        //	if ( (typeof(initclam) == 'undefined') || (typeof($) == 'undefined') )  {
+        //		window.location.reload();
+        //	} else { 
+        //		initclam();
+        //	}
+        //}; 
+
+        $(document).ready(function() {
+            if ( (typeof(initclam) == 'undefined') )  {
+                alert("Error loading clam.js . Try refreshing the page?");
+            } else {
+                initclam();
+            }
+        });
 		                
     </script>
             
