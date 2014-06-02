@@ -33,7 +33,7 @@ class RegisterForm(forms.ModelForm):
 
         username = cleaned_data['username']
 
-        for c in (' ','&','?','<','>','/','\\','\t','\n','\r'):
+        for c in (' ','&','?','<','>','/',';','`','\\','\t','\n','\r','\b'):
             if c in username:
                 raise forms.ValidationError("Username contains illegal character (" + c + ")" )
 
