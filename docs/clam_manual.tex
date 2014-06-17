@@ -95,7 +95,7 @@ pre-installed for the webservice. The NLP application is usually expected to
 produce a certain output, which is subsequently made available through the
 webservice for viewing and downloading.
 
-The CLAM webservice is a RESTful webservice, meaning it uses the HTTP verbs
+The CLAM webservice is a RESTful webservice\cite{REST}, meaning it uses the HTTP verbs
 GET, POST, PUT and DELETE to manipulate resources and returns responses using
 the HTTP response codes. The principal resource in CLAM is called a
 \emph{project}. Various users can maintain various projects, each representing
@@ -103,9 +103,9 @@ one specific run of the system, with particular input data, output data, and a
 set of configured parameters.
 
 In addition to using HTTP Error Codes for error responses, the webservice
-responds in the CLAM XML format. An associated XSL stylesheet can directly
+responds in the CLAM XML format. An associated XSL stylesheet \cite{XSLT} can directly
 transform this to xhtml in the user's browser, thus providing a standalone web
-application for humand end-users. 
+application for human end-users. 
 
 CLAM comes with an ample number of features, the most notable ones being:
 
@@ -151,7 +151,7 @@ interface.
 
 \section{Technical details}
 
-CLAM is written in Python 2.6, and is built on the webpy framework. It can run
+CLAM is written in Python 2.6 \cite{PYTHON}, and is built on the webpy framework. It can run
 stand-alone thanks to the built-in cherrypy webserver; no additional webserver
 is needed to test your service. In production environments, it is however
 strongly recommended that CLAM is integrated into a real webserver. Supported
@@ -627,7 +627,7 @@ outside of CLAM.
 \subsection{User Authentication}
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM
-implements HTTP Digest Authentication, which as opposed to HTTP Basic
+implements HTTP Digest Authentication \cite{HTTPAUTH}, which as opposed to HTTP Basic
 Authentication computes a hash of the username and password client-side and
 transmits that hash, rather than a plaintext password. User passwords are
 therefore only available to CLAM in hashed form. User authentication is not
@@ -1667,6 +1667,7 @@ To be written still...
 
 %\chapter{Frequently Asked Questions}
 
+\bibliography{clam}
 
 \end{document}
 

@@ -1722,7 +1722,7 @@ class InterfaceData(object):
 
     #@RequireLogin(ghost=GHOST) (may be loaded before authentication)
     def GET(self, user=None):
-        web.header('Content-Type', 'application/javascript')
+        web.header('Content-Type', 'text/javascript')
 
         inputtemplates_mem = []
         inputtemplates = []
