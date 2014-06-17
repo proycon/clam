@@ -14,8 +14,8 @@ def pwhash(user, password):
 
 class RegisterForm(forms.ModelForm):
     mail = forms.EmailField( label='E-Mail',max_length = 255 ,required=True)
-    password2 = forms.CharField(label="Password (again)",  widget=forms.PasswordInput, max_length = 60, required=True )    
-        
+    password2 = forms.CharField(label="Password (again)",  widget=forms.PasswordInput, max_length = 60, required=True )
+
     class Meta:
         model = PendingUsers
         fields = ('username', 'fullname', 'institution','mail','password')
@@ -23,25 +23,30 @@ class RegisterForm(forms.ModelForm):
             'password': forms.PasswordInput,
             'password2': forms.PasswordInput,
         }
-        
+
 
 
     def clean(self):
         cleaned_data = self.cleaned_data
-        password = cleaned_data.get("password")    
+        password = cleaned_data.get("password")
         password2 = cleaned_data.get("password2")
+
+        username = cleaned_data['username']
+
+        for c in (' ','&','?','<','>','/',';','`','\\','\t','\n','\r','\b'):
+            if c in username:
+                raise forms.ValidationError("Username contains illegal character (" + c + ")" )
 
         if password != password2:
             raise forms.ValidationError("Passwords don't match")
-        
+
         #hash the passwords
-        username = cleaned_data['username']
         cleaned_data['password'] = pwhash(username,password)
-        
+
         # Always return the full collection of cleaned data.
         return cleaned_data
-    
-        
+
+
 #class RegisterForm(forms.Form):
     #username = forms.CharField(label="Username", max_length = 60, required=True)
     #password = forms.CharField(label="Password", widget=forms.PasswordInput, max_length = 60, required=True )
