@@ -1402,7 +1402,7 @@ web-interface:
 
 \begin{itemize}
 \item \texttt{simpleupload} -- Use the simple uploader instead of the more advanced javascript-based. The simple uploader does not support multiple files but does provide full HTTP Digest Security whereas the default and more advanced uploader relies on a less sophisticated security mechanism.
-\item \texttt{simplepolling} -- Uses a simpler polling mechanism in the stage in which CLAM awaits the completion of a procress. This method simply refreshes the page periodically, whilst the default method is asynchronous but relies on a less sophisticated security mechanism. 
+\item \texttt{simplepolling} -- Uses a simpler polling mechanism in the stage in which CLAM awaits the completion of a process. This method simply refreshes the page periodically, whilst the default method is asynchronous but relies on a less sophisticated security mechanism. 
 \item \texttt{secureonly} -- Equals to \texttt{simpleupload} and \texttt{simplepolling}, forcing only methods that fully support HTTP Digest Authentication.
 \item \texttt{disablefileupload} -- Disables the file uploader in the interface (do note that this is merely cosmetic and not a security mechanism, the RESTful webservice API will continue to support file uploads).
 \item \texttt{inputfromweb} -- Enables downloading an input file from the web (do note that this is merely cosmetic and not a security mechanism, the RESTUL webservice API always supports this regardless of visibility in the interface).
