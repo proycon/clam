@@ -770,6 +770,7 @@ variables you can use that will be automatically set by CLAM.
 \item \texttt{\$PARAMETERS} -- This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
 \item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} -- The username of the logged-in user.
+\item \texttt{\$PROJECT} -- The ID of the project
 \end{itemize}
 
 
