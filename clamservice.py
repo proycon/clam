@@ -810,6 +810,7 @@ class Project(object):
             cmd = cmd.replace('$STATUSFILE',Project.path(project, user) + '.status')
             cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
+            cmd = cmd.replace('$PROJECT',project)
             #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
             #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
