@@ -1249,6 +1249,8 @@ class InputTemplate(object):
                 self.acceptarchive = bool(value)
             elif key == 'onlyinputsource':
                 self.onlyinputsource = bool(value)
+            else:
+                raise ValueError("Unexpected keyword argument for InputTemplate: " + key)
 
         if not self.unique and (self.filename and not '#' in self.filename):
             raise Exception("InputTemplate configuration error for inputtemplate '" + self.id + "', filename is set to a single specific name, but unique is disabled. Use '#' in filename, which will automatically resolve to a number in sequence.")
@@ -1620,6 +1622,8 @@ class OutputTemplate(object):
                     self.viewers = value
                 else:
                     raise Exception("Invalid viewer specified!")
+            else:
+                raise ValueError("Unexpected keyword argument for OutputTemplate: " + key)
 
 
         if not self.unique and (self.filename and not '$SEQNR' in self.filename and not '#' in self.filename):
@@ -1967,15 +1971,18 @@ class InputSource(object):
     def __init__(self, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
+            del kwargs['id']
         else:
             raise Exception("No id specified for InputSource")
         if 'label' in kwargs:
             self.label = kwargs['label']
+            del kwargs['label']
         else:
             raise Exception("No label specified for InputSource")
 
         if 'path' in kwargs:
             self.path = kwargs['path']
+            del kwargs['path']
             if not os.path.exists(self.path):
                 raise Exception("No such file or directory for InputSource: " + self.path)
         else:
@@ -1983,17 +1990,23 @@ class InputSource(object):
 
         if 'defaultmetadata' in kwargs:
             self.metadata = kwargs['defaultmetadata']
+            del kwargs['defaultmetadata']
             assert isinstance(self.metadata, CLAMMetaData)
         elif 'metadata' in kwargs: #alias
             self.metadata = kwargs['metadata']
+            del kwargs['metadata']
             assert isinstance(self.metadata, CLAMMetaData)
         else:
             self.metadata = None
 
         if 'inputtemplate' in kwargs:
             self.inputtemplate = kwargs['inputtemplate']
+            del kwargs['inputtemplate']
         else:
             self.inputtemplate = None
+
+        for key in kwargs:
+            raise ValueError("Invalid keyword argument for InputSource: " + key)
 
 
 
