@@ -107,8 +107,11 @@ function initclam() {
     });
 
 
+
    //Create a new project'
-       if ($("#startprojectbutton").length) {
+    if ($("#startprojectbutton").length) {
+       $('#projectname').keypress(function(e){ if (e.which == 13) $('#startprojectbutton').focus().click(); });
+
        $("#startprojectbutton").click(function(event){
          $.ajax({ 
             type: "PUT", 
