@@ -106,6 +106,14 @@ the end-user or automated client interacts with the system
     presentation/download.
 \end{enumerate}
 
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=100.0mm]{architecture.png}
+\end{center}
+\caption{Schematic overview of the CLAM architecture}
+\label{fig:arch} 
+\end{figure}
+
 Any tool that can be described in these terms can be used with CLAM. The system
 has been designed specifically to work with software that may take quite some
 time to process or runs large batches. Stage two therefore is not confined to
@@ -127,8 +135,8 @@ expected to provide two things in addition to the actual tool:
   \item \textbf{Service configuration} - This specifies everything there is to
     know about your application, it defines what the input will be, what
     the output will be, and what parameters the system may take. Input and output
-    are always in the form of files. The web user interface, however, also
-    optionally offers a text field for users to create files on the fly.
+    are always in the form of files, adhering to whatever format you desire. The web user interface, however, also
+    optionally offers a text field for users to create files on the fly. 
     
   \item \textbf{System wrapper script} - This is a small script that CLAM will
     invoke to start your system. It acts as the glue between CLAM and your
@@ -141,15 +149,8 @@ A generic client for communicating with the webservice is already provided,
 more specific clients can be written using the CLAM API (Python) to greatly
 facilitate development.
 
-The architecture is visualised in the scheme in Figure~\ref{fig:arch}.
+The architecture of CLAM is visualised in the scheme in Figure~\ref{fig:arch}.
 
-\begin{figure}[h]
-\begin{center}
-\includegraphics[width=100.0mm]{architecture.png}
-\end{center}
-\caption{Schematic overview of the CLAM architecture}
-\label{fig:arch} 
-\end{figure}
 
 CLAM is a multi-user system, although out-of-the-box it simply uses an
 ``anonymous'' user and requires no authentication. Each user can create an
@@ -158,12 +159,58 @@ system, which may be one large batch depending on how you configure your
 service. Users can always return to earlier projects and inspect input files
 and output files, until they explicitly delete the project.
 
-The strong metadata support in CLAM has to be emphasised as one of its notable
-features. Metadata can be associated with any input files, and the profiles in
-the service configuration file determines how such metadata is carried over to
-output files. Additionally, as part of the metadata, provenance data is
-generated for all output files. This is provided in a simple and straightforward XML
-format.
+\subsection{Service Configuration}
+
+In the service configuration file, you specify precisely what kind of input
+goes into the system, and what kind of output goes out: this results in a
+deterministic and thus predictable webservice.  With any input and output
+files, arbitrary metadata can be associated. For input files, metadata is
+created from parameters that can be set by users, these are rendered as input
+fields in the web interface.  You can specify how this metadata is carried over
+to output files.  Additionally, as part of the metadata, provenance data is
+generated for all output files. These are both stored in a simple and
+straightforward XML format.
+
+All these definitions are specified in so-called \emph{profiles}. A
+profile defines \emph{input templates} and \emph{output templates}. The input
+templates and output template can be seen as ``slots'' for certain filetypes
+and their metadata. A small excerpt of a profile for a simple translation system with
+some associated metadata is shown in Figure~\ref{fig:profile}. A full
+discussion of its syntax goes beyond the scope of this paper, but is explained
+in length in the manual.
+
+\begin{figure}[h]
+{\footnotesize{
+\begin{verbatim}
+Profile(
+InputTemplate('maininput', PlainTextFormat, "Translator input: Plain-text document",  
+  StaticParameter(
+    id='encoding',name='Encoding',description='The character encoding of the file', 
+    value='utf-8'
+  ),  
+  ChoiceParameter(
+    id='language',name='Language',description='The language the text is in', 
+    choices=[('en','English'),('nl','Dutch'),('fr','French')]),
+  ),      
+  extension='.txt',
+  multi=True
+)
+OutputTemplate('translationoutput', PlainTextFormat,
+    "Translator output: Plain-text document",  
+    CopyMetaField('encoding','maininput.encoding')
+    SetMetaField('language','de'),
+    removeextension='.txt',
+    extension='.translation',
+    multi=True
+)
+)
+\end{verbatim}
+}}
+\caption{An excerpt of a fictitious \emph{profile} for a simple translation system form
+English, Dutch or French to German.}
+\label{fig:profile}
+\end{figure}
+
 
 \section{Extensions}
 
