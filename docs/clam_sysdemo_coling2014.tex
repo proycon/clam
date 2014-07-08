@@ -4,6 +4,8 @@
 \usepackage{url}
 \usepackage{latexsym}
 \usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{enumitem}
 
 %\setlength\titlebox{5cm}
 
@@ -92,19 +94,9 @@ need to describe it.
 An NLP command-line tool can usually be described in terms of \emph{input
 files}, \emph{output files} and parameters influencing its run. Parameters may
 either be \emph{global parameters}, pertaining to the system as a whole, or
-\emph{local parameters} which act as metadata for specific input files. File
+\emph{local parameters} which act as \emph{metadata} for specific input files. File
 formats are never dictated by CLAM itself, but are up to the service provider
 to define.
-
-CLAM discerns three \emph{states}, which also reflect the stages in which
-the end-user or automated client interacts with the system
-
-\begin{enumerate}
-  \item The system is ready to accept files for input and input parameters
-  \item The system is running
-  \item The system is done and the output files are offered for
-    presentation/download.
-\end{enumerate}
 
 \begin{figure}[htb]
 \begin{center}
@@ -113,6 +105,16 @@ the end-user or automated client interacts with the system
 \caption{Schematic overview of the CLAM architecture}
 \label{fig:arch} 
 \end{figure}
+
+CLAM discerns three \emph{states}, which also reflect the stages in which
+the end-user or automated client interacts with the system
+
+\begin{enumerate}[noitemsep]
+  \item The system is ready to accept files for input and input parameters
+  \item The system is running
+  \item The system is done and the output files are offered for presentation/download.
+\end{enumerate}
+
 
 Any tool that can be described in these terms can be used with CLAM. The system
 has been designed specifically to work with software that may take quite some
@@ -145,12 +147,11 @@ expected to provide two things in addition to the actual tool:
     application.
 \end{enumerate}
 
+
 A generic client for communicating with the webservice is already provided,
 more specific clients can be written using the CLAM API (Python) to greatly
-facilitate development.
-
-The architecture of CLAM is visualised in the scheme in Figure~\ref{fig:arch}.
-
+facilitate development. The architecture of CLAM is schemetically visualised in
+Figure~\ref{fig:arch}.
 
 CLAM is a multi-user system, although out-of-the-box it simply uses an
 ``anonymous'' user and requires no authentication. Each user can create an
@@ -158,6 +159,7 @@ arbitrary number of \emph{projects}. One project corresponds to one run of the
 system, which may be one large batch depending on how you configure your
 service. Users can always return to earlier projects and inspect input files
 and output files, until they explicitly delete the project.
+
 
 \subsection{Service Configuration}
 
@@ -182,8 +184,7 @@ in length in the manual.
 \begin{figure}[h]
 {\footnotesize{
 \begin{verbatim}
-Profile(
-InputTemplate('maininput', PlainTextFormat, "Translator input: Plain-text document",  
+Profile(InputTemplate('maininput', PlainTextFormat, "Translator input: Plain-text document",  
   StaticParameter(
     id='encoding',name='Encoding',description='The character encoding of the file', 
     value='utf-8'
@@ -194,23 +195,70 @@ InputTemplate('maininput', PlainTextFormat, "Translator input: Plain-text docume
   ),      
   extension='.txt',
   multi=True
-)
-OutputTemplate('translationoutput', PlainTextFormat,
+), OutputTemplate('translationoutput', PlainTextFormat,
     "Translator output: Plain-text document",  
     CopyMetaField('encoding','maininput.encoding')
     SetMetaField('language','de'),
     removeextension='.txt',
     extension='.translation',
     multi=True
-)
-)
+))
 \end{verbatim}
 }}
-\caption{An excerpt of a fictitious \emph{profile} for a simple translation system form
-English, Dutch or French to German.}
+\caption{An excerpt of a fictitious \emph{profile} for a simple translation
+system from English, Dutch or French to German. The attribute
+\texttt{multi=True} states that multiple files of this type may be submitted during a single run}
 \label{fig:profile}
 \end{figure}
 
+Global parameters to the system are specified independently of any profiles.
+Consider a global parameter that would indicate whether or not want
+the fictitious translation system seen in Figure~\ref{fig:profile} to be
+case-sensitive, and take a look at the following example\footnote{Parameters are always grouped into named groups,
+``Translation parameters'' is just the label of the group here}:
+
+{\footnotesize{
+\begin{verbatim}
+PARAMETERS =  [
+    ('Translation parameters', [
+        BooleanParameter(id='casesensitive',name='Case Sensitivity',
+        description='Enable case sensitive behaviour?'),
+    ] )
+]
+\end{verbatim}
+}}
+
+\subsection{System Wrapper}
+
+Communication between CLAM and your command-line tool proceeds through a system
+wrapper script. The service configuration file defines what script to call and
+what variables, pre-defined by CLAM, to pass to it:
+
+{\footnotesize{
+\begin{verbatim}
+COMMAND = "mywrapper.py $DATAFILE $OUTPUTDIRECTORY"
+\end{verbatim}
+}}
+
+This is then executed whenever a user runs a project. It is the job of the system wrapper script to
+invoke your actual application. 
+
+There are two main means of communicating the parameters to the system
+wrapper: one is to make use of the data file (\texttt{\$DATAFILE}), which is an XML file
+that contains all input parameters. It can be parsed and queried effortlessly using the
+CLAM API, provided you write your wrapper script in Python. The other way, more
+limited, is to specify parameter flags for your global parameters\footnote{caveat: this does not work for local
+parameters, i.e. parameters pertaining to files} in the service configuration, and simply
+let CLAM pass all global parameters as arguments on the command line:
+
+{\footnotesize{
+\begin{verbatim}
+COMMAND = "mywrapper.pl $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+\end{verbatim}
+}}
+
+By passing the input directory, the system wrapper script can simply look for 
+its input files there.
 
 \section{Extensions}
 
