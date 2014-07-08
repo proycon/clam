@@ -173,18 +173,18 @@ to output files.  Additionally, as part of the metadata, provenance data is
 generated for all output files. These are both stored in a simple and
 straightforward XML format.
 
-All these definitions are specified in so-called \emph{profiles}. A
-profile defines \emph{input templates} and \emph{output templates}. The input
-templates and output template can be seen as ``slots'' for certain filetypes
-and their metadata. A small excerpt of a profile for a simple translation system with
-some associated metadata is shown in Figure~\ref{fig:profile}. A full
-discussion of its syntax goes beyond the scope of this paper, but is explained
-in length in the manual.
+All these definitions are specified in so-called \emph{profiles}. A profile
+defines \emph{input templates} and \emph{output templates}. These can be seen
+as ``slots'' for certain filetypes and their metadata. A small excerpt of a
+profile for a simple translation system with some associated metadata is shown
+in Figure~\ref{fig:profile}. A full discussion of its syntax goes beyond the
+scope of this paper, but is explained in length in the manual.
 
 \begin{figure}[h]
 {\footnotesize{
 \begin{verbatim}
-Profile(InputTemplate('maininput', PlainTextFormat, "Translator input: Plain-text document",  
+Profile(InputTemplate('maininput', PlainTextFormat, 
+  "Translator input: Plain-text document",  
   StaticParameter(
     id='encoding',name='Encoding',description='The character encoding of the file', 
     value='utf-8'
