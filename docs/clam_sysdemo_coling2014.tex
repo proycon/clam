@@ -82,10 +82,10 @@ time.
 
 The Computational Linguistics Application Mediator (CLAM) is a tool that wraps
 around your command-line interface and allows you to very quickly and
-transparently turn your program into \textbf{1)} a \emph{RESTful}~\cite{REST} webservice with which
-automated clients can communicate, as well as \textbf{2)} a generic web user interface
-for human end-users. Just like an actual clam is a
-shell around the animal that inhabits it, which most never see
+transparently turn your program into \textbf{1)} a \emph{RESTful}~\cite{REST}
+webservice with which automated clients can communicate, as well as \textbf{2)}
+a generic web user interface for human end-users. Just like an actual clam is a
+shell around the animal that inhabits it, which most onlookers never see
 directly, CLAM wraps around your sofware, providing extra functionality and
 hardening it through its built-in security mechanism. You do not need to modify
 your original software in any way, it is always taken as a given, you merely
@@ -150,7 +150,7 @@ expected to provide two things in addition to the actual tool:
 
 A generic client for communicating with the webservice is already provided,
 more specific clients can be written using the CLAM API (Python) to greatly
-facilitate development. The architecture of CLAM is schemetically visualised in
+facilitate development. The architecture of CLAM is schematically visualised in
 Figure~\ref{fig:arch}.
 
 CLAM is a multi-user system, although out-of-the-box it simply uses an
@@ -178,7 +178,7 @@ defines \emph{input templates} and \emph{output templates}. These can be seen
 as ``slots'' for certain filetypes and their metadata. A small excerpt of a
 profile for a simple translation system with some associated metadata is shown
 in Figure~\ref{fig:profile}. A full discussion of its syntax goes beyond the
-scope of this paper, but is explained in length in the manual.
+scope of this paper, but is explained at length in the manual.
 
 \begin{figure}[h]
 {\footnotesize{
@@ -269,7 +269,7 @@ implemented as internal Python modules, or you can link to any external URL
 which takes care of the visualisation. Another extension is
 \emph{converters}, these allow users to upload an input file in one file type and have it
 automatically converted to another. Converters for PDF and Word to plain text are already
-provided through the tools \texttt{pdf2txt} and \texttt{antiword}.
+provided through third party tools.
 
 \section{Technical Details}
 
@@ -296,12 +296,12 @@ itself but can be configured in the encompassing webserver. The underlying user
 database can be specified either directly in the service configuration file or
 in a table in a Mysql database, but it is fairly easy to replace this and
 communicate with another external database of your choice instead. There is
-also support for being relayed credentials from another authentication source
-such as Shibboleth, allowing for integrating with single-sign-on scenarios.
-Implementation of OAuth2 will follow in a later version.
+also support for propagating credentials from another authentication source
+such as Shibboleth\footnote{\url{http://shibboleth.net}}, allowing for integrating with single-sign-on scenarios.
+Implementation of OAuth2\footnote{\url{http://oauth.net/2/}} will follow in a later version.
 
 CLAM is open-source software licensed under the GNU Public License v3. Both the
-software as well as the documentation can be obtained through the the CLAM
+software as well as the documentation can be obtained through the CLAM
 website at github: \url{http://proycon.github.io/clam} .
 
 \section{Related Work}
