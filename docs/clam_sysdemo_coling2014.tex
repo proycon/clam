@@ -50,7 +50,17 @@ well as a generic webapplication interface for human end-users.
 
 \section{Introduction}
 
-In the field of Natural Language Processing, the majority of tools come in the
+
+% The following footnote without marker is needed for the camera-ready
+% version of the paper.
+\blfootnote{
+     \hspace{-0.65cm}  % space normally used by the marker
+     This work is licensed under a Creative Commons 
+     Attribution 4.0 International Licence:
+     \url{http://creativecommons.org/licenses/by/4.0/}
+}
+
+In the field of Natural Language Processing, tools often come in the
 form of command-line tools aimed at UNIX-derived systems. We consider this good
 practice in line with the UNIX philosophy \cite{unixphilo} which states,
 amongst others, that programs should 1) do one thing and do it well, and 2) expect the output of one
@@ -220,11 +230,10 @@ case-sensitive, and take a look at the following example\footnote{Parameters are
 {\footnotesize{
 \begin{verbatim}
 PARAMETERS =  [
-    ('Translation parameters', [
+  ('Translation parameters', [
         BooleanParameter(id='casesensitive',name='Case Sensitivity',
-        description='Enable case sensitive behaviour?'),
-    ] )
-]
+        description='Enable case sensitive behaviour?') 
+])]
 \end{verbatim}
 }}
 
@@ -316,10 +325,9 @@ corpus data. CLAM leaves file formats completely up to the service providers,
 although it does come, as a bonus, with a viewer for users of FoLiA \cite{FOLIA}.
 
 Weblicht is Java-based whereas CLAM is Python-based, which tends to be less
-verbose and more easily accessible. System wrapper scripts need not even be
-written in Python if the developer prefers another language, and service
-configuration files simply consist of directives that require virtually
-no Python knowledge.
+verbose and more easily accessible. System wrapper scripts can be written in
+any language, and service configuration files simply consist of directives that
+require virtually no Python knowledge.
 
 All in all CLAM offers a more lightweight solution than Weblicht, allowing
 webservices to be set up more easily and quicker. Nevertheless, CLAM offers
