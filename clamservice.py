@@ -298,6 +298,7 @@ class CLAMService(object):
     urls = (
         settings.STANDALONEURLPREFIX + '/', 'Index',
         settings.STANDALONEURLPREFIX + '/info/?', 'Info',
+        settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
         settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -426,6 +427,39 @@ class Info(object):
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
+
+class AdminInterface(object):
+    GHOST = False
+    @RequireLogin(ghost=GHOST)
+    def GET(self, user = None):
+        """Get list of projects"""
+        if not user: user = 'anonymous'
+        if not user in settings.ADMINS:
+            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+
+        usersprojects = {}
+        for f in glob.glob(settings.ROOT + "projects/*"):
+            if os.path.isdir(f):
+                u = os.path.basename(f)
+                usersprojects[u] = []
+
+                for f2 in glob.glob(settings.ROOT + "projects/" + user + "/*"):
+                    if os.path.isdir(f2):
+                        d = datetime.datetime.fromtimestamp(os.stat(f2)[8])
+                        p = os.path.basename(f2)
+                        usersprojects[u].append( (p, d.strftime("%Y-%m-%d %H:%M:%S") ) )
+
+        for u in usersprojects:
+            usersprojects[u] = sorted(usersprojects[u])
+
+        render = web.template.render(settings.CLAMDIR + '/templates')
+
+        web.header('Content-Type', "text/html; charset=UTF-8")
+
+        try:
+            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()) )
+        except AttributeError:
+            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
 
 
