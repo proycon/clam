@@ -1336,7 +1336,8 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                 filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
-                raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
+                filename = filename +  '.' + inputtemplate.extension
+                #raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
 
     if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
         raise CustomForbidden("Adding files for this inputtemplate must proceed through inputsource") #403
