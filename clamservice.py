@@ -62,6 +62,15 @@ class CustomForbidden(web.webapi.HTTPError):
          headers = {'Content-Type': 'text/html'}
          web.webapi.HTTPError.__init__(self, status, headers, message)
 
+class CustomForbiddenXML(web.webapi.HTTPError):
+     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the standard?"""
+
+     def __init__(self, message="forbidden"):
+         status = "403 Forbidden"
+         headers = {'Content-Type': 'application/xml'}
+         web.webapi.HTTPError.__init__(self, status, headers, message)
+
+
 try:
     import MySQLdb
 except ImportError:
@@ -72,7 +81,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.8'
+VERSION = '0.9.9'
 
 DEBUG = False
 
@@ -781,10 +790,10 @@ class Project(object):
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise CustomForbidden(unicode(self.response(user, project, parameters)))
+            raise CustomForbiddenXML(unicode(self.response(user, project, parameters)))
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise CustomForbidden(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
+            raise CustomForbiddenXML(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
         else:
             #write clam.xml output file
             render = web.template.render(settings.CLAMDIR + '/templates')
@@ -1706,7 +1715,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
     elif errors:
         #parameter errors, return XML output with 403 code
         printdebug('There were paramameter errors during upload!')
-        raise CustomForbidden(output)
+        raise CustomForbiddenXML(output)
     else:
         #everything ok, return XML output and JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
