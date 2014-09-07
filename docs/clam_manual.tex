@@ -29,8 +29,8 @@
 
 \begin{titlepage}
 \begin{center}
-%\textsc{\large Language and Speech Technology\\ Technical Report Series}\\[1.5cm] 
-%\textsc{Report Number LST-13-03}\\[0.5cm] 
+\textsc{\large Language and Speech Technology\\ Technical Report Series}\\[1.5cm] 
+\textsc{Report Number LST-14-02}\\[0.5cm] 
 \vspace{3cm}  %PRERELEASE
 
 \HRule \\[0.5cm]
@@ -40,7 +40,8 @@
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 7th, 2013} \\[0.5cm] 
+%\emph{November 7th, 2013} \\[0.5cm] 
+\emph{September 5th, 2014 \small{(pending publication} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 %\vspace{1cm}
@@ -55,10 +56,10 @@ P.O. Box 9103 \\
 NL-6500 HD Nijmegen \\
 The Netherlands \\
 http://www.ru.nl/lst \\[0.3cm]
-%Series editors: \\
-%\hspace{0.5cm}\emph{Nelleke Oostdijk}   \\
-%\hspace{0.5cm}\emph{Antal van den Bosch}  \\
-%\hspace{0.5cm}\emph{David van Leeuwen}  \\
+Series editors: \\
+\hspace{0.5cm}\emph{Nelleke Oostdijk}   \\
+\hspace{0.5cm}\emph{Antal van den Bosch}  \\
+\hspace{0.5cm}\emph{David van Leeuwen}  \\
 \end{flushleft}
 \end{minipage}
 
@@ -71,41 +72,41 @@ The Computational Linguistics Application Mediator (CLAM) allows you to quickly
 and transparently transform your Natural Language Processing application into a
 \emph{RESTful}\/ webservice, with which automated clients can communicate, but
 which at the same time also acts as a modern webapplication with which human
-end users can interact. CLAM takes a description of your system and wraps
+end-users can interact. CLAM takes a description of your system and wraps
 itself around the system, allowing clients or users to upload input files to
 your application, start your application with specific parameters of their
 choice, and download and view the output of the application. Whilst the
 application runs, users can monitor its status.
 
 CLAM is set up in a universal fashion, making it flexible enough to be wrapped
-around a wide range of computational linguistic applications. These
+around a wide range of applications with a command line interface. These
 applications are treated as a black box, of which only the parameters, input
 formats, and output formats need to be described. The applications themselves
 need not be network-aware in any way, nor aware of CLAM, and the handling and
 validation of input can be taken care of by CLAM.
 
 CLAM is entirely written in Python. It is set up in a modular fashion and as
-such is easily extendable. It offers a rich API for writing clients and wrapper
+such is easily extendible. It offers a rich API for writing clients and wrapper
 scripts.
 
-The kind of applications that CLAM is intended for are Natural Language
+The kind of applications that CLAM is originally intended for are Natural Language
 Processing applications, usually of a kind that do some processing on a text
 corpus. This corpus (any text file) can be uploaded by the user, or may be
 pre-installed for the webservice. The NLP application is usually expected to
 produce a certain output, which is subsequently made available through the
-webservice for viewing and downloading.
+webservice for viewing and downloading. CLAM can, however, just as well be used
+in fields other than NLP.
 
 The CLAM webservice is a RESTful webservice\cite{REST}, meaning it uses the HTTP verbs
 GET, POST, PUT and DELETE to manipulate resources and returns responses using
-the HTTP response codes. The principal resource in CLAM is called a
+the HTTP response codes and XML. The principal resource in CLAM is called a
 \emph{project}. Various users can maintain various projects, each representing
 one specific run of the system, with particular input data, output data, and a
 set of configured parameters.
 
-In addition to using HTTP Error Codes for error responses, the webservice
-responds in the CLAM XML format. An associated XSL stylesheet \cite{XSLT} can directly
-transform this to xhtml in the user's browser, thus providing a standalone web
-application for human end-users. 
+The webservice responds in the CLAM XML format. An associated XSL stylesheet
+\cite{XSLT} can directly transform this to xhtml in the user's browser, thus
+providing a standalone web application for human end-users. 
 
 CLAM comes with an ample number of features, the most notable ones being:
 
@@ -121,8 +122,8 @@ CLAM comes with an ample number of features, the most notable ones being:
 \end{itemize}
 
 In publication of research that makes use of this software, a citation should
-be given of: {\em ``Maarten van Gompel (2012). CLAM: Computational Linguistics
-Application Mediator. Documentation. ILK Technical Report 12-02.''}.
+be given of: {\em ``Maarten van Gompel (2014). CLAM: Computational Linguistics
+Application Mediator. Documentation. LST Technical Report Series 14-02.''}.
 
 CLAM is open-source software licensed under the GNU Public License v3, a copy
 of which can be found along with the software.
@@ -133,7 +134,7 @@ CLAM and this documentation are intended for \emph{1)} service providers;
 people who want to build a CLAM Webservice around their tool and/or people
 wanting to set up existing CLAM services on their server, and \emph{2)}
 webservice users; people who want to write automated clients to communicate
-with CLAM webservices.
+with CLAM webservices. 
 
 On the part of these users, a certain level of technical expertise is required
 and assumed, such as familiarity with UNIX/Linux systems, software development
@@ -151,8 +152,10 @@ interface.
 
 \section{Technical details}
 
-CLAM is written in Python 2.6 \cite{PYTHON}, and is built on the webpy framework. It can run
-stand-alone thanks to the built-in cherrypy webserver; no additional webserver
+CLAM is written in Python 2.6 \cite{PYTHON}, and is built on the webpy
+framework\footnote{http://webpy.org}. It can run
+stand-alone thanks to the built-in cherrypy
+webserver\footnote{http://cherrypy.org}; no additional webserver
 is needed to test your service. In production environments, it is however
 strongly recommended that CLAM is integrated into a real webserver. Supported
 are: Apache, nginx or lighthttpd, though others may work too.
@@ -164,7 +167,7 @@ be.
 
 \subsection{Installation}
 
-CLAM is available from the Python Package Index; a standarised framework and
+CLAM is available from the Python Package Index; a standardised framework and
 repository for the installation of all kinds of Python packages. Using the
 Python Package Index, installation is easy on Debian/Ubuntu based Linux
 distributions:
@@ -175,7 +178,7 @@ This will automatically download and globally install the latest version of
 CLAM for you. It it wise to repeatedly issue this command every month or so, as
 updates are released on a regular basis.
 
-In case easy\_install is not yet available on your system, you first need to
+In case \texttt{easy\_install} is not yet available on your system, you first need to
 install it as follows on Debian/Ubuntu based distribution: 
 
 \begin{verbatim} $ sudo apt-get install python-setuptools \end{verbatim}
@@ -244,7 +247,7 @@ may be of particular interest:
 \end{itemize}
 
 Starting the service in stand-alone mode is done by launching
-\texttt{clamservice} (or \texttt{clamservice.py}) with the name of your service
+\texttt{clamservice} (or \texttt{clamservice.py} directly) with the name of your service
 configuration. This standalone mode is intended primarily for development
 purposes and not recommended for production use. The below example shows how to
 launch the supplied ``Text Statistics'' demo-service:
@@ -279,13 +282,13 @@ developer seeking to improve CLAM itself, and possibly sending in patches.
 Especially people migrating from earlier versions of CLAM may have already
 adopted this way of working. Do note that if you do not use \texttt{setup.py}
 then the commands \texttt{clamservice} and \texttt{clamnewproject} are only
-available as \texttt{clamservice.py} and \texttt{clamnewproject.py} from within
-the \texttt{clam} directory. 
+available directly as \texttt{clamservice.py} and \texttt{clamnewproject.py}
+from within the \texttt{clam} directory. 
 
 \subsection{Using CLAM with Apache 2}
 
 In order to run a CLAM webservice in Apache, you have to install and configure
-several files. We will be using WSGI, through \texttt{mod\_wsgi}, an interface
+several files. We will be using WSGI, through \texttt{mod\_wsgi}, a gateway interface
 between Apache and Python. The following instructions assume you are at least
 basically familiar with Apache 2 configuration and Linux server administration
 in general.
@@ -354,12 +357,12 @@ application = clam.clamservice.run_wsgi(yourwebservice)
  </Directory>
 \end{verbatim}
 
-The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directivse go on
+The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directives go on
 one line, but were wrapped here
 for presentational purposes. Needless to say, all paths need to be adapted
 according to your setup and the configuration can be extended further as
-desired, \texttt{/path/to/clam/static/} should be changed to where CLAM is
-installed and the \texttt{static} dir is found. Dependening on your
+desired. The path \texttt{/path/to/clam/static/} should be changed to where CLAM is
+installed and where the \texttt{static} directory is found. Depending on your
 installation and versions, this will be a directory like: \\
 \texttt{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
 
@@ -379,7 +382,7 @@ recommended way of running CLAM. Whenever any code changes are made, simply
 will be immediately available. Embedded mode would require an apache restart
 when modifications are made, and it may also lead to problems with the HTTP
 Digest Authentication as authentication keys (nonces) may not be retainable in
-memory due to constant reloads. Again I'd like to emphasise tht for
+memory due to constant reloads. Again I'd like to emphasise that for
 authentication the line \texttt{WSGIPassAuthorization On} is vital, as
 otherwise user credentials will never each CLAM.
 
@@ -473,7 +476,8 @@ You may possibly encounter one of the following issues when attempting to access
 \item \textbf{Apache gives an Internal Server Error (HTTP 500)} -- Check your Apache error log to see what happened. For additional debug output by CLAM, set \texttt{DEBUG=True} in your CLAM service configuration file. 
 \item \textbf{I get an empty white page} -- There is probably an error in loading the XSL stylesheet that renders the web application. Please use Firefox to verify, instead of Google Chrome or Internet Explorer, as it provides more detailed error output on XSLT transformations.
 \item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that renders the web-application can not be loaded. This is most likely due to a mismatch in URLs. The URL at which the webservice is accessed has to correspond with the URL configured in the service configuration file. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
-\item \textbf{I get an error ``No template named response''} -- Check whether CLAMDIR is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
+\item \textbf{I get an error ``No template named response''} -- Check whether
+  \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
 \item \textbf{I'm using CLAM through Apache and WSGI, but authentication does not work and I am always logged in as anonymous} -- Check that \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and \texttt{USERS} is configured in your service configuration file.
 \end{enumerate}
 
@@ -483,7 +487,7 @@ your final service.
 
 \section{Architecture}
 
-CLAM has a layered architecture, with at the core the NLP application(s) you
+CLAM has a layered architecture, with at the core the command line application(s) you
 want to turn into a webservice. The application itself can remain untouched and
 unaware of CLAM. The scheme in Figure~\ref{fig:arch} illustrates the various
 layers:
@@ -501,14 +505,14 @@ A CLAM webservice needs the following three components from the service develope
 
 \begin{enumerate}
 \item A service configuration file;
-\item A wrapper script for your NLP application;
-\item An NLP application.
+\item A wrapper script for your command line application;
+\item A command line application (your NLP tool)
 \end{enumerate}
 
-The wrapper script is not strictly mandatory if the NLP application can be
+The wrapper script is not strictly mandatory if the command line application can be
 directly invoked by CLAM. However, for more complex applications, writing a
 wrapper script is strongly recommended, as it offers more flexibility and
-better integration, and allows you to keep the actual NLP application
+better integration, and allows you to keep the actual application
 unmodified. The wrapper scripts can be seen as the ``glue'' between CLAM and
 your application, taking care of any translation steps.
 
@@ -574,7 +578,7 @@ directory. The \texttt{ROOT} will be automatically created upon the first run.
 
 The hostname and port of the webserver can be configured in the service
 configuration file. Note that the hostname has to match exactly with what the
-end users will use. An attempt will be made to detect this automatically if no
+end-users will use. An attempt will be made to detect this automatically if no
 hostname is specified. A mismatch in the name you define and the hostname the
 user uses may result in unexpected behaviour\footnote{Most likely, the XSLT
 stylesheet will refuse to render the web application interface due to this
@@ -588,7 +592,7 @@ case the value of \texttt{URLPREFIX} should be configured accordingly.
 
 In order to keep server load manageable, three methods are configurable in the
 service configuration file. First, you can set the variable
-\texttt{REQUIREMEMORY} to the minumum amount of free memory that has to be
+\texttt{REQUIREMEMORY} to the minimum amount of free memory that has to be
 available (in megabytes, and not considering swap memory!). If not enough
 memory is free, users will not be able to launch new processes, but will
 receive an HTTP 500 error instead. Second, there is the \texttt{MAXLOADAVG}
@@ -596,7 +600,7 @@ variable; if the 5-minute load average exceeds this number, new processes will
 also be rejected. Third, there is \texttt{MINDISKSPACE} and \texttt{DISK}. This
 sets a constraint on the minimum amount of free disk space in megabytes on the
 specified DISK (for example: \texttt{/dev/sda1}), which should be the disk
-holding \texttt{ROOT}. If any of these values is set to zero, they are
+holding \texttt{ROOT}. If any of these values is set to zero, the checks are
 disabled. Note though that this makes your system vulnerable to
 denial-of-service attacks by possibly malicious users, especially if no user
 authentication is configured!
@@ -620,7 +624,7 @@ to a prefix that the webservice will be made available on \emph{without}
 webapplication support. If you set for example \texttt{WEBSERVICEGHOST = 'ws'}
 then there will be an additional ``ghosted'' webservice without webapplication
 interface running on \texttt{http://yourdomain.com/ws/}. This option is
-included to accomodate the wish to apply two distinct authentication schemes
+included to accommodate the wish to apply two distinct authentication schemes
 outside of CLAM. 
 
 
@@ -662,7 +666,7 @@ instead:
     }
 \end{verbatim}
 
-This precomputation can be done in an interactive python session, executed from
+This pre-computation can be done in an interactive python session, executed from
 the CLAM directory. Make sure to change \texttt{yourconfig} in the below
 example to your actual service configuration file:
 
@@ -709,26 +713,27 @@ dictionary with the following configurable keys:
 \end{verbatim}
 
 For advanced service providers wanting to use external authentication schemes,
-CLAM supports the \texttt{PREAUTHHEADER} configuration directive, the value of
-which is a string containing an HTTP header which CLAM may read to obtain the
-authenticated username. This should be set by an authentication system prior to
-passing control to CLAM. An example of such a system is Shibboleth. Multiple
-headers may be specified in \texttt{PREAUTHHEADER}, using space as delimiter,
-effectively creating a fallback chain. When \texttt{PREAUTHONLY} is set to
-\texttt{False} (default), the ultimate fallback will be CLAM's built-in user
-system, unless this is set to None. When such a scheme is used, proper care has
-to be taken to ensure that the HTTP headers can not be forged by end-users
-themselves! If usernames that come from external pre-authentication methods are
-different from those in the internal \texttt{USERS} map (if used at all), then
-an explicit mapping between the two may be specified in the
+such as federated identity solutions, CLAM supports the \texttt{PREAUTHHEADER}
+configuration directive, the value of which is a string containing an HTTP
+header which CLAM may read to obtain the authenticated username. This should be
+set by an authentication system \emph{prior} to passing control to CLAM. An
+example of such a system is Shibboleth \footenote{http://shibboleth.net}.
+Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as
+delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is
+set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in
+user system, unless this is set to None. When such a scheme is used, proper
+care has to be taken to ensure that the HTTP headers can not be forged by
+end-users themselves! If usernames that come from external pre-authentication
+methods are different from those in the internal \texttt{USERS} map (if used at
+all), then an explicit mapping between the two may be specified in the
 \texttt{PREAUTHMAPPING} dictionary. Note that this pre-authentication mechanism
 never applies to the ``ghosted'' webservice, if enabled through
 \texttt{WEBSERVICEGHOST}. Only the regular authentication method is supported
 for the webservice ghost.
 
-The below example shows an Apache configuration for a proxy/entry server that
-forwards to another server on which a CLAM service runs, mediated through
-Shibboleth:
+The below example shows an Apache configuration for a \emph{proxy server} or
+\emph{entry server} that forwards to another server on which a CLAM service runs, mediated
+through Shibboleth:
 
 \begin{verbatim}
    <Location /yourclamservice>
@@ -745,7 +750,7 @@ The actual server, if it runs Apache, must always contain the directive
 \texttt{WSGIPassAuthorization On}.
 
 The CLAM service configuration file can in turn be restricted to \emph{only}
-except Shibboleth authenticated users using the following settings:
+accept Shibboleth authenticated users using the following settings:
 
 \begin{verbatim}
 PREAUTHHEADER = 'HTTP_EDUPERSONPRINCIPALNAME'
@@ -753,7 +758,7 @@ PREAUTHONLY = True
 \end{verbatim}
 
 Replace \texttt{HTTP\_EDUPERSONPRINCIPALNAME} with the proper HTTP header, this
-is just an example in a CLARIN-NL context.
+variable name is just an example in a CLARIN-NL context.
 
 
 \subsection{Command Definition} \label{sec:command}
@@ -1048,7 +1053,7 @@ There are four different types of metafield actors:
 \item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} -- Get the value for this metadata field from a global parameter with the specified ID.
 \end{itemize}
 
-Take a look at the following example for a ficticious automatic translation
+Take a look at the following example for a fictitious automatic translation
 system, translating to Esperanto. If an input file \texttt{x.txt} is uploaded,
 the output file will be named \texttt{x.translation}.
 
@@ -1128,8 +1133,9 @@ overview:
 \item \texttt{\$INPUTEXTENSION} - The extension of the associated input file (without the initial period). Valid only in Output Templates.
 \end{itemize} 
 
-Other than these variables pre-defined by CLAM, you can in input templates use
-any of the metadata parameters as variables in the filename. To this end, use a
+Other than these variables pre-defined by CLAM, you can use
+any of the metadata parameters as variables in the filename, for input
+templates only. To this end, use a
 dollar sign followed by the ID of the parameter in the filename specification.
 For Output Templates, you can use metafield IDs or global parameter IDs (in
 that order of priority) in the same way. This syntax is valid in both
@@ -1223,11 +1229,11 @@ After the condition you specify \texttt{then=} and optionally also
 \texttt{else=}, and then you specify an \texttt{OutputTemplate} or yet another
 \texttt{ParameterCondition}---they can be nested at will.
 
-Parameter conditions can not only be used around output templates, but also be
-around metafield actors, inside the output template specification. In other
+Parameter conditions can not only be used for output templates, but also
+for metafield actors, inside the output template specification. In other
 words, you can make metadata fields conditional on global parameters.
 
-Parameter conditions can not be used around input templates, for the simple
+Parameter conditions can not be used for input templates, for the simple
 reason that in CLAM the parameters are set after the input files are uploaded.
 However, input templates can be \emph{optional}, by setting
 \texttt{optional=True}. This means that providing such input files is optional,
