@@ -1,5 +1,13 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.10) [Sep 2014]
+- Security upgrades, better protection against possible code injection, added shellsafe function
+- Added simple administrative web-app interface
+
+0.9.9) [Aug 2014]
+- Bugfix Issue #10: XSL doesn't render on 403 response
+- Bugfix Issue #9: Upload denied because of extension
+
 
 0.9.8) [Nov-Dec 2013]
 - Fixes in clamnewproject and PYTHONPATH issues. Updated documentation
@@ -8,6 +16,11 @@
  - (0.9.8.3) Better support for custom html in web app, now through directives in service configuration
  - (0.9.8.5) Re-added return to index button in interface
  - (0.9.8.7) HTTPS now properly recognised when port is explicitly set to 443
+ - (0.9.8.8) Fix for issue #12: Inputfromweb problems [May 2014]
+ - (0.9.8.9) Fix for customhtml browser compatibility issues + Reload cycle problem [May 2014]
+ - (0.9.8.10) Minor fixes [Jun 2014]
+ - (0.9.8.11) Stricter checks on parsing InputTemplate  [Jun 2014]
+ - (0.9.8.12) Interface behaviour fix  [Jun 2014]
 
 0.9.7) [Oct 2013]
 - Fixed filename constraint (filename=) bug as reported by Eric Auer
