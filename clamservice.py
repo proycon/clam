@@ -444,7 +444,7 @@ class AdminInterface(object):
                 u = os.path.basename(f)
                 usersprojects[u] = []
 
-                for f2 in glob.glob(settings.ROOT + "projects/" + user + "/*"):
+                for f2 in glob.glob(settings.ROOT + "projects/" + u + "/*"):
                     if os.path.isdir(f2):
                         d = datetime.datetime.fromtimestamp(os.stat(f2)[8])
                         p = os.path.basename(f2)
