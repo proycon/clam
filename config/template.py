@@ -77,6 +77,8 @@ PORT= 8080
 
 USERS = None #no user authentication/security (this is not recommended for production environments!)
 
+ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
+
 #If you want to enable user-based security, you can define a dictionary
 #of users and (hashed) passwords here. The actual authentication will proceed
 #as HTTP Digest Authentication. Although being a convenient shortcut,

@@ -435,7 +435,7 @@ class AdminInterface(object):
     def GET(self, user = None):
         """Get list of projects"""
         if not user: user = 'anonymous'
-        if not user in settings.ADMINS:
+        if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
         usersprojects = {}
@@ -468,7 +468,7 @@ class AdminHandler(object):
     @RequireLogin(ghost=GHOST)
     def GET(self, command, targetuser, project, user = None):
         if not user: user = 'anonymous'
-        if not user in settings.ADMINS:
+        if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
 
@@ -508,7 +508,7 @@ class AdminDownloader(object):
     @RequireLogin(ghost=GHOST)
     def GET(self, targetuser, project, type, filename, user = None):
         if not user: user = 'anonymous'
-        if not user in settings.ADMINS:
+        if settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
 
