@@ -265,7 +265,7 @@ class CLAMFile:
             return True
         else:
             if self.client: self.client.initauth()
-            response = urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
+            urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
             return True
 
 
@@ -781,7 +781,6 @@ class Profile(object):
             return False, mandatory_absent
 
         #check if output is produced
-        outputproduced = False
         if not self.output: return False, mandatory_absent
         for outputtemplate in self.output:
             if isinstance(outputtemplate, ParameterCondition):
@@ -1170,7 +1169,6 @@ class CLAMMetaData(object):
             if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
                 formatclass = vars(clam.common.formats)[format]
             if not formatclass:
-                d = vars(clam.common.formats)
                 raise Exception("Format class " + format + " not found!")
 
             data = {}
