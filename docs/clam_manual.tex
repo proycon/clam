@@ -35,7 +35,7 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.8.4} \\[0.5cm]
+{\bf \small version 0.9.10} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
@@ -1436,12 +1436,21 @@ important things to take into account:
 \item All user-viewable output must be put in the specified output directory. Output files must be generated in accordance with the profiles that describe this generation. 
 \item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. Whilst this is not mandatory, it offers valuable feedback to the user on the state of the system. 
 \item The wrapper script is always started with the current working directory set to the selected project directory.
+\item Wrapper scripts often invoke the actual application using some kind of
+  \texttt{system()} call. Take care never to pass unvalidated user-input to the shell! This makes you vulnerable
+  for code injection attacks. The CLAM Data API offers the function
+  \texttt{clam.common.data.shellsafe()} to help protect you.
 \end{itemize}
 
 The wrapper script can be written in any language. Python developers will have
 the big advantage that they can directly tie into the CLAM Data API, which
-handles things such as reading the \texttt{clam.xml} data file, and makes all
-parameters and input files (with metadata) directly accessible.
+handles things such as reading the \texttt{clam.xml} data file, makes all
+parameters and input files (with metadata) directly accessible, and offers a
+function to protect your variables against code injection when passing them to
+the shell.
+
+If you used \texttt{clamnewproject} to begin your new clam service, then an example
+wrapper script will have been created for you, using the CLAM Data API.
 
 \subsection{CLAM Data API}
 
@@ -1455,7 +1464,6 @@ Suppose your wrapper script is called with the following command definition:
 COMMAND = "/path/to/wrapperscript.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY" 
 \end{verbatim}
 
-%$ 
 
 Your wrapper scripts then typically starts in the following fashion:
 
@@ -1471,9 +1479,114 @@ outputdir = sys.argv[3]
 clamdata = clam.common.data.getclamdata(datafile)
 \end{verbatim}
 
-The first statements parse the command line arguments. The last statement returns a CLAMData instance, containing all data your wrapper might need.
+The first statements parse the command line arguments. The last statement
+returns a \texttt{CLAMData} instance, which contains all data your wrapper might need,
+representing the state of the project and all user input.
 
-For an extensive overview of the \texttt{CLAMData} class, we refer to the CLAM Data API Documentation at \url{http://packages.python.org/CLAM}.
+For an extensive overview of the \texttt{CLAMData} class, we refer to the CLAM
+Data API Documentation at \url{http://packages.python.org/CLAM}. It is highly
+recommended to read this when your wrapper using the CLAM Data API. A few of the
+variables available are:
+
+\begin{itemize}
+\item \texttt{clamdata.system\_id}
+\item \texttt{clamdata.project}
+\item \texttt{clamdata.user}
+\item \texttt{clamdata.status}
+\item \texttt{clamdata.parameters}
+\item \texttt{clamdata.input}
+\end{itemize}
+
+
+Any global parameters are available from the \texttt{clamdata} instance, by
+using it like a Python dictionary, where the keys correspond to the Parameter ID:
+
+\begin{verbatim}
+parameter = clamdata['parameter_id']
+\end{verbatim}
+
+The CLAM API also has facilities to use a status file to relay progress
+feedback to the web-interface. Using it is as simple as importing the library
+and writing messages at strategic points during your program's execution:
+
+\begin{verbatim}
+import clam.common.status
+clam.common.status.write(statusfile, "We are running!")
+\end{verbatim}
+
+Progress can also be expressed through an additional completion parameter,
+holding a value between $0$ and $1$. The web-application will show a progress bar if
+such information is provided:
+
+\begin{verbatim}
+clam.common.status.write(statusfile, "We're half way there! Hang on!", 0.5)
+\end{verbatim}
+
+If you have a specific input file you want to grab, you may obtain it from your
+\texttt{clamdata} instance by inputtemplate:
+
+\begin{verbatim}
+inputfile = clamdata.inputfile('some-inputtemplate-id')
+inputfilepath = str(inputfile) 
+\end{verbatim}
+
+The variable \texttt{inputfilepath} in the above example will contain the full
+path to the file that was uploaded by the user for the specified input
+template. 
+
+Once you have a file, you can easily obtain any associated metadata in a
+dictionary-like fashion, for instance:
+
+\begin{verbatim}
+author = inputfile.metadata['author']
+\end{verbatim}
+
+When you have multiple input files, you may want to iterate over all of them,
+the name of the inputtemplate can be obtained from the metadata:
+
+\begin{verbatim}
+for inputfile in clamdata.input:
+    inputfilepath = str(inputfile)
+    inputtemplate = inputfile.metadata.inputtemplate
+\end{verbatim}
+  
+The core of your wrapper script usually consists of a call to your external
+program. In Python this can be done through \texttt{os.system()}. Consider the
+following ficticious example of a program that translates an input text to the
+language specified by a global parameter.
+
+\begin{verbatim}
+os.system("translate -l " + clamdata['language'] + " " + \
+ str(clamdata.inputfile('sourcetext')) + \
+ + " > " + outputdir + "/output.txt"))
+\end{verbatim}
+
+
+However, at this point
+you need to be conscient of possible malicious use, and make sure nobody can
+perform a code injection attack. The key here is to never pass unvalidated data
+obtained from user-input directly to the shell. CLAM's various parameters have
+there own validation options, the only risk left to mitigate is that of string
+input. If the global parameter \emph{language} would be a free string input
+field, a user may insert malicious code that gets passed to the shell. To
+prevent this, use the \texttt{shellsafe()} function from the CLAM Data API. 
+
+
+\begin{verbatim}
+shellsafe = clam.common.data.shellsafe #just a shortcut
+
+os.system("translate -l " + shellsafe(clamdata['language'],"'") + " " + \
+ shellsafe(str(clamdata.inputfile('sourcetext')),'"') + \
+ + " > " + shellsafe(outputdir + "/output.txt") ))
+\end{verbatim}
+
+Each variable should be wrapped in \texttt{shellsafe}, the second argument to
+shellsafe expresses whether to wrap the variable in quotes, and if so, which
+quotes. Quotes are mandatory for values containing spaces or other symbols
+otherwise forbidden. If no quotes are used, shellsafe does more stringent
+checks to prevent code injection. A Python exception is raised if the variable
+is not deemed safe, and the shell will not be invoked. CLAM itself will pick
+this up and produce an error log.
 
 
 \chapter{Documentation for Service Clients}

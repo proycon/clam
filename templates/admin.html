@@ -1,0 +1,32 @@
+$def with (version, system_id,system_name, system_description, user, url, usersprojects)
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>CLAM Administrative Interface</title>
+    <link rel="StyleSheet" href="$url/static/base.css" title="Base Stylesheet" type="text/css" />
+    <script type="text/javascript" src="$url/static/jquery-1.8.3.min.js" />
+</head>
+<body>
+<div id="container">
+    <h1>CLAM Administrative Interface</h1>
+    <div class="box">
+        <h3>Users &amp; Projects</h3>
+
+        <ul>
+        $for user, projects in usersprojects:
+            <li><strong>$user</strong><ul>
+            $for project, date, status in projects:
+                <li class="status$status">$project <span class="date">$date</span>
+                <a href="$url/admin/inpect/$user/$project">Inspect files</a>
+                $if status == 1:
+                    <a href="$url/admin/abort/$user/$project" target="_blank">Abort run</a>
+                $elif status == 2:
+                    <a href="$url/admin/delete/$user/$project" target="_blank">Delete project</a>
+                </li>
+            </ul></li>
+        </ul>
+
+    </div>
+</div>
+</body>
+</html>

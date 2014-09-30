@@ -81,7 +81,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.9'
+VERSION = '0.9.10'
 
 DEBUG = False
 
@@ -91,9 +91,7 @@ settingsmodule = None #will be overwritten later
 
 setlog(sys.stdout)
 #Empty defaults
-#SYSTEM_ID = "clam"nv pynv python
-#-*- coding:thon
-#-*- coding:
+#SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
 #SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 #COMMAND = ""
@@ -298,6 +296,7 @@ class CLAMService(object):
     urls = (
         settings.STANDALONEURLPREFIX + '/', 'Index',
         settings.STANDALONEURLPREFIX + '/info/?', 'Info',
+        settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
         settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -426,6 +425,39 @@ class Info(object):
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
+
+class AdminInterface(object):
+    GHOST = False
+    @RequireLogin(ghost=GHOST)
+    def GET(self, user = None):
+        """Get list of projects"""
+        if not user: user = 'anonymous'
+        if not user in settings.ADMINS:
+            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+
+        usersprojects = {}
+        for f in glob.glob(settings.ROOT + "projects/*"):
+            if os.path.isdir(f):
+                u = os.path.basename(f)
+                usersprojects[u] = []
+
+                for f2 in glob.glob(settings.ROOT + "projects/" + user + "/*"):
+                    if os.path.isdir(f2):
+                        d = datetime.datetime.fromtimestamp(os.stat(f2)[8])
+                        p = os.path.basename(f2)
+                        usersprojects[u].append( (p, d.strftime("%Y-%m-%d %H:%M:%S", Project.status(p,u)[0] ) ) )
+
+        for u in usersprojects:
+            usersprojects[u] = sorted(usersprojects[u])
+
+        render = web.template.render(settings.CLAMDIR + '/templates')
+
+        web.header('Content-Type', "text/html; charset=UTF-8")
+
+        try:
+            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()) )
+        except AttributeError:
+            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
 
 
@@ -805,7 +837,7 @@ class Project(object):
 
             #Start project with specified parameters
             cmd = settings.COMMAND
-            cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams))
+            cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams)) #commandlineparams is shell-safe
             #if 'usecorpus' in postdata and postdata['usecorpus']:
             #    corpus = postdata['usecorpus'].replace('..','') #security
             #    #use a preinstalled corpus:
@@ -819,11 +851,8 @@ class Project(object):
             cmd = cmd.replace('$STATUSFILE',Project.path(project, user) + '.status')
             cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
-            cmd = cmd.replace('$PROJECT',project)
-            #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
-            #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
-            #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
-            #TODO: protect against insertion
+            cmd = cmd.replace('$PROJECT',project) #alphanumberic only, shell-safe
+            #everything should be shell-safe now
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
 
@@ -2174,7 +2203,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(os.path.abspath(__file__))
     if not 'DISPATCHER' in settingkeys:
-        r = os.system('which clamdispatcher')
+        r = os.system('which clamdispatcher >/dev/null 2>/dev/null')
         if r == 0:
             settings.DISPATCHER = 'clamdispatcher'
         elif os.path.exists(settings.CLAMDIR + '/clamdispatcher.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/clamdispatcher.py')[stat.ST_MODE]:

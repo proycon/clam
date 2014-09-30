@@ -31,7 +31,8 @@ import string
 import clam.common.data
 import clam.common.status
 
-
+#make a shortcut to the shellsafe() function
+shellsafe = clam.common.data.shellsafe
 
 #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
 datafile = sys.argv[1]
@@ -50,7 +51,7 @@ clam.common.status.write(statusfile, "Starting...")
 
 #-- Iterate over all input files? --
 
-#for inputfile in clamdata.input
+#for inputfile in clamdata.input:
 #   inputtemplate = inputfile.metadata.inputtemplate
 #   inputfilepath = str(inputfile)
 #   encoding = inputfile.metadata['encoding'] #Example showing how to obtain metadata parameters
@@ -63,7 +64,12 @@ clam.common.status.write(statusfile, "Starting...")
 #parameter = clamdata['parameter_id']
 
 #-- Invoke your actual system? --
-#os.system("system.pl " + inputfile);
+# note the use of the shellsafe() function that wraps a variable in the
+# specified quotes (second parameter) and makes sure the value doesn't break
+# out of the quoted environment! Can be used without the quote too, but will be
+# do much stricter checks then to ensure security.
+
+#os.system("system.pl " + shellsafe(inputfilepath,'"') );
 
 
 #A nice status message to indicate we're done

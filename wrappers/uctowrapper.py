@@ -8,7 +8,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -23,8 +23,7 @@ import re
 import clam.common.data
 import clam.common.status
 
-
-
+shellsafe = clam.common.data.shellsafe
 
 if __name__ == "__main__":
 
@@ -43,28 +42,28 @@ if __name__ == "__main__":
     clam.common.status.write(statusfile, "Starting...")
 
 
-    commandlineargs = clamdata.commandlineargs()
-    
+    commandlineargs = clamdata.commandlineargs() #shell-safe by definition
+
 
     for i, inputfile in enumerate(clamdata.input):
         #Update our status message to let CLAM know what we're doing
         clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
-        
-        #We need one of the metadata fields        
+
+        #We need one of the metadata fields
         language = inputfile.metadata['language']
-        
-        
+
+
         if clamdata['xml']:
             docid = None
             if 'documentid' in inputfile.metadata and inputfile.metadata['documentid']:
                 docid = inputfile.metadata['documentid']
             if not docid:
-                docid = "untitled"                
-            os.system(bindir + 'ucto -L ' + language + ' -x ' + docid + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.xml')
+                docid = "untitled"
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'") + ' -x ' + shellsafe(docid,"'") + ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.xml','"'))
         elif clamdata['verbose']:
-            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.vtok')
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.vtok',"'"))
         else:
-            os.system(bindir + 'ucto -L ' + language + ' ' + commandlineargs + ' ' + str(inputfile) + ' > ' + outputdir +'/'+ inputfile.filename.replace('.txt','') + '.tok')
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.tok',"'"))
 
     #A nice status message to indicate we're done
     clam.common.status.write(statusfile, "Done",100) # status update
