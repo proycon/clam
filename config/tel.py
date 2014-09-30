@@ -69,6 +69,7 @@ elif host == 'applejack': #Nijmegen
     DEBUG = False
     REALM = "WEBSERVICES-LST"
     DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+    ADMINS = ['proycon','antalb','wstoop']
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"

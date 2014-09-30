@@ -9,7 +9,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -19,7 +19,7 @@ from clam.common.formats import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path 
+from sys import path
 from os import uname, environ
 from base64 import b64decode as D
 
@@ -35,7 +35,7 @@ PORT = 8080
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
+#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!!
 
 
 # ================ Server specific configurations for CLAM ===============
@@ -51,25 +51,26 @@ elif host == 'applejack': #Nijmegen
         CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
         ROOT = "/scratch2/www/webservices-lst/live/writable/timbl/"
         HOST = "webservices-lst.science.ru.nl"
-        PORT = 80    
+        PORT = 80
     else:
         #test environment
         CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
         ROOT = "/scratch2/www/webservices-lst/test/writable/timbl/"
         HOST = "webservices-lst.science.ru.nl"
-        PORT = 81        
+        PORT = 81
     URLPREFIX = "timbl"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"    
+    BINDIR = "/vol/customopt/uvt-ru/bin/"
     USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl', 
-        'user': 'clamopener',        
+        'host': 'mysql-clamopener.science.ru.nl',
+        'user': 'clamopener',
         'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
         'database': 'clamopener',
         'table': 'clamusers_clamusers'
     }
     REALM = "WEBSERVICES-LST"
+    ADMINS = ['proycon','antalb','wstoop']
 else:
-    raise Exception("I don't know where I'm running from! Got " + host)    
+    raise Exception("I don't know where I'm running from! Got " + host)
 
 
 
@@ -79,14 +80,14 @@ else:
 #absolute paths is preferred. The current working directory will be
 #set to the project directory.
 #
-#You can make use of the following special variables, 
+#You can make use of the following special variables,
 #which will be automatically set by CLAM:
 #     $INPUTDIRECTORY  - The directory where input files are uploaded.
 #     $OUTPUTDIRECTORY - The directory where the system should output
 #                        its output files.
-#     $STATUSFILE      - Filename of the .status file where the system 
-#                        should output status messages. 
-#     $DATAFILE        - Filename of the clam.xml file describing the 
+#     $STATUSFILE      - Filename of the .status file where the system
+#                        should output status messages.
+#     $DATAFILE        - Filename of the clam.xml file describing the
 #                        system and chosen configuration.
 #     $USERNAME        - The username of the currently logged in user
 #                        (set to "anonymous" if there is none)
@@ -97,12 +98,12 @@ COMMAND =  CLAMDIR + "/wrappers/timblwrapper.py $STATUSFILE $INPUTDIRECTORY $OUT
 
 PROFILES = [
     Profile(
-        InputTemplate('traindata', PlainTextFormat,"Training data (plain-text, space-separated)", 
-            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','so-8859-15 (Latin9)'),('ascii','ASCII')]),  
+        InputTemplate('traindata', PlainTextFormat,"Training data (plain-text, space-separated)",
+            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','so-8859-15 (Latin9)'),('ascii','ASCII')]),
             extension='train',
         ),
-        InputTemplate('testdata', PlainTextFormat,"Test data (plain-text, space-separated)", 
-            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','iso-8859-15 (Latin9)'),('ascii','ASCII')]),  
+        InputTemplate('testdata', PlainTextFormat,"Test data (plain-text, space-separated)",
+            ChoiceParameter(id='encoding',name='Encoding',description='The character encoding of the file', choices=[('utf-8','UTF-8 (Unicode)'),('iso-8859-1','ISO-8859-1 (Latin1)'),('iso-8859-15','iso-8859-15 (Latin9)'),('ascii','ASCII')]),
             extension='test',
             multi=True,
         ),
@@ -113,7 +114,7 @@ PROFILES = [
     ),
 ]
 
-PARAMETERS =  [ 
+PARAMETERS =  [
     ('Classifier Options', [
         ChoiceParameter('a','Algorithm', 'Classification Algorithm',choices=[('IB1','IB1'),('IG','IGTree'),('TRIBL','TRIBL'),('IB2','IB2'),('TRIBL2','TRIBL2')], default='IB1', paramflag='-a'),
         IntegerParameter('k','k-Nearest Neighbours', 'k-Nearest Neighbours', default=1, paramflag='-k'),
@@ -125,8 +126,8 @@ PARAMETERS =  [
     ]),
     ('Input  Format', [
         ChoiceParameter('F','Input Format','Input format for training and test files',choices=[('Compact','Compact'),('C4.5','C4.5'),('ARFF','ARFF'),('Columns','Columns'),('Tabbed','Tabbed')], default='Columns',paramflag='-F'),
-    ]),   
-    ('Output Options', [        
+    ]),
+    ('Output Options', [
         ChoiceParameter('v', 'Verbosity Level', 'Verbosity level', multi=True, choices=[('o','Show all options set'),('b','Show node/branch count and branching factor'), ('f','Show calculated feature weights'), ('p','Show Value Difference matrices'), ('e', 'Show exact matches'), ('as', 'Show advances statistics (memory consuming)'), ('cm','Show confusion matrix (memory consuming)'),('cs','Show per class statistics (memory consuming)'),('cf','Add confidence to output file'),('di','Add distance to output file'),('db','Add distribution of best matches to output file'),('md','Add matching depth to output file'),('k','Add summary for all k neighbours'),('n','Add nearest neighbours to output file')], paramflag='-v', delimiter='+'),
     ]),
 ]

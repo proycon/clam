@@ -69,6 +69,7 @@ elif host == 'applejack': #Nijmegen
     DEBUG = False
     REALM = "WEBSERVICES-LST"
     DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+    ADMINS = ['proycon','antalb','wstoop']
 else:
     raise Exception("I don't know where I'm running from! Got " + host)
 
