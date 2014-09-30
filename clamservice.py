@@ -508,7 +508,7 @@ class AdminDownloader(object):
     @RequireLogin(ghost=GHOST)
     def GET(self, targetuser, project, type, filename, user = None):
         if not user: user = 'anonymous'
-        if settings.ADMINS or not user in settings.ADMINS:
+        if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
 
