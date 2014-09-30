@@ -30,8 +30,8 @@
 \begin{titlepage}
 \begin{center}
 \textsc{\large Language and Speech Technology\\ Technical Report Series}\\[1.5cm] 
-\textsc{Report Number LST-14-03}\\[0.5cm] 
-\vspace{3cm}  %PRERELEASE
+\textsc{Report Number LST-14-??}\\[0.5cm] 
+%\vspace{3cm}  %PRERELEASE
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
@@ -41,11 +41,9 @@
 \HRule \\[1.0cm]
 
 %\emph{November 7th, 2013} \\[0.5cm] 
-\emph{September 30th, 2014 \small{(pending publication} \\[0.5cm] 
+\emph{September 30th, 2014} \small{(pending acceptation)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
-%\vspace{1cm}
-\vspace{3cm} %PRERELEASE
 
 \begin{minipage}{0.6\textwidth}
 \begin{flushleft}
@@ -717,7 +715,7 @@ such as federated identity solutions, CLAM supports the \texttt{PREAUTHHEADER}
 configuration directive, the value of which is a string containing an HTTP
 header which CLAM may read to obtain the authenticated username. This should be
 set by an authentication system \emph{prior} to passing control to CLAM. An
-example of such a system is Shibboleth \footenote{http://shibboleth.net}.
+example of such a system is Shibboleth \footnote{http://shibboleth.net}.
 Multiple headers may be specified in \texttt{PREAUTHHEADER}, using space as
 delimiter, effectively creating a fallback chain. When \texttt{PREAUTHONLY} is
 set to \texttt{False} (default), the ultimate fallback will be CLAM's built-in
