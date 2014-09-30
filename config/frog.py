@@ -25,7 +25,7 @@ from sys import path
 from os import uname, environ
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.7
+REQUIRE_VERSION = 0.9
 
 #THIS CONFIGURATION IS FOR FROG >= 0.12.10 ! OLDER VERSIONS WON'T WORK WITH IT!
 

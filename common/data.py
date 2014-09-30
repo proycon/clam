@@ -38,10 +38,13 @@ import clam.common.util
 import clam.common.viewers
 from clam.common.util import RequestWithMethod
 
+
+
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.9'
+VERSION = '0.9.10'
 
+DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','\n','\r')
 
 class BadRequest(Exception):
      def __init__(self):
@@ -353,7 +356,7 @@ def processparameter(postdata, parameter, user=None):
         if not (postvalue is None):
             clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue))
             if parameter.set(postvalue): #may generate an error in parameter.error
-                p = parameter.compilearg()
+                p = parameter.compilearg() #shell-safe
                 if p:
                     commandlineparam = p
             else:
@@ -421,7 +424,7 @@ class CLAMData(object):
 
         * ``baseurl``         - The base URL to the service (string)
         * ``projecturl``      - The full URL to the selected project, if any  (string)
-        * ``status``          - Can be: ``clam.common.status.READY`` (1), ``clam.common.status.RUNNING`` (2), or ``clam.common.status.DONE`` (3)
+        * ``status``          - Can be: ``clam.common.status.READY`` (0),``clam.common.status.RUNNING`` (1), or ``clam.common.status.DONE`` (2)
         * ``statusmessage``   - The latest status message (string)
         * ``completion``      - An integer between 0 and 100 indicating
                           the percentage towards completion.
@@ -2082,5 +2085,21 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
 
         return filename
 
+
+
+
+def shellsafe(s, quote=''):
+    """Returns the value string, wrapped in the specified quotes (if not empty), but checks and raises an Exception if the string is at risk of causing code injection"""
+    if len(s) > 1024:
+            raise ValueError("Variable value rejected for security reasons: too long")
+    if quote:
+        if quote in s:
+            raise ValueError("Variable value rejected for security reasons: " + s)
+        return quote + s + quote
+    else:
+        for c in s:
+            if c in DISALLOWINSHELLSAFE:
+                raise ValueError("Variable value rejected for security reasons: " + s)
+        return s
 
 import clam.common.formats #yes, this is deliberately placed at the end!

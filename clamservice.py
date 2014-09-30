@@ -81,7 +81,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 
-VERSION = '0.9.9'
+VERSION = '0.9.10'
 
 DEBUG = False
 
@@ -91,9 +91,7 @@ settingsmodule = None #will be overwritten later
 
 setlog(sys.stdout)
 #Empty defaults
-#SYSTEM_ID = "clam"nv pynv python
-#-*- coding:thon
-#-*- coding:
+#SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
 #SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
 #COMMAND = ""
@@ -839,7 +837,7 @@ class Project(object):
 
             #Start project with specified parameters
             cmd = settings.COMMAND
-            cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams))
+            cmd = cmd.replace('$PARAMETERS', " ".join(commandlineparams)) #commandlineparams is shell-safe
             #if 'usecorpus' in postdata and postdata['usecorpus']:
             #    corpus = postdata['usecorpus'].replace('..','') #security
             #    #use a preinstalled corpus:
@@ -853,11 +851,8 @@ class Project(object):
             cmd = cmd.replace('$STATUSFILE',Project.path(project, user) + '.status')
             cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
-            cmd = cmd.replace('$PROJECT',project)
-            #cmd = sum([ params if x == "$PARAMETERS" else [x] for x in COMMAND ] ),[])
-            #cmd = sum([ Project.path(project) + 'input/' if x == "$INPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
-            #cmd = sum([ Project.path(project) + 'output/' if x == "$OUTPUTDIRECTORY" else [x] for x in COMMAND ] ),[])
-            #TODO: protect against insertion
+            cmd = cmd.replace('$PROJECT',project) #alphanumberic only, shell-safe
+            #everything should be shell-safe now
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
 
@@ -2208,7 +2203,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'CLAMDIR' in settingkeys:
         settings.CLAMDIR = os.path.dirname(os.path.abspath(__file__))
     if not 'DISPATCHER' in settingkeys:
-        r = os.system('which clamdispatcher')
+        r = os.system('which clamdispatcher >/dev/null 2>/dev/null')
         if r == 0:
             settings.DISPATCHER = 'clamdispatcher'
         elif os.path.exists(settings.CLAMDIR + '/clamdispatcher.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/clamdispatcher.py')[stat.ST_MODE]:
