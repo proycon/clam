@@ -3,8 +3,29 @@ $def with (version, system_id,system_name, system_description, user, url, usersp
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>CLAM Administrative Interface</title>
-    <link rel="StyleSheet" href="$url/static/base.css" title="Base Stylesheet" type="text/css" />
     <script type="text/javascript" src="$url/static/jquery-1.8.3.min.js"></script>
+    <link rel="StyleSheet" href="$url/static/base.css" title="Base Stylesheet" type="text/css" />
+    <style type="text/css">
+        ul li.status0 {
+            color: black;
+        }
+        ul li.status1 {
+            color: yellow;
+        }
+        ul li.status2 {
+            color: green;
+        }
+        ul ul li {
+            background: white;
+        }
+        li span {
+            font-style: italic;
+            display: inline-block;
+            float: right;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    </style>
 </head>
 <body>
 <div id="container">
@@ -16,12 +37,14 @@ $def with (version, system_id,system_name, system_description, user, url, usersp
         $for user, projects in usersprojects:
             <li><strong>$user</strong><ul>
             $for project, date, status in projects:
-                <li class="status$status">$project <span class="date">$date</span>
-                <a href="$url/admin/inpect/$user/$project">Inspect files</a>
+                <li class="status$status"><a href="$url/admin/inspect/$user/$project">$project</a>
+                <span>
                 $if status == 1:
                     <a href="$url/admin/abort/$user/$project" target="_blank">Abort run</a>
                 $elif status == 2:
                     <a href="$url/admin/delete/$user/$project" target="_blank">Delete project</a>
+                </span>
+                <span class="date">$date</span>
                 </li>
             </ul></li>
         </ul>

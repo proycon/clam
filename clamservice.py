@@ -297,6 +297,9 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/', 'Index',
         settings.STANDALONEURLPREFIX + '/info/?', 'Info',
         settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
+        settings.STANDALONEURLPREFIX + '/admin/download/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/([a-z]*)/(.*)/?', 'AdminDownloader',
+        settings.STANDALONEURLPREFIX + '/admin/([A-Za-z]*)/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/?', 'AdminHandler',
+
         settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
@@ -459,6 +462,78 @@ class AdminInterface(object):
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
+
+class AdminHandler(object):
+    GHOST = False
+    @RequireLogin(ghost=GHOST)
+    def GET(self, command, targetuser, project, user = None):
+        if not user: user = 'anonymous'
+        if not user in settings.ADMINS:
+            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+
+
+        web.header('Content-Type', "text/html; charset=UTF-8")
+        render = web.template.render(settings.CLAMDIR + '/templates')
+
+        if command == 'inspect':
+            inputfiles = []
+            for f in glob.glob(settings.ROOT + "projects/" + targetuser + "/" + project + "/input/*"):
+                f = os.path.basename(f)
+                if f[0] != '.':
+                    inputfiles.append(f)
+            outputfiles = []
+            for f in glob.glob(settings.ROOT + "projects/" + targetuser + "/" + project + "/output/*"):
+                f = os.path.basename(f)
+                if f[0] != '.':
+                    outputfiles.append(f)
+            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles) )
+        elif command == 'abort':
+            p = Project()
+            if p.abort(project, targetuser):
+                return "Ok"
+            else:
+                raise CustomForbidden('Failed')
+        elif command == 'delete':
+            d = Project.path(project, targetuser)
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+                return "Ok"
+            else:
+                raise CustomForbidden('Not Found')
+        else:
+            raise CustomForbidden('No such command: ' + command)
+
+class AdminDownloader(object):
+    GHOST = False
+    @RequireLogin(ghost=GHOST)
+    def GET(self, targetuser, project, type, filename, user = None):
+        if not user: user = 'anonymous'
+        if not user in settings.ADMINS:
+            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+
+
+        if type == 'input':
+            try:
+                f = clam.common.data.CLAMInputFile(Project.path(project, targetuser), filename)
+            except:
+                raise web.webapi.NotFound()
+        elif type == 'output':
+            try:
+                f = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename)
+            except:
+                raise web.webapi.NotFound()
+        else:
+            raise CustomForbidden('Invalid type')
+
+        #return file contents
+        if f.metadata:
+            for header, value in f.metadata.httpheaders():
+                web.header(header, value)
+        try:
+            for line in f:
+                yield line
+        except IOError:
+            raise web.webapi.NotFound()
 
 
 def getrooturl():
