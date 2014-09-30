@@ -1449,8 +1449,16 @@ def addfile(project, filename, user, postdata, inputsource=None):
     if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:
             raise CustomForbidden("Invalid converter specified: " + postdata['converter']) #403
 
-    #Very simple security, prevent breaking out the input dir
-    filename = filename.replace("..","")
+    #Make sure the filename is secure
+    validfilename = True
+    DISALLOWED = ('/','&','|','<','>',';','"',"'","`","{","}","\n","\r","\b","\t")
+    for c in filename:
+        if c in DISALLOWED:
+            validfilename = False
+            break
+
+    if not validfilename:
+        raise CustomForbidden("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;") #403
 
 
     #Create the project (no effect if already exists)

@@ -305,7 +305,7 @@ class StringParameter(AbstractParameter):
 
     def compilearg(self):
         needsquotes = False
-        check = (' ',';','|','&','!',"'",'"','>','<','\n','\r')
+        check = (' ',';','|','&','!',"'",'"','`','>','<','\n','\r','\t')
         for c in self.value:
             if c in check:
                 needsquotes = True

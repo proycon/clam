@@ -44,7 +44,7 @@ from clam.common.util import RequestWithMethod
 
 VERSION = '0.9.10'
 
-DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','\n','\r')
+DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
 class BadRequest(Exception):
      def __init__(self):
