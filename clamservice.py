@@ -445,7 +445,7 @@ class AdminInterface(object):
                     if os.path.isdir(f2):
                         d = datetime.datetime.fromtimestamp(os.stat(f2)[8])
                         p = os.path.basename(f2)
-                        usersprojects[u].append( (p, d.strftime("%Y-%m-%d %H:%M:%S", Project.status(p,u)[0] ) ) )
+                        usersprojects[u].append( (p, d.strftime("%Y-%m-%d %H:%M:%S"), Project.status(p,u)[0]  ) )
 
         for u in usersprojects:
             usersprojects[u] = sorted(usersprojects[u])

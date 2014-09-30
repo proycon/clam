@@ -50,7 +50,7 @@ PORT= 8080
 USERS = None #no user authentication
 #USERS = { 'admin': pwhash('admin', SYSTEM_ID, 'secret'), 'proycon': pwhash('proycon', SYSTEM_ID, 'secret'), 'antal': pwhash('antal', SYSTEM_ID, 'secret') , 'martin': pwhash('martin', SYSTEM_ID, 'secret') }
 
-ADMINS = ['admin'] #Define which of the above users are admins
+ADMINS = ['anonymous'] #Define which of the above users are admins (never set this to anonymous on a real webservice!!!!)
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!!
 
 #Do you want all projects to be public to all users? Otherwise projects are
