@@ -21,17 +21,15 @@ from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path
 from os import uname, environ
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.7
+REQUIRE_VERSION = 0.9
 
-#THIS CONFIGURATION IS FOR FROG >= 0.12.10 ! OLDER VERSIONS WON'T WORK WITH IT!
 
 #============== General meta configuration =================
-SYSTEM_ID = "tel"
-SYSTEM_NAME = "tel"
+SYSTEM_ID = "foliastats"
+SYSTEM_NAME = "FoLiA-stats"
 SYSTEM_DESCRIPTION = "N-gram frequency list generation on FoLiA input"
 
 
@@ -41,7 +39,7 @@ USERS = None
 host = uname()[1]
 if host == 'galactica' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
-    ROOT = "/home/proycon/work/tel.clam/"
+    ROOT = "/home/proycon/work/foliastats.clam/"
     PORT = 9001
     BINDIR = "/usr/local/bin/"
     USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
@@ -49,15 +47,15 @@ if host == 'galactica' or host == 'roma': #proycon's laptop/server
 elif host == 'applejack': #Nijmegen
     if not 'CLAMTEST' in environ:
         CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/live/writable/tel/"
+        ROOT = "/scratch2/www/webservices-lst/live/writable/foliastats/"
         HOST = "webservices-lst.science.ru.nl"
         PORT = 80
     else:
         CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/test/writable/tel/"
+        ROOT = "/scratch2/www/webservices-lst/test/writable/foliastats/"
         HOST = "webservices-lst.science.ru.nl"
         PORT = 81
-    URLPREFIX = "tel"
+    URLPREFIX = "foliastats"
     BINDIR = "/vol/customopt/uvt-ru/bin/"
     USERS_MYSQL = {
         'host': 'mysql-clamopener.science.ru.nl',
@@ -73,10 +71,10 @@ elif host == 'applejack': #Nijmegen
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
-    ROOT = "/var/www/clamdata/tel/"
+    ROOT = "/var/www/clamdata/foliastats/"
     HOST = 'webservices.ticc.uvt.nl'
     PORT = 80
-    URLPREFIX = 'tel'
+    URLPREFIX = 'foliastats'
     WEBSERVICEGHOST = 'ws'
     BINDIR = "/var/www/bin/"
 else:
@@ -86,7 +84,7 @@ else:
 
 
 #The system command (Use the variables $STATUSFILE $DATAFILE $PARAMETERS $INPUTDIRECTORY $OUTPUTDIRECTORY $USERNAME)
-COMMAND = CLAMDIR +  "/wrappers/telwrapper.py " + BINDIR + " $INPUTDIRECTORY $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
+COMMAND = CLAMDIR +  "/wrappers/foliastats.py " + BINDIR + " $INPUTDIRECTORY $DATAFILE $STATUSFILE $OUTPUTDIRECTORY > $OUTPUTDIRECTORY/log"
 
 
 PROFILES = [
@@ -123,3 +121,5 @@ PARAMETERS =  [
         IntegerParameter('n','N-Gram Count', 'Specify a value for n to count', default=1),
     ]),
 ]
+
+DISPATCHER_MAXRESMEM = 25000 #25GB

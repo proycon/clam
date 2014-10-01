@@ -56,11 +56,11 @@ clam.common.status.write(statusfile, "Starting...")
 inputfiles = list(glob.glob(inputdir + '/*.xml'))
 opts = ""
 if 'lowercase' in clamdata and clamdata['lowercase']:
-    opts += " -l"
+    opts += " --lower"
 if 'n' in clamdata and clamdata['n']:
-    opts += " -n " + str(clamdata['n'])
+    opts += " --ngram " + str(clamdata['n'])
 
-r = os.system("tel -o " + outputdir + "/output " + opts + " " + " ".join(inputfiles))
+r = os.system("FoLiA-stats -t 1 -o " + outputdir + "/output " + opts + " " + " ".join(inputfiles))
 
 
 clam.common.status.write(statusfile, "Done",100)
