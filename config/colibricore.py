@@ -81,15 +81,18 @@ COMMAND = CLAMDIR +  "/wrappers/colibricore.py " + BINDIR + " $DATAFILE $STATUSF
 OUTPUTTEMPLATES = (
     OutputTemplate('corpusfile',BinaryDataFormat,"Colibri Corpus Data",
         removeextensions=['.txt','.xml'],
-        extension='.colibri.dat'
+        extension='.colibri.dat',
+        multi=True,
     ),
     OutputTemplate('patternmodel',BinaryDataFormat,"Colibri Pattern Model",
         removeextensions=['.txt','.xml'],
-        extension='.colibri.patternmodel'
+        extension='.colibri.patternmodel',
+        multi=True,
     ),
     OutputTemplate('classfile',CSVFormat,"Colibri Class Data",
         removeextensions=['.txt','.xml'],
-        extension='.colibri.cls'
+        extension='.colibri.cls',
+        multi=True,
     ),
     ParameterCondition(extract=True,
         then=OutputTemplate('extract',CSVFormat,"Extract Pattern List",
