@@ -101,7 +101,7 @@ OUTPUTTEMPLATES = (
         )
     ),
     ParameterCondition(report=True,
-        then=OutputTemplate('report',PlainText,"Statistical Report",
+        then=OutputTemplate('report',PlainTextFormat,"Statistical Report",
             SetMetaField('encoding','utf-8'),
             removeextensions=['.txt','.xml'],
             extension='.report.txt',
@@ -154,13 +154,13 @@ PROFILES = [
             multi=True
           ) ,) + OUTPUTTEMPLATES)),
     Profile(
-        *((InputTemplate('textinput_tok', PlainText,"Plain text input (tokenised)",
+        *((InputTemplate('textinput_tok', PlainTextFormat,"Plain text input (tokenised)",
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             extension='.txt',
             multi=True
         ),) +  OUTPUTTEMPLATES)),
     Profile(
-        *((InputTemplate('textinput_untok', PlainText,"Plain text input (untokenised)",
+        *((InputTemplate('textinput_untok', PlainTextFormat,"Plain text input (untokenised)",
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             ChoiceParameter(id='language',name='Language',description='The language of the text', choices=[('en','English'),('nl','Dutch'),('de','German'),('fr','French'),('es','Spanish'),('pt','Portuguese'),('fy','Frysian'),('generic','Other (generic tokeniser)')]),
             BooleanParameter('sentenceperline_input','Input is one sentence per line'),
