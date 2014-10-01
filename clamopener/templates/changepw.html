@@ -9,7 +9,7 @@
           <div id="header">
               <h1>Change Password Form</h1>
           </div>
-          <div id="main">              
+          <div class="box">              
               <form method="post" action="/changepw/{{ userid }}">
                 {% csrf_token %}
                 Current password: <input type="password" name="pw" /><br />

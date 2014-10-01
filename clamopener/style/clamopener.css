@@ -1,41 +1,69 @@
 body {
     font-family: sans;
     font-size: 11px;
-    background: url(back.jpg) center fixed;
+    background: url(back.png);
+    margin: 0px;
+    padding: 0px;
+}
+
+#container {
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  min-height: 500px;
 }
 
 #header {
-    text-align: center;
-}
-#header h1 {
-    color: #ffa861; 
-    font-size: 250%;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    background: url(back2.png);
-    border-radius: 25px;
     display: block;
-    width: 600px;
-    margin-left: auto;
-    margin-right: auto;
     text-align: center;
-    padding-top: 10px;
-    padding-bottom: 10px;    
+    width: 100%;
+    border-bottom: 5px solid black;
+    background: white;
+    margin-bottom: 25px;
+   min-height: 60px;
+vertical-align: middle;
+}
+
+#header h1 {
+   color: #964205; 
+   padding: 0;
+   margin: 0;
+   font-size: 250%;
+   vertical-align: middle;
+   padding-top: 12px;   
+   display: block;
 }
 
 a {
-    color: #ffa861; 
+   color: #964205; 
 }
 
-#main {
-    width: 500px;
-    color: white;
+.box {
+    width: 800px;
+    color: black;
     margin-left: auto;
     margin-right: auto;
-    min-height: 300px;
-    background: url(back2.png);
-    padding: 50px;
-    border-radius: 25px;
+    /* background: rgba(0,0,0,0.2); */
+    border: 1px solid #aaa;
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 10px 10px 5px #555;
+}
+
+#lamalogo {
+   position: absolute;
+   background: url(lama-logo.png);
+   width: 320px;
+   height: 50px;
+   left: 10px;
+}
+#rulogo {
+  position: absolute;
+  background: url(rulogo.png) no-repeat;
+  height: 50px;
+  width: 40px;
+  right: 10px;
 }
 
 #form {
@@ -64,12 +92,12 @@ table#index {
 }
 
 table th {
-    color: white;
+    color: black;
     font-weight: bold;
     font-size: 12px;
 }
 table td {
-    color: white;
+    color: black;
     font-size: 10px;
     padding-bottom: 10px;
 }

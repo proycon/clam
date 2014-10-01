@@ -1,10 +1,16 @@
-from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django import VERSION
+#from django.views.generic.simple import direct_to_template
 from clamopener import settings
 
 # Uncomment the next two lines to enable the admin:
 #from django.contrib import admin
 #admin.autodiscover()
+
+if VERSION[1] >= 6: #Django 1.6
+    from django.conf.urls import patterns, url, include
+    from django.conf.urls.static import static
+else:
+    from django.conf.urls.defaults import *
 
 urlpatterns = patterns('',
     # Example:
