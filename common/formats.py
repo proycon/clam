@@ -78,7 +78,9 @@ class HTMLFormat(CLAMMetaData):
         """HTTP headers to output for this format. Yields (key,value) tuples."""
         yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
 
-
+class BinaryDataFormat(CLAMMetaData):
+    name = "Application-specific Binary Data"
+    mimetype = 'application/octet-stream'
 
 class TadpoleFormat(CLAMMetaData):
     attributes = {'tokenisation':'yes','lemmatisation':['yes','no'],'postagging':['yes','no'],'morphologicalanalysis':['yes','no'],'mwudetection':['yes','no'],'parsing':['yes','no'] }
