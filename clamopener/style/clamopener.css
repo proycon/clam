@@ -106,10 +106,16 @@ table th {
 table td {
     color: black;
     font-size: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 10px;  
+    border-bottom: 1px solid #ddd;
+}
+tr:hover {
+  background: #eee;
 }
 th.colname {
     width: 30%;
+    font-size: 15px;
+    font-weight: bold;
 }
 th.coldsc {
     width: 70%;
