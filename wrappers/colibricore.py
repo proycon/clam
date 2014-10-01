@@ -109,19 +109,19 @@ if __name__ == "__main__":
         cmd = bindir + 'colibri-patternmodeller ' + options + ' -i ' + shellsafe(outputdir + '/' + filename + '.colibri.patternmodel',"'") + " -c " + shellsafe(outputdir + '/' + filename + ".colibri.cls","'")
 
         if clamdata['extract']:
-            clam.common.status.write(statusfile, "Outputting pattern list for " + outputdir + '/' + filename + "...", p)
+            clam.common.status.write(statusfile, "Outputting pattern list for " + filename + "...", p)
             r = os.system(cmd + " -P > " + outputdir + '/' + filename + ".patterns.csv")
         if clamdata['report']:
-            clam.common.status.write(statusfile, "Computing and outputting report for " + outputdir + '/' + filename + "...", p)
+            clam.common.status.write(statusfile, "Computing and outputting report for " +  filename + "...", p)
             r = os.system(cmd + " -R > " + outputdir + '/' + filename + ".report.txt")
         if clamdata['histogram']:
-            clam.common.status.write(statusfile, "Computing and outputting histogram for " + outputdir + '/' + filename + "...", p)
+            clam.common.status.write(statusfile, "Computing and outputting histogram for " + filename + "...", p)
             r = os.system(cmd + " -H > " + outputdir + '/' + filename + ".histogram.csv")
         if clamdata['reverseindex']:
-            clam.common.status.write(statusfile, "Computing and outputting reverse index for " + outputdir + '/' + filename + "...", p)
+            clam.common.status.write(statusfile, "Computing and outputting reverse index for " + filename + "...", p)
             r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -Z > " + filename + ".reverseindex.csv")
         if clamdata['cooc'] > 0:
-            clam.common.status.write(statusfile, "Computing and outputting co-occurrences for " + outputdir + '/' + filename + "...", p)
+            clam.common.status.write(statusfile, "Computing and outputting co-occurrences for " + filename + "...", p)
             r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -C " + str(clamdata['cooc']) + " > " + outputdir + '/' + filename + ".cooc.csv")
         print >>sys.stderr,"NPMI=",clamdata['npmi'], type(clamdata['npmi'])
         if clamdata['npmi'] > -1:
