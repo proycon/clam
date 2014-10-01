@@ -37,12 +37,12 @@ USERS = None
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
-if host == 'galactica' or host == 'roma': #proycon's laptop/server
+if host == 'galactica' or host == 'roma' or host == 'mhysa': #proycon's laptop/server/desktop
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/colibricore.clam/"
     PORT = 9001
-    BINDIR = "/usr/local/bin/"
-    USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
+    BINDIR = "/home/proycon/local/bin/"
+    #USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
     #URLPREFIX = 'frog'
 elif host == 'applejack': #Nijmegen
     if not 'CLAMTEST' in environ:
@@ -329,7 +329,7 @@ PARAMETERS =  [
         BooleanParameter('extract','Extract patterns', 'Output a list of all patterns (ngrams, skipgrams) with their counts'),
         BooleanParameter('report','Statistical Report','Output a statistical report of total counts per ngram-group, and coverage information (enable indexing for accurate coverage information)'),
         BooleanParameter('histogram','Histogram', 'Output a histogram of ngram/skipgram occurrence count'),
-        BooleanParameter('reverseindex','reverseindex', 'Output a reverse index, for each position in the corpus, the patterns that start on that position are listed'),
+        BooleanParameter('reverseindex','Reverse Index', 'Output a reverse index, for each position in the corpus, the patterns that start on that position are listed'),
         IntegerParameter('cooc','Co-occurrence (absolute)', 'Compute co-occurring patterns (occuring on the same input line in the corpus data) that occur together more than the specified times  (0=disabled)', default=0),
         FloatParameter('npmi','Co-occurrence (relative)', 'Compute co-occurring patterns (occuring on the same input line in the corpus data) that have a normalised mutial information higher than the specified value (-1=disabled)', default=-1),
     ]),

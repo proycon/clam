@@ -581,6 +581,16 @@ class FloatParameter(AbstractParameter):
             self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False
 
+    def set(self, value):
+        """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
+        if self.validate(value):
+            #print "Parameter " + self.id + " successfully set to " + repr(value)
+            self.hasvalue = True
+            self.value = float(value)
+            return True
+        else:
+            #print "Parameter " + self.id + " COULD NOT BE set to " + repr(value)
+            return False
 
     def valuefrompostdata(self, postdata):
         """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""

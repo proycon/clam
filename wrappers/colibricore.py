@@ -25,6 +25,9 @@ import clam.common.status
 
 shellsafe = clam.common.data.shellsafe
 
+
+#curdir = os.getcwd()
+
 if __name__ == "__main__":
 
     #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
@@ -55,10 +58,9 @@ if __name__ == "__main__":
 
         inputtemplate = inputfile.metadata.inputtemplate
 
-        os.chdir(outputdir)
 
         if inputtemplate == 'textinput_tok':
-            os.symlink(str(inputfile),outputdir + '/' + filename + '.txt')
+            os.symlink(os.path.abspath(str(inputfile)),outputdir + '/' + filename + '.txt')
         elif inputtemplate == 'textinput_untok':
             #we'll need to tokenise first
             language = inputfile.metadata['language']
@@ -71,13 +73,19 @@ if __name__ == "__main__":
             os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' + uctooptions + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ filename + '.txt',"'"))
 
         elif inputtemplate == 'foliainput':
-            os.symlink(str(inputfile),outputdir + '/' + filename + '.xml')
+            os.symlink(os.path.abspath(str(inputfile)),outputdir + '/' + filename + '.xml')
+
+
 
         clam.common.status.write(statusfile, "Class Encoding " + filename + "...", p)
         if inputtemplate == 'foliainput':
-            os.system(bindir + 'colibri-classencode ' + outputdir+'/'+filename +'.xml')
+            os.system(bindir + 'colibri-classencode ' +  outputdir+'/'+filename +'.xml')
         else:
             os.system(bindir + 'colibri-classencode ' + outputdir+'/'+filename +'.txt')
+
+        #files will be in the wrong place after classencode, move:
+        os.rename(filename+'.colibri.cls', outputdir+'/'+filename+'.colibri.cls')
+        os.rename(filename+'.colibri.dat', outputdir+'/'+filename+'.colibri.dat')
 
         doindex = clamdata['indexing'] or clamdata['cooc'] or clamdata['npmi']
 
@@ -91,33 +99,34 @@ if __name__ == "__main__":
         options += "-l " + str(clamdata['maxlength']) + " "
 
         clam.common.status.write(statusfile, "Building pattern model for " + filename + "...", p)
-        r = os.system(bindir + 'colibri-patternmodeller ' + options + ' -f ' + shellsafe(filename + '.colibri.dat',"'") + " -c " + shellsafe(filename + ".colbiri.cls","'") + " -o " + shellsafe(filename + ".colibri.patternmodel","'") )
+        r = os.system(bindir + 'colibri-patternmodeller ' + options + ' -f ' + shellsafe(outputdir + '/' + filename + '.colibri.dat',"'") + " -c " + shellsafe(outputdir + '/' + filename + ".colibri.cls","'") + " -o " + shellsafe(outputdir + '/' + filename + ".colibri.patternmodel","'") )
         if r != 0:
             clam.common.status.write(statusfile, "Failure in building patternmodel for " + filename,100) # status update
             sys.exit(1)
 
 
 
-        cmd = bindir + 'colibri-patternmodeller ' + options + ' -i ' + shellsafe(filename + '.colibri.patternmodel',"'") + " -c " + shellsafe(filename + ".colbiri.cls","'")
+        cmd = bindir + 'colibri-patternmodeller ' + options + ' -i ' + shellsafe(outputdir + '/' + filename + '.colibri.patternmodel',"'") + " -c " + shellsafe(outputdir + '/' + filename + ".colibri.cls","'")
 
         if clamdata['extract']:
-            clam.common.status.write(statusfile, "Outputting pattern list for " + filename + "...", p)
-            r = os.system(cmd + " -P > " + filename + ".patterns.csv")
-        elif clamdata['report']:
-            clam.common.status.write(statusfile, "Computing and outputting report for " + filename + "...", p)
-            r = os.system(cmd + " -R > " + filename + ".report.txt")
-        elif clamdata['histogram']:
-            clam.common.status.write(statusfile, "Computing and outputting histogram for " + filename + "...", p)
-            r = os.system(cmd + " -H > " + filename + ".histogram.csv")
-        elif clamdata['reverseindex']:
-            clam.common.status.write(statusfile, "Computing and outputting reverse index for " + filename + "...", p)
-            r = os.system(cmd + " -r " + filename + ".colibri.dat" + " -Z > " + filename + ".reverseindex.csv")
-        elif clamdata['cooc'] > 0:
-            clam.common.status.write(statusfile, "Computing and outputting co-occurrences for " + filename + "...", p)
-            r = os.system(cmd + " -r " + filename + ".colibri.dat" + " -C " + str(clamdata['cooc']) + " > " + filename + ".cooc.csv")
-        elif clamdata['npmi'] > -1:
+            clam.common.status.write(statusfile, "Outputting pattern list for " + outputdir + '/' + filename + "...", p)
+            r = os.system(cmd + " -P > " + outputdir + '/' + filename + ".patterns.csv")
+        if clamdata['report']:
+            clam.common.status.write(statusfile, "Computing and outputting report for " + outputdir + '/' + filename + "...", p)
+            r = os.system(cmd + " -R > " + outputdir + '/' + filename + ".report.txt")
+        if clamdata['histogram']:
+            clam.common.status.write(statusfile, "Computing and outputting histogram for " + outputdir + '/' + filename + "...", p)
+            r = os.system(cmd + " -H > " + outputdir + '/' + filename + ".histogram.csv")
+        if clamdata['reverseindex']:
+            clam.common.status.write(statusfile, "Computing and outputting reverse index for " + outputdir + '/' + filename + "...", p)
+            r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -Z > " + filename + ".reverseindex.csv")
+        if clamdata['cooc'] > 0:
+            clam.common.status.write(statusfile, "Computing and outputting co-occurrences for " + outputdir + '/' + filename + "...", p)
+            r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -C " + str(clamdata['cooc']) + " > " + outputdir + '/' + filename + ".cooc.csv")
+        print >>sys.stderr,"NPMI=",clamdata['npmi'], type(clamdata['npmi'])
+        if clamdata['npmi'] > -1:
             clam.common.status.write(statusfile, "Computing and outputting co-occurrences (npmi) for " + filename + "...", p)
-            r = os.system(cmd + " -r " + filename + ".colibri.dat" + " -Y " + str(clamdata['npmi']) + " > " + filename + ".npmi.csv")
+            r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -Y " + str(clamdata['npmi']) + " > " + outputdir + '/' + filename + ".npmi.csv")
 
         if r != 0:
             clam.common.status.write(statusfile, "Error processing " + filename,100) # status update
