@@ -32,7 +32,6 @@ if __name__ == "__main__":
     datafile = sys.argv[2]
     statusfile = sys.argv[3]
     outputdir = sys.argv[4]
-    os.chdir(outputdir)
 
     #Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml))
     clamdata = clam.common.data.getclamdata(datafile)
@@ -54,9 +53,9 @@ if __name__ == "__main__":
         #strip extension
         filename = filename[:-4]
 
-        inputfile.loadmetadata()
         inputtemplate = inputfile.metadata.inputtemplate
 
+        os.chdir(outputdir)
 
         if inputtemplate == 'textinput_tok':
             os.symlink(str(inputfile),outputdir + '/' + filename + '.txt')
