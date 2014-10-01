@@ -78,99 +78,236 @@ else:
 COMMAND = CLAMDIR +  "/wrappers/colibricore.py " + BINDIR + " $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 
-OUTPUTTEMPLATES = (
-    OutputTemplate('corpusfile',BinaryDataFormat,"Colibri Corpus Data",
-        removeextensions=['.txt','.xml'],
-        extension='.colibri.dat',
-        multi=True,
-    ),
-    OutputTemplate('patternmodel',BinaryDataFormat,"Colibri Pattern Model",
-        removeextensions=['.txt','.xml'],
-        extension='.colibri.patternmodel',
-        multi=True,
-    ),
-    OutputTemplate('classfile',CSVFormat,"Colibri Class Data",
-        removeextensions=['.txt','.xml'],
-        extension='.colibri.cls',
-        multi=True,
-    ),
-    ParameterCondition(extract=True,
-        then=OutputTemplate('extract',CSVFormat,"Extract Pattern List",
-            SimpleTableViewer(),
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.patterns.csv',
-            multi=True
-        )
-    ),
-    ParameterCondition(report=True,
-        then=OutputTemplate('report',PlainTextFormat,"Statistical Report",
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.report.txt',
-            multi=True
-        )
-    ),
-    ParameterCondition(histogram=True,
-        then=OutputTemplate('histogram',CSVFormat,"Histogram",
-            SimpleTableViewer(),
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.histogram.csv',
-            multi=True
-        )
-    ),
-    ParameterCondition(reverseindex=True,
-        then=OutputTemplate('reverseindex',CSVFormat,"Reverse Index",
-            SimpleTableViewer(),
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.reverseindex.csv',
-            multi=True
-        )
-    ),
-    ParameterCondition(cooc=True,
-        then=OutputTemplate('cooc',CSVFormat,"Co-occurrence data (absolute)",
-            SimpleTableViewer(),
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.cooc.csv',
-            multi=True
-        )
-    ),
-    ParameterCondition(npmi=True,
-        then=OutputTemplate('npmi',CSVFormat,"Co-occurrence data (relative)",
-            SimpleTableViewer(),
-            SetMetaField('encoding','utf-8'),
-            removeextensions=['.txt','.xml'],
-            extension='.npmi.csv',
-            multi=True
-        )
-    )
-)
 
 
 PROFILES = [
     Profile(
-        *((InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA XML document",
+        InputTemplate('foliainput', FoLiAXMLFormat,"FoLiA XML document",
             extension='.xml',
             multi=True
-          ) ,) + OUTPUTTEMPLATES)),
+        ),
+        OutputTemplate('corpusfile',BinaryDataFormat,"Colibri Corpus Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.dat',
+            multi=True,
+        ),
+        OutputTemplate('patternmodel',BinaryDataFormat,"Colibri Pattern Model",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.patternmodel',
+            multi=True,
+        ),
+        OutputTemplate('classfile',CSVFormat,"Colibri Class Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.cls',
+            multi=True,
+        ),
+        ParameterCondition(extract=True,
+            then=OutputTemplate('extract',CSVFormat,"Extract Pattern List",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.patterns.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(report=True,
+            then=OutputTemplate('report',PlainTextFormat,"Statistical Report",
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.report.txt',
+                multi=True
+            )
+        ),
+        ParameterCondition(histogram=True,
+            then=OutputTemplate('histogram',CSVFormat,"Histogram",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.histogram.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(reverseindex=True,
+            then=OutputTemplate('reverseindex',CSVFormat,"Reverse Index",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.reverseindex.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(cooc=True,
+            then=OutputTemplate('cooc',CSVFormat,"Co-occurrence data (absolute)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.cooc.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(npmi=True,
+            then=OutputTemplate('npmi',CSVFormat,"Co-occurrence data (relative)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.npmi.csv',
+                multi=True
+            )
+        )
+    ),
     Profile(
-        *((InputTemplate('textinput_tok', PlainTextFormat,"Plain text input (tokenised)",
+        InputTemplate('textinput_tok', PlainTextFormat,"Plain text input (tokenised)",
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             extension='.txt',
             multi=True
-        ),) +  OUTPUTTEMPLATES)),
+        ),
+        OutputTemplate('corpusfile',BinaryDataFormat,"Colibri Corpus Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.dat',
+            multi=True,
+        ),
+        OutputTemplate('patternmodel',BinaryDataFormat,"Colibri Pattern Model",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.patternmodel',
+            multi=True,
+        ),
+        OutputTemplate('classfile',CSVFormat,"Colibri Class Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.cls',
+            multi=True,
+        ),
+        ParameterCondition(extract=True,
+            then=OutputTemplate('extract',CSVFormat,"Extract Pattern List",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.patterns.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(report=True,
+            then=OutputTemplate('report',PlainTextFormat,"Statistical Report",
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.report.txt',
+                multi=True
+            )
+        ),
+        ParameterCondition(histogram=True,
+            then=OutputTemplate('histogram',CSVFormat,"Histogram",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.histogram.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(reverseindex=True,
+            then=OutputTemplate('reverseindex',CSVFormat,"Reverse Index",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.reverseindex.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(cooc=True,
+            then=OutputTemplate('cooc',CSVFormat,"Co-occurrence data (absolute)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.cooc.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(npmi=True,
+            then=OutputTemplate('npmi',CSVFormat,"Co-occurrence data (relative)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.npmi.csv',
+                multi=True
+            )
+        )
+    ),
     Profile(
-        *((InputTemplate('textinput_untok', PlainTextFormat,"Plain text input (untokenised)",
+        InputTemplate('textinput_untok', PlainTextFormat,"Plain text input (untokenised)",
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             ChoiceParameter(id='language',name='Language',description='The language of the text', choices=[('en','English'),('nl','Dutch'),('de','German'),('fr','French'),('es','Spanish'),('pt','Portuguese'),('fy','Frysian'),('generic','Other (generic tokeniser)')]),
             BooleanParameter('sentenceperline_input','Input is one sentence per line'),
             BooleanParameter('sentenceperline_output','Output one sentence per line'),
             extension='.txt',
             multi=True
-        ),) + OUTPUTTEMPLATES)),
+        ),
+        OutputTemplate('corpusfile',BinaryDataFormat,"Colibri Corpus Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.dat',
+            multi=True,
+        ),
+        OutputTemplate('patternmodel',BinaryDataFormat,"Colibri Pattern Model",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.patternmodel',
+            multi=True,
+        ),
+        OutputTemplate('classfile',CSVFormat,"Colibri Class Data",
+            removeextensions=['.txt','.xml'],
+            extension='.colibri.cls',
+            multi=True,
+        ),
+        ParameterCondition(extract=True,
+            then=OutputTemplate('extract',CSVFormat,"Extract Pattern List",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.patterns.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(report=True,
+            then=OutputTemplate('report',PlainTextFormat,"Statistical Report",
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.report.txt',
+                multi=True
+            )
+        ),
+        ParameterCondition(histogram=True,
+            then=OutputTemplate('histogram',CSVFormat,"Histogram",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.histogram.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(reverseindex=True,
+            then=OutputTemplate('reverseindex',CSVFormat,"Reverse Index",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.reverseindex.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(cooc=True,
+            then=OutputTemplate('cooc',CSVFormat,"Co-occurrence data (absolute)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.cooc.csv',
+                multi=True
+            )
+        ),
+        ParameterCondition(npmi=True,
+            then=OutputTemplate('npmi',CSVFormat,"Co-occurrence data (relative)",
+                SimpleTableViewer(),
+                SetMetaField('encoding','utf-8'),
+                removeextensions=['.txt','.xml'],
+                extension='.npmi.csv',
+                multi=True
+            )
+        )
+    ),
 ]
 
 PARAMETERS =  [
