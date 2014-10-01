@@ -79,6 +79,7 @@ class HTMLFormat(CLAMMetaData):
         yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
 
 class BinaryDataFormat(CLAMMetaData):
+    attributes = {}
     name = "Application-specific Binary Data"
     mimetype = 'application/octet-stream'
 
