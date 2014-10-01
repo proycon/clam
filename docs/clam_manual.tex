@@ -4,6 +4,7 @@
 \usepackage{placeins}
 \usepackage{hyperref}
 \usepackage{supertabular}
+\usepackage{natbib}
 
 \author{Maarten van Gompel}
 
@@ -95,7 +96,7 @@ produce a certain output, which is subsequently made available through the
 webservice for viewing and downloading. CLAM can, however, just as well be used
 in fields other than NLP.
 
-The CLAM webservice is a RESTful webservice\cite{REST}, meaning it uses the HTTP verbs
+The CLAM webservice is a RESTful webservice\citep{REST}, meaning it uses the HTTP verbs
 GET, POST, PUT and DELETE to manipulate resources and returns responses using
 the HTTP response codes and XML. The principal resource in CLAM is called a
 \emph{project}. Various users can maintain various projects, each representing
@@ -103,7 +104,7 @@ one specific run of the system, with particular input data, output data, and a
 set of configured parameters.
 
 The webservice responds in the CLAM XML format. An associated XSL stylesheet
-\cite{XSLT} can directly transform this to xhtml in the user's browser, thus
+\citep{XSLT} can directly transform this to xhtml in the user's browser, thus
 providing a standalone web application for human end-users. 
 
 CLAM comes with an ample number of features, the most notable ones being:
@@ -121,7 +122,7 @@ CLAM comes with an ample number of features, the most notable ones being:
 
 In publication of research that makes use of this software, a citation should
 be given of: {\em ``Maarten van Gompel (2014). CLAM: Computational Linguistics
-Application Mediator. Documentation. LST Technical Report Series 14-02.''}.
+Application Mediator. Documentation. LST Technical Report Series 14-03.''}.
 
 CLAM is open-source software licensed under the GNU Public License v3, a copy
 of which can be found along with the software.
@@ -150,7 +151,7 @@ interface.
 
 \section{Technical details}
 
-CLAM is written in Python 2.6 \cite{PYTHON}, and is built on the webpy
+CLAM is written in Python 2.6 \citep{PYTHON}, and is built on the webpy
 framework\footnote{http://webpy.org}. It can run
 stand-alone thanks to the built-in cherrypy
 webserver\footnote{http://cherrypy.org}; no additional webserver
@@ -635,7 +636,7 @@ any means to adjust configuration options.
 \subsection{User Authentication}
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM
-implements HTTP Digest Authentication \cite{HTTPAUTH}, which as opposed to HTTP Basic
+implements HTTP Digest Authentication \citep{HTTPAUTH}, which as opposed to HTTP Basic
 Authentication computes a hash of the username and password client-side and
 transmits that hash, rather than a plaintext password. User passwords are
 therefore only available to CLAM in hashed form. User authentication is not
@@ -1113,7 +1114,7 @@ PROFILES = [
 
 There are several ways of controlling the way input and output files within a
 profile are named. As illustrated in the previous section, each Output Template
-has an Input Template as parent, from which it inherits the filename if no
+has an Input Template as its parent, from which it inherits the filename if no
 explicit filename is specified. This is a very important aspect that has to be
 realised By default, if no \texttt{filename=}, \texttt{extension=} or
 \texttt{removeextension=} is specified for an Output Template, it will use the
@@ -1244,7 +1245,7 @@ However, input templates can be \emph{optional}, by setting
 this also implies that any output templates that have this optional input
 template as a parent are also conditional on the presence of those input files.
 
-%TODO: Provide example?
+%TODO LATER: Provide example?
 
 \subsection{Converters}
 
@@ -1279,7 +1280,7 @@ by 3rd party software in most cases.
 
 Note that specific converters take specific parameters, consult the API reference for details.
 
-%TODO: Include examples?
+%TODO LATER: Include examples?
 
 \subsection{Viewers}
 
@@ -1287,14 +1288,23 @@ Viewers are intended for human end users, and enable visualisation of a
 particular file format. CLAM offers a viewer framework that enables you to
 write viewers for your format. Viewers may either be written within the CLAM
 framework, using Python, but they can also be external (non-CLAM) webservices,
-hosted elsewhere.
+hosted elsewhere. Several simple viewers for some formats are provided already,
+these are defined in \texttt{viewers.py}.
 
 Viewers can be included in output templates. Include them directly after any
 metafield actors.
 
-\begin{devnotes}
-To be completed still... %TODO
-\end{devnotes}
+
+The below example illustrates the use of the viewer
+\texttt{SimpleTableViewer}, capable of showing CSV files:
+
+\begin{verbatim}
+OutputTemplate('freqlist',CSVFormat,"Frequency list",
+    SimpleTableViewer(),
+    SetMetaField('encoding','utf-8'),
+    extension='.patterns.csv',
+)
+\end{verbatim}
 
 \subsection{Working with pre-installed data}
 
@@ -1781,16 +1791,18 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 
 
 
-\chapter{Predefined Formats}
 
-The following formats are pre-defined in CLAM. Each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
+%\chapter{Predefined Formats}
 
-\begin{devnotes}
-To be written still...
-\end{devnotes}
+%The following formats are pre-defined in CLAM. Each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
+
+%\begin{devnotes}
+%To be written still...
+%\end{devnotes}
 
 %\chapter{Frequently Asked Questions}
 
+\bibliographystyle{plainnat}
 \bibliography{clam}
 
 \end{document}
