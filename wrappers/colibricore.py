@@ -54,7 +54,7 @@ if __name__ == "__main__":
         #strip extension
         filename = filename[:-4]
 
-
+        inputfile.loadmetadata()
         inputtemplate = inputfile.metadata.inputtemplate
 
 
