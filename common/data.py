@@ -207,7 +207,7 @@ class CLAMFile:
                 xml = "".join(f.readlines())
                 f.close()
             else:
-                raise IOError(2, "No metadata found!")
+                raise IOError(2, "No metadata found, expected " + metafile )
         else:
             if self.client: self.client.initauth()
             try:
