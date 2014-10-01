@@ -58,6 +58,13 @@ a {
    height: 50px;
    left: 10px;
 }
+#clstlogo {
+  position: absolute;
+  background: url(clstlogo.png) no-repeat;
+  height: 50px;
+  width: 214px;
+  right: 60px;
+}
 #rulogo {
   position: absolute;
   background: url(rulogo.png) no-repeat;
@@ -115,4 +122,8 @@ td.colname {
 }
 td.colname a {
     text-decoration: none;
+}
+
+label {
+  font-variant: small-caps;
 }

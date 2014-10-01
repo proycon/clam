@@ -8,13 +8,22 @@
       <div id="container">
           <div id="header">
             <div id="lamalogo"></div>
+            <div id="clstlogo"></div>
             <div id="rulogo"></div>
             <h1>LST Webservice Portal</h1>
           </div>
           <div class="box">
-              <p>The following webservices for Language &amp; Speech Technology are offered by the research group Language Machines, part of the Centre of Language Studies of Radboud University Nijmegen.  We make available various of our open-source computational linguistic tools for the web, through the software <a href="http://proycon.github.io/clam">CLAM</a>. Many of these webservices support input and/or output in the <a href="http://proycon.github.io/folia">FoLiA</a> XML format, some of them will be explicitly designed for Dutch only.</p>
-              <p>You will need an account to access the tools. An account can be obtained free of charge for small-scale non-commercial use. The webservices can be accessed by both human end-users, offering an in-browser interface, as well as by client software. <a href="register/">Apply for an account</a> here, staff members will review your application and activate your account.</p>
+
+              <p>The webservices for Language &amp; Speech Technology are offered by the research group <strong>Language Machines</strong> and the <strong><a href="http://clst.ru.nl">Centre for Language and Speech Technology</a></strong>, both part of the Centre of Language Studies of <strong>Radboud University Nijmegen</strong>. We work in close collaboration with the <strong>Tilburg Centre for Creative Computing (TiCC)</strong>, <strong>Tilburg University</strong>, and will include web-interfaces to various relevant tools developed there.</p>
+
+              <p>Here we make available various open-source computational linguistic tools for the web, through the software <a href="http://proycon.github.io/clam">CLAM</a>.</p>
+
+            <p>Many of these webservices support input and/or output in the <a href="http://proycon.github.io/folia">FoLiA</a> XML format, some of them will be explicitly designed for Dutch only.</p>
+    
+          <p>You will need an account to access the tools. An account can be obtained free of charge for small-scale non-commercial use. The webservices can be accessed by both human end-users, offering an in-browser interface, as well as by client software. <a href="register/">Apply for an account</a> here, staff members will review your application and activate your account.</p>
+
           </div> 
+
           <div class="box">
               <table id="index">
                 <tr>
@@ -26,10 +35,16 @@
                     <td class="colname"><a href="{{ service.url }}">{{ service.name }}</a></td>
                     <td class="coldesc">{{ service.description }}
                     <br /><br />
-                    Webservice: <a href="{{ service.url }}">{{ service.url }}</a>
+                    {% if service.authors %}
+                    <label>Developers:</label> <em>{{ service.authors }}</em>
+                    <br /><br />
+                    {% endif %}
+                    <label>Webservice:</label> <strong><a href="{{ service.url }}">{{ service.url }}</a></strong>
+                    <br /><br />
+                    <label>REST API Specification:</label> <a href="{{ service.url }}/info">{{ service.url }}/info/</a>
                     <br /><br />
                     {% if service.website %} 
-                    Homepage: <a href="{{ service.website }}">{{ service.website }}</a>
+                    <label>Homepage:</label> <a href="{{ service.website }}">{{ service.website }}</a>
                     {% endif %}
                     </td>
                 </tr>
@@ -37,7 +52,7 @@
               </table>
           </div>
           <div class="box">
-              <p>For further details please contact <a href="mailto:a.vandebosch@let.ru.nl">Antal van den Bosch</a>, for technical support regarding CLAM you can contact <a href="mailto:proycon@anaproy.nl">Maarten van Gompel</a></p>. 
+              <p>For further details please contact <a href="mailto:a.vandebosch@let.ru.nl">Antal van den Bosch</a>, for technical support contact the respective developers or for issues pertaining to CLAM and this server contact <a href="mailto:proycon@anaproy.nl">Maarten van Gompel</a></p>. 
           </div>
       </div>
   </body>
