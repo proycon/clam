@@ -47,6 +47,7 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 import clam.common.digestauth
+import clam.common.oauth
 import clam.common.data
 from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug, xmlescape
 import clam.config.defaults as settings #will be overridden by real settings later
@@ -276,6 +277,8 @@ class RequireLogin(object):
                                 return f(*args, **kwargs)
                     if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
                         raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
+            if settings.OAUTH:
+                #TODO: OAUTH !!!!
             if settings.USERS or settings.USERS_MYSQL:
                 return auth(f)(*args, **kwargs)
             else:
@@ -2583,7 +2586,9 @@ def run_wsgi(settings_module):
     set_defaults(None,None)
     test_dirs()
 
-    if settings.USERS:
+    if settings.OAUTH:
+        #TODO: OAUTH!!!!
+    elif settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
         printdebug("Initialised authentication")
     elif settings.USERS_MYSQL:
