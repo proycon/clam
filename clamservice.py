@@ -76,12 +76,11 @@ try:
 except ImportError:
     print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication"
 
-#Maybe for later: HTTPS support
+#Maybe for later: HTTPS support (Just use Apache2/nginx/lighttpd instead)
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
-
-VERSION = '0.9.10'
+VERSION = '0.9.11'
 
 DEBUG = False
 
@@ -2334,6 +2333,19 @@ def set_defaults(HOST = None, PORT = None):
         settings.FORCEURL = None
     if not 'PRIVATEACCESSTOKEN' in settingkeys:
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
+    if not 'OAUTH' in settingkeys:
+        settings.OAUTH = False
+    if not 'OAUTH_CLIENT_ID' in settingkeys:
+        settings.OAUTH_CLIENT_ID = settings.SYSTEM_ID
+    if not 'OAUTH_CLIENT_SECRET' in settingkeys:
+        settings.OAUTH_CLIENT_SECRET = ""
+    if not 'OAUTH_REDIRECT_URI' in settingkeys:
+        settings.OAUTH_REDIRECT_URI = ""
+    if not 'OAUTH_AUTH_URI' in settingkeys:
+        settings.OAUTH_AUTH_URI = ""
+    if not 'OAUTH_RESOURCE_URI' in settingkeys:
+        settings.OAUTH_RESOURCE_URI = ""
+
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
     if not 'CUSTOMHTML_INDEX' in settingkeys:
@@ -2382,8 +2394,20 @@ def test_dirs():
                     shutil.move(d, settings.ROOT + 'projects/anonymous/' + os.path.basename(d))
     if not settings.PARAMETERS:
             warning("No parameters specified in settings module!")
-    if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER:
+    if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
             warning("No user authentication enabled, this is not recommended for production environments!")
+    if settings.OAUTH:
+        if not settings.OAUTH_CLIENT_ID:
+            error("ERROR: OAUTH enabled but OAUTH_CLIENT_ID not specified!")
+        if not settings.OAUTH_CLIENT_SECRET:
+            error("ERROR: OAUTH enabled but OAUTH_CLIENT_SECRET not specified!")
+        if not settings.OAUTH_REDIRECT_URI:
+            error("ERROR: OAUTH enabled but OAUTH_REDIRECT_URI not specified!")
+        if not settings.OAUTH_AUTH_URI:
+            error("ERROR: OAUTH enabled but OAUTH_AUTH_URI not specified!")
+
+        warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
+
 
 def test_version():
     global VERSION
@@ -2513,8 +2537,8 @@ if __name__ == "__main__":
         validate_users_mysql()
         auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.STANDALONEURLPREFIX,True,"","Unauthorized",16, settings.DIGESTOPAQUE)
 
-
-
+    if settings.OAUTH and not fastcgi:
+        warning("*** OAUTH is enabled but you are running the development server which has no HTTPS support, THIS IS NOT SECURE! ONLY USE FOR TESTING!  ***")
 
     CLAMService('fastcgi' if fastcgi else '') #start
 
