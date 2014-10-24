@@ -52,6 +52,7 @@ from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebu
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
+from requests_oauthlib import OAuth2Session
 
 
 class CustomForbidden(web.webapi.HTTPError):
@@ -2339,12 +2340,12 @@ def set_defaults(HOST = None, PORT = None):
         settings.OAUTH_CLIENT_ID = settings.SYSTEM_ID
     if not 'OAUTH_CLIENT_SECRET' in settingkeys:
         settings.OAUTH_CLIENT_SECRET = ""
-    if not 'OAUTH_REDIRECT_URI' in settingkeys:
-        settings.OAUTH_REDIRECT_URI = ""
-    if not 'OAUTH_AUTH_URI' in settingkeys:
-        settings.OAUTH_AUTH_URI = ""
-    if not 'OAUTH_RESOURCE_URI' in settingkeys:
-        settings.OAUTH_RESOURCE_URI = ""
+    if not 'OAUTH_REDIRECT_URL' in settingkeys:
+        settings.OAUTH_REDIRECT_URL = ""
+    if not 'OAUTH_AUTH_URL' in settingkeys:
+        settings.OAUTH_AUTH_URL = ""
+    if not 'OAUTH_TOKEN_URL' in settingkeys:
+        settings.OAUTH_TOKEN_URL = ""
 
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
@@ -2401,10 +2402,12 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_ID not specified!")
         if not settings.OAUTH_CLIENT_SECRET:
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_SECRET not specified!")
-        if not settings.OAUTH_REDIRECT_URI:
-            error("ERROR: OAUTH enabled but OAUTH_REDIRECT_URI not specified!")
-        if not settings.OAUTH_AUTH_URI:
-            error("ERROR: OAUTH enabled but OAUTH_AUTH_URI not specified!")
+        if not settings.OAUTH_REDIRECT_URL:
+            error("ERROR: OAUTH enabled but OAUTH_REDIRECT_URL not specified!")
+        if not settings.OAUTH_AUTH_URL:
+            error("ERROR: OAUTH enabled but OAUTH_AUTH_URL not specified!")
+        if not settings.OAUTH_TOKEN_URL:
+            error("ERROR: OAUTH enabled but OAUTH_TOKEN_URL not specified!")
 
         warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
 
