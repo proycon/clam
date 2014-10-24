@@ -2346,6 +2346,12 @@ def set_defaults(HOST = None, PORT = None):
         settings.OAUTH_AUTH_URL = ""
     if not 'OAUTH_TOKEN_URL' in settingkeys:
         settings.OAUTH_TOKEN_URL = ""
+    if not 'OAUTH_SCOPE' in settingkeys:
+        settings.OAUTH_SCOPE = []
+    if not 'OAUTH_USERNAME_FUNCTION' in settingkeys:
+        settings.OAUTH_USERNAME_FUNCTION = None
+    if not 'OAUTH_AUTH_FUNCTION' in settingkeys:
+        settings.OAUTH_AUTH_FUNCTION = lambda oauthsession, authurl: oauthsession.authorize_url(authurl)
 
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
@@ -2408,6 +2414,8 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_AUTH_URL not specified!")
         if not settings.OAUTH_TOKEN_URL:
             error("ERROR: OAUTH enabled but OAUTH_TOKEN_URL not specified!")
+        if not settings.OAUTH_USERNAME_FUNCTION:
+            error("ERROR: OAUTH enabled but OAUTH_USERNAME_FUNCTION not specified!")
 
         warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
 
