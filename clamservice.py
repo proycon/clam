@@ -53,7 +53,6 @@ from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebu
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
-from requests_oauthlib import OAuth2Session
 
 
 class CustomForbidden(web.webapi.HTTPError):
@@ -77,6 +76,13 @@ try:
     import MySQLdb
 except ImportError:
     print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication"
+
+
+try:
+    from requests_oauthlib import OAuth2Session
+except ImportError:
+    print >>sys.stderr, "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication"
+
 
 #Maybe for later: HTTPS support (Just use Apache2/nginx/lighttpd instead)
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
@@ -278,7 +284,21 @@ class RequireLogin(object):
                     if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
                         raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
             if settings.OAUTH:
-                #TODO: OAUTH !!!!
+                authheader = web.ctx.env.get('Authorization', '')
+                if authheader and authheader[:6] == "Bearer":
+                    accesstoken = authheader[7:]
+                    #TODO: OAUTH !!!!
+                else:
+                    oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
+                    #No access token yet, return redirect to authentication page
+                    redirect_url = getrooturl() + 'login'
+                    kwargs = {'redirect_uri': redirect_url}
+                    if settings.OAUTH_SCOPE:
+                        kwargs['scope'] = settings.OAUTH_SCOPE
+                    auth_url, state = settings.OAUTH_AUTH_FUNCTION(settings.OAUTH_AUTH_URL, **kwargs)
+                    raise web.seeother(auth_url)
+
+
             if settings.USERS or settings.USERS_MYSQL:
                 return auth(f)(*args, **kwargs)
             else:
@@ -299,6 +319,7 @@ class CLAMService(object):
     urls = (
         settings.STANDALONEURLPREFIX + '/', 'Index',
         settings.STANDALONEURLPREFIX + '/info/?', 'Info',
+        settings.STANDALONEURLPREFIX + '/login/?', 'Login', #for Oauth2 only, return access token
         settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
         settings.STANDALONEURLPREFIX + '/admin/download/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/([a-z]*)/(.*)/?', 'AdminDownloader',
         settings.STANDALONEURLPREFIX + '/admin/([A-Za-z]*)/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/?', 'AdminHandler',
@@ -375,6 +396,14 @@ class CLAMService(object):
                 if os.path.isdir(f):
                     corpora.append(os.path.basename(f))
             return corpora
+
+
+class Login(object):
+    GHOST = False
+
+    def GET(self):
+        #TODO: OAUTH!!
+
 
 
 class Index(object):
@@ -2343,8 +2372,6 @@ def set_defaults(HOST = None, PORT = None):
         settings.OAUTH_CLIENT_ID = settings.SYSTEM_ID
     if not 'OAUTH_CLIENT_SECRET' in settingkeys:
         settings.OAUTH_CLIENT_SECRET = ""
-    if not 'OAUTH_REDIRECT_URL' in settingkeys:
-        settings.OAUTH_REDIRECT_URL = ""
     if not 'OAUTH_AUTH_URL' in settingkeys:
         settings.OAUTH_AUTH_URL = ""
     if not 'OAUTH_TOKEN_URL' in settingkeys:
@@ -2411,8 +2438,6 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_ID not specified!")
         if not settings.OAUTH_CLIENT_SECRET:
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_SECRET not specified!")
-        if not settings.OAUTH_REDIRECT_URL:
-            error("ERROR: OAUTH enabled but OAUTH_REDIRECT_URL not specified!")
         if not settings.OAUTH_AUTH_URL:
             error("ERROR: OAUTH enabled but OAUTH_AUTH_URL not specified!")
         if not settings.OAUTH_TOKEN_URL:
