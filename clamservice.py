@@ -284,25 +284,36 @@ class RequireLogin(object):
                     if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
                         raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
             if settings.OAUTH:
+                #Check header for token
                 authheader = web.ctx.env.get('Authorization', '')
+                oauth_access_token = None
                 if authheader and authheader[:6] == "Bearer":
-                    accesstoken = authheader[7:]
-                    #TODO: OAUTH !!!!
+                    oauth_access_token = authheader[7:]
                 else:
-                    oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
-                    #No access token yet, return redirect to authentication page
+                    #Is the token submitted in the GET/POST data? (as oauth_access_token)
+                    try:
+                        oauth_access_token = web.input().oauth_access_token
+                    except:
+                        pass
+
+                if not oauth_access_token:
+                    #No access token yet, start login process
+
                     redirect_url = getrooturl() + 'login'
                     kwargs = {'redirect_uri': redirect_url}
                     if settings.OAUTH_SCOPE:
                         kwargs['scope'] = settings.OAUTH_SCOPE
-                    auth_url, state = settings.OAUTH_AUTH_FUNCTION(settings.OAUTH_AUTH_URL, **kwargs)
+                    oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID, **kwargs)
+                    auth_url, state = settings.OAUTH_AUTH_FUNCTION(oauthsession, settings.OAUTH_AUTH_URL)
+
+                    #Redirect to Authentication Provider
                     raise web.seeother(auth_url)
-
-
-            if settings.USERS or settings.USERS_MYSQL:
-                return auth(f)(*args, **kwargs)
+                else:
+                    return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+            elif settings.USERS or settings.USERS_MYSQL:
+                return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
             else:
-                return f(*args, **kwargs)
+                return f(*args, **kwargs) #no authentication
         return wraps(f)(wrapper)
 
 
@@ -403,6 +414,7 @@ class Login(object):
 
     def GET(self):
         #TODO: OAUTH!!
+        oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
 
 
 
@@ -2612,7 +2624,8 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.OAUTH:
-        #TODO: OAUTH!!!!
+        oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
+        auth = clam.common.oauth.auth(oauthsession, settings.OAUTH_USERNAME_FUNCTION)
     elif settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
         printdebug("Initialised authentication")

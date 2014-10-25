@@ -33,3 +33,13 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
 
 
 
+
+class auth(object):
+    def __init__(self, oauthsession, username_function):
+        self.username = username_function(oauthsession)
+
+    def __call__(self,  f):
+        def wrapper(*arguments, **keywords):
+            arguments += (self.username,)
+            return f(*arguments, **keywords)
+        return wrapper

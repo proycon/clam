@@ -1,12 +1,5 @@
-$def with (version, system_id,system_name, system_description, url, redirect_url, customhtml)
+$def with (version, system_id,system_name, system_description, url, redirect_url, customhtml, oauth_access_token)
 <?xml version="1.0" encoding="UTF-8" ?>
-<?xml-stylesheet type="text/xsl" href="$url/static/interface.xsl"?>
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url" interfaceoptions="$interfaceoptions" redirectoauth2="$redirect_url">
- <description>$:system_description</description>
-$if customhtml:
-        <customhtml>
-        <![CDATA[
-        $:customhtml 
-        ]]>
-        </customhtml>
+<?xml-stylesheet type="text/xsl" href="$url/static/login.xsl"?>
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version" id="$system_id" name="$system_name" baseurl="$url" oauth_access_token="$oauth_access_token">
 </clam>
