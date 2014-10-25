@@ -795,7 +795,7 @@ Apache2, with SSL support.
 
 When the user approaches the CLAM webservice, he/she will need to pass a valid
 access token. If none is passed, the user is instantly delegated to the OAuth2
-authentication provider\footnote{CLAM responses with a HTTP 303 - See Other}.
+authentication provider\footnote{CLAM responds with a HTTP 303 - See Other}.
 The authentication provider in turn redirects the user back to the CLAM
 webservice, which in turn returns the access token to the client in its XML
 response as follows:
@@ -816,11 +816,58 @@ with the actual access token:
 Authentication: Bearer 1234567890
 \end{verbatim}
 
-The alternative way is by passing it along with the HTTP GET/POST request:
+The alternative way is by passing it along with the HTTP GET/POST request. This
+is considered less secure as your browser may log it in its history, and the
+server in its access logs. It can still not be intercepted, however, as it is
+transmitted over HTTPS.
 
 \begin{verbatim}
 https://yourservice.com/?oauth_access_token=1234567890
 \end{verbatim}
+
+The only information CLAM needs from the authorization provider is a username.
+The setting \texttt{OAUTH\_USERNAME\_FUNCTION} refers to a (Python) function
+that obtains this from your resource provider after you have been
+authenticated. It gets a single argument, the instance \texttt{oauthsession}
+instance, and returns the username as a string.  The following example shows
+how to implement this function for a resource provider that returns the
+username in JSON format. This, however, is completely provider-specific so
+you always have to write your own function.
+
+\begin{verbatim}
+def myprovider_username_function(oauthsession):
+  r = oauthsession.get("https://myprovider/user")
+  d = json.loads(r.content)
+  return d['username']
+
+OAUTH_USERNAME_FUNCTION = myprovider_username_function
+\end{verbatim}
+
+Various providers require the system to specify scopes, indicating the
+permissions the application requests from the resource provider. This can be
+done using the \texttt{OAUTH_SCOPE} directive in the service configuration file, which
+takes a list of scopes, all of which are provider-specific. The following
+example refers to the Google API:
+
+\begin{verbatim}
+OAUTH_SCOPE = [
+     "https://www.googleapis.com/auth/userinfo.email",
+     "https://www.googleapis.com/auth/userinfo.profile"
+]
+\end{verbatim}
+
+One of the problems with OAuth2 for automated clients is the authentication
+step that often requires user intervention. CLAM redirects unauthenticated
+users to the authorization provider. This is generally a website where the user
+enters his username and password, but the means by which authentication
+proceeds is not fixed by the OAuth2 specification. After authentication, the
+site passes a one-time authorization code back to the user, with which the user
+goes to CLAM to obtain the actual access token.
+
+This implies that automated clients accessing the CLAM service can not
+authenticate in a generic fashion that is equal accross authorization
+providers, there is again a provider-specific component here and CLAM clients
+need to know how to communicate with the specific authorization provider.
 
 \subsection{Command Definition} \label{sec:command}
 
