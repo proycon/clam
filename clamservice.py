@@ -426,7 +426,15 @@ class Login(object):
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state' + state )
         if not 'access_token' in d:
             raise CustomForbidden('No access token received from authorization provider')
-        raise web.seeother(getrooturl() + '/?oauth_access_token=' + d['access_token'])
+
+        #raise web.seeother(getrooturl() + '/?oauth_access_token=' + d['access_token'])
+        render = web.template.render(settings.CLAMDIR + '/templates')
+
+        web.header('Content-Type', "text/xml; charset=UTF-8")
+        try:
+            return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
+
+
 
 
 
