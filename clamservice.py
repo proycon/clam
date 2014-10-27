@@ -2412,7 +2412,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'OAUTH_USERNAME_FUNCTION' in settingkeys:
         settings.OAUTH_USERNAME_FUNCTION = None
     if not 'OAUTH_AUTH_FUNCTION' in settingkeys:
-        settings.OAUTH_AUTH_FUNCTION = lambda oauthsession, authurl: oauthsession.authorize_url(authurl)
+        settings.OAUTH_AUTH_FUNCTION = lambda oauthsession, authurl: oauthsession.authorization_url(authurl)
 
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
