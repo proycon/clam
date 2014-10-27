@@ -431,8 +431,7 @@ class Login(object):
         render = web.template.render(settings.CLAMDIR + '/templates')
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        try:
-            return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
+        return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
 
 
 
