@@ -413,8 +413,20 @@ class Login(object):
     GHOST = False
 
     def GET(self):
-        #TODO: OAUTH!!
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
+        try:
+            code = web.input().code
+        except:
+            raise CustomForbidden('No code passed')
+        try:
+            state = web.input().state
+        except:
+            raise CustomForbidden('No state passed')
+
+        d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state' + state )
+        if not 'access_token' in d:
+            raise CustomForbidden('No access token received from authorization provider')
+        raise web.seeother(getrooturl() + '/?oauth_access_token=' + d['access_token'])
 
 
 
