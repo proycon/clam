@@ -8,6 +8,9 @@
 import json
 import web
 
+class OAuthError(Exception):
+    pass
+
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
 GOOGLE_TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
 GOOGLE_SCOPE = [
@@ -25,12 +28,9 @@ GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
 def GITHUB_USERNAME_FUNCTION(oauthsession):
     r = oauthsession.get('https://api.github.com/user')
-    try:
-        rj = json.loads(r.content)
-    except:
-        raise web.webapi.NotFound("Github did not return valid json")
+    rj = json.loads(r.content)
     if not 'login' in rj:
-        raise web.webapi.NotFound("Key 'login' not found in github reply: "  + repr(rj))
+        raise OAuthError("Login not found in json reply from github: " + repr(rj))
     return rj['login']
 
 FACEBOOK_AUTH_URL= 'https://www.facebook.com/dialog/oauth'
@@ -45,10 +45,16 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
 
 class auth(object):
     def __init__(self, oauthsession, username_function):
-        self.username = username_function(oauthsession)
+        try:
+            self.username = username_function(oauthsession)
+        except:
+            self.username = None
 
     def __call__(self,  f):
         def wrapper(*arguments, **keywords):
-            arguments += (self.username,)
-            return f(*arguments, **keywords)
+            if self.username is None:
+                arguments += (self.username,)
+                return f(*arguments, **keywords)
+            else:
+                raise OAuthError("No valid username returned by OAUTH_USERNAME_FUNCTION")
         return wrapper

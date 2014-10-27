@@ -309,7 +309,11 @@ class RequireLogin(object):
                     #Redirect to Authentication Provider
                     raise web.seeother(auth_url)
                 else:
-                    return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+                    try:
+                        return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+                    except clam.common.oauth.OAuthError as e:
+                        raise CustomForbidden('OAuth Error: ' + str(e))
+
             elif settings.USERS or settings.USERS_MYSQL:
                 return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
             else:
