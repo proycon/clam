@@ -299,7 +299,7 @@ class RequireLogin(object):
                 if not oauth_access_token:
                     #No access token yet, start login process
 
-                    redirect_url = getrooturl() + 'login'
+                    redirect_url = getrooturl() + '/login'
                     kwargs = {'redirect_uri': redirect_url}
                     if settings.OAUTH_SCOPE:
                         kwargs['scope'] = settings.OAUTH_SCOPE
