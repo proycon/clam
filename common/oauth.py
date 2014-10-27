@@ -6,6 +6,7 @@
 #   etc...
 
 import json
+import web
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
 GOOGLE_TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
@@ -24,7 +25,12 @@ GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
 def GITHUB_USERNAME_FUNCTION(oauthsession):
     r = oauthsession.get('https://api.github.com/user')
-    rj = json.loads(r.content)
+    try:
+        rj = json.loads(r.content)
+    except:
+        raise web.webapi.NotFound("Github did not return valid json")
+    if not 'login' in rj:
+        raise web.webapi.NotFound("Key 'login' not found in github reply: "  + repr(rj))
     return rj['login']
 
 FACEBOOK_AUTH_URL= 'https://www.facebook.com/dialog/oauth'
