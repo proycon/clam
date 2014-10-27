@@ -5,6 +5,8 @@
 #   OAUTH_AUTH_URL = clam.common.oauth.GOOGLE_AUTH_URL
 #   etc...
 
+import json
+
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
 GOOGLE_TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
 GOOGLE_SCOPE = [
@@ -22,7 +24,8 @@ GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
 def GITHUB_USERNAME_FUNCTION(oauthsession):
     r = oauthsession.get('https://api.github.com/user')
-    return r.content #TODO: parse and get username!!!!!
+    rj = json.loads(r.content)
+    return rj['login']
 
 FACEBOOK_AUTH_URL= 'https://www.facebook.com/dialog/oauth'
 FACEBOOK_TOKEN_URL = 'https://graph.facebook.com/oauth/access_token'
