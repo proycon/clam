@@ -255,6 +255,7 @@ class RequireLogin(object):
             web.header('Access-Control-Allow-Origin', '*')
             web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
             web.header('Access-Control-Allow-Headers' , 'Authorization')
+            web.header('Access-Control-Allow-Credentials', 'true')
             if settings.PREAUTHHEADER:
                 DOAUTH = True
                 if settings.WEBSERVICEGHOST:

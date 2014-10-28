@@ -13,6 +13,10 @@ function initclam() {
             url: baseurl + "/static/parameters.xsl",
             dataType: "xml", 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(xml){ 
                 parametersxsl = xml;
             }
@@ -118,6 +122,10 @@ function initclam() {
             url: baseurl + '/' + $("#projectname").val() + "/", 
             dataType: "text", 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(response){ 
                 window.location.href = baseurl + '/' + $("#projectname").val() + "/";
             },
@@ -139,6 +147,10 @@ function initclam() {
             url: baseurl + '/' + project + '/', 
             dataType: "text", 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(response){ 
                 window.location.href = baseurl + '/'; /* back to index */
             },
@@ -159,6 +171,10 @@ function initclam() {
             url: baseurl + '/' + project + "/output/" , 
             dataType: "text", 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(xml){ 
                 window.location.href = ""; /* refresh */
             },
@@ -230,6 +246,10 @@ function initclam() {
             dataType: "xml", 
             data: data, 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(response){            
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
@@ -262,6 +282,10 @@ function initclam() {
                 dataType: "xml", 
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
                 beforeSend: oauthheader,
+                crossDomain: true,
+                xhrFields: {
+                  withCredentials: true
+                },
                 success: function(response){
                     processuploadresponse(response, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
@@ -350,6 +374,10 @@ function initclam() {
                 //dataType: "xml", 
                 data: {'inputsource': $('#inputsource').val() }, 
                 beforeSend: oauthheader,
+                crossDomain: true,
+                xhrFields: {
+                  withCredentials: true
+                },
                 success: function(response){
                     window.location.href = baseurl + '/' + project + '/'; /* refresh */   
                 },
@@ -367,6 +395,10 @@ function initclam() {
             url: baseurl + '/' + project + "/input/",
             data: {'inputsource': $('#uploadinputsource').val() }, 
             beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
             success: function(response){
                 //processuploadresponse(response, '#nonexistant');
                 window.location.href = baseurl + '/' + project + '/'; /* refresh */   
@@ -596,6 +628,10 @@ function deleteinputfile(filename) {
     $.ajax({ 
         type: "DELETE", 
         beforeSend: oauthheader,
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
         url: baseurl + '/' + project + "/input/" + filename, 
         dataType: "xml"
     });    
@@ -627,6 +663,10 @@ function pollstatus() {
 		type: 'GET',
 		url: baseurl + '/' + project + "/status/",
         beforeSend: oauthheader,
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
 		dataType: 'json', 
 		data: {accesstoken: accesstoken, user: user},
 		success: function(response){
