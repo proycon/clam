@@ -421,7 +421,6 @@
             <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)
           </xsl:when>
           <xsl:otherwise>
-            <li><a href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
             <a href="output/zip/?oauth_access_token={/clam/@oauth_access_token}">zip</a> | <a href="output/gz/?oauth_access_token={/clam/@oauth_access_token}">tar.gz</a> | <a href="output/bz2/?oauth_access_token={/clam/@oauth_access_token}">tar.bz2</a>)
           </xsl:otherwise>
           </xsl:choose>
