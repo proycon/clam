@@ -45,10 +45,7 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
 
 class auth(object):
     def __init__(self, oauthsession, username_function):
-        try:
-            self.username = username_function(oauthsession)
-        except:
-            self.username = None
+        self.username = username_function(oauthsession)
 
 
     def __call__(self,  oauth_access_token, f):
