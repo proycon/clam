@@ -12,6 +12,7 @@ function initclam() {
             type: "GET", 
             url: baseurl + "/static/parameters.xsl",
             dataType: "xml", 
+            beforeSend: oauthheader,
             success: function(xml){ 
                 parametersxsl = xml;
             }
@@ -22,7 +23,6 @@ function initclam() {
        }
     }
 
-   
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
    //done alone in all browsers
    if (($('#customhtml').length > 0) && $('#customhtml').html().search("&lt;") != 1) {
@@ -117,6 +117,7 @@ function initclam() {
             type: "PUT", 
             url: baseurl + '/' + $("#projectname").val() + "/", 
             dataType: "text", 
+            beforeSend: oauthheader,
             success: function(response){ 
                 window.location.href = baseurl + '/' + $("#projectname").val() + "/";
             },
@@ -137,6 +138,7 @@ function initclam() {
             type: "DELETE", 
             url: baseurl + '/' + project + '/', 
             dataType: "text", 
+            beforeSend: oauthheader,
             success: function(response){ 
                 window.location.href = baseurl + '/'; /* back to index */
             },
@@ -156,6 +158,7 @@ function initclam() {
             type: "DELETE", 
             url: baseurl + '/' + project + "/output/" , 
             dataType: "text", 
+            beforeSend: oauthheader,
             success: function(xml){ 
                 window.location.href = ""; /* refresh */
             },
@@ -226,6 +229,7 @@ function initclam() {
             url: baseurl + '/' + project + "/input/" + filename, 
             dataType: "xml", 
             data: data, 
+            beforeSend: oauthheader,
             success: function(response){            
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
@@ -257,6 +261,7 @@ function initclam() {
                 url: baseurl + '/' + project + "/input/" + filename, 
                 dataType: "xml", 
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() }, 
+                beforeSend: oauthheader,
                 success: function(response){
                     processuploadresponse(response, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
@@ -344,6 +349,7 @@ function initclam() {
                 url: baseurl + '/' + project + "/input/", 
                 //dataType: "xml", 
                 data: {'inputsource': $('#inputsource').val() }, 
+                beforeSend: oauthheader,
                 success: function(response){
                     window.location.href = baseurl + '/' + project + '/'; /* refresh */   
                 },
@@ -360,6 +366,7 @@ function initclam() {
             type: "POST",
             url: baseurl + '/' + project + "/input/",
             data: {'inputsource': $('#uploadinputsource').val() }, 
+            beforeSend: oauthheader,
             success: function(response){
                 //processuploadresponse(response, '#nonexistant');
                 window.location.href = baseurl + '/' + project + '/'; /* refresh */   
@@ -588,6 +595,7 @@ function deleteinputfile(filename) {
     if (found >= 0) tableinputfiles.fnDeleteRow(found);
     $.ajax({ 
         type: "DELETE", 
+        beforeSend: oauthheader,
         url: baseurl + '/' + project + "/input/" + filename, 
         dataType: "xml"
     });    
@@ -618,6 +626,7 @@ function pollstatus() {
 	$.ajax({
 		type: 'GET',
 		url: baseurl + '/' + project + "/status/",
+        beforeSend: oauthheader,
 		dataType: 'json', 
 		data: {accesstoken: accesstoken, user: user},
 		success: function(response){
@@ -644,3 +653,8 @@ function pollstatus() {
 	});	
 }
 
+function oauthheader(req) { 
+  if (oauth_access_token != "") {
+    req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
+  }
+}

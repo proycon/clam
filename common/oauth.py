@@ -50,10 +50,11 @@ class auth(object):
         except:
             self.username = None
 
-    def __call__(self,  f):
+
+    def __call__(self,  oauth_access_token, f):
         def wrapper(*arguments, **keywords):
             if self.username is None:
-                arguments += (self.username,)
+                arguments += ( (self.username, oauth_access_token) )
                 return f(*arguments, **keywords)
             else:
                 raise OAuthError("No valid username returned by OAUTH_USERNAME_FUNCTION")

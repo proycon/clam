@@ -16,7 +16,14 @@
          <xsl:when test="@project">    	
     		<div id="tabs">
     			<ol>
-    				<li><a href="{/clam/@baseurl}/">1. Projects</a></li>
+                    <xsl:choose>
+                    <xsl:when test="/clam/@oauth_access_token = ''">
+                      <li><a href="{/clam/@baseurl}/">1. Projects</a></li>
+                    </xsl:when>
+                    <xsl:otherwise>
+                      <li><a href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
+                    </xsl:otherwise>
+                    </xsl:choose>
 				    <xsl:choose>
 				        <xsl:when test="status/@code = 0">  
 				         <li class="active">2. Input &amp; Parameters</li>
@@ -93,6 +100,10 @@
     <xsl:if test="status/@code = 1 and (contains(/clam/@interfaceoptions,'secureonly') or contains(/clam/@interfaceoptions,'simplepolling'))" >
       <meta http-equiv="refresh" content="2" />            
     </xsl:if>
+    <meta name="oauth_access_token" content="{/clam/@oauth_access_token}">
+    <meta name="system_id" content="{/clam/@id}">
+    <meta name="system_name" content="{/clam/@name}">
+    <meta name="baseurl" content="{/clam/@baseurl}">
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
@@ -131,6 +142,9 @@
         </xsl:if>
         <xsl:if test="/clam/@accesstoken">
         		accesstoken = '<xsl:value-of select="/clam/@accesstoken" />';
+        </xsl:if>
+        <xsl:if test="/clam/@oauth_access_token">
+        		oauth_access_token = '<xsl:value-of select="/clam/@oauth_access_token" />';
         </xsl:if>
         <xsl:choose>
         <xsl:when test="/clam/@user">
@@ -392,7 +406,17 @@
 <xsl:template match="/clam/output">
     <div id="output" class="box">
         <h2>Output files</h2>
-        <p>(Download all as archive: <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)</p>
+        <p>(Download all as archive:
+          <xsl:choose>
+          <xsl:when test="/clam/@oauth_access_token = ''">
+            <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)
+          </xsl:when>
+          <xsl:otherwise>
+            <li><a href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
+            <a href="output/zip/?oauth_access_token={/clam/@oauth_access_token}">zip</a> | <a href="output/gz/?oauth_access_token={/clam/@oauth_access_token}">tar.gz</a> | <a href="output/bz2/?oauth_access_token={/clam/@oauth_access_token}">tar.bz2</a>)
+          </xsl:otherwise>
+          </xsl:choose>
+        </p>
         <table id="outputfiles" class="files">
             <thead>
                 <tr>
@@ -411,7 +435,7 @@
 
 <xsl:template match="/clam/input/file">
     <tr>
-        <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
+      <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/><xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a></td>
         <xsl:variable name="template" select="@template" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
@@ -428,10 +452,10 @@
         <td class="file">
         <xsl:choose>
         <xsl:when test="./viewers/viewer[1]">
-            <a><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /><xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:when>
         <xsl:otherwise>
-            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:otherwise>
         </xsl:choose>
         </td>
@@ -442,12 +466,12 @@
         
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
             </xsl:for-each>
-            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
+            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
             <xsl:if test="@template">
                 <xsl:text> | </xsl:text>
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a>                
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam@oauth_access_token != ''">/?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>                
             </xsl:if>
         </td>
     </tr>
@@ -483,7 +507,14 @@
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
         <div id="upload" class="box">
-            <a href="../">Return to the project view</a>
+            <xsl:choose>
+            <xsl:when test="/clam/@oauth_access_token = ''">
+              <a href="../">Return to the project view</a>
+            </xsl:when>
+            <xsl:otherwise>
+              <a href="../?oauth_access_token={/clam/@oauth_access_token}">Return to the project view</a>
+            </xsl:otherwise>
+            </xsl:choose>
             <ul>
               <xsl:apply-templates select="file"/>  
             </ul>
@@ -509,7 +540,14 @@
                 
    		<div id="tabs">
 			<ol>
-				<li class="active"><a href="{/clam/@baseurl}/">1. Projects</a></li>
+                <xsl:choose>
+                <xsl:when test="/clam/@oauth_access_token = ''">
+                  <li class="active"><a href="{/clam/@baseurl}/">1. Projects</a></li>
+                </xsl:when>
+                <xsl:otherwise>
+                  <li class="active"><a href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
+                </xsl:otherwise>
+                </xsl:choose>
 				<li class="disabled">2. Input &amp; Parameters</li>
 				<li class="disabled">3. Processing</li>
 				<li class="disabled">4. Output &amp; Visualisation</li>
@@ -540,7 +578,7 @@
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-            <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/</xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
+             <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@time" /></td></tr>
            </xsl:for-each>
           </tbody>
         </table>

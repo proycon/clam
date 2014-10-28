@@ -289,15 +289,18 @@ class RequireLogin(object):
                 oauth_access_token = None
                 if authheader and authheader[:6] == "Bearer":
                     oauth_access_token = authheader[7:]
+                    printdebug("Oauth access token obtained from HTTP request Authentication header")
                 else:
                     #Is the token submitted in the GET/POST data? (as oauth_access_token)
                     try:
                         oauth_access_token = web.input().oauth_access_token
+                        printdebug("Oauth access token obtained from HTTP request GET/POST data")
                     except:
                         pass
 
                 if not oauth_access_token:
                     #No access token yet, start login process
+                    printdebug("No access token available yet, starting login process")
 
                     redirect_url = getrooturl() + '/login'
                     kwargs = {'redirect_uri': redirect_url}
@@ -307,10 +310,11 @@ class RequireLogin(object):
                     auth_url, state = settings.OAUTH_AUTH_FUNCTION(oauthsession, settings.OAUTH_AUTH_URL)
 
                     #Redirect to Authentication Provider
+                    printdebug("Redirecting to authentication provider: " + auth_url)
                     raise web.seeother(auth_url)
                 else:
                     try:
-                        return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+                        return auth(oauth_access_token, f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
                     except clam.common.oauth.OAuthError as e:
                         raise CustomForbidden('OAuth Error: ' + str(e))
 
@@ -437,8 +441,17 @@ class Login(object):
         web.header('Content-Type', "text/xml; charset=UTF-8")
         return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
 
-
-
+def validateuser(user):
+    if settings.OAUTH:
+        assert isinstance(user, tuple)
+        oauth_access_token = user[1]
+        user = user[0]
+    elif not user:
+        if not user: user = 'anonymous'
+        oauth_access_token = ""
+    if '/' in user or user == '.' or user == '..' or len(user) > 200:
+        raise web.CustomForbidden("Username invalid")
+    return user, oauth_access_token
 
 
 class Index(object):
@@ -448,7 +461,7 @@ class Index(object):
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])
@@ -464,7 +477,7 @@ class Index(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_access_token)
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -474,7 +487,7 @@ class Info(object):
     def GET(self, user = None):
         """Get list of projects"""
         projects = []
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])
@@ -491,7 +504,7 @@ class Info(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"")
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_access_token)
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -501,7 +514,7 @@ class AdminInterface(object):
     @RequireLogin(ghost=GHOST)
     def GET(self, user = None):
         """Get list of projects"""
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
@@ -525,7 +538,7 @@ class AdminInterface(object):
         web.header('Content-Type', "text/html; charset=UTF-8")
 
         try:
-            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()) )
+            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()), oauth_access_token )
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -534,7 +547,7 @@ class AdminHandler(object):
     GHOST = False
     @RequireLogin(ghost=GHOST)
     def GET(self, command, targetuser, project, user = None):
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
@@ -553,7 +566,7 @@ class AdminHandler(object):
                 f = os.path.basename(f)
                 if f[0] != '.':
                     outputfiles.append(f)
-            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles) )
+            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles), oauth_access_token )
         elif command == 'abort':
             p = Project()
             if p.abort(project, targetuser):
@@ -574,7 +587,7 @@ class AdminDownloader(object):
     GHOST = False
     @RequireLogin(ghost=GHOST)
     def GET(self, targetuser, project, type, filename, user = None):
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
@@ -864,7 +877,7 @@ class Project(object):
 
 
 
-    def response(self, user, project, parameters, errormsg = "", datafile = False):
+    def response(self, user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
         global VERSION
 
         #check if there are invalid parameters:
@@ -910,34 +923,34 @@ class Project(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_access_token)
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
     @RequireLogin(ghost=GHOST)
     def GET(self, project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
+        user, oauth_access_token = validateuser(user)
         if not self.exists(project, user):
-            if not user: user = 'anonymous'
             raise web.webapi.NotFound("Project " + project + " was not found for user " + user) #404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
             #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
-            return self.response(user, project, settings.PARAMETERS) #200
+            return self.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
     @RequireLogin(ghost=GHOST)
     def PUT(self, project, user=None):
         """Create an empty project"""
         Project.create(project, user)
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
         raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
 
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
         global settingsmodule
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         Project.create(project, user)
         #if user and not Project.access(project, user):
         #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
@@ -972,7 +985,7 @@ class Project(object):
             #write clam.xml output file
             render = web.template.render(settings.CLAMDIR + '/templates')
             f = open(Project.path(project, user) + "clam.xml",'w')
-            f.write(str(self.response(user, project, parameters, "",True)))
+            f.write(str(self.response(user, project, parameters, "",True, oauth_access_token)))
             f.close()
 
 
@@ -1027,13 +1040,13 @@ class Project(object):
                 f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
                 f.write(str(pid))
                 f.close()
-                raise web.webapi.Accepted(unicode(self.response(user, project, parameters))) #returns 202 - Accepted
+                raise web.webapi.Accepted(unicode(self.response(user, project, parameters,"",False,oauth_access_token))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
     @RequireLogin(ghost=GHOST)
     def DELETE(self, project, user=None):
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         if not self.exists(project, user):
             raise web.webapi.NotFound("No such project: " + project + " for user " + user)
         statuscode, _, _, _  = self.status(project, user)
@@ -1048,6 +1061,7 @@ class Project(object):
 
     @staticmethod
     def getaccesstoken(user,project):
+        #for fineuploader, not oauth
         if not user: user = 'anonymous'
         h = hashlib.md5()
         h.update(user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project)
@@ -1921,7 +1935,6 @@ class InterfaceData(object):
                 if not inputtemplate in inputtemplates: #no duplicates
                     inputtemplates_mem.append(inputtemplate)
                     inputtemplates.append( inputtemplate.json() )
-
 
         return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
