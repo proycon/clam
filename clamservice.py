@@ -249,6 +249,10 @@ class RequireLogin(object):
 
     def __call__(self,f):
         global auth
+        web.header('Access-Control-Allow-Origin', '*')
+        web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+        web.header('Access-Control-Allow-Headers' , 'Authorization')
+
         def wrapper(*args, **kwargs):
             printdebug("wrapper: "+ repr(f))
             if settings.PREAUTHHEADER:
