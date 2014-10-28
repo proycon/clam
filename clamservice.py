@@ -677,13 +677,13 @@ class Project(object):
     @staticmethod
     def path(project, user):
         """Get the path to the project (static method)"""
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         return settings.ROOT + "projects/" + user + '/' + project + "/"
 
     @staticmethod
     def create(project, user):
         """Create project skeleton if it does not already exist (static method)"""
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         if not Project.validate(project):
             raise CustomForbidden('Invalid project ID')
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
@@ -780,7 +780,7 @@ class Project(object):
 
     def exists(self, project, user):
         """Check if the project exists"""
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         printdebug("Checking if project " + project + " exists for " + user)
         return os.path.isdir(Project.path(project, user))
 
@@ -1083,7 +1083,7 @@ class Project(object):
     @staticmethod
     def getaccesstoken(user,project):
         #for fineuploader, not oauth
-        if not user: user = 'anonymous'
+        user, oauth_access_token = validateuser(user)
         h = hashlib.md5()
         h.update(user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project)
         return h.hexdigest()
