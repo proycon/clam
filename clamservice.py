@@ -446,8 +446,10 @@ class Logout(object):
     @RequireLogin(ghost=GHOST)
     def GET(self, user = None):
         user, oauth_access_token = validateuser(user)
-
-        raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
+        if not settings.OAUTH_REVOKE_URL:
+            raise web.CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
+        else:
+            raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
 
 def validateuser(user):
     if settings.OAUTH:

@@ -775,13 +775,13 @@ variable name is just an example in a CLARIN-NL context.
 
 CLAM also implements OAuth2 \cite{OAUTH2}, i.e. it acts as a client in the
 OAuth2 Authorization framework. An external OAuth2 authorization provider is
-responsible for authenticating you, your user credentials. Many OAuth2
-providers exists; such as Google, Facebook and Github, but you most likely want
-to use the OAuth2 provider of your own institution. You will need to register
-your webservice with your authentication provider, and obtain a
-\texttt{CLIENT_ID} and \texttt{CLIENT_SECRET}, the latter should be kept
-strictly private. These go into your service configuration file and we then
-enable OAuth as follows: 
+responsible for authenticating you, using your user credentials to which CLAM
+itself will never have access. Many OAuth2 providers exists; such as Google,
+Facebook and Github, but you most likely want to use the OAuth2 provider of
+your own institution. You will need to register your webservice with your
+authentication provider, and obtain a \texttt{CLIENT_ID} and
+\texttt{CLIENT_SECRET}, the latter should be kept strictly private! These go
+into your service configuration file and we then enable OAuth as follows: 
 
 \begin{verbatim}
 OAUTH = True
@@ -795,8 +795,17 @@ Apache2, with SSL support.
 
 When the user approaches the CLAM webservice, he/she will need to pass a valid
 access token. If none is passed, the user is instantly delegated to the OAuth2
-authentication provider\footnote{CLAM responds with a HTTP 303 - See Other}.
-The authentication provider in turn redirects the user back to the CLAM
+authorization provider\footnote{CLAM responds with a HTTP 303 - See Other}.
+The authorization provider makes available a URL for authentication and for
+obtaining the final access token. These are configured as follows in the CLAM
+service configuration file: 
+
+\begin{verbatim}
+OAUTH_AUTH_URL= "https://yourprovider/oauth/authenticate"
+OAUTH_TOKEN_URL "https://yourprovider/oauth/token"
+\end{verbatim}
+
+The authorization provider in turn redirects the user back to the CLAM
 webservice, which in turn returns the access token to the client in its XML
 response as follows:
 
@@ -808,9 +817,11 @@ id="yourservice"
 </clam>
 \end{verbatim}
 
-Passing the access token can be done in two ways, the recommended way is by
-sending the following HTTP header in your request, where the number is replaced
-with the actual access token:
+Now any subsequent call to CLAM must pass this access token, otherwise you'd
+simply be redirected to authenticate again. Passing the access
+token can be done in two ways, the recommended way is by sending the following
+HTTP header in your request, where the number is replaced with the actual
+access token:
 
 \begin{verbatim}
 Authentication: Bearer 1234567890
@@ -825,6 +836,21 @@ transmitted over HTTPS.
 https://yourservice.com/?oauth_access_token=1234567890
 \end{verbatim}
 
+Automated clients can avoid this method, but it is necessarily used by the
+web-based interface. To mitigage security concerns, the web interface will
+explicitly ask users to log out. Logging out is done by revoking the
+access token with the authorization provider. For this to work, your
+authentication provider must offer a revoke URL, as described in
+RFC7009\footnote{ \url{https://tools.ietf.org/html/rfc7009}}, which you configure in your
+service configuration file as follows:
+
+\begin{verbatim}
+OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
+\end{verbatim}
+
+If none is set, CLAM's logout procedure will simply instruct users to clear
+their browser history and cache, which is clearly sub-optimal.
+
 The only information CLAM needs from the authorization provider is a username.
 The setting \texttt{OAUTH\_USERNAME\_FUNCTION} refers to a (Python) function
 that obtains this from your resource provider after you have been
@@ -832,11 +858,11 @@ authenticated. It gets a single argument, the instance \texttt{oauthsession}
 instance, and returns the username as a string.  The following example shows
 how to implement this function for a resource provider that returns the
 username in JSON format. This, however, is completely provider-specific so
-you always have to write your own function.
+you always have to write your own function! 
 
 \begin{verbatim}
 def myprovider_username_function(oauthsession):
-  r = oauthsession.get("https://myprovider/user")
+  r = oauthsession.get("https://yourprovider/user")
   d = json.loads(r.content)
   return d['username']
 
@@ -845,9 +871,9 @@ OAUTH_USERNAME_FUNCTION = myprovider_username_function
 
 Various providers require the system to specify scopes, indicating the
 permissions the application requests from the resource provider. This can be
-done using the \texttt{OAUTH_SCOPE} directive in the service configuration file, which
-takes a list of scopes, all of which are provider-specific. The following
-example refers to the Google API:
+done using the \texttt{OAUTH\_SCOPE} directive in the service configuration
+file, which takes a list of scopes, all of which are provider-specific. The
+following example refers to the Google API:
 
 \begin{verbatim}
 OAUTH_SCOPE = [
@@ -862,12 +888,15 @@ users to the authorization provider. This is generally a website where the user
 enters his username and password, but the means by which authentication
 proceeds is not fixed by the OAuth2 specification. After authentication, the
 site passes a one-time authorization code back to the user, with which the user
-goes to CLAM to obtain the actual access token.
+goes to CLAM to obtain the actual access token. This access token may be used
+for a longer time, depending on the authorization provider.
 
 This implies that automated clients accessing the CLAM service can not
 authenticate in a generic fashion that is equal accross authorization
 providers, there is again a provider-specific component here and CLAM clients
 need to know how to communicate with the specific authorization provider.
+
+At the moment, CLAM does not yet implement support for refresh tokens.
 
 \subsection{Command Definition} \label{sec:command}
 
