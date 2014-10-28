@@ -46,7 +46,7 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
 
 class auth(object):
     def __init__(self, client_id, oauth_access_token, username_function):
-        oauthsession = OAuth2Session(client_id, token=oauth_access_token)
+        oauthsession = OAuth2Session(client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
         self.username = username_function(oauthsession)
         self.oauth_access_token = oauth_access_token
 
