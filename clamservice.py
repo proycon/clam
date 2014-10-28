@@ -428,6 +428,7 @@ class CLAMService(object):
 
 class Login(object):
     def GET(self):
+        global auth
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
             code = web.input().code
@@ -441,6 +442,8 @@ class Login(object):
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state' + state )
         if not 'access_token' in d:
             raise CustomForbidden('No access token received from authorization provider')
+
+        auth.oauthsession = oauthsession
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
