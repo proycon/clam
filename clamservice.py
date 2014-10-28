@@ -296,7 +296,7 @@ class RequireLogin(object):
                         oauth_access_token = web.input().oauth_access_token
                         printdebug("Oauth access token obtained from HTTP request GET/POST data")
                     except:
-                        pass
+                        printdebug("No oauth access token found. Header debug: " + repr(web.ctx.env))
 
                 if not oauth_access_token:
                     #No access token yet, start login process
