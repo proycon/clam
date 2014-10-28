@@ -807,7 +807,8 @@ OAUTH_TOKEN_URL "https://yourprovider/oauth/token"
 
 The authorization provider in turn redirects the user back to the CLAM
 webservice, which in turn returns the access token to the client in its XML
-response as follows:
+response as follows. Note that there will just be this one tag without any
+children.
 
 \begin{verbatim}
 <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version"
@@ -818,10 +819,10 @@ id="yourservice"
 \end{verbatim}
 
 Now any subsequent call to CLAM must pass this access token, otherwise you'd
-simply be redirected to authenticate again. Passing the access
-token can be done in two ways, the recommended way is by sending the following
-HTTP header in your request, where the number is replaced with the actual
-access token:
+simply be redirected to authenticate again. The client must thus explicitly call CLAM
+again. Passing the access token can be done in two ways, the recommended way is
+by sending the following HTTP header in your request, where the number is
+replaced with the actual access token:
 
 \begin{verbatim}
 Authentication: Bearer 1234567890
@@ -1915,7 +1916,11 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \medskip
 
 If OAuth authentication is enabled and no access token is passed, almost all URLs
-return \texttt{HTTP 303 - See Other} and redirect to the authentication provider.
+return \texttt{HTTP 303 - See Other} and redirect to the authentication
+provider. At this stage, user input may be required, stopping automated
+clients. After the user input, or if no user input is required, the
+authorization provider should relay the user back to a special CLAM login page with another
+\texttt{HTTP 303}. See the section on OAuth2 authentication for more details.
 
 \chapter{Predefined Formats}
 
