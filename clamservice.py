@@ -963,8 +963,7 @@ class Project(object):
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
-        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'
-,'' }) #201
+        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #201
 
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
@@ -1380,8 +1379,6 @@ class InputFileHandler(object):
             else:
                 msg = "Deleted"
                 defaultheaders( 'text/plain')
-            if contentencoding:
-                web.header('Content-Encoding', contentencoding)
                 web.header('Content-Length',len(msg))
                 return msg #200
 
