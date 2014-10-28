@@ -12,9 +12,6 @@
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><xsl:if test="@project"><h2><xsl:value-of select="@project"/></h2></xsl:if></div>
     <div id="container">
-        <xsl:if test="/clam/@oauth_access_token != ''">
-          <xsl:call-template name="logout"/>
-        </xsl:if>
 
         <xsl:choose>
          <xsl:when test="@project">    	
@@ -49,6 +46,9 @@
     			</ol>
     		</div>        
 
+          <xsl:if test="/clam/@oauth_access_token != ''">
+            <xsl:call-template name="logout"/>
+          </xsl:if>
             
             <xsl:choose>
                 <xsl:when test="status/@code = 0">  
@@ -89,6 +89,9 @@
             </xsl:choose>
          </xsl:when>
          <xsl:otherwise>
+            <xsl:if test="/clam/@oauth_access_token != ''">
+              <xsl:call-template name="logout"/>
+            </xsl:if>
              <xsl:call-template name="clamindex" />
          </xsl:otherwise>
         </xsl:choose>    
