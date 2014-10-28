@@ -963,7 +963,8 @@ class Project(object):
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
-        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg) }) #201
+        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'
+,'' }) #201
 
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
@@ -1073,7 +1074,7 @@ class Project(object):
         printlog("Deleting project '" + project + "'" )
         shutil.rmtree(Project.path(project, user))
         msg = "Deleted"
-        web.header('Content-Type', 'text/plain')
+        defaultheaders('text/plain')
         web.header('Content-Length',len(msg))
         return msg #200
 
@@ -1197,14 +1198,14 @@ class OutputFileHandler(object):
             #Deleting all output files and resetting
             self.reset(project, user)
             msg = "Deleted"
-            web.header('Content-Type', 'text/plain')
+            defaultheaders('text/plain')
             web.header('Content-Length',len(msg))
             return msg #200
         elif os.path.isdir(Project.path(project, user) + filename):
             #Deleting specified directory
             shutil.rmtree(Project.path(project, user) + filename)
             msg = "Deleted"
-            web.header('Content-Type', 'text/plain')
+            defaultheaders('text/plain')
             web.header('Content-Length',len(msg))
             return msg #200
         else:
@@ -1297,7 +1298,7 @@ class OutputFileHandler(object):
 
             if contentencoding:
                 web.header('Content-Encoding', contentencoding)
-            web.header('Content-Type', contenttype)
+            defaultheaders(contenttype)
             for line in open(path,'r'):
                 yield line
 
@@ -1378,7 +1379,9 @@ class InputFileHandler(object):
                 raise web.webapi.NotFound()
             else:
                 msg = "Deleted"
-                web.header('Content-Type', 'text/plain')
+                defaultheaders( 'text/plain')
+            if contentencoding:
+                web.header('Content-Encoding', contentencoding)
                 web.header('Content-Length',len(msg))
                 return msg #200
 
