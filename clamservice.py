@@ -339,6 +339,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/', 'Index',
         settings.STANDALONEURLPREFIX + '/info/?', 'Info',
         settings.STANDALONEURLPREFIX + '/login/?', 'Login', #for Oauth2 only, return access token
+        settings.STANDALONEURLPREFIX + '/logout/?', 'Logout', #for Oauth2 only, revokes access token with authorization provider
         settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
         settings.STANDALONEURLPREFIX + '/admin/download/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/([a-z]*)/(.*)/?', 'AdminDownloader',
         settings.STANDALONEURLPREFIX + '/admin/([A-Za-z]*)/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/?', 'AdminHandler',
@@ -418,8 +419,6 @@ class CLAMService(object):
 
 
 class Login(object):
-    GHOST = False
-
     def GET(self):
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
@@ -440,6 +439,15 @@ class Login(object):
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
         return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
+
+class Logout(object):
+    GHOST = False
+
+    @RequireLogin(ghost=GHOST)
+    def GET(self, user = None):
+        user, oauth_access_token = validateuser(user)
+
+        raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
 
 def validateuser(user):
     if settings.OAUTH:
@@ -2424,6 +2432,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.OAUTH_AUTH_URL = ""
     if not 'OAUTH_TOKEN_URL' in settingkeys:
         settings.OAUTH_TOKEN_URL = ""
+    if not 'OAUTH_REVOKE_URL' in settingkeys:
+        settings.OAUTH_REVOKE_URL = ""
     if not 'OAUTH_SCOPE' in settingkeys:
         settings.OAUTH_SCOPE = []
     if not 'OAUTH_USERNAME_FUNCTION' in settingkeys:
