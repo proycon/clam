@@ -463,6 +463,13 @@ def validateuser(user):
         raise web.CustomForbidden("Username invalid")
     return user, oauth_access_token
 
+def defaultheaders(contenttype="text/xml; charset=UTF-8"):
+    web.header('Content-Type', contenttype)
+    web.header('Access-Control-Allow-Origin', '*')
+    web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    web.header('Access-Control-Allow-Headers' , 'Authorization')
+
+
 
 class Index(object):
     GHOST = False
@@ -485,7 +492,8 @@ class Index(object):
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
-        web.header('Content-Type', "text/xml; charset=UTF-8")
+        defaultheaders()
+
         try:
             return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_access_token)
         except AttributeError:
@@ -512,7 +520,7 @@ class Info(object):
         render = web.template.render(settings.CLAMDIR + '/templates')
 
 
-        web.header('Content-Type', "text/xml; charset=UTF-8")
+        defaultheaders()
         try:
             return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_access_token)
         except AttributeError:
@@ -545,7 +553,7 @@ class AdminInterface(object):
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
-        web.header('Content-Type', "text/html; charset=UTF-8")
+        defaultheaders( "text/html; charset=UTF-8")
 
         try:
             return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()), oauth_access_token )
@@ -562,7 +570,7 @@ class AdminHandler(object):
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
 
 
-        web.header('Content-Type', "text/html; charset=UTF-8")
+        defaultheaders( "text/html; charset=UTF-8")
         render = web.template.render(settings.CLAMDIR + '/templates')
 
         if command == 'inspect':
@@ -931,7 +939,7 @@ class Project(object):
 
 
 
-        web.header('Content-Type', "text/xml; charset=UTF-8")
+        defaultheaders()
         try:
             return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_access_token)
         except AttributeError:
@@ -955,7 +963,7 @@ class Project(object):
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
-        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg)}) #201
+        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg) }) #201
 
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
@@ -1556,9 +1564,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
     Project.create(project, user)
 
 
-
-
-    web.header('Content-Type', "text/xml; charset=UTF-8")
+    defaultheaders()
     head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     head += "<clamupload>\n"
     if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
@@ -1936,7 +1942,7 @@ class InterfaceData(object):
 
     #@RequireLogin(ghost=GHOST) (may be loaded before authentication)
     def GET(self, user=None):
-        web.header('Content-Type', 'text/javascript')
+        defaultheaders('text/javascript')
 
         inputtemplates_mem = []
         inputtemplates = []
@@ -1951,7 +1957,7 @@ class InterfaceData(object):
 class FoLiAXSL(object):
     """Provides Stylesheet"""
     def GET(self):
-        web.header('Content-Type', 'text/xsl')
+        defaultheaders('text/xsl')
 
         for line in codecs.open(settings.CLAMDIR + '/static/folia.xsl','r','utf-8'):
             yield line
@@ -1960,7 +1966,7 @@ class StyleData(object):
     """Provides Stylesheet"""
 
     def GET(self):
-        web.header('Content-Type', 'text/css')
+        defaultheaders('text/css')
         yield "//" + settings.STYLE + '.css\n'
         for line in codecs.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r','utf-8'):
             yield line
