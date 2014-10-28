@@ -452,13 +452,13 @@ class Logout(object):
             raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
 
 def validateuser(user):
+    oauth_access_token = ""
     if settings.OAUTH:
         assert isinstance(user, tuple)
         oauth_access_token = user[1]
         user = user[0]
-    elif not user:
-        if not user: user = 'anonymous'
-        oauth_access_token = ""
+    if not user:
+        user = 'anonymous'
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
         raise web.CustomForbidden("Username invalid")
     return user, oauth_access_token
