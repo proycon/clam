@@ -127,7 +127,11 @@ function initclam() {
               withCredentials: true
             },
             success: function(response){ 
-                window.location.href = baseurl + '/' + $("#projectname").val() + "/";
+                if (oauth_access_token != "") {
+                  window.location.href = baseurl + '/' + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
+                } else {
+                  window.location.href = baseurl + '/' + $("#projectname").val() + "/";
+                }
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -152,7 +156,11 @@ function initclam() {
               withCredentials: true
             },
             success: function(response){ 
-                window.location.href = baseurl + '/'; /* back to index */
+                if (oauth_access_token != "") {
+                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
+                } else {
+                  window.location.href = baseurl + '/'; /* back to index */
+                }
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -190,7 +198,11 @@ function initclam() {
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(event){
-            window.location.href = baseurl + '/'; /* refresh */
+            if (oauth_access_token != "") {
+              window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
+            } else {
+              window.location.href = baseurl + '/'; /* back to index */
+            }
        });
    }  
    
@@ -325,7 +337,11 @@ function initclam() {
 		        return true;
 		}).on('complete', function(event, id, fileName, responseJSON) {
 				if (responseJSON.isarchive) {
-					window.location.href = baseurl + '/' + project + '/'; /* just refresh page */
+                    if (oauth_access_token != "") {
+                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
+                    } else {
+                      window.location.href = baseurl + '/' + project + "/";
+                    }
 					return true;
 				} 
 		        processuploadresponse(responseJSON.xml, '#uploadparameters');
@@ -379,7 +395,11 @@ function initclam() {
                   withCredentials: true
                 },
                 success: function(response){
-                    window.location.href = baseurl + '/' + project + '/'; /* refresh */   
+                    if (oauth_access_token != "") {
+                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
+                    } else {
+                      window.location.href = baseurl + '/' + project + "/";
+                    }
                 },
                 error: function(response, errortype){
                     alert(response);
@@ -401,13 +421,21 @@ function initclam() {
             },
             success: function(response){
                 //processuploadresponse(response, '#nonexistant');
-                window.location.href = baseurl + '/' + project + '/'; /* refresh */   
-            },
+                if (oauth_access_token != "") {
+                  window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
+                } else {
+                  window.location.href = baseurl + '/' + project + "/";
+                }
+          },
             error: function(response,errortype){
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
-                    window.location.href = baseurl + '/' + project + '/'; /* refresh */   
+                    if (oauth_access_token != "") {
+                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
+                    } else {
+                      window.location.href = baseurl + '/' + project + "/";
+                    }
                 } else {
                     alert("Error, unable to add file ("+response.status+")");
                 }
@@ -671,7 +699,11 @@ function pollstatus() {
 		data: {accesstoken: accesstoken, user: user},
 		success: function(response){
                 if (response.statuscode != 1) {
-                	window.location.href = baseurl + '/' + project + '/'; /* refresh */
+                    if (oauth_access_token != "") {
+                      window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
+                    } else {
+                      window.location.href = baseurl + '/' + project + '/'; /* refresh */
+                    }
                 } else {
                 	if (response.completion > 0) {
                 		progress = response.completion;

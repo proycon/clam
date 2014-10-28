@@ -6,7 +6,6 @@
 #   etc...
 
 import json
-import web
 from requests_oauthlib import OAuth2Session
 
 class OAuthError(Exception):
