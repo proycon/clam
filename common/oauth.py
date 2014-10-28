@@ -53,7 +53,7 @@ class auth(object):
 
     def __call__(self, f):
         def wrapper(*arguments, **keywords):
-            if self.username is None:
+            if not (self.username is None):
                 arguments += ( (self.username, self.oauth_access_token) ,)
                 return f(*arguments, **keywords)
             else:
