@@ -442,7 +442,6 @@ class Login(object):
         if not 'access_token' in d:
             raise CustomForbidden('No access token received from authorization provider')
 
-        #raise web.seeother(getrooturl() + '/?oauth_access_token=' + d['access_token'])
         render = web.template.render(settings.CLAMDIR + '/templates')
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
@@ -966,7 +965,11 @@ class Project(object):
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
-        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #201
+        if oauth_access_token:
+            extraloc = '?oauth_access_token=' + oauth_access_token
+        else:
+            extraloc = ''
+        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #201
 
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
@@ -978,7 +981,10 @@ class Project(object):
 
         statuscode, _, _, _  = self.status(project, user)
         if statuscode != clam.common.status.READY:
-            raise web.seeother(getrooturl() + '/' + project)
+            if oauth_access_token:
+                raise web.seeother(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+            else:
+                raise web.seeother(getrooturl() + '/' + project)
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
