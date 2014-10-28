@@ -322,7 +322,8 @@ class RequireLogin(object):
                     raise web.seeother(auth_url)
                 else:
                     try:
-                        return auth(oauth_access_token, f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+                        auth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
+                        return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
                     except clam.common.oauth.OAuthError as e:
                         raise CustomForbidden('OAuth Error: ' + str(e))
 
@@ -443,7 +444,6 @@ class Login(object):
         if not 'access_token' in d:
             raise CustomForbidden('No access token received from authorization provider')
 
-        auth.oauthsession = oauthsession
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
@@ -2690,8 +2690,7 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.OAUTH:
-        oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
-        auth = clam.common.oauth.auth(oauthsession, settings.OAUTH_USERNAME_FUNCTION)
+        auth = None #will be instantiated anew each time
     elif settings.USERS:
         auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
         printdebug("Initialised authentication")

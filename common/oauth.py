@@ -7,6 +7,7 @@
 
 import json
 import web
+from requests_oauthlib import OAuth2Session
 
 class OAuthError(Exception):
     pass
@@ -44,7 +45,8 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
 
 
 class auth(object):
-    def __init__(self, oauthsession, username_function):
+    def __init__(self, client_id, oauth_access_token, username_function):
+        oauthsession = OAuth2Session(client_id, token=oauth_access_token)
         self.username = username_function(oauthsession)
 
 
