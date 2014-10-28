@@ -42,7 +42,7 @@ from clam.common.util import RequestWithMethod
 
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.10'
+VERSION = '0.9.11'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
@@ -436,6 +436,7 @@ class CLAMData(object):
         * ``corpora``         - List of pre-installed corpora
         * ``errors``          - Boolean indicating whether there are errors in parameter specification
         * ``errormsg``        - String containing an error message
+        * ``oauth_access_token``  -  OAuth2 access token (empty if not used, string)
 
     Note that depending on the current status of the project, not all may be available.
     """
@@ -525,12 +526,14 @@ class CLAMData(object):
                     self.remote = True #no directory: remote URL
                     self.projecturl = self.baseurl + '/' + self.project + '/'
 
-
-
         if 'user' in root.attrib:
             self.user = root.attrib['user']
         else:
             self.user = None
+
+        self.oauth_access_token = ""
+        if 'oauth_access_token' in root.attrib:
+            self.oauth_access_token = root.attrib['oauth_access_token']
 
         for node in root:
             if node.tag == 'status':

@@ -19,7 +19,6 @@
 
 import os.path
 import sys
-#import httplib2
 import urllib2
 from urllib import urlencode
 import pycurl
@@ -37,7 +36,7 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION, BadRequest, NotFound, PermissionDenied, ServerError, AuthRequired,NoConnection, UploadError, ParameterError, TimeOut, processhttpcode
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.9.10'
+VERSION = '0.9.11'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
@@ -46,23 +45,28 @@ register_openers()
 
 
 class CLAMClient:
-    def __init__(self, url, user=None, password=None):
+    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None):
         """Initialise the CLAM client (does not actually connect yet)
 
         * ``url`` - URL of the webservice
-        * ``user`` - username (or None if no authentication is needed)
-        * ``password`` - password (or None if not authentication is needed)
+        * ``user`` - username (or None if no authentication is needed or if using OAuth2)
+        * ``password`` - password (or None if no authentication is needed or if using OAuth2)
+        * ``oauth`` - Use OAuth2? (boolean)
+        * ``oauth_access_token`` - OAuth2 Access Token (or None), if OAuth is
+            enabled and no token is specified, the authorization provider will be called to obtain one.
+            If this stage requires user interaction, it will fail.
         """
 
         #self.http = httplib2.Http()
         if url[-1] != '/': url += '/'
         self.url = url
+        self.oauth = oauth
+        self.oauth_access_token = oauth_access_token
         if user and password:
             self.authenticated = True
-            #for most things we use httplib2, no we don't anymore
-            #self.http.add_credentials(user, password)
             self.user = user
             self.password = password
+            self.oauth = False
             self.initauth()
         else:
             self.authenticated = False
@@ -82,6 +86,22 @@ class CLAMClient:
             authhandler = urllib2.HTTPDigestAuthHandler(self.passman)
             opener = urllib2.build_opener(authhandler)
             opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+            urllib2.install_opener(opener)
+        elif self.oauth:
+            if not self.oauth_access_token:
+                opener = urllib2.build_opener()
+                opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+                urllib2.install_opener(opener)
+
+                data = self.request()
+                if data is True: #indicates failure
+                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically")
+                else:
+                    self.oauth_access_token = data.oauth_access_token
+
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
+            opener.addheaders = [('Authorization', 'Bearer ' + self.oauth_access_token)]
             urllib2.install_opener(opener)
         else:
             opener = urllib2.build_opener()
