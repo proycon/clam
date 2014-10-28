@@ -89,9 +89,6 @@
             </xsl:choose>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:if test="/clam/@oauth_access_token != ''">
-              <xsl:call-template name="logout"/>
-            </xsl:if>
              <xsl:call-template name="clamindex" />
          </xsl:otherwise>
         </xsl:choose>    
@@ -566,6 +563,10 @@
 			</ol>
 		</div>   
         
+        <xsl:if test="/clam/@oauth_access_token != ''">
+          <xsl:call-template name="logout"/>
+        </xsl:if>
+
         <div id="description" class="box">
          <xsl:value-of select="description" />
         </div>
