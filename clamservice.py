@@ -469,11 +469,6 @@ def validateuser(user):
 
 def defaultheaders(contenttype="text/xml; charset=UTF-8"):
     web.header('Content-Type', contenttype)
-    web.header('Access-Control-Allow-Origin', '*')
-    web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-    web.header('Access-Control-Allow-Headers' , 'Authorization')
-
-
 
 class Index(object):
     GHOST = False
