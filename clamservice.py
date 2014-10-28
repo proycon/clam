@@ -290,10 +290,13 @@ class RequireLogin(object):
                         raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
             if settings.OAUTH:
                 #Check header for token
-                authheader = web.ctx.env.get('Authorization', '')
+                authheader = web.ctx.env.get('HTTP_AUTHORIZATION', '')
                 oauth_access_token = None
-                if authheader and authheader[:6] == "Bearer":
+                if authheader and authheader[:6].lower() == "bearer":
                     oauth_access_token = authheader[7:]
+                    printdebug("Oauth access token obtained from HTTP request Authentication header")
+                elif authheader and authheader[:5].lower() == "token":
+                    oauth_access_token = authheader[6:]
                     printdebug("Oauth access token obtained from HTTP request Authentication header")
                 else:
                     #Is the token submitted in the GET/POST data? (as oauth_access_token)
