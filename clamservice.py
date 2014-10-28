@@ -457,7 +457,7 @@ class Logout(object):
     def GET(self, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.OAUTH_REVOKE_URL:
-            raise web.CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
+            raise CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
         else:
             raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
 
@@ -469,7 +469,7 @@ def validateuser(user):
     if not user:
         user = 'anonymous'
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
-        raise web.CustomForbidden("Username invalid")
+        raise CustomForbidden("Username invalid")
     return user, oauth_access_token
 
 def defaultheaders(contenttype="text/xml; charset=UTF-8"):
