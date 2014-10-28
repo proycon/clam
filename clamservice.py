@@ -460,8 +460,7 @@ class Logout(object):
 
 def validateuser(user):
     oauth_access_token = ""
-    if settings.OAUTH:
-        assert isinstance(user, tuple)
+    if settings.OAUTH and isinstance(user, tuple):
         oauth_access_token = user[1]
         user = user[0]
     if not user:
@@ -974,8 +973,8 @@ class Project(object):
     @RequireLogin(ghost=GHOST)
     def POST(self, project, user=None):
         global settingsmodule
-        user, oauth_access_token = validateuser(user)
         Project.create(project, user)
+        user, oauth_access_token = validateuser(user)
         #if user and not Project.access(project, user):
         #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
 
@@ -1400,6 +1399,7 @@ class InputFileHandler(object):
         #TODO LATER: re-add support for archives?
 
         Project.create(project, user)
+        user, oauth_access_token = validateuser(user)
         postdata = web.input(file={})
 
         if filename == '':
