@@ -46,7 +46,7 @@
     		</div>        
 
             <xsl:if test="/clam/@oauth_access_token != ''">
-              <xsl:apply-templates select="logout"/>
+              <xsl:call-template name="logout"/>
             </xsl:if>
             
             <xsl:choose>
