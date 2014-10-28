@@ -48,12 +48,13 @@ class auth(object):
     def __init__(self, client_id, oauth_access_token, username_function):
         oauthsession = OAuth2Session(client_id, token=oauth_access_token)
         self.username = username_function(oauthsession)
+        self.oauth_access_token = oauth_access_token
 
 
-    def __call__(self,  oauth_access_token, f):
+    def __call__(self, f):
         def wrapper(*arguments, **keywords):
             if self.username is None:
-                arguments += ( (self.username, oauth_access_token) ,)
+                arguments += ( (self.username, self.oauth_access_token) ,)
                 return f(*arguments, **keywords)
             else:
                 raise OAuthError("No valid username returned by OAUTH_USERNAME_FUNCTION")

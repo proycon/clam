@@ -323,7 +323,7 @@ class RequireLogin(object):
                 else:
                     try:
                         auth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
-                        return auth(f)(*args, **kwargs) #auth will be instance of clam.common.oauth.auth
+                        return auth(f)(*args, **kwargs)
                     except clam.common.oauth.OAuthError as e:
                         raise CustomForbidden('OAuth Error: ' + str(e))
 
