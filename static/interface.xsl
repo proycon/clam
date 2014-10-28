@@ -105,10 +105,6 @@
     <xsl:if test="status/@code = 1 and (contains(/clam/@interfaceoptions,'secureonly') or contains(/clam/@interfaceoptions,'simplepolling'))" >
       <meta http-equiv="refresh" content="2" />            
     </xsl:if>
-    <meta name="oauth_access_token" content="{/clam/@oauth_access_token}">
-    <meta name="system_id" content="{/clam/@id}">
-    <meta name="system_name" content="{/clam/@name}">
-    <meta name="baseurl" content="{/clam/@baseurl}">
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
