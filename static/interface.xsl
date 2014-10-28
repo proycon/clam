@@ -44,6 +44,11 @@
     				
     			</ol>
     		</div>        
+
+            <xsl:if test="/clam/@oauth_access_token = ''">
+              <xsl:apply-templates select="logout"/>
+            </xsl:if>
+            
             <xsl:choose>
                 <xsl:when test="status/@code = 0">  
                     <xsl:if test="/clam/customhtml">
@@ -192,6 +197,13 @@
 
 </xsl:template>
 
+<xsl:template name="logout">
+    <div class="box">
+      <p>
+        You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/?oauth_access_token={/clam@oauth_access_token}">log out</a></strong> when you are done.
+      </p>
+    </div>
+</xsl:template>
 
 <xsl:template match="/clam/status">
     <div id="status" class="box">
