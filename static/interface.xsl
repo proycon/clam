@@ -200,7 +200,7 @@
 <xsl:template name="logout">
     <div class="box">
       <p>
-        You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/?oauth_access_token={/clam@oauth_access_token}">log out</a></strong> when you are done.
+        You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/?oauth_access_token={/clam/@oauth_access_token}">log out</a></strong> when you are done.
       </p>
     </div>
 </xsl:template>
