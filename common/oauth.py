@@ -65,8 +65,15 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
     BLOCK_SIZE = 16
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = oauth_access_token + ':' + ip
-    clear = str(clear + ((BLOCK_SIZE - len(clear) % BLOCK_SIZE) * " "))
-    return base64.urlsafe_b64encode(c.encrypt(clear))
+    try:
+        clear = str(clear + ((BLOCK_SIZE - len(clear) % BLOCK_SIZE) * " "))
+        encoded = base64.urlsafe_b64encode(c.encrypt(clear))
+    except:
+        #prevent leaks in debug mode
+        encryptionsecret = "SECRET"
+        oauth_access_token = "SECRET"
+        raise OAuthError("Error in access token encryption")
+    return encoded
 
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
@@ -74,7 +81,9 @@ def decrypt(encryptionsecret, oauth_access_token):
     try:
         oauth_access_token, ip = clear.strip().split(':')
     except:
-        oauth_access_token = "SECRET" #prevent leaks in debug mode
-        raise OAuthError("Error in decryption")
+        #prevent leaks in debug mode
+        encryptionsecret = "SECRET"
+        oauth_access_token = "SECRET"
+        raise OAuthError("Error in access token decryption")
     return oauth_access_token, ip
 

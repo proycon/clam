@@ -845,14 +845,14 @@ https://yourservice.com/?oauth_access_token=1234567890
 
 Automated clients can avoid this method, but it is necessarily used by the
 web-based interface. To mitigage security concerns, the access token you
-receive is encrypted by CLAM and bound to your IP\footnote{The passphrase for
-token encryption can be configured through \texttt{OAUTH\_ENCRYPTIONSECRET}, a random
-cipher will be picked if this is not configured}. The web
-interface will furthermore explicitly ask users to log out. Logging out is done
-by revoking the access token with the authorization provider. For this to work,
-your authentication provider must offer a revoke URL, as described in
-RFC7009\footnote{ \url{https://tools.ietf.org/html/rfc7009}}, which you
-configure in your service configuration file as follows:
+receive is encrypted by CLAM and bound to your IP. The passphrase for token
+encryption has to be configured through \texttt{OAUTH\_ENCRYPTIONSECRET} in
+your secrive confifuration file. The web interface will furthermore explicitly
+ask users to log out. Logging out is done by revoking the access token with the
+authorization provider. For this to work, your authentication provider must
+offer a revoke URL, as described in RFC7009\footnote{
+\url{https://tools.ietf.org/html/rfc7009}}, which you configure in your service
+configuration file as follows:
 
 \begin{verbatim}
 OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"

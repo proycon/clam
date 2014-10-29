@@ -2433,7 +2433,7 @@ def set_defaults(HOST = None, PORT = None):
     if not 'DIGESTOPAQUE' in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128)
     if not 'OAUTH_ENCRYPTIONSECRET' in settingkeys:
-        settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(128)
+        settings.OAUTH_ENCRYPTIONSECRET = None
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     elif settings.ENABLEWEBAPP is False:
@@ -2550,6 +2550,8 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_TOKEN_URL not specified!")
         if not settings.OAUTH_USERNAME_FUNCTION:
             error("ERROR: OAUTH enabled but OAUTH_USERNAME_FUNCTION not specified!")
+        if not settings.OAUTH_ENCRYPTIONSECRET
+            error("ERROR: OAUTH enabled but OAUTH_ENCRYPTIONSECRET not specified!")
 
         warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
 
