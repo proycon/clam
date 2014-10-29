@@ -66,11 +66,11 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = oauth_access_token + ':' + ip
     clear = clear + ((BLOCK_SIZE - len(clear) % BLOCK_SIZE) * " ")
-    return base64.b64encode(c.encrypt(clear))
+    return base64.urlsafe_b64encode(c.encrypt(clear))
 
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
-    clear = c.decrypt(base64.b64decode(oauth_access_token))
+    clear = c.decrypt(base64.urlsafe_b64decode(oauth_access_token))
     oauth_access_token, ip = clear.split(':')
     return oauth_access_token.strip(), ip
 
