@@ -55,5 +55,5 @@ setup(
         ]
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf','docs/clam.rng','clients/*.py','tests/*.py'] },
-    install_requires=['web.py >= 0.33','lxml >= 2.2','pycurl','requests_oauthlib']
+    install_requires=['web.py >= 0.33','lxml >= 2.2','pycurl','requests_oauthlib','pycrypto']
 )
