@@ -71,6 +71,10 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
-    oauth_access_token, ip = clear.strip().split(':')
+    try:
+        oauth_access_token, ip = clear.strip().split(':')
+    except:
+        oauth_access_token = "SECRET" #prevent leaks in debug mode
+        raise OAuthError("Error in decryption")
     return oauth_access_token, ip
 
