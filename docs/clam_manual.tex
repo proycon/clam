@@ -378,12 +378,13 @@ installation and versions, this will be a directory like: \\
 
 Note that we run WSGI in Daemon mode using the \texttt{WSGIDaemonProcess} and
 \texttt{WSGIProcessGroup} directives, as opposed to embedded mode. This is the
-recommended way of running CLAM. Whenever any code changes are made, simply
+recommended way of running CLAM, and is even mandatory when using HTTP Digest
+Authentication. Whenever any code changes are made, simply
 \texttt{touch} the WSGI file (updating its modification time), and the changes
 will be immediately available. Embedded mode would require an apache restart
 when modifications are made, and it may also lead to problems with the HTTP
 Digest Authentication as authentication keys (nonces) may not be retainable in
-memory due to constant reloads. Again I'd like to emphasise that for
+memory due to constant reloads.  Again I'd like to emphasise that for
 authentication the line \texttt{WSGIPassAuthorization On} is vital, as
 otherwise user credentials will never each CLAM.
 
@@ -479,7 +480,11 @@ You may possibly encounter one of the following issues when attempting to access
 \item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that renders the web-application can not be loaded. This is most likely due to a mismatch in URLs. The URL at which the webservice is accessed has to correspond with the URL configured in the service configuration file. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
 \item \textbf{I get an error ``No template named response''} -- Check whether
   \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
-\item \textbf{I'm using CLAM through Apache and WSGI, but authentication does not work and I am always logged in as anonymous} -- Check that \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and \texttt{USERS} is configured in your service configuration file.
+\item \textbf{I'm using CLAM through Apache and WSGI, but authentication does
+  not work and I am always logged in as anonymous} -- Check that
+  \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and
+  \texttt{USERS}, \texttt{USERS\_MYSQL} or \texttt{OAUTH} is configured in your service configuration file.
+
 \end{enumerate}
 
 Note that we strongly recommend developing your services using the built-in
@@ -839,12 +844,15 @@ https://yourservice.com/?oauth_access_token=1234567890
 \end{verbatim}
 
 Automated clients can avoid this method, but it is necessarily used by the
-web-based interface. To mitigage security concerns, the web interface will
-explicitly ask users to log out. Logging out is done by revoking the
-access token with the authorization provider. For this to work, your
-authentication provider must offer a revoke URL, as described in
-RFC7009\footnote{ \url{https://tools.ietf.org/html/rfc7009}}, which you configure in your
-service configuration file as follows:
+web-based interface. To mitigage security concerns, the access token you
+receive is encrypted by CLAM and bound to your IP\footnote{The passphrase for
+token encryption can be configured through \texttt{OAUTH\_ENCRYPTIONSECRET}, a random
+cipher will be picked if this is not configured}. The web
+interface will furthermore explicitly ask users to log out. Logging out is done
+by revoking the access token with the authorization provider. For this to work,
+your authentication provider must offer a revoke URL, as described in
+RFC7009\footnote{ \url{https://tools.ietf.org/html/rfc7009}}, which you
+configure in your service configuration file as follows:
 
 \begin{verbatim}
 OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
@@ -900,6 +908,11 @@ need to know how to communicate with the specific authorization provider.
 
 At the moment, CLAM does not yet implement support for refresh tokens.
 
+The unencrypted access token may be passed to the wrapper script if needed (has
+to be explicitly configured), allowing the wrapper script or underlying system
+to communicate with a resource provider on behalf of the user, through CLAM's
+client\_id.
+
 \subsection{Command Definition} \label{sec:command}
 
 Central in the configuration file is the command that CLAM will execute. This
@@ -915,6 +928,7 @@ variables you can use that will be automatically set by CLAM.
 \item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} -- The username of the logged-in user.
 \item \texttt{\$PROJECT} -- The ID of the project
+\item \texttt{\$OAUTH\_ACCESS\_TOKEN} -- The unencrypted OAuth access token\footnote{At this is passed as a command line parameter, it may be exposed in the process list to other users on the machine CLAM is hosted on}.
 \end{itemize}
 
 

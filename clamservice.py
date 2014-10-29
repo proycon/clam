@@ -306,6 +306,8 @@ class RequireLogin(object):
                     except:
                         printdebug("No oauth access token found. Header debug: " + repr(web.ctx.env))
 
+
+
                 if not oauth_access_token:
                     #No access token yet, start login process
                     printdebug("No access token available yet, starting login process")
@@ -321,6 +323,11 @@ class RequireLogin(object):
                     printdebug("Redirecting to authentication provider: " + auth_url)
                     raise web.seeother(auth_url)
                 else:
+                    #Decrypt access token
+                    oauth_access_token, ip = clam.common.oauth.decrypt(oauth_access_token)
+                    if ip != web.ctx.env.get('REMOTE_ADDR', ''):
+                        raise CustomForbidden("Access token not valid for this IP")
+
                     try:
                         auth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
                         return auth(f)(*args, **kwargs)
@@ -444,11 +451,13 @@ class Login(object):
         if not 'access_token' in d:
             raise CustomForbidden('No access token received from authorization provider')
 
-
         render = web.template.render(settings.CLAMDIR + '/templates')
 
         web.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), d['access_token'])
+        return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), oauth_encrypt(d['access_token']))
+
+def oauth_encrypt(oauth_access_token):
+        return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, web.ctx.env.get('REMOTE_ADDR',''))
 
 class Logout(object):
     GHOST = False
@@ -459,7 +468,23 @@ class Logout(object):
         if not settings.OAUTH_REVOKE_URL:
             raise CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
         else:
-            raise web.seeother(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
+            try:
+                response = urllib2.urlopen(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
+                response.read()
+            except Exception, e:
+                try:
+                    statuscode = int(e.code)
+                except AttributeError:
+                    raise e
+
+            if statuscode >= 200 and statuscode < 300:
+                return "Logout successful, have a nice day"
+            else:
+                raise CustomForbidden("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
+
+        return "Logout successful, have a nice day"
+
+
 
 def validateuser(user):
     oauth_access_token = ""
@@ -499,7 +524,7 @@ class Index(object):
         defaultheaders()
 
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_access_token)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -526,7 +551,7 @@ class Info(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_access_token)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -560,7 +585,7 @@ class AdminInterface(object):
         defaultheaders( "text/html; charset=UTF-8")
 
         try:
-            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()), oauth_access_token )
+            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()), oauth_encrypt(oauth_access_token) )
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -588,7 +613,7 @@ class AdminHandler(object):
                 f = os.path.basename(f)
                 if f[0] != '.':
                     outputfiles.append(f)
-            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles), oauth_access_token )
+            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles), oauth_encrypt(oauth_access_token) )
         elif command == 'abort':
             p = Project()
             if p.abort(project, targetuser):
@@ -945,7 +970,7 @@ class Project(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_access_token)
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -1006,13 +1031,12 @@ class Project(object):
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise CustomForbiddenXML(unicode(self.response(user, project, parameters)))
+            raise CustomForbiddenXML(unicode(self.response(user, project, parameters,"",False,oauth_access_token)))
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise CustomForbiddenXML(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?")))
+            raise CustomForbiddenXML(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token)))
         else:
             #write clam.xml output file
-            render = web.template.render(settings.CLAMDIR + '/templates')
             f = open(Project.path(project, user) + "clam.xml",'w')
             f.write(str(self.response(user, project, parameters, "",True, oauth_access_token)))
             f.close()
@@ -1036,6 +1060,7 @@ class Project(object):
             cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$PROJECT',project) #alphanumberic only, shell-safe
+            cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
             #everything should be shell-safe now
             if settings.COMMAND.find("2>") == -1:
                 cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
@@ -2406,8 +2431,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128)
-    if not 'OAUTHOPAQUE' in settingkeys:
-        settings.OAUTHOPAQUE = "%032x" % random.getrandbits(128)
+    if not 'OAUTH_ENCRYPTIONSECRET' in settingkeys:
+        settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(128)
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     elif settings.ENABLEWEBAPP is False:

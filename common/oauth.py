@@ -7,6 +7,8 @@
 
 import json
 from requests_oauthlib import OAuth2Session
+from Crypto.Cipher import AES
+import base64
 
 class OAuthError(Exception):
     pass
@@ -58,3 +60,15 @@ class auth(object):
             else:
                 raise OAuthError("No valid username returned by OAUTH_USERNAME_FUNCTION")
         return wrapper
+
+def encrypt(encryptionsecret, oauth_access_token, ip):
+    c = AES.new(encryptionsecret, AES.MODE_ECB)
+    clear = oauth_access_token + ':' + ip
+    return base64.b64encode(c.encrypt(clear))
+
+def decrypt(encryptionsecret, oauth_access_token):
+    c = AES.new(encryptionsecret, AES.MODE_ECB)
+    clear = c.decrypt(base64.b64decode(oauth_access_token))
+    oauth_access_token, ip = clear.split(':')
+    return oauth_access_token, ip
+
