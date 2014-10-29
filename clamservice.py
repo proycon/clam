@@ -326,6 +326,7 @@ class RequireLogin(object):
                     #Decrypt access token
                     oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
                     if ip != web.ctx.env.get('REMOTE_ADDR', ''):
+                        printdebug("Access token not valid for IP, got " + ip + ", expected " + web.ctx.env.get('REMOTE_ADDR',''))
                         raise CustomForbidden("Access token not valid for this IP")
 
                     try:
