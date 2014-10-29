@@ -2406,6 +2406,8 @@ def set_defaults(HOST = None, PORT = None):
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128)
+    if not 'OAUTHOPAQUE' in settingkeys:
+        settings.OAUTHOPAQUE = "%032x" % random.getrandbits(128)
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     elif settings.ENABLEWEBAPP is False:
