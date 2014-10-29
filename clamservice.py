@@ -2550,7 +2550,7 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_TOKEN_URL not specified!")
         if not settings.OAUTH_USERNAME_FUNCTION:
             error("ERROR: OAUTH enabled but OAUTH_USERNAME_FUNCTION not specified!")
-        if not settings.OAUTH_ENCRYPTIONSECRET
+        if not settings.OAUTH_ENCRYPTIONSECRET:
             error("ERROR: OAUTH enabled but OAUTH_ENCRYPTIONSECRET not specified!")
 
         warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
