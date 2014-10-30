@@ -1,4 +1,4 @@
-$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, ghost, info, accesstoken, interfaceoptions, customhtml, oauth_access_token)
+$def with (version, system_id,system_name, system_description, user, project, url, statuscode,statusmessage,statuslog, completion, errors, errormsg, parameterdata, inputsources, outputpaths, inputpaths,profiles, datafile, projects, actions, ghost, info, accesstoken, interfaceoptions, customhtml, oauth_access_token)
 <?xml version="1.0" encoding="UTF-8" ?>
 $if info:
 	<?xml-stylesheet type="text/xsl" href="$url/static/info.xsl"?>
@@ -27,6 +27,11 @@ $if not project:
             $else:
                 <project xlink:type="simple" xlink:href="$url/$p" time="$time">$p</project>
         </projects>
+$if not project and actions:
+        <actions>
+        $for action in actions:
+            $:action.xml("")
+        </actions>
 $if not datafile and project:
         <status code="$statuscode" message="$statusmessage" completion="$completion" errors="$errors" errormsg="$errormsg">
         $if statuscode == 1 or statuscode == 2:

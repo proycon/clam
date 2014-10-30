@@ -526,7 +526,7 @@ class Index(object):
         defaultheaders()
 
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -553,7 +553,7 @@ class Info(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -972,7 +972,7 @@ class Project(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , None, settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -2597,6 +2597,9 @@ def set_defaults(HOST = None, PORT = None):
                 settings.CUSTOMHTML_PROJECTDONE = f.read()
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
+
+    if not 'ACTIONS' in settingkeys:
+        settings.ACTIONS = []
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')
