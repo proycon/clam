@@ -2031,6 +2031,48 @@ class InputSource(object):
         if not self.inputtemplate:
             raise Exception("Input source has no input template")
 
+
+class Action(object):
+    def __init__(self, *args, **kwargs):
+        if 'id' in kwargs:
+            self.id = kwargs['id']
+            del kwargs['id']
+        elif 'parameters' in kwargs:
+            assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in kwargs['parameters']  ])
+            self.parameters = kwargs['parameters']
+        elif args:
+            assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in args  ])
+            self.parameters = args
+        else:
+            raise Exception("No id specified for Action")
+
+    def xml(self, indent = ""):
+        xml = indent + "<action>\n"
+        for parameter in self.parameters:
+            xml += parameter.xml(indent+ "\t")
+        xml += indent + "</action>"
+        return xml
+
+    @staticmethod
+    def fromxml(node):
+        """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot()
+        assert(node.tag.lower() == 'action')
+
+        kwargs = {}
+        args = []
+
+        found = False
+        for subnode in node:
+            if subnode.tag.lower() == 'parametercondition':
+                kwargs[node.tag] = ParameterCondition.fromxml(subnode)
+            elif subnode.tag in vars(clam.common.parameters):
+                args.append(vars(clam.common.parameters)[subnode.tag].fromxml(subnode))
+        if not found:
+            raise Exception("No condition found in ParameterCondition!")
+        return Action(*args, **kwargs)
+
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
         #parameters are local
         if filename.find('$') != -1:
