@@ -2039,6 +2039,16 @@ class Action(object):
         else:
             raise Exception("No id specified for Action")
 
+        if 'name' in kwargs:
+            self.name = kwargs['name']
+        else:
+            self.name = self.id
+
+        if 'description' in kwargs:
+            self.description = kwargs['description']
+        else:
+            self.description = ""
+
         if 'command' in kwargs:
             self.command = kwargs['command']
         elif 'function' in kwargs:
