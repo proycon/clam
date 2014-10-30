@@ -2036,15 +2036,28 @@ class Action(object):
     def __init__(self, *args, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
-            del kwargs['id']
-        elif 'parameters' in kwargs:
+        else:
+            raise Exception("No id specified for Action")
+
+        if 'command' in kwargs:
+            self.command = kwargs['command']
+        else:
+            raise Exception("No command specified for Action")
+
+        if 'method' in kwargs:
+            self.method = kwargs['method']
+        else:
+            self.method = None #all methods
+
+        if 'parameters' in kwargs:
             assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in kwargs['parameters']  ])
             self.parameters = kwargs['parameters']
         elif args:
             assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in args  ])
             self.parameters = args
         else:
-            raise Exception("No id specified for Action")
+            self.parameters = []
+
 
     def xml(self, indent = ""):
         xml = indent + "<action>\n"
