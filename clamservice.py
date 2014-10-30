@@ -2158,9 +2158,21 @@ class ActionHandler(object):
         return self.do(action_id, 'GET', user, oauth_access_token)
 
 
+    @RequireLogin(ghost=GHOST)
+    def POST(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'POST', user, oauth_access_token)
 
 
+    @RequireLogin(ghost=GHOST)
+    def PUT(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'PUT', user, oauth_access_token)
 
+    @RequireLogin(ghost=GHOST)
+    def DELETE(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'DELETE', user, oauth_access_token)
 
 
 
