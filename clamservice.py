@@ -2101,50 +2101,55 @@ class ActionHandler(object):
     def do(self, action_id, method, user=None, oauth_access_token=None):
         action = self.find_action(action_id, 'GET')
 
-        parameters = ""
-        for flag, value in self.collect_parameters(action):
-            if parameters: parameters += " "
-            if flag: parameters += flag + " "
-            if value: parameters += clam.common.data.shellsafe(value,'"')
-
-
         userdir =  settings.ROOT + "projects/" + user + '/'
 
-        cmd = settings.COMMAND
-        cmd = cmd.replace('$PARAMETERS', parameters)
-        cmd = cmd.replace('$USERNAME',user if user else "anonymous")
-        cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
-        #everything should be shell-safe now
+        if action.command:
+            parameters = ""
+            for flag, value in self.collect_parameters(action):
+                if parameters: parameters += " "
+                if flag: parameters += flag + " "
+                if value: parameters += clam.common.data.shellsafe(value,'"')
 
-        #run the action
-        pythonpath = ''
-        try:
-            pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
-        except:
-            pass
-        if pythonpath:
-            pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
-        else:
-            pythonpath = os.path.dirname(settings.__file__)
+            cmd = action.command
+            cmd = cmd.replace('$PARAMETERS', parameters)
+            cmd = cmd.replace('$USERNAME',user if user else "anonymous")
+            cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
+            #everything should be shell-safe now
 
-        cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
-        if settings.REMOTEHOST:
-            if settings.REMOTEUSER:
-                cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+            #run the action
+            pythonpath = ''
+            try:
+                pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
+            except:
+                pass
+            if pythonpath:
+                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
             else:
-                cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
-        printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
-        process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if process:
-            printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
-            stdoutdata, stderrdata = process.communicate()
-            if process.returncode != 0:
-                raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
+                pythonpath = os.path.dirname(settings.__file__)
+
+            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
+            if settings.REMOTEHOST:
+                if settings.REMOTEUSER:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+                else:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
+            printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
+            process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if process:
+                printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
+                stdoutdata, stderrdata = process.communicate()
+                if process.returncode != 0:
+                    raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
+                else:
+                    web.header('Content-Type', action.mimetype)
+                    return stdoutdata #200
             else:
-                web.header('Content-Type', action.mimetype)
-                return stdoutdata
-        else:
-            raise web.webapi.InternalError("Unable to launch process")
+                raise web.webapi.InternalError("Unable to launch process")
+        elif action.function:
+            args = [ x[1] for x in  self.collect_parameters(action) ]
+            web.header('Content-Type', action.mimetype)
+            return action.function(*args) #200
+
 
 
     @RequireLogin(ghost=GHOST)
