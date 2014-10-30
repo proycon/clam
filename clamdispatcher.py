@@ -54,8 +54,11 @@ def main():
 
     settingsmodule = sys.argv[1+offset]
     projectdir = sys.argv[2+offset]
-    if projectdir[-1] != '/':
-        projectdir += '/'
+    if projectdir == 'NONE': #Used for actions
+        projectdir = None
+    else:
+        if projectdir[-1] != '/':
+            projectdir += '/'
 
     cmd = " ".join(sys.argv[3+offset:])
 
@@ -63,12 +66,13 @@ def main():
 
     if not cmd:
         print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: No command specified!"
-        f = open(projectdir + '.done','w')
-        f.write(str(1))
-        f.close()
-        if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
+        if projectdir:
+            f = open(projectdir + '.done','w')
+            f.write(str(1))
+            f.close()
+            if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
-    elif not os.path.isdir(projectdir):
+    elif projectdir and not os.path.isdir(projectdir):
         print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist"
         f = open(projectdir + '.done','w')
         f.write(str(1))
@@ -81,9 +85,10 @@ def main():
     except ImportError as e:
         print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e)
         print >>sys.stderr, "[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)"
-        f = open(projectdir + '.done','w')
-        f.write(str(1))
-        f.close()
+        if projectdir:
+            f = open(projectdir + '.done','w')
+            f.write(str(1))
+            f.close()
         return 1
 
     settingkeys = dir(settings)
@@ -96,21 +101,26 @@ def main():
 
     print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
 
-    process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
+    if projectdir:
+        process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
+    else:
+        process = subprocess.Popen(cmd, shell=True, stderr=sys.stderr)
     begintime = datetime.datetime.now()
     if process:
         pid = process.pid
         print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")"
         sys.stderr.flush()
-        f = open(projectdir + '.pid','w')
-        f.write(str(pid))
-        f.close()
+        if projectdir:
+            f = open(projectdir + '.pid','w')
+            f.write(str(pid))
+            f.close()
     else:
         print >>sys.stderr, "[CLAM Dispatcher] Unable to launch process"
         sys.stderr.flush()
-        f = open(projectdir + '.done','w')
-        f.write(str(1))
-        f.close()
+        if projectdir:
+            f = open(projectdir + '.done','w')
+            f.write(str(1))
+            f.close()
         return 1
 
     #intervalf = lambda s: min(s/10.0, 15)
@@ -139,7 +149,7 @@ def main():
         abortchecktime += d
         if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
             abortchecktime = 0
-            if os.path.exists(projectdir + '.abort'):
+            if projectdir and os.path.exists(projectdir + '.abort'):
                 abort = True
             if abort:
                 print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)"
@@ -150,7 +160,8 @@ def main():
                     if running:
                         idle += 0.2
                         time.sleep(0.2)
-                os.unlink(projectdir + '.abort')
+                if projectdir:
+                    os.unlink(projectdir + '.abort')
                 break
         if d <= 1:
             idle += 0.05
@@ -178,10 +189,11 @@ def main():
             abort = True
             statuscode = 3
 
-    f = open(projectdir + '.done','w')
-    f.write(str(statuscode))
-    f.close()
-    if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
+    if projectdir:
+        f = open(projectdir + '.done','w')
+        f.write(str(statuscode))
+        f.close()
+        if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
     d = total_seconds(datetime.datetime.now() - begintime)
     print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s"

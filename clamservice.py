@@ -365,6 +365,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
+        settings.STANDALONEURLPREFIX + '/actions/([A-Za-z0-9_]*)/?', 'ActionHandler',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/status/?', 'Status', #returns status information in JSON, for web interface
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
@@ -2069,6 +2070,93 @@ class Status(object):
 
         statuscode, statusmsg, statuslog, completion = Project.status(project,user)
         return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
+
+class ActionHandler(object):
+    GHOST = False
+
+    def find_action(self, action_id, method):
+        for action in settings.ACTIONS:
+            if action.id == action.id and (not action.method or method == action.method):
+                return action
+        raise web.api.NotFound("Action does not exist")
+
+    def collect_parameters(self,action):
+        data = web.input()
+        params = []
+        for parameter in action.parameters:
+            if not parameter.id in data:
+                raise CustomForbidden("Missing parameter: " + parameter.id)
+            else:
+                if parameter.paramflag:
+                    flag = parameter.paramflag
+                else:
+                    flag = None
+                if parameter.validate(data[parameter.id]):
+                    raise CustomForbidden("Invalid value for parameter " + parameter.id)
+                else:
+                    params.append( ( flag,data[parameter.id]) )
+        return params
+
+
+    def do(self, action_id, method, user=None, oauth_access_token=None):
+        action = self.find_action(action_id, 'GET')
+
+        parameters = ""
+        for flag, value in self.collect_parameters(action):
+            if parameters: parameters += " "
+            if flag: parameters += flag + " "
+            if value: parameters += clam.common.data.shellsafe(value,'"')
+
+
+        userdir =  settings.ROOT + "projects/" + user + '/'
+
+        cmd = settings.COMMAND
+        cmd = cmd.replace('$PARAMETERS', parameters)
+        cmd = cmd.replace('$USERNAME',user if user else "anonymous")
+        cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
+        #everything should be shell-safe now
+
+        #run the action
+        pythonpath = ''
+        try:
+            pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
+        except:
+            pass
+        if pythonpath:
+            pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
+        else:
+            pythonpath = os.path.dirname(settings.__file__)
+
+        cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
+        if settings.REMOTEHOST:
+            if settings.REMOTEUSER:
+                cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+            else:
+                cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
+        printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
+        process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if process:
+            printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
+            stdoutdata, stderrdata = process.communicate()
+            if process.returncode != 0:
+                raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
+            else:
+                web.header('Content-Type', action.mimetype)
+                return stdoutdata
+        else:
+            raise web.webapi.InternalError("Unable to launch process")
+
+
+    @RequireLogin(ghost=GHOST)
+    def GET(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'GET', user, oauth_access_token)
+
+
+
+
+
+
 
 
 

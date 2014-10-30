@@ -2059,6 +2059,12 @@ class Action(object):
             self.parameters = []
 
 
+        if 'mimetype' in kwargs:
+            self.mimetype = kwargs['mimetype']
+        else:
+            self.mimetype = "text/plain"
+
+
     def xml(self, indent = ""):
         xml = indent + "<action>\n"
         for parameter in self.parameters:
