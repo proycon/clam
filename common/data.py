@@ -2051,7 +2051,9 @@ class Action(object):
 
         if 'command' in kwargs:
             self.command = kwargs['command']
+            self.function = None
         elif 'function' in kwargs:
+            self.command = None
             self.function = kwargs['function']
         else:
             raise Exception("No command or function specified for Action")
