@@ -28,7 +28,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.9
+REQUIRE_VERSION = "0.9.11"
 
 # ======== GENERAL INFORMATION ===========
 
