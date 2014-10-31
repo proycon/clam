@@ -28,8 +28,10 @@
     	 
          <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
     	 </p>
-    	 
-    
+
+         <xsl:if test="count(/clam/profiles/profile) > 0">
+
+         <h4>Project Paradigm</h4>
     	  
     	 <ol>
     		<li><strong>Create a <em>project</em></strong> - Issue a <tt>HTTP PUT</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em></tt>
@@ -115,7 +117,34 @@
     			</ul>
 			</li>
     	 </ol>
-    	 
+         
+        </xsl:if>
+        <xsl:if test="count(/clam/actions/action) > 0">
+
+        <h4>Actions</h4>
+
+        <ul>
+        <xsl:for-each select="/clam/actions/action">
+          <li><tt><xsl:value-of select="{/clam/@baseurl}/actions/{@id}/"></tt> -- <strong><xsl:value-of select="@name" /></strong><br />
+              <emph><xsl:value-of select="@description" /></emph><br />
+              <xsl:choose>
+              <xsl:when test="@method"> 
+                Method: <tt><xsl:value-of select="@method" /></tt><br />
+              </xsl:when>
+              <xsl:otherwise>
+                Methods: <tt>GET</tt>, <tt>POST</tt><br />
+              </xsl:otherwise>
+              </xsl:choose>
+              Returns: <tt><xsl:value-of select="mimetype" /></tt><br />Parameters:<br />
+              <ol>
+              <xsl:apply-templates />
+              </ol>
+          </li>
+        </xsl:for-each>
+        </ul>
+
+
+        </xsl:if>
     	  
     	</div>
     	
@@ -264,7 +293,7 @@ clamclient.delete(project)
     <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://clst.ru.nl">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
 
 <span class="extracredits">
-<strong>CLAM</strong> is funded under <a href="http://www.clarin.nl/">CLARIN-NL</a> projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
+<strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and started under the projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
 </span>
 </div>
 
