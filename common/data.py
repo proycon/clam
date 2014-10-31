@@ -2081,10 +2081,14 @@ class Action(object):
 
 
     def xml(self, indent = ""):
-        xml = indent + "<action>\n"
+        if self.method:
+            method = "method=\"" + self.method + "\""
+        else:
+            method = ""
+        xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" >\n"
         for parameter in self.parameters:
-            xml += parameter.xml(indent+ "\t")
-        xml += indent + "</action>"
+            xml += parameter.xml(indent+ "\t") + "\n"
+        xml += indent + "</action>\n"
         return xml
 
     @staticmethod

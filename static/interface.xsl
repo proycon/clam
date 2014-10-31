@@ -595,6 +595,33 @@
           </tbody>
         </table>
         </div>
+
+        <xsl:if test="count(/clam/actions/action) > 0">
+            <div id="actions" class="box">
+                <h2>Actions</h2>
+                <xsl:for-each select="/clam/actions/action">
+                    <h3><xsl:value-of select="./@name" /></h3>
+                    <p><xsl:value-of select="./@description" /></p>
+                    <form action="{/clam/@baseurl}/actions/{./@id}/">
+                        <xsl:choose>
+                            <xsl:when test="./@method = 'POST'">
+                                <xsl:attribute name="method">POST</xsl:attribute>
+                                <xsl:attribute name="enctype">multipart/form-data</xsl:attribute>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:attribute name="method">GET</xsl:attribute>
+                                <xsl:attribute name="enctype">application/x-www-form-urlencoded</xsl:attribute>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <table>
+                            <xsl:apply-templates />
+                        </table>
+                        <input type="submit" class="submitaction" value="Submit" />
+                    </form>
+                </xsl:for-each>
+            </div>
+        </xsl:if>
+
 </xsl:template>
 
 </xsl:stylesheet>
