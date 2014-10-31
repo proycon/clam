@@ -2095,7 +2095,8 @@ return \texttt{HTTP 303 - See Other} and redirect to the authentication
 provider. At this stage, user input may be required, stopping automated
 clients. After the user input, or if no user input is required, the
 authorization provider should relay the user back to a special CLAM login page with another
-\texttt{HTTP 303}. See the section on OAuth2 authentication for more details.
+\texttt{HTTP 303}. This implies the client should then redo the request with
+the proper access token. See the section on OAuth2 authentication for more details.
 
 
 %\chapter{Predefined Formats}
