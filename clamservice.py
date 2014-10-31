@@ -2097,7 +2097,7 @@ class ActionHandler(object):
                 if not parameter.set(data[parameter.id]):
                     raise CustomForbidden("Invalid value for parameter " + parameter.id + ": " + parameter.error)
                 else:
-                    params.append( ( flag, data[parameter.id]) )
+                    params.append( ( flag, parameter.value) )
         return params
 
 
