@@ -2094,10 +2094,10 @@ class ActionHandler(object):
                     flag = parameter.paramflag
                 else:
                     flag = None
-                if parameter.validate(data[parameter.id]):
-                    raise CustomForbidden("Invalid value for parameter " + parameter.id)
+                if not parameter.set(data[parameter.id]):
+                    raise CustomForbidden("Invalid value for parameter " + parameter.id + ": " + parameter.error)
                 else:
-                    params.append( ( flag,data[parameter.id]) )
+                    params.append( ( flag, data[parameter.id]) )
         return params
 
 
@@ -2111,6 +2111,11 @@ class ActionHandler(object):
             for flag, value in self.collect_parameters(action):
                 if parameters: parameters += " "
                 if flag: parameters += flag + " "
+
+                if isinstance(value, unicode):
+                    value = value.encode('utf-8')
+                elif not isinstance(value, str):
+                    value = str(value)
                 if value: parameters += clam.common.data.shellsafe(value,'"')
 
             cmd = action.command
