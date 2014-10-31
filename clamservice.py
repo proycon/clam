@@ -2165,7 +2165,7 @@ class ActionHandler(object):
             try:
                 r = action.function(*args) #200
             except Exception as e:
-                if isinstance(e, web.api.HTTPError):
+                if isinstance(e, web.webapi.HTTPError):
                     raise
                 else:
                     raise web.webapi.InternalError(str(e))
