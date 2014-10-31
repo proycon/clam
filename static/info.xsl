@@ -127,7 +127,7 @@
 
         <ul>
         <xsl:for-each select="/clam/actions/action">
-          <li><tt><xsl:value-of select="{/clam/@baseurl}/actions/{@id}/"></tt> -- <strong><xsl:value-of select="@name" /></strong><br />
+          <li><tt><xsl:value-of select="/clam/@baseurl" />/actions/<xsl:value-of select="@id" />/</tt> -- <strong><xsl:value-of select="@name" /></strong><br />
               <emph><xsl:value-of select="@description" /></emph><br />
               <xsl:choose>
               <xsl:when test="@method"> 
