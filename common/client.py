@@ -193,6 +193,7 @@ class CLAMClient:
 
 
     def action(self, id, **kwargs):
+        """Query an action, specify the parameters for the action as keyword parameters. An optional keyword parameter method='GET' (default) or method='POST' can be set."""
         if 'method' in kwargs:
             method = kwargs['method']
             del kwargs['method']
@@ -200,10 +201,6 @@ class CLAMClient:
             method = 'GET'
 
         return self.request('/actions/' + id, method, urlencode(kwargs))
-
-
-
-
 
 
 
