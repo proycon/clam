@@ -123,6 +123,8 @@
 
         <h4>Actions</h4>
 
+        <p>Actions are simple remote procedure calls that can be executed in real-time, they will return HTTP 200 on success with a response fitting the specified MIME type. On fatal server-side errors, they may return <tt>HTTP 500 Server Error</tt> with an error message. Other HTTP errors may be returned, but this is customly defined by underlying function, rather than CLAM itself.</p>
+
         <ul>
         <xsl:for-each select="/clam/actions/action">
           <li><tt><xsl:value-of select="{/clam/@baseurl}/actions/{@id}/"></tt> -- <strong><xsl:value-of select="@name" /></strong><br />
