@@ -120,6 +120,8 @@ CUSTOM_FORMATS_MODULE = None
 
 # ======== PROFILE DEFINITIONS ===========
 
+#Define your profiles here. This is required for the project paradigm, but can be set to an empty list if you only use the action paradigm.
+
 PROFILES = [
     Profile(
         InputTemplate('replace-with-a-unique-identifier', PlainTextFormat,"Replace with human label for this input template",
@@ -146,7 +148,8 @@ PROFILES = [
 
 # ======== COMMAND ===========
 
-#The system command. It is recommended you set this to small wrapper
+#The system command for the project paradigm.
+#It is recommended you set this to small wrapper
 #script around your actual system. Full shell syntax is supported. Using
 #absolute paths is preferred. The current working directory will be
 #set to the project directory.
@@ -166,9 +169,13 @@ PROFILES = [
 #
 COMMAND = sys.path[0] + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
+#COMMAND = None   #Set to none if you only use the action paradigm
+
 # ======== PARAMETER DEFINITIONS ===========
 
-#The parameters are subdivided into several groups. In the form of a list of (groupname, parameters) tuples. The parameters are a list of instances from common/parameters.py
+#The global parameters (for the project paradigm) are subdivided into several
+#groups. In the form of a list of (groupname, parameters) tuples. The parameters
+#are a list of instances from common/parameters.py
 
 PARAMETERS =  [
     ('Group title', [
@@ -178,6 +185,19 @@ PARAMETERS =  [
     ] )
 ]
 
+
+# ======= ACTIONS =============
+
+#The action paradigm is an independent Remote-Procedure-Call mechanism that
+#allows you to tie scripts (command=) or Python functions (function=) to URLs.
+#It has no notion of projects or files and must respond in real-time. The syntax
+#for commands is equal to those of COMMAND above, any file or project specific
+#variables are not available though, so there is no $DATAFILE, $STATUSFILE, $INPUTDIRECTORY, $OUTPUTDIRECTORY or $PROJECT.
+
+ACTIONS = [
+    #Action(id='multiply',name='Multiply',parameters=[IntegerParameter(id='x',name='Value'),IntegerParameter(id='y',name='Multiplier'), command=sys.path[0] + "/actions/multiply.sh $PARAMETERS" ])
+    #Action(id='multiply',name='Multiply',parameters=[IntegerParameter(id='x',name='Value'),IntegerParameter(id='y',name='Multiplier'), function=lambda x,y: x*y ])
+]
 
 
 # ======== DISPATCHING (ADVANCED! YOU CAN SAFELY SKIP THIS!) ========

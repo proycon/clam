@@ -2156,13 +2156,20 @@ class ActionHandler(object):
                     web.header('Content-Type', action.mimetype)
                     raise web.webapi.NotFound(stdoutdata)
                 else:
-                    raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
+                    raise web.webapi.InternalError("Process for action " +  action_id + " failed\n" + stderrdata)
             else:
                 raise web.webapi.InternalError("Unable to launch process")
         elif action.function:
             args = [ x[1] for x in  self.collect_parameters(action) ]
             web.header('Content-Type', action.mimetype)
-            return action.function(*args) #200
+            try:
+                r = action.function(*args) #200
+            except Exception as e:
+                if isinstance(e, web.api.HTTPError):
+                    raise
+                else:
+                    raise web.webapi.InternalError(str(e))
+            return r
         else:
             raise Exception("No command or function defined for action " + action_id)
 
