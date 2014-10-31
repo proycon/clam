@@ -599,7 +599,7 @@
         </xsl:if>
 
         <xsl:if test="count(/clam/actions/action) > 0">
-            <div id="actionindex" class="box">
+            <div id="actionindex" class="box parameters">
                 <h2>Actions</h2>
                 <xsl:for-each select="/clam/actions/action">
                     <h3><xsl:value-of select="./@name" /></h3>
