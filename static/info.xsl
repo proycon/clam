@@ -170,6 +170,10 @@
 <em>#the latter two arguments are required for authenticated webservices, they can be omitted otherwise</em>
 clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
 
+
+
+<xsl:if test="count(/clam/profiles/profile) > 0">
+
 <em>#Set a project name (it is recommended to include a sufficiently random naming component here, to allow for concurrent uses of the same client)</em>
 project = "projectname" + str(random.getrandbits(64))
 
@@ -262,6 +266,15 @@ data = clamclient.start(project)
 
 <em>#delete the project (otherwise it would remain on server and clients would leave a mess)</em>
 clamclient.delete(project)
+
+</xsl:if>
+
+
+<xsl:if test="count(/clam/actions/action) > 0">
+<em>#A fictitious sample showing how to use the actions:</em>
+result = clamclient.action('someaction', someparameter='blah',otherparameter=42, method='GET')
+</xsl:if>
+
 </pre>
     	</div>
     	
