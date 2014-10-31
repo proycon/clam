@@ -2149,6 +2149,8 @@ class ActionHandler(object):
             args = [ x[1] for x in  self.collect_parameters(action) ]
             web.header('Content-Type', action.mimetype)
             return action.function(*args) #200
+        else:
+            raise Exception("No command or function defined for action " + action_id)
 
 
 

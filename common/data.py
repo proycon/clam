@@ -2056,7 +2056,7 @@ class Action(object):
             self.command = None
             self.function = kwargs['function']
         else:
-            raise Exception("No command or function specified for Action")
+            self.command = self.function = None #action won't be able to do anything!
 
 
         if 'method' in kwargs:
@@ -2100,6 +2100,16 @@ class Action(object):
 
         kwargs = {}
         args = []
+        if 'id' in node.attrib:
+            kwargs['id'] = node.attrib['id']
+        elif 'name' in node.attrib:
+            kwargs['name'] = node.attrib['name']
+        elif 'description' in node.attrib:
+            kwargs['description'] = node.attrib['description']
+        elif 'method' in node.attrib:
+            kwargs['method'] = node.attrib['method']
+        elif 'mimetype' in node.attrib:
+            kwargs['mimetype'] = node.attrib['mimetype']
 
         found = False
         for subnode in node:
