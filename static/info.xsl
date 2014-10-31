@@ -14,7 +14,7 @@
     	<div class="box">
     	 <h3>Introduction</h3>
     	 <p>
-    	 This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="http://ilk.uvt.nl/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="http://ilk.uvt.nl/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
+           This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="https://proycon.github.io/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="https://proycon.github.io/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
     	 </p>
 		</div>
 
@@ -26,7 +26,7 @@
         <div id="restspec" class="box">
     	 <h3>RESTful Specification</h3>
     	 
-    	 <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="http://ilk.uvt.nl/clam/">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
+         <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
     	 </p>
     	 
     
@@ -261,7 +261,7 @@ clamclient.delete(project)
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://clst.ru.nl">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
 
 <span class="extracredits">
 <strong>CLAM</strong> is funded under <a href="http://www.clarin.nl/">CLARIN-NL</a> projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.

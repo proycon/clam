@@ -185,7 +185,7 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://cls.ru.nl">Centre for Language Studies</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
 
 <span class="extracredits">
 <strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and started under the projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
