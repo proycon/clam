@@ -2146,11 +2146,17 @@ class ActionHandler(object):
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
-                if process.returncode != 0:
-                    raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
-                else:
+                if process.returncode in action.returncodes200:
                     web.header('Content-Type', action.mimetype)
                     return stdoutdata #200
+                elif process.returncode in action.returncodes403:
+                    web.header('Content-Type', action.mimetype)
+                    raise CustomForbidden(stdoutdata)
+                elif process.returncode in action.returncodes404:
+                    web.header('Content-Type', action.mimetype)
+                    raise web.webapi.NotFound(stdoutdata)
+                else:
+                    raise CustomForbidden("Process for action " +  action_id + " failed\n" + stderrdata)
             else:
                 raise web.webapi.InternalError("Unable to launch process")
         elif action.function:

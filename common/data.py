@@ -2079,6 +2079,21 @@ class Action(object):
         else:
             self.mimetype = "text/plain"
 
+        if 'returncodes404' in kwargs:
+            self.returncodes404 = kwargs['returncodes404']
+        else:
+            self.returncodes404 = [4]
+
+        if 'returncodes403' in kwargs:
+            self.returncodes403 = kwargs['returncodes403']
+        else:
+            self.returncodes403 = [3]
+
+        if 'returncodes200' in kwargs:
+            self.returncodes200 = kwargs['returncodes200']
+        else:
+            self.returncodes200 = [0]
+
 
     def xml(self, indent = ""):
         if self.method:
