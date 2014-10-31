@@ -384,17 +384,13 @@ class CLAMService(object):
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             error("Specified root path " + settings.ROOT + " not found")
-        elif not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0]):
+        elif settings.COMMAND and (not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0])):
             error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
-        elif not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
+        elif settings.COMMAND and not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
             if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
                settings.COMMAND = sys.executable + " " + settings.COMMAND
             else:
                 error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
-        elif not settings.PROFILES:
-            error("No profiles were defined in settings module!")
-        elif not settings.PARAMETERS:
-            warning("No parameters defined in settings module!")
         else:
             lastparameter = None
             try:
@@ -459,6 +455,9 @@ class Login(object):
         return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), oauth_encrypt(d['access_token']))
 
 def oauth_encrypt(oauth_access_token):
+    if not oauth_access_token:
+        return None #no oauth
+    else:
         return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, web.ctx.env.get('REMOTE_ADDR',''))
 
 class Logout(object):
@@ -711,6 +710,10 @@ class Project(object):
     @staticmethod
     def create(project, user):
         """Create project skeleton if it does not already exist (static method)"""
+
+        if not settings.COMMAND:
+            raise web.webapi.NotFound("Projects disabled, no command configured")
+
         user, oauth_access_token = validateuser(user)
         if not Project.validate(project):
             raise CustomForbidden('Invalid project ID')
