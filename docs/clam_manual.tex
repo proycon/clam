@@ -2076,6 +2076,20 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 
 \medskip
 
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/actions/[action\_id]/} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
+\hline
+\textbf{Method} & \texttt{GET} and/or \texttt{POST}, may be constrained by the action \\
+\textbf{Querystring} & Determined by the action  \\
+\textbf{Response} & \texttt{200 - OK} \& Result data determined by the action, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & This is a remote procedure call to run the specified
+action and obtain the results. The parameters are specific to the action. \\ 
+\hline
+\end{supertabular}
+
 If OAuth authentication is enabled and no access token is passed, almost all URLs
 return \texttt{HTTP 303 - See Other} and redirect to the authentication
 provider. At this stage, user input may be required, stopping automated
