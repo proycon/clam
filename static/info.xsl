@@ -127,7 +127,7 @@
 
         <ul>
         <xsl:for-each select="/clam/actions/action">
-          <li><tt><xsl:value-of select="/clam/@baseurl" />/actions/<xsl:value-of select="@id" />/</tt> -- <strong><xsl:value-of select="@name" /></strong><br />
+          <li><strong><xsl:value-of select="@name" /></strong> -- <tt><xsl:value-of select="/clam/@baseurl" />/actions/<xsl:value-of select="@id" />/</tt><br />
               <emph><xsl:value-of select="@description" /></emph><br />
               <xsl:choose>
               <xsl:when test="@method"> 
@@ -137,7 +137,7 @@
                 Methods: <tt>GET</tt>, <tt>POST</tt><br />
               </xsl:otherwise>
               </xsl:choose>
-              Returns: <tt><xsl:value-of select="mimetype" /></tt><br />Parameters:<br />
+              Returns: <tt><xsl:value-of select="@mimetype" /></tt><br />Parameters:<br />
               <ol>
               <xsl:apply-templates />
               </ol>
