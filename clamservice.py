@@ -407,7 +407,7 @@ class CLAMService(object):
         self.service = web.application(self.urls, globals())
         self.service.internalerror = web.debugerror
         self.mode = mode
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/')
+        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
         if settings.FORCEURL:
             printlog("Access using forced URL: " + settings.FORCEURL)
         if mode == 'fastcgi':
