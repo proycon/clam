@@ -169,7 +169,7 @@ def main():
 
     print >>sys.stderr, "All of this information can be read in the " + dir + "/INSTRUCTIONS file"
 
-    with open(dir + "/INSTRUCTIONS") as f:
+    with open(dir + "/INSTRUCTIONS",'w') as f:
         f.write(s + s2)
 
 
