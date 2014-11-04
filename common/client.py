@@ -132,7 +132,7 @@ class CLAMClient:
     def request(self, url='', method = 'GET', data = None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
-        if self.authenticated: self.initauth()
+        if self.authenticated or self.oauth: self.initauth()
         if data:
             request = RequestWithMethod(self.url + url,data,method=method)
         else:
@@ -207,6 +207,19 @@ class CLAMClient:
            client.create("myprojectname")
         """
         return self.request(project + '/', 'PUT')
+
+
+
+    def action(self, id, **kwargs):
+        """Query an action, specify the parameters for the action as keyword parameters. An optional keyword parameter method='GET' (default) or method='POST' can be set."""
+        if 'method' in kwargs:
+            method = kwargs['method']
+            del kwargs['method']
+        else:
+            method = 'GET'
+
+        return self.request('/actions/' + id, method, urlencode(kwargs))
+
 
 
     def start(self, project, **parameters):

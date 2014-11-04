@@ -101,11 +101,13 @@ GET, POST, PUT and DELETE to manipulate resources and returns responses using
 the HTTP response codes and XML. The principal resource in CLAM is called a
 \emph{project}. Various users can maintain various projects, each representing
 one specific run of the system, with particular input data, output data, and a
-set of configured parameters.
+set of configured parameters. The projects and all data is stored on the
+server.
 
 The webservice responds in the CLAM XML format. An associated XSL stylesheet
 \citep{XSLT} can directly transform this to xhtml in the user's browser, thus
 providing a standalone web application for human end-users. 
+
 
 CLAM comes with an ample number of features, the most notable ones being:
 
@@ -120,6 +122,13 @@ CLAM comes with an ample number of features, the most notable ones being:
 \item \textbf{Metadata and provenance data} -- \emph{There is extensive support for metadata and provenance data}
 \item \textbf{Automatic converters} -- \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
 \item \textbf{Viewers} -- \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
+\item \textbf{Predefined datasets} -- \emph{Service providers may optionally predefine datasets, such as large corpora} 
+\item \textbf{Batch Processing} -- \emph{CLAM's default project paradigm is ideally suited for
+  batch-processing and the processing of large files. The background process
+  may run for an undefined period}
+\item \textbf{Actions} -- \emph{CLAM's action paradigm is a remote procedure
+  call mechanism in which you make available actions (any script/program or Python
+  function) on specific URLs}.
 \end{itemize}
 
 In publication of research that makes use of this software, a citation should
@@ -505,7 +514,23 @@ layers:
 \label{fig:arch} 
 \end{figure}
 
+
 The workflow interface layer is not provided nor necessary, but shows a possible use-case.
+
+CLAM presents two different paradigms for wrapping your script or application.
+The second is a new addition since CLAM 0.9.11 . You may use either or both at
+the same time.
+
+\begin{enumerate}
+  \item \textbf{Project Paradigm} -- Users create projects, upload files with
+    optional parameters to those projects, and subsequently start the project,
+    optionally passing global parameters to the system. The system may run for
+    a long time and may do batch-processing on multiple input files. 
+  \item \textbf{Action Paradigm} -- This is a more limited, and simple
+    remote-procedure call mechanism. Users interact in real-time with the service on
+    specific URLs, passing parameters. Unlike the project paradigm, this is not
+    suitable for complex operations on big-data.
+\end{enumerate}
 
 A CLAM webservice needs the following three components from the service developer:
 
@@ -521,6 +546,9 @@ wrapper script is strongly recommended, as it offers more flexibility and
 better integration, and allows you to keep the actual application
 unmodified. The wrapper scripts can be seen as the ``glue'' between CLAM and
 your application, taking care of any translation steps.
+
+Note that wrapper scripts in the action paradigm are more constrained,  and
+there may be multiple wrapper scripts for different actions.
 
 \section{Beginning a new CLAM project}
 
@@ -550,7 +578,8 @@ edit and  how to start the clam service for your specific project.
 
 You can choose not to make use of the system wrapper script and instead either
 write one from scratch in another language of your choice, or directly let CLAM
-invoke your application.
+invoke your application. Moreover, this generated wrapper script is intended for the
+project paradigm, not the action paradigm.
 
 The next section will provide a detailed overview on the various ways to
 configure the service configuration file, and the section thereafter will deal
@@ -944,10 +973,10 @@ and NLP tool are of course free to use any other locations on the filesystem
 for whatever other purposes.
 
 
-\subsection{Paradigm: Metadata, Profiles \& Parameters}
+\subsection{Project Paradigm: Metadata, Profiles \& Parameters}
 
 In order to explain how to build service configuration files for the tools you
-want to make into webservices, we first need to clarify the paradigm CLAM uses.
+want to make into webservices, we first need to clarify the project paradigm CLAM uses.
 We shall start with a word about metadata. Metadata is data \emph{about}\/ your
 data, i.e. data about your input and output files. Take the example of a plain
 text file: metadata for such a file can be for example the character encoding
@@ -1026,9 +1055,10 @@ section.
 \subsection{Parameter Specification}
 \label{sec:parameters}
 
-The parameters which an NLP application, or rather the wrapper script, can
-take, are defined in the service configuration. First of all parameters can be
-subdivided into parameter groups, but these serve only presentational purposes. 
+The global parameters which an NLP application, or rather the wrapper script,
+can take, are defined in the service configuration file. These parameters can
+be subdivided into parameter groups, but these serve only presentational
+purposes. 
 
 There are seven parameter types available, though custom types can be easily
 added\footnote{to \texttt{common/parameters.py}}. Each parameter type is a
@@ -1538,6 +1568,7 @@ the full input template, with the same ID as in the other profile. The most
 elegant solution however, is to instantiate the input template in a variable,
 prior to the profile definition, and then use this variable in both profiles.
 
+
 \subsection{Customising the web application}
 
 The CLAM web application offers a single uniform interface for all kinds of
@@ -1578,6 +1609,112 @@ web-interface:
 \item \texttt{disableliveinput} -- Disables adding input through the live in-browser editor. 
 \end{itemize}
 
+
+
+\subsection{Actions}
+
+Since CLAM 0.9.11, a simple remote procedure call mechanism is available in
+addition to the more elaborate project paradigm. 
+
+This action paradigm allows you to specify \emph{actions}, each action allows
+you to tie a URL to a script or Python function, and may take a number of
+parameters you explicitly specify. Each action is strictly independent of other
+actions, and complete separate of the projects, and by extension also of any
+files within projects and any profiles. Unlike projects, which may run over a
+long time period and are suited for batch processing, actions are intended for
+real-time communication. Typically they should return an answer in at most a
+couple of seconds.
+
+Actions are specified in the service configuration file in the \texttt{ACTIONS}
+list. Consider the following example:
+
+
+\begin{verbatim}
+ACTIONS = [
+  Action(id='multiply',name="Multiplier",description="Multiply two
+  numbers",command="/path/to/multiply.sh $PARAMETERS",mimetype="text/plain",
+  parameters=[
+    IntegerParameter(id='x',name="Value 1"),
+    IntegerParameter(id='y',name="Value 2"),
+  ])
+]
+\end{verbatim}
+
+The ID of the action determines on what URL it listens. In this case the URL
+will be \texttt{/actions/multiply/}, relative to the root of your service. The
+name and display are for presentational purposes in the interface.
+
+Actions will show in the web-application interface on the index page.
+
+In this example, we specify two parameters, they will be passed \emph{in the
+order they are defined} to the script. The command to be called is configured
+analagous to \texttt{COMMAND}, but only a subset of the variables are
+supported. The most prominent is the \texttt{\$PARAMETERS} variable. Note that
+you can set \texttt{paramflag} on the parameters to pass them with an option
+flag. String parameters with spaces will work without problem\footnote{Do note that
+shells have a maximum length of all parameters combined}. Actions do not have
+the notion of the CLAM XML datafile that wrapper scripts in the project
+paradigm can use, so passing command-line parameters is the only way here.
+
+It may, however, not even be necessary to invoke an external script. Actions
+support calling Python functions directly. Consider the following trivial Python
+function for multiplication:
+
+\begin{verbatim}
+def multiply(a,b):
+  return a * b
+\end{verbatim}
+
+You can define functions in the service configuration file itself, or import it
+from elsewhere. We can now use this as an action directly:
+
+\begin{verbatim}
+ACTIONS = [
+  Action(id='multiply',name="Multiplier",description="Multiply two
+  numbers",function=multiply,mimetype="text/plain"
+  parameters=[
+    IntegerParameter(id='x',name="Value 1"),
+    IntegerParameter(id='y',name="Value 2"),
+  ])
+]
+\end{verbatim}
+
+Again, the parameters are passed in the order they are specified, irregardless
+of their names. A mismatch in parameters will result in an error as soon as you
+try to use the action. All parameters will always be validated prior to calling the
+script or function.
+
+When an action completes, the standard output of the script or the return
+value\footnote{Will be serialised to a string automatically by CLAM, assuming
+this is possible} of the function is returned to the user directly (as HTTP 200) and as-is.
+It is therefore important to specify what MIME type the user can expect, the
+default is \texttt{text/plain}, but for many applications \texttt{text/html}, \texttt{text/xml} or
+\texttt{application/json} may be more appropriate.
+
+By default, actions listen to both GET and POST requests. You may constrain it
+explicitly by specifying \texttt{method="GET"} or \texttt{method="POST"}.
+
+When a script is called, CLAM looks at its return code to determine whether
+execution was successful ($0$). If not, CLAM will return the standard error
+output in a ``HTTP 500 -- Internal Server Error'' reply. If define your own
+errors and return standard \emph{output} in an HTTP 403 reply, use return code
+$3$; for standard output in an HTTP 404 reply, use return code $4$. These are just defaults, all return
+codes are configurable through the keyword arguments \texttt{returncodes200},
+\texttt{returncodes403}, \texttt{returncodes404}, each being a list of
+integers.
+
+When using Python functions, exceptions will be caught and returned to the
+end-user in a HTTP 500 reply (without traceback). For custom replies, Python
+functions may raise any instance of \texttt{web.webapi.HTTPError}.
+
+If you want to use only actions and disable the project paradigm
+entirely, set the following in your service configuration file:
+
+\begin{verbatim}
+COMMAND = None
+PROFILES = []
+PARAMETERS = []
+\end{verbatim}
 
 
 \section{Wrapper script}
@@ -1939,12 +2076,27 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 
 \medskip
 
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+\textbf{URL} & \texttt{/actions/[action\_id]/} \\
+\hline
+\multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
+\hline
+\textbf{Method} & \texttt{GET} and/or \texttt{POST}, may be constrained by the action \\
+\textbf{Querystring} & Determined by the action  \\
+\textbf{Response} & \texttt{200 - OK} \& Result data determined by the action, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & This is a remote procedure call to run the specified
+action and obtain the results. The parameters are specific to the action. \\ 
+\hline
+\end{supertabular}
+
 If OAuth authentication is enabled and no access token is passed, almost all URLs
 return \texttt{HTTP 303 - See Other} and redirect to the authentication
 provider. At this stage, user input may be required, stopping automated
 clients. After the user input, or if no user input is required, the
 authorization provider should relay the user back to a special CLAM login page with another
-\texttt{HTTP 303}. See the section on OAuth2 authentication for more details.
+\texttt{HTTP 303}. This implies the client should then redo the request with
+the proper access token. See the section on OAuth2 authentication for more details.
 
 
 %\chapter{Predefined Formats}

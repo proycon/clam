@@ -185,7 +185,7 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://cls.ru.nl">Centre for Language Studies</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
 
 <span class="extracredits">
 <strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and started under the projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
@@ -576,6 +576,7 @@
             </div>
         </xsl:if>
     
+        <xsl:if test="count(/clam/profiles/profile) > 0">
         <div id="startproject" class="box">
             <h3>Start a new Project</h3>    
             	<p>A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
@@ -595,6 +596,34 @@
           </tbody>
         </table>
         </div>
+        </xsl:if>
+
+        <xsl:if test="count(/clam/actions/action) > 0">
+            <div id="actionindex" class="box parameters">
+                <h2>Actions</h2>
+                <xsl:for-each select="/clam/actions/action">
+                    <h3><xsl:value-of select="./@name" /></h3>
+                    <p><xsl:value-of select="./@description" /></p>
+                    <form action="{/clam/@baseurl}/actions/{./@id}/">
+                        <xsl:choose>
+                            <xsl:when test="./@method = 'POST'">
+                                <xsl:attribute name="method">POST</xsl:attribute>
+                                <xsl:attribute name="enctype">multipart/form-data</xsl:attribute>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:attribute name="method">GET</xsl:attribute>
+                                <xsl:attribute name="enctype">application/x-www-form-urlencoded</xsl:attribute>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <table>
+                            <xsl:apply-templates />
+                        </table>
+                        <input type="submit" class="submitaction" value="Submit" />
+                    </form>
+                </xsl:for-each>
+            </div>
+        </xsl:if>
+
 </xsl:template>
 
 </xsl:stylesheet>

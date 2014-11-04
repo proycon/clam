@@ -365,6 +365,7 @@ class CLAMService(object):
         settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
         settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
         #'/t/', 'TestInterface',
+        settings.STANDALONEURLPREFIX + '/actions/([A-Za-z0-9_]*)/?', 'ActionHandler',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/status/?', 'Status', #returns status information in JSON, for web interface
         settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
@@ -383,17 +384,13 @@ class CLAMService(object):
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             error("Specified root path " + settings.ROOT + " not found")
-        elif not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0]):
+        elif settings.COMMAND and (not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0])):
             error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
-        elif not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
+        elif settings.COMMAND and not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
             if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
                settings.COMMAND = sys.executable + " " + settings.COMMAND
             else:
                 error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
-        elif not settings.PROFILES:
-            error("No profiles were defined in settings module!")
-        elif not settings.PARAMETERS:
-            warning("No parameters defined in settings module!")
         else:
             lastparameter = None
             try:
@@ -458,6 +455,9 @@ class Login(object):
         return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), oauth_encrypt(d['access_token']))
 
 def oauth_encrypt(oauth_access_token):
+    if not oauth_access_token:
+        return None #no oauth
+    else:
         return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, web.ctx.env.get('REMOTE_ADDR',''))
 
 class Logout(object):
@@ -525,7 +525,7 @@ class Index(object):
         defaultheaders()
 
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -552,7 +552,7 @@ class Info(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -710,6 +710,10 @@ class Project(object):
     @staticmethod
     def create(project, user):
         """Create project skeleton if it does not already exist (static method)"""
+
+        if not settings.COMMAND:
+            raise web.webapi.NotFound("Projects disabled, no command configured")
+
         user, oauth_access_token = validateuser(user)
         if not Project.validate(project):
             raise CustomForbidden('Invalid project ID')
@@ -971,7 +975,7 @@ class Project(object):
 
         defaultheaders()
         try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
+            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , None, settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
@@ -2070,6 +2074,130 @@ class Status(object):
         statuscode, statusmsg, statuslog, completion = Project.status(project,user)
         return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
 
+class ActionHandler(object):
+    GHOST = False
+
+    def find_action(self, action_id, method):
+        for action in settings.ACTIONS:
+            if action.id == action.id and (not action.method or method == action.method):
+                return action
+        raise web.api.NotFound("Action does not exist")
+
+    def collect_parameters(self,action):
+        data = web.input()
+        params = []
+        for parameter in action.parameters:
+            if not parameter.id in data:
+                raise CustomForbidden("Missing parameter: " + parameter.id)
+            else:
+                if parameter.paramflag:
+                    flag = parameter.paramflag
+                else:
+                    flag = None
+                if not parameter.set(data[parameter.id]):
+                    raise CustomForbidden("Invalid value for parameter " + parameter.id + ": " + parameter.error)
+                else:
+                    params.append( ( flag, parameter.value) )
+        return params
+
+
+    def do(self, action_id, method, user=None, oauth_access_token=None):
+        action = self.find_action(action_id, 'GET')
+
+        userdir =  settings.ROOT + "projects/" + user + '/'
+
+        if action.command:
+            parameters = ""
+            for flag, value in self.collect_parameters(action):
+                if parameters: parameters += " "
+                if flag: parameters += flag + " "
+
+                if isinstance(value, unicode):
+                    value = value.encode('utf-8')
+                elif not isinstance(value, str):
+                    value = str(value)
+                if value: parameters += clam.common.data.shellsafe(value,'"')
+
+            cmd = action.command
+            cmd = cmd.replace('$PARAMETERS', parameters)
+            cmd = cmd.replace('$USERNAME',user if user else "anonymous")
+            cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
+            #everything should be shell-safe now
+
+            #run the action
+            pythonpath = ''
+            try:
+                pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
+            except:
+                pass
+            if pythonpath:
+                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
+            else:
+                pythonpath = os.path.dirname(settings.__file__)
+
+            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
+            if settings.REMOTEHOST:
+                if settings.REMOTEUSER:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+                else:
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
+            printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
+            process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if process:
+                printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
+                stdoutdata, stderrdata = process.communicate()
+                if process.returncode in action.returncodes200:
+                    web.header('Content-Type', action.mimetype)
+                    return stdoutdata #200
+                elif process.returncode in action.returncodes403:
+                    web.header('Content-Type', action.mimetype)
+                    raise CustomForbidden(stdoutdata)
+                elif process.returncode in action.returncodes404:
+                    web.header('Content-Type', action.mimetype)
+                    raise web.webapi.NotFound(stdoutdata)
+                else:
+                    raise web.webapi.InternalError("Process for action " +  action_id + " failed\n" + stderrdata)
+            else:
+                raise web.webapi.InternalError("Unable to launch process")
+        elif action.function:
+            args = [ x[1] for x in  self.collect_parameters(action) ]
+            web.header('Content-Type', action.mimetype)
+            try:
+                r = action.function(*args) #200
+            except Exception as e:
+                if isinstance(e, web.webapi.HTTPError):
+                    raise
+                else:
+                    raise web.webapi.InternalError(str(e))
+            return r
+        else:
+            raise Exception("No command or function defined for action " + action_id)
+
+
+
+    @RequireLogin(ghost=GHOST)
+    def GET(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'GET', user, oauth_access_token)
+
+
+    @RequireLogin(ghost=GHOST)
+    def POST(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'POST', user, oauth_access_token)
+
+
+    @RequireLogin(ghost=GHOST)
+    def PUT(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'PUT', user, oauth_access_token)
+
+    @RequireLogin(ghost=GHOST)
+    def DELETE(self, action_id, user=None):
+        user, oauth_access_token = validateuser(user)
+        return self.do(action_id, 'DELETE', user, oauth_access_token)
+
+
 
 
 #class Uploader(object): #OBSOLETE!
@@ -2509,6 +2637,9 @@ def set_defaults(HOST = None, PORT = None):
                 settings.CUSTOMHTML_PROJECTDONE = f.read()
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
+
+    if not 'ACTIONS' in settingkeys:
+        settings.ACTIONS = []
 
     if 'LOG' in settingkeys: #set LOG
         LOG = open(settings.LOG,'a')

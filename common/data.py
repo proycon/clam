@@ -2031,6 +2031,111 @@ class InputSource(object):
         if not self.inputtemplate:
             raise Exception("Input source has no input template")
 
+
+class Action(object):
+    def __init__(self, *args, **kwargs):
+        if 'id' in kwargs:
+            self.id = kwargs['id']
+        else:
+            raise Exception("No id specified for Action")
+
+        if 'name' in kwargs:
+            self.name = kwargs['name']
+        else:
+            self.name = self.id
+
+        if 'description' in kwargs:
+            self.description = kwargs['description']
+        else:
+            self.description = ""
+
+        if 'command' in kwargs:
+            self.command = kwargs['command']
+            self.function = None
+        elif 'function' in kwargs:
+            self.command = None
+            self.function = kwargs['function']
+        else:
+            self.command = self.function = None #action won't be able to do anything!
+
+
+        if 'method' in kwargs:
+            self.method = kwargs['method']
+        else:
+            self.method = None #all methods
+
+        if 'parameters' in kwargs:
+            assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in kwargs['parameters']  ])
+            self.parameters = kwargs['parameters']
+        elif args:
+            assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in args  ])
+            self.parameters = args
+        else:
+            self.parameters = []
+
+
+        if 'mimetype' in kwargs:
+            self.mimetype = kwargs['mimetype']
+        else:
+            self.mimetype = "text/plain"
+
+        if 'returncodes404' in kwargs:
+            self.returncodes404 = kwargs['returncodes404']
+        else:
+            self.returncodes404 = [4]
+
+        if 'returncodes403' in kwargs:
+            self.returncodes403 = kwargs['returncodes403']
+        else:
+            self.returncodes403 = [3]
+
+        if 'returncodes200' in kwargs:
+            self.returncodes200 = kwargs['returncodes200']
+        else:
+            self.returncodes200 = [0]
+
+
+    def xml(self, indent = ""):
+        if self.method:
+            method = "method=\"" + self.method + "\""
+        else:
+            method = ""
+        xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" >\n"
+        for parameter in self.parameters:
+            xml += parameter.xml(indent+ "\t") + "\n"
+        xml += indent + "</action>\n"
+        return xml
+
+    @staticmethod
+    def fromxml(node):
+        """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
+        if not isinstance(node,ElementTree._Element):
+            node = ElementTree.parse(StringIO(node)).getroot()
+        assert(node.tag.lower() == 'action')
+
+        kwargs = {}
+        args = []
+        if 'id' in node.attrib:
+            kwargs['id'] = node.attrib['id']
+        elif 'name' in node.attrib:
+            kwargs['name'] = node.attrib['name']
+        elif 'description' in node.attrib:
+            kwargs['description'] = node.attrib['description']
+        elif 'method' in node.attrib:
+            kwargs['method'] = node.attrib['method']
+        elif 'mimetype' in node.attrib:
+            kwargs['mimetype'] = node.attrib['mimetype']
+
+        found = False
+        for subnode in node:
+            if subnode.tag.lower() == 'parametercondition':
+                kwargs[node.tag] = ParameterCondition.fromxml(subnode)
+            elif subnode.tag in vars(clam.common.parameters):
+                args.append(vars(clam.common.parameters)[subnode.tag].fromxml(subnode))
+        if not found:
+            raise Exception("No condition found in ParameterCondition!")
+        return Action(*args, **kwargs)
+
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
         #parameters are local
         if filename.find('$') != -1:

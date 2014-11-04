@@ -210,3 +210,9 @@ div#startbutton input {
 div#startbutton input:hover {
 	background: #AA0000;
 }
+div#actionindex p {
+    margin-left: 20px;
+}
+div#actionindex form {
+    margin-left: 30px;
+}

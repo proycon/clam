@@ -14,7 +14,7 @@
     	<div class="box">
     	 <h3>Introduction</h3>
     	 <p>
-    	 This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="http://ilk.uvt.nl/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="http://ilk.uvt.nl/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
+           This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="https://proycon.github.io/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="https://proycon.github.io/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
     	 </p>
 		</div>
 
@@ -26,10 +26,12 @@
         <div id="restspec" class="box">
     	 <h3>RESTful Specification</h3>
     	 
-    	 <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="http://ilk.uvt.nl/clam/">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
+         <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
     	 </p>
-    	 
-    
+
+         <xsl:if test="count(/clam/profiles/profile) > 0">
+
+         <h4>Project Paradigm</h4>
     	  
     	 <ol>
     		<li><strong>Create a <em>project</em></strong> - Issue a <tt>HTTP PUT</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em></tt>
@@ -115,7 +117,36 @@
     			</ul>
 			</li>
     	 </ol>
-    	 
+         
+        </xsl:if>
+        <xsl:if test="count(/clam/actions/action) > 0">
+
+        <h4>Actions</h4>
+
+        <p>Actions are simple remote procedure calls that can be executed in real-time, they will return HTTP 200 on success with a response fitting the specified MIME type. On fatal server-side errors, they may return <tt>HTTP 500 Server Error</tt> with an error message. Other HTTP errors may be returned, but this is customly defined by underlying function, rather than CLAM itself.</p>
+
+        <ul>
+        <xsl:for-each select="/clam/actions/action">
+          <li><strong><xsl:value-of select="@name" /></strong> -- <tt><xsl:value-of select="/clam/@baseurl" />/actions/<xsl:value-of select="@id" />/</tt><br />
+              <em><xsl:value-of select="@description" /></em><br />
+              <xsl:choose>
+              <xsl:when test="@method"> 
+                Method: <tt><xsl:value-of select="@method" /></tt><br />
+              </xsl:when>
+              <xsl:otherwise>
+                Methods: <tt>GET</tt>, <tt>POST</tt><br />
+              </xsl:otherwise>
+              </xsl:choose>
+              Returns: <tt><xsl:value-of select="@mimetype" /></tt><br />Parameters:<br />
+              <ol>
+              <xsl:apply-templates />
+              </ol>
+          </li>
+        </xsl:for-each>
+        </ul>
+
+
+        </xsl:if>
     	  
     	</div>
     	
@@ -138,6 +169,10 @@
 <em>#create client, connect to server.</em>
 <em>#the latter two arguments are required for authenticated webservices, they can be omitted otherwise</em>
 clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
+
+
+
+<xsl:if test="count(/clam/profiles/profile) > 0">
 
 <em>#Set a project name (it is recommended to include a sufficiently random naming component here, to allow for concurrent uses of the same client)</em>
 project = "projectname" + str(random.getrandbits(64))
@@ -231,6 +266,15 @@ data = clamclient.start(project)
 
 <em>#delete the project (otherwise it would remain on server and clients would leave a mess)</em>
 clamclient.delete(project)
+
+</xsl:if>
+
+
+<xsl:if test="count(/clam/actions/action) > 0">
+<em>#A fictitious sample showing how to use the actions:</em>
+result = clamclient.action('someaction', someparameter='blah',otherparameter=42, method='GET')
+</xsl:if>
+
 </pre>
     	</div>
     	
@@ -261,10 +305,10 @@ clamclient.delete(project)
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
+    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://clst.ru.nl">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a><br /><a href="http://ilk.uvt.nl">Induction of Linguistic Knowledge Research Group</a>, <a href="http://www.uvt.nl">Tilburg University</a>
 
 <span class="extracredits">
-<strong>CLAM</strong> is funded under <a href="http://www.clarin.nl/">CLARIN-NL</a> projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
+<strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and started under the projects <strong><em>TICCLops</em></strong> <sub> (09-011)</sub>, coordinated by Martin Reynaert, and <strong>TTNWW</strong>, WP1 and WP2, respectively coordinated by Martin Reynaert and Antal van den Bosch.
 </span>
 </div>
 
