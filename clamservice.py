@@ -722,18 +722,18 @@ class Project(object):
             raise CustomForbidden('No project name')
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
-            os.mkdir(settings.ROOT + "projects/" + user)
+            os.makedirs(settings.ROOT + "projects/" + user)
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project): #verify:
                 raise CustomForbidden("Directory " + settings.ROOT + "projects/" + user + '/' + project + " could not be created succesfully")
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
-            os.mkdir(settings.ROOT + "projects/" + user + '/' + project)
+            os.makedirs(settings.ROOT + "projects/" + user + '/' + project)
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input/'):
-            os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/input")
+            os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/input")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input'):
                 raise CustomForbidden("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully")
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output/'):
-            os.mkdir(settings.ROOT + "projects/" + user + '/' + project + "/output")
+            os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
                 raise CustomForbidden("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully")
             #if not settings.PROJECTS_PUBLIC:
@@ -1269,7 +1269,7 @@ class OutputFileHandler(object):
         d = Project.path(project, user) + "output"
         if os.path.isdir(d):
             shutil.rmtree(d)
-            os.mkdir(d)
+            os.makedirs(d)
         else:
             raise web.webapi.NotFound()
         if os.path.exists(Project.path(project, user) + ".done"):
@@ -1402,7 +1402,7 @@ class InputFileHandler(object):
         if len(filename) == 0:
             #Deleting all input files
             shutil.rmtree(Project.path(project, user) + 'input')
-            os.mkdir(Project.path(project, user) + 'input') #re-add new input directory
+            os.makedirs(Project.path(project, user) + 'input') #re-add new input directory
             return "Deleted" #200
         elif os.path.isdir(Project.path(project, user) + filename):
             #Deleting specified directory
@@ -2652,15 +2652,15 @@ def set_defaults(HOST = None, PORT = None):
 def test_dirs():
     if not os.path.isdir(settings.ROOT):
         warning("Root directory does not exist yet, creating...")
-        os.mkdir(settings.ROOT)
+        os.makedirs(settings.ROOT)
     if not os.path.isdir(settings.ROOT + 'projects'):
         warning("Projects directory does not exist yet, creating...")
-        os.mkdir(settings.ROOT + 'projects')
-        os.mkdir(settings.ROOT + 'projects/anonymous')
+        os.makedirs(settings.ROOT + 'projects')
+        os.makedirs(settings.ROOT + 'projects/anonymous')
     else:
         if not os.path.isdir(settings.ROOT + 'projects/anonymous'):
             warning("Directory for anonymous user not detected, migrating existing project directory from CLAM <0.7 to >=0.7")
-            os.mkdir(settings.ROOT + 'projects/anonymous')
+            os.makedirs(settings.ROOT + 'projects/anonymous')
             for d in glob.glob(settings.ROOT + 'projects/*'):
                 if os.path.isdir(d) and os.path.basename(d) != 'anonymous':
                     if d[-1] == '/': d = d[:-1]
