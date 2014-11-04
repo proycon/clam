@@ -92,10 +92,28 @@ class CLAMClient:
                 opener = urllib2.build_opener()
                 opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
                 urllib2.install_opener(opener)
+                request = RequestWithMethod(self.url,method='GET')
+                try:
+                    response = urllib2.urlopen(request)
+                except Exception, e:
+                    try:
+                        statuscode = int(e.code)
+                    except AttributeError:
+                        raise e
 
-                data = self.request()
+                    if statuscode >= 200 and statuscode < 300:
+                        #this is no error!
+                        return self._parse(e.read())
+                    elif statuscode == 404:
+                        raise NotFound("Authorization provider not found")
+                    elif statuscode == 403:
+                        raise PermissionDenied("Authorization provider denies access")
+                    else:
+                        raise
+
+                data = self._parse(response.read())
                 if data is True: #indicates failure
-                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically")
+                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + response.geturl())
                 else:
                     self.oauth_access_token = data.oauth_access_token
 
