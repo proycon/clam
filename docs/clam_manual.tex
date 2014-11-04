@@ -481,9 +481,6 @@ CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 
 
-
-
-
 \subsection{Troubleshooting}
 
 You may possibly encounter one of the following issues when attempting to access your CLAM service through a browser:
@@ -491,7 +488,11 @@ You may possibly encounter one of the following issues when attempting to access
 \begin{enumerate}
 \item \textbf{Apache gives an Internal Server Error (HTTP 500)} -- Check your Apache error log to see what happened. For additional debug output by CLAM, set \texttt{DEBUG=True} in your CLAM service configuration file. 
 \item \textbf{I get an empty white page} -- There is probably an error in loading the XSL stylesheet that renders the web application. Please use Firefox to verify, instead of Google Chrome or Internet Explorer, as it provides more detailed error output on XSLT transformations.
-\item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that renders the web-application can not be loaded. This is most likely due to a mismatch in URLs. The URL at which the webservice is accessed has to correspond with the URL configured in the service configuration file. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
+\item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that
+  renders the web-application can not be loaded. This is most likely due to a
+  mismatch in URLs. The URL at which the webservice is accessed has to
+  correspond exactly with the URL configured in the service configuration file,
+  alternative hostnames or IPs will not work. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
 \item \textbf{I get an error ``No template named response''} -- Check whether
   \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
 \item \textbf{I'm using CLAM through Apache and WSGI, but authentication does
