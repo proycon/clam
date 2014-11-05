@@ -251,6 +251,7 @@ class RequireLogin(object):
         global auth
 
         def wrapper(*args, **kwargs):
+            global auth
             printdebug("wrapper: "+ repr(f))
             web.header('Access-Control-Allow-Origin', '*')
             web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
