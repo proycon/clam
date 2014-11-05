@@ -251,7 +251,6 @@ class RequireLogin(object):
         global auth
 
         def wrapper(*args, **kwargs):
-            global auth
             printdebug("wrapper: "+ repr(f))
             web.header('Access-Control-Allow-Origin', '*')
             web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
@@ -331,8 +330,8 @@ class RequireLogin(object):
                         raise CustomForbidden("Access token not valid for this IP")
 
                     try:
-                        auth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
-                        return auth(f)(*args, **kwargs)
+                        oauth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
+                        return oauth(f)(*args, **kwargs)
                     except clam.common.oauth.OAuthError as e:
                         raise CustomForbidden('OAuth Error: ' + str(e))
 
