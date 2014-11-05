@@ -22,9 +22,11 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.9.8'
+VERSION = '0.9.11'
 
 sys.path.append(sys.path[0] + '/..')
+
+from clam.common.data import shellsafe
 #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 
@@ -60,7 +62,9 @@ def main():
         if projectdir[-1] != '/':
             projectdir += '/'
 
-    cmd = " ".join(sys.argv[3+offset:])
+    cmd = sys.argv[3]
+    for arg in sys.argv[4+offset:]:
+        cmd += " " + shellsafe(arg,'"')
 
     print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
 
