@@ -173,7 +173,7 @@ a:visited {
 	color: #6d6450;
 }
 
-input.uploadbutton {
+input.uploadbutton, input.submitaction {
 	background: #880000;
 	padding: 7px;
 	color: white;
