@@ -62,7 +62,7 @@ def main():
         if projectdir[-1] != '/':
             projectdir += '/'
 
-    cmd = sys.argv[3]
+    cmd = sys.argv[3+offset]
     for arg in sys.argv[4+offset:]:
         cmd += " " + shellsafe(arg,'"')
 
