@@ -2106,7 +2106,11 @@ class Action(object):
             method = "method=\"" + self.method + "\""
         else:
             method = ""
-        xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" >\n"
+        if self.allowanonymous:
+            allowanonymous = "allowanoymous=\"yes\""
+        else:
+            allowanonymous = ""
+        xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" " + allowanonymous + ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+ "\t") + "\n"
         xml += indent + "</action>\n"
@@ -2131,6 +2135,9 @@ class Action(object):
             kwargs['method'] = node.attrib['method']
         elif 'mimetype' in node.attrib:
             kwargs['mimetype'] = node.attrib['mimetype']
+        elif 'allowanonymous' in node.attrib:
+            if node.attrib['allowanonymous'] == "yes":
+                kwargs['allowanonymous'] = True
 
         found = False
         for subnode in node:
