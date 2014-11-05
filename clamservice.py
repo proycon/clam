@@ -2101,7 +2101,7 @@ class ActionHandler(object):
         return params
 
 
-    def do(self, action_id, method, user=None, oauth_access_token=None):
+    def do(self, action_id, method, user="anonymous", oauth_access_token=""):
         action = self.find_action(action_id, 'GET')
 
         userdir =  settings.ROOT + "projects/" + user + '/'
@@ -2121,7 +2121,7 @@ class ActionHandler(object):
             cmd = action.command
             cmd = cmd.replace('$PARAMETERS', parameters)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
-            cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
+            cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token if oauth_access_token else "")
             #everything should be shell-safe now
 
             #run the action
@@ -2183,7 +2183,7 @@ class ActionHandler(object):
         action = self.find_action(action_id, method)
         if action.allowanonymous:
             user = "anonymous"
-            oauth_access_token = None
+            oauth_access_token = ""
             return self.do(action_id, method,user,oauth_access_token)
         else:
             return self.do_auth(action_id, method)
