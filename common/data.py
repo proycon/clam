@@ -2095,6 +2095,12 @@ class Action(object):
             self.returncodes200 = [0]
 
 
+        if 'allowanonymous' in kwargs:
+            self.allowanonymous = bool(kwargs['allowanonymous'])
+        else:
+            self.allowanonymous = False
+
+
     def xml(self, indent = ""):
         if self.method:
             method = "method=\"" + self.method + "\""

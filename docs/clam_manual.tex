@@ -1713,6 +1713,12 @@ When using Python functions, exceptions will be caught and returned to the
 end-user in a HTTP 500 reply (without traceback). For custom replies, Python
 functions may raise any instance of \texttt{web.webapi.HTTPError}.
 
+If you enabled an authentication mechanism, as is recommended, it automatically
+applies to all actions. It is, however, possible to exempt certain actions from
+needing authentication, allowing them to serve anonymous users. To do so, add
+the keyword argument \texttt{allowanonymous=True} to the configuration of the
+action. 
+
 If you want to use only actions and disable the project paradigm
 entirely, set the following in your service configuration file:
 

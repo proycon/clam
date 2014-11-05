@@ -2173,29 +2173,33 @@ class ActionHandler(object):
         else:
             raise Exception("No command or function defined for action " + action_id)
 
-
-
     @RequireLogin(ghost=GHOST)
-    def GET(self, action_id, user=None):
+    def do_auth(self, action_id, method, user=None):
         user, oauth_access_token = validateuser(user)
-        return self.do(action_id, 'GET', user, oauth_access_token)
+        return self.do(action_id, method, user, oauth_access_token)
+
+    def run(self, action_id, method):
+        #check whether the action requires authentication or allows anonymous users:
+        action = self.find_action(action_id, method)
+        if action.allowanonymous:
+            user = "anonymous"
+            oauth_access_token = None
+            return self.do(action_id, method,user,oauth_access_token)
+        else:
+            return self.do_auth(action_id, method)
 
 
-    @RequireLogin(ghost=GHOST)
-    def POST(self, action_id, user=None):
-        user, oauth_access_token = validateuser(user)
-        return self.do(action_id, 'POST', user, oauth_access_token)
+    def GET(self, action_id):
+        return self.run(action_id, 'GET')
 
+    def POST(self, action_id):
+        return self.run(action_id, 'POST')
 
-    @RequireLogin(ghost=GHOST)
-    def PUT(self, action_id, user=None):
-        user, oauth_access_token = validateuser(user)
-        return self.do(action_id, 'PUT', user, oauth_access_token)
+    def PUT(self, action_id):
+        return self.run(action_id, 'PUT')
 
-    @RequireLogin(ghost=GHOST)
-    def DELETE(self, action_id, user=None):
-        user, oauth_access_token = validateuser(user)
-        return self.do(action_id, 'DELETE', user, oauth_access_token)
+    def DELETE(self, action_id):
+        return self.run(action_id, 'DELETE')
 
 
 
