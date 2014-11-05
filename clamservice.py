@@ -49,7 +49,7 @@ import clam.common.formats
 import clam.common.digestauth
 import clam.common.oauth
 import clam.common.data
-from clam.common.util import globsymlinks, setdebug, setlog, printlog, printdebug, xmlescape
+from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
@@ -2641,8 +2641,6 @@ def set_defaults(HOST = None, PORT = None):
     if not 'ACTIONS' in settingkeys:
         settings.ACTIONS = []
 
-    if 'LOG' in settingkeys: #set LOG
-        LOG = open(settings.LOG,'a')
 
     for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:
         if not s in settingkeys:
@@ -2839,15 +2837,18 @@ def run_wsgi(settings_module):
             setdebug(True)
     except:
         pass
+
+    test_version()
+    if DEBUG:
+        setlog(sys.stderr)
+    else:
+        setlog(None)
     try:
         if settings.LOGFILE:
             setlogfile(settings.LOGFILE)
     except:
         pass
-
-    test_version()
-    setlog(None)
-    set_defaults(None,None)
+    set_defaults(None,None) #host, port
     test_dirs()
 
     if settings.OAUTH:

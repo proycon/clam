@@ -7,7 +7,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -16,7 +16,8 @@ import glob
 import os
 from sys import stdout,stderr
 import datetime
-from urllib2 import Request 
+from urllib2 import Request
+import io
 
 LOG = stdout
 DEBUGLOG = stderr
@@ -30,16 +31,16 @@ def globsymlinks(pattern, recursion=True):
         for d in os.listdir(os.path.dirname(pattern)):
             if os.path.isdir(d):
                 for linkf,realf in globsymlinks(d + '/' + os.path.basename(pattern),recursion):
-                    yield linkf,realf                
+                    yield linkf,realf
 
 def setlog(log):
     global LOG
     LOG = log
-    
+
 def setdebug(debug):
     global DEBUG
     DEBUG = debug
-    
+
 def printlog(msg):
     global LOG
     now = datetime.datetime.now()
@@ -51,9 +52,9 @@ def printdebug(msg):
 
 def setlogfile(filename):
     global LOG, DEBUGLOG
-    LOG = DEBUGLOG = open(filename,'w')
+    LOG = DEBUGLOG = io.open(filename,'w', encoding='utf-8')
 
-def xmlescape(s):        
+def xmlescape(s):
     begin = -1
     s2 = ""
     for i,c in enumerate(s):
@@ -63,30 +64,30 @@ def xmlescape(s):
             if begin > -1:
                 s2 += s[begin:i+1]
                 begin = -1
-            else: 
-                s2 += c            
-        elif c == ' ':            
+            else:
+                s2 += c
+        elif c == ' ':
             if begin != -1:
                 s2 += "&amp;" + s[begin+1:i+1]
                 begin = -1
             else:
-                s2 += c            
+                s2 += c
         elif c == '<':
                 s2 += "&lt;"
         elif c == '>':
                 s2 += "&gt;"
         elif c == '"':
-                s2 += "&quot;"                
-        elif begin == -1:                            
+                s2 += "&quot;"
+        elif begin == -1:
             s2 += c
     if begin != -1:
-        s2 += "&amp;" + s[begin+1:]        
-    s = s2    
+        s2 += "&amp;" + s[begin+1:]
+    s = s2
     return s
-    
-        
-    
-        
+
+
+
+
 
 class RequestWithMethod(Request):
   def __init__(self, *args, **kwargs):
