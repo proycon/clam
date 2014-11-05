@@ -137,6 +137,9 @@
                 Methods: <tt>GET</tt>, <tt>POST</tt><br />
               </xsl:otherwise>
               </xsl:choose>
+              <xsl:if test="@allowanonymous = 'yes'">
+                (<em>Anonymous access allowed</em>)<br />
+              </xsl:if>
               Returns: <tt><xsl:value-of select="@mimetype" /></tt><br />Parameters:<br />
               <ol>
               <xsl:apply-templates />
