@@ -43,7 +43,7 @@ class BasicServiceTest(unittest.TestCase):
     def test1_index(self):
         """Basic Service Test - Index and sanity"""
         data = self.client.index()
-        self.assertTrue(data.system_id == "test")
+        self.assertTrue(data.system_id == "textstats")
         self.assertTrue(isinstance(data.projects,list))
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
@@ -61,7 +61,7 @@ class BasicServiceTest(unittest.TestCase):
     def test2_3_create(self):
         """Basic Service Test - Project state retrieval"""
         data = self.client.get('basicservicetest')
-        self.assertTrue(data.system_id == "test")
+        self.assertTrue(data.system_id == "textstats")
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
         self.assertTrue(isinstance(data.input,list))
