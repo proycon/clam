@@ -1,0 +1,5 @@
+web.py>=0.33
+lxml>=2.2
+pycurl
+requests_oauthlib
+pycrypto

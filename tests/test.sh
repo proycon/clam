@@ -79,8 +79,10 @@ sleep 2
 
 if [ $GOOD -eq 1 ]; then
     echo "Done, all tests passed!" >&2
+    exit 0
 else
     echo "TESTS FAILED!" >&2
+    exit 1
 fi
 
 
