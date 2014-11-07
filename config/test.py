@@ -25,7 +25,7 @@ import sys
 REQUIRE_VERSION = 0.7
 
 #The System ID, a short alphanumeric identifier for internal use only
-SYSTEM_ID = "clamtest"
+SYSTEM_ID = "test"
 
 #System name, the way the system is presented to the world
 SYSTEM_NAME = "CLAM Test"

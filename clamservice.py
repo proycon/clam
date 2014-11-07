@@ -97,7 +97,7 @@ DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 
 settingsmodule = None #will be overwritten later
 
-setlog(sys.stdout)
+setlog(sys.stderr)
 #Empty defaults
 #SYSTEM_ID = "clam"
 #SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
