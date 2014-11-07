@@ -55,6 +55,9 @@ python servicetest.py
 if [ $? -ne 0 ]; then
     echo "ERROR: Service test failed!!" >&2
    GOOD=0
+   echo "<--------------------- servicetest.server.log --------------------------------->" >&2
+   cat servicetest.server.log >&2
+   echo "</-------------------- servicetest.server.log --------------------------------->" >&2
 fi
 
 echo "Stopping clam service" >&2
@@ -69,8 +72,11 @@ sleep 3
 echo "Running authentication tests:" >&2
 python authtest.py 
 if [ $? -ne 0 ]; then
-    echo "ERROR: Authentication test failed!!" >&2
+   echo "ERROR: Authentication test failed!!" >&2
    GOOD=0
+   echo "<--------------------- authtest.server.log --------------------------------->" >&2
+   cat authtest.server.log >&2
+   echo "</-------------------- authtest.server.log --------------------------------->" >&2
 fi
 
 echo "Stopping clam service" >&2
@@ -81,7 +87,7 @@ if [ $GOOD -eq 1 ]; then
     echo "Done, all tests passed!" >&2
     exit 0
 else
-    echo "TESTS FAILED!" >&2
+    echo "TESTS FAILED!!!!" >&2
     exit 1
 fi
 
