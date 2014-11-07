@@ -724,8 +724,8 @@ class Project(object):
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
             os.makedirs(settings.ROOT + "projects/" + user)
-            if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project): #verify:
-                raise CustomForbidden("Directory " + settings.ROOT + "projects/" + user + '/' + project + " could not be created succesfully")
+            if not os.path.isdir(settings.ROOT + "projects/" + user): #verify:
+                raise CustomForbidden("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully")
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project)
