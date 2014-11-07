@@ -48,7 +48,7 @@ sleep 2
 
 echo "Starting clam textstats service" >&2
 clamservice clam.config.textstats 2> servicetest.server.log &
-sleep 2
+sleep 5
 
 echo "Running service tests:" >&2
 python servicetest.py 
@@ -66,7 +66,7 @@ kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 
 echo "Starting clam service 'authtest'" >&2
 clamservice clam.config.authtest 2> authtest.server.log &
-sleep 3
+sleep 5
 
 
 echo "Running authentication tests:" >&2
