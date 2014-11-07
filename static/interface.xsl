@@ -159,6 +159,7 @@
         
         simplepolling = false;
         simpleupload = false;               
+        preselectinputtemplate = false;
 		<xsl:if test="contains(/clam/@interfaceoptions,'secureonly')">
 			simplepolling = true;
 			simpleupload = true;
@@ -169,7 +170,9 @@
 		<xsl:if test="contains(/clam/@interfaceoptions,'simpleupload')">
 			simpleupload = true;
 		</xsl:if>				
-		
+		<xsl:if test="contains(/clam/@interfaceoptions,'preselectinputtemplate')">
+			preselectinputtemplate = true;
+		</xsl:if>				
         $(document).ready(function() {
             if ( (typeof(initclam) == 'undefined') )  {
                 alert("Error loading clam.js . Try refreshing the page?");

@@ -6,26 +6,6 @@ function initclam() {
         window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
 
-   if (typeof(stage) != 'undefined') {
-       //Download parameters.xsl so it's available to javascript for file-parameters
-       $.ajax({ 
-            type: "GET", 
-            url: baseurl + "/static/parameters.xsl",
-            dataType: "xml", 
-            beforeSend: oauthheader,
-            crossDomain: true,
-            xhrFields: {
-              withCredentials: true
-            },
-            success: function(xml){ 
-                parametersxsl = xml;
-            }
-       });
-      if (stage == 1) {
-       		$('#progressbar').progressbar({value: progress});
-       		setTimeout(pollstatus,2000);
-       }
-    }
 
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
    //done alone in all browsers
@@ -93,9 +73,15 @@ function initclam() {
         }
         if (duplicate) continue;
         processed.push(inputtemplates[i].id);     
-        inputtemplate_options += '<option value="' + inputtemplates[i].id + '">' + inputtemplates[i].label + '</option>';
+        if ((i == 0) && (preselectinputtemplate) ) {
+            selected='selected="selected"';
+        } else {
+            selected="";
+        }
+        inputtemplate_options += '<option value="' + inputtemplates[i].id + '" ' + selected + '>' + inputtemplates[i].label + '</option>';
    }
    $(".inputtemplates").html(inputtemplate_options);
+   
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
    $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
@@ -110,6 +96,32 @@ function initclam() {
         }
     });
 
+   if (typeof(stage) != 'undefined') {
+       //Download parameters.xsl so it's available to javascript for file-parameters
+       $.ajax({ 
+            type: "GET", 
+            url: baseurl + "/static/parameters.xsl",
+            dataType: "xml", 
+            beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
+            success: function(xml){ 
+                parametersxsl = xml;
+                if (preselectinputtemplate) {
+                  //we have a preselection, trigger
+                  $("#uploadinputtemplate").trigger('change');
+                  $("#urluploadinputtemplate").trigger('change');
+                  $("#editorinputtemplate").trigger('change');
+                }
+            }
+       });
+      if (stage == 1) {
+       		$('#progressbar').progressbar({value: progress});
+       		setTimeout(pollstatus,2000);
+       }
+    }
 
 
    //Create a new project'
