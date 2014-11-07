@@ -428,8 +428,11 @@ class CLAMClient:
         c.setopt(pycurl.URL, self.url + project + '/input/' + filename)
         fields = list(data.items())
         c.setopt(c.HTTPPOST, fields)
-        c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
-        c.setopt(c.USERPWD, self.user + ':' + self.password)
+        if self.authenticated:
+            c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
+            c.setopt(c.USERPWD, self.user + ':' + self.password)
+        elif self.oauth:
+            c.setopt(c.HTTPHEADER, [ 'Authorization: Bearer %s' % str(self.oauth_access_token) ])
         c.setopt(c.WRITEFUNCTION, buf.write)
         c.perform()
         code = processhttpcode(c.getinfo(c.HTTP_CODE),[403]) #raises exception when not successful

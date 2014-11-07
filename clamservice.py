@@ -32,6 +32,7 @@ import hashlib
 import urllib2
 import getopt
 import time
+import socket
 try:
     import json
 except ImportError: #fallback for Python2.5
@@ -2803,7 +2804,7 @@ if __name__ == "__main__":
     if not fastcgi:
         if settings.URLPREFIX:
             settings.STANDALONEURLPREFIX = settings.URLPREFIX
-            print >>sys.stderr,"WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?"
+            warning("WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?")
             #raise Exception("Can't use URLPREFIX when running in standalone mode!")
         settings.URLPREFIX = '' #standalone server always runs at the root
 
@@ -2820,7 +2821,11 @@ if __name__ == "__main__":
     if settings.OAUTH and not fastcgi:
         warning("*** OAUTH is enabled but you are running the development server which has no HTTPS support, THIS IS NOT SECURE! ONLY USE FOR TESTING!  ***")
 
-    CLAMService('fastcgi' if fastcgi else '') #start
+    try:
+        CLAMService('fastcgi' if fastcgi else '') #start
+    except socket.error:
+        error("Unable to open socket. Is another service already running on this port?")
+
 
 def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""

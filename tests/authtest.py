@@ -68,7 +68,7 @@ class BasicServiceTest(unittest.TestCase):
     def test1_index(self):
         """Basic Service Test - Index and sanity"""
         data = self.client.index()
-        self.assertTrue(data.system_id == "textstats")
+        self.assertTrue(data.system_id == "authtest")
         self.assertTrue(isinstance(data.projects,list))
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
@@ -86,7 +86,7 @@ class BasicServiceTest(unittest.TestCase):
     def test2_3_project(self):
         """Basic Service Test - Project state retrieval"""
         data = self.client.get('basicservicetest')
-        self.assertTrue(data.system_id == "textstats")
+        self.assertTrue(data.system_id == "authtest")
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
         self.assertTrue(isinstance(data.input,list))
@@ -98,7 +98,7 @@ class BasicServiceTest(unittest.TestCase):
         self.assertTrue(success)
 
         data = self.client.get(projectname)
-        self.assertTrue(data.system_id == "textstats")
+        self.assertTrue(data.system_id == "authtest")
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
         self.assertTrue(isinstance(data.input,list))
@@ -319,3 +319,5 @@ class ArchiveUploadTest(unittest.TestCase):
     def tearDown(self):
         success = self.client.delete(self.project)
 
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
