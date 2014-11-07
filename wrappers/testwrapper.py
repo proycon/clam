@@ -80,7 +80,7 @@ for inputfile in clamdata.input:
         clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
 
         #invoke 'rev' through the shell to reverse the input, note the use of the shellsafe() function that wraps our input in the specified quotes (second parameter) and makes sure the value doesn't break out of the quoted environment!
-        os.system("rev " + shellsafe(str(inputfile),'"') + " > " + shellsafe(outputdir + os.path.basename(str(inputfile))) + '"')
+        os.system("rev " + shellsafe(str(inputfile),'"') + " > " + shellsafe(outputdir + os.path.basename(str(inputfile)),'"'))
     else:
         print "\tSkipping " + str(inputfile)
         clam.common.status.write(statusfile, "Skipping " + os.path.basename(str(inputfile)) + ", invalid format")
