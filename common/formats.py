@@ -198,3 +198,9 @@ class TiffImageFormat(CLAMMetaData):
     attributes = {}
     name ="Tiff Image"
     mimetype = 'image/tiff'
+
+class DjVuFormat(CLAMMetaData):
+    attributes = {}
+    name = "DjVu format"
+    mimetype = 'image/x-djvu'
+
