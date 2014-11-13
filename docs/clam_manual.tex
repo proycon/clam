@@ -375,10 +375,10 @@ The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directives go on
 one line, but were wrapped here
 for presentational purposes. Needless to say, all paths need to be adapted
 according to your setup and the configuration can be extended further as
-desired. The path \texttt{/path/to/clam/static/} should be changed to where CLAM is
-installed and where the \texttt{static} directory is found. Depending on your
+desired. The path \path{/path/to/clam/static/} should be changed to where CLAM is
+installed and where the \path{static} directory is found. Depending on your
 installation and versions, this will be a directory like: \\
-\texttt{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
+\path{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
 
 \item It is always recommended to add some form of authentication or more restrictive
 access. You can either let CLAM handle authentication (\emph{HTTP Digest
@@ -416,7 +416,7 @@ at FastCGI:
 
 \begin{enumerate}[leftmargin=5mm]
 \item Nginx misses a mime-type we need. Add the following
-    line to \texttt{/etc/nginx/mime.types}:
+    line to \path{/etc/nginx/mime.types}:
 \begin{verbatim}
   text/xsl                              xsl;
 \end{verbatim}
@@ -437,7 +437,7 @@ at FastCGI:
  kill `pgrep -f "python /path/to/clam/clamservice.py"`
 \end{verbatim}
 
-\item Add and adapt the following configuration to a server in \texttt{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
+\item Add and adapt the following configuration to a server in \path{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
 \begin{verbatim}
  root /path/to/clam;
 
@@ -798,7 +798,7 @@ through Shibboleth:
    </Location>
 \end{verbatim}
 
-The actual server, if it runs Apache, must always contain the directive
+The actual server, if it runs Apache, must always contain the directive \\
 \texttt{WSGIPassAuthorization On}.
 
 The CLAM service configuration file can in turn be restricted to accept \emph{only}
@@ -1266,7 +1266,10 @@ There are four different types of metafield actors:
 
 \begin{itemize}
 \item \texttt{SetMetaField(\emph{key},\emph{value})} -- Set metafield \emph{key} to the specified value.
-\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} -- If a value is specified: Unset this metafield if it has the specified value. If no value is specified: Unset the metafield regardless of value. This only makes sense if you set \texttt{copymetadata=True}.
+\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} -- If a value is
+  specified: Unset this metafield if it has the specified value. If no value is
+  specified: Unset the metafield regardless of value. This only makes sense if
+  you set \\ \texttt{copymetadata=True}.
 \item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} -- Copy
   metadata from one of the input template's metadata. Here \emph{inputtemplate}
   is the ID of one of the input templates in the profile, and the \emph{key}
@@ -1281,7 +1284,8 @@ the output file will be named \texttt{x.translation}.
 
 {\footnotesize{
 \begin{verbatim}
-OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
+OutputTemplate('translationoutput', PlainTextFormat,
+    "Translator output: Plain-text document",  
     CopyMetaField('encoding','maininput.encoding')
     SetMetaField('language','eo'),
     removeextension='.txt',
@@ -1300,7 +1304,8 @@ files.
 \begin{verbatim}
 PROFILES = [ 
   Profile( 
-    InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
+    InputTemplate('maininput', PlainTextFormat,
+     "Translator input (Plain-text document)",  
       StaticParameter(
        id='encoding',name='Encoding',description='The character encoding of the file', 
        value='utf-8'
@@ -1418,7 +1423,8 @@ Assume you have the following \emph{global} parameter:
 
 \begin{verbatim}
 BooleanParameter(
-  id='createlexicon',name='Create Lexicon',description='Create lexicon files', 
+  id='createlexicon',name='Create Lexicon',
+  description='Create lexicon files', 
 )
 \end{verbatim}
 
@@ -1546,9 +1552,11 @@ Take a look at the following example:
 
 \begin{verbatim}
 InputTemplate('lexicon', PlainTextFormat,"Input Lexicon", 
-   StaticParameter(id='encoding',name='Encoding',description='Character encoding',
+   StaticParameter(id='encoding',name='Encoding',
+       description='Character encoding',
        value='utf-8'),
-   ChoiceParameter(id='language',name='Language',description='The language the text is in', 
+   ChoiceParameter(id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]),
    InputSource(id='lexiconA', label="Lexicon A",
     path="/path/to/lexiconA.txt", 
@@ -1570,8 +1578,8 @@ choose only from the input sources, and cannot upload his own version.
 
 Metadata can be provided either in the inputsource configuration, or by simply
 adding a CLAM metadata file alongside the actual file. For the file
-\texttt{/path/to/lexiconA.txt}, the metadata file would be
-\texttt{/path/to/.lexiconA.txt.METADATA} (note the initial period; metadata
+\path{/path/to/lexiconA.txt}, the metadata file would be
+\path{/path/to/.lexiconA.txt.METADATA} (note the initial period; metadata
 files are hidden). 
 
 Input sources can also be defined globally, and correspond to multiple files,
@@ -1583,7 +1591,8 @@ a test set consisting out of many text documents is the input source:
 INPUTSOURCES = [
     InputSource(id='demotexts', label="Demo texts",
         path="/path/to/demotextdir/", 
-        metadata=PlainTextFormat(None, encoding='utf-8',language='en'),
+        metadata=PlainTextFormat(None, encoding='utf-8',
+                 language='en'),
         inputtemplate='maininput',
        ),
 ]
@@ -1678,8 +1687,10 @@ list. Consider the following example:
 
 \begin{verbatim}
 ACTIONS = [
-  Action(id='multiply',name="Multiplier",description="Multiply two
-  numbers",command="/path/to/multiply.sh $PARAMETERS",mimetype="text/plain",
+  Action(id='multiply',name="Multiplier",
+  description="Multiply two
+  numbers",command="/path/to/multiply.sh $PARAMETERS",
+  mimetype="text/plain",
   parameters=[
     IntegerParameter(id='x',name="Value 1"),
     IntegerParameter(id='y',name="Value 2"),
@@ -1717,8 +1728,9 @@ from elsewhere. We can now use this as an action directly:
 
 \begin{verbatim}
 ACTIONS = [
-  Action(id='multiply',name="Multiplier",description="Multiply two
-  numbers",function=multiply,mimetype="text/plain"
+  Action(id='multiply',name="Multiplier",
+  description="Multiply two numbers",
+  function=multiply,mimetype="text/plain"
   parameters=[
     IntegerParameter(id='x',name="Value 1"),
     IntegerParameter(id='y',name="Value 2"),
@@ -1813,9 +1825,10 @@ its components are made available in an instance of a CLAMData class.
 
 Suppose your wrapper script is called with the following command definition:
 
+{\footnotesize
 \begin{verbatim}
 COMMAND = "/path/to/wrapperscript.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY" 
-\end{verbatim}
+\end{verbatim}}
 
 
 Your wrapper scripts then typically starts in the following fashion:
@@ -1872,7 +1885,8 @@ holding a value between $0$ and $1$. The web-application will show a progress ba
 such information is provided:
 
 \begin{verbatim}
-clam.common.status.write(statusfile, "We're half way there! Hang on!", 0.5)
+clam.common.status.write(statusfile, 
+     "We're half way there! Hang on!", 0.5)
 \end{verbatim}
 
 If you have a specific input file you want to grab, you may obtain it from your
@@ -1928,9 +1942,10 @@ Data API.
 \begin{verbatim}
 shellsafe = clam.common.data.shellsafe #just a shortcut
 
-os.system("translate -l " + shellsafe(clamdata['language'],"'") + " " + \
+os.system("translate -l " + shellsafe(clamdata['language'],"'") + \
+ " " + \
  shellsafe(str(clamdata.inputfile('sourcetext')),'"') + \
- + " > " + shellsafe(outputdir + "/output.txt") ))
+ " > " + shellsafe(outputdir + "/output.txt") ))
 \end{verbatim}
 
 Each variable should be wrapped in \texttt{shellsafe}. The second argument to
