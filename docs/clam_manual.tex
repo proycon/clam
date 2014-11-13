@@ -1894,7 +1894,7 @@ dictionary-like fashion, for instance:
 author = inputfile.metadata['author']
 \end{verbatim}
 
-When you have multiple input files, you may want to iterate over all of them,
+When you have multiple input files, you may want to iterate over all of them.
 The name of the inputtemplate can be obtained from the metadata:
 
 \begin{verbatim}
@@ -1915,14 +1915,14 @@ os.system("translate -l " + clamdata['language'] + " " + \
 \end{verbatim}
 
 
-However, at this point
-you need to be conscient of possible malicious use, and make sure nobody can
-perform a code injection attack. The key here is to never pass unvalidated data
-obtained from user-input directly to the shell. CLAM's various parameters have
-there own validation options, the only risk left to mitigate is that of string
-input. If the global parameter \emph{language} would be a free string input
-field, a user may insert malicious code that gets passed to the shell. To
-prevent this, use the \texttt{shellsafe()} function from the CLAM Data API. 
+However, at this point you need to be aware of possible malicious use, and make
+sure nobody can perform a code injection attack. The key here is to never pass
+unvalidated data obtained from user-input directly to the shell. CLAM's various
+parameters have their own validation options; the only risk left to mitigate is
+that of string input. If the global parameter \emph{language} would be a free
+string input field, a user may insert malicious code that gets passed to the
+shell. To prevent this, use the \texttt{shellsafe()} function from the CLAM
+Data API. 
 
 
 \begin{verbatim}
@@ -1933,21 +1933,21 @@ os.system("translate -l " + shellsafe(clamdata['language'],"'") + " " + \
  + " > " + shellsafe(outputdir + "/output.txt") ))
 \end{verbatim}
 
-Each variable should be wrapped in \texttt{shellsafe}, the second argument to
+Each variable should be wrapped in \texttt{shellsafe}. The second argument to
 shellsafe expresses whether to wrap the variable in quotes, and if so, which
 quotes. Quotes are mandatory for values containing spaces or other symbols
 otherwise forbidden. If no quotes are used, shellsafe does more stringent
 checks to prevent code injection. A Python exception is raised if the variable
-is not deemed safe, and the shell will not be invoked. CLAM itself will pick
-this up and produce an error log.
+is not deemed safe, and the shell will not be invoked. CLAM itself will detect
+and produce an error log.
 
 
 \chapter{Documentation for Service Clients}
 
-CLAM is designed as a RESTful webservice, which implies that usage of the four
-HTTP verbs (GET/POST/PUT/DELETE) on pre-defined URLs is how you can communicate
-with a CLAM webservice. The webservice will in turn respond with standard HTTP
-response codes and, where applicable, in CLAM XML format.
+CLAM is designed as a RESTful webservice. This means a client communicates with
+CLAM through the four HTTP verbs (GET/POST/PUT/DELETE) on pre-defined URLs,
+effectively manipulating various resources. The webservice will in turn respond
+with standard HTTP response codes and, where applicable, a body in CLAM XML format.
 
 When writing a client for a CLAM webservice, Python users benefit greatly from
 the CLAM Client API, which in addition to the CLAM Data API provides a friendly
@@ -1955,7 +1955,7 @@ high-level interface for communication with a CLAM webservice and the handling
 of its data. Both are shipped as an integral part of CLAM by default. Using
 this API greatly facilitates writing a client for your webservice in a limited
 amount of time, so it is an approach to be recommended. Nevertheless, there are
-many valid reasons one might wish to write a client from scratch, not least as
+many valid reasons why one might wish to write a client from scratch, not least as
 this allows you to use any programming language of your choice, or better
 integrate a CLAM webservice as a part of an existing application.
 
@@ -2014,9 +2014,9 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differs per service). The parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differ per service). The parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
-\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
+\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
@@ -2051,9 +2051,19 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \hline
 \textbf{URL} & \texttt{/[project]/input/[filename]} or \texttt{/[project]/input/[inputtemplate]/[filename]}\\
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
+\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Response is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory: the input template, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/ query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as parameter to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
+\textbf{Description} & This method adds a new input file. Response is returned
+in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
+input template, which designates what kind of file will be added and points to
+one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/
+query arguments marked with an asterisk. Adding a file can proceed either by
+uploading it from the client machine \texttt{(file)}, by downloading it from
+another URL \texttt{(url)}, or by passing the contents in the POST message
+itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak
+Metadata can be passed in \emph{three} different ways: 1) by simply specifying
+a metadata field as parameter to the querystring, with the same ID as defined
+in the input template. 2) setting the \texttt{metafile} attribute to an HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
 
@@ -2118,6 +2128,8 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Offers a single archive, of the desired format,
+including all output files \\
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete all output files}} \\
 \hline
@@ -2163,7 +2175,7 @@ the proper access token. See the section on OAuth2 authentication for more detai
 
 %\chapter{Frequently Asked Questions}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{acl}
 \bibliography{clam}
 
 \end{document}
