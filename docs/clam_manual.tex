@@ -181,13 +181,18 @@ repository for the installation of all kinds of Python packages. Using the
 Python Package Index, installation is easy on Debian/Ubuntu based Linux
 distributions:
 
+{ \small
 \begin{verbatim} $ sudo easy_install clam \end{verbatim}
+}
+
 
 This will automatically download and globally install the latest version of
 CLAM for you. If you already have CLAM installed and just want to update it,
 run the following:
 
+{ \small
 \begin{verbatim} $ sudo easy_install -U clam \end{verbatim}
+}
 
 It it wise to repeatedly issue this command (every month or so), as
 updates are released on a regular basis.
@@ -195,11 +200,15 @@ updates are released on a regular basis.
 In case \texttt{easy\_install} is not yet available on your system, you first need to
 install it. On a Debian/Ubuntu based distribution this can be done as follows: 
 
+{ \small
 \begin{verbatim} $ sudo apt-get install python-setuptools \end{verbatim}
+}
 
 Or for Red Hat/Fedora/CentOS:
 
+{ \small
 \begin{verbatim} # yum install python-setuptools \end{verbatim}
+}
 
 For other Linux distributions, and for Mac OS X with homebrew, fink, or
 macports, a similar package should exist. 
@@ -215,7 +224,9 @@ locally in your home directory's python package directory, then invoke
 \texttt{easy\_install} with the \texttt{--user} flag. This will install CLAM in
 a path such as \texttt{~/.local/lib/python2.7/site-packages}.
 
+{ \small
 \begin{verbatim} $ easy_install --user clam \end{verbatim}
+}
 
 Alternatively, other custom paths can be specified using the \texttt{--prefix}
 flag, but this forces the user to manually ensure the target directory is part
@@ -279,9 +290,11 @@ cloned directly from its git repository at
 \texttt{http://github.com/proycon/clam}, using \texttt{git}. Cloning this CLAM
 repository is done as follows:
 
+{ \small
 \begin{verbatim}
 $ git clone git://github.com/proycon/clam.git
 \end{verbatim}
+}
  
 This will create a directory \texttt{clam} in your current working directory.
 To install CLAM globally or in your local Python packages, you can use the
@@ -321,6 +334,7 @@ is shown in full below. Copy this to somewhere like
 where Python can find it, make sure to explicitly specify its parent
 directory according to the instructions in the example.
 
+{ \small
 \begin{verbatim}
 #!/usr/bin/env python
 import sys
@@ -342,6 +356,7 @@ import yourwebservice #** import your configuration module here! **
 import clam.clamservice
 application = clam.clamservice.run_wsgi(yourwebservice)
 \end{verbatim}
+}
  
 \item Configure your service configuration file as explained in
 Section~\ref{sec:serviceconfig}. Take special note of
@@ -357,6 +372,7 @@ in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
 assumed you configured your service configuration file with
 \texttt{URLPREFIX} set to \emph{``yourservice''}.
 
+{ \small
 \begin{verbatim}
  WSGIScriptAlias /yourwebservice \
   /path/to/yourwebservice/yourwebservice.wsgi/
@@ -370,6 +386,7 @@ assumed you configured your service configuration file with
     Allow from all
  </Directory>
 \end{verbatim}
+}
 
 The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directives go on
 one line, but were wrapped here
@@ -417,27 +434,34 @@ at FastCGI:
 \begin{enumerate}[leftmargin=5mm]
 \item Nginx misses a mime-type we need. Add the following
     line to \path{/etc/nginx/mime.types}:
+{ \small
 \begin{verbatim}
   text/xsl                              xsl;
 \end{verbatim}
+}
 
 \item Configure your service configuration file as explained in
   Section~\ref{sec:serviceconfig}. Take special note of Subsection~\ref{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
 
 \item Make a script \texttt{start\_yourservice.sh} which will start the daemon for FastCGI. Change \texttt{UID} and \texttt{GID} with user ID/group ID you intend to use. Note that the IP and port can be set to anything you like, as long as you use the same consistently throughout the configuration.
+{ \small
 \begin{verbatim}
  #!/bin/bash
  spawn-fcgi -u UID -g GID -d /path/to/clam \
    -a 127.0.0.1 -p 9002 -- /path/to/clam/clamservice.py
 \end{verbatim}
+}
 
 \item Make a script \texttt{stop\_yourservice.sh} as a convenient shortcut to stop the service again:
+{ \small
 \begin{verbatim}
  #!/bin/bash
  kill `pgrep -f "python /path/to/clam/clamservice.py"`
 \end{verbatim}
+}
 
 \item Add and adapt the following configuration to a server in \path{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
+{ \small
 \begin{verbatim}
  root /path/to/clam;
 
@@ -466,6 +490,7 @@ at FastCGI:
     }
  }
 \end{verbatim}
+}
 \item Launch \texttt{start\_yourservice.sh}  and (re)start nginx.
 \end{enumerate}
 
@@ -564,9 +589,11 @@ use and for use in filenames and may not contain any spaces or other special
 characters. Mind that this ID is case sensitive, so it is recommended to keep
 it all lower case. Example:
 
+{ \small
 \begin{verbatim}
 $ clamnewproject myfirstproject 
 \end{verbatim}
+}
 
 The tool will create a directory named after the identifier, in which two
 template files are created which are similarly named after the chosen
@@ -695,28 +722,33 @@ their owners, unless no authentication is used at all, in which case everybody
 can see all projects. An example of a configuration with plain text password,
 converted on the fly to hashes, is found below:
 
+{ \small
 \begin{verbatim}
     USERS = {
         'bob': pwhash('bob', SYSTEM_ID, 'secret'), 
         'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
     }
 \end{verbatim}
+}
 
 However, computing hashes on the fly like in the above example is quite
 insecure and not recommended. You should pre-compute the hashes and add these
 instead:
 
+{ \small
 \begin{verbatim}
     USERS = {
         'bob': '6d72b6376858cf3c618c826fab1b0109',
         'alice': 'e445370f57e19a8bfa454404ba3892cc',
     }
 \end{verbatim}
+}
 
 This pre-computation can be done in an interactive python session, executed from
 the CLAM directory. Make sure to change \texttt{yourconfig} in the
 example below to your actual service configuration file:
 
+{ \small
 \begin{verbatim}
 $ python
 >>> from clam.common.digestauth import pwhash
@@ -724,6 +756,7 @@ $ python
 >>> pwhash('alice', settings.SYSTEM_ID, 'secret')
 'e445370f57e19a8bfa454404ba3892cc'
 \end{verbatim}
+}
 
 You can mark certain users as being administrators using the \texttt{ADMINS}
 list. Administrators can see and modify all projects.
@@ -749,6 +782,7 @@ again a hashed password in the same fashion as in \texttt{USERS}, so it never
 contains a plaintext password. \texttt{USERS\_MYSQL} is set as a Python
 dictionary with the following configurable keys:
 
+{ \small
 \begin{verbatim}
     USERS_MYSQL = {
         'host': 'localhost',  #(default)
@@ -760,6 +794,7 @@ dictionary with the following configurable keys:
         'passwordfield': 'password',  #(default)
     }
 \end{verbatim}
+}
 
 \subsubsection{External authentication schemes}
 
@@ -787,6 +822,7 @@ The example below shows an Apache configuration for a \emph{proxy server} or
 \emph{entry server} that forwards to another server on which a CLAM service runs, mediated
 through Shibboleth:
 
+{ \small
 \begin{verbatim}
    <Location /yourclamservice>
         AuthType shibboleth
@@ -797,6 +833,7 @@ through Shibboleth:
         ProxyPassReverse http://realserver/yourclamservice
    </Location>
 \end{verbatim}
+}
 
 The actual server, if it runs Apache, must always contain the directive \\
 \texttt{WSGIPassAuthorization On}.
@@ -804,10 +841,12 @@ The actual server, if it runs Apache, must always contain the directive \\
 The CLAM service configuration file can in turn be restricted to accept \emph{only}
 Shibboleth authenticated users using the following settings:
 
+{ \small
 \begin{verbatim}
 PREAUTHHEADER = 'HTTP_EDUPERSONPRINCIPALNAME'
 PREAUTHONLY = True
 \end{verbatim}
+}
 
 Replace \texttt{HTTP\_EDUPERSONPRINCIPALNAME} with the proper HTTP header; this
 variable name is just an example in a CLARIN-NL context.
@@ -824,11 +863,13 @@ authentication provider, and obtain a \texttt{CLIENT\_ID} and
 \texttt{CLIENT\_SECRET}, the latter should be kept strictly private! These go
 into your service configuration file and we then enable OAuth as follows: 
 
+{ \small
 \begin{verbatim}
 OAUTH = True
 OAUTH_CLIENT_ID = "some_client_id"
 OAUTH_CLIENT_SECRET = "donotsharewithanyone"
 \end{verbatim}
+}
 
 Note that OAuth2 by definition requires HTTPS, therefore, it can not be used
 with the built-in webserver but requires being embedded in a webserver such as
@@ -841,16 +882,20 @@ The authorization provider makes available a URL for authentication and for
 obtaining the final access token. These are configured as follows in the CLAM
 service configuration file: 
 
+
+{ \small
 \begin{verbatim}
 OAUTH_AUTH_URL= "https://yourprovider/oauth/authenticate"
 OAUTH_TOKEN_URL "https://yourprovider/oauth/token"
 \end{verbatim}
+}
 
 The authorization provider in turn redirects the user back to the CLAM
 webservice, which in turn returns the access token to the client in its XML
 response as follows. Note that there will just be this one tag without any
 children.
 
+{ \small
 \begin{verbatim}
 <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version"
 id="yourservice"
@@ -858,6 +903,7 @@ id="yourservice"
  oauth_access_token="1234567890">
 </clam>
 \end{verbatim}
+}
 
 Now any subsequent call to CLAM must pass this access token, otherwise you'd
 simply be redirected to authenticate again. The client must thus explicitly call CLAM
@@ -865,18 +911,22 @@ again. Passing the access token can be done in two ways, the recommended way is
 by sending the following HTTP header in your request, where the number is
 replaced with the actual access token:
 
+{ \small
 \begin{verbatim}
 Authentication: Bearer 1234567890
 \end{verbatim}
+}
 
 The alternative way is by passing it along with the HTTP GET/POST request. This
 is considered less secure as your browser may log it in its history, and the
 server in its access logs. It can still not be intercepted, however, as it is
 transmitted over HTTPS.
 
+{ \small
 \begin{verbatim}
 https://yourservice.com/?oauth_access_token=1234567890
 \end{verbatim}
+}
 
 Automated clients can avoid this method, but it is necessarily used by the
 web-based interface. To mitigage security concerns, the access token you
@@ -889,9 +939,11 @@ offer a revoke URL, as described in RFC7009\footnote{
 \url{https://tools.ietf.org/html/rfc7009}}, which you configure in your service
 configuration file as follows:
 
+{ \small
 \begin{verbatim}
 OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
 \end{verbatim}
+}
 
 If none is set, CLAM's logout procedure will simply instruct users to clear
 their browser history and cache, which is clearly sub-optimal.
@@ -905,6 +957,7 @@ how to implement this function for a resource provider that returns the
 username in JSON format. This, however, is completely provider-specific so
 you always have to write your own function! 
 
+{ \small
 \begin{verbatim}
 def myprovider_username_function(oauthsession):
   r = oauthsession.get("https://yourprovider/user")
@@ -913,6 +966,7 @@ def myprovider_username_function(oauthsession):
 
 OAUTH_USERNAME_FUNCTION = myprovider_username_function
 \end{verbatim}
+}
 
 Various providers require the system to specify scopes, indicating the
 permissions the application requests from the resource provider. This can be
@@ -920,12 +974,14 @@ done using the \texttt{OAUTH\_SCOPE} directive in the service configuration
 file, which takes a list of scopes, all of which are provider-specific. The
 following example refers to the Google API:
 
+{ \small
 \begin{verbatim}
 OAUTH_SCOPE = [
      "https://www.googleapis.com/auth/userinfo.email",
      "https://www.googleapis.com/auth/userinfo.profile"
 ]
 \end{verbatim}
+}
 
 One of the problems with OAuth2 for automated clients is the authentication
 step that often requires user intervention. CLAM redirects unauthenticated
@@ -1130,7 +1186,7 @@ All parameters can take the following extra keyword arguments:
 
 The following example defines a boolean parameter with a parameter flag:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 BooleanParameter(
   id='createlexicon',
@@ -1139,7 +1195,7 @@ BooleanParameter(
   paramflag='-l'
 )
 \end{verbatim}
-}}
+}
 
 Thus, if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
 
@@ -1160,13 +1216,13 @@ match, the system will produce an error, as it cannot perform any actions.
 The profile specification skeleton looks as follows. Note that there may be
 multiple input templates and/or multiple output templates:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
     Profile( InputTemplate(...), OutputTemplate(...) ) 
 ]
 \end{verbatim}
-}}
+}
 
 
 The definition for \texttt{InputTemplate} takes three mandatory arguments:
@@ -1216,22 +1272,25 @@ After specifying any such parameters, there are some possible keyword arguments:
 Take a look at the following example of an input template for plaintext
 documents for an automatic translation system, illustrating of all the above:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
-InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text document",  
+InputTemplate('maininput', PlainTextFormat,
+  "Translator input: Plain-text document",  
   StaticParameter(
-    id='encoding',name='Encoding',description='The character encoding of the file', 
+    id='encoding',name='Encoding',
+    description='The character encoding of the file', 
     value='utf-8'
   ),  
   ChoiceParameter(
-    id='language',name='Language',description='The language the text is in', 
+    id='language',name='Language',
+    description='The language the text is in', 
     choices=[('en','English'),('nl','Dutch'),('fr','French')]),
   ),      
   extension='.txt',
   multi=True
 )
 \end{verbatim}
-}}
+}
 
 
 For \texttt{OutputTemplate}, the syntax is similar. It takes the three
@@ -1282,7 +1341,7 @@ Take a look at the following example for a fictitious automatic translation
 system, translating to Esperanto. If an input file \texttt{x.txt} is uploaded,
 the output file will be named \texttt{x.translation}.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 OutputTemplate('translationoutput', PlainTextFormat,
     "Translator output: Plain-text document",  
@@ -1293,25 +1352,27 @@ OutputTemplate('translationoutput', PlainTextFormat,
     multi=True
 )
 \end{verbatim}
-}}
+}
 
 Putting it all together, we obtain the following profile definition describing
 a fictitious machine translation system from English, Dutch or French to
 Esperanto, where the system accepts and produces UTF-8 encoded plain-text
 files.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
   Profile( 
     InputTemplate('maininput', PlainTextFormat,
      "Translator input (Plain-text document)",  
       StaticParameter(
-       id='encoding',name='Encoding',description='The character encoding of the file', 
+       id='encoding',name='Encoding',
+       description='The character encoding of the file', 
        value='utf-8'
       ),  
       ChoiceParameter(
-       id='language',name='Language',description='The language the text is in', 
+       id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]
       ),
       extension='.txt',
@@ -1328,7 +1389,7 @@ PROFILES = [
   )
 ]
 \end{verbatim}
-}}
+}
 
 
 \subsection{Control over filenames}
@@ -1373,17 +1434,20 @@ character encoding and language in the filename itself. Note also the use of
 the special variable \texttt{\$SEQNR}, which assigns a sequence number as the
 templates are both in multi mode.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
   Profile( 
-    InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
+    InputTemplate('maininput', PlainTextFormat,
+      "Translator input (Plain-text document)",  
       StaticParameter(
-       id='encoding',name='Encoding',description='The character encoding of the file', 
+       id='encoding',name='Encoding',
+       description='The character encoding of the file', 
        value='utf-8'
       ),  
       ChoiceParameter(
-       id='language',name='Language',description='The language the text is in', 
+       id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]
       ),
       filename='input$SEQNR.$language.$encoding.txt'
@@ -1399,7 +1463,7 @@ PROFILES = [
   )
 ]
 \end{verbatim}
-}}
+}
 
 In addition to variables that refer to global or local parameters. There are some additional variables set by CLAM which you can use:
 
@@ -1421,15 +1485,18 @@ parameter is enabled. CLAM offers a solution for such situations using the
 
 Assume you have the following \emph{global} parameter:
 
+{ \small
 \begin{verbatim}
 BooleanParameter(
   id='createlexicon',name='Create Lexicon',
   description='Create lexicon files', 
 )
 \end{verbatim}
+}
 
 We can then turn an output template into an output template conditional on this parameter using the following construction:
 
+{ \small
 \begin{verbatim}
   ParameterCondition(createlexicon=True, 
     then=OutputTemplate('lexiconoutput', PlainTextFormat,
@@ -1438,6 +1505,7 @@ We can then turn an output template into an output template conditional on this 
     ) 
   )
 \end{verbatim}
+}
 
 The first argument of ParameterCondition is the condition. Here you use the ID
 of the parameter and the value you want to check against. The above example
@@ -1526,6 +1594,7 @@ metafield actors.
 The below example illustrates the use of the viewer
 \texttt{SimpleTableViewer}, capable of showing CSV files:
 
+{ \small
 \begin{verbatim}
 OutputTemplate('freqlist',CSVFormat,"Frequency list",
     SimpleTableViewer(),
@@ -1533,6 +1602,7 @@ OutputTemplate('freqlist',CSVFormat,"Frequency list",
     extension='.patterns.csv',
 )
 \end{verbatim}
+}
 
 \subsection{Working with pre-installed data}
 
@@ -1550,6 +1620,7 @@ input template, or more globally.
 
 Take a look at the following example:
 
+{ \small
 \begin{verbatim}
 InputTemplate('lexicon', PlainTextFormat,"Input Lexicon", 
    StaticParameter(id='encoding',name='Encoding',
@@ -1569,6 +1640,7 @@ InputTemplate('lexicon', PlainTextFormat,"Input Lexicon",
    onlyinputsource=False
 )            
 \end{verbatim}
+}
 
 This defines an input template for some kind of lexicon, with two pre-defined
 input sources: ``lexicon A'' and ``lexicon B''. The user can choose between
@@ -1587,6 +1659,7 @@ i.e. they point to a directory containing multiple files instead of pointing to
 a single file. Let us take the example of a spelling correction demo, in which
 a test set consisting out of many text documents is the input source:
 
+{ \small
 \begin{verbatim}
 INPUTSOURCES = [
     InputSource(id='demotexts', label="Demo texts",
@@ -1597,6 +1670,7 @@ INPUTSOURCES = [
        ),
 ]
 \end{verbatim}
+}
 
 In these cases, it is essential to set the \texttt{inputtemplate=} parameter.
 All files in the directory must be formatted according to this input template.
@@ -1685,6 +1759,7 @@ Actions are specified in the service configuration file in the \texttt{ACTIONS}
 list. Consider the following example:
 
 
+{ \small
 \begin{verbatim}
 ACTIONS = [
   Action(id='multiply',name="Multiplier",
@@ -1697,6 +1772,7 @@ ACTIONS = [
   ])
 ]
 \end{verbatim}
+}
 
 The ID of the action determines on what URL it listens. In this case the URL
 will be \texttt{/actions/multiply/}, relative to the root of your service. The
@@ -1718,14 +1794,17 @@ It may, however, not even be necessary to invoke an external script. Actions
 support calling Python functions directly. Consider the following trivial Python
 function for multiplication:
 
+{ \small
 \begin{verbatim}
 def multiply(a,b):
   return a * b
 \end{verbatim}
+}
 
 You can define functions in the service configuration file itself, or import it
 from elsewhere. We can now use this as an action directly:
 
+{ \small
 \begin{verbatim}
 ACTIONS = [
   Action(id='multiply',name="Multiplier",
@@ -1737,6 +1816,7 @@ ACTIONS = [
   ])
 ]
 \end{verbatim}
+}
 
 Again, the parameters are passed in the order they are specified, irregardless
 of their names. A mismatch in parameters will result in an error as soon as you
@@ -1775,11 +1855,13 @@ action.
 If you want to use only actions and disable the project paradigm
 entirely, set the following in your service configuration file:
 
+{ \small
 \begin{verbatim}
 COMMAND = None
 PROFILES = []
 PARAMETERS = []
 \end{verbatim}
+}
 
 
 \section{Wrapper script}
@@ -1834,6 +1916,7 @@ COMMAND = "/path/to/wrapperscript.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 Your wrapper scripts then typically starts in the following fashion:
 
 
+{ \small
 \begin{verbatim}
 import sys
 import clam.common.data
@@ -1844,6 +1927,7 @@ outputdir = sys.argv[3]
 
 clamdata = clam.common.data.getclamdata(datafile)
 \end{verbatim}
+}
 
 The first statements parse the command line arguments. The last statement
 returns a \texttt{CLAMData} instance, which contains all data your wrapper might need,
@@ -1867,35 +1951,43 @@ variables available are:
 Any global parameters are available from the \texttt{clamdata} instance, by
 using it like a Python dictionary, where the keys correspond to the Parameter ID:
 
+{ \small
 \begin{verbatim}
 parameter = clamdata['parameter_id']
 \end{verbatim}
+}
 
 The CLAM API also has facilities to use a status file to relay progress
 feedback to the web-interface. Using it is as simple as importing the library
 and writing messages at strategic points during your program's execution:
 
+{ \small
 \begin{verbatim}
 import clam.common.status
 clam.common.status.write(statusfile, "We are running!")
 \end{verbatim}
+}
 
 Progress can also be expressed through an additional completion parameter,
 holding a value between $0$ and $1$. The web-application will show a progress bar if
 such information is provided:
 
+{ \small
 \begin{verbatim}
 clam.common.status.write(statusfile, 
      "We're half way there! Hang on!", 0.5)
 \end{verbatim}
+}
 
 If you have a specific input file you want to grab, you may obtain it from your
 \texttt{clamdata} instance by inputtemplate:
 
+{ \small
 \begin{verbatim}
 inputfile = clamdata.inputfile('some-inputtemplate-id')
 inputfilepath = str(inputfile) 
 \end{verbatim}
+}
 
 The variable \texttt{inputfilepath} in the above example will contain the full
 path to the file that was uploaded by the user for the specified input
@@ -1904,29 +1996,35 @@ template.
 Once you have a file, you can easily obtain any associated metadata in a
 dictionary-like fashion, for instance:
 
+{ \small
 \begin{verbatim}
 author = inputfile.metadata['author']
 \end{verbatim}
+}
 
 When you have multiple input files, you may want to iterate over all of them.
 The name of the inputtemplate can be obtained from the metadata:
 
+{ \small
 \begin{verbatim}
 for inputfile in clamdata.input:
     inputfilepath = str(inputfile)
     inputtemplate = inputfile.metadata.inputtemplate
 \end{verbatim}
+}
   
 The core of your wrapper script usually consists of a call to your external
 program. In Python this can be done through \texttt{os.system()}. Consider the
 following ficticious example of a program that translates an input text to the
 language specified by a global parameter.
 
+{ \small
 \begin{verbatim}
 os.system("translate -l " + clamdata['language'] + " " + \
  str(clamdata.inputfile('sourcetext')) + \
  + " > " + outputdir + "/output.txt"))
 \end{verbatim}
+}
 
 
 However, at this point you need to be aware of possible malicious use, and make
@@ -1939,6 +2037,7 @@ shell. To prevent this, use the \texttt{shellsafe()} function from the CLAM
 Data API. 
 
 
+{ \small
 \begin{verbatim}
 shellsafe = clam.common.data.shellsafe #just a shortcut
 
@@ -1947,6 +2046,7 @@ os.system("translate -l " + shellsafe(clamdata['language'],"'") + \
  shellsafe(str(clamdata.inputfile('sourcetext')),'"') + \
  " > " + shellsafe(outputdir + "/output.txt") ))
 \end{verbatim}
+}
 
 Each variable should be wrapped in \texttt{shellsafe}. The second argument to
 shellsafe expresses whether to wrap the variable in quotes, and if so, which
