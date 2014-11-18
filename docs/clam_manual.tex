@@ -460,7 +460,7 @@ at FastCGI:
 \end{verbatim}
 }
 
-\item Add and adapt the following configuration to a server in \path{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
+\item Add and adapt the following configuration to a server in \\ \path{/etc/nginx/sites-enabled} . Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
 { \small
 \begin{verbatim}
  root /path/to/clam;
@@ -1148,7 +1148,7 @@ The seven parameter types are:
   ID is the internal value, and label the text the user sees. For example,
   suppose a parameter with flag \texttt{-c} is defined.
   \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user
-  selects ``green'', then  \texttt{-c g} will be added to
+  selects ``green'', then  \texttt{-c g} will be added to \\
   \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=},
   and then the ID of the choice. If you want the user to be able to select
   multiple parameters, you can set the option \texttt{multi=True}. The IDs
