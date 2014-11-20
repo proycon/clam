@@ -1,0 +1,154 @@
+\documentclass[xcolor=table,10pt,t]{beamer}
+\title{CLAM}
+\subtitle{Bringing your NLP command-line tools to the web!}
+\date{\today}
+\author{Maarten van Gompel}
+%% Use the official themes as much as possible
+%\usetheme[official=false,department=clst]{ruhuisstijl}
+%\usetheme[official=false]{ruhuisstijl}
+\usetheme[official=true,department=clst]{ruhuisstijl}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+        \begin{figure}
+          \includegraphics[height=1cm]{clamup_bw.png}
+        \end{figure}
+        \vspace{3.5cm}
+      \includegraphics[justify=left,width=5cm]{lama-logo-transparent.png}
+\end{frame}
+
+
+
+
+
+
+
+\begin{frame}{Introduction}
+  \begin{block}{}
+    \textbf{Observation:} NLP tools are often command-line programs \ldots for
+    good reason.
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Command line tools: pros}
+  \begin{block}{Command-line tools are a good thing!}
+      \emph{``This is the Unix philosophy: Write programs that do one thing and do
+      it well. Write programs to work together.'' (Doug McIlroy)}
+      
+      \begin{itemize}
+        \item \textbf{Flexibility \& Extensibility}: Integrate tools into pipelines, the output of one tool is the
+          input to another
+        \item \textbf{Performance}: Little overhead
+        \item \textbf{Modularity}: Separate the interface from the actual program
+      \end{itemize}
+      
+  \end{block}
+
+  \begin{block}{}<2->
+        \begin{figure}
+            \includegraphics[height=3cm]{unix_cartoon.png}
+        \end{figure}
+  \end{block}
+\end{frame}
+
+
+
+\begin{frame}{Command line tools: cons}
+  \begin{block}{But..}
+      \begin{itemize}
+        \item The command-line is challenging and intimidating for non-technical end-users
+        \begin{figure}
+            \includegraphics[height=4cm]{commandlinefear.jpg}
+        \end{figure}
+        \item<2-> Installation may be complex and depend on other software
+        \item<2-> Web-connectivity has to be explicitly built-in in your program (not trivial)
+      \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{CLAM as a solution}
+  \begin{block}{What is CLAM?}
+      CLAM is software that wraps itself around your command-line NLP-tool and:
+      
+      \begin{itemize}
+        \item Offers an automatically generated \textbf{web-based
+          user-interface} for human end-users to interact with your tool
+        \item Offers an automatically generated \textbf{RESTful webservice} interface for automated clients to interact with your tool
+      \end{itemize}
+  \end{block}
+
+  \begin{block}{How to use CLAM?}
+      You can wrap your application with minimal effort:
+      
+      \begin{enumerate}
+        \item .. write a \textbf{service configuration} specifying what kind of input your
+          program expects and what output it produces. The interfaces can be generated on the basis of this.
+        \item .. write a \textbf{wrapper script} that acts as the glue between CLAM and your tool
+      \end{enumerate}
+      
+  \end{block}
+\end{frame}
+
+
+\begin{tussenpagina}{ }{ }{screenshot_wide.png}
+\end{tussenpagina}
+
+\begin{frame}{Typical workflow}
+  \begin{enumerate}
+    \item User (or automated client) creates a project
+    \item User uploads input files
+    \item User sets parameters for the run
+    \item User presses the ``START'' button
+    \item The tool runs for a certain time (may be long), progress status is
+      reported back to the user
+    \item When doen, the output files are presented
+    \item User may select output files for viewing or download
+  \end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Notable Features}
+  \begin{block}{}
+      \begin{itemize}
+        \item Optimised for \textbf{batch processing} and dealing with
+          \textbf{large files}, your tool may run for hours or days if necessary
+        \item \textbf{Storage model}: files are uploaded and downloaded, they stay on server in ``projects'' until explicitly removed.
+        \item Extensive \textbf{user-authentication} support (including OAuth2).
+        \item Extensive support for \textbf{metadata} and \textbf{provenance
+          data}
+        \item Suitable for use in external workflow management systems.
+        \item Support for quick real-time ``actions''; tie scripts to URLs.
+        \item Support for viewers and convertors
+        \item \textbf{Python API} for Python users (clients \& service providers)
+        \item Used by various projects in \textbf{CLARIN-NL} and others (CLAM is funded through CLARIN-NL)
+      \end{itemize}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Demo}
+  \begin{block}{}
+      \begin{itemize}
+        \item CLAM website: \url{http://proycon.github.io/clam}
+      \end{itemize}
+
+      \begin{itemize}
+        \item Numerous webservices from our department are hosted here:
+          \url{http://webservices-lst.science.ru.nl}
+        \item (register for a free account if you have none yet)
+      \end{itemize}
+      \medskip
+        \begin{figure}
+          \includegraphics[height=1.5cm]{clamup.png}
+        \end{figure}
+  \end{block}
+\end{frame}
+
+
+
+\end{document}
