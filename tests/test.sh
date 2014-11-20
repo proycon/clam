@@ -47,7 +47,7 @@ kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 sleep 2
 
 echo "Starting clam textstats service" >&2
-clamservice clam.config.textstats 2> servicetest.server.log &
+clamservice -d clam.config.textstats 2> servicetest.server.log &
 sleep 5
 
 echo "Running service tests:" >&2
@@ -65,7 +65,7 @@ kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 
 
 echo "Starting clam service 'authtest'" >&2
-clamservice clam.config.authtest 2> authtest.server.log &
+clamservice -d clam.config.authtest 2> authtest.server.log &
 sleep 5
 
 

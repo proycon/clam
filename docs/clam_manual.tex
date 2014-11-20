@@ -1,10 +1,12 @@
-\documentclass[a4paper,12pt]{report}
+\documentclass[a4paper,12pt,twoside,openright]{report}
 \usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{placeins}
 \usepackage{hyperref}
 \usepackage{supertabular}
 \usepackage{natbib}
+\usepackage{enumitem}
+\usepackage[font={small,sf},sf]{caption}
 
 \author{Maarten van Gompel}
 
@@ -31,7 +33,7 @@
 \begin{titlepage}
 \begin{center}
 \textsc{\large Language and Speech Technology\\ Technical Report Series}\\[1.5cm] 
-\textsc{Report Number LST-14-??}\\[0.5cm] 
+\textsc{Report Number LST-14-03}\\[0.5cm] 
 %\vspace{3cm}  %PRERELEASE
 
 \HRule \\[0.5cm]
@@ -41,8 +43,7 @@
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-%\emph{November 7th, 2013} \\[0.5cm] 
-\emph{October 28th, 2014} \small{(pending acceptation)} \\[0.5cm] 
+\emph{November 11th, 2014} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -74,11 +75,11 @@ which at the same time also acts as a modern webapplication with which human
 end-users can interact. CLAM takes a description of your system and wraps
 itself around the system, allowing clients or users to upload input files to
 your application, start your application with specific parameters of their
-choice, and download and view the output of the application. Whilst the
+choice, and download and view the output of the application. While the
 application runs, users can monitor its status.
 
 CLAM is set up in a universal fashion, making it flexible enough to be wrapped
-around a wide range of applications with a command line interface. These
+around a wide range of applications that have a command line interface. These
 applications are treated as a black box, of which only the parameters, input
 formats, and output formats need to be described. The applications themselves
 need not be network-aware in any way, nor aware of CLAM, and the handling and
@@ -108,8 +109,7 @@ The webservice responds in the CLAM XML format. An associated XSL stylesheet
 \citep{XSLT} can directly transform this to xhtml in the user's browser, thus
 providing a standalone web application for human end-users. 
 
-
-CLAM comes with an ample number of features, the most notable ones being:
+The most notable features of CLAM are: 
 
 \begin{itemize}
 \item \textbf{RESTful webservice} -- \emph{CLAM is a fully RESTful webservice}
@@ -119,19 +119,19 @@ CLAM comes with an ample number of features, the most notable ones being:
 \item \textbf{Authentication} -- \emph{A user-based authentication mechanism
   through HTTP Digest is provided. Morever, OAuth2 is also supported for delegating
   authentication}
-\item \textbf{Metadata and provenance data} -- \emph{There is extensive support for metadata and provenance data}
+\item \textbf{Metadata and provenance data} -- \emph{Extensive support for metadata and provenance data is offered}
 \item \textbf{Automatic converters} -- \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
 \item \textbf{Viewers} -- \emph{Viewers enable web-based visualisation for a particular format. CLAM supports both built-in python-based viewers as well as external viewers in the form of external (non-CLAM) webservices.}
 \item \textbf{Predefined datasets} -- \emph{Service providers may optionally predefine datasets, such as large corpora} 
 \item \textbf{Batch Processing} -- \emph{CLAM's default project paradigm is ideally suited for
   batch-processing and the processing of large files. The background process
   may run for an undefined period}
-\item \textbf{Actions} -- \emph{CLAM's action paradigm is a remote procedure
-  call mechanism in which you make available actions (any script/program or Python
+\item \textbf{Actions} -- \emph{CLAM's action paradigm is a remote-procedure
+  call-mechanism in which you make available actions (any script/program or Python
   function) on specific URLs}.
 \end{itemize}
 
-In publication of research that makes use of this software, a citation should
+In publication pertaining to  research that makes use of this software, a citation should
 be given of: {\em ``Maarten van Gompel (2014). CLAM: Computational Linguistics
 Application Mediator. Documentation. LST Technical Report Series 14-03.''}.
 
@@ -155,7 +155,7 @@ people who want to build a CLAM Webservice around their tool, and a chapter for
 service clients, users wanting to write automated clients to communicate with
 the aforemented webservice.
 
-This documentation is not intended for end-users using only the web application
+This documentation is not intended for end users using only the web application
 interface. 
 
 \chapter{Documentation for Service Providers}
@@ -163,17 +163,16 @@ interface.
 \section{Technical details}
 
 CLAM is written in Python 2.6 \citep{PYTHON}, and is built on the webpy
-framework\footnote{http://webpy.org}. It can run
+framework.\footnote{http://webpy.org} It can run
 stand-alone thanks to the built-in cherrypy
-webserver\footnote{http://cherrypy.org}; no additional webserver
+webserver;\footnote{http://cherrypy.org} no additional webserver
 is needed to test your service. In production environments, it is however
 strongly recommended that CLAM is integrated into a real webserver. Supported
 are: Apache, nginx or lighthttpd, though others may work too.
 
 The software is designed for Unix-based systems (e.g. Linux or BSD) only. It
 also has been verified to run on Mac OS X, although this is less well supported
-and more difficult to install. Windows is not supported at all, and never will
-be.
+and more difficult to install. Windows is not supported.
 
 \subsection{Installation}
 
@@ -182,25 +181,34 @@ repository for the installation of all kinds of Python packages. Using the
 Python Package Index, installation is easy on Debian/Ubuntu based Linux
 distributions:
 
+{ \small
 \begin{verbatim} $ sudo easy_install clam \end{verbatim}
+}
+
 
 This will automatically download and globally install the latest version of
 CLAM for you. If you already have CLAM installed and just want to update it,
 run the following:
 
+{ \small
 \begin{verbatim} $ sudo easy_install -U clam \end{verbatim}
+}
 
-It it wise to repeatedly issue this command every month or so, as
+It it wise to repeatedly issue this command (every month or so), as
 updates are released on a regular basis.
 
 In case \texttt{easy\_install} is not yet available on your system, you first need to
-install it as follows on Debian/Ubuntu based distribution: 
+install it. On a Debian/Ubuntu based distribution this can be done as follows: 
 
+{ \small
 \begin{verbatim} $ sudo apt-get install python-setuptools \end{verbatim}
+}
 
 Or for Red Hat/Fedora/CentOS:
 
+{ \small
 \begin{verbatim} # yum install python-setuptools \end{verbatim}
+}
 
 For other Linux distributions, and for Mac OS X with homebrew, fink, or
 macports, a similar package should exist. 
@@ -216,10 +224,12 @@ locally in your home directory's python package directory, then invoke
 \texttt{easy\_install} with the \texttt{--user} flag. This will install CLAM in
 a path such as \texttt{~/.local/lib/python2.7/site-packages}.
 
+{ \small
 \begin{verbatim} $ easy_install --user clam \end{verbatim}
+}
 
 Alternatively, other custom paths can be specified using the \texttt{--prefix}
-flag, but this forces to user to manually ensure this target directory is part
+flag, but this forces the user to manually ensure the target directory is part
 of the user's \texttt{\$PYTHONPATH}.
 
 \subsubsection{Installation Details} 
@@ -238,8 +248,8 @@ automatically, except for Python itself:
 
 For development and testing, each CLAM webservice can run stand-alone on any
 TCP port of your choice (make sure the port is open in your firewall) using the
-built-in webserver. For production environments, it is strongly recommended you
-plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
+built-in webserver. For production environments, it is strongly recommended
+that you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
 
 If you want to run in the supplied test units, an additional dependency is
 needed: \texttt{python-unittest2}.
@@ -248,9 +258,9 @@ If you look in the directory where CLAM has been installed, the following files
 may be of particular interest:
 
 \begin{itemize}
-\item \texttt{clamservice.py} -- The webservice itself, the command to be invoked to start it.
-\item \texttt{clamclient.py} -- A very generic CLAM client, to be used from the command-line
-\item \texttt{clamdispatcher.py} -- The default dispatcher for launching wrapper scripts
+\item \texttt{clamservice.py} -- The webservice itself; the command to be invoked to start it.
+\item \texttt{clamclient.py} -- A very generic CLAM client, to be used from the command-line.
+\item \texttt{clamdispatcher.py} -- The default dispatcher for launching wrapper scripts.
 \item \texttt{config/} -- The directory containing service configuration files. Place you service configuration here.
 \item \texttt{config/textstats.py} -- An example configuration.
 \item \texttt{common/} -- Common Python modules for CLAM.
@@ -258,14 +268,14 @@ may be of particular interest:
 \item \texttt{common/format.py} -- Format-type definitions.
 \item \texttt{common/data.py} -- CLAM Data API.
 \item \texttt{common/client.py} -- CLAM Client API.
-\item \texttt{static/style.css} -- The styling for visualisation, you can copy this to create your own styles.
+\item \texttt{static/style.css} -- The styling for visualisation; you can copy this to create your own styles.
 \end{itemize}
 
 Starting the service in stand-alone mode is done by launching
 \texttt{clamservice} (or \texttt{clamservice.py} directly) with the name of your service
 configuration. This standalone mode is intended primarily for development
-purposes and not recommended for production use. The below example shows how to
-launch the supplied ``Text Statistics'' demo-service:
+purposes and not recommended for production use. The example below shows how to
+launch the supplied \emph{``Text Statistics''} demo-service:
 
 \texttt{\$ clamservice clam.config.textstats}
 
@@ -275,17 +285,19 @@ some additional work. This is explained in later sections for Apache and nginx.
 \subsubsection{Git \& Github}
 
 Though the Python Package Index is now the recommended way of installing and
-maintaining CLAM up to date, all CLAM code is hosted on github and can be
+keeping CLAM up to date, all CLAM code is hosted on github and can be
 cloned directly from its git repository at
 \texttt{http://github.com/proycon/clam}, using \texttt{git}. Cloning this CLAM
 repository is done as follows:
 
+{ \small
 \begin{verbatim}
 $ git clone git://github.com/proycon/clam.git
 \end{verbatim}
+}
  
 This will create a directory \texttt{clam} in your current working directory.
-To install CLAM globally or in your local Python packages, then you can use the
+To install CLAM globally or in your local Python packages, you can use the
 included \texttt{setup.py} script. Alternatively, you may work directly from
 this checked out copy. The advantage of this would be that you have easier
 access to the sources of CLAM and can more easily modify them. Moreover, not
@@ -294,7 +306,7 @@ concurrently, although it is still always recommended to keep your CLAM copy up
 to date. Using git and github is also strongly encouraged if you are a
 developer seeking to improve CLAM itself, and possibly sending in patches.
 
-Especially people migrating from earlier versions of CLAM may have already
+Especially people migrating from earlier versions of CLAM may already have
 adopted this way of working. Do note that if you do not use \texttt{setup.py}
 then the commands \texttt{clamservice} and \texttt{clamnewproject} are only
 available directly as \texttt{clamservice.py} and \texttt{clamnewproject.py}
@@ -308,20 +320,21 @@ between Apache and Python. The following instructions assume you are at least
 basically familiar with Apache 2 configuration and Linux server administration
 in general.
 
-\begin{enumerate}
-    \item Install \texttt{mod\_wsgi} for Apache 2, if not already
-    present on the system. In Debian and Ubuntu this is available as a package
-    named \texttt{libapache2-mod-wsgi}.  
-  
-    \item Next we need to write a simple
-    WSGI-script, which is a Python script that will be invoked by the
-    webserver. An example script can be copied from
-    \url{https://github.com/proycon/clam/blob/master/config/example.wsgi} and
-    is shown in full below. Copy this to somewhere like
-    \texttt{yourwebservice.wsgi} and adapt the script. If CLAM is not installed in a standard location
-    where Python can find it, make sure to explicitly specify its parent
-    directory according to the instructions in the example.
+\begin{enumerate}[leftmargin=5mm]
+\item Install \texttt{mod\_wsgi} for Apache 2, if not already
+present on the system. In Debian and Ubuntu this is available as a package
+named \texttt{libapache2-mod-wsgi}.  
 
+\item Next we need to write a simple
+WSGI-script, which is a Python script that will be invoked by the
+webserver. An example script can be copied from
+\url{https://github.com/proycon/clam/blob/master/config/example.wsgi} and
+is shown in full below. Copy this to somewhere like
+\texttt{yourwebservice.wsgi} and adapt the script. If CLAM is not installed in a standard location
+where Python can find it, make sure to explicitly specify its parent
+directory according to the instructions in the example.
+
+{ \small
 \begin{verbatim}
 #!/usr/bin/env python
 import sys
@@ -343,21 +356,23 @@ import yourwebservice #** import your configuration module here! **
 import clam.clamservice
 application = clam.clamservice.run_wsgi(yourwebservice)
 \end{verbatim}
+}
  
 \item Configure your service configuration file as explained in
-  Section~\ref{sec:serviceconfig}. Take special note of
-  Subsection~\label{sec:sadmin} where you are instructed to configure the
-  hostname, port, and optionally a URL prefix to use if the service is not
-  assigned a virtualhost of its own. If CLAM is not installed in a default
-  location, make sure \texttt{CLAMDIR} is properly set.
+Section~\ref{sec:serviceconfig}. Take special note of
+Subsection~\ref{sec:sadmin} where you are instructed to configure the
+hostname, port, and optionally a URL prefix to use if the service is not
+assigned a virtualhost of its own. If CLAM is not installed in a default
+location, make sure \texttt{CLAMDIR} is properly set.
 \item Configure Apache to let it know about WSGI and your service. I assume the
-  reader is acquainted with basic Apache configuration and will only elaborate
-  on the specifics for CLAM. Adapt and add the following to any of your sites
-  in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
-  \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is
-  assumed you configured your service configuration file with
-  \texttt{URLPREFIX} set to \emph{``yourservice''}.
+reader is acquainted with basic Apache configuration and will only elaborate
+on the specifics for CLAM. Adapt and add the following to any of your sites
+in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
+\texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is
+assumed you configured your service configuration file with
+\texttt{URLPREFIX} set to \emph{``yourservice''}.
 
+{ \small
 \begin{verbatim}
  WSGIScriptAlias /yourwebservice \
   /path/to/yourwebservice/yourwebservice.wsgi/
@@ -371,21 +386,22 @@ application = clam.clamservice.run_wsgi(yourwebservice)
     Allow from all
  </Directory>
 \end{verbatim}
+}
 
 The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directives go on
 one line, but were wrapped here
 for presentational purposes. Needless to say, all paths need to be adapted
 according to your setup and the configuration can be extended further as
-desired. The path \texttt{/path/to/clam/static/} should be changed to where CLAM is
-installed and where the \texttt{static} directory is found. Depending on your
+desired. The path \path{/path/to/clam/static/} should be changed to where CLAM is
+installed and where the \path{static} directory is found. Depending on your
 installation and versions, this will be a directory like: \\
-\texttt{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
+\path{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
 
 \item It is always recommended to add some form of authentication or more restrictive
-  access. You can either let CLAM handle authentication (\emph{HTTP Digest
-  Authentication} or \emph{OAuth2}), in which case you need to set \texttt{WSGIPassAuthorization
-  On}, as by default it is disabled, or you can let Apache itself handle
-  authentication and not use CLAM's authentication mechanism.  
+access. You can either let CLAM handle authentication (\emph{HTTP Digest
+Authentication} or \emph{OAuth2}), in which case you need to set \texttt{WSGIPassAuthorization
+On}, as by default it is disabled, or you can let Apache itself handle
+authentication and not use CLAM's authentication mechanism.  
 
 \item Restart Apache. 
 \end{enumerate}
@@ -403,7 +419,7 @@ authentication the line \texttt{WSGIPassAuthorization On} is vital, as
 otherwise user credentials will never each CLAM.
 
 For the specific options to the WSGIDaemonProcess directive you can check
-\url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives\#WSGIDaemonProcess}.
+\url{http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives}.
 Important settings are the user and group the daemon will run as, the home
 directory it will run in. The number of threads, processes, and
 maximum-requests can also be configured to optimise performance and system
@@ -415,28 +431,37 @@ With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI.
 With Apache we already explored a WSGI option above, so we will now take a look
 at FastCGI:
 
-\begin{enumerate} \item Nginx misses a mime-type we need. Add the following
-    line to \texttt{/etc/nginx/mime.types}:
+\begin{enumerate}[leftmargin=5mm]
+\item Nginx misses a mime-type we need. Add the following
+    line to \path{/etc/nginx/mime.types}:
+{ \small
 \begin{verbatim}
   text/xsl                              xsl;
 \end{verbatim}
+}
 
-\item Configure your service configuration file as explained in Section~\ref{sec:serviceconfig}. Take special note of Subsection~\label{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
+\item Configure your service configuration file as explained in
+  Section~\ref{sec:serviceconfig}. Take special note of Subsection~\ref{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
 
 \item Make a script \texttt{start\_yourservice.sh} which will start the daemon for FastCGI. Change \texttt{UID} and \texttt{GID} with user ID/group ID you intend to use. Note that the IP and port can be set to anything you like, as long as you use the same consistently throughout the configuration.
+{ \small
 \begin{verbatim}
  #!/bin/bash
  spawn-fcgi -u UID -g GID -d /path/to/clam \
    -a 127.0.0.1 -p 9002 -- /path/to/clam/clamservice.py
 \end{verbatim}
+}
 
 \item Make a script \texttt{stop\_yourservice.sh} as a convenient shortcut to stop the service again:
+{ \small
 \begin{verbatim}
  #!/bin/bash
  kill `pgrep -f "python /path/to/clam/clamservice.py"`
 \end{verbatim}
+}
 
-\item Add and adapt the following configuration to a server in \texttt{/etc/nginx/sites-enabled}. Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
+\item Add and adapt the following configuration to a server in \\ \path{/etc/nginx/sites-enabled} . Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
+{ \small
 \begin{verbatim}
  root /path/to/clam;
 
@@ -465,6 +490,7 @@ at FastCGI:
     }
  }
 \end{verbatim}
+}
 \item Launch \texttt{start\_yourservice.sh}  and (re)start nginx.
 \end{enumerate}
 
@@ -485,14 +511,15 @@ CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
 
 You may possibly encounter one of the following issues when attempting to access your CLAM service through a browser:
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=5mm]
 \item \textbf{Apache gives an Internal Server Error (HTTP 500)} -- Check your Apache error log to see what happened. For additional debug output by CLAM, set \texttt{DEBUG=True} in your CLAM service configuration file. 
 \item \textbf{I get an empty white page} -- There is probably an error in loading the XSL stylesheet that renders the web application. Please use Firefox to verify, instead of Google Chrome or Internet Explorer, as it provides more detailed error output on XSLT transformations.
-\item \textbf{I get an error loading stylesheet} -- The XSL stylesheet that
+\item \textbf{I get ``error loading stylesheet''} -- The XSL stylesheet that
   renders the web-application can not be loaded. This is most likely due to a
   mismatch in URLs. The URL at which the webservice is accessed has to
   correspond exactly with the URL configured in the service configuration file,
-  alternative hostnames or IPs will not work. Browsers refuse to load stylesheets from other source for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
+  alternative hostnames or IPs will not work. Browsers refuse to load
+  stylesheets from other sources for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
 \item \textbf{I get an error ``No template named response''} -- Check whether
   \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
 \item \textbf{I'm using CLAM through Apache and WSGI, but authentication does
@@ -503,15 +530,16 @@ You may possibly encounter one of the following issues when attempting to access
 \end{enumerate}
 
 Note that we strongly recommend developing your services using the built-in
-webserver, and migrating to Apache, nginx or another webserver, when deploying
+webserver, and migrating to Apache, nginx or another webserver when deploying
 your final service.
 
 \section{Architecture}
 
-CLAM has a layered architecture, with at the core the command line application(s) you
-want to turn into a webservice. The application itself can remain untouched and
-unaware of CLAM. The scheme in Figure~\ref{fig:arch} illustrates the various
-layers:
+CLAM has a layered architecture, with at the core the command line
+application(s) you want to turn into a webservice. The application itself can
+remain untouched and unaware of CLAM. The scheme in Figure~\ref{fig:arch}
+illustrates the various layers.  The workflow interface layer is not provided
+nor necessary, but shows a possible use-case.
 
 \begin{figure}[h] \begin{center}
 \includegraphics[width=130.0mm]{architecture.png}
@@ -519,9 +547,6 @@ layers:
 \caption{The CLAM Architecture}
 \label{fig:arch} 
 \end{figure}
-
-
-The workflow interface layer is not provided nor necessary, but shows a possible use-case.
 
 CLAM presents two different paradigms for wrapping your script or application.
 The second is a new addition since CLAM 0.9.11 . You may use either or both at
@@ -548,7 +573,7 @@ A CLAM webservice needs the following three components from the service develope
 
 The wrapper script is not strictly mandatory if the command line application can be
 directly invoked by CLAM. However, for more complex applications, writing a
-wrapper script is strongly recommended, as it offers more flexibility and
+wrapper script is recommended, as it offers more flexibility and
 better integration, and allows you to keep the actual application
 unmodified. The wrapper scripts can be seen as the ``glue'' between CLAM and
 your application, taking care of any translation steps.
@@ -564,16 +589,18 @@ use and for use in filenames and may not contain any spaces or other special
 characters. Mind that this ID is case sensitive, so it is recommended to keep
 it all lower case. Example:
 
+{ \small
 \begin{verbatim}
 $ clamnewproject myfirstproject 
 \end{verbatim}
+}
 
 The tool will create a directory named after the identifier, in which two
 template files are created which are similarly named after the chosen
 identifier. Both are Python scripts which you are expected to edit:
 
 \begin{enumerate}
-\item \texttt{myfirstproject.py} - Service Configuration FIle
+\item \texttt{myfirstproject.py} - Service Configuration File
 \item \texttt{myfirstproject-wrapper.py} - System Wrapper Script.
 \end{enumerate}
 
@@ -587,7 +614,7 @@ write one from scratch in another language of your choice, or directly let CLAM
 invoke your application. Moreover, this generated wrapper script is intended for the
 project paradigm, not the action paradigm.
 
-The next section will provide a detailed overview on the various ways to
+The next section will provide a detailed overview of the various ways to
 configure the service configuration file, and the section thereafter will deal
 with the system wrapper file.
 
@@ -598,8 +625,8 @@ The service configuration consists of a description of your NLP application, or
 rather, a description of the system wrapper script that surrounds it. It
 specifies what parameters the system can take, and what input and output
 formats are expected under what circumstances. The service configuration is
-itself a Python script, but knowledge of Python is not essential to be able to
-make your own service configurations. 
+itself a Python script, but knowledge of Python is not essential for you to be
+able to make your own service configurations. 
 
 The server configuration files reside in the \texttt{config/} directory. Making
 a new webservice starts with copying the sample \texttt{template.py} and
@@ -621,15 +648,15 @@ The hostname and port of the webserver can be configured in the service
 configuration file. Note that the hostname has to match exactly with what the
 end-users will use. An attempt will be made to detect this automatically if no
 hostname is specified. A mismatch in the name you define and the hostname the
-user uses may result in unexpected behaviour\footnote{Most likely, the XSLT
+user uses may result in unexpected behaviour. \footnote{Most likely, the XSLT
 stylesheet will refuse to render the web application interface due to this
-mismatch}. CLAM comes with a built-in webserver, which will be used when
-invoked directly from the command-line\footnote{unless FastCGI mode is
-enabled}.
+mismatch.}. CLAM comes with a built-in webserver, which will be used when
+invoked directly from the command-line. \footnote{Unless FastCGI mode is
+enabled.}
 
 When CLAM runs in an existing webserver without its own virtual host, it is
 often configured at a different URL rather than the webserver root. In this
-case the value of \texttt{URLPREFIX} should be configured accordingly.
+case, the value of \texttt{URLPREFIX} should be configured accordingly.
 
 In order to keep server load manageable, three methods are configurable in the
 service configuration file. First, you can set the variable
@@ -654,19 +681,19 @@ your process, in megabytes. The latter is the maximum run-time of your process
 in seconds. Programs that exceed this limit will be automatically aborted. The
 dispatcher will check with a certain interval, configured in
 \texttt{DISPATCHER\_POLLINTERVAL} (in seconds), if the limits have been
-exceeded and will take necessary action.  
+exceeded and will take the necessary action.  
   
 
-If you for some reason do not want to make use of the web application in CLAM,
+If for some reason you do not want to make use of the web application in CLAM,
 then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want
-to make the webservice available at a different URL than the webapplication,
-then there is a small trick you can apply by setting \texttt{WEBSERVICEGHOST}
-to a prefix that the webservice will be made available on \emph{without}
-webapplication support. If you set for example \texttt{WEBSERVICEGHOST = 'ws'}
-then there will be an additional ``ghosted'' webservice without webapplication
-interface running on \texttt{http://yourdomain.com/ws/}. This option is
-included to accommodate the wish to apply two distinct authentication schemes
-outside of CLAM. 
+to make the webservice available at a different URL than where the
+webapplication is located, there is a small trick you can apply by setting
+\texttt{WEBSERVICEGHOST} to a URL prefix that the webservice will be made
+available on \emph{without} webapplication support. If you set for example
+\texttt{WEBSERVICEGHOST = 'ws'}, then there will be an additional ``ghosted''
+webservice without webapplication interface running on
+\texttt{http://yourdomain.com/ws/}. This option is included to accommodate the
+wish to apply two distinct authentication schemes outside of CLAM. 
 
 CLAM offers a limited web-based administrative interface that allows you to
 view what users and projects there are,  access their files, abort runs, and
@@ -679,7 +706,7 @@ any means to adjust configuration options.
 
 Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM
 implements HTTP Digest Authentication \cite{HTTPAUTH} and OAuth2 \cite{OAUTH2}. HTTP Digest
-Authentication, as opposed to HTTP Basic Authentication computes a hash of the
+Authentication, contrary to HTTP Basic Authentication, computes a hash of the
 username and password client-side and transmits that hash, rather than a
 plaintext password. User passwords are therefore only available to CLAM in
 hashed form. User authentication is not mandatory, but for any world-accessible
@@ -695,28 +722,33 @@ their owners, unless no authentication is used at all, in which case everybody
 can see all projects. An example of a configuration with plain text password,
 converted on the fly to hashes, is found below:
 
+{ \small
 \begin{verbatim}
     USERS = {
         'bob': pwhash('bob', SYSTEM_ID, 'secret'), 
-		'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
+        'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
     }
 \end{verbatim}
+}
 
-However, computing hashes on-the-fly like in the above example is quite
-insecure and not recommended. You should pre-compute the hashes add those
+However, computing hashes on the fly like in the above example is quite
+insecure and not recommended. You should pre-compute the hashes and add these
 instead:
 
+{ \small
 \begin{verbatim}
     USERS = {
         'bob': '6d72b6376858cf3c618c826fab1b0109',
-		'alice': 'e445370f57e19a8bfa454404ba3892cc',
+        'alice': 'e445370f57e19a8bfa454404ba3892cc',
     }
 \end{verbatim}
+}
 
 This pre-computation can be done in an interactive python session, executed from
-the CLAM directory. Make sure to change \texttt{yourconfig} in the below
-example to your actual service configuration file:
+the CLAM directory. Make sure to change \texttt{yourconfig} in the
+example below to your actual service configuration file:
 
+{ \small
 \begin{verbatim}
 $ python
 >>> from clam.common.digestauth import pwhash
@@ -724,6 +756,7 @@ $ python
 >>> pwhash('alice', settings.SYSTEM_ID, 'secret')
 'e445370f57e19a8bfa454404ba3892cc'
 \end{verbatim}
+}
 
 You can mark certain users as being administrators using the \texttt{ADMINS}
 list. Administrators can see and modify all projects.
@@ -731,7 +764,7 @@ list. Administrators can see and modify all projects.
 
 The ability to view and set parameters can be restricted to certain users. You
 can use the extra parameter options \texttt{allowusers=} or \texttt{denyusers=}
-to set this. See section \ref{sec:parameters}. A common use would be to define
+to set this. See Section~\ref{sec:parameters}. A common use would be to define
 one user to be the guest user, for instance the user named ``guest'', and set
 \texttt{denyusers=['guest']} on the parameters you do not want the guest user
 to use.
@@ -749,6 +782,7 @@ again a hashed password in the same fashion as in \texttt{USERS}, so it never
 contains a plaintext password. \texttt{USERS\_MYSQL} is set as a Python
 dictionary with the following configurable keys:
 
+{ \small
 \begin{verbatim}
     USERS_MYSQL = {
         'host': 'localhost',  #(default)
@@ -760,6 +794,7 @@ dictionary with the following configurable keys:
         'passwordfield': 'password',  #(default)
     }
 \end{verbatim}
+}
 
 \subsubsection{External authentication schemes}
 
@@ -775,18 +810,19 @@ passing control to CLAM. An example of such a system is Shibboleth
 fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default),
 the ultimate fallback will be CLAM's built-in user system, unless this is set
 to None. When such a scheme is used, proper care has to be taken to ensure that
-the HTTP headers can not be forged by end-users themselves! If usernames that
+the HTTP headers cannot be forged by end users themselves! If usernames that
 come from external pre-authentication methods are different from those in the
-internal \texttt{USERS} map (if used at all), then an explicit mapping between
+internal \texttt{USERS} map (if used at all), an explicit mapping between
 the two may be specified in the \texttt{PREAUTHMAPPING} dictionary. Note that
 this pre-authentication mechanism never applies to the ``ghosted'' webservice,
 if enabled through \texttt{WEBSERVICEGHOST}. Only the regular authentication
 method is supported for the webservice ghost.
 
-The below example shows an Apache configuration for a \emph{proxy server} or
+The example below shows an Apache configuration for a \emph{proxy server} or
 \emph{entry server} that forwards to another server on which a CLAM service runs, mediated
 through Shibboleth:
 
+{ \small
 \begin{verbatim}
    <Location /yourclamservice>
         AuthType shibboleth
@@ -797,19 +833,22 @@ through Shibboleth:
         ProxyPassReverse http://realserver/yourclamservice
    </Location>
 \end{verbatim}
+}
 
-The actual server, if it runs Apache, must always contain the directive
+The actual server, if it runs Apache, must always contain the directive \\
 \texttt{WSGIPassAuthorization On}.
 
-The CLAM service configuration file can in turn be restricted to \emph{only}
-accept Shibboleth authenticated users using the following settings:
+The CLAM service configuration file can in turn be restricted to accept \emph{only}
+Shibboleth authenticated users using the following settings:
 
+{ \small
 \begin{verbatim}
 PREAUTHHEADER = 'HTTP_EDUPERSONPRINCIPALNAME'
 PREAUTHONLY = True
 \end{verbatim}
+}
 
-Replace \texttt{HTTP\_EDUPERSONPRINCIPALNAME} with the proper HTTP header, this
+Replace \texttt{HTTP\_EDUPERSONPRINCIPALNAME} with the proper HTTP header; this
 variable name is just an example in a CLARIN-NL context.
 
 \subsubsection{OAuth2}
@@ -824,11 +863,13 @@ authentication provider, and obtain a \texttt{CLIENT\_ID} and
 \texttt{CLIENT\_SECRET}, the latter should be kept strictly private! These go
 into your service configuration file and we then enable OAuth as follows: 
 
+{ \small
 \begin{verbatim}
 OAUTH = True
 OAUTH_CLIENT_ID = "some_client_id"
 OAUTH_CLIENT_SECRET = "donotsharewithanyone"
 \end{verbatim}
+}
 
 Note that OAuth2 by definition requires HTTPS, therefore, it can not be used
 with the built-in webserver but requires being embedded in a webserver such as
@@ -841,16 +882,20 @@ The authorization provider makes available a URL for authentication and for
 obtaining the final access token. These are configured as follows in the CLAM
 service configuration file: 
 
+
+{ \small
 \begin{verbatim}
 OAUTH_AUTH_URL= "https://yourprovider/oauth/authenticate"
 OAUTH_TOKEN_URL "https://yourprovider/oauth/token"
 \end{verbatim}
+}
 
 The authorization provider in turn redirects the user back to the CLAM
 webservice, which in turn returns the access token to the client in its XML
 response as follows. Note that there will just be this one tag without any
 children.
 
+{ \small
 \begin{verbatim}
 <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version"
 id="yourservice"
@@ -858,6 +903,7 @@ id="yourservice"
  oauth_access_token="1234567890">
 </clam>
 \end{verbatim}
+}
 
 Now any subsequent call to CLAM must pass this access token, otherwise you'd
 simply be redirected to authenticate again. The client must thus explicitly call CLAM
@@ -865,18 +911,22 @@ again. Passing the access token can be done in two ways, the recommended way is
 by sending the following HTTP header in your request, where the number is
 replaced with the actual access token:
 
+{ \small
 \begin{verbatim}
 Authentication: Bearer 1234567890
 \end{verbatim}
+}
 
 The alternative way is by passing it along with the HTTP GET/POST request. This
 is considered less secure as your browser may log it in its history, and the
 server in its access logs. It can still not be intercepted, however, as it is
 transmitted over HTTPS.
 
+{ \small
 \begin{verbatim}
 https://yourservice.com/?oauth_access_token=1234567890
 \end{verbatim}
+}
 
 Automated clients can avoid this method, but it is necessarily used by the
 web-based interface. To mitigage security concerns, the access token you
@@ -889,9 +939,11 @@ offer a revoke URL, as described in RFC7009\footnote{
 \url{https://tools.ietf.org/html/rfc7009}}, which you configure in your service
 configuration file as follows:
 
+{ \small
 \begin{verbatim}
 OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
 \end{verbatim}
+}
 
 If none is set, CLAM's logout procedure will simply instruct users to clear
 their browser history and cache, which is clearly sub-optimal.
@@ -905,6 +957,7 @@ how to implement this function for a resource provider that returns the
 username in JSON format. This, however, is completely provider-specific so
 you always have to write your own function! 
 
+{ \small
 \begin{verbatim}
 def myprovider_username_function(oauthsession):
   r = oauthsession.get("https://yourprovider/user")
@@ -913,6 +966,7 @@ def myprovider_username_function(oauthsession):
 
 OAUTH_USERNAME_FUNCTION = myprovider_username_function
 \end{verbatim}
+}
 
 Various providers require the system to specify scopes, indicating the
 permissions the application requests from the resource provider. This can be
@@ -920,12 +974,14 @@ done using the \texttt{OAUTH\_SCOPE} directive in the service configuration
 file, which takes a list of scopes, all of which are provider-specific. The
 following example refers to the Google API:
 
+{ \small
 \begin{verbatim}
 OAUTH_SCOPE = [
      "https://www.googleapis.com/auth/userinfo.email",
      "https://www.googleapis.com/auth/userinfo.profile"
 ]
 \end{verbatim}
+}
 
 One of the problems with OAuth2 for automated clients is the authentication
 step that often requires user intervention. CLAM redirects unauthenticated
@@ -959,7 +1015,9 @@ variables you can use that will be automatically set by CLAM.
 \item \texttt{\$INPUTDIRECTORY} -- The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
 \item \texttt{\$OUTPUTDIRECTORY} -- The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
 \item \texttt{\$STATUSFILE} -- The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
-\item \texttt{\$PARAMETERS} -- This variable will contain all parameter flags and the parameter values that have been selected by the user. It is recommended however to use \$DATAFILE instead.  
+\item \texttt{\$PARAMETERS} -- This variable will contain all parameter flags
+  and the parameter values that have been selected by the user. It is
+  recommendedm however, to use \$DATAFILE instead of \$PARAMETERS.
 \item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} -- The username of the logged-in user.
 \item \texttt{\$PROJECT} -- The ID of the project
@@ -972,7 +1030,7 @@ the \texttt{\$PATH} of the user \texttt{clamservice.py} will run as. Upon
 launch, the current working directory will be automatically set to the specific
 project directory. Within this directory, there will be an \texttt{input/} and
 \texttt{output/} directory, but use the full path as stored in
-\texttt{\$INPUTDIRECTORY} and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user
+\texttt{\$INPUTDIRECTORY}/ and \texttt{\$OUTPUTDIRECTORY}/. All uploaded user
 input will be in this input directory, and all output that users should be able
 to view or download, should be in this output directory. Your wrapper script
 and NLP tool are of course free to use any other locations on the filesystem
@@ -991,10 +1049,10 @@ necessarily encoded within the file itself, as is also not the case in the
 example of plain text files. CLAM therefore builds external metadata files for
 each input and output file. These files contain all metadata of the files they
 describe. These are stored in the CLAM Metadata XML format, a very simple and
-straightforward format\footnote{It is in essence a simple XML representation of
+straightforward format. \footnote{It is in essence a simple XML representation of
 key--value pairs. These metadata files are named \texttt{.filename.METADATA},
-in which filename is the name of the file it describes and reside in the very
-same input/output directory.} Metadata simply consists out of metadata fields
+in which filename is the name of the file it describes and resides in the very
+same input/output directory.} Metadata simply consists of metadata fields
 and associated values.
 
 Metadata in CLAM is tied to a particular file format (such as plain text
@@ -1011,7 +1069,7 @@ description at all, then that is of course an option as well, though this may
 come at the cost of your service not providing enough information to interact
 with others.
 
-In a webservice it is important to precisely define what kind of input goes in,
+In a webservice it is important to define precisely what kind of input goes in,
 and what kind of output goes out: this results in a deterministic and thus
 predictable webservice. It is also necessary to define exactly how the output
 metadata is based on the input metadata, if that is the case. These definitions
@@ -1019,7 +1077,7 @@ are made in so-called \emph{profiles}. A profile defines \emph{input templates}
 and \emph{output templates}. The input templates and output template can be
 seen as ``slots'' for certain filetypes and metadata. An analogy from childhood
 memory may facilitate understanding this, as shown and explained in
-Figure~\ref{fig:blokkendoos}:
+Figure~\ref{fig:blokkendoos}.
 
 \begin{figure}[h]
 \begin{center}
@@ -1029,14 +1087,14 @@ correspond to input templates, the holes on the other end correspond to output
 templates. Imagine blocks going in through one and out through the other. The
 blocks themselves correspond to input or output files \emph{with attached
 metadata}. Profiles describe how one or more input blocks are transformed into
-output blocks, which may differ in type and number.Granted, I'm stretching the
+output blocks, which may differ in type and number. Granted, I am stretching the
 analogy here; your childhood toy did not have this magic feature of course!}
 \label{fig:blokkendoos} 
 \end{center}
 \end{figure}
 
 A profile is thus a precise specification of what output files will be produced
-given what input files,  it specifies exactly how the metadata for the
+given particular input files, and it specifies exactly how the metadata for the
 outputfiles can be constructed given the metadata of the inputfiles. The
 generation of metadata for output files is fully handled by CLAM, outside of
 your wrapper script and NLP application.
@@ -1044,7 +1102,7 @@ your wrapper script and NLP application.
 Input templates are specified in part as a collection of parameters for which
 the user/client is expected to choose a value in the predetermined range.
 Output templates are specified as a collection of ``metafields'', which simply
-assign a value, unassign a value, or copy a value from an inputtemplate or from
+assign a value, unassign a value, or copy a value from an input template or from
 a global parameter. Through these templates, the actual metadata can be
 constructed. Input templates and output templates always have a label
 describing their function. Upon input, this provides the means for the user to
@@ -1066,13 +1124,14 @@ can take, are defined in the service configuration file. These parameters can
 be subdivided into parameter groups, but these serve only presentational
 purposes. 
 
+%MAYBE TODO: CUSTOMPARAMETERS?
 There are seven parameter types available, though custom types can be easily
-added\footnote{to \texttt{common/parameters.py}}. Each parameter type is a
+added. \footnote{Use \texttt{common/parameters.py}} Each parameter type is a
 Python class taking the following mandatory arguments:
 
 \begin{enumerate}
 \item \textbf{\texttt{id}} -- An id for internal use only.
-\item \textbf{\texttt{name}} -- The name of this parameter, this will be shown to the user in the interface.
+\item \textbf{\texttt{name}} -- The name of this parameter; this will be shown to the user in the interface.
 \item \textbf{\texttt{description}} -- A description of this parameter, meant for the end-user.
 \end{enumerate}
 
@@ -1089,15 +1148,17 @@ The seven parameter types are:
   ID is the internal value, and label the text the user sees. For example,
   suppose a parameter with flag \texttt{-c} is defined.
   \texttt{choices=[('r','red'),('g','green'),('b', 'blue)]}, and the user
-  selects ``green'', then  \texttt{-c g} will be added to
+  selects ``green'', then  \texttt{-c g} will be added to \\
   \texttt{\$PARAMETERS}. The default choice can be set with \texttt{default=},
   and then the ID of the choice. If you want the user to be able to select
-  multiple parameters, then you can set the option \texttt{multi=True}. The IDs
+  multiple parameters, you can set the option \texttt{multi=True}. The IDs
   will be concatenated together in the parameter value. A delimiter (a comma by
   default) can be specified with \texttt{delimiter=}. If you do not use
   \texttt{multi=True}, but you do want all options to be visible in one view,
-  then you can set the option \texttt{showall=True}.
-\item \textbf{\texttt{StaticParameter}} -- A parameter with a fixed immutable value. This may seem a bit of a contradiction, but it serves a purpose in forcing a parameter or metadata parameter to have a specific non-variable value.
+  you can set the option \texttt{showall=True}.
+\item \textbf{\texttt{StaticParameter}} -- A parameter with a fixed immutable
+  value. This may seem a bit of a contradiction, but it serves a purpose in
+  forcing a global parameter or metadata parameter to have a specific non-variable value.
 \end{itemize}
 
 All parameters can take the following extra keyword arguments:
@@ -1108,7 +1169,7 @@ All parameters can take the following extra keyword arguments:
   mandatory if you use the \texttt{\$PARAMETERS} variable in your
   \texttt{COMMAND} definition. It is customary for parameter flags to consist
   of a hyphen and a letter or two hyphens and a string. Parameter flags could
-  be for example be formed like: \texttt{-p} ,\texttt{--pages},
+  for example be formed like: \texttt{-p} ,\texttt{--pages},
   \texttt{--pages=}. There will be a space between the parameter flag and its
   value, unless it ends in a \texttt{=} sign or \texttt{nospace=True} is set.
   Multi-word string values will automatically be enclosed in quotation marks
@@ -1125,7 +1186,7 @@ All parameters can take the following extra keyword arguments:
 
 The following example defines a boolean parameter with a parameter flag:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 BooleanParameter(
   id='createlexicon',
@@ -1134,7 +1195,7 @@ BooleanParameter(
   paramflag='-l'
 )
 \end{verbatim}
-}}
+}
 
 Thus, if this parameter is set, the invoked command will have \texttt{\$PARAMETERS} set to \texttt{-l 1} (plus any additional parameters).
 
@@ -1150,59 +1211,86 @@ input templates of that profile are provided and if it generates output. If no
 input templates have been defined at all for a profile, then it will match as
 well, to allow for the option of producing output files that are not dependent
 on input files. A profile is allowed to mismatch, but if none of the profiles
-match, the system will produce an error, as it can not perform any actions. 
+match, the system will produce an error, as it cannot perform any actions. 
 
 The profile specification skeleton looks as follows. Note that there may be
 multiple input templates and/or multiple output templates:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
     Profile( InputTemplate(...), OutputTemplate(...) ) 
 ]
 \end{verbatim}
-}}
+}
 
 
 The definition for \texttt{InputTemplate} takes three mandatory arguments:
 
-\begin{enumerate}
+\begin{enumerate}[leftmargin=5mm]
 \item \texttt{id} -- An ID for the InputTemplate. This will be used internally and by automated clients.
-\item \texttt{format} -- This points to a Format class, indicating the kind of format that this inputtemplate accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there.
-\item \texttt{label} -- A human readable label for the input template. This is how it will be known to users in the web application and on the basis of which they will select it.
+\item \texttt{format} -- This points to a Format class, indicating the kind of format that this input template accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there.
+\item \texttt{label} -- A human readable label for the input template. This is how it will be known to users in the web application and displayed in its selection menus.
 \end{enumerate}
 
-Subsequently you may specify any of the Parameter types to indicate the accepted/required metadata. Use any of the types from Section~\label{sec:parameters}. 
+After the three mandatory arguments, you may specify any of the Parameter types
+to indicate the accepted/required metadata for the particular input templates.
+Use any of the types from Section~\ref{sec:parameters}. We will come to an
+example of this soon. 
 
 After specifying any such parameters, there are some possible keyword arguments:
 
-\begin{enumerate}
-\item \texttt{unique} -- Set to \texttt{True} or \texttt{False}, this indicates whether the input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
+\begin{enumerate}[leftmargin=5mm]
+\item \texttt{unique} -- Set to \texttt{True} or \texttt{False}; this indicates whether the input template may be used only once or multiple times. \texttt{unique=True} is the default if not specified.
 \item \texttt{multi} -- The logical inverse of the above; you can whichever you prefer. \texttt{multi=False} is the default if not specified.
-\item \texttt{filename} -- Files uploaded through this input template will receive this filename (regardless of how the original file on the client is called). If you set \texttt{multi=True} or its alias \texttt{unique=False}, insert the variable \texttt{\$SEQNR} into the filename, which will be replaced by a number in sequence. After all, we cannot have multiple files with the same name. You can also use any of the metadata parameters as variable in the filename; as explained in section~\ref{sec:filenamevariables}.
-\item \texttt{extension} -- Files uploaded through this input template are expected to have this extension, but can have whatever filename. Here it doesn't matter whether you specify the extension with or without the prefixing period. Note that in the web application, the extension is appended automatically regardless of the filename of the source file. Automated clients do have to take care to submit with the proper extension right away. 
-\item \texttt{acceptarchive} -- This is a boolean which can be set to True if you want to accept the upload of archives to instantly upload multiple files \emph{for the same input template}. The file must be in zip, tar.gz or tar.bz2 format. Archives will be automatically extracted and the files within renamed according to the input template's specifications if necessary. Using this option implies that the exact same metadata will be associated with all uploaded files! This option can only be used in combination with \texttt{multi=True}. Note that archives can only be uploaded when all files therein fit the same input template!
+\item \texttt{filename} -- Files uploaded through this input template will
+  receive this filename (regardless of how the original file on the client is
+  called). If you set \texttt{multi=True} or its alias \texttt{unique=False},
+  insert the variable \texttt{\$SEQNR} into the filename, which will be
+  replaced by a number in sequence. After all, we cannot have multiple files
+  with the same name. As explained in Section~\ref{sec:filenamevariables}, you
+  can also use any of the metadata parameters as variable in the filename.
+\item \texttt{extension} -- Files uploaded through this input template are
+  expected to have this extension, but can have any filename. Here it
+  does not matter whether you specify the extension with or without the
+  prefixing period. Note that in the web application, the extension is appended
+  automatically regardless of the filename of the source file. Automated
+  clients do must take care to submit files with the proper extension right away. 
+\item \texttt{acceptarchive} -- This is a boolean which can be set to True if
+  you want to accept the upload of archives. Uploaded archives will be
+  automatically unpacked. It is a method to instantly upload multiple files
+  \emph{for the same input template}. The file must be in zip, tar.gz or
+  tar.bz2 format. The files within the archive will be
+  renamed according to the input template's specifications if necessary. Using
+  this option implies that the exact same metadata will be associated with all
+  uploaded files! This option can only be used in combination with
+  \texttt{multi=True}. Note that archives can only be uploaded when all files
+  therein fit the same input template!
 \end{enumerate}
 
 
-Take a look at the following example of an input template for plaintext documents for an automatic translation system:
+Take a look at the following example of an input template for plaintext
+documents for an automatic translation system, illustrating of all the above:
 
-{\footnotesize{
+{\small
 \begin{verbatim}
-InputTemplate('maininput', PlainTextFormat,"Translator input: Plain-text document",  
+InputTemplate('maininput', PlainTextFormat,
+  "Translator input: Plain-text document",  
   StaticParameter(
-    id='encoding',name='Encoding',description='The character encoding of the file', 
+    id='encoding',name='Encoding',
+    description='The character encoding of the file', 
     value='utf-8'
   ),  
   ChoiceParameter(
-    id='language',name='Language',description='The language the text is in', 
+    id='language',name='Language',
+    description='The language the text is in', 
     choices=[('en','English'),('nl','Dutch'),('fr','French')]),
   ),      
   extension='.txt',
   multi=True
 )
 \end{verbatim}
-}}
+}
 
 
 For \texttt{OutputTemplate}, the syntax is similar. It takes the three
@@ -1215,7 +1303,7 @@ the filename from the input template that is its parent. In this way, the user
 may upload a particular file, and get that very same file back with the same
 name. If you specify \texttt{extension}, it will append an extra extension to
 this inherited filename. Prior to appending an extension, you may often want to
-remove existing extension, you can do that with the \texttt{removeextension}
+remove an existing extension; you can do that with the \texttt{removeextension}
 attribute. 
 As there may be multiple input templates, it is not always clear what input
 template is the parent. The system will automatically select the \emph{first}
@@ -1237,8 +1325,15 @@ There are four different types of metafield actors:
 
 \begin{itemize}
 \item \texttt{SetMetaField(\emph{key},\emph{value})} -- Set metafield \emph{key} to the specified value.
-\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} -- If a value is specified: Unset this metafield if it has the specified value. If no value is specified: Unset the metafield regardless of value. This only makes sense if you set \texttt{copymetadata=True}.
-\item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} -- Copy metadata from one of the input template's metadata. Here \emph{inputtemplate} is the ID of one of inputtemplates in the profile, and the \emph{key} part is the metadata field to copy. This allows you to combine metadata from multiple input source into your output metadata.
+\item \texttt{UnsetMetaField(\emph{key}\emph{[,value]})} -- If a value is
+  specified: Unset this metafield if it has the specified value. If no value is
+  specified: Unset the metafield regardless of value. This only makes sense if
+  you set \\ \texttt{copymetadata=True}.
+\item \texttt{CopyMetaField(\emph{key}, \emph{inputtemplate.key})} -- Copy
+  metadata from one of the input template's metadata. Here \emph{inputtemplate}
+  is the ID of one of the input templates in the profile, and the \emph{key}
+  part is the metadata field to copy. This allows you to combine metadata from
+  multiple input sources into your output metadata.
 \item \texttt{ParameterMetaField(\emph{key}, \emph{parameter$-$id})} -- Get the value for this metadata field from a global parameter with the specified ID.
 \end{itemize}
 
@@ -1246,9 +1341,10 @@ Take a look at the following example for a fictitious automatic translation
 system, translating to Esperanto. If an input file \texttt{x.txt} is uploaded,
 the output file will be named \texttt{x.translation}.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
-OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-text document",  
+OutputTemplate('translationoutput', PlainTextFormat,
+    "Translator output: Plain-text document",  
     CopyMetaField('encoding','maininput.encoding')
     SetMetaField('language','eo'),
     removeextension='.txt',
@@ -1256,24 +1352,27 @@ OutputTemplate('translationoutput', PlainTextFormat,"Translator output: Plain-te
     multi=True
 )
 \end{verbatim}
-}}
+}
 
 Putting it all together, we obtain the following profile definition describing
 a fictitious machine translation system from English, Dutch or French to
 Esperanto, where the system accepts and produces UTF-8 encoded plain-text
 files.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
   Profile( 
-    InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
+    InputTemplate('maininput', PlainTextFormat,
+     "Translator input (Plain-text document)",  
       StaticParameter(
-       id='encoding',name='Encoding',description='The character encoding of the file', 
+       id='encoding',name='Encoding',
+       description='The character encoding of the file', 
        value='utf-8'
       ),  
       ChoiceParameter(
-       id='language',name='Language',description='The language the text is in', 
+       id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]
       ),
       extension='.txt',
@@ -1290,27 +1389,27 @@ PROFILES = [
   )
 ]
 \end{verbatim}
-}}
+}
 
 
 \subsection{Control over filenames}
 \label{sec:filenamevariables}
 
 There are several ways of controlling the way input and output files within a
-profile are named. As illustrated in the previous section, each Output Template
-has an Input Template as its parent, from which it inherits the filename if no
+profile are named. As illustrated in the previous section, each output template
+has an input template as its parent, from which it inherits the filename if no
 explicit filename is specified. This is a very important aspect that has to be
-realised By default, if no \texttt{filename=}, \texttt{extension=} or
-\texttt{removeextension=} is specified for an Output Template, it will use the
-same filename as the parent Input Template. If \texttt{filename=} and
+considered when building your profiles. By default, if no \texttt{filename=}, \texttt{extension=} or
+\texttt{removeextension=} is specified for an output template, it will use the
+same filename as the parent input template. If \texttt{filename=} and
 \texttt{extension=} are not specified for the Input Template, then the file the
 user uploads will simply maintain the very same name as it is uploaded with. If
-\texttt{extension=} is specified, then the input file is required to have the
+\texttt{extension=} is specified, the input file is required to have the
 specified extension, the web application and CLAM Client API takes care of this
-automatically if not the case.
+automatically if this is not the case.
 
 In a previous section, we mentioned the use of the variable \texttt{\$SEQNR}
-that will insert a number in when the Input Template or Output Template is in
+that will insert a number in the filename when the input template or output template is in
 multi-mode. In addition to this, other variables can also be used. Here is an
 overview:
 
@@ -1322,7 +1421,7 @@ overview:
 \item \texttt{\$INPUTEXTENSION} - The extension of the associated input file (without the initial period). Valid only in Output Templates.
 \end{itemize} 
 
-Other than these variables pre-defined by CLAM, you can use
+Other than these pre-defined variables by CLAM, you can use
 any of the metadata parameters as variables in the filename, for input
 templates only. To this end, use a
 dollar sign followed by the ID of the parameter in the filename specification.
@@ -1335,17 +1434,20 @@ character encoding and language in the filename itself. Note also the use of
 the special variable \texttt{\$SEQNR}, which assigns a sequence number as the
 templates are both in multi mode.
 
-{\footnotesize{
+{\small
 \begin{verbatim}
 PROFILES = [ 
   Profile( 
-    InputTemplate('maininput', PlainTextFormat,"Translator input (Plain-text document)",  
+    InputTemplate('maininput', PlainTextFormat,
+      "Translator input (Plain-text document)",  
       StaticParameter(
-       id='encoding',name='Encoding',description='The character encoding of the file', 
+       id='encoding',name='Encoding',
+       description='The character encoding of the file', 
        value='utf-8'
       ),  
       ChoiceParameter(
-       id='language',name='Language',description='The language the text is in', 
+       id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]
       ),
       filename='input$SEQNR.$language.$encoding.txt'
@@ -1361,7 +1463,7 @@ PROFILES = [
   )
 ]
 \end{verbatim}
-}}
+}
 
 In addition to variables that refer to global or local parameters. There are some additional variables set by CLAM which you can use:
 
@@ -1377,20 +1479,24 @@ In addition to variables that refer to global or local parameters. There are som
 It is not always possible to define all output templates straight away.
 Sometimes output templates are dependent on certain global parameters. For
 example, given a global parameter that toggles the generation of a lexicon, you
-want to only include the output template that describes this lexicon, if the
+want to include only the output template that describes this lexicon, if the
 parameter is enabled. CLAM offers a solution for such situations using the
 \texttt{ParameterCondition} directive.
 
 Assume you have the following \emph{global} parameter:
 
+{ \small
 \begin{verbatim}
 BooleanParameter(
-  id='createlexicon',name='Create Lexicon',description='Create lexicon files', 
+  id='createlexicon',name='Create Lexicon',
+  description='Create lexicon files', 
 )
 \end{verbatim}
+}
 
 We can then turn an output template into an output template conditional on this parameter using the following construction:
 
+{ \small
 \begin{verbatim}
   ParameterCondition(createlexicon=True, 
     then=OutputTemplate('lexiconoutput', PlainTextFormat,
@@ -1399,34 +1505,36 @@ We can then turn an output template into an output template conditional on this 
     ) 
   )
 \end{verbatim}
+}
 
 The first argument of ParameterCondition is the condition. Here you use the ID
 of the parameter and the value you want to check against. The above example
-illustrates an equality comparison, but other comparisons are also possible:
+illustrates an equality comparison, but other comparisons are also possible. We
+list them all here:
 
 \begin{itemize}
 \item \texttt{\emph{ID}$=$\emph{value}} -- Equality; matches if the global parameter with the specified ID has the specified value.
 \item \texttt{\emph{ID}\_equals$=$\emph{value}} -- Same as above, the above is an alias.
 \item \texttt{\emph{ID}\_notequals$=$\emph{value}} -- The reverse of the above, matches if the value is \emph{not equal}
-\item \texttt{\emph{ID}\_lessthan$=$\emph{number}} -- Matches if the parameter with the specified ID is less than then specified number
-\item \texttt{\emph{ID}\_greaterthan$=$\emph{number}} -- Matches if the parameter with the specified ID is greater than then specified number
-\item \texttt{\emph{ID}\_lessequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or less than then specified number
-\item \texttt{\emph{ID}\_greaterequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or greater than then specified number
+\item \texttt{\emph{ID}\_lessthan$=$\emph{number}} -- Matches if the parameter with the specified ID is less than the specified number
+\item \texttt{\emph{ID}\_greaterthan$=$\emph{number}} -- Matches if the parameter with the specified ID is greater tha then specified number
+\item \texttt{\emph{ID}\_lessequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or less than the specified number
+\item \texttt{\emph{ID}\_greaterequalthan$=$\emph{number}} -- Matches if the parameter with the specified ID is equal or greater than the specified number
 \end{itemize}
 
 After the condition you specify \texttt{then=} and optionally also
 \texttt{else=}, and then you specify an \texttt{OutputTemplate} or yet another
 \texttt{ParameterCondition}---they can be nested at will.
 
-Parameter conditions can not only be used for output templates, but also
+Parameter conditions cannot only be used for output templates, but also
 for metafield actors, inside the output template specification. In other
 words, you can make metadata fields conditional on global parameters.
 
-Parameter conditions can not be used for input templates, for the simple
+Parameter conditions cannot be used for input templates, for the simple
 reason that in CLAM the parameters are set after the input files are uploaded.
 However, input templates can be \emph{optional}, by setting
-\texttt{optional=True}. This means that providing such input files is optional,
-this also implies that any output templates that have this optional input
+\texttt{optional=True}. This means that providing such input files is optional.
+This also implies that any output templates that have this optional input
 template as a parent are also conditional on the presence of those input files.
 
 %TODO LATER: Provide example?
@@ -1440,7 +1548,7 @@ framework that can do two things:
 
 \begin{enumerate}
 \item Convert input files from auxiliary formats to your desired format, upon upload;
-\item Convert output files from your output format to secondary formats.
+\item Convert output files from your output format to auxiliary formats.
 \end{enumerate}
 
 A converter, using the above-mentioned class names, can be included in input
@@ -1457,12 +1565,16 @@ be provided out of the box. Note that the actual conversion will be performed
 by 3rd party software in most cases.
 
 \begin{itemize}
-\item \texttt{MSWordConverter} -- Convert MS Word files to plain text
-\item \texttt{PDFConverter} -- Convert PDF to plain text.
-\item \texttt{CharEncodingConverter} -- Convert between plain text files in different character encodings.
+\item \texttt{MSWordConverter} -- Convert MS Word files to plain text. This
+  converter uses the external tool \texttt{catdoc} by default.
+  \footnote{\url{http://www.wagner.pp.ru/~vitus/software/catdoc/}}
+\item \texttt{PDFConverter} -- Convert PDF to plain text. This converter uses
+  the external tool \texttt{pdftohtml} by default. \footnote{\url{http://pdftohtml.sourceforge.net/}}
+\item \texttt{CharEncodingConverter} -- Convert between plain text files in
+  different character encodings.
 \end{itemize}
 
-Note that specific converters take specific parameters, consult the API reference for details.
+Note that specific converters take specific parameters; consult the API reference for details.
 
 %TODO LATER: Include examples?
 
@@ -1472,7 +1584,7 @@ Viewers are intended for human end users, and enable visualisation of a
 particular file format. CLAM offers a viewer framework that enables you to
 write viewers for your format. Viewers may either be written within the CLAM
 framework, using Python, but they can also be external (non-CLAM) webservices,
-hosted elsewhere. Several simple viewers for some formats are provided already,
+hosted elsewhere. Several simple viewers for some formats are provided already;
 these are defined in \texttt{viewers.py}.
 
 Viewers can be included in output templates. Include them directly after any
@@ -1482,6 +1594,7 @@ metafield actors.
 The below example illustrates the use of the viewer
 \texttt{SimpleTableViewer}, capable of showing CSV files:
 
+{ \small
 \begin{verbatim}
 OutputTemplate('freqlist',CSVFormat,"Frequency list",
     SimpleTableViewer(),
@@ -1489,13 +1602,14 @@ OutputTemplate('freqlist',CSVFormat,"Frequency list",
     extension='.patterns.csv',
 )
 \end{verbatim}
+}
 
 \subsection{Working with pre-installed data}
 
 Rather than letting users upload files, CLAM also offers the possibility of
 pre-installing input data on the server. This feature is ideally suited for
 dealing with data for a demo, or for offering a selection of pre-installed
-corpora that are too big to transfer over network. Furthermore, pre-installed
+corpora that are too big to transfer over a network. Furthermore, pre-installed
 data is also suited in situations where you want the user to be able to choose
 from several pre-installed resources, such as lexicons, grammars, etc., instead
 of having to upload files they may not have available.
@@ -1506,11 +1620,14 @@ input template, or more globally.
 
 Take a look at the following example:
 
+{ \small
 \begin{verbatim}
 InputTemplate('lexicon', PlainTextFormat,"Input Lexicon", 
-   StaticParameter(id='encoding',name='Encoding',description='Character encoding',
+   StaticParameter(id='encoding',name='Encoding',
+       description='Character encoding',
        value='utf-8'),
-   ChoiceParameter(id='language',name='Language',description='The language the text is in', 
+   ChoiceParameter(id='language',name='Language',
+       description='The language the text is in', 
        choices=[('en','English'),('nl','Dutch'),('fr','French')]),
    InputSource(id='lexiconA', label="Lexicon A",
     path="/path/to/lexiconA.txt", 
@@ -1521,19 +1638,20 @@ InputTemplate('lexicon', PlainTextFormat,"Input Lexicon",
     metadata=PlainTextFormat(None, encoding='utf-8',language='en')
    ),
    onlyinputsource=False
-),            
+)            
 \end{verbatim}
+}
 
 This defines an input template for some kind of lexicon, with two pre-defined
 input sources: ``lexicon A'' and ``lexicon B''. The user can choose between
 these, or alternatively upload a lexicon of his own. If, however,
 \texttt{onlyinputsource} is set to \texttt{True}, then the user is forced to
-choose only from the input sources, and can't upload his own version. 
+choose only from the input sources, and cannot upload his own version. 
 
 Metadata can be provided either in the inputsource configuration, or by simply
 adding a CLAM metadata file alongside the actual file. For the file
-\texttt{/path/to/lexiconA.txt}, the metadata file would be
-\texttt{/path/to/.lexiconA.txt.METADATA} (note the initial period; metadata
+\path{/path/to/lexiconA.txt}, the metadata file would be
+\path{/path/to/.lexiconA.txt.METADATA} (note the initial period; metadata
 files are hidden). 
 
 Input sources can also be defined globally, and correspond to multiple files,
@@ -1541,28 +1659,31 @@ i.e. they point to a directory containing multiple files instead of pointing to
 a single file. Let us take the example of a spelling correction demo, in which
 a test set consisting out of many text documents is the input source:
 
+{ \small
 \begin{verbatim}
 INPUTSOURCES = [
     InputSource(id='demotexts', label="Demo texts",
         path="/path/to/demotextdir/", 
-        metadata=PlainTextFormat(None, encoding='utf-8',language='en'),
+        metadata=PlainTextFormat(None, encoding='utf-8',
+                 language='en'),
         inputtemplate='maininput',
        ),
 ]
 \end{verbatim}
+}
 
-In these cases, it is essential to fill the \texttt{inputtemplate=} parameter.
+In these cases, it is essential to set the \texttt{inputtemplate=} parameter.
 All files in the directory must be formatted according to this input template.
 Adding input sources for multiple input templates is done by simply defining
 multiple input sources. %The user may always select from as many or few input
-sources as he wants.
+%sources as he wants.
 
 \subsection{Multiple profiles, identical input templates}
 
 It is possible and sometimes necessary to define more than one profile. Recall
 that each profile defines what output will be generated given what input, and
 how the metadata is translated. Multiple profiles come into the picture as soon
-as you have a a disjunction of possible inputs. Imagine a spelling check system
+as you have a disjunction of possible inputs. Imagine a spelling check system
 that can take either plain text as input, or a kind of XML file. In this
 situation you have two profiles; one for the plain-text variant, and one for
 the XML variant. 
@@ -1592,23 +1713,25 @@ service configuration file:
 \end{itemize}
 
 As the HTML text will be embedded on the fly, take care \emph{not} to include
-any headers, only tags that go within the HTML \texttt{body} are permitted!
-Always use the UTF-8 encoding and well-formed xhtml syntax.
+any headers. Only tags that go within the HTML \texttt{body} are permitted!
+Always use the utf-8 encoding and well-formed xhtml syntax.
 
-A second kind of customisation is customisation of the style, this can be
+A second kind of customisation is customisation of the style, which can be
 achieved by creating new CSS themes. CLAM gets shipped with the default
 ``classic'' style (which did receive a significant overhaul in CLAM 0.9). Copy,
 rename and adapt \texttt{style/classic.css} to create your own style. And set
 \texttt{STYLE} accordingly in your service configuration file.
 
 In your service configuration file you can set a variable
-\texttt{INTERFACEOPTIONS}, this string is a space-separated list in which you
+\texttt{INTERFACEOPTIONS}; this string is a space-separated list in which you
 can use the following directives to customise certain aspects of the
 web-interface:
 
 \begin{itemize}
 \item \texttt{simpleupload} -- Use the simple uploader instead of the more advanced javascript-based. The simple uploader does not support multiple files but does provide full HTTP Digest Security whereas the default and more advanced uploader relies on a less sophisticated security mechanism.
-\item \texttt{simplepolling} -- Uses a simpler polling mechanism in the stage in which CLAM awaits the completion of a process. This method simply refreshes the page periodically, whilst the default method is asynchronous but relies on a less sophisticated security mechanism. 
+\item \texttt{simplepolling} -- Uses a simpler polling mechanism in the stage
+  in which CLAM awaits the completion of a process. This method simply
+  refreshes the page periodically, while the default method is asynchronous but relies on a less sophisticated security mechanism. 
 \item \texttt{secureonly} -- Equals to \texttt{simpleupload} and \texttt{simplepolling}, forcing only methods that fully support HTTP Digest Authentication.
 \item \texttt{disablefileupload} -- Disables the file uploader in the interface (do note that this is merely cosmetic and not a security mechanism, the RESTful webservice API will continue to support file uploads).
 \item \texttt{inputfromweb} -- Enables downloading an input file from the web (do note that this is merely cosmetic and not a security mechanism, the RESTUL webservice API always supports this regardless of visibility in the interface).
@@ -1636,16 +1759,20 @@ Actions are specified in the service configuration file in the \texttt{ACTIONS}
 list. Consider the following example:
 
 
+{ \small
 \begin{verbatim}
 ACTIONS = [
-  Action(id='multiply',name="Multiplier",description="Multiply two
-  numbers",command="/path/to/multiply.sh $PARAMETERS",mimetype="text/plain",
+  Action(id='multiply',name="Multiplier",
+  description="Multiply two
+  numbers",command="/path/to/multiply.sh $PARAMETERS",
+  mimetype="text/plain",
   parameters=[
     IntegerParameter(id='x',name="Value 1"),
     IntegerParameter(id='y',name="Value 2"),
   ])
 ]
 \end{verbatim}
+}
 
 The ID of the action determines on what URL it listens. In this case the URL
 will be \texttt{/actions/multiply/}, relative to the root of your service. The
@@ -1667,24 +1794,29 @@ It may, however, not even be necessary to invoke an external script. Actions
 support calling Python functions directly. Consider the following trivial Python
 function for multiplication:
 
+{ \small
 \begin{verbatim}
 def multiply(a,b):
   return a * b
 \end{verbatim}
+}
 
 You can define functions in the service configuration file itself, or import it
 from elsewhere. We can now use this as an action directly:
 
+{ \small
 \begin{verbatim}
 ACTIONS = [
-  Action(id='multiply',name="Multiplier",description="Multiply two
-  numbers",function=multiply,mimetype="text/plain"
+  Action(id='multiply',name="Multiplier",
+  description="Multiply two numbers",
+  function=multiply,mimetype="text/plain"
   parameters=[
     IntegerParameter(id='x',name="Value 1"),
     IntegerParameter(id='y',name="Value 2"),
   ])
 ]
 \end{verbatim}
+}
 
 Again, the parameters are passed in the order they are specified, irregardless
 of their names. A mismatch in parameters will result in an error as soon as you
@@ -1723,11 +1855,13 @@ action.
 If you want to use only actions and disable the project paradigm
 entirely, set the following in your service configuration file:
 
+{ \small
 \begin{verbatim}
 COMMAND = None
 PROFILES = []
 PARAMETERS = []
 \end{verbatim}
+}
 
 
 \section{Wrapper script}
@@ -1746,7 +1880,8 @@ important things to take into account:
 \begin{itemize}
 \item All user-provided input has to be read from the specified input directory. A full listing of this input will be provided in the \texttt{clam.xml} data file. If you choose not to use this, but use \texttt{\$PARAMETERS} instead, then you must take care that your application can identify the file formats by filename, extension or otherwise.
 \item All user-viewable output must be put in the specified output directory. Output files must be generated in accordance with the profiles that describe this generation. 
-\item The wrapper should periodically output a small status message to \texttt{\$STATUSFILE}. Whilst this is not mandatory, it offers valuable feedback to the user on the state of the system. 
+\item The wrapper should periodically output a small status message to
+  \texttt{\$STATUSFILE}. While this is not mandatory, it offers valuable feedback to the user on the state of the system. 
 \item The wrapper script is always started with the current working directory set to the selected project directory.
 \item Wrapper scripts often invoke the actual application using some kind of
   \texttt{system()} call. Take care never to pass unvalidated user-input to the shell! This makes you vulnerable
@@ -1772,14 +1907,16 @@ its components are made available in an instance of a CLAMData class.
 
 Suppose your wrapper script is called with the following command definition:
 
+{\footnotesize
 \begin{verbatim}
 COMMAND = "/path/to/wrapperscript.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY" 
-\end{verbatim}
+\end{verbatim}}
 
 
 Your wrapper scripts then typically starts in the following fashion:
 
 
+{ \small
 \begin{verbatim}
 import sys
 import clam.common.data
@@ -1790,6 +1927,7 @@ outputdir = sys.argv[3]
 
 clamdata = clam.common.data.getclamdata(datafile)
 \end{verbatim}
+}
 
 The first statements parse the command line arguments. The last statement
 returns a \texttt{CLAMData} instance, which contains all data your wrapper might need,
@@ -1797,7 +1935,7 @@ representing the state of the project and all user input.
 
 For an extensive overview of the \texttt{CLAMData} class, we refer to the CLAM
 Data API Documentation at \url{http://packages.python.org/CLAM}. It is highly
-recommended to read this when your wrapper using the CLAM Data API. A few of the
+recommended to read this when your wrapper is using the CLAM Data API. A few of the
 variables available are:
 
 \begin{itemize}
@@ -1813,34 +1951,43 @@ variables available are:
 Any global parameters are available from the \texttt{clamdata} instance, by
 using it like a Python dictionary, where the keys correspond to the Parameter ID:
 
+{ \small
 \begin{verbatim}
 parameter = clamdata['parameter_id']
 \end{verbatim}
+}
 
 The CLAM API also has facilities to use a status file to relay progress
 feedback to the web-interface. Using it is as simple as importing the library
 and writing messages at strategic points during your program's execution:
 
+{ \small
 \begin{verbatim}
 import clam.common.status
 clam.common.status.write(statusfile, "We are running!")
 \end{verbatim}
+}
 
 Progress can also be expressed through an additional completion parameter,
 holding a value between $0$ and $1$. The web-application will show a progress bar if
 such information is provided:
 
+{ \small
 \begin{verbatim}
-clam.common.status.write(statusfile, "We're half way there! Hang on!", 0.5)
+clam.common.status.write(statusfile, 
+     "We're half way there! Hang on!", 0.5)
 \end{verbatim}
+}
 
 If you have a specific input file you want to grab, you may obtain it from your
 \texttt{clamdata} instance by inputtemplate:
 
+{ \small
 \begin{verbatim}
 inputfile = clamdata.inputfile('some-inputtemplate-id')
 inputfilepath = str(inputfile) 
 \end{verbatim}
+}
 
 The variable \texttt{inputfilepath} in the above example will contain the full
 path to the file that was uploaded by the user for the specified input
@@ -1849,64 +1996,73 @@ template.
 Once you have a file, you can easily obtain any associated metadata in a
 dictionary-like fashion, for instance:
 
+{ \small
 \begin{verbatim}
 author = inputfile.metadata['author']
 \end{verbatim}
+}
 
-When you have multiple input files, you may want to iterate over all of them,
-the name of the inputtemplate can be obtained from the metadata:
+When you have multiple input files, you may want to iterate over all of them.
+The name of the inputtemplate can be obtained from the metadata:
 
+{ \small
 \begin{verbatim}
 for inputfile in clamdata.input:
     inputfilepath = str(inputfile)
     inputtemplate = inputfile.metadata.inputtemplate
 \end{verbatim}
+}
   
 The core of your wrapper script usually consists of a call to your external
 program. In Python this can be done through \texttt{os.system()}. Consider the
 following ficticious example of a program that translates an input text to the
 language specified by a global parameter.
 
+{ \small
 \begin{verbatim}
 os.system("translate -l " + clamdata['language'] + " " + \
  str(clamdata.inputfile('sourcetext')) + \
  + " > " + outputdir + "/output.txt"))
 \end{verbatim}
+}
 
 
-However, at this point
-you need to be conscient of possible malicious use, and make sure nobody can
-perform a code injection attack. The key here is to never pass unvalidated data
-obtained from user-input directly to the shell. CLAM's various parameters have
-there own validation options, the only risk left to mitigate is that of string
-input. If the global parameter \emph{language} would be a free string input
-field, a user may insert malicious code that gets passed to the shell. To
-prevent this, use the \texttt{shellsafe()} function from the CLAM Data API. 
+However, at this point you need to be aware of possible malicious use, and make
+sure nobody can perform a code injection attack. The key here is to never pass
+unvalidated data obtained from user-input directly to the shell. CLAM's various
+parameters have their own validation options; the only risk left to mitigate is
+that of string input. If the global parameter \emph{language} would be a free
+string input field, a user may insert malicious code that gets passed to the
+shell. To prevent this, use the \texttt{shellsafe()} function from the CLAM
+Data API. 
 
 
+{ \small
 \begin{verbatim}
 shellsafe = clam.common.data.shellsafe #just a shortcut
 
-os.system("translate -l " + shellsafe(clamdata['language'],"'") + " " + \
+os.system("translate -l " + shellsafe(clamdata['language'],"'") + \
+ " " + \
  shellsafe(str(clamdata.inputfile('sourcetext')),'"') + \
- + " > " + shellsafe(outputdir + "/output.txt") ))
+ " > " + shellsafe(outputdir + "/output.txt") ))
 \end{verbatim}
+}
 
-Each variable should be wrapped in \texttt{shellsafe}, the second argument to
+Each variable should be wrapped in \texttt{shellsafe}. The second argument to
 shellsafe expresses whether to wrap the variable in quotes, and if so, which
 quotes. Quotes are mandatory for values containing spaces or other symbols
 otherwise forbidden. If no quotes are used, shellsafe does more stringent
 checks to prevent code injection. A Python exception is raised if the variable
-is not deemed safe, and the shell will not be invoked. CLAM itself will pick
-this up and produce an error log.
+is not deemed safe, and the shell will not be invoked. CLAM itself will detect
+and produce an error log.
 
 
 \chapter{Documentation for Service Clients}
 
-CLAM is designed as a RESTful webservice, which implies that usage of the four
-HTTP verbs (GET/POST/PUT/DELETE) on pre-defined URLs is how you can communicate
-with a CLAM webservice. The webservice will in turn respond with standard HTTP
-response codes and, where applicable, in CLAM XML format.
+CLAM is designed as a RESTful webservice. This means a client communicates with
+CLAM through the four HTTP verbs (GET/POST/PUT/DELETE) on pre-defined URLs,
+effectively manipulating various resources. The webservice will in turn respond
+with standard HTTP response codes and, where applicable, a body in CLAM XML format.
 
 When writing a client for a CLAM webservice, Python users benefit greatly from
 the CLAM Client API, which in addition to the CLAM Data API provides a friendly
@@ -1914,7 +2070,7 @@ high-level interface for communication with a CLAM webservice and the handling
 of its data. Both are shipped as an integral part of CLAM by default. Using
 this API greatly facilitates writing a client for your webservice in a limited
 amount of time, so it is an approach to be recommended. Nevertheless, there are
-many valid reasons one might wish to write a client from scratch, not least as
+many valid reasons why one might wish to write a client from scratch, not least as
 this allows you to use any programming language of your choice, or better
 integrate a CLAM webservice as a part of an existing application.
 
@@ -1973,9 +2129,9 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differs per service). The parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differ per service). The parameter ID corresponds to the parameter keys in the querystring \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
-\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, then CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
+\textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
@@ -2010,9 +2166,19 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \hline
 \textbf{URL} & \texttt{/[project]/input/[filename]} or \texttt{/[project]/input/[inputtemplate]/[filename]}\\
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
+\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Response is returned in CLAM-Upload XML (distinct from CLAM XML!) Two arguments are mandatory: the input template, which designates what kind of file will be added and points to one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/ query arguments marked with an asterisk. Adding a file can proceed either by uploading it from the client machine \texttt{(file)}, by downloading it from another URL \texttt{(url)}, or by passing the contents in the POST message itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak Metadata can be passed in \emph{three} different ways: 1) by simply specifying a metadata field as parameter to the querystring, with the same ID as defined in the input template. 2) setting the \texttt{metafile} attribute to a HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
+\textbf{Description} & This method adds a new input file. Response is returned
+in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
+input template, which designates what kind of file will be added and points to
+one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/
+query arguments marked with an asterisk. Adding a file can proceed either by
+uploading it from the client machine \texttt{(file)}, by downloading it from
+another URL \texttt{(url)}, or by passing the contents in the POST message
+itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak
+Metadata can be passed in \emph{three} different ways: 1) by simply specifying
+a metadata field as parameter to the querystring, with the same ID as defined
+in the input template. 2) setting the \texttt{metafile} attribute to an HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
 
@@ -2077,6 +2243,8 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \textbf{Method} & \texttt{GET} \\
 \textbf{Querystring} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
+\textbf{Description} & Offers a single archive, of the desired format,
+including all output files \\
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete all output files}} \\
 \hline
@@ -2122,7 +2290,7 @@ the proper access token. See the section on OAuth2 authentication for more detai
 
 %\chapter{Frequently Asked Questions}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{apalike}
 \bibliography{clam}
 
 \end{document}
