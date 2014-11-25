@@ -155,9 +155,39 @@ function initclam() {
        });
    }
 
-   //Abort and delete a project
+   //Abort execution without deleting project (TODO)
    if ($("#abortbutton").length) {
        $("#abortbutton").click(function(event){
+         var data = {'delete': false };
+         $.ajax({ 
+            type: "DELETE", 
+            url: baseurl + '/' + project + '/', 
+            data: data,
+            dataType: "text", 
+            beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
+            success: function(response){ 
+                if (oauth_access_token != "") {
+                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
+                } else {
+                  window.location.href = baseurl + '/'; /* back to index */
+                }
+            },
+            error: function(response){
+                if ((response.status < 200) || (response.status > 299)) { //patch
+                    alert("Unable to delete project (" + response.status + ")");   
+                }
+            }
+         });         
+       });
+   }    
+
+   //Abort and delete a project
+   if ($("#deletebutton").length) {
+       $("#deletebutton").click(function(event){
          $.ajax({ 
             type: "DELETE", 
             url: baseurl + '/' + project + '/', 

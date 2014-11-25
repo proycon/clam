@@ -211,7 +211,7 @@
      <xsl:choose>
       <xsl:when test="@code = 0">
         <div id="actions">
-        	<input id="abortbutton" type="button" value="Abort and delete project" />
+        	<input id="abortbutton" type="button" value="Abort execution" />
        	</div>
   		<xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">
@@ -223,7 +223,7 @@
       </xsl:when>
       <xsl:when test="@code = 1">
         <div id="actions">
-        	<input id="abortbutton" type="button" value="Abort and delete project" />
+        	<input id="abortbutton" type="button" value="Abort execution" />
         </div>
   		<xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">
@@ -246,7 +246,7 @@
       </xsl:when>
       <xsl:when test="@code = 2">
         <div id="actions">
-            <input id="indexbutton" type="button" value="Done, return to project index" /><input id="abortbutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
+            <input id="indexbutton" type="button" value="Done, return to project index" /><input id="deletebutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
         </div>     
         <xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">
