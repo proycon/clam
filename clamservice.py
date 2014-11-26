@@ -871,7 +871,7 @@ class Project(object):
                 return (clam.common.status.RUNNING, "The system is running",  [], 0) #running
         elif Project.done(project, user):
             statuslog, completion = Project.statuslog(project, user)
-            if Project.aborted(project.user):
+            if Project.aborted(project,user):
                 if not statuslog:
                     completion = 100
                 return (clam.common.status.DONE, "Aborted! Output may be partial or unavailable", statuslog, completion)
