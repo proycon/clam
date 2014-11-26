@@ -1,10 +1,15 @@
 (for a complete and exact overview, consult 'git log')
 
+0.9.12) [Nov 2014]
+- Added abort execution without deleting project (and set as default action
+from interface)
+
 0.9.11) [Oct 2014]
 - OAuth2 support
 - Enabled Cross-Site Resource Sharing, allowing browser-based CLAM clients on
 other domains
 - Added 'Actions'
+- Security fixes in dispatcher
 
 0.9.10) [Sep 2014]
 - Security upgrades, better protection against possible code injection, added shellsafe function

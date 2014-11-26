@@ -158,7 +158,7 @@ function initclam() {
    //Abort execution without deleting project (TODO)
    if ($("#abortbutton").length) {
        $("#abortbutton").click(function(event){
-         var data = {'delete': false };
+         var data = {'abortonly': true };
          $.ajax({ 
             type: "DELETE", 
             url: baseurl + '/' + project + '/', 

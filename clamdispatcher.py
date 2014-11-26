@@ -22,7 +22,7 @@ import datetime
 import subprocess
 import time
 
-VERSION = '0.9.11'
+VERSION = '0.9.12'
 
 sys.path.append(sys.path[0] + '/..')
 
@@ -166,6 +166,9 @@ def main():
                         time.sleep(0.2)
                 if projectdir:
                     os.unlink(projectdir + '.abort')
+                    os.unlink(projectdir + '.abort')
+                    open(projectdir + '.aborted','w')
+                    f.close()
                 break
         if d <= 1:
             idle += 0.05

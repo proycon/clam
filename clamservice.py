@@ -89,7 +89,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
-VERSION = '0.9.11'
+VERSION = '0.9.12'
 
 DEBUG = False
 
@@ -804,6 +804,11 @@ class Project(object):
     def done(project,user):
         return os.path.isfile(Project.path(project, user) + ".done")
 
+    @staticmethod
+    def aborted(project,user):
+        return os.path.isfile(Project.path(project, user) + ".aborted")
+
+
     def exitstatus(self, project, user):
         f = open(Project.path(project, user) + ".done")
         status = int(f.read(1024))
@@ -866,10 +871,15 @@ class Project(object):
                 return (clam.common.status.RUNNING, "The system is running",  [], 0) #running
         elif Project.done(project, user):
             statuslog, completion = Project.statuslog(project, user)
-            if statuslog:
-                return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
+            if Project.aborted(project.user):
+                if not statuslog:
+                    completion = 100
+                return (clam.common.status.DONE, "Aborted! Output may be partial or unavailable", statuslog, completion)
             else:
-                return (clam.common.status.DONE, "Done", statuslog, 100)
+                if statuslog:
+                    return (clam.common.status.DONE, statuslog[0][0],statuslog, completion)
+                else:
+                    return (clam.common.status.DONE, "Done", statuslog, 100)
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
@@ -1106,15 +1116,22 @@ class Project(object):
 
     @RequireLogin(ghost=GHOST)
     def DELETE(self, project, user=None):
+        data = web.input()
+        if 'abortonly' in data:
+            abortonly = bool(data['abortonly'])
         user, oauth_access_token = validateuser(user)
         if not self.exists(project, user):
             raise web.webapi.NotFound("No such project: " + project + " for user " + user)
         statuscode, _, _, _  = self.status(project, user)
+        msg = ""
         if statuscode == clam.common.status.RUNNING:
             self.abort(project, user)
-        printlog("Deleting project '" + project + "'" )
-        shutil.rmtree(Project.path(project, user))
-        msg = "Deleted"
+            msg = "Aborted"
+        if not abortonly:
+            printlog("Deleting project '" + project + "'" )
+            shutil.rmtree(Project.path(project, user))
+            msg += " Deleted"
+        msg = msg.strip()
         defaultheaders('text/plain')
         web.header('Content-Length',len(msg))
         return msg #200
