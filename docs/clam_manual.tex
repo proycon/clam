@@ -38,12 +38,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.11} \\[0.5cm]
+{\bf \small version 0.9.12 - revision 1.1} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014} \\[0.5cm] 
+\emph{November 11th, 2014 (date published) - November 26th, 2014 (last revision)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -2136,7 +2136,8 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Querystring} & The parameter \texttt{abortonly} can be set to 1 if you
+only want to abort a running process without deleting the entire project \\
 \textbf{Response} & \texttt{200 - OK}, \texttt{401 - Unauthorised},  \texttt{404 - Not Found}\\ 
 \textbf{Description} & Deletes a project. Any running processes will be aborted. \\ 
 \hline
