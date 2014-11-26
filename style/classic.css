@@ -181,7 +181,7 @@ input.uploadbutton, input.submitaction {
 	font-size: 12px;
 }
 
-input#indexbutton, input#abortbutton, input#restartbutton {
+input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton {
 	background: #880000;
 	padding: 2px;
 	color: white;
@@ -191,7 +191,7 @@ input#indexbutton, input#abortbutton, input#restartbutton {
 	border: none;
 	cursor: pointer;
 }
-input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover {
+input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, input#deletebutton:hover {
 	background: #EE0000;	
 }
 

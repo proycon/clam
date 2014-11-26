@@ -211,7 +211,7 @@
      <xsl:choose>
       <xsl:when test="@code = 0">
         <div id="actions">
-        	<input id="abortbutton" type="button" value="Abort execution" />
+        	<input id="deletebutton" type="button" value="Cancel and delete project" />
        	</div>
   		<xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">

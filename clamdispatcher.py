@@ -21,6 +21,7 @@ import os
 import datetime
 import subprocess
 import time
+import signal
 
 VERSION = '0.9.12'
 
@@ -128,12 +129,11 @@ def main():
         return 1
 
     #intervalf = lambda s: min(s/10.0, 15)
-    abortchecktime = 0
     abort = False
     idle = 0
     done = False
     lastpolltime = datetime.datetime.now()
-
+    lastabortchecktime = datetime.datetime.now()
 
     while not done:
         d = total_seconds(datetime.datetime.now() - begintime)
@@ -150,26 +150,22 @@ def main():
         if done:
             break
 
-        abortchecktime += d
-        if abortchecktime >= d+0.1 or abortchecktime >= 10: #every 10 seconds, faster at beginning
-            abortchecktime = 0
+        if total_seconds(datetime.datetime.now() - lastabortchecktime) >= min(10, d* 0.5):  #every 10 seconds, faster at beginning
             if projectdir and os.path.exists(projectdir + '.abort'):
                 abort = True
             if abort:
                 print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)"
-                running = True
-                while running:
-                    os.system("kill -15 " + str(pid))
-                    running = (os.system('ps ' + str(pid)) == 0)
-                    if running:
-                        idle += 0.2
-                        time.sleep(0.2)
+                os.kill(pid, signal.SIGTERM)
+                os.waitpid(pid, 0)
                 if projectdir:
-                    os.unlink(projectdir + '.abort')
                     os.unlink(projectdir + '.abort')
                     open(projectdir + '.aborted','w')
                     f.close()
+                done = True
                 break
+            lastabortchecktime = datetime.datetime.now()
+
+
         if d <= 1:
             idle += 0.05
             time.sleep(0.05)

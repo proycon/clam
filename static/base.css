@@ -226,7 +226,7 @@ input.start {
     padding: 10px;
 }
 
-input#abortbutton, input#restartbutton, input#indexbutton {
+input#abortbutton, input#restartbutton, input#indexbutton, input#deletebutton {
     float: right;
 }
 .uploadform table, #inputbox table {

@@ -795,6 +795,9 @@ class Project(object):
         if self.pid(project, user) == 0:
             return False
         printlog("Aborting process of project '" + project + "'" )
+        f = open(Project.path(project,user) + ".abort", 'w')
+        f.close()
+        os.chmod( Project.path(project,user) + ".abort", 0777)
         while not os.path.exists(Project.path(project, user) + ".done"):
             printdebug("Waiting for process to die")
             time.sleep(1)
