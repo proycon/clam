@@ -155,6 +155,7 @@ def main():
                 abort = True
             if abort:
                 print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)"
+                os.system("sleep 30 && kill -9 " + str(pid) + " &") #deathtrap in case the process doesn't listen within 30 seconds
                 os.kill(pid, signal.SIGTERM)
                 os.waitpid(pid, 0)
                 if projectdir:
