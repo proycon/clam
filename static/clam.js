@@ -161,8 +161,7 @@ function initclam() {
          var data = {'abortonly': true };
          $.ajax({ 
             type: "DELETE", 
-            url: baseurl + '/' + project + '/', 
-            data: data,
+            url: baseurl + '/' + project + '/?abortonly=true', 
             dataType: "text", 
             beforeSend: oauthheader,
             crossDomain: true,

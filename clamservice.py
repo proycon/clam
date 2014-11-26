@@ -1119,6 +1119,8 @@ class Project(object):
         data = web.input()
         if 'abortonly' in data:
             abortonly = bool(data['abortonly'])
+        else:
+            abortonly = False
         user, oauth_access_token = validateuser(user)
         if not self.exists(project, user):
             raise web.webapi.NotFound("No such project: " + project + " for user " + user)
