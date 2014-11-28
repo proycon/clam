@@ -57,6 +57,7 @@ for i, inputfile in enumerate(clamdata.inputfiles('maininput')):
     cmdoptions = " --max-parser-tokens=200"
 
     if 'skip' in clamdata and clamdata['skip']:
+        print >>sys.stderr, "Skip options: ", "".join(clamdata['skip'])
         cmdoptions += ' --skip=' + "".join(clamdata['skip'])
 
 
