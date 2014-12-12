@@ -354,8 +354,11 @@ class ChoiceParameter(AbstractParameter):
         self.delimiter = ","
         self.showall = False
         self.multi = False
-        if not 'value' in kwargs and not 'default' in kwargs:
+        if not 'value' in kwargs and not 'default' in kwargs and not 'multi' in kwargs:
             self.value = self.choices[0][0] #no default specified, first choice is default
+
+        if 'multi' in kwargs:
+            self.value = []
 
         for key, value in kwargs.items():
             if key == 'multi':
@@ -372,8 +375,11 @@ class ChoiceParameter(AbstractParameter):
 
     def validate(self,values):
         self.error = None
-        if not isinstance(values,list):
+        if not isinstance(values,list) or not isinstance(values, tuple):
             values = [values]
+        if not self.multi and len(values) > 1:
+            self.error = "Multiple values were specified, but only one is allowed!"
+            return False
         for v in values:
             if not v in [x[0] for x in self.choices]:
                 self.error = "Selected value was not an option!"
@@ -381,6 +387,11 @@ class ChoiceParameter(AbstractParameter):
         return True
 
 
+    def set(self, value):
+        if self.multi:
+            if not isinstance(value,list) or not isistance(value, tuple):
+                value = [value]
+        super(ChoiceParameter,self).set(value)
 
     def compilearg(self):
         """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
