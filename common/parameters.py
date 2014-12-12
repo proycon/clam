@@ -391,7 +391,7 @@ class ChoiceParameter(AbstractParameter):
         if self.multi:
             if not isinstance(value,list) or not isinstance(value, tuple):
                 value = [value]
-        super(ChoiceParameter,self).set(value)
+        return super(ChoiceParameter,self).set(value)
 
     def compilearg(self):
         """This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value"""
