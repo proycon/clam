@@ -354,10 +354,10 @@ class ChoiceParameter(AbstractParameter):
         self.delimiter = ","
         self.showall = False
         self.multi = False
-        if not 'value' in kwargs and not 'default' in kwargs and not 'multi' in kwargs:
+        if not 'value' in kwargs and not 'default' in kwargs and (not 'multi' in kwargs or not kwargs['multi']):
             self.value = self.choices[0][0] #no default specified, first choice is default
 
-        if 'multi' in kwargs:
+        if 'multi' in kwargs and kwargs['multi']:
             self.value = []
 
         for key, value in kwargs.items():
@@ -375,14 +375,14 @@ class ChoiceParameter(AbstractParameter):
 
     def validate(self,values):
         self.error = None
-        if not isinstance(values,list) or not isinstance(values, tuple):
+        if not isinstance(values,list) and not isinstance(values, tuple):
             values = [values]
         if not self.multi and len(values) > 1:
             self.error = "Multiple values were specified, but only one is allowed!"
             return False
         for v in values:
             if not v in [x[0] for x in self.choices]:
-                self.error = "Selected value was not an option!"
+                self.error = "Selected value was not an option! (" + str(v) + ")"
                 return False
         return True
 
