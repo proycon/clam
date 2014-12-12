@@ -389,7 +389,7 @@ class ChoiceParameter(AbstractParameter):
 
     def set(self, value):
         if self.multi:
-            if not isinstance(value,list) or not isinstance(value, tuple):
+            if not isinstance(value,list) and not isinstance(value, tuple):
                 value = [value]
         return super(ChoiceParameter,self).set(value)
 
