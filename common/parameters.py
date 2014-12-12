@@ -203,7 +203,7 @@ class AbstractParameter(object):
                     if not 'choices' in kwargs: kwargs['choices'] = {}
                     kwargs['choices'][subtag.attrib['id']] = subtag.text
                     if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                        if 'multi' in kwargs and kwargs['multi'] == '1':
+                        if 'multi' in kwargs and kwargs['multi']:
                             if not 'value' in kwargs: kwargs['value'] = []
                             kwargs['value'].append(subtag.attrib['id'])
                         else:

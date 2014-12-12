@@ -283,6 +283,20 @@ class MultiChoiceParameterTest(unittest.TestCase):
         self.assertFalse(success)
         self.assertFalse(self.parameter.hasvalue)
 
+    def test5_fromxml(self):
+        """MultiChoice parameter - reading from XML"""
+        xml = """<ChoiceParameter id="skip" name="Skip modules" description="Are there any components you want to skip? Skipping components you do not need may speed up the process considerably." flag="--skip=" multi="true"> <choice id="t">Tokeniser</choice> <choice id="m" selected="1">Multi-Word Detector</choice> <choice id="p" selected="1">Parser</choice> <choice id="c" selected="1">Chunker / Shallow parser</choice> <choice id="n" selected="1">Named Entity Recognition</choice></ChoiceParameter>"""
+        parameter = clam.common.parameters.AbstractParameter.fromxml(xml)
+        self.assertTrue(isinstance(parameter, clam.common.parameters.ChoiceParameter))
+        self.assertTrue(parameter.multi == True)
+        self.assertTrue(len(parameter.choices) == 5)
+        self.assertTrue(isinstance(parameter.value, list))
+        self.assertTrue(not 't' in parameter.value)
+        self.assertTrue('p' in parameter.value)
+        self.assertTrue('m' in parameter.value)
+        self.assertTrue('c' in parameter.value)
+        self.assertTrue('n' in parameter.value)
+
 
 class ParameterProcessingTest(unittest.TestCase):
     """Parameter Processing Tests"""
