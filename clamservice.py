@@ -89,7 +89,7 @@ except ImportError:
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
-VERSION = '0.9.12'
+VERSION = '0.9.13'
 
 DEBUG = False
 

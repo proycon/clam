@@ -36,7 +36,7 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION, BadRequest, NotFound, PermissionDenied, ServerError, AuthRequired,NoConnection, UploadError, ParameterError, TimeOut, processhttpcode
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.9.12'
+VERSION = '0.9.13'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
@@ -233,6 +233,9 @@ class CLAMClient:
         if 'auth' in parameters:
             auth = parameters['auth']
             del parameters['auth']
+        for key in parameters:
+            if isinstance(parameters[key],list) or isinstance(parameters[key],tuple):
+                parameters[key] = ",".join(parameters[key])
 
         return self.request(project + '/', 'POST', urlencode(parameters))
 
