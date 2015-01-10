@@ -17,10 +17,12 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import web
 import shutil
 import os
-import codecs
+import io
 import stat
 import subprocess
 import glob
@@ -76,20 +78,20 @@ class CustomForbiddenXML(web.webapi.HTTPError):
 try:
     import MySQLdb
 except ImportError:
-    print >>sys.stderr, "WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication"
+    print("WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication",file=sys.stderr)
 
 
 try:
     from requests_oauthlib import OAuth2Session
 except ImportError:
-    print >>sys.stderr, "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication"
+    print( "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication", file=sys.stderr)
 
 
 #Maybe for later: HTTPS support (Just use Apache2/nginx/lighttpd instead)
 #web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
 #web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
-VERSION = '0.9.13'
+VERSION = '0.9.14'
 
 DEBUG = False
 
@@ -111,13 +113,13 @@ setlog(sys.stderr)
 
 def error(msg):
     if __name__ == '__main__':
-        print >>sys.stderr, "ERROR: " + msg
+        print("ERROR: " + msg, file=sys.stderr)
         sys.exit(1)
     else:
         raise Exception(msg) #Raise python errors if we were not directly invoked
 
 def warning(msg):
-    print >>sys.stderr, "WARNING: " + msg
+    print("WARNING: " + msg, file=sys.stderr)
 
 
 
@@ -473,7 +475,7 @@ class Logout(object):
             try:
                 response = urllib2.urlopen(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
                 response.read()
-            except Exception, e:
+            except Exception as e:
                 try:
                     statuscode = int(e.code)
                 except AttributeError:
@@ -1223,7 +1225,7 @@ class OutputFileHandler(object):
                     output = viewer.view(outputfile, **web.input())
                     if isinstance(output, web.template.TemplateResult):
                        output =  output['__body__']
-                    elif isinstance(output, str) or isinstance(output, unicode):
+                    elif isinstance(output, str) or (sys.version[0] == '2' and isinstance(output, unicode)):
                        output = output.split('\n')
                     for line in output:
                         yield line
@@ -1881,7 +1883,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                             encoding = p.value
                     #Contents passed in POST message itself
                     try:
-                        f = codecs.open(Project.path(project, user) + 'input/' + filename,'w',encoding)
+                        f = io.open(Project.path(project, user) + 'input/' + filename,'w',encoding=encoding)
                         f.write(postdata['contents'])
                         f.close()
                     except UnicodeError:
@@ -2024,7 +2026,7 @@ class FoLiAXSL(object):
     def GET(self):
         defaultheaders('text/xsl')
 
-        for line in codecs.open(settings.CLAMDIR + '/static/folia.xsl','r','utf-8'):
+        for line in io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8'):
             yield line
 
 class StyleData(object):
@@ -2033,7 +2035,7 @@ class StyleData(object):
     def GET(self):
         defaultheaders('text/css')
         yield "//" + settings.STYLE + '.css\n'
-        for line in codecs.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r','utf-8'):
+        for line in io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8'):
             yield line
 
 class ProjectGhost(Project):
@@ -2135,8 +2137,11 @@ class ActionHandler(object):
                 if parameters: parameters += " "
                 if flag: parameters += flag + " "
 
-                if isinstance(value, unicode):
-                    value = value.encode('utf-8')
+                if sys.version[0] == '2':
+                    if isinstance(value, unicode):
+                        value = value.encode('utf-8')
+                    elif not isinstance(value, str):
+                        value = str(value)
                 elif not isinstance(value, str):
                     value = str(value)
                 if value: parameters += clam.common.data.shellsafe(value,'"')
@@ -2518,19 +2523,19 @@ def sufficientresources():
 
 
 def usage():
-        print >> sys.stderr, "Syntax: clamservice.py [options] clam.config.yoursystem"
-        print >> sys.stderr, "Options:"
-        print >> sys.stderr, "\t-d            - Enable debug mode"
-        print >> sys.stderr, "\t-c            - Run in FastCGI mode"
-        print >> sys.stderr, "\t-H [hostname] - Hostname"
-        print >> sys.stderr, "\t-p [port]     - Port"
-        print >> sys.stderr, "\t-u [url]      - Force URL"
-        print >> sys.stderr, "\t-h            - This help message"
-        print >> sys.stderr, "\t-P [path]     - Python Path from which the settings module can be imported"
-        print >> sys.stderr, "\t-v            - Version information"
-        print >> sys.stderr, "(Note: Running clamservice directly from the command line uses the built-in"
-        print >> sys.stderr, "web-server. This is great for development purposes but not recommended"
-        print >> sys.stderr, "for production use. Use the WSGI interface with for instance Apache instead.)"
+        print( "Syntax: clamservice.py [options] clam.config.yoursystem",file=sys.stderr)
+        print("Options:",file=sys.stderr)
+        print("\t-d            - Enable debug mode",file=sys.stderr)
+        print("\t-c            - Run in FastCGI mode",file=sys.stderr)
+        print("\t-H [hostname] - Hostname",file=sys.stderr)
+        print("\t-p [port]     - Port",file=sys.stderr)
+        print("\t-u [url]      - Force URL",file=sys.stderr)
+        print("\t-h            - This help message",file=sys.stderr)
+        print("\t-P [path]     - Python Path from which the settings module can be imported",file=sys.stderr)
+        print("\t-v            - Version information",file=sys.stderr)
+        print("(Note: Running clamservice directly from the command line uses the built-in",file=sys.stderr)
+        print("web-server. This is great for development purposes but not recommended",file=sys.stderr)
+        print("for production use. Use the WSGI interface with for instance Apache instead.)",file=sys.stderr)
 
 
 def set_defaults(HOST = None, PORT = None):
@@ -2581,7 +2586,7 @@ def set_defaults(HOST = None, PORT = None):
         elif os.path.exists(settings.CLAMDIR + '/clamdispatcher.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/clamdispatcher.py')[stat.ST_MODE]:
             settings.DISPATCHER = settings.CLAMDIR + '/clamdispatcher.py'
         else:
-            print >>sys.stderr, "WARNING: clamdispatcher not found!!"
+            print("WARNING: clamdispatcher not found!!",file=sys.stderr)
             settings.DISPATCHER = 'clamdispatcher'
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
@@ -2648,19 +2653,19 @@ def set_defaults(HOST = None, PORT = None):
         settings.INTERFACEOPTIONS = ""
     if not 'CUSTOMHTML_INDEX' in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html'):
-            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html','r','utf-8') as f:
+            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_INDEX = f.read()
         else:
             settings.CUSTOMHTML_INDEX = ""
     if not 'CUSTOMHTML_PROJECTSTART' in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
-            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r','utf-8') as f:
+            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTSTART = f.read()
         else:
             settings.CUSTOMHTML_PROJECTSTART = ""
     if not 'CUSTOMHTML_PROJECTDONE' in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
-            with codecs.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r','utf-8') as f:
+            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTDONE = f.read()
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
@@ -2744,7 +2749,7 @@ if __name__ == "__main__":
         opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:P:")
     except getopt.GetoptError, err:
         # print help information and exit:
-        print str(err)
+        print(str(err))
         usage()
         sys.exit(2)
 
@@ -2766,21 +2771,21 @@ if __name__ == "__main__":
         elif o == '-u':
             FORCEURL = a
         elif o == '-v':
-            print "CLAM WebService version " + str(VERSION)
+            print("CLAM WebService version " + str(VERSION))
             sys.exit(0)
         else:
             usage()
-            print "ERROR: Unknown option: ", o
+            print("ERROR: Unknown option: ", o,file=sys.stderr)
             sys.exit(2)
 
     if (len(args) == 1):
         settingsmodule = args[0]
     elif (len(args) > 1):
-        print >>sys.stderr, "ERROR: Too many arguments specified"
+        print("ERROR: Too many arguments specified",file=sys.stderr)
         usage()
         sys.exit(2)
     else:
-        print >>sys.stderr, "ERROR: No settings module specified!"
+        print("ERROR: No settings module specified!",file=sys.stderr)
         usage()
         sys.exit(2)
 

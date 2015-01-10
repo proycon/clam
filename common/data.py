@@ -17,17 +17,15 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 from lxml import etree as ElementTree
 from StringIO import StringIO
-import urllib2
-
-
+import sys
+import requests
 import os.path
-import codecs
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import io
+import json
 import time
 from copy import copy
 import pycurl
@@ -42,7 +40,7 @@ from clam.common.util import RequestWithMethod
 
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.13'
+VERSION = '0.9.14'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
@@ -211,7 +209,7 @@ class CLAMFile:
         else:
             if self.client: self.client.initauth()
             try:
-                response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))
+                response = urlopen(Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))
                 xml = response.read()
             except:
                 extramsg = ""
@@ -228,15 +226,15 @@ class CLAMFile:
         """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first. Use ``copy()`` instead if you want to download a large remote file."""
         if not self.remote:
             if self.metadata and 'encoding' in self.metadata:
-                for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
+                for line in io.open(self.projectpath + self.basedir + '/' + self.filename, 'r', encoding=self.metadata['encoding']).readlines():
                     yield line
             else:
-                for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
+                for line in io.open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
                     yield line
         else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
             if self.client: self.client.initauth()
-            response = urllib2.urlopen(urllib2.Request( fullpath))
+            response = urlopen(Request( fullpath))
             for line in response.readlines():
                 if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
                     yield unicode(line, self.metadata['encoding'])
@@ -265,7 +263,7 @@ class CLAMFile:
             return True
         else:
             if self.client: self.client.initauth()
-            urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
+            urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
             return True
 
 
@@ -286,12 +284,16 @@ class CLAMFile:
 
     def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""
+
+        #TODO: rewrite using requests
+        #TODO: no support for openauth yet??
+
         if self.remote:
             if self.projectpath.endswith('/'):
                 url = self.projectpath + self.basedir + '/' + self.filename
             else:
                 url = self.projectpath + '/' + self.basedir + '/' + self.filename
-            f = open(target,'wb')
+            f = io.open(target,'wb')
             c = pycurl.Curl()
             c.setopt(pycurl.URL, url)
             if self.client and self.client.authenticated:
@@ -306,11 +308,11 @@ class CLAMFile:
             c.close()
         else:
             if self.metadata and 'encoding' in self.metadata:
-                f = codecs.open(target,'w', self.metadata['encoding'])
+                f = io.open(target,'w', encoding=self.metadata['encoding'])
                 for line in self:
                     f.write(line)
             else:
-                f = open(target,'w')
+                f = io.open(target,'wb')
                 for line in self:
                     f.write(line)
         f.close()
@@ -855,7 +857,7 @@ class Profile(object):
                                 metafilename = os.path.dirname(outputfilename)
                                 if metafilename: metafilename += '/'
                                 metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'
-                                f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
+                                f = io.open(projectpath + '/output/' + metafilename,'w',encoding='utf-8')
                                 f.write(metadata.xml())
                                 f.close()
                     else:
@@ -1141,7 +1143,7 @@ class CLAMMetaData(object):
 
     def save(self, filename):
         """Save metadata to XML file"""
-        f = codecs.open(filename,'w','utf-8')
+        f = io.open(filename,'w',encoding='utf-8')
         f.write(self.xml())
         f.close()
 

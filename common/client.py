@@ -17,18 +17,18 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import os.path
 import sys
-import urllib2
-from urllib import urlencode
+import requests
 import pycurl
 from lxml import etree as ElementTree
-from StringIO import StringIO
+if sys.version < '3':
+    from StringIO import StringIO
+else:
+    from io import StringIO,  BytesIO
 import base64
-from clam.external.poster.encode import multipart_encode
-from clam.external.poster.streaminghttp import register_openers, StreamingHTTPHandler
-
-
 
 import clam.common.status
 import clam.common.parameters
@@ -36,12 +36,10 @@ import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION, BadRequest, NotFound, PermissionDenied, ServerError, AuthRequired,NoConnection, UploadError, ParameterError, TimeOut, processhttpcode
 from clam.common.util import RequestWithMethod
 
-VERSION = '0.9.13'
+VERSION = '0.9.14'
 if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
-# Register poster's streaming http handlers with urllib2
-register_openers()
 
 
 class CLAMClient:
@@ -78,53 +76,27 @@ class CLAMClient:
     def initauth(self):
         """Initialise authentication, for internal use"""
         global VERSION
-        if self.authenticated:
-            #for file upload we use urllib2:
-            self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            # this creates a password manager
-            self.passman.add_password(None, self.url, self.user, self.password) #realm will be automagically detected
-            authhandler = urllib2.HTTPDigestAuthHandler(self.passman)
-            opener = urllib2.build_opener(authhandler)
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
-        elif self.oauth:
+
+        headers = {'User-agent', 'CLAMClientAPI-' + VERSION}
+        if self.oauth:
             if not self.oauth_access_token:
-                opener = urllib2.build_opener()
-                opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-                urllib2.install_opener(opener)
-                request = RequestWithMethod(self.url,method='GET')
-                try:
-                    response = urllib2.urlopen(request)
-                except Exception, e:
-                    try:
-                        statuscode = int(e.code)
-                    except AttributeError:
-                        raise e
+                r = requests.get(self.url,headers=headers)
+                if r.status_code == 404:
+                    raise NotFound("Authorization provider not found")
+                elif r.status_code == 403:
+                    raise PermissionDenied("Authorization provider denies access")
+                elif not (r.status_code >= 200 and r.status_code <= 299):
+                    raise Exception("An error occured, return code " + str(r_status_code))
 
-                    if statuscode >= 200 and statuscode < 300:
-                        #this is no error!
-                        return self._parse(e.read())
-                    elif statuscode == 404:
-                        raise NotFound("Authorization provider not found")
-                    elif statuscode == 403:
-                        raise PermissionDenied("Authorization provider denies access")
-                    else:
-                        raise
 
-                data = self._parse(response.read())
+                data = self._parse(r.text)
                 if data is True: #indicates failure
                     raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + response.geturl())
                 else:
                     self.oauth_access_token = data.oauth_access_token
 
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            opener.addheaders = [('Authorization', 'Bearer ' + self.oauth_access_token)]
-            urllib2.install_opener(opener)
-        else:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
+            headers['Authorization'] = 'Bearer ' + self.oauth_access_token
+        return headers
 
 
 
@@ -132,45 +104,47 @@ class CLAMClient:
     def request(self, url='', method = 'GET', data = None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
-        if self.authenticated or self.oauth: self.initauth()
+        headers = self.initauth()
+
+        kwargs = {}
+        if self.authenticated and not self.oauth:
+           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
         if data:
-            request = RequestWithMethod(self.url + url,data,method=method)
-        else:
-            request = RequestWithMethod(self.url + url,method=method)
-        try:
-            response = urllib2.urlopen(request)
-        except Exception, e:
-            try:
-                statuscode = int(e.code)
-            except AttributeError:
-                raise e
+           kwargs['data'] = data
 
-            if statuscode >= 200 and statuscode < 300:
-                #this is no error!
-                return self._parse(e.read())
-            elif statuscode == 400:
-                raise BadRequest()
-            elif statuscode == 401:
-                raise AuthRequired()
-            elif statuscode == 403:
-                content = e.read()
-                data = self._parse(content)
-                if data:
-                    raise PermissionDenied(data)
-                else:
-                    raise PermissionDenied(content)
-            elif statuscode == 404 and data:
-                raise NotFound(e.read())
-            elif statuscode == 500:
-                raise ServerError(e.read())
-            elif statuscode == 405:
-                raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
-            elif statuscode == 408:
-                raise TimeOut()
+
+        if method == 'POST':
+            request = requests.post
+        elif method == 'DELETE':
+            request = requests.delete
+        elif method == 'PUT':
+            request = requests.put
+
+        r = request(self.url,headers=headers,**kwargs)
+
+        if r.status_code == 400:
+            raise BadRequest()
+        elif r.status_code == 401:
+            raise AuthRequired()
+        elif r.status_code == 403:
+            content = r.text
+            data = self._parse(content)
+            if data:
+                raise PermissionDenied(data)
             else:
-                raise
+                raise PermissionDenied(content)
+        elif r.status_code == 404 and data:
+            raise NotFound(r.text)
+        elif r.status_code == 500:
+            raise ServerError(r.text)
+        elif r.status_code == 405:
+            raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
+        elif r.status_code == 408:
+            raise TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r_status_code))
 
-        return self._parse(response.read())
+        return self._parse(r.text)
 
 
     def _parse(self, content):
@@ -218,7 +192,7 @@ class CLAMClient:
         else:
             method = 'GET'
 
-        return self.request('/actions/' + id, method, urlencode(kwargs))
+        return self.request('/actions/' + id, method, kwargs)
 
 
 
@@ -237,7 +211,7 @@ class CLAMClient:
             if isinstance(parameters[key],list) or isinstance(parameters[key],tuple):
                 parameters[key] = ",".join(parameters[key])
 
-        return self.request(project + '/', 'POST', urlencode(parameters))
+        return self.request(project + '/', 'POST', parameters)
 
     def startsafe(self, project, **parameters):
         """Start a run. ``project`` is the ID of the project, and ``parameters`` are keyword arguments for
@@ -284,15 +258,18 @@ class CLAMClient:
             client.downloadarchive("myproject","allresults.zip","zip")
 
         """
-        #MAYBE TODO: Redo??
-        self.initauth()
-        req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
-        CHUNK = 16 * 1024
-        while True:
-            chunk = req.read(CHUNK)
-            if not chunk: break
-            targetfile.write(chunk)
+        headers = self.initauth()
+        if self.authenticated and not self.oauth:
+           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
+        else:
+           kwargs = {}
 
+        r = requests.get(self.url + project + '/output/',data={'format':format},headers=headers,**kwargs)
+        CHUNK = 16 * 1024
+        for chunk in r.iter_content(chunk_size=CHUNK):
+            if chunk: # filter out keep-alive new chunks
+                targetfile.write(chunk)
+                targetfile.flush()
 
     def getinputfilename(self, inputtemplate, filename):
         """Determine the final filename for an input file given an inputtemplate and a given filename.
@@ -388,42 +365,7 @@ class CLAMClient:
             else:
                 data[key] = value
 
-
-        #streamhandler = StreamingHTTPHandler(debuglevel=6)
-        #if self.authenticated:
-        #    opener = urllib2.build_opener(streamhandler, urllib2.HTTPDigestAuthHandler(self.passman))
-        #else:
-        #    opener = urllib2.build_opener(streamhandler)
-        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        #urllib2.install_opener(opener)
-
-        #opener = register_openers() #for streaming upload (poster)
-        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        #if self.authenticated:
-        #    opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
-        #    pass
-        #urllib2.install_opener(opener)
-
-        #if self.authenticated:
-        #    request = urllib2.Request(self.url + project + '/input/' + filename, "")
-        #    response = urllib2.urlopen(request)
-        #    print dir(request)
-        #    print request.headers
-
-
-        #datagen, headers = multipart_encode(data)
-
-        # Create the Request object
-        #request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        #print dir(request)
-        #print request.headers
-        #print request.get_header("Authorization")
-        #try:
-        #    response = urllib2.urlopen(request)
-        #    xml = response.read()
-        #except urllib2.HTTPError, e:
-        #    xml = e.read()
-
+        #TODO: Rewrite using requests
 
         buf = StringIO()
         # Initialize pycurl
@@ -497,22 +439,35 @@ class CLAMClient:
                 data[key] = value
 
 
-        opener = register_openers()
-        opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        if self.authenticated:
-            opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
-        datagen, headers = multipart_encode(data)
+        headers = self.initauth()
 
-        # Create the Request object
-        request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        try:
-            xml = urllib2.urlopen(request).read()
-        except urllib2.HTTPError, e:
-            xml = e.read()
-        try:
-            return self._parseupload(xml)
-        except:
-            raise
+        kwargs = {}
+        if self.authenticated and not self.oauth:
+           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
+        if data:
+           kwargs['data'] = data
+
+
+        r = requests.post(self.url + project + '/input/' + filename,headers=headers,**kwargs)
+
+        if r.status_code == 400:
+            raise BadRequest()
+        elif r.status_code == 401:
+            raise AuthRequired()
+        elif r.status_code == 403:
+            raise PermissionDenied()
+        elif r.status_code == 404:
+            raise NotFound(r.text)
+        elif r.status_code == 500:
+            raise ServerError(r.text)
+        elif r.status_code == 405:
+            raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
+        elif r.status_code == 408:
+            raise TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r_status_code))
+
+        return self._parseupload(r.text)
 
 
 

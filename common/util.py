@@ -12,15 +12,27 @@
 #
 ###############################################################
 
+
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import glob
 import os
-from sys import stdout,stderr
+import sys
 import datetime
-from urllib2 import Request
+if sys.version < '3':
+    from urllib2 import Request
+else:
+    from urllib.request import Request #pylint: disable=E0611
 import io
 
-LOG = stdout
-DEBUGLOG = stderr
+if sys.version < '3':
+    from codecs import getwriter
+    DEBUGLOG = getwriter('utf-8')(sys.stderr)
+    LOG = getwriter('utf-8')(sys.stdout)
+else:
+    DEBUGLOG = sys.stderr
+    LOG = sys.stdout
+
 DEBUG = False
 
 def globsymlinks(pattern, recursion=True):
