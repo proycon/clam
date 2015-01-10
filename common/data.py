@@ -201,16 +201,19 @@ class CLAMFile:
         if not self.remote:
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
             if os.path.exists(metafile):
-                f = open(metafile, 'r')
+                f = io.open(metafile, 'r',encoding='utf-8')
                 xml = "".join(f.readlines())
                 f.close()
             else:
                 raise IOError(2, "No metadata found, expected " + metafile )
         else:
-            if self.client: self.client.initauth()
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
             try:
-                response = urlopen(Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))
-                xml = response.read()
+                response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+                xml = response.text
             except:
                 extramsg = ""
                 if not self.client: extramsg = "No client was associated with this CLAMFile, associating a client is necessary when authentication is needed"
@@ -233,7 +236,12 @@ class CLAMFile:
                     yield line
         else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
-            if self.client: self.client.initauth()
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
+            response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+
             response = urlopen(Request( fullpath))
             for line in response.readlines():
                 if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :

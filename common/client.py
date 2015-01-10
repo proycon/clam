@@ -100,18 +100,18 @@ class CLAMClient:
 
 
 
+    def initrequest(self, data=None):
+        params = {'headers': self.initauth() }
+        if self.authenticated and not self.oauth:
+           params = {'auth': HTTPDigestAuth(self.user, self.password) }
+        if data:
+           params['data'] = data
+        return params
 
     def request(self, url='', method = 'GET', data = None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
-        headers = self.initauth()
-
-        kwargs = {}
-        if self.authenticated and not self.oauth:
-           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
-        if data:
-           kwargs['data'] = data
-
+        requestparams = self.initrequest(data)
 
         if method == 'POST':
             request = requests.post
@@ -120,7 +120,7 @@ class CLAMClient:
         elif method == 'PUT':
             request = requests.put
 
-        r = request(self.url,headers=headers,**kwargs)
+        r = request(self.url,**requestparams)
 
         if r.status_code == 400:
             raise BadRequest()
@@ -258,13 +258,9 @@ class CLAMClient:
             client.downloadarchive("myproject","allresults.zip","zip")
 
         """
-        headers = self.initauth()
-        if self.authenticated and not self.oauth:
-           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
-        else:
-           kwargs = {}
-
-        r = requests.get(self.url + project + '/output/',data={'format':format},headers=headers,**kwargs)
+        requestparams = self.initrequest()
+        requestparams['data'] = {'format':format}
+        r = requests.get(self.url + project + '/output/',**requestparams)
         CHUNK = 16 * 1024
         for chunk in r.iter_content(chunk_size=CHUNK):
             if chunk: # filter out keep-alive new chunks
@@ -439,16 +435,8 @@ class CLAMClient:
                 data[key] = value
 
 
-        headers = self.initauth()
-
-        kwargs = {}
-        if self.authenticated and not self.oauth:
-           kwargs = {'auth': HTTPDigestAuth(self.user, self.password) }
-        if data:
-           kwargs['data'] = data
-
-
-        r = requests.post(self.url + project + '/input/' + filename,headers=headers,**kwargs)
+        requestparams = self.initrequest()
+        r = requests.post(self.url + project + '/input/' + filename,**requestparams)
 
         if r.status_code == 400:
             raise BadRequest()
