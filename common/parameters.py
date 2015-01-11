@@ -11,8 +11,14 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
+import sys
 from lxml import etree as ElementTree
-from StringIO import StringIO
+if sys.version < '3':
+    from StringIO import StringIO
+else:
+    from io import StringIO,  BytesIO
 from clam.common.util import xmlescape
 
 class AbstractParameter(object):
@@ -125,9 +131,10 @@ class AbstractParameter(object):
 
     def __str__(self):
         if self.value:
-            if isinstance(self.value, unicode):
+            if sys.version < '3' and isinstance(self.value, unicode):
                 return self.value.encode('utf-8')
-            return str(self.value)
+            else:
+                return str(self.value)
         else:
             return ""
 
