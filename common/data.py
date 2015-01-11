@@ -20,7 +20,10 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 from lxml import etree as ElementTree
-from StringIO import StringIO
+if sys.version < '3':
+    from StringIO import StringIO
+else:
+    from io import StringIO,  BytesIO
 import sys
 import requests
 import os.path
@@ -28,8 +31,6 @@ import io
 import json
 import time
 from copy import copy
-import pycurl
-
 import clam.common.parameters
 import clam.common.status
 import clam.common.util
@@ -226,7 +227,7 @@ class CLAMFile:
         self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
 
     def __iter__(self):
-        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first. Use ``copy()`` instead if you want to download a large remote file."""
+        """Read the lines of the file, one by one without loading the file into memory."""
         if not self.remote:
             if self.metadata and 'encoding' in self.metadata:
                 for line in io.open(self.projectpath + self.basedir + '/' + self.filename, 'r', encoding=self.metadata['encoding']).readlines():
@@ -240,12 +241,13 @@ class CLAMFile:
                 requestparams = self.client.initrequest()
             else:
                 requestparams = {}
+            requestparams['stream'] = True
             response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
-
-            response = urlopen(Request( fullpath))
-            for line in response.readlines():
-                if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
+            for line in response.iter_lines():
+                if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
                     yield unicode(line, self.metadata['encoding'])
+                if sys.version[0] >= '3' and not isinstance(line,str) and self.metadata and 'encoding' in self.metadata :
+                    yield str(line, self.metadata['encoding'])
                 else:
                     yield line
 
@@ -270,58 +272,33 @@ class CLAMFile:
 
             return True
         else:
-            if self.client: self.client.initauth()
-            urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
+            r = requests.delete( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
             return True
 
 
     def readlines(self):
         """Loads all lines in memory"""
-        #if not self.remote:
-        #    if self.metadata and 'encoding' in self.metadata:
-        #       return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
-        #    else:
-        #       return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
-        #else:
-        #    response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))
-        #    content = response.read()
-        #    if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
-        #        content = unicode(content, self.metadata['encoding'])
-        #    return response
         return list(iter(self))
 
     def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""
 
-        #TODO: rewrite using requests
-        #TODO: no support for openauth yet??
-
-        if self.remote:
-            if self.projectpath.endswith('/'):
-                url = self.projectpath + self.basedir + '/' + self.filename
-            else:
-                url = self.projectpath + '/' + self.basedir + '/' + self.filename
-            f = io.open(target,'wb')
-            c = pycurl.Curl()
-            c.setopt(pycurl.URL, url)
-            if self.client and self.client.authenticated:
-                c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
-                c.setopt(c.USERPWD, self.client.user + ':' + self.client.password)
-            c.setopt(c.WRITEDATA, f)
-            c.setopt(c.USERAGENT, "CLAMCLientAPI-" + VERSION)
-            c.setopt(c.CONNECTTIMEOUT, 60)
-            c.setopt(c.TIMEOUT, timeout)
-            c.perform()
-            processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
-            c.close()
+        if self.metadata and 'encoding' in self.metadata:
+            f = io.open(target,'w', encoding=self.metadata['encoding'])
+            for line in self:
+                f.write(line)
         else:
-            if self.metadata and 'encoding' in self.metadata:
-                f = io.open(target,'w', encoding=self.metadata['encoding'])
-                for line in self:
-                    f.write(line)
-            else:
-                f = io.open(target,'wb')
-                for line in self:
+            f = io.open(target,'wb')
+            for line in self:
+                if sys.version < '3' and isinstance(line,unicode):
+                    f.write(line.encode('utf-8'))
+                elif sys.version >= '3' and isinstance(line,str):
+                    f.write(line.encode('utf-8'))
+                else:
                     f.write(line)
         f.close()
 
@@ -345,7 +322,7 @@ class CLAMOutputFile(CLAMFile):
 def getclamdata(filename):
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance."""
-    f = open(filename,'r')
+    f = io.open(filename,'r',encoding='utf-8')
     xml = f.read(os.path.getsize(filename))
     f.close()
     return CLAMData(xml, None, True)
@@ -510,7 +487,10 @@ class CLAMData(object):
     def parseresponse(self, xml, localroot = False):
         """Parses CLAM XML, there's usually no need to call this directly"""
         global VERSION
-        root = ElementTree.parse(StringIO(xml)).getroot()
+        if sys.version < '3':
+            root = ElementTree.parse(StringIO(xml)).getroot()
+        else:
+            root = ElementTree.parse(BytesIO(xml)).getroot()
         if root.tag != 'clam':
             raise FormatError()
 
@@ -902,7 +882,10 @@ class Profile(object):
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
 
         args = []
 
@@ -988,7 +971,10 @@ class CLAMProvenanceData(object):
     def fromxml(node):
         """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         if node.tag == 'provenance':
             if node.attrib['type'] == 'clam':
                 serviceid = node.attrib['id']
@@ -1174,7 +1160,10 @@ class CLAMMetaData(object):
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         if node.tag == 'CLAMMetaData':
             format = node.attrib['format']
 
@@ -1326,7 +1315,10 @@ class InputTemplate(object):
     def fromxml(node):
         """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         assert(node.tag.lower() == 'inputtemplate')
 
         id = node.attrib['id']
@@ -1485,7 +1477,10 @@ class AbstractMetaField(object): #for OutputTemplate only
     def fromxml(node):
         """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         if node.tag.lower() != 'meta':
             raise Exception("Expected meta tag but got '" + node.tag + "' instead")
 
@@ -1670,7 +1665,10 @@ class OutputTemplate(object):
     def fromxml(node):
         """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         assert(node.tag.lower() == 'outputtemplate')
 
         id = node.attrib['id']
@@ -1952,7 +1950,10 @@ class ParameterCondition(object):
     def fromxml(node):
         """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         assert(node.tag.lower() == 'parametercondition')
 
         kwargs = {}
@@ -2130,7 +2131,11 @@ class Action(object):
     def fromxml(node):
         """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            lode = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3':
+                node = ElementTree.parse(StringIO(node)).getroot()
+            else:
+                node = ElementTree.parse(BytesIO(node)).getroot()
         assert(node.tag.lower() == 'action')
 
         kwargs = {}
