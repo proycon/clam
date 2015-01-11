@@ -31,7 +31,7 @@ import datetime
 import random
 import re
 import hashlib
-import urllib2
+import requests
 import getopt
 import time
 import socket
@@ -472,16 +472,9 @@ class Logout(object):
         if not settings.OAUTH_REVOKE_URL:
             raise CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
         else:
-            try:
-                response = urllib2.urlopen(settings.OAUTH_REVOKE_URL + '/?token=' + oauth_access_token)
-                response.read()
-            except Exception as e:
-                try:
-                    statuscode = int(e.code)
-                except AttributeError:
-                    raise e
+            response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
-            if statuscode >= 200 and statuscode < 300:
+            if reponse.status_code >= 200 and reponse.status_code < 300:
                 return "Logout successful, have a nice day"
             else:
                 raise CustomForbidden("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
@@ -1860,15 +1853,18 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     printdebug('(Receiving data via url)')
                     #Download file from 3rd party server to CLAM server
                     try:
-                        req = urllib2.urlopen(postdata['url'])
+                        r = requests.get(postdata['url'])
                     except:
                         raise web.webapi.NotFound()
+                    if not (r.status_code >= 200 and r.status_code < 300):
+                        raise web.webapi.NotFound()
+
                     CHUNK = 16 * 1024
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
-                    while True:
-                        chunk = req.read(CHUNK)
-                        if not chunk: break
-                        f.write(chunk)
+                    for chunk in r.iter_content(chunk_size=CHUNK):
+                        if chunk: # filter out keep-alive new chunks
+                            f.write(chunk)
+                            f.flush()
                     f.close()
                 elif 'inputsource' in postdata and postdata['inputsource']:
                     #Copy (symlink!) from preinstalled data

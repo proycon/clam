@@ -142,7 +142,7 @@ class CLAMClient:
         elif r.status_code == 408:
             raise TimeOut()
         elif not (r.status_code >= 200 and r.status_code <= 299):
-            raise Exception("An error occured, return code " + str(r_status_code))
+            raise Exception("An error occured, return code " + str(r.status_code))
 
         return self._parse(r.text)
 
