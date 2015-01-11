@@ -294,10 +294,10 @@ class StringParameter(AbstractParameter):
 
         self.maxlength = 0 #unlimited
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'maxlength':
                 self.maxlength = int(value)
-                del kwargs[key]
+                del kwargs['maxlength']
 
         super(StringParameter,self).__init__(id,name,description, **kwargs)
 
@@ -367,7 +367,7 @@ class ChoiceParameter(AbstractParameter):
         if 'multi' in kwargs and kwargs['multi']:
             self.value = []
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'multi':
                 self.multi = bool(value) #boolean
                 del kwargs[key]
@@ -508,7 +508,7 @@ class IntegerParameter(AbstractParameter):
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
                 del kwargs[key]
@@ -569,7 +569,7 @@ class FloatParameter(AbstractParameter):
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0.0
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = float(value)
                 del kwargs[key]
