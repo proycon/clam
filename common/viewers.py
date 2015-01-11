@@ -20,6 +20,7 @@ import requests
 import os.path
 from lxml import etree
 import csv
+import sys
 if sys.version < '3':
     from StringIO import StringIO
 else:

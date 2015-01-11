@@ -35,7 +35,6 @@ import clam.common.parameters
 import clam.common.status
 import clam.common.util
 import clam.common.viewers
-from clam.common.util import RequestWithMethod
 
 
 
