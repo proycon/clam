@@ -1141,7 +1141,13 @@ class Project(object):
         #for fineuploader, not oauth
         user, oauth_access_token = validateuser(user)
         h = hashlib.md5()
-        h.update(user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project)
+        clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
+        if sys.version < '3' and isinstance(clear,unicode):
+            h.update(clear.encode('utf-8'))
+        if sys.version >= '3' and isinstance(clear,str):
+            h.update(clear.encode('utf-8'))
+        else:
+            h.update(clear)
         return h.hexdigest()
 
 class ZipHandler(object): #archive download
