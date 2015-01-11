@@ -11,9 +11,11 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import web
 import shutil
-import codecs
+import io
 import os
 from clam.common.data import CLAMMetaData, CLAMOutputFile
 import clam.common.formats
@@ -70,8 +72,8 @@ class CharEncodingConverter(AbstractConverter):
         shutil.copy(filepath, filepath + '.convertsource')
 
         try:
-            fsource = codecs.open(filepath + '.convertsource','r',self.charset)
-            ftarget = codecs.open(filepath,'w',metadata['encoding'])
+            fsource = io.open(filepath + '.convertsource','r',encoding=self.charset)
+            ftarget = io.open(filepath,'w',encoding=metadata['encoding'])
             for line in fsource:
                 ftarget.write(line + "\n")
             success = True
