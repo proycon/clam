@@ -792,7 +792,7 @@ class Project(object):
         printlog("Aborting process of project '" + project + "'" )
         f = open(Project.path(project,user) + ".abort", 'w')
         f.close()
-        os.chmod( Project.path(project,user) + ".abort", 0777)
+        os.chmod( Project.path(project,user) + ".abort", 0o777)
         while not os.path.exists(Project.path(project, user) + ".done"):
             printdebug("Waiting for process to die")
             time.sleep(1)
@@ -1667,7 +1667,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
             metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'])
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
-        except Exception, e:
+        except Exception as e:
             printlog("Uploaded metadata is invalid! " + str(e))
             metadata = None
             errors = True
@@ -1914,10 +1914,10 @@ def addfile(project, filename, user, postdata, inputsource=None):
                         metadata.inputtemplate = inputtemplate.id
                     else:
                         metadataerror = "Undefined error"
-                except ValueError, msg:
+                except ValueError as msg:
                     validmeta = False
                     metadataerror = msg
-                except KeyError, msg:
+                except KeyError as msg:
                     validmeta = False
                     metadataerror = msg
             elif validmeta:
@@ -2743,7 +2743,7 @@ if __name__ == "__main__":
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:P:")
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err))
         usage()
@@ -2793,7 +2793,7 @@ if __name__ == "__main__":
         sys.path.append(PYTHONPATH)
 
     import_string = "import " + settingsmodule + " as settings"
-    exec import_string
+    exec(import_string)
 
     try:
         if settings.DEBUG:
