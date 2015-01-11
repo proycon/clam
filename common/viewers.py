@@ -10,17 +10,20 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 try:
     import web
 except ImportError:
     pass
-import urllib2
-from urllib import urlencode
+import requests
 import os.path
 from lxml import etree
 import csv
-from StringIO import StringIO
+if sys.version < '3':
+    from StringIO import StringIO
+else:
+    from io import StringIO,  BytesIO
 
 class AbstractViewer(object):
 
@@ -41,12 +44,15 @@ class AbstractViewer(object):
 
     def view(self, file, **kwargs):
         """Returns the view itself, in xhtml (it's recommended to use web.py's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
-        url = self.url(file) + urlencode(kwargs)
+        url = self.url(file)
         if url: #is the resource external?
             if self.embed:
                 #fetch
-                req = urllib2.urlopen(url)
-                for line in req.readlines():
+                if kwargs:
+                    req = requests.get(url,data=kwargs)
+                else:
+                    req = requests.get(url)
+                for line in req.iter_lines():
                     yield line
             else:
                 #redirect
@@ -74,19 +80,24 @@ class SimpleTableViewer(AbstractViewer):
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
-        #Load all in memory to prevent unicode issues (not ideal)
-        data = file.readlines()
-        if any( ( isinstance(x, unicode) for x in data ) ):
-            data = u"\n".join(data)
-            data = data.encode('utf-8')
+        if sys.version < '3':
+            #Load all in memory to prevent unicode issues (not ideal) (TODO: test in python2 after python3 migration)
+            data = file.readlines()
+            if any( ( isinstance(x, unicode) for x in data ) ):
+                data = "\n".join(data)
+                data = data.encode('utf-8')
+            else:
+                data = "\n".join(data)
+            if self.quotechar:
+                file = csv.reader(StringIO(data), delimiter=self.delimiter, quotechar=self.quotechar)
+            else:
+                file = csv.reader(StringIO(data), delimiter=self.delimiter)
+            for line in file:
+                yield [ unicode(x,'utf-8') for x in line ] #todo, can't really assume utf-8
         else:
-            data = "\n".join(data)
-        if self.quotechar:
-            file = csv.reader(StringIO(data), delimiter=self.delimiter, quotechar=self.quotechar)
-        else:
-            file = csv.reader(StringIO(data), delimiter=self.delimiter)
-        for line in file:
-            yield [ unicode(x,'utf-8') for x in line ] #todo, can't really assume utf-8
+            file = csv.reader(file.read(), delimiter=self.delimiter)
+            for line in file:
+                yield line
 
     def view(self,file,**kwargs):
         render = web.template.render('templates')
@@ -125,7 +136,7 @@ class XSLTViewer(AbstractViewer):
         #f = file.open()
         lines = file.readlines()
         if lines:
-            if isinstance(lines[0], unicode):
+            if sys.version < '3' and isinstance(lines[0], unicode):
                 xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
             else:
                 xml_doc = etree.parse(StringIO("".join(lines) ))
@@ -145,7 +156,10 @@ class FoLiAViewer(AbstractViewer):
 
         #f = file.open()
 
-        xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        if sys.version < '3':
+            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        else:
+            xml_doc = etree.parse(StringIO("".join(file.readlines())))
         return str(transform(xml_doc))
 
 
@@ -159,7 +173,10 @@ class SoNaRViewer(AbstractViewer):
         transform = etree.XSLT(xslt_doc)
 
         #f = file.open()
-        xml_doc = etree.parse(StringIO("".join(file.readlines())))
+        if sys.version < '3':
+            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        else:
+            xml_doc = etree.parse(StringIO("".join(file.readlines())))
 
         return str(transform(xml_doc))
 

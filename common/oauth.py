@@ -5,6 +5,8 @@
 #   OAUTH_AUTH_URL = clam.common.oauth.GOOGLE_AUTH_URL
 #   etc...
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import json
 from requests_oauthlib import OAuth2Session
 from Crypto.Cipher import AES

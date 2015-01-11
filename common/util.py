@@ -19,10 +19,6 @@ import glob
 import os
 import sys
 import datetime
-if sys.version < '3':
-    from urllib2 import Request
-else:
-    from urllib.request import Request #pylint: disable=E0611
 import io
 
 if sys.version < '3':
@@ -100,13 +96,3 @@ def xmlescape(s):
 
 
 
-
-class RequestWithMethod(Request):
-  def __init__(self, *args, **kwargs):
-    self._method = kwargs.get('method')
-    if self._method:
-        del kwargs['method']
-    Request.__init__(self, *args, **kwargs)
-
-  def get_method(self):
-    return self._method if self._method else super(RequestWithMethod, self).get_method()

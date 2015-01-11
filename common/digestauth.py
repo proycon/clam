@@ -2,6 +2,8 @@
 # version 0.01
 #  Public domain.
 
+
+from __future__ import print_function, unicode_literals, division, absolute_import
 import web
 import random, time, re
 
@@ -205,7 +207,7 @@ class auth(object):
         web.header("WWW-Authenticate", "Digest " + ",".join(x for x in challengeList if x))
         web.header("Content-Type","text/html")
         if self.webpy2:
-            print self.unauthHTML
+            print(self.unauthHTML)
             return None
         return self.unauthHTML
 
@@ -216,7 +218,7 @@ class auth(object):
         web.ctx.status = "400 Bad Request"
         s1 = web.ctx.status + info
         if self.webpy2:
-            print s1
+            print(s1)
             return None
         return s1
 
@@ -225,7 +227,7 @@ class auth(object):
         """Sent when user has entered an incorrect password too many times"""
         web.ctx.status = "403 Forbidden"
         if self.webpy2:
-            print self.unauthHTML
+            print(self.unauthHTML)
             return None
         return self.unauthHTML
 
