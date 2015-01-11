@@ -20,11 +20,11 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 from lxml import etree as ElementTree
+import sys
 if sys.version < '3':
     from StringIO import StringIO
 else:
     from io import StringIO,  BytesIO
-import sys
 import requests
 import os.path
 import io
