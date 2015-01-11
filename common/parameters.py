@@ -123,7 +123,10 @@ class AbstractParameter(object):
                 else:
                     xml += ' ' + key + '="'+xmlescape(str(v))+ '"'
         if self.hasvalue:
-            xml += ' value="'+xmlescape(unicode(self.value)) + '"'
+            if sys.version < '3':
+                xml += ' value="'+xmlescape(unicode(self.value)) + '"'
+            else:
+                xml += ' value="'+xmlescape(str(self.value)) + '"'
         if self.error:
             xml += ' error="'+xmlescape(self.error) + '"'
         xml += " />"
@@ -138,7 +141,7 @@ class AbstractParameter(object):
         else:
             return ""
 
-    def __unicode__(self):
+    def __unicode__(self): #for python 2 only
         if self.value:
             return self.value
         else:
