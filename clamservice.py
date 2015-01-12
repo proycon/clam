@@ -19,7 +19,7 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-import web
+import flask
 import shutil
 import os
 import io
@@ -35,10 +35,7 @@ import requests
 import getopt
 import time
 import socket
-try:
-    import json
-except ImportError: #fallback for Python2.5
-    import simplejson as json
+import json
 from copy import copy #shallow copy (use deepcopy for deep)
 from functools import wraps
 
@@ -244,195 +241,91 @@ auth = lambda x: x
 
 
 
-class RequireLogin(object):
-    def __init__(self, **kwargs):
-        #if 'ghost' in kwargs:
-        #    self.ghost = bool(kwargs['ghost']) #NOT USED!!!!
-        pass
+def require_login(f):
+    global auth
 
-    def __call__(self,f):
-        global auth
-
-        def wrapper(*args, **kwargs):
-            printdebug("wrapper: "+ repr(f))
-            web.header('Access-Control-Allow-Origin', '*')
-            web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-            web.header('Access-Control-Allow-Headers' , 'Authorization')
-            web.header('Access-Control-Allow-Credentials', 'true')
-            if settings.PREAUTHHEADER:
-                DOAUTH = True
-                if settings.WEBSERVICEGHOST:
-                    #prefix = settings.STANDALONEURLPREFIX
-                    #if prefix:
-                    #    prefix = '/' + prefix + '/' + settings.WEBSERVICEGHOST
-                    #else:
-                    prefix = '/' + settings.WEBSERVICEGHOST
-                    try:
-                        requesturl = web.ctx.env.get('PATH_INFO', '')
-                    except KeyError:
-                        printdebug("ERROR: No PATH_INFO found! Unable to authenticate")
-                    if requesturl == prefix or requesturl[:len(prefix) + 1] == prefix + '/':
-                        #ghost url accessed, no preauthheader authentication
-                        DOAUTH=False
-
-                if DOAUTH:
-                    printdebug("Header debug: " + repr(web.ctx.env))
-                    for header in settings.PREAUTHHEADER:
-                        if header:
-                            user = web.ctx.env.get(header, '')
-                            printdebug("Got pre-authenticated user: " + user)
-                            if user:
-                                if settings.PREAUTHMAPPING:
-                                    try:
-                                        user = settings.PREAUTHMAPPING[user]
-                                    except KeyError:
-                                        raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")
-                                args += (user,)
-                                return f(*args, **kwargs)
-                    if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-                        raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
-            if settings.OAUTH:
-                #Check header for token
-                authheader = web.ctx.env.get('HTTP_AUTHORIZATION', '')
-                oauth_access_token = None
-                if authheader and authheader[:6].lower() == "bearer":
-                    oauth_access_token = authheader[7:]
-                    printdebug("Oauth access token obtained from HTTP request Authentication header")
-                elif authheader and authheader[:5].lower() == "token":
-                    oauth_access_token = authheader[6:]
-                    printdebug("Oauth access token obtained from HTTP request Authentication header")
-                else:
-                    #Is the token submitted in the GET/POST data? (as oauth_access_token)
-                    try:
-                        oauth_access_token = web.input().oauth_access_token
-                        printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                    except:
-                        printdebug("No oauth access token found. Header debug: " + repr(web.ctx.env))
-
-
-
-                if not oauth_access_token:
-                    #No access token yet, start login process
-                    printdebug("No access token available yet, starting login process")
-
-                    redirect_url = getrooturl() + '/login'
-                    kwargs = {'redirect_uri': redirect_url}
-                    if settings.OAUTH_SCOPE:
-                        kwargs['scope'] = settings.OAUTH_SCOPE
-                    oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID, **kwargs)
-                    auth_url, state = settings.OAUTH_AUTH_FUNCTION(oauthsession, settings.OAUTH_AUTH_URL)
-
-                    #Redirect to Authentication Provider
-                    printdebug("Redirecting to authentication provider: " + auth_url)
-                    raise web.seeother(auth_url)
-                else:
-                    #Decrypt access token
-                    oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
-                    if ip != web.ctx.env.get('REMOTE_ADDR', ''):
-                        printdebug("Access token not valid for IP, got " + ip + ", expected " + web.ctx.env.get('REMOTE_ADDR',''))
-                        raise CustomForbidden("Access token not valid for this IP")
-
-                    try:
-                        oauth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
-                        return oauth(f)(*args, **kwargs)
-                    except clam.common.oauth.OAuthError as e:
-                        raise CustomForbidden('OAuth Error: ' + str(e))
-
-            elif settings.USERS or settings.USERS_MYSQL:
-                return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
+    def wrapper(*args, **kwargs):
+        printdebug("wrapper: "+ repr(f))
+        web.header('Access-Control-Allow-Origin', '*')
+        web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+        web.header('Access-Control-Allow-Headers' , 'Authorization')
+        web.header('Access-Control-Allow-Credentials', 'true')
+        if settings.PREAUTHHEADER:
+            DOAUTH = True
+            if DOAUTH:
+                printdebug("Header debug: " + repr(web.ctx.env))
+                for header in settings.PREAUTHHEADER:
+                    if header:
+                        user = web.ctx.env.get(header, '')
+                        printdebug("Got pre-authenticated user: " + user)
+                        if user:
+                            if settings.PREAUTHMAPPING:
+                                try:
+                                    user = settings.PREAUTHMAPPING[user]
+                                except KeyError:
+                                    raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")
+                            args += (user,)
+                            return f(*args, **kwargs)
+                if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
+                    raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
+        if settings.OAUTH:
+            #Check header for token
+            authheader = web.ctx.env.get('HTTP_AUTHORIZATION', '')
+            oauth_access_token = None
+            if authheader and authheader[:6].lower() == "bearer":
+                oauth_access_token = authheader[7:]
+                printdebug("Oauth access token obtained from HTTP request Authentication header")
+            elif authheader and authheader[:5].lower() == "token":
+                oauth_access_token = authheader[6:]
+                printdebug("Oauth access token obtained from HTTP request Authentication header")
             else:
-                return f(*args, **kwargs) #no authentication
-        return wraps(f)(wrapper)
-
-
-class TestInterface(object):
-
-    @RequireLogin()
-    def GET(self, user = None):
-        raise CustomForbidden('Test error response')
-
-
-class CLAMService(object):
-    """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
-
-    urls = (
-        settings.STANDALONEURLPREFIX + '/', 'Index',
-        settings.STANDALONEURLPREFIX + '/info/?', 'Info',
-        settings.STANDALONEURLPREFIX + '/login/?', 'Login', #for Oauth2 only, return access token
-        settings.STANDALONEURLPREFIX + '/logout/?', 'Logout', #for Oauth2 only, revokes access token with authorization provider
-        settings.STANDALONEURLPREFIX + '/admin/?', 'AdminInterface',
-        settings.STANDALONEURLPREFIX + '/admin/download/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/([a-z]*)/(.*)/?', 'AdminDownloader',
-        settings.STANDALONEURLPREFIX + '/admin/([A-Za-z]*)/([A-Za-z0-9_]*)/([A-Za-z0-9_]*)/?', 'AdminHandler',
-
-        settings.STANDALONEURLPREFIX + '/data.js', 'InterfaceData', #provides Javascript data for the web interface
-        settings.STANDALONEURLPREFIX + '/style.css', 'StyleData', #provides stylesheet for the web interface
-        settings.STANDALONEURLPREFIX + '/(?:[A-Za-z0-9_]*)/(?:input|output)/folia.xsl', 'FoLiAXSL', #provides the FoLiA XSL in every output directory without it actually existing there
-        #'/t/', 'TestInterface',
-        settings.STANDALONEURLPREFIX + '/actions/([A-Za-z0-9_]*)/?', 'ActionHandler',
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/?', 'Project',
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/status/?', 'Status', #returns status information in JSON, for web interface
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/upload/?', 'Uploader',
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/zip/?', 'ZipHandler', #(also handles viewers, convertors, metadata, and archive download
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/gz/?', 'TarGZHandler', #(also handles viewers, convertors, metadata, and archive download
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/bz2/?', 'TarBZ2Handler', #(also handles viewers, convertors, metadata, and archive download
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandler', #(also handles viewers, convertors, metadata, and archive download
-        settings.STANDALONEURLPREFIX + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandler',
-        #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler', #first viewer is always named 'view', second 'view2' etc..
-    )
+                #Is the token submitted in the GET/POST data? (as oauth_access_token)
+                try:
+                    oauth_access_token = web.input().oauth_access_token
+                    printdebug("Oauth access token obtained from HTTP request GET/POST data")
+                except:
+                    printdebug("No oauth access token found. Header debug: " + repr(web.ctx.env))
 
 
 
-    def __init__(self, mode = 'standalone'):
-        global VERSION
-        printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
-        if not settings.ROOT or not os.path.isdir(settings.ROOT):
-            error("Specified root path " + settings.ROOT + " not found")
-        elif settings.COMMAND and (not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0])):
-            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
-        elif settings.COMMAND and not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
-            if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
-               settings.COMMAND = sys.executable + " " + settings.COMMAND
+            if not oauth_access_token:
+                #No access token yet, start login process
+                printdebug("No access token available yet, starting login process")
+
+                redirect_url = getrooturl() + '/login'
+                kwargs = {'redirect_uri': redirect_url}
+                if settings.OAUTH_SCOPE:
+                    kwargs['scope'] = settings.OAUTH_SCOPE
+                oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID, **kwargs)
+                auth_url, state = settings.OAUTH_AUTH_FUNCTION(oauthsession, settings.OAUTH_AUTH_URL)
+
+                #Redirect to Authentication Provider
+                printdebug("Redirecting to authentication provider: " + auth_url)
+                raise web.seeother(auth_url)
             else:
-                error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
-        else:
-            lastparameter = None
-            try:
-                for parametergroup, parameters in settings.PARAMETERS:
-                    for parameter in parameters:
-                        assert isinstance(parameter, clam.common.parameters.AbstractParameter)
-                        lastparameter = parameter
-            except AssertionError:
-                msg = "Syntax error in parameter specification."
-                if lastparameter:
-                     msg += "Last part parameter: ", lastparameter.id
-                error(msg)
+                #Decrypt access token
+                oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
+                if ip != web.ctx.env.get('REMOTE_ADDR', ''):
+                    printdebug("Access token not valid for IP, got " + ip + ", expected " + web.ctx.env.get('REMOTE_ADDR',''))
+                    raise CustomForbidden("Access token not valid for this IP")
 
-        self.service = web.application(self.urls, globals())
-        self.service.internalerror = web.debugerror
-        self.mode = mode
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
-        if settings.FORCEURL:
-            printlog("Access using forced URL: " + settings.FORCEURL)
-        if mode == 'fastcgi':
-            web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr)
-            self.service.run()
-        elif mode == 'wsgi':
-            self.application = self.service.wsgifunc()
-        elif mode == 'standalone' or mode == 'cherrypy' or not mode:
-            #standalone mode
-            self.mode = 'standalone'
-            self.service.run()
-        else:
-            raise Exception("Unknown mode: " + mode + ", specify 'fastcgi', 'wsgi' or 'standalone'")
+                try:
+                    oauth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
+                    return oauth(f)(*args, **kwargs)
+                except clam.common.oauth.OAuthError as e:
+                    raise CustomForbidden('OAuth Error: ' + str(e))
 
-    @staticmethod
-    def corpusindex():
-            """Get list of pre-installed corpora"""
-            corpora = []
-            for f in glob.glob(settings.ROOT + "corpora/*"):
-                if os.path.isdir(f):
-                    corpora.append(os.path.basename(f))
-            return corpora
+        elif settings.USERS or settings.USERS_MYSQL:
+            return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
+        else:
+            return f(*args, **kwargs) #no authentication
+    return wraps(f)(wrapper)
+
+
+
+
+
+
 
 
 class Login(object):
@@ -466,7 +359,6 @@ def oauth_encrypt(oauth_access_token):
 class Logout(object):
     GHOST = False
 
-    @RequireLogin(ghost=GHOST)
     def GET(self, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.OAUTH_REVOKE_URL:
@@ -497,66 +389,61 @@ def validateuser(user):
 def defaultheaders(contenttype="text/xml; charset=UTF-8"):
     web.header('Content-Type', contenttype)
 
-class Index(object):
-    GHOST = False
-
-    @RequireLogin(ghost=GHOST)
-    def GET(self, user = None):
-        """Get list of projects"""
-        projects = []
-        user, oauth_access_token = validateuser(user)
-        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
-            if os.path.isdir(f):
-                d = datetime.datetime.fromtimestamp(os.stat(f)[8])
-                project = os.path.basename(f)
-                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
-
-        errors = "no"
-        errormsg = ""
-
-        corpora = CLAMService.corpusindex()
-
-        render = web.template.render(settings.CLAMDIR + '/templates')
-
-        defaultheaders()
-
-        try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
-        except AttributeError:
-            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
-
-class Info(object):
-    GHOST = False
-    @RequireLogin(ghost=GHOST)
-    def GET(self, user = None):
-        """Get list of projects"""
-        projects = []
-        user, oauth_access_token = validateuser(user)
-        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
-            if os.path.isdir(f):
-                d = datetime.datetime.fromtimestamp(os.stat(f)[8])
-                project = os.path.basename(f)
-                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
-
-        errors = "no"
-        errormsg = ""
-
-        corpora = CLAMService.corpusindex()
-
-        render = web.template.render(settings.CLAMDIR + '/templates')
 
 
-        defaultheaders()
-        try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
-        except AttributeError:
-            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
+################# Views ##########################
 
+#Are tied into flask later because at this point we don't have an app instance yet
 
-class AdminInterface(object):
-    GHOST = False
-    @RequireLogin(ghost=GHOST)
-    def GET(self, user = None):
+def index(user = None):
+    """Get list of projects"""
+    projects = []
+    user, oauth_access_token = validateuser(user)
+    for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
+        if os.path.isdir(f):
+            d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+            project = os.path.basename(f)
+            projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+
+    errors = "no"
+    errormsg = ""
+
+    corpora = CLAMService.corpusindex()
+
+    render = web.template.render(settings.CLAMDIR + '/templates')
+
+    defaultheaders()
+
+    try:
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
+    except AttributeError:
+        raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
+
+def info(user=None):
+    """Get info"""
+    projects = []
+    user, oauth_access_token = validateuser(user)
+    for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
+        if os.path.isdir(f):
+            d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+            project = os.path.basename(f)
+            projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+
+    errors = "no"
+    errormsg = ""
+
+    corpora = CLAMService.corpusindex()
+
+    render = web.template.render(settings.CLAMDIR + '/templates')
+
+    defaultheaders()
+    try:
+        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
+    except AttributeError:
+        raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
+
+class Admin:
+    def index(user=None):
         """Get list of projects"""
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
@@ -587,10 +474,7 @@ class AdminInterface(object):
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
 
-class AdminHandler(object):
-    GHOST = False
-    @RequireLogin(ghost=GHOST)
-    def GET(self, command, targetuser, project, user = None):
+    def handler(command, targetuser, project, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
@@ -627,14 +511,10 @@ class AdminHandler(object):
         else:
             raise CustomForbidden('No such command: ' + command)
 
-class AdminDownloader(object):
-    GHOST = False
-    @RequireLogin(ghost=GHOST)
-    def GET(self, targetuser, project, type, filename, user = None):
+    def downloader(targetuser, project, type, filename, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             raise CustomForbidden('You shall not pass!!! You are not an administrator!')
-
 
         if type == 'input':
             try:
@@ -660,7 +540,10 @@ class AdminDownloader(object):
             raise web.webapi.NotFound()
 
 
-def getrooturl():
+
+
+
+def getrooturl(): #not a view
     if settings.FORCEURL:
         return settings.FORCEURL
     else:
@@ -677,33 +560,17 @@ def getrooturl():
         if url[-1] == '/': url = url[:-1]
         return url
 
+class Project:
+    """This class simply groups project methods, is not instantiated and does not offer any kind of persistence, all methods are static"""
 
-class Project(object):
-    GHOST = False
-
-    #@staticmethod
-    #def users(project):
-    #    path = Project.path(project)
-    #    users = []
-    #    if os.path.isfile(path + '.users'):
-    #        f = codecs.open(path + '.users','r','utf-8')
-    #        for user in f.readlines():
-    #            if user.strip():
-    #                users.append(user.strip())
-    #        f.close()
-    #    return users
-
-    @staticmethod
     def validate(project):
         return re.match(r'^\w+$',project, re.UNICODE)
 
-    @staticmethod
     def path(project, user):
         """Get the path to the project (static method)"""
         user, oauth_access_token = validateuser(user)
         return settings.ROOT + "projects/" + user + '/' + project + "/"
 
-    @staticmethod
     def create(project, user):
         """Create project skeleton if it does not already exist (static method)"""
 
@@ -711,7 +578,7 @@ class Project(object):
             raise web.webapi.NotFound("Projects disabled, no command configured")
 
         user, oauth_access_token = validateuser(user)
-        if not Project.validate(project):
+        if not project_validate(project):
             raise CustomForbidden('Invalid project ID')
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
         if not project:
@@ -738,24 +605,7 @@ class Project(object):
             #    f.close()
 
 
-    #@staticmethod
-    #def access(project, user):
-    #    """Checks whether the specified user has access to the project"""
-    #    userfile = Project.path(project) + ".users"
-    #    if os.path.isfile(userfile):
-    #        access = False
-    #        f = codecs.open(userfile,'r','utf-8')
-    #        for line in f:
-    #            line = line.strip()
-    #            if line and user == line.strip():
-    #                access = True
-    #                break
-    #        f.close()
-    #        return access
-    #    else:
-    #        return True #no access file, grant access for all users
-
-    def pid(self, project, user):
+    def pid(project, user):
         pidfile = Project.path(project, user) + '.pid'
         if os.path.isfile(pidfile):
             f = open(pidfile,'r')
@@ -765,7 +615,6 @@ class Project(object):
         else:
             return 0
 
-    @staticmethod
     def running(project, user):
         pidfile = Project.path(project, user) + '.pid'
         if os.path.isfile(pidfile) and not os.path.isfile(Project.path(project, user) + ".done"):
@@ -785,7 +634,6 @@ class Project(object):
             return False
 
 
-
     def abort(self, project, user):
         if self.pid(project, user) == 0:
             return False
@@ -798,28 +646,25 @@ class Project(object):
             time.sleep(1)
         return True
 
-    @staticmethod
     def done(project,user):
         return os.path.isfile(Project.path(project, user) + ".done")
 
-    @staticmethod
     def aborted(project,user):
         return os.path.isfile(Project.path(project, user) + ".aborted")
 
 
-    def exitstatus(self, project, user):
+    def exitstatus(project, user):
         f = open(Project.path(project, user) + ".done")
         status = int(f.read(1024))
         f.close()
         return status
 
-    def exists(self, project, user):
+    def exists(project, user):
         """Check if the project exists"""
         user, oauth_access_token = validateuser(user)
         printdebug("Checking if project " + project + " exists for " + user)
         return os.path.isdir(Project.path(project, user))
 
-    @staticmethod
     def statuslog(project, user):
         statuslog = []
         statusfile = Project.path(project,user) + ".status"
@@ -841,11 +686,11 @@ class Project(object):
                                     totalcompletion = completion
                             elif DATEMATCH.match(field):
                                 if field.isdigit():
-                                      try:
-                                          d = datetime.datetime.fromtimestamp(float(field))
-                                          timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
-                                      except:
-                                          pass
+                                        try:
+                                            d = datetime.datetime.fromtimestamp(float(field))
+                                            timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
+                                        except:
+                                            pass
                             else:
                                 message += " " + field
 
@@ -858,7 +703,6 @@ class Project(object):
             statuslog.reverse()
         return statuslog, totalcompletion
 
-    @staticmethod
     def status(project, user):
         global DATEMATCH
         if Project.running(project, user):
@@ -881,8 +725,24 @@ class Project(object):
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
+    def status_json(project, user=None):
+        postdata = web.input(file={},qqfile={})
+        if 'user' in postdata:
+            user = postdata['user']
+        else:
+            user = 'anonymous'
+        if 'accesstoken' in postdata:
+            accesstoken = postdata['accesstoken']
+        else:
+            return "{success: false, error: 'No accesstoken given'}"
+        if accesstoken != Project.getaccesstoken(user,project):
+            return "{success: false, error: 'Invalid accesstoken given'}"
+        if not os.path.exists(Project.path(project, user)):
+            return "{success: false, error: 'Destination does not exist'}"
 
-    @staticmethod
+        statuscode, statusmsg, statuslog, completion = Project.status(project,user)
+        return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
+
     def inputindex(project, user, d = ''):
         prefix = Project.path(project, user) + 'input/'
         for f in glob.glob(prefix + d + "/*"):
@@ -896,7 +756,6 @@ class Project(object):
                     yield file
 
 
-    @staticmethod
     def outputindex(project, user, d = ''):
         prefix = Project.path(project, user) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
@@ -909,7 +768,6 @@ class Project(object):
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
 
-    @staticmethod
     def inputindexbytemplate(project, user, inputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
@@ -923,7 +781,6 @@ class Project(object):
             yield seq, clam.common.data.CLAMInputFile(Project.path(project, user), f[len(prefix):])
 
 
-    @staticmethod
     def outputindexbytemplate(project, user, outputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
@@ -937,8 +794,7 @@ class Project(object):
             yield seq, clam.common.data.CLAMOutputFile(Project.path(project, user), f[len(prefix):])
 
 
-
-    def response(self, user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
+    def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
         global VERSION
 
         #check if there are invalid parameters:
@@ -947,7 +803,7 @@ class Project(object):
         else:
             errors = "yes"
 
-        statuscode, statusmsg, statuslog, completion = self.status(project, user)
+        statuscode, statusmsg, statuslog, completion = Project.status(project, user)
 
         customhtml = ""
         if statuscode == clam.common.status.READY:
@@ -988,20 +844,34 @@ class Project(object):
         except AttributeError:
             raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, user=None):
+
+    def getaccesstoken(user,project):
+        #for fineuploader, not oauth
+        user, oauth_access_token = validateuser(user)
+        h = hashlib.md5()
+        clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
+        if sys.version < '3' and isinstance(clear,unicode):
+            h.update(clear.encode('utf-8'))
+        if sys.version >= '3' and isinstance(clear,str):
+            h.update(clear.encode('utf-8'))
+        else:
+            h.update(clear)
+        return h.hexdigest()
+
+    #exposed views:
+
+    def get(project, user=None):
         """Main Get method: Get project state, parameters, outputindex"""
         user, oauth_access_token = validateuser(user)
-        if not self.exists(project, user):
+        if not Project.exists(project, user):
             raise web.webapi.NotFound("Project " + project + " was not found for user " + user) #404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
             #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
-            return self.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
+            return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
-    @RequireLogin(ghost=GHOST)
-    def PUT(self, project, user=None):
+    def new(project, user=None):
         """Create an empty project"""
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
@@ -1012,15 +882,15 @@ class Project(object):
             extraloc = ''
         raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #201
 
-    @RequireLogin(ghost=GHOST)
-    def POST(self, project, user=None):
+    def start(project, user=None):
+        """Start execution"""
         global settingsmodule
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         #if user and not Project.access(project, user):
         #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
 
-        statuscode, _, _, _  = self.status(project, user)
+        statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
             if oauth_access_token:
                 raise web.seeother(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
@@ -1045,14 +915,14 @@ class Project(object):
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise CustomForbiddenXML(unicode(self.response(user, project, parameters,"",False,oauth_access_token)))
+            raise CustomForbiddenXML(unicode(Project.response(user, project, parameters,"",False,oauth_access_token)))
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise CustomForbiddenXML(unicode(self.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token)))
+            raise CustomForbiddenXML(unicode(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token)))
         else:
             #write clam.xml output file
-            f = open(Project.path(project, user) + "clam.xml",'w')
-            f.write(str(self.response(user, project, parameters, "",True, oauth_access_token)))
+            f = io.open(Project.path(project, user) + "clam.xml",'w',encoding='utf-8')
+            f.write(str(Project.response(user, project, parameters, "",True, oauth_access_token)))
             f.close()
 
 
@@ -1108,24 +978,23 @@ class Project(object):
                 f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
                 f.write(str(pid))
                 f.close()
-                raise web.webapi.Accepted(unicode(self.response(user, project, parameters,"",False,oauth_access_token))) #returns 202 - Accepted
+                raise web.webapi.Accepted(unicode(Project.response(user, project, parameters,"",False,oauth_access_token))) #returns 202 - Accepted
             else:
                 raise web.webapi.InternalError("Unable to launch process")
 
-    @RequireLogin(ghost=GHOST)
-    def DELETE(self, project, user=None):
+    def delete(project, user=None):
         data = web.input()
         if 'abortonly' in data:
             abortonly = bool(data['abortonly'])
         else:
             abortonly = False
         user, oauth_access_token = validateuser(user)
-        if not self.exists(project, user):
+        if not Project.exists(project, user):
             raise web.webapi.NotFound("No such project: " + project + " for user " + user)
-        statuscode, _, _, _  = self.status(project, user)
+        statuscode, _, _, _  = Project.status(project, user)
         msg = ""
         if statuscode == clam.common.status.RUNNING:
-            self.abort(project, user)
+            Project.abort(project, user)
             msg = "Aborted"
         if not abortonly:
             printlog("Deleting project '" + project + "'" )
@@ -1136,50 +1005,20 @@ class Project(object):
         web.header('Content-Length',len(msg))
         return msg #200
 
-    @staticmethod
-    def getaccesstoken(user,project):
-        #for fineuploader, not oauth
-        user, oauth_access_token = validateuser(user)
-        h = hashlib.md5()
-        clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
-        if sys.version < '3' and isinstance(clear,unicode):
-            h.update(clear.encode('utf-8'))
-        if sys.version >= '3' and isinstance(clear,str):
-            h.update(clear.encode('utf-8'))
-        else:
-            h.update(clear)
-        return h.hexdigest()
 
-class ZipHandler(object): #archive download
-    GHOST = False
+    def download_zip(project, user=None):
+            for line in OutputFileHandler.getarchive(project, user,'zip'):
+                    yield line
 
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, user=None):
-        for line in OutputFileHandler.getarchive(project, user,'zip'):
-                yield line
+    def download_targz(project, user=None):
+            for line in OutputFileHandler.getarchive(project, user,'tar.gz'):
+                    yield line
 
-class TarGZHandler(object):  #archive download
-    GHOST = False
+    def download_tarbz2(project, user=None):
+            for line in OutputFileHandler.getarchive(project, user,'tar.bz2'):
+                    yield line
 
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, user=None):
-        for line in OutputFileHandler.getarchive(project, user,'tar.gz'):
-                yield line
-
-
-class TarBZ2Handler(object):  #archive download
-    GHOST = False
-
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, user=None):
-        for line in OutputFileHandler.getarchive(project, user,'tar.bz2'):
-                yield line
-
-class OutputFileHandler(object):
-    GHOST = False
-
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, filename, user=None):
+    def getoutputfile(project, filename, user=None):
         raw = filename.split('/')
 
         viewer = None
@@ -1252,8 +1091,7 @@ class OutputFileHandler(object):
                 raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
 
 
-    @RequireLogin(ghost=GHOST)
-    def DELETE(self, project, filename, user=None):
+    def deleteoutputfile(project, filename, user=None):
         """Delete an output file"""
 
         filename = filename.replace("..","") #Simple security
@@ -1288,7 +1126,7 @@ class OutputFileHandler(object):
                 return msg #200
 
 
-    def reset(self, project, user):
+    def reset(project, user):
         """Reset system, delete all output files and prepare for a new run"""
         d = Project.path(project, user) + "output"
         if os.path.isdir(d):
@@ -1301,7 +1139,6 @@ class OutputFileHandler(object):
         if os.path.exists(Project.path(project, user) + ".status"):
             os.unlink(Project.path(project, user) + ".status")
 
-    @staticmethod
     def getarchive(project, user, format=None):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
@@ -1366,14 +1203,8 @@ class OutputFileHandler(object):
             for line in open(path,'r'):
                 yield line
 
-class OutputFileHandlerGhost(OutputFileHandler):
-    GHOST = True
 
-class InputFileHandler(object):
-    GHOST = False
-
-    @RequireLogin(ghost=GHOST)
-    def GET(self, project, filename, user=None):
+    def getinputfile(project, filename, user=None):
 
         viewer = None
         requestid = None
@@ -1415,10 +1246,7 @@ class InputFileHandler(object):
             except IOError:
                 raise web.webapi.NotFound()
 
-
-
-    @RequireLogin(ghost=GHOST)
-    def DELETE(self, project, filename, user=None):
+    def deleteinputfile(project, filename, user=None):
         """Delete an input file"""
 
         filename = filename.replace("..","") #Simple security
@@ -1447,8 +1275,7 @@ class InputFileHandler(object):
                 web.header('Content-Length',len(msg))
                 return msg #200
 
-    @RequireLogin(ghost=GHOST)
-    def POST(self, project, filename, user=None):
+    def addinputfile(project, filename, user=None):
         """Add a new input file, this invokes the actual uploader"""
 
         #TODO: test support for uploading metadata files
@@ -1515,9 +1342,9 @@ class InputFileHandler(object):
 
 
     def extract(self,project,filename, archivetype):
+        #OBSOLETE?
         #namelist = None
         subfiles = []
-
 
         #return [ subfile for subfile in subfiles ] #return only the files that actually exist
 
@@ -2001,16 +1828,9 @@ def addfile(project, filename, user, postdata, inputsource=None):
         return output, json.dumps(jsonoutput)
 
 
-class InputFileHandlerGhost(InputFileHandler):
-    GHOST = True
 
 
-class InterfaceData(object):
-    """Provides Javascript data needed by the webinterface. Such as JSON data for the inputtemplates"""
-    GHOST = False
-
-    #@RequireLogin(ghost=GHOST) (may be loaded before authentication)
-    def GET(self, user=None):
+def interfacedata(): #no auth
         defaultheaders('text/javascript')
 
         inputtemplates_mem = []
@@ -2023,94 +1843,57 @@ class InterfaceData(object):
 
         return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
 
-class FoLiAXSL(object):
-    """Provides Stylesheet"""
-    def GET(self):
+def foliaxsl(path):
         defaultheaders('text/xsl')
 
         for line in io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8'):
             yield line
 
-class StyleData(object):
-    """Provides Stylesheet"""
-
-    def GET(self):
+def styledata():
         defaultheaders('text/css')
         yield "//" + settings.STYLE + '.css\n'
         for line in io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8'):
             yield line
 
-class ProjectGhost(Project):
-    GHOST=True
 
 
-class IndexGhost(Index):
-    GHOST=True
 
-class InfoGhost(Info):
-    GHOST=True
-
-
-class Uploader(object):
+def uploader(project, user=None):
     """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML. Unfortunately, normal digest authentication does not work well with the uploader, so we implement a simple key check based on hashed username, projectname and a secret key that is communicated as a JS variable in the interface ."""
-    GHOST=False
-
-    #@RequireLogin(ghost=GHOST) #No auth, see description in docstring above
-    def POST(self, project, user=None):
-        postdata = web.input(file={},qqfile={})
-        if 'user' in postdata:
-            user = postdata['user']
-        else:
-            user = 'anonymous'
-        if 'filename' in postdata:
-            filename = postdata['filename']
-        else:
-            printdebug('No filename passed')
-            return "{success: false, error: 'No filename passed'}"
-        if 'accesstoken' in postdata:
-            accesstoken = postdata['accesstoken']
-        else:
-            return "{success: false, error: 'No accesstoken given'}"
-        if accesstoken != Project.getaccesstoken(user,project):
-            return "{success: false, error: 'Invalid accesstoken given'}"
-        if not os.path.exists(Project.path(project, user)):
-            return "{success: false, error: 'Destination does not exist'}"
-        else:
-            xmlresult,jsonresult = addfile(project,filename,user, postdata)
-            return jsonresult
+    postdata = web.input(file={},qqfile={})
+    if 'user' in postdata:
+        user = postdata['user']
+    else:
+        user = 'anonymous'
+    if 'filename' in postdata:
+        filename = postdata['filename']
+    else:
+        printdebug('No filename passed')
+        return "{success: false, error: 'No filename passed'}"
+    if 'accesstoken' in postdata:
+        accesstoken = postdata['accesstoken']
+    else:
+        return "{success: false, error: 'No accesstoken given'}"
+    if accesstoken != Project.getaccesstoken(user,project):
+        return "{success: false, error: 'Invalid accesstoken given'}"
+    if not os.path.exists(Project.path(project, user)):
+        return "{success: false, error: 'Destination does not exist'}"
+    else:
+        xmlresult,jsonresult = addfile(project,filename,user, postdata)
+        return jsonresult
 
 
 
-class Status(object):
-    #@RequireLogin(ghost=GHOST) #No auth, see description in docstring above
-    def GET(self, project, user=None):
-        postdata = web.input(file={},qqfile={})
-        if 'user' in postdata:
-            user = postdata['user']
-        else:
-            user = 'anonymous'
-        if 'accesstoken' in postdata:
-            accesstoken = postdata['accesstoken']
-        else:
-            return "{success: false, error: 'No accesstoken given'}"
-        if accesstoken != Project.getaccesstoken(user,project):
-            return "{success: false, error: 'Invalid accesstoken given'}"
-        if not os.path.exists(Project.path(project, user)):
-            return "{success: false, error: 'Destination does not exist'}"
-
-        statuscode, statusmsg, statuslog, completion = Project.status(project,user)
-        return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
 
 class ActionHandler(object):
-    GHOST = False
 
-    def find_action(self, action_id, method):
+    def find_action( action_id, method):
         for action in settings.ACTIONS:
             if action.id == action.id and (not action.method or method == action.method):
                 return action
         raise web.api.NotFound("Action does not exist")
 
-    def collect_parameters(self,action):
+    def collect_parameters(action):
         data = web.input()
         params = []
         for parameter in action.parameters:
@@ -2128,8 +1911,8 @@ class ActionHandler(object):
         return params
 
 
-    def do(self, action_id, method, user="anonymous", oauth_access_token=""):
-        action = self.find_action(action_id, 'GET')
+    def do( action_id, method, user="anonymous", oauth_access_token=""):
+        action = ActionHandler.find_action(action_id, 'GET')
 
         userdir =  settings.ROOT + "projects/" + user + '/'
 
@@ -2203,279 +1986,32 @@ class ActionHandler(object):
         else:
             raise Exception("No command or function defined for action " + action_id)
 
-    @RequireLogin(ghost=GHOST)
-    def do_auth(self, action_id, method, user=None):
+    def do_auth(action_id, method, user=None):
         user, oauth_access_token = validateuser(user)
-        return self.do(action_id, method, user, oauth_access_token)
+        return ActionHandler.do(action_id, method, user, oauth_access_token)
 
-    def run(self, action_id, method):
+    def run(action_id, method):
         #check whether the action requires authentication or allows anonymous users:
-        action = self.find_action(action_id, method)
+        action = ActionHandler.find_action(action_id, method)
         if action.allowanonymous:
             user = "anonymous"
             oauth_access_token = ""
-            return self.do(action_id, method,user,oauth_access_token)
+            return ActionHandler.do(action_id, method,user,oauth_access_token)
         else:
-            return self.do_auth(action_id, method)
+            return ActionHandler.do_auth(action_id, method)
 
 
-    def GET(self, action_id):
-        return self.run(action_id, 'GET')
+    def GET(action_id):
+        return ActionHandler.run(action_id, 'GET')
 
-    def POST(self, action_id):
-        return self.run(action_id, 'POST')
+    def POST(action_id):
+        return ActionHandler.run(action_id, 'POST')
 
-    def PUT(self, action_id):
-        return self.run(action_id, 'PUT')
+    def PUT(action_id):
+        return ActionHandler.run(action_id, 'PUT')
 
-    def DELETE(self, action_id):
-        return self.run(action_id, 'DELETE')
-
-
-
-
-#class Uploader(object): #OBSOLETE!
-
-    #def path(self, project):
-        #return Project.path(project) + 'input/'
-
-    #def isarchive(self,filename):
-        #return (filename[-3:] == '.gz' or filename[-4:] == '.bz2' or filename[-4:] == '.zip')
-
-    #def extract(self,project,filename, format):
-        #namelist = None
-        #subfiles = []
-        #if filename[-7:].lower() == '.tar.gz':
-            #cmd = 'tar -xvzf'
-            #namelist = 'tar'
-        #elif filename[-7:].lower() == '.tar.bz2':
-            #cmd = 'tar -xvjf'
-            #namelist = 'tar'
-        #elif filename[-3:].lower() == '.gz':
-            #cmd = 'gunzip'
-            #subfiles = [filename[-3:]]  #one subfile only
-        #elif filename[-4:].lower() == '.bz2':
-            #cmd = 'bunzip2'
-            #subfiles = [filename[-3:]] #one subfile only
-        #elif filename[-4:].lower() == '.tar':
-            #cmd = 'tar -xvf'
-            #namelist = 'tar'
-        #elif filename[-4:].lower() == '.zip':
-            #cmd = 'unzip -u'
-            #namelist = 'zip'
-        #else:
-            #raise Exception("Invalid archive format") #invalid archive, shouldn't happend
-
-        #printlog("Extracting '" + filename + "'" )
-        #try:
-            #process = subprocess.Popen(cmd + " " + filename, cwd=self.path(project), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        #except:
-            #raise web.webapi.InternalError("Unable to extract file: " + cmd + " " + filename + ", cwd="+ self.path(project))
-        #out, err = process.communicate() #waits for process to end
-
-        #if namelist:
-            #firstline = True
-            #for line in out.split("\n"):
-                #line = line.strip()
-                #if line:
-                    #subfile = None
-                    #if namelist == 'tar':
-                        #subfile = line
-                    #elif namelist == 'zip' and not firstline: #firstline contains archive name itself, skip it
-                        #colon = line.find(":")
-                        #if colon:
-                            #subfile =  line[colon + 1:].strip()
-                    #if subfile and os.path.exists(self.path(project) + subfile):
-                        #newsubfile = format.filename(subfile)
-                        #os.rename(self.path(project) + subfile, self.path(project) + newsubfile)
-                        #subfiles.append(newsubfile)
-                #firstline = False
-
-        #return [ subfile for subfile in subfiles ] #return only the files that actually exist
-
-
-
-    #def test(self,project, filename, inputformat, depth = 0):
-        #printdebug("Testing " + filename)
-        #o = ""
-
-
-        #if depth > 3: #security against archive-bombs
-            #if os.path.exists(self.path(project) + filename):
-                #os.unlink(self.path(project) + filename)
-            #return ""
-
-        #prefix = (depth + 1) * "\t"
-        #remove = False
-        #o += prefix + "<file name=\""+filename+"\""
-        #if not os.path.exists(self.path(project) + filename):
-            #o += " uploaded=\"no\" />\n"
-        #else:
-            #if self.isarchive(filename):
-                #o += " archive=\"yes\">"
-                #remove = True #archives no longer necessary after extract
-            #else:
-                #o += " format=\""+inputformat.__class__.__name__+"\" formatlabel=\""+inputformat.name+"\" encoding=\""+inputformat.encoding+"\""; #TODO: output nice format labels?
-                #if inputformat.validate(self.path(project) + filename):
-                    #o += " validated=\"yes\" />\n"
-                    #printlog("Succesfully validated '" + filename + "'" )
-                #else:
-                    #o += " validated=\"no\" />\n"
-                    #printlog("File did not validate '" + filename + "'" )
-                    #remove = True #remove files that don't validate
-
-            #if self.isarchive(filename):
-                #for subfilename in self.extract(project,filename, inputformat):
-                    #if subfilename[-1] != '/': #only act on files, not directories
-                        #printdebug("Extracted from archive: " + subfilename)
-                        #if not inputformat.archivesubdirs and os.path.dirname(subfilename) != '':
-                            ##we don't want subdirectories, move the files:
-                            ##TODO: delete subdirectories
-                            #printdebug("Moving extracted file out of subdirectory...")
-                            #os.rename(self.path(project) + subfilename, self.path(project) + os.path.basename(subfilename))
-                            #o += self.test(project,os.path.basename(subfilename), inputformat, depth + 1)
-                        #else:
-                            #o += self.test(project,subfilename, inputformat, depth + 1)
-                #o += prefix + "</file>\n"
-
-        #if remove and os.path.exists(self.path(project) + filename):
-           #printdebug("Removing '" + filename + "'" )
-           #os.unlink(self.path(project) + filename)
-
-        #return o
-
-
-    #@requirelogin
-    #def POST(self, project, user=None): #OBSOLETE!
-        ##postdata = web.input()
-
-        ##defaults (max 25 uploads)
-        #kwargs = {}
-        #for i in range(1,26):
-            #kwargs['upload' + str(i)] = {}
-        #postdata = web.input(**kwargs)
-        #if not 'uploadcount' in postdata or not postdata['uploadcount'].isdigit():
-            #raise BadRequest('No valid uploadcount specified') #TODO: message doesn't show to client
-        #if int(postdata['uploadcount']) > 25:
-            #raise BadRequest('Too many uploads') #TODO: message doesn't show to client
-
-        ##Check if all uploads have a valid format specified, raise 403 otherwise, dismissing any uploads
-        #for i in range(1,int(postdata['uploadcount']) + 1):
-            #if 'upload'+str(i) in postdata or ('uploadfilename'+str(i) in postdata and 'uploadtext' + str(i) in postdata):
-                #inputformat = None
-                #if not 'uploadformat' + str(i) in postdata:
-                    #raise BadRequest('No upload format specified') #TODO: message doesn't show to client
-                #for f in settings.INPUTFORMATS:
-                    #if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
-                        #inputformat = f
-
-                #if not inputformat:
-                    #raise web.forbidden()
-            #else:
-                #raise web.forbidden()
-
-        #Project.create(project, user)
-
-
-        #web.header('Content-Type', "text/xml; charset=UTF-8")
-        #output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        #output += "<clamupload uploads=\""+str(postdata['uploadcount'])+"\">\n"
-
-        ##we may now assume all upload-data exists:
-        #for i in range(1,int(postdata['uploadcount']) + 1):
-            #if 'upload'+str(i) in postdata and (not 'uploadtext'+str(i) in postdata or not postdata['uploadtext' + str(i)]) and (not 'uploadurl'+str(i) in postdata or not postdata['uploadurl' + str(i)]):
-                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['upload' + str(i)].filename +"\">\n"
-
-                #printdebug("Selecting client-side file " + postdata['upload' + str(i)].filename + " for upload")
-
-                #filename = os.path.basename(postdata['upload' + str(i)].filename.lower())
-
-                ##Is the upload an archive?
-                #extension = filename.split(".")[-1]
-                #if extension == "gz" or  extension == "bz2" or extension == "tar" or  extension == "zip":
-                    #archive = True
-                #else:
-                    ##upload not an archive:
-                    #archive = False
-                    #filename = inputformat.filename(filename) #set proper filename extension
-                #realupload = True
-                #wget = False
-            #elif 'uploadtext'+str(i) in postdata and postdata['uploadtext' + str(i)]:
-                #if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
-                    #filename = postdata['uploadfilename' + str(i)]
-                #else:
-                    ##if no filename exists, make a random one
-                    #filename =  "%032x" % random.getrandbits(128)
-                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadfilename' + str(i)] +"\">\n"
-
-                #archive = False
-                #filename = inputformat.filename(postdata['uploadfilename' + str(i)]) #set proper filename extension
-                #realupload = False
-                #wget = False
-            #elif 'uploadurl'+str(i) in postdata and postdata['uploadurl' + str(i)]:
-                #if 'uploadfilename'+str(i) in postdata and postdata['uploadfilename' + str(i)]:
-                    ##explicit filename passed
-                    #filename = postdata['uploadfilename' + str(i)]
-                #else:
-                    ##get filename from URL:
-                    #filename = os.path.basename(postdata['uploadurl' + str(i)])
-                    #if not filename:
-                        #filename =  "%032x" % random.getrandbits(128)  #make a random one
-
-                #output += "<upload seq=\""+str(i) +"\" filename=\""+postdata['uploadurl' + str(i)] +"\">\n"
-
-                #wget = True
-                #realupload = False
-                #filename = inputformat.filename(filename) #set proper filename extension
-
-
-            #inputformat = None
-            #for f in settings.INPUTFORMATS:
-                #if f.__class__.__name__ == postdata['uploadformat' + str(i)]:
-                    #inputformat = f
-
-            ##write trigger so the system knows uploads are in progress
-            ##f = open(Project.path(project) + '.upload','w')
-            ##f.close()
-
-            #printlog("Uploading '" + filename + "' (" + unicode(inputformat) + ", " + inputformat.encoding + ")")
-            #printdebug("(start copy upload)" )
-            ##upload file
-            ##if archive:
-            #if inputformat.subdirectory:
-                #if not os.path.isdir(inputformat.subdirectory ):
-                    #os.mkdir(inputformat.subdirectory ) #TODO: make recursive and set mode
-                #filename = inputformat.subdirectory  + "/" + filename
-
-            #if wget:
-                #try:
-                    #req = urllib2.urlopen(postdata['uploadurl' + str(i)])
-                #except:
-                    #raise web.webapi.NotFound()
-                #CHUNK = 16 * 1024
-                #f = open(Project.path(project) + 'input/' + filename,'wb')
-                #while True:
-                    #chunk = req.read(CHUNK)
-                    #if not chunk: break
-                    #f.write(chunk)
-            #elif realupload:
-                #f = open(Project.path(project) + 'input/' + filename,'wb')
-                #for line in postdata['upload' + str(i)].file:
-                    #f.write(line) #encoding unaware, solves big-file upload problem?
-            #else:
-                #f = codecs.open(Project.path(project) + 'input/' + filename,'w', inputformat.encoding)
-                #f.write(postdata['uploadtext' + str(i)])
-            #f.close()
-            #printdebug("(end copy upload)" )
-
-            ##test uploaded files (this also takes care of extraction)
-            #output += self.test(project, filename, inputformat)
-
-            #output += "</upload>\n"
-
-        #output += "</clamupload>"
-
-        #return output #200
+    def DELETE(action_id):
+        return ActionHandler.run(action_id, 'DELETE')
 
 
 def sufficientresources():
@@ -2539,8 +2075,91 @@ def usage():
         print("web-server. This is great for development purposes but not recommended",file=sys.stderr)
         print("for production use. Use the WSGI interface with for instance Apache instead.)",file=sys.stderr)
 
+class CLAMService(object):
+    """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
-def set_defaults(HOST = None, PORT = None):
+    def __init__(self, mode = 'standalone'):
+        global VERSION
+        printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
+        if not settings.ROOT or not os.path.isdir(settings.ROOT):
+            error("Specified root path " + settings.ROOT + " not found")
+        elif settings.COMMAND and (not settings.COMMAND.split(" ")[0] or not os.path.exists( settings.COMMAND.split(" ")[0])):
+            error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
+        elif settings.COMMAND and not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
+            if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
+               settings.COMMAND = sys.executable + " " + settings.COMMAND
+            else:
+                error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
+        else:
+            lastparameter = None
+            try:
+                for parametergroup, parameters in settings.PARAMETERS:
+                    for parameter in parameters:
+                        assert isinstance(parameter, clam.common.parameters.AbstractParameter)
+                        lastparameter = parameter
+            except AssertionError:
+                msg = "Syntax error in parameter specification."
+                if lastparameter:
+                     msg += "Last part parameter: ", lastparameter.id
+                error(msg)
+
+        self.service = flask.Flask("clam")
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/', 'index', require_login(index), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/info', 'info', info, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/login', 'login', Login.GET, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout', require_login(Logout.GET), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin', 'adminindex', require_login(Admin.index), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', require_login(Admin.downloader), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', require_login(Admin.handler), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get', require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post', require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put', require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete', require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json', Project.status_json, methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get', require_login(Project.get), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start', require_login(Project.start), methods=['POST'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new', require_login(Project.new), methods=['PUT'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete', require_login(Project.delete), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', require_login(Project.getoutputfile), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', require_login(Project.getinputfile), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', require_login(Project.deleteinputfile), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', require_login(Project.addinputfile), methods=['POST'] )
+
+
+
+        self.mode = mode
+        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
+        if settings.FORCEURL:
+            printlog("Access using forced URL: " + settings.FORCEURL)
+        if mode == 'wsgi':
+            pass
+        elif mode == 'standalone' or not mode:
+            #standalone mode
+            self.mode = 'standalone'
+            self.service.run(host=settings.HOST,port=settings.PORT)
+        else:
+            raise Exception("Unknown mode: " + mode + ", specify 'wsgi' or 'standalone'")
+
+    @staticmethod
+    def corpusindex():
+            """Get list of pre-installed corpora"""
+            corpora = []
+            for f in glob.glob(settings.ROOT + "corpora/*"):
+                if os.path.isdir(f):
+                    corpora.append(os.path.basename(f))
+            return corpora
+
+
+
+def set_defaults():
     global LOG
 
     #Default settings
@@ -2598,20 +2217,6 @@ def set_defaults(HOST = None, PORT = None):
         settings.OAUTH_ENCRYPTIONSECRET = None
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
-    elif settings.ENABLEWEBAPP is False:
-        Project.GHOST = True
-        Index.GHOST = True
-    if not 'WEBSERVICEGHOST' in settingkeys:
-        settings.WEBSERVICEGHOST = False
-    elif settings.WEBSERVICEGHOST:
-        CLAMService.urls = (
-            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/', 'IndexGhost',
-            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/info/?', 'InfoGhost',
-            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/?', 'ProjectGhost',
-            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/output/(.*)/?', 'OutputFileHandlerGhost', #(also handles viewers, convertors, metadata, and archive download
-            settings.STANDALONEURLPREFIX + '/' + settings.WEBSERVICEGHOST + '/([A-Za-z0-9_]*)/input/(.*)/?', 'InputFileHandlerGhost',
-            #'/([A-Za-z0-9_]*)/output/([^/]*)/([^/]*)/?', 'ViewerHandler
-        ) + CLAMService.urls
     if not 'REMOTEHOST' in settingkeys:
         settings.REMOTEHOST = None
     elif not 'REMOTEUSER' in settingkeys:
@@ -2814,28 +2419,20 @@ if __name__ == "__main__":
         pass
 
     test_version()
-    set_defaults(HOST,PORT)
     if HOST:
         settings.HOST = HOST
     test_dirs()
 
     if FORCEURL:
         settings.FORCEURL = FORCEURL
-
-    #fake command line options for web.py
-    sys.argv = [ sys.argv[0] ]
     if PORT:
-        sys.argv.append(str(PORT)) #port from command line
         settings.PORT = PORT
-    elif 'PORT' in dir(settings):
-        sys.argv.append(str(settings.PORT))
 
-    if not fastcgi:
-        if settings.URLPREFIX:
-            settings.STANDALONEURLPREFIX = settings.URLPREFIX
-            warning("WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?")
-            #raise Exception("Can't use URLPREFIX when running in standalone mode!")
-        settings.URLPREFIX = '' #standalone server always runs at the root
+    if settings.URLPREFIX:
+        settings.STANDALONEURLPREFIX = settings.URLPREFIX
+        warning("WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?")
+        #raise Exception("Can't use URLPREFIX when running in standalone mode!")
+    settings.URLPREFIX = '' #standalone server always runs at the root
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :)
@@ -2851,7 +2448,7 @@ if __name__ == "__main__":
         warning("*** OAUTH is enabled but you are running the development server which has no HTTPS support, THIS IS NOT SECURE! ONLY USE FOR TESTING!  ***")
 
     try:
-        CLAMService('fastcgi' if fastcgi else '') #start
+        CLAMService() #start
     except socket.error:
         error("Unable to open socket. Is another service already running on this port?")
 
@@ -2900,7 +2497,7 @@ def run_wsgi(settings_module):
         printdebug("Initialised MySQL authentication")
 
     service = CLAMService('wsgi')
-    return service.application
+    return service.wsgi_app
 
 
 
