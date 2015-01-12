@@ -55,21 +55,7 @@ settings.STANDALONEURLPREFIX = ''
 
 
 
-class CustomForbidden(web.webapi.HTTPError):
-     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the standard?"""
 
-     def __init__(self, message="forbidden"):
-         status = "403 Forbidden"
-         headers = {'Content-Type': 'text/html'}
-         web.webapi.HTTPError.__init__(self, status, headers, message)
-
-class CustomForbiddenXML(web.webapi.HTTPError):
-     """Custom `403 Forbidden` error, because later versions of web.py seem to have disallowed custom messages. Are we violating the standard?"""
-
-     def __init__(self, message="forbidden"):
-         status = "403 Forbidden"
-         headers = {'Content-Type': 'application/xml'}
-         web.webapi.HTTPError.__init__(self, status, headers, message)
 
 
 try:
@@ -84,9 +70,6 @@ except ImportError:
     print( "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication", file=sys.stderr)
 
 
-#Maybe for later: HTTPS support (Just use Apache2/nginx/lighttpd instead)
-#web.wsgiserver.CherryPyWSGIServer.ssl_certificate = "path/to/ssl_certificate"
-#web.wsgiserver.CherryPyWSGIServer.ssl_private_key = "path/to/ssl_private_key"
 
 VERSION = '0.9.14'
 
@@ -211,52 +194,24 @@ def validate_users_mysql():
 
 auth = lambda x: x
 
-#auth = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
-
-#def requirelogin(f):
-#    global auth
-#    def wrapper(*args, **kwargs):
-#        printdebug("wrapper: "+ repr(f))
-#        if settings.PREAUTHHEADER and not f.im_class.GHOST:
-#            printdebug("Header debug: " + repr(web.ctx.env))
-#            for header in settings.PREAUTHHEADER:
-#                if header:
-#                    user = web.ctx.env.get(header, '')
-#                    printdebug("Got pre-authenticated user: " + user)
-#                    if user:
-#                        if settings.PREAUTHMAPPING:
-#                            try:
-#                                user = settings.PREAUTHMAPPING[user]
-#                            except KeyError:
-#                                raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")
-#                        args += (user,)
-#                        return f(*args, **kwargs)
-#            if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-#                raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
-#        if settings.USERS or settings.USERS_MYSQL:
-#            return auth(f)(*args, **kwargs)
-#        else:
-#            return f(*args, **kwargs)
-#    return wraps(f)(wrapper)
-
-
-
 def require_login(f):
     global auth
 
     def wrapper(*args, **kwargs):
         printdebug("wrapper: "+ repr(f))
-        web.header('Access-Control-Allow-Origin', '*')
-        web.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-        web.header('Access-Control-Allow-Headers' , 'Authorization')
-        web.header('Access-Control-Allow-Credentials', 'true')
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+            'Access-Control-Allow-Headers': 'Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+        }
         if settings.PREAUTHHEADER:
             DOAUTH = True
             if DOAUTH:
-                printdebug("Header debug: " + repr(web.ctx.env))
+                printdebug("Header debug: " + repr(flask.request.headers))
                 for header in settings.PREAUTHHEADER:
                     if header:
-                        user = web.ctx.env.get(header, '')
+                        user = flask.request.headers.get(header, '')
                         printdebug("Got pre-authenticated user: " + user)
                         if user:
                             if settings.PREAUTHMAPPING:
@@ -267,10 +222,10 @@ def require_login(f):
                             args += (user,)
                             return f(*args, **kwargs)
                 if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-                    raise web.webapi.Unauthorized("Expected pre-authenticated header not found")
+                    raise make_response("Expected pre-authenticated header not found",401, headers)
         if settings.OAUTH:
             #Check header for token
-            authheader = web.ctx.env.get('HTTP_AUTHORIZATION', '')
+            authheader = flask.request.headers.get('HTTP_AUTHORIZATION', '')
             oauth_access_token = None
             if authheader and authheader[:6].lower() == "bearer":
                 oauth_access_token = authheader[7:]
@@ -284,7 +239,7 @@ def require_login(f):
                     oauth_access_token = web.input().oauth_access_token
                     printdebug("Oauth access token obtained from HTTP request GET/POST data")
                 except:
-                    printdebug("No oauth access token found. Header debug: " + repr(web.ctx.env))
+                    printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
 
 
 
@@ -301,19 +256,20 @@ def require_login(f):
 
                 #Redirect to Authentication Provider
                 printdebug("Redirecting to authentication provider: " + auth_url)
-                raise web.seeother(auth_url)
+
+                return flask.redirect(auth_url)
             else:
                 #Decrypt access token
                 oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
-                if ip != web.ctx.env.get('REMOTE_ADDR', ''):
-                    printdebug("Access token not valid for IP, got " + ip + ", expected " + web.ctx.env.get('REMOTE_ADDR',''))
-                    raise CustomForbidden("Access token not valid for this IP")
+                if ip != flask.request.headers.get('REMOTE_ADDR', ''):
+                    printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.headers.get('REMOTE_ADDR',''))
+                    return flask.make_response("Access token not valid for this IP",403)
 
                 try:
                     oauth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
                     return oauth(f)(*args, **kwargs)
                 except clam.common.oauth.OAuthError as e:
-                    raise CustomForbidden('OAuth Error: ' + str(e))
+                    return flask.make_response('OAuth Error: ' + str(e),403)
 
         elif settings.USERS or settings.USERS_MYSQL:
             return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
@@ -335,26 +291,26 @@ class Login(object):
         try:
             code = web.input().code
         except:
-            raise CustomForbidden('No code passed')
+            return flask.make_response('No code passed',403)
         try:
             state = web.input().state
         except:
-            raise CustomForbidden('No state passed')
+            return flask.make_response('No state passed',403)
 
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state' + state )
         if not 'access_token' in d:
-            raise CustomForbidden('No access token received from authorization provider')
+            return flask.make_response('No access token received from authorization provider',403)
 
         render = web.template.render(settings.CLAMDIR + '/templates')
 
-        web.header('Content-Type', "text/xml; charset=UTF-8")
+        flask.header('Content-Type', "text/xml; charset=UTF-8")
         return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), oauth_encrypt(d['access_token']))
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
         return None #no oauth
     else:
-        return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, web.ctx.env.get('REMOTE_ADDR',''))
+        return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, flask.request.headers.get('REMOTE_ADDR',''))
 
 class Logout(object):
     GHOST = False
@@ -362,14 +318,14 @@ class Logout(object):
     def GET(self, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.OAUTH_REVOKE_URL:
-            raise CustomForbidden("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
+            raise flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
             if reponse.status_code >= 200 and reponse.status_code < 300:
                 return "Logout successful, have a nice day"
             else:
-                raise CustomForbidden("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer")
+                return flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
 
         return "Logout successful, have a nice day"
 
@@ -383,11 +339,11 @@ def validateuser(user):
     if not user:
         user = 'anonymous'
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
-        raise CustomForbidden("Username invalid")
+        raise flask.make_response("Username invalid",403)
     return user, oauth_access_token
 
 def defaultheaders(contenttype="text/xml; charset=UTF-8"):
-    web.header('Content-Type', contenttype)
+    flask.header('Content-Type', contenttype)
 
 
 
@@ -447,7 +403,7 @@ class Admin:
         """Get list of projects"""
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
-            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+            return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
         usersprojects = {}
         for f in glob.glob(settings.ROOT + "projects/*"):
@@ -477,7 +433,7 @@ class Admin:
     def handler(command, targetuser, project, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
-            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+            return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
 
         defaultheaders( "text/html; charset=UTF-8")
@@ -500,44 +456,44 @@ class Admin:
             if p.abort(project, targetuser):
                 return "Ok"
             else:
-                raise CustomForbidden('Failed')
+                return flask.make_response('Failed',403)
         elif command == 'delete':
             d = Project.path(project, targetuser)
             if os.path.isdir(d):
                 shutil.rmtree(d)
                 return "Ok"
             else:
-                raise CustomForbidden('Not Found')
+                return flask.make_response('Not Found',403)
         else:
-            raise CustomForbidden('No such command: ' + command)
+            return flask.make_response('No such command: ' + command,403)
 
     def downloader(targetuser, project, type, filename, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
-            raise CustomForbidden('You shall not pass!!! You are not an administrator!')
+            return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
         if type == 'input':
             try:
                 f = clam.common.data.CLAMInputFile(Project.path(project, targetuser), filename)
             except:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
         elif type == 'output':
             try:
                 f = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename)
             except:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
         else:
-            raise CustomForbidden('Invalid type')
+            return flask.make_response('Invalid type,403')
 
         #return file contents
         if f.metadata:
             for header, value in f.metadata.httpheaders():
-                web.header(header, value)
+                flask.header(header, value)
         try:
             for line in f:
                 yield line
         except IOError:
-            raise web.webapi.NotFound()
+            raise flask.abort(404)
 
 
 
@@ -575,30 +531,30 @@ class Project:
         """Create project skeleton if it does not already exist (static method)"""
 
         if not settings.COMMAND:
-            raise web.webapi.NotFound("Projects disabled, no command configured")
+            return make_response("Projects disabled, no command configured",404)
 
         user, oauth_access_token = validateuser(user)
         if not project_validate(project):
-            raise CustomForbidden('Invalid project ID')
+            return flask.make_response('Invalid project ID',403)
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
         if not project:
-            raise CustomForbidden('No project name')
+            return flask.make_response('No project name',403)
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
             os.makedirs(settings.ROOT + "projects/" + user)
             if not os.path.isdir(settings.ROOT + "projects/" + user): #verify:
-                raise CustomForbidden("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully")
+                return flask.make_response("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully",403)
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project)
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/input")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input'):
-                raise CustomForbidden("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully")
+                return flask.make_response("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully",403)
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
-                raise CustomForbidden("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully")
+                return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
             #if not settings.PROJECTS_PUBLIC:
             #    f = codecs.open(settings.ROOT + "projects/" + user + '/' + project + '/.users','w','utf-8')
             #    f.write(user + "\n")
@@ -864,7 +820,7 @@ class Project:
         """Main Get method: Get project state, parameters, outputindex"""
         user, oauth_access_token = validateuser(user)
         if not Project.exists(project, user):
-            raise web.webapi.NotFound("Project " + project + " was not found for user " + user) #404
+            return flask.make_response("Project " + project + " was not found for user " + user,404) #404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
             #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
@@ -880,7 +836,7 @@ class Project:
             extraloc = '?oauth_access_token=' + oauth_access_token
         else:
             extraloc = ''
-        raise web.webapi.Created(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #201
+        return flask.make_response(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'},201) #HTTP CREATED
 
     def start(project, user=None):
         """Start execution"""
@@ -893,9 +849,9 @@ class Project:
         statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
             if oauth_access_token:
-                raise web.seeother(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+                return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
             else:
-                raise web.seeother(getrooturl() + '/' + project)
+                return flask.redirect(getrooturl() + '/' + project)
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
@@ -906,19 +862,17 @@ class Project:
         sufresources, resmsg = sufficientresources()
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
-            #TODO: Use 503 instead of 500 (but 503 not implemented in web.py)
-            raise web.webapi.InternalError("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.")
-
+            raise flask.make_response("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.",503)
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise CustomForbiddenXML(unicode(Project.response(user, project, parameters,"",False,oauth_access_token)))
+            raise flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),403, {'Content-Type':'application/xml'} )
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise CustomForbiddenXML(unicode(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token)))
+            raise flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
         else:
             #write clam.xml output file
             f = io.open(Project.path(project, user) + "clam.xml",'w',encoding='utf-8')
@@ -978,9 +932,9 @@ class Project:
                 f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
                 f.write(str(pid))
                 f.close()
-                raise web.webapi.Accepted(unicode(Project.response(user, project, parameters,"",False,oauth_access_token))) #returns 202 - Accepted
+                return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),202) #returns 202 - Accepted
             else:
-                raise web.webapi.InternalError("Unable to launch process")
+                return flask.make_response("Unable to launch process",500)
 
     def delete(project, user=None):
         data = web.input()
@@ -990,7 +944,7 @@ class Project:
             abortonly = False
         user, oauth_access_token = validateuser(user)
         if not Project.exists(project, user):
-            raise web.webapi.NotFound("No such project: " + project + " for user " + user)
+            return flask.make_response("No such project: " + project + " for user " + user,404)
         statuscode, _, _, _  = Project.status(project, user)
         msg = ""
         if statuscode == clam.common.status.RUNNING:
@@ -1002,7 +956,7 @@ class Project:
             msg += " Deleted"
         msg = msg.strip()
         defaultheaders('text/plain')
-        web.header('Content-Length',len(msg))
+        flask.header('Content-Length',len(msg))
         return msg #200
 
 
@@ -1040,16 +994,16 @@ class Project:
             try:
                 outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
             except:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
 
         if requestid:
             if requestid == 'metadata':
                 if outputfile.metadata:
-                    web.header('Content-Type', 'text/xml')
+                    flask.header('Content-Type', 'text/xml')
                     for line in outputfile.metadata.xml().split("\n"):
                         yield line
                 else:
-                    raise web.webapi.NotFound("No metadata found!")
+                    return flask.make_response("No metadata found!",404)
             else:
                 #attach viewer data (also attaches converters!
                 outputfile.attachviewers(settings.PROFILES)
@@ -1059,7 +1013,7 @@ class Project:
                     if v.id == requestid:
                         viewer = v
                 if viewer:
-                    web.header('Content-Type', viewer.mimetype)
+                    flask.header('Content-Type', viewer.mimetype)
                     output = viewer.view(outputfile, **web.input())
                     if isinstance(output, web.template.TemplateResult):
                        output =  output['__body__']
@@ -1076,19 +1030,19 @@ class Project:
                         for line in converter.convertforoutput(outputfile):
                             yield line
                     else:
-                        raise web.webapi.NotFound("No such viewer or converter:" + requestid)
+                        return flask.make_response("No such viewer or converter:" + requestid,404)
         elif not requestarchive:
             #normal request - return file contents
             if outputfile.metadata:
                 for header, value in outputfile.metadata.httpheaders():
-                    web.header(header, value)
+                    flask.header(header, value)
             try:
                 for line in outputfile:
                     yield line
             except IOError:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
             except UnicodeError:
-                raise web.webapi.InternalError("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.")
+                flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
 
 
     def deleteoutputfile(project, filename, user=None):
@@ -1101,28 +1055,28 @@ class Project:
             self.reset(project, user)
             msg = "Deleted"
             defaultheaders('text/plain')
-            web.header('Content-Length',len(msg))
+            flask.header('Content-Length',len(msg))
             return msg #200
         elif os.path.isdir(Project.path(project, user) + filename):
             #Deleting specified directory
             shutil.rmtree(Project.path(project, user) + filename)
             msg = "Deleted"
             defaultheaders('text/plain')
-            web.header('Content-Length',len(msg))
+            flask.header('Content-Length',len(msg))
             return msg #200
         else:
             try:
                 file = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
             except:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
 
             success = file.delete()
             if not success:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
             else:
                 msg = "Deleted"
-                web.header('Content-Type', 'text/plain')
-                web.header('Content-Length',len(msg))
+                flask.header('Content-Type', 'text/plain')
+                flask.header('Content-Length',len(msg))
                 return msg #200
 
 
@@ -1133,7 +1087,7 @@ class Project:
             shutil.rmtree(d)
             os.makedirs(d)
         else:
-            raise web.webapi.NotFound()
+            raise flask.abort(404)
         if os.path.exists(Project.path(project, user) + ".done"):
             os.unlink(Project.path(project, user) + ".done")
         if os.path.exists(Project.path(project, user) + ".status"):
@@ -1143,7 +1097,7 @@ class Project:
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
-            raise CustomForbidden('Another compression is already running')
+            return flask.make_response('Another compression is already running',403)
         else:
             if not format:
                 data = web.input()
@@ -1177,7 +1131,7 @@ class Project:
                 if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
                     os.unlink(Project.path(project, user) + "output/" + project + ".zip")
             else:
-                raise CustomForbidden('Invalid archive format') #TODO: message won't show
+                return flask.make_response('Invalid archive format',403) #TODO: message won't show
 
             path = Project.path(project, user) + "output/" + project + "." + format
 
@@ -1188,7 +1142,7 @@ class Project:
                 printdebug(Project.path(project, user)+'output/')
                 process = subprocess.Popen(cmd, cwd=Project.path(project, user)+'output/', shell=True)
                 if not process:
-                    raise web.webapi.InternalError("Unable to make download package")
+                    flask.make_response("Unable to make download package",500)
                 else:
                     pid = process.pid
                     f = open(Project.path(project, user) + '.download','w')
@@ -1198,7 +1152,7 @@ class Project:
                     os.unlink(Project.path(project, user) + '.download')
 
             if contentencoding:
-                web.header('Content-Encoding', contentencoding)
+                flask.header('Content-Encoding', contentencoding)
             defaultheaders(contenttype)
             for line in open(path,'r'):
                 yield line
@@ -1213,7 +1167,7 @@ class Project:
 
         if filename.strip('/') == "":
             #this is a request for the index
-            raise CustomForbidden()
+            return flask.make_response("Permission denied",403)
         if len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'input/' +  "/".join(raw[:-1])):
@@ -1223,28 +1177,28 @@ class Project:
         try:
             inputfile = clam.common.data.CLAMInputFile(Project.path(project, user), filename)
         except:
-            raise web.webapi.NotFound()
+            raise flask.abort(404)
 
         if requestid:
             if requestid == 'metadata':
                 if inputfile.metadata:
-                    web.header('Content-Type', 'text/xml')
+                    flask.header('Content-Type', 'text/xml')
                     for line in inputfile.metadata.xml().split("\n"):
                         yield line
                 else:
-                    raise web.webapi.NotFound("No metadata found!")
+                    return flask.make_response("No metadata found!",404)
             else:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
         else:
             #normal request - return file contents
             if inputfile.metadata:
                 for header, value in inputfile.metadata.httpheaders():
-                    web.header(header, value)
+                    flask.header(header, value)
             try:
                 for line in inputfile:
                     yield line
             except IOError:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
 
     def deleteinputfile(project, filename, user=None):
         """Delete an input file"""
@@ -1264,15 +1218,15 @@ class Project:
             try:
                 file = clam.common.data.CLAMInputFile(Project.path(project, user), filename)
             except:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
 
             success = file.delete()
             if not success:
-                raise web.webapi.NotFound()
+                raise flask.abort(404)
             else:
                 msg = "Deleted"
                 defaultheaders( 'text/plain')
-                web.header('Content-Length',len(msg))
+                flask.header('Content-Length',len(msg))
                 return msg #200
 
     def addinputfile(project, filename, user=None):
@@ -1304,7 +1258,7 @@ class Project:
                                     inputtemplate = t
                                     break
                 if not inputsource:
-                    raise CustomForbidden("No such inputsource exists")
+                    return flask.make_response("No such inputsource exists",403)
                 if not inputtemplate:
                     for profile in settings.PROFILES:
                         for t in profile.input:
@@ -1332,7 +1286,7 @@ class Project:
                 else:
                     assert False
             else:
-                raise CustomForbidden("No filename or inputsource specified")
+                return flask.make_response("No filename or inputsource specified",403)
         else:
             #Simply forward to addfile
             xml,_ = addfile(project,filename,user, postdata)
@@ -1365,7 +1319,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
         if not inputtemplate:
             #Inputtemplate not found, send 404
             printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-            raise web.webapi.NotFound("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
+            return flask.make_response("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!",404)
     if not inputtemplate:
         #See if an inputtemplate is explicitly specified in the filename
         if '/' in filename.strip('/'):
@@ -1392,7 +1346,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                         inputtemplate = t
         if not inputtemplate:
             printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
-            raise web.webapi.NotFound("No inputtemplate specified nor auto-detected for this filename!")
+            return flask.make_response("No inputtemplate specified nor auto-detected for this filename!",404)
 
 
 
@@ -1404,7 +1358,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
 
     for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
         if inputtemplate.unique:
-            raise CustomForbidden("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)") #(it will have to be explicitly deleted by the client first)
+            return flask.make_response("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)",403) #(it will have to be explicitly deleted by the client first)
         else:
             if seq >= nextseq:
                 nextseq = seq + 1 #next available sequence number
@@ -1425,7 +1379,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
         if inputtemplate.filename:
             if filename != inputtemplate.filename:
                 filename = inputtemplate.filename
-                #raise CustomForbidden("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
+                #return flask.make_response("Specified filename must the filename dictated by the inputtemplate, which is " + inputtemplate.filename)
             #TODO LATER: add support for calling this with an actual number instead of #
         if inputtemplate.extension:
             if filename[-len(inputtemplate.extension) - 1:].lower() == '.' + inputtemplate.extension.lower():
@@ -1433,13 +1387,13 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
                 filename = filename +  '.' + inputtemplate.extension
-                #raise CustomForbidden("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
+                #return flask.make_response("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
 
     if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
-        raise CustomForbidden("Adding files for this inputtemplate must proceed through inputsource") #403
+        return flask.make_response("Adding files for this inputtemplate must proceed through inputsource",403) #403
 
     if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:
-            raise CustomForbidden("Invalid converter specified: " + postdata['converter']) #403
+            return flask.make_response("Invalid converter specified: " + postdata['converter'],403) #403
 
     #Make sure the filename is secure
     validfilename = True
@@ -1450,7 +1404,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
             break
 
     if not validfilename:
-        raise CustomForbidden("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;") #403
+        return flask.make_response("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;",403) #403
 
 
     #Create the project (no effect if already exists)
@@ -1479,14 +1433,14 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 if s.id.lower() == postdata['inputsource'].lower():
                     inputsource = s
             if not inputsource:
-                raise CustomForbidden("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
+                return flask.make_response("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'",403)
         sourcefile = os.path.basename(inputsource.path)
-    elif 'data' in web.ctx and web.ctx['data']:
+    elif 'data' in flask.request.headers and flask.request.headers['data']:
         #XHR POST, data in bodys
         printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST") #(temporarily held in memory, not suitable for huge files)
         sourcefile = postdata['filename']
     else:
-        raise CustomForbidden("No file, url or contents specified!")
+        return flask.make_response("No file, url or contents specified!",403)
 
 
 
@@ -1542,7 +1496,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     parameters = []
                     validmeta = False
             else:
-                 raise web.webapi.InternalError("No metadata found nor specified for inputsource " + inputsource.id )
+                 flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
     else:
         errors, parameters = inputtemplate.validate(postdata, user)
         validmeta = True #will be checked later
@@ -1596,7 +1550,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
                 f.close()
             elif xhrpost:
                 f = open(Project.path(project,user) + archive,'wb')
-                f.write(web.ctx['data'])
+                f.write(flask.request.headers['data'])
                 f.close()
             printdebug('(Archive transfer completed)')
             # =============== Extract archive ======================
@@ -1618,7 +1572,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
             try:
                 process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             except:
-                raise web.webapi.InternalError("Unable to extract archive")
+                flask.make_response("Unable to extract archive",500)
             out, err = process.communicate() #waits for process to end
 
 
@@ -1688,9 +1642,9 @@ def addfile(project, filename, user, postdata, inputsource=None):
                     try:
                         r = requests.get(postdata['url'])
                     except:
-                        raise web.webapi.NotFound()
+                        raise flask.abort(404)
                     if not (r.status_code >= 200 and r.status_code < 300):
-                        raise web.webapi.NotFound()
+                        raise flask.abort(404)
 
                     CHUNK = 16 * 1024
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
@@ -1716,11 +1670,11 @@ def addfile(project, filename, user, postdata, inputsource=None):
                         f.write(postdata['contents'])
                         f.close()
                     except UnicodeError:
-                        raise CustomForbidden("Input file " + str(filename) + " is not in the expected encoding!")
-                elif 'data' in web.ctx and web.ctx['data']:
+                        return flask.make_response("Input file " + str(filename) + " is not in the expected encoding!",403)
+                elif 'data' in flask.request.headers and flask.request.headers['data']:
                     printdebug('(Receiving data directly from context)')
                     f = open(Project.path(project, user) + 'input/' + filename,'w')
-                    f.write(web.ctx['data'])
+                    f.write(flask.request.headers['data'])
                     f.close()
 
                 printdebug('(File transfer completed)')
@@ -1817,11 +1771,11 @@ def addfile(project, filename, user, postdata, inputsource=None):
     if fatalerror:
         #fatal error return error message with 403 code
         printlog('Fatal Error during upload: ' + fatalerror)
-        raise CustomForbidden(head + fatalerror)
+        return flask.make_response(head + fatalerror,403)
     elif errors:
         #parameter errors, return XML output with 403 code
         printdebug('There were paramameter errors during upload!')
-        raise CustomForbiddenXML(output)
+        return flask.make_response(output,403)
     else:
         #everything ok, return XML output and JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
@@ -1891,21 +1845,21 @@ class ActionHandler(object):
         for action in settings.ACTIONS:
             if action.id == action.id and (not action.method or method == action.method):
                 return action
-        raise web.api.NotFound("Action does not exist")
+        raise flask.make_response("Action does not exist",404)
 
     def collect_parameters(action):
         data = web.input()
         params = []
         for parameter in action.parameters:
             if not parameter.id in data:
-                raise CustomForbidden("Missing parameter: " + parameter.id)
+                return flask.make_response("Missing parameter: " + parameter.id,403)
             else:
                 if parameter.paramflag:
                     flag = parameter.paramflag
                 else:
                     flag = None
                 if not parameter.set(data[parameter.id]):
-                    raise CustomForbidden("Invalid value for parameter " + parameter.id + ": " + parameter.error)
+                    return flask.make_response("Invalid value for parameter " + parameter.id + ": " + parameter.error,403)
                 else:
                     params.append( ( flag, parameter.value) )
         return params
@@ -1960,18 +1914,18 @@ class ActionHandler(object):
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
                 if process.returncode in action.returncodes200:
-                    web.header('Content-Type', action.mimetype)
+                    flask.header('Content-Type', action.mimetype)
                     return stdoutdata #200
                 elif process.returncode in action.returncodes403:
-                    web.header('Content-Type', action.mimetype)
-                    raise CustomForbidden(stdoutdata)
+                    flask.header('Content-Type', action.mimetype)
+                    return flask.make_response(stdoutdata,403)
                 elif process.returncode in action.returncodes404:
                     web.header('Content-Type', action.mimetype)
-                    raise web.webapi.NotFound(stdoutdata)
+                    return flask.make_response(stdoutdata, 404)
                 else:
-                    raise web.webapi.InternalError("Process for action " +  action_id + " failed\n" + stderrdata)
+                    return flask.make_response("Process for action " +  action_id + " failed\n" + stderrdata,500)
             else:
-                raise web.webapi.InternalError("Unable to launch process")
+                return flask.make_response("Unable to launch process",500)
         elif action.function:
             args = [ x[1] for x in  self.collect_parameters(action) ]
             web.header('Content-Type', action.mimetype)
@@ -1981,7 +1935,7 @@ class ActionHandler(object):
                 if isinstance(e, web.webapi.HTTPError):
                     raise
                 else:
-                    raise web.webapi.InternalError(str(e))
+                    return flask.make_response(str(e),500)
             return r
         else:
             raise Exception("No command or function defined for action " + action_id)
