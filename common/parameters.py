@@ -198,13 +198,17 @@ class AbstractParameter(object):
                     description = value
                 else:
                     kwargs[attrib] = value
+
+            #extra parsing for choice parameter (TODO: put in a better spot)
+            if 'multi' in kwargs and (kwargs['multi'] == 'yes' or kwargs['multi'] == '1' or kwargs['multi'] == 'true'):
+                kwargs['value'] = []
+
             for subtag in node: #parse possible subtags
                 if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
                     if not 'choices' in kwargs: kwargs['choices'] = {}
                     kwargs['choices'][subtag.attrib['id']] = subtag.text
                     if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
-                        if 'multi' in kwargs and kwargs['multi']:
-                            if not 'value' in kwargs: kwargs['value'] = []
+                        if 'multi' in kwargs and (kwargs['multi'] == 'yes' or kwargs['multi'] == '1' or kwargs['multi'] == 'true'):
                             kwargs['value'].append(subtag.attrib['id'])
                         else:
                             kwargs['value'] = subtag.attrib['id']
