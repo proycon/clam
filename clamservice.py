@@ -38,7 +38,6 @@ import time
 import socket
 import json
 from copy import copy #shallow copy (use deepcopy for deep)
-from functools import wraps
 
 if __name__ == "__main__":
     sys.path.append(sys.path[0] + '/..')
@@ -54,22 +53,10 @@ from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlo
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
-
-
-
-
-
 try:
     import MySQLdb
 except ImportError:
     print("WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication",file=sys.stderr)
-
-
-try:
-    from requests_oauthlib import OAuth2Session
-except ImportError:
-    print( "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication", file=sys.stderr)
-
 
 
 VERSION = '0.99'
@@ -81,15 +68,6 @@ DATEMATCH = re.compile(r'^[\d\.\-\s:]*$')
 settingsmodule = None #will be overwritten later
 
 setlog(sys.stderr)
-#Empty defaults
-#SYSTEM_ID = "clam"
-#SYSTEM_NAME = "CLAM: Computional Linguistics Application Mediator"
-#SYSTEM_DESCRIPTION = "CLAM is a webservice wrapper around NLP tools"
-#COMMAND = ""
-#ROOT = "."
-#PARAMETERS = []
-#URL = "http://localhost:8080"
-#USERS = None
 
 
 def error(msg):
@@ -101,8 +79,6 @@ def error(msg):
 
 def warning(msg):
     print("WARNING: " + msg, file=sys.stderr)
-
-
 
 
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
@@ -2361,6 +2337,7 @@ if __name__ == "__main__":
     test_version()
     if HOST:
         settings.HOST = HOST
+    set_defaults()
     test_dirs()
 
     if FORCEURL:
@@ -2374,29 +2351,18 @@ if __name__ == "__main__":
         #raise Exception("Can't use URLPREFIX when running in standalone mode!")
     settings.URLPREFIX = '' #standalone server always runs at the root
 
-    # Create decorator
-    #requirelogin = real_requirelogin #fool python :)
-    #if USERS
-    #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
-
     try:
         CLAMService('debug' if DEBUG else 'standalone') #start
     except socket.error:
         error("Unable to open socket. Is another service already running on this port?")
 
-
 def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""
-    global settingsmodule, auth, DEBUG
-    #import_string = "import " + settingsmodule + " as settings"
-    #exec import_string
+    global settingsmodule, DEBUG
     printdebug("Initialising WSGI service")
-
-
 
     globals()['settings'] = settings_module
     settingsmodule = settings_module.__name__
-
 
     try:
         if settings.DEBUG:
@@ -2415,21 +2381,8 @@ def run_wsgi(settings_module):
             setlogfile(settings.LOGFILE)
     except:
         pass
-    set_defaults(None,None) #host, port
+    set_defaults() #host, port
     test_dirs()
-
-    if settings.OAUTH:
-        auth = None #will be instantiated anew each time
-    elif settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
-        printdebug("Initialised authentication")
-    elif settings.USERS_MYSQL:
-        validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.URLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
-        printdebug("Initialised MySQL authentication")
 
     service = CLAMService('wsgi')
     return service.wsgi_app
-
-
-
