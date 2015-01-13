@@ -381,10 +381,11 @@ def index(user = None):
             inputsources=corpora,
             outputpaths=None,
             inputpaths=None,
-            profiles=[ x.xml() for x in settings.PROFILES ],
+            profiles=settings.PROFILES,
             datafile=None,
             projects=projects,
-            actions=[ x.xml() for x in settings.ACTIONS ],
+            actions=settings.ACTIONS,
+            disableinterface=not settings.ENABLEWEBAPP,
             info=False,
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
@@ -409,13 +410,35 @@ def info(user=None):
 
     corpora = CLAMService.corpusindex()
 
-    render = web.template.render(settings.CLAMDIR + '/templates')
-
-    defaultheaders()
-    try:
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, True, None, settings.INTERFACEOPTIONS,"", oauth_encrypt(oauth_access_token))
-    except AttributeError:
-        raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
+    return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+            version=VERSION,
+            system_id=settings.SYSTEM_ID,
+            system_name=settings.SYSTEM_NAME,
+            system_description=settings.SYSTEM_DESCRIPTION,
+            user=user,
+            project=None,
+            url=getrooturl(),
+            statuscode=-1,
+            statusmessage="",
+            statuslog=[],
+            completion=0,
+            errors=errors,
+            errormsg=errormsg,
+            parameterdata=settings.PARAMETERS,
+            inputsources=corpora,
+            outputpaths=None,
+            inputpaths=None,
+            profiles=settings.PROFILES,
+            datafile=None,
+            projects=projects,
+            actions=settings.ACTIONS,
+            info=True,
+            disableinterface=not settings.ENABLEWEBAPP,
+            accesstoken=None,
+            interfaceoptions=settings.INTERFACEOPTIONS,
+            customhtml=settings.CUSTOMHTML_INDEX,
+            oauth_access_token=oauth_encrypt(oauth_access_token)
+    )))
 
 class Admin:
     def index(user=None):
@@ -439,24 +462,21 @@ class Admin:
         for u in usersprojects:
             usersprojects[u] = sorted(usersprojects[u])
 
-        render = web.template.render(settings.CLAMDIR + '/templates')
-
-        defaultheaders( "text/html; charset=UTF-8")
-
-        try:
-            return render.admin(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, getrooturl(), sorted(usersprojects.items()), oauth_encrypt(oauth_access_token) )
-        except AttributeError:
-            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
-
+        return withdefaultheaders(flask.make_response(flask.render_template('admin.html',
+                version=VERSION,
+                system_id=settings.SYSTEM_ID,
+                system_name=settings.SYSTEM_NAME,
+                system_description=settings.SYSTEM_DESCRIPTION,
+                user=user,
+                url=getrooturl(),
+                usersprojects = sorted(usersprojects.items()),
+                oauth_access_token=oauth_encrypt(oauth_access_token)
+        )), "text/html; charset=UTF-8" )
 
     def handler(command, targetuser, project, user = None):
         user, oauth_access_token = validateuser(user)
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
-
-
-        defaultheaders( "text/html; charset=UTF-8")
-        render = web.template.render(settings.CLAMDIR + '/templates')
 
         if command == 'inspect':
             inputfiles = []
@@ -469,7 +489,18 @@ class Admin:
                 f = os.path.basename(f)
                 if f[0] != '.':
                     outputfiles.append(f)
-            return render.admininspect(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, targetuser, getrooturl(), project, sorted(inputfiles), sorted(outputfiles), oauth_encrypt(oauth_access_token) )
+            return withdefaultheaders(flask.make_response(flask.render_template('admininspect.html',
+                    version=VERSION,
+                    system_id=settings.SYSTEM_ID,
+                    system_name=settings.SYSTEM_NAME,
+                    system_description=settings.SYSTEM_DESCRIPTION,
+                    user=targetuser,
+                    project=project,
+                    inputfiles=sorted(inputfiles),
+                    outputfiles=sorted(outputfiles),
+                    url=getrooturl(),
+                    oauth_access_token=oauth_encrypt(oauth_access_token)
+            )), "text/html; charset=UTF-8" )
         elif command == 'abort':
             p = Project()
             if p.abort(project, targetuser):
@@ -769,6 +800,8 @@ class Project:
             yield seq, clam.common.data.CLAMOutputFile(Project.path(project, user), f[len(prefix):])
 
 
+
+    #main view
     def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
         global VERSION
 
@@ -809,15 +842,35 @@ class Project:
                     printlog("One or more parameters are invalid")
                     break
 
-        render = web.template.render(settings.CLAMDIR + '/templates')
-
-
-
-        defaultheaders()
-        try:
-            return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, project, getrooturl(), statuscode, statusmsg, statuslog, completion, errors, errormsg, parameters,settings.INPUTSOURCES, outputpaths,inputpaths, settings.PROFILES, datafile, None , None, settings.WEBSERVICEGHOST if self.GHOST else False, False, Project.getaccesstoken(user,project), settings.INTERFACEOPTIONS, customhtml, oauth_encrypt(oauth_access_token))
-        except AttributeError:
-            raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
+        return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+                version=VERSION,
+                system_id=settings.SYSTEM_ID,
+                system_name=settings.SYSTEM_NAME,
+                system_description=settings.SYSTEM_DESCRIPTION,
+                user=user,
+                project=project,
+                url=getrooturl(),
+                statuscode=statuscode,
+                statusmessage=statusmsg,
+                statuslog=statuslog,
+                completion=completion,
+                errors=errors,
+                errormsg=errormsg,
+                parameterdata=settings.PARAMETERS,
+                inputsources=settings.INPUTSOURCES,
+                outputpaths=outputpaths,
+                inputpaths=inputpaths,
+                profiles=settings.PROFILES,
+                datafile=datafile,
+                projects=projects,
+                actions=settings.ACTIONS,
+                disableinterface=not settings.ENABLEWEBAPP,
+                info=False,
+                accesstoken=Project.getacesstoken(user,project),
+                interfaceoptions=settings.INTERFACEOPTIONS,
+                customhtml=customhtml,
+                oauth_access_token=oauth_encrypt(oauth_access_token)
+        )))
 
 
     def getaccesstoken(user,project):

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 {% if info %}
 <?xml-stylesheet type="text/xsl" href="{{ url }}/static/info.xsl"?>
-{% elif not disablewebapp %}
+{% elif not disableinterface %}
 <?xml-stylesheet type="text/xsl" href="{{ url }}/static/interface.xsl"?>
 {% endif %}
 {% if project and user %}
@@ -35,7 +35,7 @@
 {% if actions and not project %}
     <actions>
     {% for action in actions %}
-        {{ action|safe }}
+        {{ action.xml|safe }}
     {% endfor %}
     </actions>
 {% endif %}
@@ -53,7 +53,7 @@
 {% if statuscode == 0 or statuscode == 2 or not project %}
     <profiles>
         {% for profile in profiles %}
-            {{ profile|safe }]
+            {{ profile.xml|safe }]
         {% endfor %}
     </profiles>
     <parameters>
@@ -117,4 +117,4 @@
         {% endif %}
 {% endif %}
 
- </clam>
+</clam>

@@ -3,8 +3,8 @@ $def with (version, system_id,system_name, system_description, user, url, usersp
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>CLAM Administrative Interface</title>
-    <script type="text/javascript" src="$url/static/jquery-1.8.3.min.js"></script>
-    <link rel="StyleSheet" href="$url/static/base.css" title="Base Stylesheet" type="text/css" />
+    <script type="text/javascript" src="{{ url }}/static/jquery-1.8.3.min.js"></script>
+    <link rel="StyleSheet" href="{{ url }}/static/base.css" title="Base Stylesheet" type="text/css" />
     <style type="text/css">
         .status0 {
             color: black;
@@ -38,28 +38,32 @@ $def with (version, system_id,system_name, system_description, user, url, usersp
         <h3>Users &amp; Projects</h3>
 
         <ul>
-        $for user, projects in usersprojects:
-            <li><strong>$user</strong><ul>
-            $for project, date, status in projects:
-                <li><a href="$url/admin/inspect/$user/$project">$project</a>
+        {% for user, projects in usersprojects: %}
+            <li><strong>{{ user }}</strong><ul>
+            {% for project, date, status in projects %}
+                <li><a href="{{ url }}/admin/inspect/{{ user }}/{{ project }}">{{ project }}</a>
                 <span>
-                $if status == 1:
-                    <a href="$url/admin/abort/$user/$project" target="_blank">Abort run</a>
-                $elif status == 2:
-                    <a href="$url/admin/delete/$user/$project" target="_blank">Delete project</a>
+                {% if status == 1 %}
+                    <a href="{{ url }}/admin/abort/{{ user }}/{{ project }}" target="_blank">Abort run</a>
+                {% elif status == 2 %}
+                    <a href="{{ url }}/admin/delete/{{ user }}/{{ project }}" target="_blank">Delete project</a>
+                {% endif %}
                 </span>
-                <span class="date">$date</span>
-                <span class="status$status">
-                $if status == 0:
+                <span class="date">{{ date }}</span>
+                <span class="status{{ status }}">
+                {% if status == 0 %}
                     staging
-                $elif status == 1:
+                {% elif status == 1 %}
                     running
-                $elif status == 2:
+                {% elif status == 2 %}
                     done
+                {% endif %}
                 </span>
                 </li>
+            {% endfor %}
             </ul></li>
         </ul>
+        {% endif %}
 
     </div>
 </div>
