@@ -484,7 +484,7 @@ class Project:
             return make_response("Projects disabled, no command configured",404)
 
         user, oauth_access_token = parsecredentials(credentials)
-        if not project_validate(project):
+        if not Project.validate(project):
             return flask.make_response('Invalid project ID',403)
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
         if not project:
@@ -1286,7 +1286,7 @@ class Project:
         #return [ subfile for subfile in subfiles ] #return only the files that actually exist
 
 
-def addfile(project, filename, user, postdata, inputsource=None):
+def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'):
     """Add a new input file, this invokes the actual uploader"""
 
     inputtemplate = None
@@ -1417,9 +1417,9 @@ def addfile(project, filename, user, postdata, inputsource=None):
             if not inputsource:
                 return flask.make_response("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'",403)
         sourcefile = os.path.basename(inputsource.path)
-    elif 'data' in flask.request.headers and flask.request.headers['data']:
+    elif 'accesstoken' in postdata and 'filename' in postdata:
         #XHR POST, data in bodys
-        printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST") #(temporarily held in memory, not suitable for huge files)
+        printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST")
         sourcefile = postdata['filename']
     else:
         return flask.make_response("No file, url or contents specified!",403)
@@ -1757,10 +1757,15 @@ def addfile(project, filename, user, postdata, inputsource=None):
         #parameter errors, return XML output with 403 code
         printdebug('There were paramameter errors during upload!')
         return flask.make_response(output,403)
-    else:
-        #everything ok, return XML output and JSON output (caller decides)
+    elif returntype == 'xml':
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
-        return output, json.dumps(jsonoutput)
+        return withheaders(flask.make_response(output), 'text/xml')
+    elif returntype == 'json':
+        #everything ok, return JSON output (caller decides)
+        jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
+        return flask.make_response(json.dumps(jsonoutput), 'application/json')
+    else:
+        raise Exception("invalid return type")
 
 
 
@@ -1798,14 +1803,13 @@ def uploader(project, credentials=None):
     if 'accesstoken' in postdata:
         accesstoken = postdata['accesstoken']
     else:
-        return "{success: false, error: 'No accesstoken given'}"
+        return withheaders(make_response("{success: false, error: 'No accesstoken given'}"),'application/json')
     if accesstoken != Project.getaccesstoken(user,project):
-        return "{success: false, error: 'Invalid accesstoken given'}"
+        return withheaders(make_response("{success: false, error: 'Invalid accesstoken given'}"),'application/json')
     if not os.path.exists(Project.path(project, user)):
-        return "{success: false, error: 'Destination does not exist'}"
+        return withheaders(make_response("{success: false, error: 'Destination does not exist'}"),'application/json')
     else:
-        xmlresult,jsonresult = addfile(project,filename,user, postdata)
-        return jsonresult
+        return addfile(project,filename,user, postdata,None, 'json' )
 
 
 
