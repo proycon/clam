@@ -1159,8 +1159,8 @@ class CLAMMetaData(object):
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
+            if sys.version < '3' and isinstance(node,unicode):
+                node = ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
             else:
                 node = ElementTree.parse(BytesIO(node)).getroot()
         if node.tag == 'CLAMMetaData':

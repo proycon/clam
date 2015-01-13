@@ -865,7 +865,7 @@ class Project:
         else:
             #write clam.xml output file
             f = io.open(Project.path(project, user) + "clam.xml",'w',encoding='utf-8')
-            f.write(str(Project.response(user, project, parameters, "",True, oauth_access_token)))
+            f.write(Project.response(user, project, parameters, "",True, oauth_access_token).data)
             f.close()
 
 
@@ -1652,10 +1652,15 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         f.close()
                     except UnicodeError:
                         return flask.make_response("Input file " + str(filename) + " is not in the expected encoding!",403)
-                elif 'data' in flask.request.headers and flask.request.headers['data']:
-                    printdebug('(Receiving data directly from context)')
-                    f = open(Project.path(project, user) + 'input/' + filename,'w')
-                    f.write(flask.request.headers['data'])
+                elif 'accesstoken' in postdata and 'filename' in postdata:
+                    printdebug('(Receiving data directly from post body)')
+                    f = open(Project.path(project,user) + 'input/' + filename,'wb') #TODO: test
+                    while True:
+                        chunk = flask.request.stream.read(16384)
+                        if chunk:
+                            f.write(chunk)
+                        else:
+                            break
                     f.close()
 
                 printdebug('(File transfer completed)')
@@ -2073,8 +2078,8 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>/', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
@@ -2088,11 +2093,11 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>/', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>/', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>/', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>/', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>/', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
 
 
         self.mode = mode
