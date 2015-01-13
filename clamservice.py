@@ -47,7 +47,7 @@ if __name__ == "__main__":
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
-import clam.common.digestauth
+import clam.common.auth
 import clam.common.oauth
 import clam.common.data
 from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders
@@ -110,7 +110,7 @@ def userdb_lookup_dict(user, realm):
     global TEMPUSER
     printdebug("Looking up user " + user)
     TEMPUSER = user
-    return settings.USERS[user] #possible KeyError is captured by digest.auth itself!
+    return settings.USERS[user] #possible KeyError is captured later
 
 
 def userdb_lookup_mysql(user, realm):
@@ -189,101 +189,6 @@ def validate_users_mysql():
         denylist = []
     return host,port, user,password, database, table, userfield, passwordfield,accesslist, denylist
 
-#requirelogin = lambda x: x
-#if settings.USERS:
-#    requirelogin = clam.common.digestauth.auth(userdb_lookup, realm= settings.SYSTEM_ID)
-
-auth = lambda x: x
-
-def require_login(f):
-    global auth
-
-    def wrapper(*args, **kwargs):
-        printdebug("wrapper: "+ repr(f))
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-            'Access-Control-Allow-Headers': 'Authorization',
-            'Access-Control-Allow-Credentials': 'true',
-        }
-        if settings.PREAUTHHEADER:
-            DOAUTH = True
-            if DOAUTH:
-                printdebug("Header debug: " + repr(flask.request.headers))
-                for header in settings.PREAUTHHEADER:
-                    if header:
-                        user = flask.request.headers.get(header, '')
-                        printdebug("Got pre-authenticated user: " + user)
-                        if user:
-                            if settings.PREAUTHMAPPING:
-                                try:
-                                    user = settings.PREAUTHMAPPING[user]
-                                except KeyError:
-                                    return flask.make_response("Pre-authenticated user is unknown in the user database",401)
-                            args += (user,)
-                            return f(*args, **kwargs)
-                if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
-                    raise make_response("Expected pre-authenticated header not found",401, headers)
-        if settings.OAUTH:
-            #Check header for token
-            authheader = flask.request.headers.get('HTTP_AUTHORIZATION', '')
-            oauth_access_token = None
-            if authheader and authheader[:6].lower() == "bearer":
-                oauth_access_token = authheader[7:]
-                printdebug("Oauth access token obtained from HTTP request Authentication header")
-            elif authheader and authheader[:5].lower() == "token":
-                oauth_access_token = authheader[6:]
-                printdebug("Oauth access token obtained from HTTP request Authentication header")
-            else:
-                #Is the token submitted in the GET/POST data? (as oauth_access_token)
-                try:
-                    oauth_access_token = flask.request.values['oauth_access_token']
-                    printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                except:
-                    printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
-
-
-
-            if not oauth_access_token:
-                #No access token yet, start login process
-                printdebug("No access token available yet, starting login process")
-
-                redirect_url = getrooturl() + '/login'
-                kwargs = {'redirect_uri': redirect_url}
-                if settings.OAUTH_SCOPE:
-                    kwargs['scope'] = settings.OAUTH_SCOPE
-                oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID, **kwargs)
-                auth_url, state = settings.OAUTH_AUTH_FUNCTION(oauthsession, settings.OAUTH_AUTH_URL)
-
-                #Redirect to Authentication Provider
-                printdebug("Redirecting to authentication provider: " + auth_url)
-
-                return flask.redirect(auth_url)
-            else:
-                #Decrypt access token
-                oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
-                if ip != flask.request.headers.get('REMOTE_ADDR', ''):
-                    printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.headers.get('REMOTE_ADDR',''))
-                    return flask.make_response("Access token not valid for this IP",403)
-
-                try:
-                    oauth = clam.common.oauth.auth(settings.OAUTH_CLIENT_ID, oauth_access_token, settings.OAUTH_USERNAME_FUNCTION)
-                    return oauth(f)(*args, **kwargs)
-                except clam.common.oauth.OAuthError as e:
-                    return flask.make_response('OAuth Error: ' + str(e),403)
-
-        elif settings.USERS or settings.USERS_MYSQL:
-            return auth(f)(*args, **kwargs) #auth will be instance of clam.common.digestauth.auth
-        else:
-            return f(*args, **kwargs) #no authentication
-    return wraps(f)(wrapper)
-
-
-
-
-
-
-
 
 class Login(object):
     def GET(self):
@@ -311,10 +216,9 @@ def oauth_encrypt(oauth_access_token):
         return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, flask.request.headers.get('REMOTE_ADDR',''))
 
 class Logout(object):
-    GHOST = False
 
-    def GET(self, user = None):
-        user, oauth_access_token = validateuser(user)
+    def GET(self, credentials = None):
+        user, oauth_access_token = parsecredentials(credentials)
         if not settings.OAUTH_REVOKE_URL:
             raise flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
         else:
@@ -329,7 +233,7 @@ class Logout(object):
 
 
 
-def validateuser(user):
+def parsecredentials(credentials):
     oauth_access_token = ""
     if settings.OAUTH and isinstance(user, tuple):
         oauth_access_token = user[1]
@@ -346,10 +250,10 @@ def validateuser(user):
 
 #Are tied into flask later because at this point we don't have an app instance yet
 
-def index(user = None):
+def index(credentials = None):
     """Get list of projects"""
     projects = []
-    user, oauth_access_token = validateuser(user)
+    user, oauth_access_token = parsecredentials(credentials)
     for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
         if os.path.isdir(f):
             d = datetime.datetime.fromtimestamp(os.stat(f)[8])
@@ -393,10 +297,10 @@ def index(user = None):
 
 
 
-def info(user=None):
+def info(credentials=None):
     """Get info"""
     projects = []
-    user, oauth_access_token = validateuser(user)
+    user, oauth_access_token = parsecredentials(credentials)
     for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
         if os.path.isdir(f):
             d = datetime.datetime.fromtimestamp(os.stat(f)[8])
@@ -439,9 +343,9 @@ def info(user=None):
     )))
 
 class Admin:
-    def index(user=None):
+    def index(credentials=None):
         """Get list of projects"""
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
@@ -471,8 +375,8 @@ class Admin:
                 oauth_access_token=oauth_encrypt(oauth_access_token)
         )), "text/html; charset=UTF-8" )
 
-    def handler(command, targetuser, project, user = None):
-        user, oauth_access_token = validateuser(user)
+    def handler(command, targetuser, project, credentials=None):
+        user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
@@ -515,8 +419,8 @@ class Admin:
         else:
             return flask.make_response('No such command: ' + command,403)
 
-    def downloader(targetuser, project, type, filename, user = None):
-        user, oauth_access_token = validateuser(user)
+    def downloader(targetuser, project, type, filename, credentials=None):
+        user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
@@ -581,18 +485,18 @@ class Project:
     def validate(project):
         return re.match(r'^\w+$',project, re.UNICODE)
 
-    def path(project, user):
+    def path(project, credentials):
         """Get the path to the project (static method)"""
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         return settings.ROOT + "projects/" + user + '/' + project + "/"
 
-    def create(project, user):
+    def create(project, credentials):
         """Create project skeleton if it does not already exist (static method)"""
 
         if not settings.COMMAND:
             return make_response("Projects disabled, no command configured",404)
 
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         if not project_validate(project):
             return flask.make_response('Invalid project ID',403)
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
@@ -674,9 +578,9 @@ class Project:
         f.close()
         return status
 
-    def exists(project, user):
+    def exists(project, credentials):
         """Check if the project exists"""
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         printdebug("Checking if project " + project + " exists for " + user)
         return os.path.isdir(Project.path(project, user))
 
@@ -740,7 +644,7 @@ class Project:
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
-    def status_json(project, user=None):
+    def status_json(project, credentials=None):
         if 'user' in postdata:
             user = flask.request.values['user']
         else:
@@ -883,7 +787,6 @@ class Project:
 
     def getaccesstoken(user,project):
         #for fineuploader, not oauth
-        user, oauth_access_token = validateuser(user)
         h = hashlib.md5()
         clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
         if sys.version < '3' and isinstance(clear,unicode):
@@ -896,9 +799,9 @@ class Project:
 
     #exposed views:
 
-    def get(project, user=None):
+    def get(project, credentials=None):
         """Main Get method: Get project state, parameters, outputindex"""
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         if not Project.exists(project, user):
             return flask.make_response("Project " + project + " was not found for user " + user,404) #404
         else:
@@ -907,10 +810,10 @@ class Project:
             return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
-    def new(project, user=None):
+    def new(project, credentials=None):
         """Create an empty project"""
+        user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
-        user, oauth_access_token = validateuser(user)
         msg = "Project " + project + " has been created for user " + user
         if oauth_access_token:
             extraloc = '?oauth_access_token=' + oauth_access_token
@@ -918,11 +821,11 @@ class Project:
             extraloc = ''
         return flask.make_response(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'},201) #HTTP CREATED
 
-    def start(project, user=None):
+    def start(project, credentials=None):
         """Start execution"""
         global settingsmodule
+        user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
-        user, oauth_access_token = validateuser(user)
         #if user and not Project.access(project, user):
         #    return flask.make_response("Access denied to project " + project +  " for user " + user,401) #401
 
@@ -1016,13 +919,13 @@ class Project:
             else:
                 return flask.make_response("Unable to launch process",500)
 
-    def delete(project, user=None):
+    def delete(project, credentials=None):
         data = flask.request.values
         if 'abortonly' in data:
             abortonly = bool(data['abortonly'])
         else:
             abortonly = False
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         if not Project.exists(project, user):
             return flask.make_response("No such project: " + project + " for user " + user,404)
         statuscode, _, _, _  = Project.status(project, user)
@@ -1038,16 +941,16 @@ class Project:
         return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg)})  #200
 
 
-    def download_zip(project, user=None):
+    def download_zip(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'zip')
 
-    def download_targz(project, user=None):
+    def download_targz(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'tar.gz')
 
-    def download_tarbz2(project, user=None):
+    def download_tarbz2(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'tar.bz2')
 
-    def getoutputfile(project, filename, user=None):
+    def getoutputfile(project, filename, credentials=None):
         raw = filename.split('/')
 
         viewer = None
@@ -1115,7 +1018,7 @@ class Project:
             except IOError:
                 raise flask.abort(404)
 
-    def deleteoutputfile(project, filename, user=None):
+    def deleteoutputfile(project, filename, credentials=None):
         """Delete an output file"""
 
         filename = filename.replace("..","") #Simple security
@@ -1222,7 +1125,7 @@ class Project:
             return withheaders(flask.make_response(getbinarydata(path)), contenttype, extraheaders)
 
 
-    def getinputfile(project, filename, user=None):
+    def getinputfile(project, filename, credentials=None):
 
         viewer = None
         requestid = None
@@ -1266,7 +1169,7 @@ class Project:
             except IOError:
                 raise flask.abort(404)
 
-    def deleteinputfile(project, filename, user=None):
+    def deleteinputfile(project, filename, credentials=None):
         """Delete an input file"""
 
         filename = filename.replace("..","") #Simple security
@@ -1293,7 +1196,7 @@ class Project:
                 msg = "Deleted"
                 return withheaders(flask.make_response(msg),'text/plain', {'Content-Length': len(msg)}) #200
 
-    def addinputfile(project, filename, user=None):
+    def addinputfile(project, filename, credentials=None):
         """Add a new input file, this invokes the actual uploader"""
 
         #TODO: test support for uploading metadata files
@@ -1301,7 +1204,7 @@ class Project:
         #TODO LATER: re-add support for archives?
 
         Project.create(project, user)
-        user, oauth_access_token = validateuser(user)
+        user, oauth_access_token = parsecredentials(credentials)
         postdata = flask.request.values
 
         if filename == '':
@@ -1874,7 +1777,7 @@ def styledata():
 
 
 
-def uploader(project, user=None):
+def uploader(project, credentials=None):
     """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML. Unfortunately, normal digest authentication does not work well with the uploader, so we implement a simple key check based on hashed username, projectname and a secret key that is communicated as a JS variable in the interface ."""
     postdata = flask.request.values
     if 'user' in postdata:
@@ -2001,8 +1904,8 @@ class ActionHandler(object):
         else:
             raise Exception("No command or function defined for action " + action_id)
 
-    def do_auth(action_id, method, user=None):
-        user, oauth_access_token = validateuser(user)
+    def do_auth(action_id, method, credentials=None):
+        user, oauth_access_token = parsecredentials(credentials)
         return ActionHandler.do(action_id, method, user, oauth_access_token)
 
     def run(action_id, method):
@@ -2093,7 +1996,7 @@ def usage():
 class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
-    def __init__(self, mode = 'standalone'):
+    def __init__(self, mode = 'debug'):
         global VERSION
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
@@ -2118,50 +2021,76 @@ class CLAMService(object):
                      msg += "Last part parameter: ", lastparameter.id
                 error(msg)
 
+        if settings.OAUTH:
+            warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=OAUTH_SCOPE)
+        elif settings.USERS:
+            if settings.BASICAUTH:
+                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            else:
+                self.auth = clam.common.auth.HTTPDigestAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+        elif settings.USERS_MYSQL:
+            validate_users_mysql()
+            if settings.BASICAUTH:
+                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+                warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            else:
+                self.auth = clam.common.auth.HTTPDigestAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+        elif settings.PREAUTHHEADER:
+            warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
+            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER)
+        else:
+            warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
+            self.auth = lambda f: f
+
+
+
         self.service = flask.Flask("clam")
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/', 'index', require_login(index), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/info', 'info', info, methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/login', 'login', Login.GET, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout', require_login(Logout.GET), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin', 'adminindex', require_login(Admin.index), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', require_login(Admin.downloader), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', require_login(Admin.handler), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get', require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post', require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put', require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete', require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json', Project.status_json, methods=['GET'] )
         self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get', require_login(Project.get), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start', require_login(Project.start), methods=['POST'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new', require_login(Project.new), methods=['PUT'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete', require_login(Project.delete), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', require_login(Project.download_targz), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', require_login(Project.getoutputfile), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', require_login(Project.deleteoutputfile), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', require_login(Project.getinputfile), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', require_login(Project.deleteinputfile), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', require_login(Project.addinputfile), methods=['POST'] )
-
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start', self.auth.require_login(Project.start), methods=['POST'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
+        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
 
 
         self.mode = mode
+        if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings. settings.BASICAUTH):
+            warning("*** YOU ARE RUNNING THE DEVELOPMENT SERVER, THIS IS INSECURE WITH THE CONFIGURED AUTHENTICATION METHOD ***")
         printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
         if settings.FORCEURL:
             printlog("Access using forced URL: " + settings.FORCEURL)
-        if mode == 'wsgi':
+
+        if self.mode == 'wsgi':
             pass
-        elif mode == 'standalone' or not mode:
-            #standalone mode
-            self.mode = 'standalone'
+        elif self.mode in ('standalone','debug'):
+            self.service.debug = (mode == 'debug')
             self.service.run(host=settings.HOST,port=settings.PORT)
         else:
-            raise Exception("Unknown mode: " + mode + ", specify 'wsgi' or 'standalone'")
+            raise Exception("Unknown mode: " + mode + ", specify 'wsgi', 'standalone' or 'debug'")
 
     @staticmethod
     def corpusindex():
@@ -2188,6 +2117,8 @@ def set_defaults():
         settings.USERS = None
     if not 'ADMINS' in settingkeys:
         settings.ADMINS = []
+    if not 'BASICAUTH' in settingkeys:
+        settings.BASICAUTH = False #default is HTTP Digest
     if not 'PROJECTS_PUBLIC' in settingkeys:
         settings.PROJECTS_PUBLIC = True
     if not 'PROFILES' in settingkeys:
@@ -2227,7 +2158,7 @@ def set_defaults():
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:
-        settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128)
+        settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128) #TODO: not used now
     if not 'OAUTH_ENCRYPTIONSECRET' in settingkeys:
         settings.OAUTH_ENCRYPTIONSECRET = None
     if not 'ENABLEWEBAPP' in settingkeys:
@@ -2242,10 +2173,6 @@ def set_defaults():
         settings.PREAUTHHEADER = settings.PREAUTHHEADER.split(' ')
     else:
         settings.PREAUTHHEADER = None
-    if not 'PREAUTHMAPPING' in settingkeys:
-        settings.PREAUTHMAPPING = None #A mapping from pre-authenticated usernames to built-in usernames
-    if not 'PREAUTHONLY' in settingkeys: #If set to False, CLAM defaults to normal authentication if the preauth header was not found
-        settings.PREAUTHONLY = False
     if not 'USERS_MYSQL' in settingkeys:
         settings.USERS_MYSQL = None
     if not 'FORCEURL' in settingkeys:
@@ -2368,7 +2295,7 @@ if __name__ == "__main__":
     PYTHONPATH = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdcH:p:vu:P:")
+        opts, args = getopt.getopt(sys.argv[1:], "hdH:p:vu:P:")
     except getopt.GetoptError as err:
         # print help information and exit:
         print(str(err))
@@ -2379,8 +2306,6 @@ if __name__ == "__main__":
         if o == '-d':
             DEBUG = True
             setdebug(True)
-        elif o == '-c':
-            fastcgi = True
         elif o == '-H':
             HOST = a
         elif o == '-p':
@@ -2451,19 +2376,11 @@ if __name__ == "__main__":
 
     # Create decorator
     #requirelogin = real_requirelogin #fool python :)
-    #if USERS:
+    #if USERS
     #    requirelogin = digestauth.auth(lambda x: USERS[x], realm=SYSTEM_ID)
-    if settings.USERS:
-        auth = clam.common.digestauth.auth(userdb_lookup_dict, settings.REALM, printdebug, settings.STANDALONEURLPREFIX, True, "","Unauthorized",16, settings.DIGESTOPAQUE)
-    elif settings.USERS_MYSQL:
-        validate_users_mysql()
-        auth = clam.common.digestauth.auth(userdb_lookup_mysql, settings.REALM, printdebug, settings.STANDALONEURLPREFIX,True,"","Unauthorized",16, settings.DIGESTOPAQUE)
-
-    if settings.OAUTH and not fastcgi:
-        warning("*** OAUTH is enabled but you are running the development server which has no HTTPS support, THIS IS NOT SECURE! ONLY USE FOR TESTING!  ***")
 
     try:
-        CLAMService() #start
+        CLAMService('debug' if DEBUG else 'standalone') #start
     except socket.error:
         error("Unable to open socket. Is another service already running on this port?")
 
