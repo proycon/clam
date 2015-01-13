@@ -71,7 +71,7 @@ except ImportError:
 
 
 
-VERSION = '0.9.14'
+VERSION = '0.99'
 
 DEBUG = False
 
@@ -301,10 +301,7 @@ class Login(object):
         if not 'access_token' in d:
             return flask.make_response('No access token received from authorization provider',403)
 
-        render = web.template.render(settings.CLAMDIR + '/templates')
-
-        flask.header('Content-Type', "text/xml; charset=UTF-8")
-        return render.login(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, getrooturl(), oauth_encrypt(d['access_token']))
+        return withdefaultheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))))
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
@@ -342,9 +339,9 @@ def validateuser(user):
         raise flask.make_response("Username invalid",403)
     return user, oauth_access_token
 
-def defaultheaders(contenttype="text/xml; charset=UTF-8"):
-    flask.header('Content-Type', contenttype)
-
+def withdefaultheaders(response, contenttype="text/xml; charset=UTF-8"):
+    response['Content-Type'] = contenttype
+    return response
 
 
 ################# Views ##########################
@@ -366,14 +363,36 @@ def index(user = None):
 
     corpora = CLAMService.corpusindex()
 
-    render = web.template.render(settings.CLAMDIR + '/templates')
+    return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+            version=VERSION,
+            system_id=settings.SYSTEM_ID,
+            system_name=settings.SYSTEM_NAME,
+            system_description=settings.SYSTEM_DESCRIPTION,
+            user=user,
+            project=None,
+            url=getrooturl(),
+            statuscode=-1,
+            statusmessage="",
+            statuslog=[],
+            completion=0,
+            errors=errors,
+            errormsg=errormsg,
+            parameterdata=settings.PARAMETERS,
+            inputsources=corpora,
+            outputpaths=None,
+            inputpaths=None,
+            profiles=[ x.xml() for x in settings.PROFILES ],
+            datafile=None,
+            projects=projects,
+            actions=[ x.xml() for x in settings.ACTIONS ],
+            info=False,
+            accesstoken=None,
+            interfaceoptions=settings.INTERFACEOPTIONS,
+            customhtml=settings.CUSTOMHTML_INDEX,
+            oauth_access_token=oauth_encrypt(oauth_access_token)
+    )))
 
-    defaultheaders()
 
-    try:
-        return render.response(VERSION, settings.SYSTEM_ID, settings.SYSTEM_NAME, settings.SYSTEM_DESCRIPTION, user, None, getrooturl(), -1 ,"",[],0, errors, errormsg, settings.PARAMETERS,corpora, None,None, settings.PROFILES, None, projects, settings.ACTIONS, settings.WEBSERVICEGHOST if self.GHOST else False, False, None, settings.INTERFACEOPTIONS, settings.CUSTOMHTML_INDEX, oauth_encrypt(oauth_access_token))
-    except AttributeError:
-        raise Exception("Unable to find templates in CLAMDIR=" + settings.CLAMDIR)
 
 def info(user=None):
     """Get info"""

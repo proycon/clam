@@ -40,7 +40,7 @@ import clam.common.viewers
 
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.14'
+VERSION = '0.99'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
