@@ -35,7 +35,7 @@
 {% if actions and not project %}
     <actions>
     {% for action in actions %}
-        {{ action.xml|safe }}
+        {{ action.xml()|safe }}
     {% endfor %}
     </actions>
 {% endif %}
@@ -53,7 +53,7 @@
 {% if statuscode == 0 or statuscode == 2 or not project %}
     <profiles>
         {% for profile in profiles %}
-            {{ profile.xml|safe }]
+            {{ profile.xml()|safe }}
         {% endfor %}
     </profiles>
     <parameters>
@@ -61,10 +61,11 @@
         <parametergroup name="{{ group }}">
             {% for parameter in parameters %}
                 {% if parameter.access(user) %}
-                    {{ parameter.xml|safe }}
+                    {{ parameter.xml()|safe }}
                 {% endif %}
             {% endfor %}
-            </parametergroup>
+        </parametergroup>
+        {% endfor %}
     </parameters>
 {% endif %}
 
@@ -76,7 +77,7 @@
             {% else %}
             <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}">                        
             {% endif %}
-            <name>{{ outputfile.filename }</name>
+            <name>{{ outputfile.filename }}</name>
             {% if outputfile.viewers %}
             <viewers>
                 {% for viewer in outputfile.viewers %}

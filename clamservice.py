@@ -167,6 +167,7 @@ def validate_users_mysql():
 
 
 class Login(object):
+    @staticmethod
     def GET(self):
         global auth
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
@@ -193,6 +194,7 @@ def oauth_encrypt(oauth_access_token):
 
 class Logout(object):
 
+    @staticmethod
     def GET(self, credentials = None):
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.OAUTH_REVOKE_URL:
@@ -211,11 +213,14 @@ class Logout(object):
 
 def parsecredentials(credentials):
     oauth_access_token = ""
-    if settings.OAUTH and isinstance(user, tuple):
-        oauth_access_token = user[1]
-        user = user[0]
-    if not user:
+    if settings.OAUTH and isinstance(credentials, tuple):
+        oauth_access_token = credentials[1]
+        user = credentials[0]
+    elif credentials:
+        user = credentials
+    else:
         user = 'anonymous'
+
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
         raise flask.make_response("Username invalid",403)
     return user, oauth_access_token
@@ -319,6 +324,7 @@ def info(credentials=None):
     )))
 
 class Admin:
+    @staticmethod
     def index(credentials=None):
         """Get list of projects"""
         user, oauth_access_token = parsecredentials(credentials)
@@ -351,6 +357,7 @@ class Admin:
                 oauth_access_token=oauth_encrypt(oauth_access_token)
         )), "text/html; charset=UTF-8" )
 
+    @staticmethod
     def handler(command, targetuser, project, credentials=None):
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
@@ -395,6 +402,7 @@ class Admin:
         else:
             return flask.make_response('No such command: ' + command,403)
 
+    @staticmethod
     def downloader(targetuser, project, type, filename, credentials=None):
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
@@ -458,14 +466,17 @@ def getbinarydata(path, buffersize=16*1024):
 class Project:
     """This class simply groups project methods, is not instantiated and does not offer any kind of persistence, all methods are static"""
 
+    @staticmethod
     def validate(project):
         return re.match(r'^\w+$',project, re.UNICODE)
 
+    @staticmethod
     def path(project, credentials):
         """Get the path to the project (static method)"""
         user, oauth_access_token = parsecredentials(credentials)
         return settings.ROOT + "projects/" + user + '/' + project + "/"
 
+    @staticmethod
     def create(project, credentials):
         """Create project skeleton if it does not already exist (static method)"""
 
@@ -500,6 +511,7 @@ class Project:
             #    f.close()
 
 
+    @staticmethod
     def pid(project, user):
         pidfile = Project.path(project, user) + '.pid'
         if os.path.isfile(pidfile):
@@ -510,6 +522,7 @@ class Project:
         else:
             return 0
 
+    @staticmethod
     def running(project, user):
         pidfile = Project.path(project, user) + '.pid'
         if os.path.isfile(pidfile) and not os.path.isfile(Project.path(project, user) + ".done"):
@@ -529,6 +542,7 @@ class Project:
             return False
 
 
+    @staticmethod
     def abort(self, project, user):
         if self.pid(project, user) == 0:
             return False
@@ -541,25 +555,30 @@ class Project:
             time.sleep(1)
         return True
 
+    @staticmethod
     def done(project,user):
         return os.path.isfile(Project.path(project, user) + ".done")
 
+    @staticmethod
     def aborted(project,user):
         return os.path.isfile(Project.path(project, user) + ".aborted")
 
 
+    @staticmethod
     def exitstatus(project, user):
         f = open(Project.path(project, user) + ".done")
         status = int(f.read(1024))
         f.close()
         return status
 
+    @staticmethod
     def exists(project, credentials):
         """Check if the project exists"""
         user, oauth_access_token = parsecredentials(credentials)
         printdebug("Checking if project " + project + " exists for " + user)
         return os.path.isdir(Project.path(project, user))
 
+    @staticmethod
     def statuslog(project, user):
         statuslog = []
         statusfile = Project.path(project,user) + ".status"
@@ -598,6 +617,7 @@ class Project:
             statuslog.reverse()
         return statuslog, totalcompletion
 
+    @staticmethod
     def status(project, user):
         global DATEMATCH
         if Project.running(project, user):
@@ -620,6 +640,7 @@ class Project:
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
+    @staticmethod
     def status_json(project, credentials=None):
         if 'user' in postdata:
             user = flask.request.values['user']
@@ -637,6 +658,7 @@ class Project:
         statuscode, statusmsg, statuslog, completion = Project.status(project,user)
         return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
 
+    @staticmethod
     def inputindex(project, user, d = ''):
         prefix = Project.path(project, user) + 'input/'
         for f in glob.glob(prefix + d + "/*"):
@@ -650,6 +672,7 @@ class Project:
                     yield file
 
 
+    @staticmethod
     def outputindex(project, user, d = ''):
         prefix = Project.path(project, user) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
@@ -662,6 +685,7 @@ class Project:
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
 
+    @staticmethod
     def inputindexbytemplate(project, user, inputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
@@ -675,6 +699,7 @@ class Project:
             yield seq, clam.common.data.CLAMInputFile(Project.path(project, user), f[len(prefix):])
 
 
+    @staticmethod
     def outputindexbytemplate(project, user, outputtemplate):
         """Retrieve sorted index for the specified input template"""
         index = []
@@ -690,6 +715,7 @@ class Project:
 
 
     #main view
+    @staticmethod
     def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
         global VERSION
 
@@ -750,17 +776,18 @@ class Project:
                 inputpaths=inputpaths,
                 profiles=settings.PROFILES,
                 datafile=datafile,
-                projects=projects,
+                projects=[],
                 actions=settings.ACTIONS,
                 disableinterface=not settings.ENABLEWEBAPP,
                 info=False,
-                accesstoken=Project.getacesstoken(user,project),
+                accesstoken=Project.getaccesstoken(user,project),
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
                 oauth_access_token=oauth_encrypt(oauth_access_token)
         )))
 
 
+    @staticmethod
     def getaccesstoken(user,project):
         #for fineuploader, not oauth
         h = hashlib.md5()
@@ -775,6 +802,7 @@ class Project:
 
     #exposed views:
 
+    @staticmethod
     def get(project, credentials=None):
         """Main Get method: Get project state, parameters, outputindex"""
         user, oauth_access_token = parsecredentials(credentials)
@@ -786,6 +814,7 @@ class Project:
             return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
+    @staticmethod
     def new(project, credentials=None):
         """Create an empty project"""
         user, oauth_access_token = parsecredentials(credentials)
@@ -797,6 +826,7 @@ class Project:
             extraloc = ''
         return flask.make_response(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'},201) #HTTP CREATED
 
+    @staticmethod
     def start(project, credentials=None):
         """Start execution"""
         global settingsmodule
@@ -895,6 +925,7 @@ class Project:
             else:
                 return flask.make_response("Unable to launch process",500)
 
+    @staticmethod
     def delete(project, credentials=None):
         data = flask.request.values
         if 'abortonly' in data:
@@ -917,15 +948,19 @@ class Project:
         return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg)})  #200
 
 
+    @staticmethod
     def download_zip(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'zip')
 
+    @staticmethod
     def download_targz(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'tar.gz')
 
+    @staticmethod
     def download_tarbz2(project, credentials=None):
         return OutputFileHandler.getarchive(project, user,'tar.bz2')
 
+    @staticmethod
     def getoutputfile(project, filename, credentials=None):
         raw = filename.split('/')
 
@@ -993,6 +1028,7 @@ class Project:
             except IOError:
                 raise flask.abort(404)
 
+    @staticmethod
     def deleteoutputfile(project, filename, credentials=None):
         """Delete an output file"""
 
@@ -1022,6 +1058,7 @@ class Project:
                 return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
 
 
+    @staticmethod
     def reset(project, user):
         """Reset system, delete all output files and prepare for a new run"""
         d = Project.path(project, user) + "output"
@@ -1035,6 +1072,7 @@ class Project:
         if os.path.exists(Project.path(project, user) + ".status"):
             os.unlink(Project.path(project, user) + ".status")
 
+    @staticmethod
     def getarchive(project, user, format=None):
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
@@ -1100,6 +1138,7 @@ class Project:
             return withheaders(flask.make_response(getbinarydata(path)), contenttype, extraheaders)
 
 
+    @staticmethod
     def getinputfile(project, filename, credentials=None):
 
         viewer = None
@@ -1144,6 +1183,7 @@ class Project:
             except IOError:
                 raise flask.abort(404)
 
+    @staticmethod
     def deleteinputfile(project, filename, credentials=None):
         """Delete an input file"""
 
@@ -1237,6 +1277,7 @@ class Project:
 
 
 
+    @staticmethod
     def extract(self,project,filename, archivetype):
         #OBSOLETE?
         #namelist = None
@@ -1725,31 +1766,21 @@ def addfile(project, filename, user, postdata, inputsource=None):
 
 
 def interfacedata(): #no auth
-        defaultheaders('text/javascript')
+    inputtemplates_mem = []
+    inputtemplates = []
+    for profile in settings.PROFILES:
+        for inputtemplate in profile.input:
+            if not inputtemplate in inputtemplates: #no duplicates
+                inputtemplates_mem.append(inputtemplate)
+                inputtemplates.append( inputtemplate.json() )
 
-        inputtemplates_mem = []
-        inputtemplates = []
-        for profile in settings.PROFILES:
-            for inputtemplate in profile.input:
-                if not inputtemplate in inputtemplates: #no duplicates
-                    inputtemplates_mem.append(inputtemplate)
-                    inputtemplates.append( inputtemplate.json() )
-
-        return "systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"
+    return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript')
 
 def foliaxsl(path):
-        defaultheaders('text/xsl')
-
-        for line in io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8'):
-            yield line
+    return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8').read()),'text/xsl')
 
 def styledata():
-        defaultheaders('text/css')
-        yield "//" + settings.STYLE + '.css\n'
-        for line in io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8'):
-            yield line
-
-
+    return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8').read()),'text/css')
 
 
 def uploader(project, credentials=None):
@@ -1781,12 +1812,14 @@ def uploader(project, credentials=None):
 
 class ActionHandler(object):
 
+    @staticmethod
     def find_action( action_id, method):
         for action in settings.ACTIONS:
             if action.id == action.id and (not action.method or method == action.method):
                 return action
         raise flask.make_response("Action does not exist",404)
 
+    @staticmethod
     def collect_parameters(action):
         data = flask.request.values
         params = []
@@ -1805,6 +1838,7 @@ class ActionHandler(object):
         return params
 
 
+    @staticmethod
     def do( action_id, method, user="anonymous", oauth_access_token=""):
         action = ActionHandler.find_action(action_id, 'GET')
 
@@ -1879,10 +1913,12 @@ class ActionHandler(object):
         else:
             raise Exception("No command or function defined for action " + action_id)
 
+    @staticmethod
     def do_auth(action_id, method, credentials=None):
         user, oauth_access_token = parsecredentials(credentials)
         return ActionHandler.do(action_id, method, user, oauth_access_token)
 
+    @staticmethod
     def run(action_id, method):
         #check whether the action requires authentication or allows anonymous users:
         action = ActionHandler.find_action(action_id, method)
@@ -1894,15 +1930,19 @@ class ActionHandler(object):
             return ActionHandler.do_auth(action_id, method)
 
 
+    @staticmethod
     def GET(action_id):
         return ActionHandler.run(action_id, 'GET')
 
+    @staticmethod
     def POST(action_id):
         return ActionHandler.run(action_id, 'POST')
 
+    @staticmethod
     def PUT(action_id):
         return ActionHandler.run(action_id, 'PUT')
 
+    @staticmethod
     def DELETE(action_id):
         return ActionHandler.run(action_id, 'DELETE')
 
