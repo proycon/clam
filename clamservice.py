@@ -218,7 +218,7 @@ def require_login(f):
                                 try:
                                     user = settings.PREAUTHMAPPING[user]
                                 except KeyError:
-                                    raise web.webapi.Unauthorized("Pre-authenticated user is unknown in the user database")
+                                    return flask.make_response("Pre-authenticated user is unknown in the user database",401)
                             args += (user,)
                             return f(*args, **kwargs)
                 if settings.PREAUTHONLY or (not settings.USERS and not settings.USERS_MYSQL):
@@ -236,7 +236,7 @@ def require_login(f):
             else:
                 #Is the token submitted in the GET/POST data? (as oauth_access_token)
                 try:
-                    oauth_access_token = web.input().oauth_access_token
+                    oauth_access_token = flask.request.values['oauth_access_token']
                     printdebug("Oauth access token obtained from HTTP request GET/POST data")
                 except:
                     printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
@@ -289,11 +289,11 @@ class Login(object):
         global auth
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
-            code = web.input().code
+            code = flask.request.values['code']
         except:
             return flask.make_response('No code passed',403)
         try:
-            state = web.input().state
+            state = flask.request.values['state']
         except:
             return flask.make_response('No state passed',403)
 
@@ -732,13 +732,12 @@ class Project:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
 
     def status_json(project, user=None):
-        postdata = web.input(file={},qqfile={})
         if 'user' in postdata:
-            user = postdata['user']
+            user = flask.request.values['user']
         else:
             user = 'anonymous'
         if 'accesstoken' in postdata:
-            accesstoken = postdata['accesstoken']
+            accesstoken = flask.request.values['accesstoken']
         else:
             return "{success: false, error: 'No accesstoken given'}"
         if accesstoken != Project.getaccesstoken(user,project):
@@ -927,7 +926,7 @@ class Project:
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
-        postdata = web.input()
+        postdata = flask.request.values
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
 
@@ -1009,7 +1008,7 @@ class Project:
                 return flask.make_response("Unable to launch process",500)
 
     def delete(project, user=None):
-        data = web.input()
+        data = flask.request.values
         if 'abortonly' in data:
             abortonly = bool(data['abortonly'])
         else:
@@ -1086,7 +1085,7 @@ class Project:
                         viewer = v
                 if viewer:
                     flask.header('Content-Type', viewer.mimetype)
-                    output = viewer.view(outputfile, **web.input())
+                    output = viewer.view(outputfile, **flask.request.values) #TODO: test
                     if isinstance(output, web.template.TemplateResult):
                        output =  output['__body__']
                     elif isinstance(output, str) or (sys.version[0] == '2' and isinstance(output, unicode)):
@@ -1172,7 +1171,7 @@ class Project:
             return flask.make_response('Another compression is already running',403)
         else:
             if not format:
-                data = web.input()
+                data = flask.request.values
                 if 'format' in data:
                     format = data['format']
                 else:
@@ -1310,7 +1309,7 @@ class Project:
 
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
-        postdata = web.input(file={})
+        postdata = flask.request.values
 
         if filename == '':
             #Handle inputsource
@@ -1483,12 +1482,11 @@ def addfile(project, filename, user, postdata, inputsource=None):
     Project.create(project, user)
 
 
-    defaultheaders()
     head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     head += "<clamupload>\n"
-    if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+    if 'file' in flask.request.files:
         printlog("Adding client-side file " + postdata['file'].filename + " to input files")
-        sourcefile = postdata['file'].filename
+        sourcefile = flask.request.files['file'].filename
     elif 'url' in postdata and postdata['url']:
         #Download from URL
         printlog("Adding web-based URL " + postdata['url'] + " to input files")
@@ -1581,7 +1579,7 @@ def addfile(project, filename, user, postdata, inputsource=None):
         printdebug('(Archive test)')
         # -------- Are we an archive? If so, determine what kind
         archivetype = None
-        if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+        if 'file' in flask.request.files:
             uploadname = sourcefile.lower()
             archivetype = None
             if uploadname[-4:] == '.zip':
@@ -1616,13 +1614,15 @@ def addfile(project, filename, user, postdata, inputsource=None):
             #Upload file from client to server
             printdebug('(Archive transfer starting)')
             if not xhrpost:
-                f = open(Project.path(project,user) + archive,'wb')
-                for line in postdata['file'].file:
-                    f.write(line)
-                f.close()
+                flask.request.files['file'].save(Project.path(project,user) + archive)
             elif xhrpost:
-                f = open(Project.path(project,user) + archive,'wb')
-                f.write(flask.request.headers['data'])
+                f = open(Project.path(project,user) + archive,'wb') #TODO: test
+                while True:
+                    chunk = flask.request.stream.read(16384)
+                    if chunk:
+                        f.write(chunk)
+                    else:
+                        break
                 f.close()
             printdebug('(Archive transfer completed)')
             # =============== Extract archive ======================
@@ -1701,13 +1701,10 @@ def addfile(project, filename, user, postdata, inputsource=None):
             if not archive:
                 #============================ Transfer file ========================================
                 printdebug('(Start file transfer: ' +  Project.path(project, user) + 'input/' + filename+' )')
-                if 'file' in postdata and (not isinstance(postdata['file'], dict) or len(postdata['file']) > 0):
+                if 'file' in flask.request.files:
                     printdebug('(Receiving data by uploading file)')
                     #Upload file from client to server
-                    f = open(Project.path(project, user) + 'input/' + filename,'wb')
-                    for line in postdata['file'].file:
-                        f.write(line) #encoding unaware, seems to solve big-file upload problem
-                    f.close()
+                    flask.requests.files['file'].save(Project.path(project, user) + 'input/' + filename)
                 elif 'url' in postdata and postdata['url']:
                     printdebug('(Receiving data via url)')
                     #Download file from 3rd party server to CLAM server
@@ -1886,7 +1883,7 @@ def styledata():
 
 def uploader(project, user=None):
     """The Uploader is intended for the Fine Uploader used in the web application (or similar frontend), it is not intended for proper RESTful communication. Will return JSON compatible with Fine Uploader rather than CLAM Upload XML. Unfortunately, normal digest authentication does not work well with the uploader, so we implement a simple key check based on hashed username, projectname and a secret key that is communicated as a JS variable in the interface ."""
-    postdata = web.input(file={},qqfile={})
+    postdata = flask.request.values
     if 'user' in postdata:
         user = postdata['user']
     else:
@@ -1920,7 +1917,7 @@ class ActionHandler(object):
         raise flask.make_response("Action does not exist",404)
 
     def collect_parameters(action):
-        data = web.input()
+        data = flask.request.values
         params = []
         for parameter in action.parameters:
             if not parameter.id in data:
