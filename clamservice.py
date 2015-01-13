@@ -20,6 +20,7 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 import flask
+import werkzeug
 import shutil
 import os
 import io
@@ -49,7 +50,7 @@ import clam.common.formats
 import clam.common.digestauth
 import clam.common.oauth
 import clam.common.data
-from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape
+from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
@@ -301,7 +302,7 @@ class Login(object):
         if not 'access_token' in d:
             return flask.make_response('No access token received from authorization provider',403)
 
-        return withdefaultheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))))
+        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))))
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
@@ -339,9 +340,6 @@ def validateuser(user):
         raise flask.make_response("Username invalid",403)
     return user, oauth_access_token
 
-def withdefaultheaders(response, contenttype="text/xml; charset=UTF-8"):
-    response['Content-Type'] = contenttype
-    return response
 
 
 ################# Views ##########################
@@ -363,7 +361,7 @@ def index(user = None):
 
     corpora = CLAMService.corpusindex()
 
-    return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+    return withheaders(flask.make_response(flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
@@ -410,7 +408,7 @@ def info(user=None):
 
     corpora = CLAMService.corpusindex()
 
-    return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+    return withheaders(flask.make_response(flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
@@ -462,7 +460,7 @@ class Admin:
         for u in usersprojects:
             usersprojects[u] = sorted(usersprojects[u])
 
-        return withdefaultheaders(flask.make_response(flask.render_template('admin.html',
+        return withheaders(flask.make_response(flask.render_template('admin.html',
                 version=VERSION,
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
@@ -489,7 +487,7 @@ class Admin:
                 f = os.path.basename(f)
                 if f[0] != '.':
                     outputfiles.append(f)
-            return withdefaultheaders(flask.make_response(flask.render_template('admininspect.html',
+            return withheaders(flask.make_response(flask.render_template('admininspect.html',
                     version=VERSION,
                     system_id=settings.SYSTEM_ID,
                     system_name=settings.SYSTEM_NAME,
@@ -524,24 +522,27 @@ class Admin:
 
         if type == 'input':
             try:
-                f = clam.common.data.CLAMInputFile(Project.path(project, targetuser), filename)
+                outputfile = clam.common.data.CLAMInputFile(Project.path(project, targetuser), filename)
             except:
                 raise flask.abort(404)
         elif type == 'output':
             try:
-                f = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename)
+                outputfile = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename)
             except:
                 raise flask.abort(404)
         else:
-            return flask.make_response('Invalid type,403')
+            return flask.make_response('Invalid type',403)
 
-        #return file contents
-        if f.metadata:
-            for header, value in f.metadata.httpheaders():
-                flask.header(header, value)
+        if outputfile.metadata:
+            headers = outputfile.metadata.httpheaders()
+            mimetype = outputfile.metadata.mimetype
+        else:
+            headers = {}
+            mimetype = 'application/octet-stream'
         try:
-            for line in f:
-                yield line
+            return withheaders(flask.make_response( (line for line in outputfile) ), mimetype, headers )
+        except UnicodeError:
+            return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
         except IOError:
             raise flask.abort(404)
 
@@ -566,6 +567,14 @@ def getrooturl(): #not a view
         if url[-1] == '/': url = url[:-1]
         return url
 
+def getbinarydata(path, buffersize=16*1024):
+    with io.open(path,'rb') as f:
+        while True:
+            data = f.read(buffersize)
+            if data is None:
+                break
+            else:
+                yield data
 class Project:
     """This class simply groups project methods, is not instantiated and does not offer any kind of persistence, all methods are static"""
 
@@ -841,7 +850,7 @@ class Project:
                     printlog("One or more parameters are invalid")
                     break
 
-        return withdefaultheaders(flask.make_response(flask.render_template('response.xml',
+        return withheaders(flask.make_response(flask.render_template('response.xml',
                 version=VERSION,
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
@@ -894,7 +903,7 @@ class Project:
             return flask.make_response("Project " + project + " was not found for user " + user,404) #404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
-            #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
+            #    return flask.make_response("Access denied to project " +  project + " for user " + user, 401) #401
             return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
@@ -915,7 +924,7 @@ class Project:
         Project.create(project, user)
         user, oauth_access_token = validateuser(user)
         #if user and not Project.access(project, user):
-        #    raise web.webapi.Unauthorized("Access denied to project " + project + " for user " + user) #401
+        #    return flask.make_response("Access denied to project " + project +  " for user " + user,401) #401
 
         statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
@@ -1026,22 +1035,17 @@ class Project:
             shutil.rmtree(Project.path(project, user))
             msg += " Deleted"
         msg = msg.strip()
-        defaultheaders('text/plain')
-        flask.header('Content-Length',len(msg))
-        return msg #200
+        return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg)})  #200
 
 
     def download_zip(project, user=None):
-            for line in OutputFileHandler.getarchive(project, user,'zip'):
-                    yield line
+        return OutputFileHandler.getarchive(project, user,'zip')
 
     def download_targz(project, user=None):
-            for line in OutputFileHandler.getarchive(project, user,'tar.gz'):
-                    yield line
+        return OutputFileHandler.getarchive(project, user,'tar.gz')
 
     def download_tarbz2(project, user=None):
-            for line in OutputFileHandler.getarchive(project, user,'tar.bz2'):
-                    yield line
+        return OutputFileHandler.getarchive(project, user,'tar.bz2')
 
     def getoutputfile(project, filename, user=None):
         raw = filename.split('/')
@@ -1053,8 +1057,7 @@ class Project:
         if filename.strip('/') == "":
             #this is a request for everything
             requestarchive = True
-            for line in self.getarchive(project, user):
-                yield line
+            return self.getarchive(project,user)
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'output/' +  "/".join(raw[:-1])):
@@ -1070,9 +1073,7 @@ class Project:
         if requestid:
             if requestid == 'metadata':
                 if outputfile.metadata:
-                    flask.header('Content-Type', 'text/xml')
-                    for line in outputfile.metadata.xml().split("\n"):
-                        yield line
+                    return withheaders(flask.make_response(outputfile.metadata.xml()))
                 else:
                     return flask.make_response("No metadata found!",404)
             else:
@@ -1084,14 +1085,11 @@ class Project:
                     if v.id == requestid:
                         viewer = v
                 if viewer:
-                    flask.header('Content-Type', viewer.mimetype)
                     output = viewer.view(outputfile, **flask.request.values) #TODO: test
-                    if isinstance(output, web.template.TemplateResult):
-                       output =  output['__body__']
-                    elif isinstance(output, str) or (sys.version[0] == '2' and isinstance(output, unicode)):
-                       output = output.split('\n')
-                    for line in output:
-                        yield line
+                    if isinstance(output, flask.Response):
+                        return output
+                    else:
+                        return withheaders(flask.make_response(  (line for line in output ) , 200), viewer.mimetype) #streaming output
                 else:
                     #Check for converters
                     for c in outputfile.converters:
@@ -1105,16 +1103,17 @@ class Project:
         elif not requestarchive:
             #normal request - return file contents
             if outputfile.metadata:
-                for header, value in outputfile.metadata.httpheaders():
-                    flask.header(header, value)
+                headers = outputfile.metadata.httpheaders()
+                mimetype = outputfile.metadata.mimetype
+            else:
+                headers = {}
+                mimetype = 'application/octet-stream'
             try:
-                for line in outputfile:
-                    yield line
+                return withheaders(flask.make_response( (line for line in outputfile) ), mimetype, headers )
+            except UnicodeError:
+                return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
             except IOError:
                 raise flask.abort(404)
-            except UnicodeError:
-                flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
-
 
     def deleteoutputfile(project, filename, user=None):
         """Delete an output file"""
@@ -1125,16 +1124,12 @@ class Project:
             #Deleting all output files and resetting
             self.reset(project, user)
             msg = "Deleted"
-            defaultheaders('text/plain')
-            flask.header('Content-Length',len(msg))
-            return msg #200
+            return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
         elif os.path.isdir(Project.path(project, user) + filename):
             #Deleting specified directory
             shutil.rmtree(Project.path(project, user) + filename)
             msg = "Deleted"
-            defaultheaders('text/plain')
-            flask.header('Content-Length',len(msg))
-            return msg #200
+            return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
         else:
             try:
                 file = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
@@ -1146,9 +1141,7 @@ class Project:
                 raise flask.abort(404)
             else:
                 msg = "Deleted"
-                flask.header('Content-Type', 'text/plain')
-                flask.header('Content-Length',len(msg))
-                return msg #200
+                return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
 
 
     def reset(project, user):
@@ -1222,11 +1215,11 @@ class Project:
                     os.waitpid(pid, 0) #wait for process to finish
                     os.unlink(Project.path(project, user) + '.download')
 
+            extraheaders = {}
             if contentencoding:
-                flask.header('Content-Encoding', contentencoding)
-            defaultheaders(contenttype)
-            for line in open(path,'r'):
-                yield line
+                extraheaders['Content-Encoding'] = contentencoding
+
+            return withheaders(flask.make_response(getbinarydata(path)), contenttype, extraheaders)
 
 
     def getinputfile(project, filename, user=None):
@@ -1253,9 +1246,7 @@ class Project:
         if requestid:
             if requestid == 'metadata':
                 if inputfile.metadata:
-                    flask.header('Content-Type', 'text/xml')
-                    for line in inputfile.metadata.xml().split("\n"):
-                        yield line
+                    return withheaders(flask.make_response(inputfile.metadata.xml()))
                 else:
                     return flask.make_response("No metadata found!",404)
             else:
@@ -1263,11 +1254,15 @@ class Project:
         else:
             #normal request - return file contents
             if inputfile.metadata:
-                for header, value in inputfile.metadata.httpheaders():
-                    flask.header(header, value)
+                headers = inputfile.metadata.httpheaders()
+                mimetype = inputfile.metadata.mimetype
+            else:
+                headers = {}
+                mimetype = 'application/octet-stream'
             try:
-                for line in inputfile:
-                    yield line
+                return withheaders(flask.make_response( (line for line in inputfile) ), mimetype, headers )
+            except UnicodeError:
+                return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
             except IOError:
                 raise flask.abort(404)
 
@@ -1296,9 +1291,7 @@ class Project:
                 raise flask.abort(404)
             else:
                 msg = "Deleted"
-                defaultheaders( 'text/plain')
-                flask.header('Content-Length',len(msg))
-                return msg #200
+                return withheaders(flask.make_response(msg),'text/plain', {'Content-Length': len(msg)}) #200
 
     def addinputfile(project, filename, user=None):
         """Add a new input file, this invokes the actual uploader"""
@@ -1983,29 +1976,28 @@ class ActionHandler(object):
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
                 if process.returncode in action.returncodes200:
-                    flask.header('Content-Type', action.mimetype)
-                    return stdoutdata #200
+                    return withheaders(stdoutdata,action.mimetype) #200
                 elif process.returncode in action.returncodes403:
-                    flask.header('Content-Type', action.mimetype)
-                    return flask.make_response(stdoutdata,403)
+                    return withheaders(flask.make_response(stdoutdata,403), actions.mimetype)
                 elif process.returncode in action.returncodes404:
-                    web.header('Content-Type', action.mimetype)
-                    return flask.make_response(stdoutdata, 404)
+                    return withheaders(flask.make_response(stdoutdata, 404), action.mimetype)
                 else:
                     return flask.make_response("Process for action " +  action_id + " failed\n" + stderrdata,500)
             else:
                 return flask.make_response("Unable to launch process",500)
         elif action.function:
             args = [ x[1] for x in  self.collect_parameters(action) ]
-            web.header('Content-Type', action.mimetype)
             try:
                 r = action.function(*args) #200
             except Exception as e:
-                if isinstance(e, web.webapi.HTTPError):
+                if isinstance(e, werkzeug.exceptions.HTTPException):
                     raise
                 else:
-                    return flask.make_response(str(e),500)
-            return r
+                    return flask.make_response(e,500)
+            if not isinstance(r, flask.Response):
+                return withheaders(flask.make_response(r), action.mimetype)
+            else:
+                return r
         else:
             raise Exception("No command or function defined for action " + action_id)
 

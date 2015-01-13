@@ -1,8 +1,7 @@
-$def with (file, tableviewer)
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=$file.metadata['encoding']" />
-<title>$file.filename</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>{{ file.filename }}</title>
 <style type="text/css">
     body {
         background: #e6dcca;
@@ -43,13 +42,15 @@ $def with (file, tableviewer)
 
 <body>
 <div id="viewer">
-    <h1>$file.filename.encode(file.metadata['encoding'])</h1>
+    <h1>{{ file.filename }}</h1>
 
     <table>
-    	$for line in tableviewer.read(file):
+        {% for line in tableviewer.read(file) %}
         <tr>
-            $for field in line:
-                <td>$field.encode(file.metadata['encoding'])</td>
+            {% for field in line %}
+                <td>{{ field }}</td>
+            {% endif %}
+        {% endif %}
         </tr>
     </table>
 </div>

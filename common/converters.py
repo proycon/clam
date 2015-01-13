@@ -13,11 +13,12 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-import web
+import flask
 import shutil
 import io
 import os
 from clam.common.data import CLAMMetaData, CLAMOutputFile
+from clam.common.util import withheaders
 import clam.common.formats
 
 class AbstractConverter(object):
@@ -91,9 +92,7 @@ class CharEncodingConverter(AbstractConverter):
         """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Outputfile is a CLAMOutputFile instance."""
         super(CharEncodingConverter,self).convertforoutput(outputfile)
 
-        web.header('Content-Type', 'text/plain; charset=' + self.charset)
-        for line in outputfile:
-            yield line.encode(self.charset)
+        return withheaders( flask.make_response( ( line.encode(self.charset) for line in outputfile ) ) , 'text/plain; charset=' + self.charset)
 
 
 

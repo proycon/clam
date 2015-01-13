@@ -95,4 +95,9 @@ def xmlescape(s):
 
 
 
+def withheaders(response, contenttype="text/xml; charset=UTF-8", extra={}):
+    response['Content-Type'] = contenttype
+    for key, value in extra.items():
+        response[key] = value
+    return response
 

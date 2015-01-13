@@ -852,7 +852,7 @@ class Profile(object):
 
 
     def xml(self, indent = ""):
-        """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
+        """Produce XML output for the profile"""
         xml = "\n" + indent + "<profile"
         xml += ">\n"
         xml += indent + " <input>\n"
