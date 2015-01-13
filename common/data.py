@@ -1384,7 +1384,7 @@ class InputTemplate(object):
         return json.dumps(d)
 
     def __eq__(self, other):
-        if isinstance(other, str):
+        if isinstance(other, str) or (sys.version < '3' and isinstance(other,unicode)):
             return self.id == other
         else: #object
             return other.id == self.id

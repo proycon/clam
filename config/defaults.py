@@ -21,7 +21,6 @@ from clam.common.formats import *
 from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
-from clam.common.digestauth import pwhash
 import sys
 
 REQUIRE_VERSION = 0.9
