@@ -975,8 +975,7 @@ class Project:
                         if c.id == requestid:
                             converter = c
                     if converter:
-                        for line in converter.convertforoutput(outputfile):
-                            yield line
+                        return flask.make_response( ( line for line in converter.convertforoutput(outputfile) ) )
                     else:
                         return flask.make_response("No such viewer or converter:" + requestid,404)
         elif not requestarchive:
@@ -1958,7 +1957,6 @@ def usage():
         print( "Syntax: clamservice.py [options] clam.config.yoursystem",file=sys.stderr)
         print("Options:",file=sys.stderr)
         print("\t-d            - Enable debug mode",file=sys.stderr)
-        print("\t-c            - Run in FastCGI mode",file=sys.stderr)
         print("\t-H [hostname] - Hostname",file=sys.stderr)
         print("\t-p [port]     - Port",file=sys.stderr)
         print("\t-u [url]      - Force URL",file=sys.stderr)
@@ -2018,43 +2016,43 @@ class CLAMService(object):
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER)
         else:
             warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
-            self.auth = lambda f: f
+            self.auth = clam.common.auth.NoAuth()
 
 
 
         self.service = flask.Flask("clam")
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/info', 'info', info, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/login', 'login', Login.GET, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json', Project.status_json, methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start', self.auth.require_login(Project.start), methods=['POST'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
-        self.service.add_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info', info, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login', Login.GET, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json', Project.status_json, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start', self.auth.require_login(Project.start), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
 
 
         self.mode = mode
-        if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings. settings.BASICAUTH):
+        if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings.BASICAUTH):
             warning("*** YOU ARE RUNNING THE DEVELOPMENT SERVER, THIS IS INSECURE WITH THE CONFIGURED AUTHENTICATION METHOD ***")
         printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
         if settings.FORCEURL:

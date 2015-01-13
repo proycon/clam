@@ -25,6 +25,10 @@ except ImportError:
     print( "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication!", file=sys.stderr)
 
 
+class NoAuth(object):
+    def require_login(self, f):
+        return f
+
 class HTTPAuth(object):
     def __init__(self, **kwargs):
         def default_get_password(username, **kwargs):
