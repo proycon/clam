@@ -37,6 +37,7 @@ import getopt
 import time
 import socket
 import json
+import mimetypes
 from copy import copy #shallow copy (use deepcopy for deep)
 
 if __name__ == "__main__":
@@ -642,6 +643,7 @@ class Project:
 
     @staticmethod
     def status_json(project, credentials=None):
+        postdata = flask.request.values
         if 'user' in postdata:
             user = flask.request.values['user']
         else:
@@ -739,7 +741,7 @@ class Project:
 
         if statuscode == clam.common.status.DONE:
             outputpaths = Project.outputindex(project, user)
-            if self.exitstatus(project, user) != 0: #non-zero codes indicate errors!
+            if Project.exitstatus(project, user) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
                 printlog("Child process failed, exited with non zero-exit code.")
@@ -962,6 +964,7 @@ class Project:
 
     @staticmethod
     def getoutputfile(project, filename, credentials=None):
+        user, oauth_access_token = parsecredentials(credentials)
         raw = filename.split('/')
 
         viewer = None
@@ -979,10 +982,7 @@ class Project:
                 requestid = raw[-1].lower()
 
         if not requestarchive:
-            try:
-                outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
-            except:
-                raise flask.abort(404)
+            outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
 
         if requestid:
             if requestid == 'metadata':
@@ -1018,9 +1018,13 @@ class Project:
             if outputfile.metadata:
                 headers = outputfile.metadata.httpheaders()
                 mimetype = outputfile.metadata.mimetype
+                printdebug("No metadata found for output file " + str(outputfile))
             else:
                 headers = {}
-                mimetype = 'application/octet-stream'
+                #guess mimetype
+                mimetype = mimetypes.guess_type(str(outputfile))[0]
+                if not mimetype: mimetype = 'application/octet-stream'
+            printdebug("Returning output file " + str(outputfile) + " with mimetype " + mimetype)
             try:
                 return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
             except UnicodeError:
@@ -1177,7 +1181,8 @@ class Project:
             else:
                 printdebug("No metadata found for input file " + str(inputfile))
                 headers = {}
-                mimetype = 'application/octet-stream'
+                mimetype = mimetypes.guess_type(str(outputfile))[0]
+                if not mimetype: mimetype = 'application/octet-stream'
             try:
                 printdebug("Returning input file " + str(inputfile) + " with mimetype " + mimetype)
                 return withheaders(flask.Response( (line for line in inputfile) ), mimetype, headers )

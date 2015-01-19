@@ -169,9 +169,9 @@ class CLAMFile:
             try:
                 self.loadmetadata()
             except IOError:
-                pass
+                pass #if metadata not found
             except HTTPError:
-                pass
+                pass #if metadata not found
 
         self.viewers = []
         self.converters = []
