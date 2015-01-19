@@ -168,8 +168,8 @@ class CLAMFile:
         if loadmetadata:
             try:
                 self.loadmetadata()
-            #except IOError:
-            #    pass
+            except IOError:
+                pass
             except HTTPError:
                 pass
 
