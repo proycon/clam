@@ -64,11 +64,12 @@ def main():
         if projectdir[-1] != '/':
             projectdir += '/'
 
+    print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
+
     cmd = sys.argv[3+offset]
     for arg in sys.argv[4+offset:]:
         cmd += " " + shellsafe(arg,'"')
 
-    print("[CLAM Dispatcher] Started (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
 
     if not cmd:
         print("[CLAM Dispatcher] FATAL ERROR: No command specified!", file=sys.stderr)

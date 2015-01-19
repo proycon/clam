@@ -169,7 +169,7 @@ def validate_users_mysql():
 
 class Login(object):
     @staticmethod
-    def GET(self):
+    def GET():
         global auth
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
@@ -196,7 +196,7 @@ def oauth_encrypt(oauth_access_token):
 class Logout(object):
 
     @staticmethod
-    def GET(self, credentials = None):
+    def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.OAUTH_REVOKE_URL:
             raise flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
@@ -544,7 +544,7 @@ class Project:
 
 
     @staticmethod
-    def abort(self, project, user):
+    def abort(project, user):
         if self.pid(project, user) == 0:
             return False
         printlog("Aborting process of project '" + project + "'" )
