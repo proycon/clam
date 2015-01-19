@@ -1175,9 +1175,11 @@ class Project:
                 headers = inputfile.metadata.httpheaders()
                 mimetype = inputfile.metadata.mimetype
             else:
+                printdebug("No metadata found for input file " + str(inputfile))
                 headers = {}
                 mimetype = 'application/octet-stream'
             try:
+                printdebug("Returning input file " + str(inputfile) + " with mimetype " + mimetype)
                 return withheaders(flask.Response( (line for line in inputfile) ), mimetype, headers )
             except UnicodeError:
                 return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)

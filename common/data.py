@@ -125,6 +125,20 @@ def processhttpcode(code, allowcodes=[]):
         raise UploadError()
 
 
+def parsexmlstring(node):
+    if sys.version < '3' and isinstance(node,unicode):
+        return ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
+    elif sys.version >= '3' and isinstance(node,str):
+        return ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
+    elif sys.version < '2' and isinstance(node,str):
+        return ElementTree.parse(StringIO(node)).getroot()
+    elif sys.version >= '3' and isinstance(node,bytes):
+        return ElementTree.parse(BytesIO(node)).getroot()
+    else:
+        raise Exception("Expected XML string, don't know how to parse type " + str(type(node)))
+
+
+
 
 class FormatError(Exception):
      """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
@@ -154,8 +168,8 @@ class CLAMFile:
         if loadmetadata:
             try:
                 self.loadmetadata()
-            except IOError:
-                pass
+            #except IOError:
+            #    pass
             except HTTPError:
                 pass
 
@@ -486,10 +500,7 @@ class CLAMData(object):
     def parseresponse(self, xml, localroot = False):
         """Parses CLAM XML, there's usually no need to call this directly"""
         global VERSION
-        if sys.version < '3':
-            root = ElementTree.parse(StringIO(xml)).getroot()
-        else:
-            root = ElementTree.parse(BytesIO(xml)).getroot()
+        root = parsexmlstring(xml)
         if root.tag != 'clam':
             raise FormatError()
 
@@ -881,10 +892,7 @@ class Profile(object):
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
 
         args = []
 
@@ -970,10 +978,7 @@ class CLAMProvenanceData(object):
     def fromxml(node):
         """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag == 'provenance':
             if node.attrib['type'] == 'clam':
                 serviceid = node.attrib['id']
@@ -1159,10 +1164,7 @@ class CLAMMetaData(object):
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3' and isinstance(node,unicode):
-                node = ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag == 'CLAMMetaData':
             format = node.attrib['format']
 
@@ -1314,10 +1316,7 @@ class InputTemplate(object):
     def fromxml(node):
         """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'inputtemplate')
 
         id = node.attrib['id']
@@ -1476,10 +1475,7 @@ class AbstractMetaField(object): #for OutputTemplate only
     def fromxml(node):
         """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag.lower() != 'meta':
             raise Exception("Expected meta tag but got '" + node.tag + "' instead")
 
@@ -1664,10 +1660,7 @@ class OutputTemplate(object):
     def fromxml(node):
         """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'outputtemplate')
 
         id = node.attrib['id']
@@ -1949,10 +1942,7 @@ class ParameterCondition(object):
     def fromxml(node):
         """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'parametercondition')
 
         kwargs = {}
@@ -2130,11 +2120,7 @@ class Action(object):
     def fromxml(node):
         """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            lode = ElementTree.parse(StringIO(node)).getroot()
-            if sys.version < '3':
-                node = ElementTree.parse(StringIO(node)).getroot()
-            else:
-                node = ElementTree.parse(BytesIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'action')
 
         kwargs = {}
