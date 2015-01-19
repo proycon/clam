@@ -1034,7 +1034,7 @@ class Project:
 
     @staticmethod
     def deletealloutput(project, credentials=None):
-        Project.deleteoutputfile(project,None,credentials)
+        return Project.deleteoutputfile(project,None,credentials)
 
     @staticmethod
     def deleteoutputfile(project, filename, credentials=None):
