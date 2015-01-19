@@ -864,7 +864,7 @@ class Project:
             raise flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
         else:
             #write clam.xml output file
-            f = io.open(Project.path(project, user) + "clam.xml",'w',encoding='utf-8')
+            f = io.open(Project.path(project, user) + "clam.xml",'wb')
             f.write(Project.response(user, project, parameters, "",True, oauth_access_token).data)
             f.close()
 

@@ -247,7 +247,7 @@ class BooleanParameter(AbstractParameter):
 
     def set(self, value = True):
         """Set the boolean parameter"""
-        if value is True or value == 1 or ( (isinstance(value, str) or isinstance(value, unicode)) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ):
+        if value is True or value == 1 or ( (isinstance(value, str) or (sys.version < '3' and isinstance(value, unicode))) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ):
             value = True
         else:
             value = False
