@@ -1033,21 +1033,26 @@ class Project:
                 raise flask.abort(404)
 
     @staticmethod
+    def deletealloutput(project, credentials=None):
+        Project.deleteoutputfile(project,None,credentials)
+
+    @staticmethod
     def deleteoutputfile(project, filename, credentials=None):
         """Delete an output file"""
 
-        filename = filename.replace("..","") #Simple security
+        user, oauth_access_token = parsecredentials(credentials)
+        if filename: filename = filename.replace("..","") #Simple security
 
-        if len(filename) == 0:
+        if not filename or len(filename) == 0:
             #Deleting all output files and resetting
-            self.reset(project, user)
+            Project.reset(project, user)
             msg = "Deleted"
-            return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
+            return withheaders(flask.make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
         elif os.path.isdir(Project.path(project, user) + filename):
             #Deleting specified directory
             shutil.rmtree(Project.path(project, user) + filename)
             msg = "Deleted"
-            return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
+            return withheaders(flask.make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
         else:
             try:
                 file = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
@@ -1059,7 +1064,7 @@ class Project:
                 raise flask.abort(404)
             else:
                 msg = "Deleted"
-                return withheaders(make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
+                return withheaders(flask.make_response(msg), 'text/plain',{'Content-Length':len(msg)}) #200
 
 
     @staticmethod
@@ -1287,7 +1292,7 @@ class Project:
 
 
     @staticmethod
-    def extract(self,project,filename, archivetype):
+    def extract(project,filename, archivetype):
         #OBSOLETE?
         #namelist = None
         subfiles = []
@@ -1817,11 +1822,11 @@ def uploader(project, credentials=None):
     if 'accesstoken' in postdata:
         accesstoken = postdata['accesstoken']
     else:
-        return withheaders(make_response("{success: false, error: 'No accesstoken given'}"),'application/json')
+        return withheaders(flask.make_response("{success: false, error: 'No accesstoken given'}"),'application/json')
     if accesstoken != Project.getaccesstoken(user,project):
-        return withheaders(make_response("{success: false, error: 'Invalid accesstoken given'}"),'application/json')
+        return withheaders(flask.make_response("{success: false, error: 'Invalid accesstoken given'}"),'application/json')
     if not os.path.exists(Project.path(project, user)):
-        return withheaders(make_response("{success: false, error: 'Destination does not exist'}"),'application/json')
+        return withheaders(flask.make_response("{success: false, error: 'Destination does not exist'}"),'application/json')
     else:
         return addfile(project,filename,user, postdata,None, 'json' )
 
@@ -1864,7 +1869,7 @@ class ActionHandler(object):
 
         if action.command:
             parameters = ""
-            for flag, value in self.collect_parameters(action):
+            for flag, value in ActionHandler.collect_parameters(action):
                 if parameters: parameters += " "
                 if flag: parameters += flag + " "
 
@@ -1916,7 +1921,7 @@ class ActionHandler(object):
             else:
                 return flask.make_response("Unable to launch process",500)
         elif action.function:
-            args = [ x[1] for x in  self.collect_parameters(action) ]
+            args = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
             try:
                 r = action.function(*args) #200
             except Exception as e:
@@ -2097,6 +2102,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
