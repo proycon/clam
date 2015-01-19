@@ -97,7 +97,11 @@ def xmlescape(s):
 
 def withheaders(response, contenttype="text/xml; charset=UTF-8", extra={}):
     response.headers['Content-Type'] = contenttype
-    for key, value in extra.items():
-        response.headers[key] = value
+    try:
+        for key, value in extra.items():
+            response.headers[key] = value
+    except AttributeError: #no dictionary? could be generator/list of tuples
+        for key, value in extra:
+            response.headers[key] = value
     return response
 

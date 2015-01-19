@@ -428,7 +428,7 @@ class Admin:
             headers = {}
             mimetype = 'application/octet-stream'
         try:
-            return withheaders(flask.make_response( (line for line in outputfile) ), mimetype, headers )
+            return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
         except UnicodeError:
             return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
         except IOError:
@@ -1003,14 +1003,14 @@ class Project:
                     if isinstance(output, flask.Response):
                         return output
                     else:
-                        return withheaders(flask.make_response(  (line for line in output ) , 200), viewer.mimetype) #streaming output
+                        return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype) #streaming output
                 else:
                     #Check for converters
                     for c in outputfile.converters:
                         if c.id == requestid:
                             converter = c
                     if converter:
-                        return flask.make_response( ( line for line in converter.convertforoutput(outputfile) ) )
+                        return flask.Response( ( line for line in converter.convertforoutput(outputfile) ) )
                     else:
                         return flask.make_response("No such viewer or converter:" + requestid,404)
         elif not requestarchive:
@@ -1022,7 +1022,7 @@ class Project:
                 headers = {}
                 mimetype = 'application/octet-stream'
             try:
-                return withheaders(flask.make_response( (line for line in outputfile) ), mimetype, headers )
+                return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
             except UnicodeError:
                 return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
             except IOError:
@@ -1178,7 +1178,7 @@ class Project:
                 headers = {}
                 mimetype = 'application/octet-stream'
             try:
-                return withheaders(flask.make_response( (line for line in inputfile) ), mimetype, headers )
+                return withheaders(flask.Response( (line for line in inputfile) ), mimetype, headers )
             except UnicodeError:
                 return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
             except IOError:
@@ -2101,7 +2101,6 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
 
-        print(self.service.url_map)
 
 
         self.mode = mode
