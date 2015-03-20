@@ -18,7 +18,7 @@ if not os.path.exists('clam'):
     os.system('cp -Rpfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clamopener ../external ../wrappers ../docs clam/')
     os.system('find clam/ -type l | xargs rm')
     os.system('mv -f clam/setup.py clam/setup.cfg .')
-    os.system('cp -f ../README ../INSTALL ../ChangeLog ../COPYING .')
+    os.system('cp -f ../README.rst ../INSTALL ../ChangeLog ../COPYING .')
 
 
 def read(fname):
@@ -26,7 +26,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.9.13.1",
+    version = "0.9.13.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
@@ -34,7 +34,7 @@ setup(
     keywords = "clam webservice rest nlp computational_linguistics rest",
     url = "http://proycon.github.com/clam",
     packages=['clam','clam.common','clam.config','clam.external','clam.external.poster','clam.wrappers'],
-    long_description=read('README'),
+    long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
