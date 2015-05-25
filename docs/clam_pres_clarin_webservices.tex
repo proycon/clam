@@ -1,6 +1,6 @@
 \documentclass[xcolor=table,10pt,t]{beamer}
 \title{CLAM}
-\subtitle{Current state of affairs}
+\subtitle{From NLP command-line tools to webservices: current state of affairs}
 \date{\today}
 \author{Maarten van Gompel}
 %% Use the official themes as much as possible
@@ -156,12 +156,12 @@
 \begin{frame}
     \begin{block}{Profiles}
         \begin{itemize}
-            \item \textbf{what output files are produced given which input files?}
-            \item what format are the input files in? (CLAM needs not be able to parse it itself)
-            \item what parameters (metadata) are required or possible on input files?
+            \item \textbf{What output files are produced given which input files?}
+            \item What format are the input files in? (CLAM needs not be able to parse it itself)
+            \item What parameters (metadata) are required or possible on input files?
             \item How is metadata propagated from input files to output files?
-            \item what viewers are associated with output files?
-            \item which converters can act upon input/output files?
+            \item What viewers are associated with output files?
+            \item Which converters can act upon input/output files?
         \end{itemize}
     \end{block}
     \includegraphics[width=40.0mm]{blokkendoos.jpg}
@@ -207,8 +207,8 @@
 
 
 
-\begin{frame}{Actions}
-    \begin{block}{Batch processing}
+\begin{frame}{Projects vs Actions}
+    \begin{block}{Projects: Batch processing}
       \begin{itemize}
         \item CLAM is optimised for \textbf{batch processing}, your tool may run for hours or days if necessary
         \item The user can always close his browser and come back later
@@ -217,7 +217,7 @@
       \end{itemize}
     \end{block}
 
-    \begin{block}{Actions}
+    \begin{block}{Actions: Real-time response}
       \begin{itemize}
         \item Define a command line application or Python function to run for a specific webservice URL
         \item Independent of projects
