@@ -23,31 +23,20 @@
 
 
 \begin{frame}{Introduction}
-  \begin{block}{CLAM}
+  \begin{block}{}
     \textbf{Observation:} NLP tools are often command-line programs \ldots for
     good reason.
   \end{block}
 \end{frame}
 
 
-\begin{frame}{Wrap}
-  \begin{block}{Command-line tools are a good thing!}
-      \emph{``This is the Unix philosophy: Write programs that do one thing and do
-      it well. Write programs to work together.'' (Doug McIlroy)}
-
-      \begin{itemize}
-        \item \textbf{Flexibility \& Extensibility}: Integrate tools into pipelines, the output of one tool is the input to another
-        \item \textbf{Performance \& Simplicity}: Little overhead
-        \item \textbf{Modularity}: Separate the interface (GUI, web) from the actual program
-      \end{itemize}
-
-  \end{block}
-\end{frame}
 
 \begin{frame}{Command line tools: pros}
   \begin{block}{Command-line tools are a good thing!}
       \emph{``This is the Unix philosophy: Write programs that do one thing and do
       it well. Write programs to work together.'' (Doug McIlroy)}
+
+      \medskip
 
       \begin{itemize}
         \item \textbf{Flexibility \& Extensibility}: Integrate tools into pipelines, the output of one tool is the input to another
@@ -67,21 +56,23 @@
         \begin{figure}
             \includegraphics[height=4cm]{commandlinefear.jpg}
         \end{figure}
-        \item<2-> \textbf{Installation}: Installation may complex and depend on other software
-        \item<2-> \textbf{Connectivity}: Web/networking has to be explicitly built-in in your program (not trivial)
+        \item \textbf{Installation}: Installation may complex and depend on other software
+        \item \textbf{Connectivity}: Web-connectivity/networking has to be
+            explicitly built-in into your program (not trivial)
       \end{itemize}
   \end{block}
 \end{frame}
 
 \begin{frame}{Web-connectivity through CLAM}
-  \begin{block}{CLAM}
-      Objectives:
+  \begin{block}{Objectives}
       \begin{itemize}
         \item Quickly transform existing command-line tools into fully-fledged webservices
         \begin{itemize}
-            \item No need to alter to tool itself
-            \item No requirements on programming language or technology, as
-                long it can be invoked from the command line
+            \item No need to alter the tool itself
+            \begin{itemize}
+                \item \foonotesize{No requirements on programming language or technology, as
+                long as it runs on Linux/BSD and can be invoked from the command line}
+            \end{itemize}
             \item Maintain flexibility and modularity
             \item Simply describe the tool in terms of input, output and
                 parameters using CLAM
@@ -157,7 +148,7 @@
 
     \begin{block}{Development}
         CLAM has a built-in webserver so it can be tested quickly in
-        development
+        development.
     \end{block}
 
 \end{frame}
