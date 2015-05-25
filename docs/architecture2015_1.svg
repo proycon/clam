@@ -15,9 +15,9 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="architecture2015_1.svg"
-   inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-filename="/home/proycon/work/clam/docs/architecture2015_1.png"
+   inkscape:export-xdpi="300.06873"
+   inkscape:export-ydpi="300.06873">
   <defs
      id="defs4">
     <marker
@@ -394,8 +394,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="417.19957"
-     inkscape:cy="812.24078"
+     inkscape:cx="243.98528"
+     inkscape:cy="840.81221"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -421,14 +421,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <ellipse
-       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#ffe680;fill-opacity:1;stroke:#000000;stroke-width:1.81902897;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.81902902, 87.31339266;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#ffe680;fill-opacity:1;stroke:none;stroke-width:1.81902897;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.81902902, 87.31339266000000521;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
        id="path4536-5"
        cx="376.28183"
        cy="183.63101"
        rx="262.43015"
        ry="148.78799" />
     <ellipse
-       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#552200;fill-opacity:1;stroke:#000000;stroke-width:1.47259033;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.47259036, 70.68433707;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#552200;fill-opacity:1;stroke:none;stroke-width:1.47259033;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.47259036, 70.68433706999999799;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
        id="path4536"
        cx="376.28183"
        cy="201.81377"

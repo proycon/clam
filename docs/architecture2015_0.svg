@@ -15,9 +15,9 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="architecture2015_0.svg"
-   inkscape:export-filename="/home/proycon/work/clam/docs/architecture.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-filename="/home/proycon/work/clam/docs/architecture2015_0.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300">
   <defs
      id="defs4">
     <marker
@@ -408,15 +408,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
+     inkscape:zoom="2.8"
      inkscape:cx="417.19957"
-     inkscape:cy="783.66935"
+     inkscape:cy="797.95506"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="3812"
+     inkscape:window-width="1821"
      inkscape:window-height="2096"
-     inkscape:window-x="10"
+     inkscape:window-x="2001"
      inkscape:window-y="46"
      inkscape:window-maximized="0" />
   <metadata
@@ -436,14 +436,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <ellipse
-       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#ffe680;fill-opacity:1;stroke:#000000;stroke-width:1.81902897;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.81902902, 87.31339266;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#ffe680;fill-opacity:1;stroke:none;stroke-width:1.81900001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
        id="path4536-5"
        cx="376.28183"
        cy="183.63101"
        rx="262.43015"
        ry="148.78799" />
     <ellipse
-       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#552200;fill-opacity:1;stroke:#000000;stroke-width:1.47259033;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.47259036, 70.68433707;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;opacity:1;fill:#552200;fill-opacity:1;stroke:none;stroke-width:1.473;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.473, 70.70399999999999352;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
        id="path4536"
        cx="376.28183"
        cy="201.81377"
@@ -544,11 +544,11 @@
          sodipodi:role="line"
          x="464.6702"
          y="77.564972"
-         id="tspan9921">(client-side</tspan><tspan
+         id="tspan9921">(client-side:</tspan><tspan
          sodipodi:role="line"
          x="464.6702"
          y="90.064972"
-         id="tspan9925">     XSL &amp; JS)</tspan></text>
+         id="tspan9925">     XSL &amp; Javascript)</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10px;line-height:125%;font-family:'Gillius ADF';-inkscape-font-specification:'Gillius ADF';letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
