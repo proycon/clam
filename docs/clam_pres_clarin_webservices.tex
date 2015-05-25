@@ -34,13 +34,13 @@
   \begin{block}{Command-line tools are a good thing!}
       \emph{``This is the Unix philosophy: Write programs that do one thing and do
       it well. Write programs to work together.'' (Doug McIlroy)}
-      
+
       \begin{itemize}
         \item \textbf{Flexibility \& Extensibility}: Integrate tools into pipelines, the output of one tool is the input to another
         \item \textbf{Performance \& Simplicity}: Little overhead
         \item \textbf{Modularity}: Separate the interface (GUI, web) from the actual program
       \end{itemize}
-      
+
   \end{block}
 \end{frame}
 
@@ -48,20 +48,20 @@
   \begin{block}{Command-line tools are a good thing!}
       \emph{``This is the Unix philosophy: Write programs that do one thing and do
       it well. Write programs to work together.'' (Doug McIlroy)}
-      
+
       \begin{itemize}
         \item \textbf{Flexibility \& Extensibility}: Integrate tools into pipelines, the output of one tool is the input to another
         \item \textbf{Performance \& Simplicity}: Little overhead
         \item \textbf{Modularity}: Separate the interface (GUI, web) from the actual program
       \end{itemize}
-      
+
   \end{block}
 
 \end{frame}
 
 
 \begin{frame}{Command line tools: cons}
-  \begin{block}{But..}
+  \begin{block}{But\ldots}
       \begin{itemize}
         \item The command-line is challenging and intimidating for non-technical end-users
         \begin{figure}
@@ -77,7 +77,7 @@
   \begin{block}{CLAM}
       Objectives:
       \begin{itemize}
-        \item Quickly transform existing command-line tools into fully-fledged webservices 
+        \item Quickly transform existing command-line tools into fully-fledged webservices
         \begin{itemize}
             \item No need to alter to tool itself
             \item No requirements on programming language or technology, as
@@ -114,7 +114,7 @@
 \begin{frame}{Architecture}
 
     \begin{center}
-    \includegraphics[width=70.0mm]{architecture2015_2.png}
+    \includegraphics[width=70.0mm]{architecture2015_0.png}
     \end{center}
 
 \end{frame}
@@ -126,21 +126,22 @@
 
 \begin{frame}
     \begin{block}{Providing a Service (1/2)}
-        In order to wrap a tool and make a webservice: \\       
+        In order to wrap a tool and make a webservice: \\
         \textbf{1.} Write a service configuration file
         \begin{itemize}
-            \item General meta information about your system {\footnotesize{(name, description, etc..)}}
+            \item General meta information about your system
+                {\footnotesize{(name, description, etc\ldots)}}
             \item Definition of global parameters accepted by your system
             \item The program to invoke {\footnotesize{(i.e.\ the wrapper script around your NLP tool)}}
             \item Definition of \emph{profiles}
             \begin{itemize}
-                \item A profile defines in detail what output a system produces given a certain input.                    
+                \item A profile defines in detail what output a system produces given a certain input.
             \end{itemize}
-        \end{itemize}    
-    
+        \end{itemize}
+
     \end{block}
 
-\end{frame}            
+\end{frame}
 
 \begin{frame}
     \begin{block}{Providing a Service (2/2)}
@@ -162,15 +163,15 @@
 \end{frame}
 
 \begin{frame}
-    \begin{block}{Profiles}    
+    \begin{block}{Profiles}
         \begin{itemize}
             \item \textbf{what output files are produced given which input files?}
             \item what format are the input files in? (CLAM needs not be able to parse it itself)
             \item what parameters (metadata) are required or possible on input files?
-            \item how is metadata propagated from input files to output files?
+            \item How is metadata propagated from input files to output files?
             \item what viewers are associated with output files?
             \item which converters can act upon input/output files?
-        \end{itemize}        
+        \end{itemize}
     \end{block}
     \includegraphics[width=40.0mm]{blokkendoos.jpg}
 \end{frame}
@@ -189,7 +190,7 @@
                 \item Local parameters (i.e.\ metadata)
             \end{itemize}
             \item \textbf{Output files}: Can be downloaded as-is, visualised
-                using a \emph{viewer} or external webservice. 
+                using a \emph{viewer} or external webservice.
           \end{itemize}
       \end{itemize}
   \end{block}
@@ -245,7 +246,7 @@
         \begin{enumerate}
             \item HTTP Digest Authentication
             \begin{itemize}
-                \item Explicit user specification in configuration 
+                \item Explicit user specification in configuration
                 \item or database-backed (MySQL)
             \end{itemize}
             \item Pre-authentication by webserver (usable with for instance Shibboleth)
