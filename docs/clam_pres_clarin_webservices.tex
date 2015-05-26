@@ -127,7 +127,8 @@
             \item The program to invoke {\footnotesize{(i.e.\ the wrapper script around your NLP tool)}}
             \item Definition of \emph{profiles}
             \begin{itemize}
-                \item A profile defines in detail what output a system produces given a certain input.
+                \item A profile defines in detail what output files a system
+                    produces given certain input files.
             \end{itemize}
         \end{itemize}
 
@@ -188,8 +189,6 @@
   \end{block}
 \end{frame}
 
-\begin{tussenpagina}{}{}{screenshot_wide.png}
-\end{tussenpagina}
 
 \begin{frame}{Workflow}
   \begin{block}{Typical Workflow}
@@ -207,13 +206,15 @@
 \end{frame}
 
 
+\begin{tussenpagina}{}{}{screenshot_wide.png}
+\end{tussenpagina}
 
 \begin{frame}{Projects vs Actions}
     \begin{block}{Projects: Batch processing}
       \begin{itemize}
         \item CLAM is optimised for \textbf{batch processing}, your tool may run for hours or days if necessary
         \item The user can always close his browser and come back later
-        \item Data stored and held on server until explicitly deleted: \textbf{projects}
+        \item Data stored and held on server until explicitly deleted
         \item Different from real-time request-response cycles
       \end{itemize}
     \end{block}
@@ -255,7 +256,7 @@
       \begin{itemize}
         \item Port of underlying framework from web.py to Flask
         \item Python 3 support
-        \item Testing in CLARIN/CLARIAH authentication infrastructure
+        \item Testing in CLARIN authentication infrastructure
       \end{itemize}
   \end{block}
 \end{frame}
