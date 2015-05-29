@@ -22,7 +22,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 from lxml import etree as ElementTree
 import sys
 if sys.version < '3':
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error
 else:
     from io import StringIO,  BytesIO
 import requests
@@ -126,7 +126,7 @@ def processhttpcode(code, allowcodes=[]):
 
 
 def parsexmlstring(node):
-    if sys.version < '3' and isinstance(node,unicode):
+    if sys.version < '3' and isinstance(node,unicode): #pylint: disable=undefined-variable
         return ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
     elif sys.version >= '3' and isinstance(node,str):
         return ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
@@ -257,8 +257,8 @@ class CLAMFile:
             requestparams['stream'] = True
             response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
             for line in response.iter_lines():
-                if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
-                    yield unicode(line, self.metadata['encoding'])
+                if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata: #pylint: disable=undefined-variable
+                    yield unicode(line, self.metadata['encoding']) #pylint: disable=undefined-variable
                 if sys.version[0] >= '3' and not isinstance(line,str) and self.metadata and 'encoding' in self.metadata :
                     yield str(line, self.metadata['encoding'])
                 else:
@@ -307,7 +307,7 @@ class CLAMFile:
         else:
             f = io.open(target,'wb')
             for line in self:
-                if sys.version < '3' and isinstance(line,unicode):
+                if sys.version < '3' and isinstance(line,unicode): #pylint: disable=undefined-variable
                     f.write(line.encode('utf-8'))
                 elif sys.version >= '3' and isinstance(line,str):
                     f.write(line.encode('utf-8'))
@@ -1383,7 +1383,7 @@ class InputTemplate(object):
         return json.dumps(d)
 
     def __eq__(self, other):
-        if isinstance(other, str) or (sys.version < '3' and isinstance(other,unicode)):
+        if isinstance(other, str) or (sys.version < '3' and isinstance(other,unicode)): #pylint: disable=undefined-variable
             return self.id == other
         else: #object
             return other.id == self.id
@@ -2150,59 +2150,59 @@ class Action(object):
         return Action(*args, **kwargs)
 
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
-        #parameters are local
+    #parameters are local
+    if filename.find('$') != -1:
+        for parameter in sorted(parameters, key= lambda x: len(x.id),reverse=True):#cmp=lambda x,y: len(x.id) - len(y.id)):
+            if parameter and parameter.hasvalue:
+                filename = filename.replace('$' + parameter.id, str(parameter.value))
         if filename.find('$') != -1:
-            for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):
-                if parameter and parameter.hasvalue:
-                    filename = filename.replace('$' + parameter.id, str(parameter.value))
-            if filename.find('$') != -1:
-                if project: filename = filename.replace('$PROJECT', project)
-                if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
+            if project: filename = filename.replace('$PROJECT', project)
+            if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
 
-        #BACKWARD COMPATIBILITY:
-        if not inputtemplate.unique:
-            if '#' in filename: #resolve number in filename
-                filename = filename.replace('#',str(nextseq))
+    #BACKWARD COMPATIBILITY:
+    if not inputtemplate.unique:
+        if '#' in filename: #resolve number in filename
+            filename = filename.replace('#',str(nextseq))
 
-        clam.common.util.printdebug("Determined input filename: " + filename)
+    clam.common.util.printdebug("Determined input filename: " + filename)
 
 
-        return filename
+    return filename
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
-        #MAYBE TODO: make more efficient
+    #MAYBE TODO: make more efficient
+    if filename.find('$') != -1:
+        for id, parameter in sorted(globalparameters.items(), key=lambda x: len(x[0]),reverse=True): #, cmp=lambda x,y: len(y[0]) - len(x[0])):
+            if parameter and parameter.hasvalue:
+                filename = filename.replace('$' + parameter.id, str(parameter.value))
         if filename.find('$') != -1:
-            for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
-                if parameter and parameter.hasvalue:
-                    filename = filename.replace('$' + parameter.id, str(parameter.value))
-            if filename.find('$') != -1:
-                for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
-                    if value != None:
-                        filename = filename.replace('$' + id, str(value))
-            if filename.find('$') != -1:
-                if inputfilename:
-                    inputfilename = os.path.basename(inputfilename)
-                    raw = inputfilename.split('.',1)
-                    inputstrippedfilename = raw[0]
-                    if len(raw) > 1:
-                        inputextension = raw[1]
-                    else:
-                        inputextension = ""
-                    filename = filename.replace('$INPUTFILENAME', inputfilename)
-                    filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
-                    filename = filename.replace('$INPUTEXTENSION', inputextension)
-                if project: filename = filename.replace('$PROJECT', project)
-                if not outputtemplate.unique:
-                    filename = filename.replace('$SEQNR', str(nextseq))
+            for id, value in sorted(localparameters.items(), key=lambda x:len(x[0]),reverse=True): # cmp=lambda x,y: len(y[0]) - len(x[0])):
+                if value != None:
+                    filename = filename.replace('$' + id, str(value))
+        if filename.find('$') != -1:
+            if inputfilename:
+                inputfilename = os.path.basename(inputfilename)
+                raw = inputfilename.split('.',1)
+                inputstrippedfilename = raw[0]
+                if len(raw) > 1:
+                    inputextension = raw[1]
+                else:
+                    inputextension = ""
+                filename = filename.replace('$INPUTFILENAME', inputfilename)
+                filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
+                filename = filename.replace('$INPUTEXTENSION', inputextension)
+            if project: filename = filename.replace('$PROJECT', project)
+            if not outputtemplate.unique:
+                filename = filename.replace('$SEQNR', str(nextseq))
 
-        #BACKWARD COMPATIBILITY:
-        if not outputtemplate.unique:
-            if '#' in filename: #resolve number in filename
-                filename = filename.replace('#',str(nextseq))
+    #BACKWARD COMPATIBILITY:
+    if not outputtemplate.unique:
+        if '#' in filename: #resolve number in filename
+            filename = filename.replace('#',str(nextseq))
 
-        clam.common.util.printdebug("Determined output filename: " + filename)
+    clam.common.util.printdebug("Determined output filename: " + filename)
 
-        return filename
+    return filename
 
 
 
