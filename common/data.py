@@ -45,9 +45,9 @@ VERSION = '0.99'
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
 class BadRequest(Exception):
-     def __init__(self):
-        pass
-     def __str__(self):
+    def __init__(se
+       pass
+    def __str__(self):
         return "Bad Request"
 
 class NotFound(Exception):

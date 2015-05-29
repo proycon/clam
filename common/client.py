@@ -22,10 +22,10 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os.path
 import sys
 import requests
-import pycurl
+import pycurl #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error  
 else:
     from io import StringIO,  BytesIO
 import base64
@@ -34,7 +34,6 @@ import clam.common.status
 import clam.common.parameters
 import clam.common.formats
 from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION, BadRequest, NotFound, PermissionDenied, ServerError, AuthRequired,NoConnection, UploadError, ParameterError, TimeOut, processhttpcode
-from clam.common.util import RequestWithMethod
 
 VERSION = '0.99'
 if VERSION != DATAAPIVERSION:
@@ -86,12 +85,12 @@ class CLAMClient:
                 elif r.status_code == 403:
                     raise PermissionDenied("Authorization provider denies access")
                 elif not (r.status_code >= 200 and r.status_code <= 299):
-                    raise Exception("An error occured, return code " + str(r_status_code))
+                    raise Exception("An error occured, return code " + str(r.status_code))
 
 
                 data = self._parse(r.text)
                 if data is True: #indicates failure
-                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + response.geturl())
+                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + r.geturl())
                 else:
                     self.oauth_access_token = data.oauth_access_token
 
@@ -453,7 +452,7 @@ class CLAMClient:
         elif r.status_code == 408:
             raise TimeOut()
         elif not (r.status_code >= 200 and r.status_code <= 299):
-            raise Exception("An error occured, return code " + str(r_status_code))
+            raise Exception("An error occured, return code " + str(r.status_code))
 
         return self._parseupload(r.text)
 

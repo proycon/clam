@@ -15,7 +15,7 @@ import sys
 from functools import wraps
 from hashlib import md5
 from random import Random, SystemRandom
-from flask import request, make_response, session
+import flask
 
 import clam.common.oauth
 
@@ -53,7 +53,7 @@ class HTTPAuth(object):
         def decorated(*args, **kwargs):
             res = f(*args, **kwargs)
             if type(res) == str:
-                res = make_response(res)
+                res = flask.make_response(res)
                 res.status_code = 401
             if 'WWW-Authenticate' not in res.headers.keys() and hasattr(self,'authenticate_header'):
                 res.headers['WWW-Authenticate'] = self.authenticate_header()
@@ -64,12 +64,12 @@ class HTTPAuth(object):
     def login_required(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            auth = request.authorization
+            auth = flask.request.authorization
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
-            if request.method != 'OPTIONS':
+            if flask.request.method != 'OPTIONS':
                 if not auth:
                     return self.auth_error_callback()
                 username = self.username(**self.settings)
@@ -83,14 +83,14 @@ class HTTPAuth(object):
         return decorated
 
     def username(self, **kwargs):
-        return request.authorization.username
+        return flask.request.authorization.username
 
 
 class HTTPBasicAuth(HTTPAuth):
     def __init__(self, **kwargs):
         super(HTTPBasicAuth, self).__init__(**kwargs)
         if 'realm' in kwargs:
-            self.realm = realm
+            self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
         self.hash_password(None)
@@ -121,7 +121,7 @@ class HTTPDigestAuth(HTTPAuth):
     def __init__(self, **kwargs):
         super(HTTPDigestAuth, self).__init__(**kwargs)
         if 'realm' in kwargs:
-            self.realm = realm
+            self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
         self.random = SystemRandom()
@@ -134,20 +134,20 @@ class HTTPDigestAuth(HTTPAuth):
         return md5(str(self.random.random()).encode('utf-8')).hexdigest()
 
     def authenticate_header(self):
-        session["auth_nonce"] = self.get_nonce()
-        session["auth_opaque"] = self.get_nonce()
-        return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, session["auth_nonce"], session["auth_opaque"])
+        flask.session["auth_nonce"] = self.get_nonce()
+        flask.session["auth_opaque"] = self.get_nonce()
+        return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, flask.session["auth_nonce"], flask.session["auth_opaque"])
 
     def authenticate(self, auth, password):
         if not auth.username or not auth.realm or not auth.uri \
                 or not auth.nonce or not auth.response or not password:
             return False
-        if auth.nonce != session.get("auth_nonce") or \
-                auth.opaque != session.get("auth_opaque"):
+        if auth.nonce != flask.session.get("auth_nonce") or \
+                auth.opaque != flask.session.get("auth_opaque"):
             return False
         a1 = auth.username + ":" + auth.realm + ":" + password
         ha1 = md5(a1.encode('utf-8')).hexdigest()
-        a2 = request.method + ":" + auth.uri
+        a2 = flask.request.method + ":" + auth.uri
         ha2 = md5(a2.encode('utf-8')).hexdigest()
         a3 = ha1 + ":" + auth.nonce + ":" + ha2
         response = md5(a3.encode('utf-8')).hexdigest()
@@ -165,17 +165,17 @@ class ForwardedAuth(HTTPAuth):
             self.headers = headers
 
     def authenticate_header(self):
-        return make_response('Pre-authentication mechanism did not pass expected header',403)
+        return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
 
     def login_required(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            auth = request.authorization
+            auth = flask.request.authorization
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
-            if request.method != 'OPTIONS':
+            if flask.request.method != 'OPTIONS':
                 if not auth:
                     return self.auth_error_callback()
                 try:
@@ -188,8 +188,8 @@ class ForwardedAuth(HTTPAuth):
 
     def username(self, **kwargs):
         for h in self.headers:
-            if h in request.headers:
-                return request.headers[h]
+            if h in flask.request.headers:
+                return flask.request.headers[h]
         raise KeyError
 
 class OAuth2(HTTPAuth):
@@ -209,7 +209,7 @@ class OAuth2(HTTPAuth):
     def login_required(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            authheader = request.headers['authorization']
+            authheader = flask.request.headers['authorization']
             oauth_access_token = None
             if authheader and authheader[:6].lower() == "bearer":
                 oauth_access_token = authheader[7:]
