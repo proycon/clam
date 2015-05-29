@@ -826,7 +826,7 @@ class Project:
             extraloc = '?oauth_access_token=' + oauth_access_token
         else:
             extraloc = ''
-        return flask.make_response(msg, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'},201) #HTTP CREATED
+        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #HTTP CREATED
 
     @staticmethod
     def start(project, credentials=None):
