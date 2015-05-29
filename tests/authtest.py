@@ -171,8 +171,8 @@ class BasicServiceTest(unittest.TestCase):
         try:
             success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='nonexistant')
             self.assertFalse(success)
-        except ParameterError, e:
-            print e
+        except ParameterError as e:
+            print(e)
             self.assertTrue(True)
 
     def test2_B_metadata(self):
@@ -242,7 +242,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         try:
             data = self.client.start(self.project, casesensitive='nonexistant')
             self.assertTrue(data)
-        except ParameterError, e:
+        except ParameterError as e:
             self.assertTrue(True)
 
     def test3_conditionaloutput(self):
