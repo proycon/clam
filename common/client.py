@@ -25,10 +25,10 @@ import requests
 import pycurl #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error  
+    from StringIO import StringIO #pylint: disable=import-error
+    from io import TextIOBase
 else:
-    from io import StringIO,  BytesIO
-import base64
+    from io import StringIO, TextIOBase
 
 import clam.common.status
 import clam.common.parameters
@@ -102,7 +102,7 @@ class CLAMClient:
     def initrequest(self, data=None):
         params = {'headers': self.initauth() }
         if self.authenticated and not self.oauth:
-           params = {'auth': HTTPDigestAuth(self.user, self.password) }
+           params = {'auth': requests.auth.HTTPDigestAuth(self.user, self.password) }
         if data:
            params['data'] = data
         return params
@@ -118,6 +118,8 @@ class CLAMClient:
             request = requests.delete
         elif method == 'PUT':
             request = requests.put
+        else:
+            request = requests.get
 
         r = request(self.url,**requestparams)
 
@@ -334,13 +336,13 @@ class CLAMClient:
             client.addinputfile("myproject", "someinputtemplate", "/path/to/local/file", parameter1="blah", parameterX=3.5)
 
         """
-        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
         elif not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
-        if isinstance(sourcefile, file):
+        if isinstance(sourcefile, TextIOBase):
             sourcefile = sourcefile.name
 
         if 'filename' in kwargs:
@@ -409,7 +411,7 @@ class CLAMClient:
             client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))
 
         """
-        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
         elif not isinstance(inputtemplate, InputTemplate):
@@ -448,7 +450,7 @@ class CLAMClient:
         elif r.status_code == 500:
             raise ServerError(r.text)
         elif r.status_code == 405:
-            raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
+            raise ServerError("Server returned 405: Method not allowed for POST on " + self.url + project + '/input/' + filename)
         elif r.status_code == 408:
             raise TimeOut()
         elif not (r.status_code >= 200 and r.status_code <= 299):
