@@ -41,8 +41,8 @@ setup(
         "Development Status :: 4 - Beta",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Topic :: Text Processing :: Linguistic",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3", #3.0, 3.1 and 3.2 are not supported by flask
+        "Programming Language :: Python :: 3.3", #3.0, 3.1 and 3.2 are not supported by flask
+        "Programming Language :: Python :: 3.4", #3.0, 3.1 and 3.2 are not supported by flask
         "Operating System :: POSIX",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
@@ -58,5 +58,5 @@ setup(
         ]
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf','docs/clam.rng','clients/*.py','tests/*.py'] },
-    install_requires=['flask >= 0.10','lxml >= 2.2','requests','requests_oauthlib','pycurl','pycrypto']
+    install_requires=['flask >= 0.10','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto']
 )

@@ -22,12 +22,13 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os.path
 import sys
 import requests
+from requests_toolbelt import MultipartEncoder #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
     from StringIO import StringIO #pylint: disable=import-error
     from io import IOBase
 else:
-    from io import StringIO, IOBase
+    from io import StringIO, IOBase, BytesIO
 
 import clam.common.status
 import clam.common.parameters
@@ -39,6 +40,9 @@ if VERSION != DATAAPIVERSION:
     raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
 
 
+#for debug of requests:
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None):
@@ -292,7 +296,7 @@ class CLAMClient:
         """Parse CLAM Upload XML Responses. For internal use"""
         if not isinstance(node,ElementTree._Element):
             try:
-                node = ElementTree.parse(StringIO(node)).getroot()
+                node = ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
             except:
                 raise Exception(node)
         if node.tag != 'clamupload':
@@ -349,7 +353,7 @@ class CLAMClient:
             else:
                 filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
 
-        data = {"file": sourcefile , 'inputtemplate': inputtemplate.id}
+        data = {"file": (filename,sourcefile,inputtemplate.formatclass.mimetype), 'inputtemplate': inputtemplate.id}
         for key, value in kwargs.items():
             if key == 'filename':
                 pass #nothing to do
@@ -362,7 +366,11 @@ class CLAMClient:
                 data[key] = value
 
         requestparams = self.initrequest(data)
+        requestparams['data'] = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt
+        #print("DEBUG: ", repr(requestparams), file=sys.stderr)
         r = requests.post(self.url + project + '/input/' + filename,**requestparams)
+        sourcefile.close()
+        print(r.text)
 
         if r.status_code == 400:
             raise BadRequest()

@@ -1245,6 +1245,7 @@ class Project:
 
         if filename == '':
             #Handle inputsource
+            printdebug('Addinputfile: checking for input source' )
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
                 inputtemplate = None
@@ -1292,8 +1293,7 @@ class Project:
                 return flask.make_response("No filename or inputsource specified",403)
         else:
             #Simply forward to addfile
-            xml = addfile(project,filename,user, postdata)
-            return xml
+            return addfile(project,filename,user, postdata)
 
 
 
@@ -1314,6 +1314,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     metadata = None
 
 
+    printdebug('Handling addfile, postdata contains fields ' + ",".join(postdata.keys()) )
     if 'inputtemplate' in postdata:
         #An input template must always be provided
         for profile in settings.PROFILES:
@@ -1324,8 +1325,10 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             #Inputtemplate not found, send 404
             printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
             return flask.make_response("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!",404)
+        printdebug('Inputtemplate explicitly provided: ' + inputtemplate.id )
     if not inputtemplate:
         #See if an inputtemplate is explicitly specified in the filename
+        printdebug('Attempting to determine input template from filename ' + filename )
         if '/' in filename.strip('/'):
             raw = filename.split('/')
             inputtemplate = None
@@ -1349,8 +1352,8 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         #good, we found one, don't break cause we want to make sure there is only one
                         inputtemplate = t
         if not inputtemplate:
-            printlog("No inputtemplate specified and filename does not uniquely match with any inputtemplate!")
-            return flask.make_response("No inputtemplate specified nor auto-detected for this filename!",404)
+            printlog("No inputtemplate specified and filename " + filename + " does not uniquely match with any inputtemplate!")
+            return flask.make_response("No inputtemplate specified nor auto-detected for filename " + filename + "!",404)
 
 
 
