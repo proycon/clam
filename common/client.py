@@ -369,7 +369,7 @@ class CLAMClient:
         elif r.status_code == 401:
             raise AuthRequired()
         elif r.status_code == 403:
-            raise PermissionDenied()
+            raise PermissionDenied(r.text)
         elif r.status_code == 404:
             raise NotFound(r.text)
         elif r.status_code == 500:
@@ -441,7 +441,7 @@ class CLAMClient:
         elif r.status_code == 401:
             raise AuthRequired()
         elif r.status_code == 403:
-            raise PermissionDenied()
+            raise PermissionDenied(r.text)
         elif r.status_code == 404:
             raise NotFound(r.text)
         elif r.status_code == 500:
