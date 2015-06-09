@@ -343,11 +343,11 @@ class CLAMClient:
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
         if not isinstance(sourcefile, IOBase):
+            sourcefile = open(sourcefile,'rb')
             if 'filename' in kwargs:
                 filename = self.getinputfilename(inputtemplate, kwargs['filename'])
             else:
-                filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile) )
-            sourcefile = open(filename,'rb')
+                filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
 
         data = {"file": sourcefile , 'inputtemplate': inputtemplate.id}
         for key, value in kwargs.items():

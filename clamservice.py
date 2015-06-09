@@ -1239,8 +1239,6 @@ class Project:
 
         #TODO: test support for uploading metadata files
 
-        #TODO LATER: re-add support for archives?
-
         user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
         postdata = flask.request.values
@@ -1275,7 +1273,7 @@ class Project:
                         filename = inputtemplate.filename
                     else:
                         filename = os.path.basename(inputsource.path)
-                    xml,_ = addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputtemplate.id}, inputsource)
+                    xml = addfile(project, filename, user, {'inputsource': postdata['inputsource'], 'inputtemplate': inputtemplate.id}, inputsource)
                     return xml
                 elif inputsource.isdir():
                     if inputtemplate.filename:
@@ -1294,7 +1292,7 @@ class Project:
                 return flask.make_response("No filename or inputsource specified",403)
         else:
             #Simply forward to addfile
-            xml,_ = addfile(project,filename,user, postdata)
+            xml = addfile(project,filename,user, postdata)
             return xml
 
 
