@@ -22,13 +22,12 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os.path
 import sys
 import requests
-import pycurl #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
     from StringIO import StringIO #pylint: disable=import-error
-    from io import TextIOBase
+    from io import IOBase
 else:
-    from io import StringIO, TextIOBase
+    from io import StringIO, IOBase
 
 import clam.common.status
 import clam.common.parameters
@@ -343,15 +342,14 @@ class CLAMClient:
         elif not isinstance(inputtemplate, InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
-        if isinstance(sourcefile, TextIOBase):
-            sourcefile = sourcefile.name
+        if not isinstance(sourcefile, IOBase):
+            if 'filename' in kwargs:
+                filename = self.getinputfilename(inputtemplate, kwargs['filename'])
+            else:
+                filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile) )
+            sourcefile = open(filename,'rb')
 
-        if 'filename' in kwargs:
-            filename = self.getinputfilename(inputtemplate, kwargs['filename'])
-        else:
-            filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile) )
-
-        data = {"file": (pycurl.FORM_FILE, sourcefile) , 'inputtemplate': inputtemplate.id}
+        data = {"file": sourcefile , 'inputtemplate': inputtemplate.id}
         for key, value in kwargs.items():
             if key == 'filename':
                 pass #nothing to do
@@ -359,33 +357,31 @@ class CLAMClient:
                 assert isinstance(value, CLAMMetaData)
                 data['metadata'] =  value.xml()
             elif key == 'metafile':
-                data['metafile'] = (pycurl.FORM_FILE, value)  #open(value,'r')
+                data['metafile'] = open(value,'rb')
             else:
                 data[key] = value
 
-        #TODO: Rewrite using requests
+        requestparams = self.initrequest(data)
+        r = requests.post(self.url + project + '/input/' + filename,**requestparams)
 
-        buf = StringIO()
-        # Initialize pycurl
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, self.url + project + '/input/' + filename)
-        fields = list(data.items())
-        c.setopt(c.HTTPPOST, fields)
-        if self.authenticated:
-            c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
-            c.setopt(c.USERPWD, self.user + ':' + self.password)
-        elif self.oauth:
-            c.setopt(c.HTTPHEADER, [ 'Authorization: Bearer %s' % str(self.oauth_access_token) ])
-        c.setopt(c.WRITEFUNCTION, buf.write)
-        c.perform()
-        code = processhttpcode(c.getinfo(c.HTTP_CODE),[403]) #raises exception when not successful
-        xml = buf.getvalue()
-        c.close()
+        if r.status_code == 400:
+            raise BadRequest()
+        elif r.status_code == 401:
+            raise AuthRequired()
+        elif r.status_code == 403:
+            raise PermissionDenied()
+        elif r.status_code == 404:
+            raise NotFound(r.text)
+        elif r.status_code == 500:
+            raise ServerError(r.text)
+        elif r.status_code == 405:
+            raise ServerError("Server returned 405: Method not allowed for POST on " + self.url + project + '/input/' + filename)
+        elif r.status_code == 408:
+            raise TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r.status_code))
 
-        try:
-            return self._parseupload(xml)
-        except:
-            raise
+        return self._parseupload(r.text)
 
 
 
@@ -437,7 +433,7 @@ class CLAMClient:
                 data[key] = value
 
 
-        requestparams = self.initrequest()
+        requestparams = self.initrequest(data)
         r = requests.post(self.url + project + '/input/' + filename,**requestparams)
 
         if r.status_code == 400:
