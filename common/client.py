@@ -125,7 +125,7 @@ class CLAMClient:
         else:
             request = requests.get
 
-        r = request(self.url,**requestparams)
+        r = request(self.url + url,**requestparams)
 
         if r.status_code == 400:
             raise BadRequest()
