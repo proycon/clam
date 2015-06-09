@@ -204,7 +204,7 @@ class Logout(object):
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.OAUTH_REVOKE_URL:
-            raise flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
+            return flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
@@ -228,7 +228,7 @@ def parsecredentials(credentials):
         user = 'anonymous'
 
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
-        raise flask.make_response("Username invalid",403)
+        return flask.make_response("Username invalid",403)
     return user, oauth_access_token
 
 
@@ -858,17 +858,17 @@ class Project:
         sufresources, resmsg = sufficientresources()
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
-            raise flask.make_response("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.",503)
+            return flask.make_response("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.",503)
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
 
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            raise flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),403, {'Content-Type':'application/xml'} )
+            return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),403, {'Content-Type':'application/xml'} )
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            raise flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
+            return flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
         else:
             #write clam.xml output file
             f = io.open(Project.path(project, user) + "clam.xml",'wb')
@@ -1853,7 +1853,7 @@ class ActionHandler(object):
         for action in settings.ACTIONS:
             if action.id == action.id and (not action.method or method == action.method):
                 return action
-        raise flask.make_response("Action does not exist",404)
+        return flask.make_response("Action does not exist",404)
 
     @staticmethod
     def collect_parameters(action):
