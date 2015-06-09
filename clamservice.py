@@ -1418,10 +1418,11 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     Project.create(project, user)
 
 
+    printdebug("(Obtaining filename for uploaded file)")
     head = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     head += "<clamupload>\n"
     if 'file' in flask.request.files:
-        printlog("Adding client-side file " + postdata['file'].filename + " to input files")
+        printlog("Adding client-side file " + flask.request.files['file'].filename + " to input files")
         sourcefile = flask.request.files['file'].filename
     elif 'url' in postdata and postdata['url']:
         #Download from URL
@@ -1442,7 +1443,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 return flask.make_response("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'",403)
         sourcefile = os.path.basename(inputsource.path)
     elif 'accesstoken' in postdata and 'filename' in postdata:
-        #XHR POST, data in bodys
+        #XHR POST, data in body
         printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST")
         sourcefile = postdata['filename']
     else:
@@ -1640,7 +1641,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 if 'file' in flask.request.files:
                     printdebug('(Receiving data by uploading file)')
                     #Upload file from client to server
-                    flask.requests.files['file'].save(Project.path(project, user) + 'input/' + filename)
+                    flask.request.files['file'].save(Project.path(project, user) + 'input/' + filename)
                 elif 'url' in postdata and postdata['url']:
                     printdebug('(Receiving data via url)')
                     #Download file from 3rd party server to CLAM server

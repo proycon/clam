@@ -366,8 +366,9 @@ class CLAMClient:
                 data[key] = value
 
         requestparams = self.initrequest(data)
-        requestparams['data'] = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt
-        #print("DEBUG: ", repr(requestparams), file=sys.stderr)
+        encodeddata = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt, necessary from streaming support
+        requestparams['data'] = encodeddata
+        requestparams['headers']['Content-Type'] = encodeddata.content_type
         r = requests.post(self.url + project + '/input/' + filename,**requestparams)
         sourcefile.close()
         print(r.text)
