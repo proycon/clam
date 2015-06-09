@@ -55,6 +55,11 @@ import clam.config.defaults as settings #will be overridden by real settings lat
 settings.STANDALONEURLPREFIX = ''
 
 try:
+    from requests_oauthlib import OAuth2Session
+except ImportError:
+    print( "WARNING: No OAUTH2 support available in your version of Python! Install python-requests-oauthlib if you plan on using OAUTH2 for authentication!", file=sys.stderr)
+
+try:
     import MySQLdb
 except ImportError:
     print("WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication",file=sys.stderr)
@@ -203,7 +208,7 @@ class Logout(object):
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
-            if reponse.status_code >= 200 and reponse.status_code < 300:
+            if response.status_code >= 200 and response.status_code < 300:
                 return "Logout successful, have a nice day"
             else:
                 return flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
@@ -482,7 +487,7 @@ class Project:
         """Create project skeleton if it does not already exist (static method)"""
 
         if not settings.COMMAND:
-            return make_response("Projects disabled, no command configured",404)
+            return flask.make_response("Projects disabled, no command configured",404)
 
         user, oauth_access_token = parsecredentials(credentials)
         if not Project.validate(project):
@@ -545,7 +550,7 @@ class Project:
 
     @staticmethod
     def abort(project, user):
-        if self.pid(project, user) == 0:
+        if Project.pid(project, user) == 0:
             return False
         printlog("Aborting process of project '" + project + "'" )
         f = open(Project.path(project,user) + ".abort", 'w')
@@ -794,7 +799,7 @@ class Project:
         #for fineuploader, not oauth
         h = hashlib.md5()
         clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
-        if sys.version < '3' and isinstance(clear,unicode):
+        if sys.version < '3' and isinstance(clear,unicode): #pylint: disable=undefined-variable
             h.update(clear.encode('utf-8'))
         if sys.version >= '3' and isinstance(clear,str):
             h.update(clear.encode('utf-8'))
@@ -911,9 +916,9 @@ class Project:
             cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
-                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
                 else:
-                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)
             process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)
@@ -952,15 +957,18 @@ class Project:
 
     @staticmethod
     def download_zip(project, credentials=None):
-        return OutputFileHandler.getarchive(project, user,'zip')
+        user, _ = parsecredentials(credentials)
+        return Project.getarchive(project, user,'zip')
 
     @staticmethod
     def download_targz(project, credentials=None):
-        return OutputFileHandler.getarchive(project, user,'tar.gz')
+        user, _ = parsecredentials(credentials)
+        return Project.getarchive(project, user,'tar.gz')
 
     @staticmethod
     def download_tarbz2(project, credentials=None):
-        return OutputFileHandler.getarchive(project, user,'tar.bz2')
+        user, _ = parsecredentials(credentials)
+        return Project.getarchive(project, user,'tar.bz2')
 
     @staticmethod
     def getoutputfile(project, filename, credentials=None):
@@ -974,7 +982,7 @@ class Project:
         if filename.strip('/') == "":
             #this is a request for everything
             requestarchive = True
-            return self.getarchive(project,user)
+            return Project.getarchive(project,user)
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'output/' +  "/".join(raw[:-1])):
@@ -1186,13 +1194,13 @@ class Project:
             else:
                 printdebug("No metadata found for input file " + str(inputfile))
                 headers = {}
-                mimetype = mimetypes.guess_type(str(outputfile))[0]
+                mimetype = mimetypes.guess_type(str(inputfile))[0]
                 if not mimetype: mimetype = 'application/octet-stream'
             try:
                 printdebug("Returning input file " + str(inputfile) + " with mimetype " + mimetype)
                 return withheaders(flask.Response( (line for line in inputfile) ), mimetype, headers )
             except UnicodeError:
-                return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
+                return flask.make_response("Input file " + str(inputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
             except IOError:
                 raise flask.abort(404)
 
@@ -1225,6 +1233,7 @@ class Project:
                 msg = "Deleted"
                 return withheaders(flask.make_response(msg),'text/plain', {'Content-Length': len(msg)}) #200
 
+    @staticmethod
     def addinputfile(project, filename, credentials=None):
         """Add a new input file, this invokes the actual uploader"""
 
@@ -1232,8 +1241,8 @@ class Project:
 
         #TODO LATER: re-add support for archives?
 
-        Project.create(project, user)
         user, oauth_access_token = parsecredentials(credentials)
+        Project.create(project, user)
         postdata = flask.request.values
 
         if filename == '':
@@ -1874,7 +1883,7 @@ class ActionHandler(object):
                 if flag: parameters += flag + " "
 
                 if sys.version[0] == '2':
-                    if isinstance(value, unicode):
+                    if isinstance(value, unicode):#pylint: disable=undefined-variable
                         value = value.encode('utf-8')
                     elif not isinstance(value, str):
                         value = str(value)
@@ -1902,9 +1911,9 @@ class ActionHandler(object):
             cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
-                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST() + " " + cmd
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
                 else:
-                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST() + " " + cmd
+                    cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + action.command + ": " + repr(cmd) + " ..." )
             process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
@@ -1913,7 +1922,7 @@ class ActionHandler(object):
                 if process.returncode in action.returncodes200:
                     return withheaders(stdoutdata,action.mimetype) #200
                 elif process.returncode in action.returncodes403:
-                    return withheaders(flask.make_response(stdoutdata,403), actions.mimetype)
+                    return withheaders(flask.make_response(stdoutdata,403), action.mimetype)
                 elif process.returncode in action.returncodes404:
                     return withheaders(flask.make_response(stdoutdata, 404), action.mimetype)
                 else:
@@ -2060,7 +2069,7 @@ class CLAMService(object):
 
         if settings.OAUTH:
             warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=OAUTH_SCOPE)
+            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=settings.OAUTH_SCOPE)
         elif settings.USERS:
             if settings.BASICAUTH:
                 self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)

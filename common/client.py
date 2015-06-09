@@ -76,7 +76,7 @@ class CLAMClient:
         """Initialise authentication, for internal use"""
         global VERSION
 
-        headers = {'User-agent', 'CLAMClientAPI-' + VERSION}
+        headers = {'User-agent': 'CLAMClientAPI-' + VERSION}
         if self.oauth:
             if not self.oauth_access_token:
                 r = requests.get(self.url,headers=headers)
@@ -111,6 +111,7 @@ class CLAMClient:
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
         requestparams = self.initrequest(data)
+
 
         if method == 'POST':
             request = requests.post
