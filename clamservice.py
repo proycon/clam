@@ -1574,7 +1574,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             elif archivetype == 'tar.bz2':
                 cmd = 'tar -xvjf'
             else:
-                raise Exception("Invalid archive format: " + archivetype) #invalid archive, shouldn't happend
+                raise Exception("Invalid archive format: " + archivetype) #invalid archive, shouldn't happen
 
             #invoke extractor
             printlog("Extracting '" + archive + "'" )
@@ -1582,8 +1582,10 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             except:
                 flask.make_response("Unable to extract archive",500)
-            out, err = process.communicate() #waits for process to end
+            out, _ = process.communicate() #waits for process to end
 
+            if isinstance(out, bytes):
+                out = str(out,'utf-8')
 
             #Read filename results
 
