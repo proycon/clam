@@ -371,7 +371,6 @@ class CLAMClient:
         requestparams['headers']['Content-Type'] = encodeddata.content_type
         r = requests.post(self.url + project + '/input/' + filename,**requestparams)
         sourcefile.close()
-        print(r.text)
 
         if r.status_code == 400:
             raise BadRequest()
