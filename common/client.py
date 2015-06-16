@@ -377,7 +377,11 @@ class CLAMClient:
         elif r.status_code == 401:
             raise AuthRequired()
         elif r.status_code == 403:
-            raise PermissionDenied(r.text)
+            if r.text[0] == '<':
+                #XML response
+                return self._parseupload(r.text)
+            else:
+                raise PermissionDenied(r.text)
         elif r.status_code == 404:
             raise NotFound(r.text)
         elif r.status_code == 500:
@@ -449,7 +453,11 @@ class CLAMClient:
         elif r.status_code == 401:
             raise AuthRequired()
         elif r.status_code == 403:
-            raise PermissionDenied(r.text)
+            if r.text[0] == '<':
+                #XML response
+                return self._parseupload(r.text)
+            else:
+                raise PermissionDenied(r.text)
         elif r.status_code == 404:
             raise NotFound(r.text)
         elif r.status_code == 500:
