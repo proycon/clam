@@ -135,7 +135,6 @@ class CLAMClient:
             content = r.text
             data = self._parse(content)
             if data:
-                print(content,file=sys.stderr)
                 raise PermissionDenied(data)
             else:
                 raise PermissionDenied(content)
