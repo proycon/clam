@@ -760,7 +760,7 @@ class Project:
                 if parameter.error:
                     errors = "yes"
                     if not errormsg: errormsg = "One or more parameters are invalid"
-                    printlog("One or more parameters are invalid")
+                    printlog("One or more parameters are invalid: " + parameter.id)
                     break
 
         return withheaders(flask.make_response(flask.render_template('response.xml',
@@ -777,7 +777,7 @@ class Project:
                 completion=completion,
                 errors=errors,
                 errormsg=errormsg,
-                parameterdata=settings.PARAMETERS,
+                parameterdata=parameters,
                 inputsources=settings.INPUTSOURCES,
                 outputpaths=outputpaths,
                 inputpaths=inputpaths,
