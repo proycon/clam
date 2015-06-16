@@ -225,19 +225,21 @@ class CLAMFile:
                 requestparams = self.client.initrequest()
             else:
                 requestparams = {}
-            try:
-                response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
-                xml = response.text
-            except:
+            response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+            if response.status_code != 200:
                 extramsg = ""
                 if not self.client: extramsg = "No client was associated with this CLAMFile, associating a client is necessary when authentication is needed"
                 raise HTTPError(2, "Can't download metadata for " + self.filename + ". " + extramsg)
+            xml = response.text
 
             #if response.status != 200: #TODO: Verify
             #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
 
         #parse metadata
-        self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
+        try:
+            self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
+        except ElementTree.XMLSyntaxError:
+            raise ValueError("Metadata is not XML! Contents: " + xml)
 
     def __iter__(self):
         """Read the lines of the file, one by one without loading the file into memory."""
