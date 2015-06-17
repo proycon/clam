@@ -87,11 +87,8 @@ def warning(msg):
     print("WARNING: " + msg, file=sys.stderr)
 
 
-TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
 def userdb_lookup_dict(user, **authsettings):
-    global TEMPUSER
     printdebug("Looking up user " + user)
-    TEMPUSER = user
     return settings.USERS[user] #possible KeyError is captured later
 
 

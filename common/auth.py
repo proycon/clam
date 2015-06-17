@@ -42,6 +42,10 @@ class HTTPAuth(object):
             self.set_password_function(kwargs['get_password'])
         else:
             self.set_password_function(default_get_password)
+        if 'debug' in kwargs:
+            self.printdebug = kwargs['debug']
+        else:
+            self.printdebug = lambda x: None
         self.error_handler(default_auth_error)
 
     def set_password_function(self, f):
@@ -74,7 +78,12 @@ class HTTPAuth(object):
                 if not auth:
                     return self.auth_error_callback()
                 username = self.username(**self.settings)
-                password = self.get_password(username, **self.settings)
+                self.printdebug("Obtained username: " + username)
+                try:
+                    password = self.get_password(username, **self.settings)
+                except KeyError:
+                    self.printdebug("No such user")
+                    return self.auth_error_callback()
                 if not self.authenticate(auth, password):
                     return self.auth_error_callback()
                 args.append(username)#add username as parameter to the wrapped function
@@ -125,6 +134,7 @@ class HTTPDigestAuth(HTTPAuth):
             self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
+        self.printdebug("Initialising Digest Authentication with realm " + self.realm)
         self.random = SystemRandom()
         try:
             self.random.random()
@@ -140,11 +150,14 @@ class HTTPDigestAuth(HTTPAuth):
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, flask.session["auth_nonce"], flask.session["auth_opaque"])
 
     def authenticate(self, auth, password):
-        if not auth.username or not auth.realm or not auth.uri \
-                or not auth.nonce or not auth.response or not password:
+        if not auth.username or not auth.realm or not auth.uri or not auth.nonce or not auth.response or not password:
+            self.printdebug("One or more missing authentication headers in request")
             return False
-        if auth.nonce != flask.session.get("auth_nonce") or \
-                auth.opaque != flask.session.get("auth_opaque"):
+        if auth.nonce != flask.session.get("auth_nonce"):
+            self.printdebug("Nonce mismatch")
+            return False
+        elif auth.opaque != flask.session.get("auth_opaque"):
+            self.printdebug("Opaque mismatch")
             return False
         a1 = auth.username + ":" + auth.realm + ":" + password
         ha1 = md5(a1.encode('utf-8')).hexdigest()
@@ -152,7 +165,12 @@ class HTTPDigestAuth(HTTPAuth):
         ha2 = md5(a2.encode('utf-8')).hexdigest()
         a3 = ha1 + ":" + auth.nonce + ":" + ha2
         response = md5(a3.encode('utf-8')).hexdigest()
-        return response == auth.response
+        if response == auth.response:
+            self.printdebug("Authentication challenge failed")
+            return True
+        else:
+            self.printdebug("Authentication challenge failed")
+            return False
 
 
 class ForwardedAuth(HTTPAuth):
