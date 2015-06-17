@@ -38,7 +38,7 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.12 - revision 1.1} \\[0.5cm]
+{\bf \small version 0.99 - revision 1.1} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
@@ -2101,7 +2101,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Get index of all projects}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised} \\ 
 \hline
 \end{supertabular}
@@ -2115,28 +2115,30 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Get a project}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & This returns the current state of the project in CLAM XML format. Depending on the state this contains a specification of all accepted parameters, all input files, and all output files. Note that errors in parameter validation are encoded in the CLAM XML response; the system will still return a 200 response. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Create new empty project}} \\
 \hline
 \textbf{Method} & \texttt{PUT} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{201 - Created}, \texttt{401 - Unauthorised}, \texttt{403 - Forbidden} \emph{(Invalid project ID)},  \texttt{403 - Forbidden} \emph{(No project name)} \\ 
 \textbf{Description} & This is necessary before attempting to upload any files; it initialises an empty new project. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differ per service). The parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Request Parameters} &  Accepted parameters are defined in the Service
+Configuration file (and thus differ per service). The parameter ID corresponds
+to the parameter keys in the request parameters \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
 \textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & The parameter \texttt{abortonly} can be set to 1 if you
+\textbf{Request Parameters} & The parameter \texttt{abortonly} can be set to 1 if you
 only want to abort a running process without deleting the entire project \\
 \textbf{Response} & \texttt{200 - OK}, \texttt{401 - Unauthorised},  \texttt{404 - Not Found}\\ 
 \textbf{Description} & Deletes a project. Any running processes will be aborted. \\ 
@@ -2152,14 +2154,14 @@ only want to abort a running process without deleting the entire project \\
 \multicolumn{2}{|c|}{\textbf{Get an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the specified input file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an input file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Deletes the specified input file. \\
 \hline
@@ -2167,10 +2169,11 @@ only want to abort a running process without deleting the entire project \\
 \hline
 \textbf{URL} & \texttt{/[project]/input/[filename]} or \texttt{/[project]/input/[inputtemplate]/[filename]}\\
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
+\textbf{Request Parameters} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Response is returned
-in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
+\textbf{Description} & This method adds a new input file, which is transmitted
+in the \texttt{multipart/form-data} encoding along with request parameters and metadata parameters.
+. The response is returned in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
 input template, which designates what kind of file will be added and points to
 one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/
 query arguments marked with an asterisk. Adding a file can proceed either by
@@ -2178,7 +2181,7 @@ uploading it from the client machine \texttt{(file)}, by downloading it from
 another URL \texttt{(url)}, or by passing the contents in the POST message
 itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak
 Metadata can be passed in \emph{three} different ways: 1) by simply specifying
-a metadata field as parameter to the querystring, with the same ID as defined
+a metadata field as request parameters, with the same ID as defined
 in the input template. 2) setting the \texttt{metafile} attribute to an HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
@@ -2192,14 +2195,14 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get an output file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the specified output file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an output file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Deletes the specified output file. \\
 \hline
@@ -2213,7 +2216,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get the metadat for an output file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the metadata for the specified output file. \\ 
 \hline
@@ -2226,7 +2229,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the metadata for the specified input file. \\ 
 \hline
@@ -2242,7 +2245,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Retrieve all output files as an archive}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
+\textbf{Request Parameters} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Offers a single archive, of the desired format,
 including all output files \\
@@ -2250,7 +2253,7 @@ including all output files \\
 \multicolumn{2}{|c|}{\textbf{Delete all output files}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised} \\ 
 \textbf{Description} & Deletes all output files and resets the project for another run. \\
 \hline
@@ -2265,7 +2268,7 @@ including all output files \\
 \multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} and/or \texttt{POST}, may be constrained by the action \\
-\textbf{Querystring} & Determined by the action  \\
+\textbf{Request Parameters} & Determined by the action  \\
 \textbf{Response} & \texttt{200 - OK} \& Result data determined by the action, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & This is a remote procedure call to run the specified
 action and obtain the results. The parameters are specific to the action. \\ 
