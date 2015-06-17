@@ -44,15 +44,15 @@ class AuthServiceTest(unittest.TestCase):
 
     def test1_index(self):
         """No Access Test - Testing inability to access index with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.index)
+        self.assertRaises( AuthRequired, self.client.index)
 
     def test2_create(self):
         """No Access Test - Testing inability to create project with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.create, 'basicservicetest')
+        self.assertRaises( AuthRequired, self.client.create, 'basicservicetest')
 
     def test3_project(self):
         """No Access Test - No project state retrieval with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.get, 'basicservicetest')
+        self.assertRaises( AuthRequired, self.client.get, 'basicservicetest')
 
     def test4_wait(self):
         """No Access Test - Waiting 30s for lock to expire"""
@@ -179,7 +179,6 @@ class BasicServiceTest(unittest.TestCase):
             success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='nonexistant')
             self.assertFalse(success)
         except ParameterError as e:
-            print(e)
             self.assertTrue(True)
 
     def test2_B_metadata(self):

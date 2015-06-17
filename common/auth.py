@@ -174,8 +174,6 @@ class HTTPDigestAuth(HTTPAuth):
             return True
         else:
             self.printdebug("Authentication challenge failed")
-            print(response,file=sys.stderr)
-            print(auth.response,file=sys.stderr)
             return False
 
 
