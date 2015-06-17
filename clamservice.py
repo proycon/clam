@@ -281,6 +281,9 @@ def index(credentials = None):
 
 
 
+def argtest(a,b,c,credentials = None):
+    return flask.make_response("a="+str(a)+", b="+str(b)+", c=" + str(c))
+
 def info(credentials=None):
     """Get info"""
     projects = []
@@ -2096,6 +2099,7 @@ class CLAMService(object):
         self.service = flask.Flask("clam")
         self.service.secret_key = settings.SECRET_KEY
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/argtest/<a>/<b>/<c>/', 'test', self.auth.require_login(argtest), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )

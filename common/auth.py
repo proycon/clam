@@ -86,10 +86,12 @@ class HTTPAuth(object):
                     return self.auth_error_callback()
                 if not self.authenticate(auth, password):
                     return self.auth_error_callback()
-                args.append(username)#add username as parameter to the wrapped function
+                #add username as parameter to the wrapped function
+                kwargs['credentials'] = username
             else:
-                args.append('anonymous')
-            return f(*args, **kwargs)
+                #add username as parameter to the wrapped function
+                kwargs['credentials'] = 'anonymous'
+            return f(*args,**kwargs)
         return decorated
 
     def username(self, **kwargs):
