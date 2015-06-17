@@ -116,6 +116,12 @@ class BasicServiceTest(unittest.TestCase):
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
         self.assertTrue(success)
 
+    def test2_4b_upload(self):
+        """Basic Service Test - Passing contents explicitly"""
+        data = self.client.get('basicservicetest')
+        success = self.client.addinput('basicservicetest', data.inputtemplate('textinput'),"On espère que tout ça marche bien.",filename='servicetest.txt', language='fr')
+        self.assertTrue(success)
+
     def test2_5_upload(self):
         """Basic Service Test - File upload verification"""
         data = self.client.get('basicservicetest')
@@ -320,4 +326,4 @@ class ArchiveUploadTest(unittest.TestCase):
         success = self.client.delete(self.project)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
