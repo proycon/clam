@@ -105,7 +105,7 @@ class CLAMClient:
     def initrequest(self, data=None):
         params = {'headers': self.initauth() }
         if self.authenticated and not self.oauth:
-           params = {'auth': requests.auth.HTTPDigestAuth(self.user, self.password) }
+           params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password) 
         if data:
            params['data'] = data
         return params
@@ -135,6 +135,7 @@ class CLAMClient:
             content = r.text
             data = self._parse(content)
             if data:
+                print(content,file=sys.stderr)
                 raise PermissionDenied(data)
             else:
                 raise PermissionDenied(content)
