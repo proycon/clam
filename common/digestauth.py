@@ -4,4 +4,4 @@ from hashlib import md5
 
 def pwhash(user, realm, password):
     #computes a password hash for a given user and plaintext password (HA1)
-    return md5(user.encode('utf-8') + ':' + realm.encode('utf-8') + ':' + password.encode('utf-8')).hexdigest()
+    return md5(user.encode('utf-8') + b':' + realm.encode('utf-8') + b':' + password.encode('utf-8')).hexdigest()

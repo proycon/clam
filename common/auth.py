@@ -39,13 +39,14 @@ class HTTPAuth(object):
 
         self.settings = kwargs
         if 'get_password' in kwargs:
-            self.get_password(kwargs['get_password'])
+            self.set_password_function(kwargs['get_password'])
         else:
-            self.get_password(default_get_password)
+            self.set_password_function(default_get_password)
         self.error_handler(default_auth_error)
 
-    def get_password(self, f):
-        self.get_password_callback = f
+    def set_password_function(self, f):
+        """Returns a function that is used to get the password"""
+        self.get_password = f
         return f
 
     def error_handler(self, f):
@@ -61,7 +62,7 @@ class HTTPAuth(object):
         self.auth_error_callback = decorated
         return decorated
 
-    def login_required(self, f):
+    def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = flask.request.authorization
@@ -73,7 +74,7 @@ class HTTPAuth(object):
                 if not auth:
                     return self.auth_error_callback()
                 username = self.username(**self.settings)
-                password = self.get_password_callback(username, **self.settings)
+                password = self.get_password(username, **self.settings)
                 if not self.authenticate(auth, password):
                     return self.auth_error_callback()
                 args.append(username)#add username as parameter to the wrapped function

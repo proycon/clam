@@ -88,14 +88,14 @@ def warning(msg):
 
 
 TEMPUSER = '' #temporary global variable (not very elegant and not thread-safe!) #TODO: improve?
-def userdb_lookup_dict(user, realm):
+def userdb_lookup_dict(user, **authsettings):
     global TEMPUSER
     printdebug("Looking up user " + user)
     TEMPUSER = user
     return settings.USERS[user] #possible KeyError is captured later
 
 
-def userdb_lookup_mysql(user, realm):
+def userdb_lookup_mysql(user, **authsettings):
     printdebug("Looking up user " + user + " in MySQL")
     host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()
     if denylist and user in denylist:
@@ -2097,6 +2097,7 @@ class CLAMService(object):
 
 
         self.service = flask.Flask("clam")
+        self.service.secret_key = settings.SECRET_KEY
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
@@ -2249,7 +2250,9 @@ def set_defaults():
         settings.OAUTH_USERNAME_FUNCTION = None
     if not 'OAUTH_AUTH_FUNCTION' in settingkeys:
         settings.OAUTH_AUTH_FUNCTION = lambda oauthsession, authurl: oauthsession.authorization_url(authurl)
-
+    if not 'SECRET_KEY' in settingkeys:
+        print("WARNING: No explicit SECRET_KEY set in service configuration, generating one at random! This may cause problems with session persistance in production environments!" ,file=sys.stderr)
+        settings.SECRET_KEY = "%032x" % random.getrandbits(128)
     if not 'INTERFACEOPTIONS' in settingkeys:
         settings.INTERFACEOPTIONS = ""
     if not 'CUSTOMHTML_INDEX' in settingkeys:
