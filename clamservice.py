@@ -1310,21 +1310,26 @@ class Project:
 def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'):
     """Add a new input file, this invokes the actual uploader"""
 
+    inputtemplate_id = flask.request.headers.get('Inputtemplate','')
     inputtemplate = None
     metadata = None
 
 
     printdebug('Handling addfile, postdata contains fields ' + ",".join(postdata.keys()) )
+
     if 'inputtemplate' in postdata:
+        inputtemplate_id = postdata['inputtemplate']
+
+    if inputtemplate_id:
         #An input template must always be provided
         for profile in settings.PROFILES:
             for t in profile.input:
-                if t.id == postdata['inputtemplate']:
+                if t.id == inputtemplate_id:
                     inputtemplate = t
         if not inputtemplate:
             #Inputtemplate not found, send 404
-            printlog("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!")
-            return flask.make_response("Specified inputtemplate (" + postdata['inputtemplate'] + ") not found!",404)
+            printlog("Specified inputtemplate (" + inputtemplate_id + ") not found!")
+            return flask.make_response("Specified inputtemplate (" + inputtemplate_id + ") not found!",404)
         printdebug('Inputtemplate explicitly provided: ' + inputtemplate.id )
     if not inputtemplate:
         #See if an inputtemplate is explicitly specified in the filename

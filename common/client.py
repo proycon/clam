@@ -22,7 +22,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os.path
 import sys
 import requests
-from requests_toolbelt import MultipartEncoder #pylint: disable=import-error
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
     from StringIO import StringIO #pylint: disable=import-error
@@ -43,6 +43,11 @@ if VERSION != DATAAPIVERSION:
 #for debug of requests:
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
+
+def donereadingupload(encoder):
+    """Called when the uploaded file has been read"""
+    #encoder.encoder.fields['file'][1].seek(0)
+    pass
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None):
@@ -105,7 +110,7 @@ class CLAMClient:
     def initrequest(self, data=None):
         params = {'headers': self.initauth() }
         if self.authenticated and not self.oauth:
-           params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password) 
+           params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password)
         if data:
            params['data'] = data
         return params
@@ -366,10 +371,18 @@ class CLAMClient:
             else:
                 data[key] = value
 
+
         requestparams = self.initrequest(data)
-        encodeddata = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt, necessary from streaming support
-        requestparams['data'] = encodeddata
-        requestparams['headers']['Content-Type'] = encodeddata.content_type
+        if 'auth'in requestparams:
+            #TODO: streaming support doesn't work with authentication unfortunately, disabling streaming for now:
+            del data['file']
+            requestparams['data'] = data
+            requestparams['files'] = [('file', (filename,sourcefile, inputtemplate.formatclass.mimetype))]
+        else:
+            #streaming support
+            encodeddata = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt, necessary for streaming support
+            requestparams['data'] = encodeddata
+            requestparams['headers']['Content-Type'] = encodeddata.content_type
         r = requests.post(self.url + project + '/input/' + filename,**requestparams)
         sourcefile.close()
 
