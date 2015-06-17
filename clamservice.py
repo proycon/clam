@@ -1459,11 +1459,15 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
     #============================ Generate metadata ========================================
     printdebug('(Generating and validating metadata)')
-    if ('metafile' in postdata and (not isinstance(postdata['metafile'], dict) or len(postdata['metafile']) > 0)):
+    if 'metafile' in flask.request.files:  #and (not isinstance(postdata['metafile'], dict) or len(postdata['metafile']) > 0)):
         #an explicit metadata file was provided, upload it:
         printlog("Metadata explicitly provided in file, uploading...")
+        #Upload file from client to server
+        metafile = Project.path(project, user) + 'input/.' + filename + '.METADATA'
+        flask.request.files['metafile'].save(metafile)
         try:
-            metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metafile'])
+            with open(metafile,'r',encoding='utf-8') as f:
+                metadata = clam.common.data.CLAMMetaData.fromxml(f.read())
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
         except Exception as e:

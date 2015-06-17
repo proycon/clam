@@ -378,6 +378,9 @@ class CLAMClient:
             del data['file']
             requestparams['data'] = data
             requestparams['files'] = [('file', (filename,sourcefile, inputtemplate.formatclass.mimetype))]
+            if 'metafile' in kwargs:
+                del data['metafile']
+                requestparams['files'].append(('metafile',('.'+ filename + '.METADATA', open(value,'rb'), 'text/xml')))
         else:
             #streaming support
             encodeddata = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt, necessary for streaming support

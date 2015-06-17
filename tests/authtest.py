@@ -13,12 +13,13 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import sys
 import os
 import time
 import glob
 import random
-import codecs
 import unittest
 
 #We may need to do some path magic in order to find the clam.* imports
@@ -109,8 +110,8 @@ class BasicServiceTest(unittest.TestCase):
 
     def test2_4_upload(self):
         """Basic Service Test - File upload with extension"""
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
-        f.write(u"On espère que tout ça marche bien.")
+        f = open('/tmp/servicetest.txt','w',encoding='utf-8')
+        f.write("On espère que tout ça marche bien.")
         f.close()
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
@@ -143,7 +144,7 @@ class BasicServiceTest(unittest.TestCase):
 
     def test2_7_upload(self):
         """Basic Service Test - File upload without extension"""
-        f = codecs.open('/tmp/servicetest','w','utf-8')
+        f = open('/tmp/servicetest','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
         data = self.client.get('basicservicetest')
@@ -183,11 +184,11 @@ class BasicServiceTest(unittest.TestCase):
 
     def test2_B_metadata(self):
         """Basic Service Test - Upload with explicit metadata file"""
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
-        f.write(u"On espère que tout ça marche bien.")
+        f = open('/tmp/servicetest.txt','w',encoding='utf-8')
+        f.write("On espère que tout ça marche bien.")
         f.close()
-        f = codecs.open('/tmp/servicetest.txt.METADATA','w','utf-8')
-        f.write(u"""<?xml version="1.0" encoding="UTF-8"?>
+        f = open('/tmp/servicetest.txt.METADATA','w',encoding='utf-8')
+        f.write("""<?xml version="1.0" encoding="UTF-8"?>
 <CLAMMetaData format="PlainTextFormat" mimetype="text/plain" inputtemplate="textinput">
 <meta id="encoding">utf-8</meta>
 <meta id="author">proycon</meta>
@@ -210,7 +211,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         self.client = CLAMClient(self.url,'proycon','secret')
         self.project = 'extservicetest'
         self.client.create(self.project)
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f = open('/tmp/servicetest.txt','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
 
@@ -290,13 +291,13 @@ class ArchiveUploadTest(unittest.TestCase):
         self.client = CLAMClient(self.url,'proycon','secret')
         self.project = 'archivetest'
         self.client.create(self.project)
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f = open('/tmp/servicetest.txt','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
-        f = codecs.open('/tmp/servicetest2.txt','w','utf-8')
+        f = open('/tmp/servicetest2.txt','w',encoding='utf-8')
         f.write(u"Non, rien de rien, non je ne regrette rien.")
         f.close()
-        f = codecs.open('/tmp/servicetest3.txt','w','utf-8')
+        f = open('/tmp/servicetest3.txt','w',encoding='utf-8')
         f.write(u"Ni le mal qu'on m'a fait, ni le bien, tout ça me semble égal!")
         f.close()
         os.system('zip /tmp/servicetest.zip /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest3.txt')
