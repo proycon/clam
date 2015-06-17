@@ -49,7 +49,7 @@ class HTTPAuth(object):
         self.error_handler(default_auth_error)
 
     def set_password_function(self, f):
-        """Returns a function that is used to get the password"""
+        """Returns a function that is used to get the password (which is stored as the HA1 of HTTP Digest)"""
         self.get_password = f
         return f
 
@@ -159,17 +159,21 @@ class HTTPDigestAuth(HTTPAuth):
         elif auth.opaque != flask.session.get("auth_opaque"):
             self.printdebug("Opaque mismatch")
             return False
-        a1 = auth.username + ":" + auth.realm + ":" + password
-        ha1 = md5(a1.encode('utf-8')).hexdigest()
+        #password is stored has HA1 already
+        #a1 = auth.username + ":" + auth.realm + ":" + password
+        #ha1 = md5(a1.encode('utf-8')).hexdigest()
+        ha1 = password
         a2 = flask.request.method + ":" + auth.uri
         ha2 = md5(a2.encode('utf-8')).hexdigest()
         a3 = ha1 + ":" + auth.nonce + ":" + ha2
         response = md5(a3.encode('utf-8')).hexdigest()
         if response == auth.response:
-            self.printdebug("Authentication challenge failed")
+            self.printdebug("Authentication challenge passed")
             return True
         else:
             self.printdebug("Authentication challenge failed")
+            print(response,file=sys.stderr)
+            print(auth.response,file=sys.stderr)
             return False
 
 
