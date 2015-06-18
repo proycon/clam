@@ -251,6 +251,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         except ParameterError as e:
             self.assertTrue(True)
 
+
     def test3_conditionaloutput(self):
         """Extensive Service Test - Output conditional on parameter"""
         data = self.client.get(self.project)
