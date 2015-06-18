@@ -54,10 +54,6 @@ class AuthServiceTest(unittest.TestCase):
         """No Access Test - No project state retrieval with wrong user credentials"""
         self.assertRaises( AuthRequired, self.client.get, 'basicservicetest')
 
-    def test4_wait(self):
-        """No Access Test - Waiting 30s for lock to expire"""
-        time.sleep(30)
-        self.assertTrue(True)
 
 class BasicServiceTest(unittest.TestCase):
     """Test basic operations with authentication"""
