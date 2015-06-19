@@ -210,7 +210,7 @@ class ExtensiveServiceTest(unittest.TestCase):
             self.assertTrue(data)
         except ParameterError as e:
             self.assertTrue(True)
-        except:
+        except Exception as e:
             print(e.msg,file=sys.stderr)
             raise
 

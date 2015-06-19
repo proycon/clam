@@ -246,6 +246,9 @@ class ExtensiveServiceTest(unittest.TestCase):
             self.assertTrue(data)
         except ParameterError as e:
             self.assertTrue(True)
+        except:
+            print(e.msg,file=sys.stderr)
+            raise
 
 
     def test3_conditionaloutput(self):
