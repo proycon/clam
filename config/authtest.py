@@ -53,7 +53,7 @@ USERS = {'proycon': pwhash('proycon',SYSTEM_ID,'secret'), 'antal': pwhash('antal
 REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 1.0
+MAXLOADAVG = 4.0
 
 
 # ======== WEB-APPLICATION STYLING =============
