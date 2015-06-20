@@ -144,7 +144,7 @@ class CLAMClient:
                     print("DEBUG: errors found",file=sys.stderr)
                     error = data.parametererror()
                     print("DEBUG: parametererror=" + str(error),file=sys.stderr)
-                    for parametergroup, parameters in self.parameters:
+                    for parametergroup, parameters in data.parameters:
                         for parameter in parameters:
                             print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
                     if error:
