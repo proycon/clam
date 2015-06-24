@@ -57,7 +57,7 @@ class HTTPAuth(object):
         @wraps(f)
         def decorated(*args, **kwargs):
             res = f(*args, **kwargs)
-            if type(res) == str:
+            if (sys.version >= '3' and isinstance(res, str)) or (sys.version < '3' and isinstance(res,unicode)): #pylint: disable=undefined-variable
                 res = flask.make_response(res)
                 res.status_code = 401
             if 'WWW-Authenticate' not in res.headers.keys() and hasattr(self,'authenticate_header'):
