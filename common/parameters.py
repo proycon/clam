@@ -197,6 +197,7 @@ class AbstractParameter(object):
             name = ''
             description = ''
             kwargs = {}
+            error = None
             for attrib, value in node.attrib.items():
                 if attrib == 'id':
                     id = value
@@ -206,6 +207,8 @@ class AbstractParameter(object):
                     name = value
                 elif attrib == 'description':
                     description = value
+                elif attrib == 'error':
+                    error = value
                 else:
                     kwargs[attrib] = value
             for subtag in node: #parse possible subtags
@@ -219,7 +222,10 @@ class AbstractParameter(object):
                         else:
                             kwargs['value'] = subtag.attrib['id']
 
-            return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+            parameter = globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+            if error:
+                parameter.error = error #prevent error from getting reset
+            return parameter
         else:
             raise Exception("No such parameter exists: " + node.tag)
 
