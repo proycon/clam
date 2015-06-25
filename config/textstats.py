@@ -26,6 +26,7 @@ import clam
 import sys
 
 REQUIRE_VERSION = 0.99
+CLAMDIR = clam.__path__[0]
 
 # ======== GENERAL INFORMATION ===========
 
@@ -170,7 +171,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = clam.__path__[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = CLAMDIR + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
