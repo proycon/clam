@@ -5,13 +5,10 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Webservice --
 #       by Maarten van Gompel (proycon)
-#       http://proycon.github.com/clam
+#       https://proycon.github.io/clam
 #
-#       Centre for Language Studies
+#       Centre for Language and Speech Technology / Language Machines
 #       Radboud University Nijmegen
-#
-#       Induction for Linguistic Knowledge Research Group
-#       Tilburg University
 #
 #       Licensed under GPLv3
 #

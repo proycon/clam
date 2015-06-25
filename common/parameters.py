@@ -1,11 +1,11 @@
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Parameter classes --
+# -- CLAM Parameter Classes --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       https://proycon.github.io/clam
+#
+#       Centre for Language and Speech Technology / Language Machines
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
