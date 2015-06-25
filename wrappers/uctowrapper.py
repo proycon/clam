@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -13,11 +13,12 @@
 #
 ###############################################################
 
+
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 #import some general python modules:
 import sys
 import os
-import codecs
-import re
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.
 import clam.common.data

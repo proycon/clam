@@ -13,10 +13,6 @@
 #
 ###############################################################
 
-#This is a test wrapper, meant to illustrate how easy it is to set
-#up a wrapper script for your system using Python and the CLAM Client API.
-#We make use of the XML configuration file that CLAM outputs, rather than
-#passing all parameters on the command line.
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
 

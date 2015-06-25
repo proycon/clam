@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 
@@ -6,32 +6,32 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Settings --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       http://proycon.github.io/clam/
+#       Centre for Language and Speech Technology  / Language Machines
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
 ###############################################################
+
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 from clam.common.parameters import *
 from clam.common.formats import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path
-from os import uname, environ
+import clam
+import os
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.9
+REQUIRE_VERSION = 0.99
+CLAMDIR = clam.__path__[0]
 
 SYSTEM_ID = "timbl"
 SYSTEM_NAME = "Timbl"
 SYSTEM_DESCRIPTION = "TiMBL is an open source software package implementing several memory-based learning algorithms, among which IB1-IG, an implementation of k-nearest neighbor classification with feature weighting suitable for symbolic feature spaces, and IGTree, a decision-tree approximation of IB1-IG. All implemented algorithms have in common that they store some representation of the training set explicitly in memory. During testing, new cases are classified by extrapolation from the most similar stored cases.\n\nFor the past decade, TiMBL has been mostly used in natural language processing as a machine learning classifier component, but its use extends to virtually any supervised machine learning domain. Due to its particular decision-tree-based implementation, TiMBL is in many cases far more efficient in classification than a standard k-nearest neighbor algorithm would be."
 
-#Root directory for CLAM
-ROOT = path[0] + "/../timbl.clam/"
-PORT = 8080
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
@@ -39,36 +39,49 @@ USERS = None #Enable this instead if you want no authentication
 
 
 # ================ Server specific configurations for CLAM ===============
-host = uname()[1]
-if host == 'galactica' or host == 'roma': #proycon's laptop/server
-    CLAMDIR = "/home/proycon/work/clam"
-    ROOT = "/home/proycon/work/timbl.clam/"
-    PORT = 9001
-    BINDIR = "/home/proycon/local/bin/"
-elif host == 'applejack': #Nijmegen
-    if not 'CLAMTEST' in environ:
-        #live production environment/
-        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/live/writable/timbl/"
+# ================ Server specific configuration for CLAM ===============
+host = os.uname()[1]
+if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/timbl'):
+    # Virtual Environment (LaMachine)
+    ROOT = os.environ['VIRTUAL_ENV'] + "/timbl.clam/"
+    PORT = 8804
+    BINDIR = os.environ['VIRTUAL_ENV'] + '/bin/'
+
+    if host == 'applejack': #configuration for server in Nijmegen
         HOST = "webservices-lst.science.ru.nl"
-        PORT = 80
-    else:
-        #test environment
-        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/test/writable/timbl/"
-        HOST = "webservices-lst.science.ru.nl"
-        PORT = 81
-    URLPREFIX = "timbl"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"
-    USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl',
-        'user': 'clamopener',
-        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
-        'database': 'clamopener',
-        'table': 'clamusers_clamusers'
-    }
-    REALM = "WEBSERVICES-LST"
-    ADMINS = ['proycon','antalb','wstoop']
+        URLPREFIX = 'timbl'
+
+        if not 'CLAMTEST' in os.environvagrant:
+            ROOT = "/scratch2/www/webservices-lst/live/writable/timbl/"
+            PORT = 80
+        else:
+            ROOT = "/scratch2/www/webservices-lst/test/writable/timbl/"
+            PORT = 81
+
+        USERS_MYSQL = {
+            'host': 'mysql-clamopener.science.ru.nl',
+            'user': 'clamopener',
+            'password': D(open(os.environ['CLAMOPENER_KEYFILE']).read().strip()),
+            'database': 'clamopener',
+            'table': 'clamusers_clamusers'
+        }
+        DEBUG = False
+        REALM = "WEBSERVICES-LST"
+        DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+        ADMINS = ['proycon','antalb','wstoop']
+elif os.path.exist('/usr/bin/timbl') and os.path.exists("/home/vagrant") and os.getuid() == 998:
+    # Virtual Machine (LaMachine)
+    ROOT = "/home/vagrant/timbl.clam/"
+    PORT = 8804
+    BINDIR = '/usr/bin/'
+elif os.path.exist('/usr/bin/timbl') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
+    # Docker (LaMachine)
+    ROOT = "/root/timbl.clam/"
+    PORT = 8804
+    BINDIR = '/usr/bin/'
+elif host == "hostnameofyoursystem":
+    #**** adapt hostname and add custom configuration for your system here ****
+    raise NotImplementedError
 else:
     raise Exception("I don't know where I'm running from! Got " + host)
 

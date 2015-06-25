@@ -22,9 +22,10 @@ from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
+import clam
 import sys
 
-REQUIRE_VERSION = 0.9
+REQUIRE_VERSION = 0.99
 
 # ======== GENERAL INFORMATION ===========
 
@@ -169,7 +170,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = clam.__path__[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 

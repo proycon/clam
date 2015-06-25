@@ -1,23 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- CLAM Wrapper script for Text Statistics --
+# -- Settings --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       http://proycon.github.io/clam/
+#       Centre for Language and Speech Technology  / Language Machines
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 #import some general python modules:
 import sys
 import os
-import codecs
-import re
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.
 import clam.common.data
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         if clamdata['cooc'] > 0:
             clam.common.status.write(statusfile, "Computing and outputting co-occurrences for " + filename + "...", p)
             r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -C " + str(clamdata['cooc']) + " > " + outputdir + '/' + filename + ".cooc.csv")
-        print >>sys.stderr,"NPMI=",clamdata['npmi'], type(clamdata['npmi'])
+        print("NPMI=",clamdata['npmi'], type(clamdata['npmi']),file=sys.stderr)
         if clamdata['npmi'] > -1:
             clam.common.status.write(statusfile, "Computing and outputting co-occurrences (npmi) for " + filename + "...", p)
             r = os.system(cmd + " -r " + outputdir + '/' + filename + ".colibri.dat" + " -Y " + str(clamdata['npmi']) + " > " + outputdir + '/' + filename + ".npmi.csv")

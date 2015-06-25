@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -26,7 +26,6 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import sys
 import os
 import io
-import re
 import string
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.

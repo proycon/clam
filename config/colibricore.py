@@ -1,19 +1,19 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
-
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
 # -- Settings --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       http://proycon.github.io/clam/
+#       Centre for Language and Speech Technology  / Language Machines
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -21,10 +21,12 @@ from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from os import uname, environ
+import clam
+import os
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.9
+REQUIRE_VERSION = 0.99
+CLAMDIR = clam.__path__[0]
 
 
 #============== General meta configuration =================
@@ -36,38 +38,48 @@ SYSTEM_DESCRIPTION = "A tool for pattern extraction and analysis on corpus data.
 USERS = None
 
 # ================ Server specific configuration for CLAM ===============
-host = uname()[1]
-if host == 'galactica' or host == 'roma' or host == 'mhysa': #proycon's laptop/server/desktop
-    CLAMDIR = "/home/proycon/work/clam"
-    ROOT = "/home/proycon/work/colibricore.clam/"
-    PORT = 9001
-    BINDIR = "/home/proycon/local/bin/"
-    #USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
-    #URLPREFIX = 'frog'
-elif host == 'applejack': #Nijmegen
-    if not 'CLAMTEST' in environ:
-        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/live/writable/colibricore/"
+host = os.uname()[1]
+if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/colibri-patternmodeller'):
+    # Virtual Environment (LaMachine)
+    ROOT = os.environ['VIRTUAL_ENV'] + "/colibricore.clam/"
+    PORT = 8803
+    BINDIR = os.environ['VIRTUAL_ENV'] + '/bin/'
+
+    if host == 'applejack': #configuration for server in Nijmegen
         HOST = "webservices-lst.science.ru.nl"
-        PORT = 80
-    else:
-        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/test/writable/colibricore/"
-        HOST = "webservices-lst.science.ru.nl"
-        PORT = 81
-    URLPREFIX = "colibricore"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"
-    USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl',
-        'user': 'clamopener',
-        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
-        'database': 'clamopener',
-        'table': 'clamusers_clamusers'
-    }
-    DEBUG = False
-    REALM = "WEBSERVICES-LST"
-    DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-    ADMINS = ['proycon','antalb','wstoop']
+        URLPREFIX = 'colibricore'
+
+        if not 'CLAMTEST' in os.environvagrant:
+            ROOT = "/scratch2/www/webservices-lst/live/writable/colibricore/"
+            PORT = 80
+        else:
+            ROOT = "/scratch2/www/webservices-lst/test/writable/colibricore/"
+            PORT = 81
+
+        USERS_MYSQL = {
+            'host': 'mysql-clamopener.science.ru.nl',
+            'user': 'clamopener',
+            'password': D(open(os.environ['CLAMOPENER_KEYFILE']).read().strip()),
+            'database': 'clamopener',
+            'table': 'clamusers_clamusers'
+        }
+        DEBUG = False
+        REALM = "WEBSERVICES-LST"
+        DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+        ADMINS = ['proycon','antalb','wstoop']
+elif os.path.exist('/usr/bin/colibri-patternmodeller') and os.path.exists("/home/vagrant") and os.getuid() == 998:
+    # Virtual Machine (LaMachine)
+    ROOT = "/home/vagrant/colibricore.clam/"
+    PORT = 8803
+    BINDIR = '/usr/bin/'
+elif os.path.exist('/usr/bin/colibri-patternmodeller') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
+    # Docker (LaMachine)
+    ROOT = "/root/colibricore.clam/"
+    PORT = 8803
+    BINDIR = '/usr/bin/'
+elif host == "hostnameofyoursystem":
+    #**** adapt hostname and add custom configuration for your system here ****
+    raise NotImplementedError
 else:
     raise Exception("I don't know where I'm running from! Got " + host)
 

@@ -5,19 +5,16 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Service Configuration File (Template) --
 #       by Maarten van Gompel (proycon)
-#       Centre for Language Studies
+#       Centre for Language and Speech Technology / Language Machines
 #       Radboud University Nijmegen
 #
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
-#
-#       http://proycon.github.com/clam
+#       https://proycon.github.io/clam
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
-#Consult the CLAM
+#Consult the CLAM manual for extensive documentation
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -25,9 +22,11 @@ from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
+import clam
 import sys
 
 REQUIRE_VERSION = 0.9
+CLAMDIR = clam.__path__[0]
 
 # ======== GENERAL INFORMATION ===========
 
@@ -167,7 +166,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = CLAMDIR + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 #COMMAND = None   #Set to none if you only use the action paradigm
 
