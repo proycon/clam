@@ -2472,5 +2472,4 @@ def run_wsgi(settings_module):
     set_defaults() #host, port
     test_dirs()
 
-    service = CLAMService('wsgi')
-    return service.wsgi_app
+    return CLAMService('wsgi').service.wsgi_app
