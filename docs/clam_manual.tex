@@ -408,12 +408,24 @@ Subsection~\ref{sec:sadmin} where you are instructed to configure the
 hostname, port, and optionally a URL prefix to use if the service is not
 assigned to the root of a virtualhost of its own. 
 \item Run your webservice, tweak the process and thread parameters as required
-    for your load:
+    for your load. If your webservice runs at the root, without a
+    URLPREFIX, use:
 { \small
 \begin{verbatim}
-uwsgi --socket :3031 --chdir /path/to/yourwebservice --wsgi-file /path/to/yourwebservice/yourwebservice.wsgi --master --processes 4 --threads 2
+uwsgi --socket :3031 --chdir /path/to/yourwebservice \ 
+--wsgi-file /path/to/yourwebservice/yourwebservice.wsgi \
+--master --processes 4 --threads 2
 \end{verbatim}
 }
+If you have a URLPREFIX, ``yourwebservice`` in this example, then use:
+{ \small
+\begin{verbatim}
+uwsgi --socket :3031 --chdir /path/to/yourwebservice \
+--mount /yourwebservice=/path/to/yourwebservice/yourwebservice.wsgi \
+--manage-script-name --master --processes 4 --threads 2
+\end{verbatim}
+}
+
 Note that the socket port here does not correspond to the webservice port, the
 port here is for uwsgi only and should \textbf{NOT} be publicly accessible!
 Alternatively, you can use UNIX sockets too using the flag \texttt{--socket
@@ -549,10 +561,10 @@ With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
 \item Follow steps 2, 3, 4 and 5 in Section~\ref{sec:uwsgi}.
 
 \item Add and adapt the following configuration to a server in \\
-    \path{/etc/nginx/sites-enabled}. If you expose the application at the
+    \path{/etc/nginx/sites-enabled}. If you serve the application at the
         root, not using a \texttt{URLPREFIX}, then the configuration is as
         follows:
-{ \small
+{\small
 \begin{verbatim}
     location /static/ {
         alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
@@ -565,20 +577,18 @@ With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
     }
 \end{verbatim}
 }
-If you use a \texttt{URLPREFIX}, ``yourwebservice`` in this example, then
-use the following configuration:
-{ \small
+If you do use a \texttt{URLPREFIX}, ``yourwebservice'' in this example, then
+use this configuration:
+{\small
 \begin{verbatim}
     location /yourwebservice/static/ {
         alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
     }
 
-    location = /yourwebservice { rewrite ^ /yourwebservice/; }
+    location = /yourapplication { rewrite ^ /yourapplication/; }
     location /yourwebservice { try_files $uri @yourwebservice; }
     location @yourwebservice {
         include uwsgi_params;
-        uwsgi_param SCRIPT_NAME /yourservice;
-        uwsgi_modifier1 30;
         uwsgi_pass 127.0.0.1:3031;
     }
 \end{verbatim}
@@ -594,6 +604,23 @@ installation and versions and is subject to change on an upgrade.
 
 The above configurations with Apache and Nginx are just the configurations we
 tested. Other webservers (such as for example lighttpd), should work too. 
+
+\subsection{Overriding host, port and urlprefix at runtime}
+
+CLAM must know precisely with at which host, port and URLPREFIX it will be
+served, otherwise browsers will refuse to render the web interface and you will
+get an error ``error loading stylesheet'', or a blank page entirely.  The same
+CLAM service can never be accessed through different aliases.
+
+The HOST, PORT and URLPREFIX are configured in the service configuration file.
+It is possible, however, to override these when launching or deploying the
+webserver, without changing the service configuration itself. If you use the
+development server, using \texttt{clamservice}, then you can pass the
+\texttt{-u} flag with the full URL CLAM should use. You can also set an
+environment variable \texttt{CLAMFORCEURL}, which has the same effect. This
+latter option also works when deploying CLAM through WSGI.
+
+The most common use for this is when serving CLAM behind a reverse proxy.
 
 \subsection{Troubleshooting}
 

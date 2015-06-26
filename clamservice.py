@@ -2239,6 +2239,8 @@ def set_defaults():
         settings.USERS_MYSQL = None
     if not 'FORCEURL' in settingkeys:
         settings.FORCEURL = None
+    if 'CLAMFORCEURL' in os.environ:
+        settings.FORCEURL = os.environ['CLAMFORCEURL']
     if not 'PRIVATEACCESSTOKEN' in settingkeys:
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
     if not 'OAUTH' in settingkeys:
