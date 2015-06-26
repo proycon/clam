@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
 
 import sys
@@ -15,7 +15,7 @@ if VIRTUALENV:
     activate_env = VIRTUALENV + '/bin/activate_this.py'
     exec(compile(open(activate_env).read(), activate_env, 'exec'))
 
-import clam.config.ucto #** import your configuration module here! **
+import clam.config.timbl #** import your configuration module here! **
 import clam.clamservice
-application = clam.clamservice.run_wsgi(clam.config.ucto) #** pass your module to CLAM **
+application = clam.clamservice.run_wsgi(clam.config.timbl) #** pass your module to CLAM **
 
