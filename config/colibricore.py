@@ -67,12 +67,12 @@ if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/b
         REALM = "WEBSERVICES-LST"
         DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
         ADMINS = ['proycon','antalb','wstoop']
-elif os.path.exist('/usr/bin/colibri-patternmodeller') and os.path.exists("/home/vagrant") and os.getuid() == 998:
+elif os.path.exists('/usr/bin/colibri-patternmodeller') and os.path.exists("/home/vagrant") and os.getuid() == 998:
     # Virtual Machine (LaMachine)
     ROOT = "/home/vagrant/colibricore.clam/"
     PORT = 8803
     BINDIR = '/usr/bin/'
-elif os.path.exist('/usr/bin/colibri-patternmodeller') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
+elif os.path.exists('/usr/bin/colibri-patternmodeller') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
     # Docker (LaMachine)
     ROOT = "/root/colibricore.clam/"
     PORT = 8803
