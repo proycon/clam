@@ -38,7 +38,6 @@ USERS = None #Enable this instead if you want no authentication
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!!
 
 
-# ================ Server specific configurations for CLAM ===============
 # ================ Server specific configuration for CLAM ===============
 host = os.uname()[1]
 if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/timbl'):

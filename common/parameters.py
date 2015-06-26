@@ -118,7 +118,7 @@ class AbstractParameter(object):
                     xml += ' ' + key + '="' + str(int(v))+ '"'
                 elif isinstance(v, list):
                     xml += ' ' + key + '="'+xmlescape(",".join(v))+ '"'
-                elif isinstance(v, unicode) or isinstance(v, str)  :
+                elif isinstance(v, str)  or ( sys.version < '3' and isinstance(v, unicode)):
                     xml += ' ' + key + '="'+xmlescape(v)+ '"'
                 else:
                     xml += ' ' + key + '="'+xmlescape(str(v))+ '"'
