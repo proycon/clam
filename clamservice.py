@@ -72,6 +72,8 @@ settingsmodule = None #will be overwritten later
 
 setlog(sys.stderr)
 
+HOST = PORT = None
+
 
 def error(msg):
     if __name__ == '__main__':
