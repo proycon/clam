@@ -612,7 +612,8 @@ served, otherwise browsers will refuse to render the web interface and you will
 get an error ``error loading stylesheet'', or a blank page entirely.  The same
 CLAM service can never be accessed through different aliases.
 
-The HOST, PORT and URLPREFIX are configured in the service configuration file.
+The HOST, PORT and URLPREFIX are configured in the service configuration file,
+CLAM will attempt to automatically guess them when they are not explicitly set.
 It is possible, however, to override these when launching or deploying the
 webserver, without changing the service configuration itself. If you use the
 development server, using \texttt{clamservice}, then you can pass the
@@ -620,7 +621,8 @@ development server, using \texttt{clamservice}, then you can pass the
 environment variable \texttt{CLAMFORCEURL}, which has the same effect. This
 latter option also works when deploying CLAM through WSGI.
 
-The most common use for this is when serving CLAM behind a reverse proxy.
+The most common use for this is when serving CLAM behind a reverse proxy, where
+automatic hostname detection could never work.
 
 \subsection{Troubleshooting}
 
