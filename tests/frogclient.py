@@ -13,6 +13,8 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import sys
 import os
 import time
@@ -53,8 +55,8 @@ for arg in sys.argv[1:]:
     elif os.path.isdir(arg):
         files += [ x for x in glob.glob(arg + '/*') if x[0] != '.' ]
     else:
-        print >>sys.stderr, "Unknown argument, or file/directory does not exist: " + arg
-        print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
+        print("Unknown argument, or file/directory does not exist: " + arg,file=sys.stderr)
+        print("Syntax: frogclient.py [OPTIONS] URL TEXTFILES",file=sys.stderr)
         print >>sys.stderr, "Options: -t\tTokenise only"
         print >>sys.stderr, "         -v\tTokenise only (verbosely)"
         print >>sys.stderr, "         -P\tDisable parser"

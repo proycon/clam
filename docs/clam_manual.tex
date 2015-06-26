@@ -412,7 +412,7 @@ assigned to the root of a virtualhost of its own.
     URLPREFIX, use:
 { \small
 \begin{verbatim}
-uwsgi --socket :3031 --chdir /path/to/yourwebservice \ 
+uwsgi --plugin python --socket :3031 --chdir /path/to/yourwebservice \ 
 --wsgi-file /path/to/yourwebservice/yourwebservice.wsgi \
 --master --processes 4 --threads 2
 \end{verbatim}
@@ -420,7 +420,7 @@ uwsgi --socket :3031 --chdir /path/to/yourwebservice \
 If you have a URLPREFIX, ``yourwebservice`` in this example, then use:
 { \small
 \begin{verbatim}
-uwsgi --socket :3031 --chdir /path/to/yourwebservice \
+uwsgi --plugin python --socket :3031 --chdir /path/to/yourwebservice \
 --mount /yourwebservice=/path/to/yourwebservice/yourwebservice.wsgi \
 --manage-script-name --master --processes 4 --threads 2
 \end{verbatim}
