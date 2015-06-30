@@ -104,6 +104,11 @@ class FoLiAXMLFormat(CLAMMetaData):
     mimetype = 'text/xml'
     scheme = '' #TODO
 
+class AlpinoXMLFormat(CLAMMetaData):
+    attributes = {}
+    name = "Alpino XML"
+    mimetype = 'text/xml'
+    scheme = '' #TODO
 
 class DCOIFormat(CLAMMetaData):
     attributes = {}
