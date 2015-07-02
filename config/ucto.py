@@ -27,7 +27,7 @@ import os
 from base64 import b64decode as D
 
 REQUIRE_VERSION = 0.99
-CLAMDIR = clam.__path__[0]
+CLAMDIR = clam.__path__[-1]
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Ucto Tokeniser"
