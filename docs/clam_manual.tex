@@ -566,7 +566,7 @@ With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
         follows:
 {\small
 \begin{verbatim}
-    location /static/ {
+    location /static {
         alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
     }
 
@@ -581,11 +581,11 @@ If you do use a \texttt{URLPREFIX}, ``yourwebservice'' in this example, then
 use this configuration:
 {\small
 \begin{verbatim}
-    location /yourwebservice/static/ {
+    location /yourwebservice/static {
         alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
     }
 
-    location = /yourapplication { rewrite ^ /yourapplication/; }
+    location = /yourwebservice { rewrite ^ /yourwebservice/; }
     location /yourwebservice { try_files $uri @yourwebservice; }
     location @yourwebservice {
         include uwsgi_params;
