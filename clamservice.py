@@ -2154,6 +2154,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/output/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
 
 
 
