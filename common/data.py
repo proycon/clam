@@ -104,6 +104,10 @@ class TimeOut(Exception):
     def __str__(self):
         return "Connection with server timed-out"
 
+if sys.version < '3':
+    class FileNotFoundError(IOError):
+        pass
+
 def processhttpcode(code, allowcodes=[]):
     if not isinstance(code, int): code = int(code)
     if (code >= 200 and code <= 299) or code in allowcodes:
@@ -241,11 +245,14 @@ class CLAMFile:
     def __iter__(self):
         """Read the lines of the file, one by one without loading the file into memory."""
         if not self.remote:
+            fullpath = self.projectpath + self.basedir + '/' + self.filename
+            if not os.path.exists(fullpath):
+                raise FileNotFoundError("No such file or directory: " + fullpath )
             if self.metadata and 'encoding' in self.metadata:
-                for line in io.open(self.projectpath + self.basedir + '/' + self.filename, 'r', encoding=self.metadata['encoding']).readlines():
+                for line in io.open(fullpath, 'r', encoding=self.metadata['encoding']).readlines():
                     yield line
             else:
-                for line in io.open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
+                for line in io.open(fullpath, 'r').readlines():
                     yield line
         else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
