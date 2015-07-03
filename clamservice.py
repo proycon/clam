@@ -61,6 +61,12 @@ try:
 except ImportError:
     print("WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication",file=sys.stderr)
 
+try:
+    import uwsgi
+    UWSGI = True
+except ImportError:
+    UWSGI = False
+
 
 VERSION = '0.99'
 
@@ -2063,7 +2069,19 @@ class CLAMService(object):
             error("Specified command " + settings.COMMAND.split(" ")[0] + " not found")
         elif settings.COMMAND and not os.access(settings.COMMAND.split(" ")[0], os.X_OK):
             if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
-               settings.COMMAND = sys.executable + " " + settings.COMMAND
+                if UWSGI:
+                    if 'virtualenv' in uwsgi.opt and uwsgi.opt['virtualenv']:
+                        interpeter = uwsgi.opt['virtualenv'] + '/bin/python'
+                    elif 'home' in uwsgi.opt and uwsgi.opt['home']:
+                        interpeter = uwsgi.opt['home'] + '/bin/python'
+                    else:
+                        if sys.version > '3':
+                            interpreter = 'python3'
+                        else:
+                            interpreter = 'python'
+                else:
+                   interpreter = sys.executable
+                settings.COMMAND = interpreter + " " + settings.COMMAND
             else:
                 error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
         else:
