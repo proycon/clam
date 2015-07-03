@@ -190,7 +190,7 @@ class Login(object):
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
-        return None #no oauth
+        return "" #no oauth
     else:
         return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, flask.request.headers.get('REMOTE_ADDR',''))
 
