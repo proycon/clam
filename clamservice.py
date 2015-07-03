@@ -1040,8 +1040,11 @@ class Project:
                 printdebug("No metadata found for output file " + str(outputfile))
             else:
                 headers = {}
-                #guess mimetype
-                mimetype = mimetypes.guess_type(str(outputfile))[0]
+                if os.path.basename(str(outputfile)) in ('log','error.log'):
+                    mimetype = 'text/plain'
+                else:
+                    #guess mimetype
+                    mimetype = mimetypes.guess_type(str(outputfile))[0]
                 if not mimetype: mimetype = 'application/octet-stream'
             printdebug("Returning output file " + str(outputfile) + " with mimetype " + mimetype)
             try:
