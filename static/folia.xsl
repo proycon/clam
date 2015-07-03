@@ -3,8 +3,12 @@
 
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" />
 
+<xsl:strip-space elements="*" />
+
+<!-- FoLiA v0.12 -->
+
 <xsl:template match="/folia:FoLiA">
-  <html> 
+  <html>
   <head>
         <meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
         <meta name="generator" content="folia2html.xsl" />
@@ -20,7 +24,7 @@
             </xsl:otherwise>
         </xsl:choose>
         <style type="text/css">
-            				body {
+ 				body {
 					/*background: #222222;*/
 					background: #b7c8c7;
 					font-family: sans-serif;
@@ -33,7 +37,7 @@
 					margin-top: 50px;
 					margin-left: auto;
 					margin-right: auto;
-					padding: 10px;    
+					padding: 10px;
 					padding-left: 50px;
 					padding-right: 50px;
 					text-align: left;
@@ -44,7 +48,7 @@
 				div.div {
 					padding-left: 0px;
 					padding-top: 10px;
-					padding-bottom: 10px;    
+					padding-bottom: 10px;
 				}
 
 				#metadata {
@@ -66,14 +70,14 @@
 
 				#text {
 					border: 1px solid #628f8b;
-					width: 60%; 
+					width: 60%;
 					max-width: 1024px;
 					background: white;
 					padding: 20px;
-					padding-right: 100px; 
+					padding-right: 100px;
 					margin-top: 5px;
-					margin-left: auto; 
-					margin-right: auto; 
+					margin-left: auto;
+					margin-right: auto;
 					color: #222;
 				}
 				.s {
@@ -87,62 +91,76 @@
 					border-left: 1px blue solid;
 					border-right: 1px blue solid;
 				}
-				.word { 
-					display: inline; 
-					color: black; 
-					position: relative; 
-					text-decoration: none; 
-					z-index: 24; 
-				}
+				.word {
+					display: inline;
+					color: black;
+					position: relative;
+					text-decoration: none;
+					z-index: 24;
+                }
+                .sh { 
+                    background: #f4f9ca;
+                }
+                .cor {
+                    background: #f9caca;
+                }
+                .s:hover .sh { 
+					background: #cfd0ed;
+                }
+                .s:hover .cor { 
+					background: #cfd0ed;
+                }
+
 				#text {
 					border: 1px solid #628f8b;
-					width: 60%; 
+					width: 60%;
 					max-width: 1024px;
 					background: white;
 					padding: 20px;
-					padding-right: 100px; 
+					padding-right: 100px;
 					margin-top: 5px;
-					margin-left: auto; 
-					margin-right: auto; 
+					margin-left: auto;
+					margin-right: auto;
 					color: #222;
 				}
 
-				.word { 
-					display: inline; 
-					color: black; 
-					position: relative; 
-					text-decoration: none; 
+				.word {
+					display: inline;
+					color: black;
+					position: relative;
+					text-decoration: none;
 					z-index: 24;
 				}
-				
+
 				.t {
 					display: inline;
 					text-decoration: none;
 					z-index: 24;
 				}
 
-				.word>.attributes { display: none; font-size: 12px; font-weight: normal; }
-				.word:hover { 
-					/*text-decoration: underline;*/ 
+				.word .attributes { display: none; font-size: 12px; font-weight: normal; }
+				.word:hover {
+					/*text-decoration: underline;*/
 					z-index: 25;
 				}
-				.word:hover>.t {
+				.word:hover .t {
 					background: #bfc0ed;
 					text-decoration: underline;
 				}
-				
-				.word:hover>.attributes { 
-					display: block; 
+
+				.word:hover .attributes {
+					display: block;
 					position: absolute;
-					width: 320px; 
+					width: 340px;
 					font-size: 12px;
-					left: 2em; 
+					left: 2em;
 					top: 2em;
 					background: #b4d4d1; /*#FCFFD0;*/
-					opacity: 0.9; filter: alpha(opacity = 90); 
-					border: 1px solid #628f8b; 
-					padding: 5px; 
+					opacity: 0.9; filter: alpha(opacity = 90);
+					border: 1px solid #628f8b;
+					padding: 5px;
 					text-decoration: none !important;
+                    text-align: left;
 				}
 				.attributes dt {
 					color: #254643;
@@ -164,41 +182,88 @@
 					padding: 10px;
 					border: 1px solid #4f7d87;
 				}
-				.gap pre {
+                pre.gap {
+                    width: 90%;
 					padding: 5px;
-					background: #ddd;
-					border: 1px dashed red;
-				}           
+                    border: 1px dashed #ddd;
+                    white-space: pre-wrap;
+				}
 				span.attrlabel {
 					display: inline-block;
 					color: #254643;
 					font-weight: bold;
-					width: 90px;				
-				}	
+					width: 110px;
+				}
 				span.attrvalue {
 					font-weight: 12px;
 					font-family: monospace;
-				}
+                }
+                span.spanclass {
+                    color: #990000;
+                    text-weight: bold;
+                }
+                span.morpheme {
+                    font-style: italic;
+                }
+                span.details {
+                    font-style: normal;
+                    font-size: 80%;
+                }
+
+                div.caption {
+                    text-align: center;
+                    style: italic;
+                }
+
+
 				div#iewarning {
 					width: 90%;
 					padding: 10px;
 					color: red;
 					font-size: 16px;
 					font-weight: bold;
-					text-align: center;					
-				}	
+					text-align: center;
+				}
+                td {
+                 border: 1px solid #ddd;
+                }
 
+                thead {
+                    font-weight: bold;
+                    background: #ddd;
+                }
+
+                div.note {
+                    font-size: 80%;
+                    border-bottom: 1px #ddd dotted;
+                }
+
+                dl.entry {
+                    border: 1px #aaa solid;
+                    background: #ddd;
+                    padding: 10px;
+                }
+                dt {
+                    font-weight: bold;
+                }
+                dd.example {
+                    font-style: italic;
+                }
         </style>
   </head>
     <body>
     	<xsl:comment><![CDATA[[if lte IE 10]>
 		<div id="iewarning">
-			The FoLiA viewer does not work properly with Internet Explorer, please consider upgrading to Mozilla Firefox or Google Chrome instead. 
+			The FoLiA viewer does not work properly with Internet Explorer, please consider upgrading to Mozilla Firefox or Google Chrome instead.
 		</div>
-		<![endif]]]></xsl:comment>       
+		<![endif]]]></xsl:comment>
         <xsl:apply-templates />
-    </body> 
+    </body>
   </html>
+</xsl:template>
+
+<xsl:template match="folia:meta">
+    <!-- ignore -->
 </xsl:template>
 
 <xsl:template match="folia:text">
@@ -208,14 +273,14 @@
 </xsl:template>
 
 <xsl:template match="folia:div">
- <div class="div"> 
+ <div class="div">
    <xsl:apply-templates />
  </div>
 </xsl:template>
 
 <xsl:template match="folia:p">
- <p id="{@xml:id}">
-  <xsl:apply-templates />
+ <p id="{@xml:id}">    
+    <xsl:apply-templates />
  </p>
 </xsl:template>
 
@@ -231,35 +296,66 @@
 <xsl:choose>
  <xsl:when test="count(ancestor::folia:div) = 1">
     <h1>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h1>
  </xsl:when>
  <xsl:when test="count(ancestor::folia:div) = 2">
     <h2>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h2>
- </xsl:when> 
+ </xsl:when>
  <xsl:when test="count(ancestor::folia:div) = 3">
     <h3>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h3>
- </xsl:when>  
+ </xsl:when>
  <xsl:when test="count(ancestor::folia:div) = 4">
     <h4>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h4>
- </xsl:when>  
+ </xsl:when>
  <xsl:when test="count(ancestor::folia:div) = 5">
     <h5>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h5>
- </xsl:when>   
+ </xsl:when>
  <xsl:otherwise>
     <h6>
-        <xsl:apply-templates />
+        <xsl:call-template name="headinternal" />
     </h6>
  </xsl:otherwise>
-</xsl:choose> 
+</xsl:choose>
+</xsl:template>
+
+<xsl:template name="headinternal">
+    <span id="{@xml:id}" class="head">
+        <xsl:apply-templates />
+    </span>
+</xsl:template>
+
+
+<xsl:template match="folia:entry">
+<dl class="entry">
+    <xsl:apply-templates />
+</dl>
+</xsl:template>
+
+<xsl:template match="folia:term">
+<dt>
+    <xsl:apply-templates />
+</dt>
+</xsl:template>
+
+<xsl:template match="folia:def">
+<dd>
+    <xsl:apply-templates />
+</dd>
+</xsl:template>
+
+<xsl:template match="folia:ex">
+<dd class="example">
+    <xsl:apply-templates />
+</dd>
 </xsl:template>
 
 <xsl:template match="folia:list">
@@ -268,67 +364,350 @@
 </ul>
 </xsl:template>
 
-<xsl:template match="folia:listitem">
-<li><xsl:apply-templates /></li>
+<xsl:template match="folia:item">
+    <li><xsl:apply-templates /></li>
 </xsl:template>
 
+<xsl:template match="folia:note">
+<div class="note">
+    <a name="ref.{@xml:id}"></a>
+    <xsl:apply-templates />
+</div>
+</xsl:template>
+
+<xsl:template match="folia:ref">
+    <xsl:choose>
+    <xsl:when test="*">
+        <xsl:apply-templates />
+    </xsl:when>
+    <xsl:otherwise>
+    <!-- No child elements -->
+    <a href="#ref.{@id}">*</a>
+    </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+
 <xsl:template match="folia:s">
- <span id="{@xml:id}" class="s"><xsl:apply-templates select=".//folia:w|folia:whitespace|folia:br" /></span>
+    <span id="{@xml:id}" class="s">
+        <xsl:apply-templates />
+    </span>
+</xsl:template>
+
+<xsl:template match="folia:part">
+    <span class="part"><xsl:apply-templates /></span>
 </xsl:template>
 
 <xsl:template match="folia:w">
-<xsl:if test="not(ancestor::folia:original) and not(ancestor::folia:suggestion) and not(ancestor::folia:alternative)">
-<span id="{@xml:id}" class="word"><span class="t"><xsl:value-of select=".//folia:t[1]"/></span><xsl:call-template name="tokenannotations" /></span>
-<xsl:choose>
-   <xsl:when test="@space = 'no'"></xsl:when>
-   <xsl:otherwise>
-    <xsl:text> </xsl:text>
-   </xsl:otherwise>
-</xsl:choose>
-</xsl:if>
+    <xsl:variable name="wid" select="@xml:id" />
+    <xsl:if test="not(ancestor::folia:original) and not(ancestor::folia:suggestion) and not(ancestor::folia:alternative) and not(ancestor-or-self::*/auth)">
+        <span id="{@xml:id}"><xsl:attribute name="class">word<xsl:if test="//folia:wref[@id=$wid and not(ancestor::folia:altlayers)]"> sh</xsl:if><xsl:if test=".//folia:correction or .//folia:errordetection"> cor</xsl:if></xsl:attribute><span class="t"><xsl:value-of select="string(.//folia:t[not(ancestor-or-self::*/@auth) and not(ancestor::folia:morpheme) and not(ancestor::folia:str) and not(@class)])"/></span><xsl:call-template name="tokenannotations" /></span>
+    <xsl:choose>
+       <xsl:when test="@space = 'no'"></xsl:when>
+       <xsl:otherwise>
+        <xsl:text> </xsl:text>
+       </xsl:otherwise>
+    </xsl:choose>
+    </xsl:if>
+</xsl:template>
+
+
+
+
+<xsl:template match="folia:t">
+    <!-- Test presence of text in deeper structure elements, if they exist we don't
+         render this text but rely on the text in the deeper structure  -->
+    <!-- Next, check if text element is authoritative and have the proper class -->
+    <xsl:if test="not(following-sibling::*//folia:t[(not(./@class) or ./@class='current') and not(ancestor-or-self::*/@auth) and not(ancestor::folia:suggestion) and not(ancestor::folia:alt) and not(ancestor::folia:altlayers) and not(ancestor::folia:morpheme) and not(ancestor::folia:str)])"><xsl:if test="(not(./@class) or ./@class='current') and not(ancestor-or-self::*/@auth) and not(ancestor::folia:suggestion) and not(ancestor::folia:alt) and not(ancestor::folia:altlayers) and not(ancestor::folia:morpheme) and not(ancestor::folia:str)"><xsl:apply-templates /></xsl:if></xsl:if>
+</xsl:template>
+
+<xsl:template match="folia:desc">
+    <!-- ignore -->
+</xsl:template>
+
+<xsl:template match="folia:t-style">
+    <!-- guess class names that may be indicative of certain styles, we're
+         unaware of any sets here -->
+    <xsl:choose>
+    <xsl:when test="@class = 'bold' or @class = 'b'">
+        <b><xsl:apply-templates /></b>
+    </xsl:when>
+    <xsl:when test="@class = 'italic' or @class = 'i' or @class = 'italics'">
+        <i><xsl:apply-templates /></i>
+    </xsl:when>
+     <xsl:when test="@class = 'strong'">
+        <strong><xsl:apply-templates /></strong>
+    </xsl:when>
+    <xsl:when test="@class = 'em' or @class = 'emph' or @class = 'emphasis'">
+        <em><xsl:apply-templates /></em>
+    </xsl:when>
+    <xsl:otherwise>
+        <span class="style_{@class}"><xsl:apply-templates /></span>
+    </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+
+
+<xsl:template match="folia:t-str">
+    <xsl:choose>
+        <xsl:when test="@xlink:href">
+            <a href="{@xlink:href}"><span class="str_{@class}"><xsl:apply-templates /></span></a>
+        </xsl:when>
+        <xsl:otherwise>
+            <span class="str_{@class}"><xsl:apply-templates /></span>
+        </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
+
+<xsl:template match="folia:t-gap">
+    <span class="gap"><xsl:apply-templates /></span>
+</xsl:template>
+
+
+<xsl:template name="tokenannotation_text">
+    <xsl:if test="folia:t">
+            <xsl:for-each select="folia:t">
+                <span class="attrlabel">Text
+                <xsl:if test="count(../folia:t) &gt; 1">
+                    (<xsl:value-of select="@class" />)
+                  </xsl:if>
+                </span><span class="attrvalue"><xsl:value-of select=".//text()" /></span><br />
+            </xsl:for-each>
+      </xsl:if>
 </xsl:template>
 
 <xsl:template name="tokenannotations">
  <span class="attributes">
- 	<span class="attrlabel">ID</span><span class="attrvalue"><xsl:value-of select="@xml:id" /></span><br />
-	<xsl:if test="folia:phon">
-        	<span class="attrlabel">Phonetics</span><span class="attrvalue"><xsl:value-of select="folia:phon/@class" /></span><br />
-    </xsl:if>
-        <xsl:if test="folia:pos">
-        	<span class="attrlabel">PoS</span><span class="attrvalue"><xsl:value-of select="folia:pos/@class" /></span><br />
+     <span class="attrlabel">ID</span><span class="attrvalue"><xsl:value-of select="@xml:id" /></span><br />
+        <xsl:call-template name="tokenannotation_text" />
+        <xsl:if test=".//folia:phon">
+            <xsl:for-each select=".//folia:phon[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+                <span class="attrlabel">Phonetics</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
         </xsl:if>
-        <xsl:if test="folia:lemma">
-			<span class="attrlabel">Lemma</span><span class="attrvalue"><xsl:value-of select="folia:lemma/@class" /></span><br />
+        <xsl:if test=".//folia:pos">
+            <xsl:for-each select=".//folia:pos[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+            	<span class="attrlabel">PoS</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
         </xsl:if>
-        <xsl:if test="folia:sense">
-			<span class="attrlabel">Sense</span><span class="attrvalue"><xsl:value-of select="folia:sense/@class" /></span><br />
+        <xsl:if test=".//folia:lemma">
+            <xsl:for-each select=".//folia:lemma[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+			    <span class="attrlabel">Lemma</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
         </xsl:if>
-        <xsl:if test="folia:subjectivity">
-			<span class="attrlabel">Subjectivity</span><span class="attrvalue"><xsl:value-of select="folia:subjectivity/@class" /></span><br />
+        <xsl:if test=".//folia:sense">
+            <xsl:for-each select=".//folia:sense[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+			    <span class="attrlabel">Sense</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
         </xsl:if>
-        <xsl:if test="folia:errordetection[@errors='yes']">
-			<span class="attrlabel">Error detection</span><span class="attrvalue">Possible errors</span><br />        
+        <xsl:if test=".//folia:subjectivity[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+            <xsl:for-each select=".//folia:subjectivity">
+			    <span class="attrlabel">Subjectivity</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
+        </xsl:if>
+        <xsl:if test=".//folia:metric">
+            <xsl:for-each select=".//folia:metric[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+                <span class="attrlabel">Metric <xsl:value-of select="@class" /></span><span class="attrvalue"><xsl:value-of select="@value" /></span><br />
+            </xsl:for-each>
+        </xsl:if>
+        <xsl:if test=".//folia:errordetection">
+            <xsl:for-each select=".//folia:errordetection[not(ancestor-or-self::*/@auth) and not(ancestor-or-self::*/morpheme)]">
+                <span class="attrlabel">Error detected</span><span class="attrvalue"><xsl:value-of select="@class" /></span><br />
+            </xsl:for-each>
         </xsl:if>
         <xsl:if test="folia:correction">
+            <!-- TODO: Expand to support all token annotations -->
             <xsl:if test="folia:correction/folia:suggestion/folia:t">
             	<span class="attrlabel">Suggestion(s) for text correction</span><span class="attrvalue"><xsl:for-each select="folia:correction/folia:suggestion/folia:t">
                     <em><xsl:value-of select="." /></em><xsl:text> </xsl:text>
-                </xsl:for-each></span><br />        
+                </xsl:for-each></span><br />
             </xsl:if>
             <xsl:if test="folia:correction/folia:original/folia:t">
             	<span class="attrlabel">Original pre-corrected text</span>
-            	<span class="attrvalue">                
-                <xsl:for-each select="folia:correction/folia:original/folia:t[1]">
+            	<span class="attrvalue">
+                <xsl:for-each select="folia:correction/folia:original/folia:t">
                     <em><xsl:value-of select="." /></em><xsl:text> </xsl:text>
-                </xsl:for-each>      
-                </span><br />            
-            </xsl:if>            
+                </xsl:for-each>
+                </span><br />
+            </xsl:if>
         </xsl:if>
+        <xsl:if test=".//folia:morphology">
+            <xsl:for-each select=".//folia:morphology[not(ancestor-or-self::*/@auth)]">
+                <span class="attrlabel">Morphology</span> 
+                <span class="attrvalue">
+                    <xsl:for-each select="folia:morpheme">
+                        <span class="morpheme">
+                            <xsl:value-of select="./folia:t[not(@class) or @class='current']" />
+                            <xsl:if test="@class">
+                                <span class="details">(<xsl:value-of select="@class" />)</span>
+                            </xsl:if>
+                            <xsl:if test="@function">
+                                <span class="details">[<xsl:value-of select="@function" />]</span>
+                                </xsl:if>
+                            <xsl:text> </xsl:text>
+                        </span>
+                    </xsl:for-each>
+                </span><br />
+            </xsl:for-each>
+        </xsl:if>
+        <span class="spanannotations">
+            <xsl:call-template name="spanannotations">
+                <xsl:with-param name="id" select="@xml:id" />
+            </xsl:call-template>
+        </span>
  </span>
 </xsl:template>
 
+
+<xsl:template name="span">
+    <xsl:param name="id" />
+    <xsl:text> </xsl:text>
+    <span class="span">
+        <xsl:for-each select=".//folia:wref">
+            <xsl:variable name="wrefid" select="@id" />
+            <xsl:choose>
+                <xsl:when test="@t">
+                    <xsl:value-of select="@t" />
+                    <xsl:text> </xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:if test="//folia:w[@xml:id=$wrefid]">
+                        <xsl:value-of select="//folia:w[@xml:id=$wrefid]/folia:t[not(ancestor::folia:original) and not(ancestor::folia:suggestion) and not(ancestor::folia:alternative) and not(ancestor-or-self::*/auth)]"/>
+                    </xsl:if>
+                    <xsl:text> </xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:for-each>
+    </span>
+</xsl:template>
+
+<xsl:template name="spanannotations">
+    <xsl:param name="id" />
+
+    <xsl:variable name="entities" select="ancestor::*"></xsl:variable>
+    <xsl:for-each select="$entities">
+        <xsl:for-each select="folia:entities">
+            <xsl:for-each select="folia:entity">
+                <xsl:if test=".//folia:wref[@id=$id]">
+                    <span class="attrlabel">Entity</span>
+                    <span class="attrvalue">
+                        <span class="spanclass"><xsl:value-of select="@class" /></span>
+                        <xsl:call-template name="span">
+                            <xsl:with-param name="id" select="$id" />
+                        </xsl:call-template>
+                    </span><br />
+                </xsl:if>
+            </xsl:for-each>
+        </xsl:for-each>
+    </xsl:for-each>
+
+
+    <xsl:variable name="ancestors" select="ancestor::*"></xsl:variable>
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:chunking">
+        <xsl:for-each select="folia:chunk">
+            <xsl:if test=".//folia:wref[@id=$id]">
+                <span class="attrlabel">Chunk</span>
+                <span class="attrvalue">
+                    <span class="spanclass"><xsl:value-of select="@class" /></span>
+                        <xsl:call-template name="span">
+                            <xsl:with-param name="id" select="$id" />
+                        </xsl:call-template>
+                </span><br/>
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:for-each>
+    </xsl:for-each>
+
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:syntax">
+        <xsl:for-each select="//folia:su">
+            <xsl:if test=".//folia:wref[@id=$id]">
+                <span class="attrlabel">Syntactic Unit</span>
+                <span class="attrvalue">
+                    <span class="spanclass"><xsl:value-of select="@class" /></span>
+                        <xsl:call-template name="span">
+                            <xsl:with-param name="id" select="$id" />
+                        </xsl:call-template>
+                </span><br/>
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:for-each>
+    </xsl:for-each>
+
+
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:semroles">
+        <xsl:for-each select="folia:semrole">
+            <xsl:if test=".//folia:wref[@id=$id]">
+                <span class="attrlabel">Semantic Role</span>
+                <span class="attrvalue">
+                    <span class="spanclass"><xsl:value-of select="@class" /></span>
+                        <xsl:call-template name="span">
+                            <xsl:with-param name="id" select="$id" />
+                        </xsl:call-template>
+                </span><br />
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:for-each>
+    </xsl:for-each>
+
+
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:coreferences">
+        <xsl:for-each select="folia:coreferencechain">
+            <xsl:if test=".//folia:wref[@id=$id]">
+                <span class="attrlabel">Coreference Chain</span>
+                <span class="attrvalue">
+                    <span class="spanclass"><xsl:value-of select="@class" /></span>
+                    <xsl:for-each select="folia:coreferencelink">
+                        <xsl:call-template name="span">
+                            <xsl:with-param name="id" select="$id" />
+                        </xsl:call-template>
+                        <xsl:text> - </xsl:text>
+                    </xsl:for-each>
+                    <br />
+                </span><br/>
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:for-each>
+    </xsl:for-each>
+
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:dependencies">
+        <xsl:for-each select="folia:dependency">
+            <xsl:if test=".//folia:wref[@id=$id]">
+                <span class="attrlabel">Dependency</span>
+                <span class="attrvalue">
+                    <span class="spanclass"><xsl:value-of select="@class" /></span><xsl:text> </xsl:text>
+                        <xsl:for-each select="folia:hd">
+                            <strong>Head:</strong>
+                            <xsl:call-template name="span">
+                                <xsl:with-param name="id" select="$id" />
+                            </xsl:call-template>
+                        </xsl:for-each>
+                        <xsl:for-each select="folia:dep">
+                            <strong>Dep:</strong>
+                            <xsl:call-template name="span">
+                                <xsl:with-param name="id" select="$id" />
+                            </xsl:call-template>
+                        </xsl:for-each>
+                </span><br />
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:for-each>
+    </xsl:for-each>
+
+</xsl:template>
+
+
 <xsl:template match="folia:whitespace">
  <br /><br />
+</xsl:template>
+
+<xsl:template match="folia:br">
+ <br />
 </xsl:template>
 
 <xsl:template match="folia:figure">
@@ -339,14 +718,44 @@
       </xsl:attribute>
       <xsl:attribute name="alt">
         <xsl:value-of select="folia:desc" />
-      </xsl:attribute>      
+      </xsl:attribute>
   </img>
   <xsl:if test="folia:caption">
    <div class="caption">
-     <xsl:apply-templates select="folia:caption/*" />
+     <xsl:apply-templates />
    </div>
   </xsl:if>
  </div>
+</xsl:template>
+
+<xsl:template match="folia:table">
+    <table>
+      <xsl:apply-templates select="folia:tablehead" />
+      <tbody>
+        <xsl:apply-templates select="*[name()!='tablehead']" />
+      </tbody>
+    </table>
+</xsl:template>
+
+
+
+<xsl:template match="folia:tablehead">
+  <thead>
+        <xsl:apply-templates />
+  </thead>
+</xsl:template>
+
+
+<xsl:template match="folia:row">
+  <tr>
+        <xsl:apply-templates />
+ </tr>
+</xsl:template>
+
+<xsl:template match="folia:cell">
+  <td>
+    <xsl:apply-templates />
+  </td>
 </xsl:template>
 
 </xsl:stylesheet>
