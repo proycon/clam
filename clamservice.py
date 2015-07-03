@@ -446,9 +446,9 @@ class Admin:
             return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
         except UnicodeError:
             return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
-        except IOError:
+        except FileNotFoundError:
             raise flask.abort(404)
-        except:
+        except IOError:
             raise flask.abort(404)
 
 
@@ -1034,6 +1034,11 @@ class Project:
                         return flask.make_response("No such viewer or converter:" + requestid,404)
         elif not requestarchive:
             #normal request - return file contents
+
+            #pro-actively check if file exists
+            if not os.path.exists(str(outputfile)):
+                raise flask.abort(404)
+
             if outputfile.metadata:
                 headers = outputfile.metadata.httpheaders()
                 mimetype = outputfile.metadata.mimetype
@@ -1051,9 +1056,9 @@ class Project:
                 return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
             except UnicodeError:
                 return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
-            except IOError:
+            except FileNotFoundError:
                 raise flask.abort(404)
-            except:
+            except IOError:
                 raise flask.abort(404)
 
     @staticmethod
@@ -1204,6 +1209,11 @@ class Project:
                 raise flask.abort(404)
         else:
             #normal request - return file contents
+
+            #pro-actively check if file exists
+            if not os.path.exists(str(inputfile)):
+                raise flask.abort(404)
+
             if inputfile.metadata:
                 headers = inputfile.metadata.httpheaders()
                 mimetype = inputfile.metadata.mimetype
