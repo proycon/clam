@@ -994,6 +994,8 @@ class Project:
             #this is a request for everything
             requestarchive = True
             return Project.getarchive(project,user)
+        elif filename == "folia.xsl":
+            return foliaxsl()
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'output/' +  "/".join(raw[:-1])):
@@ -1188,7 +1190,9 @@ class Project:
         if filename.strip('/') == "":
             #this is a request for the index
             return flask.make_response("Permission denied",403)
-        if len(raw) >= 2:
+        elif filename == "folia.xsl":
+            return foliaxsl()
+        elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
             if os.path.isfile(Project.path(project, user) + 'input/' +  "/".join(raw[:-1])):
                 filename = "/".join(raw[:-1])
@@ -1850,7 +1854,7 @@ def interfacedata(): #no auth
 
     return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript')
 
-def foliaxsl(path):
+def foliaxsl():
     return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8').read()),'text/xsl')
 
 def styledata():
@@ -2161,14 +2165,12 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/output/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<path:path>/input/folia.xsl', 'foliaxsl', foliaxsl, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
