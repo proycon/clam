@@ -446,9 +446,9 @@ class Admin:
             return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
         except UnicodeError:
             return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
-        except FileNotFoundError:
-            raise flask.abort(404)
         except IOError:
+            raise flask.abort(404)
+        except:
             raise flask.abort(404)
 
 
@@ -1051,9 +1051,9 @@ class Project:
                 return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
             except UnicodeError:
                 return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
-            except FileNotFoundError:
-                raise flask.abort(404)
             except IOError:
+                raise flask.abort(404)
+            except:
                 raise flask.abort(404)
 
     @staticmethod
