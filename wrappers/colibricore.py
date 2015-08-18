@@ -3,7 +3,6 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Settings --
 #       by Maarten van Gompel (proycon)
 #       http://proycon.github.io/clam/
 #       Centre for Language and Speech Technology  / Language Machines
