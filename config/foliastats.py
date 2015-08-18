@@ -37,7 +37,7 @@ USERS = None
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
-if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/colibri-patternmodeller'):
+if 'VIRTUAL_ENV' in os.environ:
     ROOT = os.environ['VIRTUAL_ENV'] + "/foliastats.clam/"
     PORT = 8805
     BINDIR = os.environ['VIRTUAL_ENV'] + '/bin/'
