@@ -2099,21 +2099,21 @@ class CLAMService(object):
                 if UWSGI:
                     if 'virtualenv' in uwsgi.opt and uwsgi.opt['virtualenv']:
                         base = uwsgi.opt['virtualenv']
-                        if sys.version >= '3' and isinstance(base, bytes): 
+                        if sys.version >= '3' and isinstance(base, bytes):
                             base = str(base, 'utf-8')
-                        interpeter = base + '/bin/python'
+                        interpreter = base + '/bin/python'
                     elif 'home' in uwsgi.opt and uwsgi.opt['home']:
                         base = uwsgi.opt['home']
                         if sys.version >= '3' and isinstance(base, bytes):
                             base = str(base, 'utf-8')
-                        interpeter = uwsgi.opt['home'] + '/bin/python'
+                        interpreter = uwsgi.opt['home'] + '/bin/python'
                     else:
                         if sys.version > '3':
                             interpreter = 'python3'
                         else:
                             interpreter = 'python'
                 else:
-                   interpreter = sys.executable
+                    interpreter = sys.executable
                 settings.COMMAND = interpreter + " " + settings.COMMAND
             else:
                 error("Specified command " + settings.COMMAND.split(" ")[0] + " is not executable")
