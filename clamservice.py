@@ -59,7 +59,7 @@ except ImportError:
 try:
     import MySQLdb
 except ImportError:
-    print("WARNING: No MySQL support available in your version of Python! Install python-mysql if you plan on using MySQL for authentication",file=sys.stderr)
+    print("WARNING: No MySQL support available in your version of Python! pip install mysqlclient if you plan on using MySQL for authentication",file=sys.stderr)
 
 try:
     import uwsgi
