@@ -50,7 +50,7 @@ if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/b
         HOST = "webservices-lst.science.ru.nl"
         URLPREFIX = 'ucto'
 
-        if not 'CLAMTEST' in os.environvagrant:
+        if not 'CLAMTEST' in os.:
             ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
             PORT = 80
         else:
