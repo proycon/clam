@@ -52,7 +52,7 @@ if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/b
         HOST = "webservices-lst.science.ru.nl"
         URLPREFIX = 'frog'
 
-        if not 'CLAMTEST' in os.:
+        if not 'CLAMTEST' in os.environ:
             ROOT = "/scratch2/www/webservices-lst/live/writable/frog/"
             PORT = 80
         else:
