@@ -2098,8 +2098,12 @@ class CLAMService(object):
             if settings.COMMAND.split(" ")[0][-3:] == ".py" and sys.executable:
                 if UWSGI:
                     if 'virtualenv' in uwsgi.opt and uwsgi.opt['virtualenv']:
-                        interpeter = uwsgi.opt['virtualenv'] + '/bin/python'
+                        base = uwsgi.opt['virtualenv']
+                        if sys.version >= '3' and isinstance(base, bytes): base = base.encode('utf-8')
+                        interpeter = base + '/bin/python'
                     elif 'home' in uwsgi.opt and uwsgi.opt['home']:
+                        base = uwsgi.opt['home']
+                        if sys.version >= '3' and isinstance(base, bytes): base = base.encode('utf-8')
                         interpeter = uwsgi.opt['home'] + '/bin/python'
                     else:
                         if sys.version > '3':
