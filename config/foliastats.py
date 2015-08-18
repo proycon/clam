@@ -37,37 +37,41 @@ USERS = None
 
 # ================ Server specific configuration for CLAM ===============
 host = uname()[1]
-if host == 'galactica' or host == 'roma': #proycon's laptop/server
+if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/colibri-patternmodeller'):
+    ROOT = os.environ['VIRTUAL_ENV'] + "/foliastats.clam/"
+    PORT = 8805
+    BINDIR = os.environ['VIRTUAL_ENV'] + '/bin/'
+
+    if host == 'applejack': #configuration for server in Nijmegen
+        HOST = "webservices-lst.science.ru.nl"
+        URLPREFIX = 'foliastats'
+
+        if not 'CLAMTEST' in environ:
+            ROOT = "/scratch2/www/webservices-lst/live/writable/foliastats/"
+            PORT = 80
+        else:
+            ROOT = "/scratch2/www/webservices-lst/test/writable/foliastats/"
+            PORT = 81
+
+        USERS_MYSQL = {
+            'host': 'mysql-clamopener.science.ru.nl',
+            'user': 'clamopener',
+            'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
+            'database': 'clamopener',
+            'table': 'clamusers_clamusers'
+        }
+        DEBUG = False
+        REALM = "WEBSERVICES-LST"
+        DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+        SECRETKEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
+        ADMINS = ['proycon','antalb','wstoop']
+elif host == 'galactica' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
     ROOT = "/home/proycon/work/foliastats.clam/"
     PORT = 9001
     BINDIR = "/usr/local/bin/"
     USERS = { 'proycon': pwhash('proycon', SYSTEM_ID, 'secret') }
     #URLPREFIX = 'frog'
-elif host == 'applejack': #Nijmegen
-    if not 'CLAMTEST' in environ:
-        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/live/writable/foliastats/"
-        HOST = "webservices-lst.science.ru.nl"
-        PORT = 80
-    else:
-        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/test/writable/foliastats/"
-        HOST = "webservices-lst.science.ru.nl"
-        PORT = 81
-    URLPREFIX = "foliastats"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"
-    USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl',
-        'user': 'clamopener',
-        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
-        'database': 'clamopener',
-        'table': 'clamusers_clamusers'
-    }
-    DEBUG = False
-    REALM = "WEBSERVICES-LST"
-    DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-    ADMINS = ['proycon','antalb','wstoop']
 elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg
     #Assuming ILK server
     CLAMDIR = "/var/www/clam"
