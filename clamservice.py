@@ -110,6 +110,7 @@ def userdb_lookup_mysql(user, **authsettings):
     if accesslist and not (user in accesslist):
         printdebug("User not in accesslist")
         raise KeyError
+    if sys.version >= '3' and isinstance(passwd,bytes): passwd = str(passwd,'utf-8')
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
     #simple protection against mysql injection
