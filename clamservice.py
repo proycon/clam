@@ -2192,7 +2192,7 @@ class CLAMService(object):
         self.mode = mode
         if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings.BASICAUTH):
             warning("*** YOU ARE RUNNING THE DEVELOPMENT SERVER, THIS IS INSECURE WITH THE CONFIGURED AUTHENTICATION METHOD ***")
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/  (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
+        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/' + settings.URLPREFIX + ' (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
         if settings.FORCEURL:
             printlog("Access using forced URL: " + settings.FORCEURL)
 
