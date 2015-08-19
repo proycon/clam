@@ -2201,7 +2201,7 @@ class CLAMService(object):
             printlog("Access using forced URL: " + settings.FORCEURL)
 
         if self.mode == 'wsgi':
-            pass
+            self.service.debug = DEBUG
         elif self.mode in ('standalone','debug'):
             self.service.debug = (mode == 'debug')
             self.service.run(host=settings.HOST,port=settings.PORT)
