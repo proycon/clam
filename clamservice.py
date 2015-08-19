@@ -105,8 +105,10 @@ def userdb_lookup_mysql(user, **authsettings):
     printdebug("Looking up user " + user + " in MySQL")
     host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()
     if denylist and user in denylist:
+        printdebug("User in denylist")
         raise KeyError
     if accesslist and not (user in accesslist):
+        printdebug("User not in accesslist")
         raise KeyError
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
@@ -125,8 +127,10 @@ def userdb_lookup_mysql(user, **authsettings):
     cursor.close()
     db.close()
     if password:
+        printdebug("Password retrieved")
         return password
     else:
+        printdebug("User not found")
         raise KeyError
 
 
