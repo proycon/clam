@@ -67,7 +67,7 @@ if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/b
         DEBUG = False
         REALM = "WEBSERVICES-LST"
         DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-        SECRETKEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
+        SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
         ADMINS = ['proycon','antalb','wstoop']
 elif os.path.exists('/usr/bin/ucto') and os.path.exists("/home/vagrant") and os.getuid() == 998:
     # Virtual Machine (LaMachine)

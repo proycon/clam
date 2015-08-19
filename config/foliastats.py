@@ -21,11 +21,12 @@ from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
+import clam
 from os import uname, environ
 from base64 import b64decode as D
 
 REQUIRE_VERSION = 0.9
-
+CLAMDIR = clam.__path__[0]
 
 #============== General meta configuration =================
 SYSTEM_ID = "foliastats"
@@ -63,7 +64,7 @@ if 'VIRTUAL_ENV' in os.environ:
         DEBUG = False
         REALM = "WEBSERVICES-LST"
         DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
-        SECRETKEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
+        SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
         ADMINS = ['proycon','antalb','wstoop']
 elif host == 'galactica' or host == 'roma': #proycon's laptop/server
     CLAMDIR = "/home/proycon/work/clam"
