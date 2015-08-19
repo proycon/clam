@@ -2528,4 +2528,8 @@ def run_wsgi(settings_module):
     set_defaults() #host, port
     test_dirs()
 
-    return CLAMService('wsgi').service.wsgi_app
+    if DEBUG:
+        from werkzeug.debug import DebuggedApplication
+        return DebuggedApplication(CLAMService('wsgi').service.wsgi_app, True)
+    else:
+        return CLAMService('wsgi').service.wsgi_app
