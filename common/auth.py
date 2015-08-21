@@ -12,9 +12,12 @@ This module provides Basic and Digest HTTP authentication for Flask routes. Adap
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
+import os
 from functools import wraps
 from hashlib import md5
 from random import Random, SystemRandom
+from glob import glob
+import time
 import flask
 
 import clam.common.oauth
@@ -130,36 +133,36 @@ class HTTPBasicAuth(HTTPAuth):
 
 
 class HTTPDigestAuth(HTTPAuth):
-    def __init__(self, **kwargs):
+    def __init__(self, noncedir, **kwargs):
         super(HTTPDigestAuth, self).__init__(**kwargs)
         if 'realm' in kwargs:
             self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
+
+        self.noncememory = NonceMemory(noncedir) 
+    
+        if 'nonceexpiration' in kwargs:
+            self.nonceexpiration = int(kwargs['nonceexpiration'])
+        else:
+            self.nonceexpiration = 900
+            
+
         self.printdebug("Initialising Digest Authentication with realm " + self.realm)
-        self.random = SystemRandom()
-        try:
-            self.random.random()
-        except NotImplementedError:
-            self.random = Random()
-
-
-        def _generate_random():
-            return md5(str(self.random.random()).encode('utf-8')).hexdigest()
 
         def default_generate_nonce():
-            session["auth_nonce"] = _generate_random()
-            return session["auth_nonce"]
+            return self.noncememory.getnew(self.nonceexpiration)
 
         def default_verify_nonce(nonce):
-            return nonce == session.get("auth_nonce")
+            return self.noncememory.validate(nonce)
 
-        def default_generate_opaque():
-            session["auth_opaque"] = _generate_random()
-            return session["auth_opaque"]
-
-        def default_verify_opaque(opaque):
-            return opaque == session.get("auth_opaque")
+        def default_generate_opaque(nonce):
+            opaque, ip, expiretime = self.noncememory.get(nonce)
+            return opaque
+            
+        def default_verify_opaque(nonce, checkopaque):
+            opaque, ip, expiretime = self.noncememory.get(nonce)
+            return opaque == checkopaque
         
         self.generate_nonce(default_generate_nonce)
         self.generate_opaque(default_generate_opaque)
@@ -185,14 +188,14 @@ class HTTPDigestAuth(HTTPAuth):
     def get_nonce(self):
         return self.generate_nonce_callback()
 
-    def get_opaque(self):
-        return self.generate_opaque_callback()
+    def get_opaque(self, nonce):
+        return self.generate_opaque_callback(nonce)
 
 
     def authenticate_header(self):
-        flask.session["auth_nonce"] = self.get_nonce()
-        flask.session["auth_opaque"] = self.get_opaque()
-        return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, flask.session["auth_nonce"], flask.session["auth_opaque"])
+        nonce = self.get_nonce()
+        opaque = self.get_opaque(nonce)
+        return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, nonce, opaque)
 
     def authenticate(self, auth, password):
         if not auth.username or not auth.realm or not auth.uri or not auth.nonce or not auth.response or not password:
@@ -201,7 +204,7 @@ class HTTPDigestAuth(HTTPAuth):
         elif not self.verify_nonce_callback(auth.nonce):
             self.printdebug("Nonce mismatch")
             return False
-        elif not self.verify_opaque_callback(auth.opaque):
+        elif not self.verify_opaque_callback(auth.nonce, auth.opaque):
             self.printdebug("Opaque mismatch")
             return False
         #password is stored has HA1 already
@@ -327,4 +330,72 @@ class OAuth2(HTTPAuth):
                     return flask.make_response("Could not obtain username from OAuth session",403)
         return decorated
 
+class NonceMemory:
+    """File-based nonce-memory (so it can work with multiple workers). Includes expiration per nonce and and IP-check"""
 
+    def __init__(self, path, debug=False):
+        self.path = path
+        self.debug = debug
+
+        self.random = SystemRandom()
+        try:
+            self.random.random()
+        except NotImplementedError:
+            self.random = Random()
+
+    def getnew(self, expiration=900, opaque=None):
+        nonce = md5(str(self.random.random()).encode('utf-8')).hexdigest()
+        if self.debug: print("Generated new nonce " + nonce,file=sys.stderr)
+        if opaque is None:
+            #Generate a random opaque if none was given
+            opaque = md5(str(self.random.random()).encode('utf-8')).hexdigest()
+        with open(self.path + '/' + nonce + '.nonce','w') as f:
+            f.write(opaque + "\n")
+            f.write(flask.request.remote_addr + "\n")
+            f.write(str(time.time() + expiration) + "\n")
+        return nonce
+
+    def validate(self, nonce):
+        """Does the nonce exist and is it valid for the request?"""
+        if self.debug: print("Checking nonce " + str(nonce),file=sys.stderr)
+        noncefile = self.path + '/' + nonce + '.nonce'
+        try:
+            opaque, ip, expiretime = self.get(nonce)
+            if expiretime < time.time():
+                if self.debug: print("Nonce expired",file=sys.stderr)
+                return False
+            elif ip != flask.request.remote_addr:
+                if self.debug: print("Nonce IP mismatch",file=sys.stderr)
+                return False
+            else:
+                return True
+        except KeyError:
+            if self.debug: print("Nonce " + nonce + " does not exist",file=sys.stderr)
+            return False
+
+
+    def get(self, nonce):
+        if not nonce: raise KeyError("No nonce supplied")
+        noncefile = self.path + '/' + nonce + '.nonce'
+        if os.path.exists(noncefile):
+            return self.readnoncefile(noncefile) #returns (opaque,ip,expiretime) tuple
+        else:
+            raise KeyError("No such nonce: " + nonce)
+        
+    def readnoncefile(self, noncefile):    
+        with open(noncefile,'r') as f:
+            opaque = f.readline().strip()
+            ip = f.readline().strip()
+            expiretime = float(f.readline().strip())
+        return (opaque, ip, expiretime)
+
+
+    def __del__(self):
+        """do cleanup on destruction, delete expired nonces"""
+        for noncefile in glob(self.path + '/*.nonce'):
+            opaque,ip, expiretime = self.readnoncefile(noncefile)
+            if time.time() > expiretime:
+                os.unlink(noncefile)
+            
+        
+        

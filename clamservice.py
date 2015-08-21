@@ -2143,14 +2143,14 @@ class CLAMService(object):
                 self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
                 warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
         elif settings.USERS_MYSQL:
             validate_users_mysql()
             if settings.BASICAUTH:
                 self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
                 warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, realm=settings.REALM,debug=printdebug)
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER)
@@ -2227,6 +2227,10 @@ def set_defaults():
     settingkeys = dir(settings)
 
     settings.STANDALONEURLPREFIX = ''
+
+    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:
+        if not s in settingkeys:
+            error("ERROR: Service configuration incomplete, missing setting: " + s)
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
@@ -2343,10 +2347,9 @@ def set_defaults():
     if not 'ACTIONS' in settingkeys:
         settings.ACTIONS = []
 
+    if not 'SESSIONDIR' in settingkeys:
+        settings.SESSIONDIR = settings.ROOT + 'sessions'
 
-    for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:
-        if not s in settingkeys:
-            error("ERROR: Service configuration incomplete, missing setting: " + s)
 
 
 def test_dirs():
@@ -2356,7 +2359,6 @@ def test_dirs():
     if not os.path.isdir(settings.ROOT + 'projects'):
         warning("Projects directory does not exist yet, creating...")
         os.makedirs(settings.ROOT + 'projects')
-        os.makedirs(settings.ROOT + 'projects/anonymous')
     else:
         if not os.path.isdir(settings.ROOT + 'projects/anonymous'):
             warning("Directory for anonymous user not detected, migrating existing project directory from CLAM <0.7 to >=0.7")
@@ -2366,6 +2368,11 @@ def test_dirs():
                     if d[-1] == '/': d = d[:-1]
                     warning("\tMoving " + d + " to " + settings.ROOT + 'projects/anonymous/' + os.path.basename(d))
                     shutil.move(d, settings.ROOT + 'projects/anonymous/' + os.path.basename(d))
+
+    if not os.path.isdir(settings.SESSIONDIR):
+        warning("Session directory does not exist yet, creating...")
+        os.makedirs(settings.SESSIONDIR)
+        
     if not settings.PARAMETERS:
             warning("No parameters specified in settings module!")
     if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
