@@ -198,8 +198,23 @@ class HTTPDigestAuth(HTTPAuth):
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, nonce, opaque)
 
     def authenticate(self, auth, password):
-        if not auth.username or not auth.realm or not auth.uri or not auth.nonce or not auth.response or not password:
-            self.printdebug("One or more missing authentication headers in request")
+        if not auth.username:
+            self.printdebug("Username missing in authorization header")
+            return False
+        elif not auth.realm:
+            self.printdebug("Realm missing in authorization header")
+            return False
+        elif not auth.uri:
+            self.printdebug("URI missing in authorization header")
+            return False
+        elif not auth.nonce:
+            self.printdebug("Nonce missing in authorization header")
+            return False
+        elif not  auth.response:
+            self.printdebug("Response missing in authorization header")
+            return False
+        elif not password:
+            self.printdebug("Password missing in authorization header")
             return False
         elif not self.verify_nonce_callback(auth.nonce):
             self.printdebug("Nonce mismatch")
