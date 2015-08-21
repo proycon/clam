@@ -35,7 +35,7 @@ class NoAuth(object):
 class HTTPAuth(object):
     def __init__(self, **kwargs):
         def default_get_password(username, **kwargs):
-            return None
+            raise Exception("No get_password function defined")
 
         def default_auth_error():
             return "Unauthorized Access"
@@ -84,6 +84,9 @@ class HTTPAuth(object):
                 self.printdebug("Obtained username: " + username)
                 try:
                     password = self.get_password(username, **self.settings)
+                    if not password:
+                        self.printdebug("Unable to obtain password for user " + username)
+                        return self.auth_error_callback()
                 except KeyError:
                     self.printdebug("No such user")
                     return self.auth_error_callback()
@@ -214,7 +217,7 @@ class HTTPDigestAuth(HTTPAuth):
             self.printdebug("Response missing in authorization header")
             return False
         elif not password:
-            self.printdebug("Password missing in authorization header")
+            self.printdebug("Password missing")
             return False
         elif not self.verify_nonce_callback(auth.nonce):
             self.printdebug("Nonce mismatch")
