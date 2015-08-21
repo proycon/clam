@@ -143,22 +143,65 @@ class HTTPDigestAuth(HTTPAuth):
         except NotImplementedError:
             self.random = Random()
 
+
+        def _generate_random():
+            return md5(str(self.random.random()).encode('utf-8')).hexdigest()
+
+        def default_generate_nonce():
+            session["auth_nonce"] = _generate_random()
+            return session["auth_nonce"]
+
+        def default_verify_nonce(nonce):
+            return nonce == session.get("auth_nonce")
+
+        def default_generate_opaque():
+            session["auth_opaque"] = _generate_random()
+            return session["auth_opaque"]
+
+        def default_verify_opaque(opaque):
+            return opaque == session.get("auth_opaque")
+        
+        self.generate_nonce(default_generate_nonce)
+        self.generate_opaque(default_generate_opaque)
+        self.verify_nonce(default_verify_nonce)
+        self.verify_opaque(default_verify_opaque)
+
+    def generate_nonce(self, f):
+        self.generate_nonce_callback = f
+        return f
+
+    def verify_nonce(self, f):
+        self.verify_nonce_callback = f
+        return f
+
+    def generate_opaque(self, f):
+        self.generate_opaque_callback = f
+        return f
+
+    def verify_opaque(self, f):
+        self.verify_opaque_callback = f
+        return f
+
     def get_nonce(self):
-        return md5(str(self.random.random()).encode('utf-8')).hexdigest()
+        return self.generate_nonce_callback()
+
+    def get_opaque(self):
+        return self.generate_opaque_callback()
+
 
     def authenticate_header(self):
         flask.session["auth_nonce"] = self.get_nonce()
-        flask.session["auth_opaque"] = self.get_nonce()
+        flask.session["auth_opaque"] = self.get_opaque()
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, flask.session["auth_nonce"], flask.session["auth_opaque"])
 
     def authenticate(self, auth, password):
         if not auth.username or not auth.realm or not auth.uri or not auth.nonce or not auth.response or not password:
             self.printdebug("One or more missing authentication headers in request")
             return False
-        if auth.nonce != flask.session.get("auth_nonce"):
+        elif not self.verify_nonce_callback(auth.nonce):
             self.printdebug("Nonce mismatch")
             return False
-        elif auth.opaque != flask.session.get("auth_opaque"):
+        elif not self.verify_opaque_callback(auth.opaque):
             self.printdebug("Opaque mismatch")
             return False
         #password is stored has HA1 already
