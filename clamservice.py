@@ -2167,6 +2167,22 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
+
+        #versions without trailing slash so no automatic 301 redirect is needed
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json2', Project.status_json, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader2', uploader, methods=['POST'] ) #has it's own login mechanism
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get2', self.auth.require_login(Project.get), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start2', self.auth.require_login(Project.start), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new2', self.auth.require_login(Project.new), methods=['PUT'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete2', self.auth.require_login(Project.delete), methods=['DELETE'] )
+
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
@@ -2192,20 +2208,6 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
 
-        #versions without trailing slash so no automatic 301 redirect is needed
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json2', Project.status_json, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader2', uploader, methods=['POST'] ) #has it's own login mechanism
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get2', self.auth.require_login(Project.get), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start2', self.auth.require_login(Project.start), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new2', self.auth.require_login(Project.new), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete2', self.auth.require_login(Project.delete), methods=['DELETE'] )
 
         self.mode = mode
         if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings.BASICAUTH):
