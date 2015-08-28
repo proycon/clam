@@ -1836,13 +1836,13 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         printdebug('There were paramameter errors during upload!')
         return flask.make_response(output,403)
     elif returntype == 'xml':
-        jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
         return withheaders(flask.make_response(output), 'text/xml')
     elif returntype == 'json':
         #everything ok, return JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
         return flask.make_response(json.dumps(jsonoutput), 'application/json')
     else:
+        printdebug('Invalid return type')
         raise Exception("invalid return type")
 
 
