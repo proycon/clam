@@ -1749,6 +1749,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
             metadataerror = None
             if not metadata and not errors: #check if it has not already been set in another stage
+                printdebug('(Generating metadata)')
                 #for newly generated metadata
                 try:
                     #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
@@ -1773,6 +1774,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 metadata.inputtemplate = inputtemplate.id
 
             if metadataerror:
+                printdebug('(Metadata could not be generated, ' + str(metadataerror) + ',  this usually indicated an error in service configuration)')
                 #output += "<metadataerror />" #This usually indicates an error in service configuration!
                 fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + str(metadataerror) + " (this usually indicates an error in service configuration!)</error>"
                 jsonoutput['error'] = "Metadata could not be generated! " + str(metadataerror) + "  (this usually indicates an error in service configuration!)"
@@ -1786,6 +1788,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                             converter = c
                             break
                     if converter: #(should always be found, error already provided earlier if not)
+                        printdebug('(Invoking converter)')
                         try:
                             success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
                         except:
@@ -1801,6 +1804,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     valid = file.validate()
 
                     if valid:
+                        printdebug('(Validation ok)')
                         output += "<valid>yes</valid>"
 
                         #Great! Everything ok, save metadata
@@ -1812,6 +1816,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(nextseq)
                         os.symlink(Project.path(project, user) + 'input/' + filename, Project.path(project, user) + 'input/' + linkfilename)
                     else:
+                        printdebug('(Validation error)')
                         #Too bad, everything worked out but the file itself doesn't validate.
                         #output += "<valid>no</valid>"
                         fatalerror = "<error type=\"validation\">The file " + xmlescape(filename) + " did not validate, it is not in the proper expected format.</error>"
@@ -1836,8 +1841,10 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         printdebug('There were paramameter errors during upload!')
         return flask.make_response(output,403)
     elif returntype == 'xml':
+        printdebug('Returning xml')
         return withheaders(flask.make_response(output), 'text/xml')
     elif returntype == 'json':
+        printdebug('Returning json')
         #everything ok, return JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
         return flask.make_response(json.dumps(jsonoutput), 'application/json')
