@@ -22,7 +22,7 @@ from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
 import clam
-from os import uname, environ
+import os
 from base64 import b64decode as D
 
 REQUIRE_VERSION = 0.9
@@ -37,7 +37,7 @@ SYSTEM_DESCRIPTION = "N-gram frequency list generation on FoLiA input"
 USERS = None
 
 # ================ Server specific configuration for CLAM ===============
-host = uname()[1]
+host = os.uname()[1]
 if 'VIRTUAL_ENV' in os.environ:
     ROOT = os.environ['VIRTUAL_ENV'] + "/foliastats.clam/"
     PORT = 8805
@@ -47,9 +47,12 @@ if 'VIRTUAL_ENV' in os.environ:
         HOST = "webservices-lst.science.ru.nl"
         URLPREFIX = 'foliastats'
 
-        if not 'CLAMTEST' in environ:
+        if not 'CLAMTEST' in os.environ:
             ROOT = "/scratch2/www/webservices-lst/live/writable/foliastats/"
-            PORT = 80
+            if 'CLAMSSL' in os.environ:
+                PORT = 443
+            else:
+                PORT = 80
         else:
             ROOT = "/scratch2/www/webservices-lst/test/writable/foliastats/"
             PORT = 81
@@ -57,13 +60,13 @@ if 'VIRTUAL_ENV' in os.environ:
         USERS_MYSQL = {
             'host': 'mysql-clamopener.science.ru.nl',
             'user': 'clamopener',
-            'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
+            'password': D(open(os.environ['CLAMOPENER_KEYFILE']).read().strip()),
             'database': 'clamopener',
             'table': 'clamusers_clamusers'
         }
         DEBUG = False
         REALM = "WEBSERVICES-LST"
-        DIGESTOPAQUE = open(environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+        DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
         SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
         ADMINS = ['proycon','antalb','wstoop']
 elif host == 'galactica' or host == 'roma': #proycon's laptop/server

@@ -51,7 +51,10 @@ if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/b
 
         if not 'CLAMTEST' in os.environ:
             ROOT = "/scratch2/www/webservices-lst/live/writable/colibricore/"
-            PORT = 80
+            if 'CLAMSSL' in os.environ:
+                PORT = 443
+            else:
+                PORT = 80
         else:
             ROOT = "/scratch2/www/webservices-lst/test/writable/colibricore/"
             PORT = 81
