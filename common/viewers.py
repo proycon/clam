@@ -22,7 +22,7 @@ from lxml import etree
 import csv
 import sys
 if sys.version < '3':
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error
 else:
     from io import StringIO,  BytesIO
 
@@ -109,10 +109,10 @@ class XSLTViewer(AbstractViewer):
 
         lines = file.readlines()
         if lines:
-            if sys.version < '3' and isinstance(lines[0], unicode):
+            if sys.version < '3' and isinstance(lines[0], unicode): #pylint: disable=undefined-variable
                 xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
             else:
-                xml_doc = etree.parse(StringIO("".join(lines) ))
+                xml_doc = etree.parse(BytesIO("".join(lines).encode('utf-8') ))
         else:
             return "(no data)"
 
