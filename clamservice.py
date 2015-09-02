@@ -1025,7 +1025,7 @@ class Project:
                     if v.id == requestid:
                         viewer = v
                 if viewer:
-                    output = viewer.view(outputfile, **flask.request.values) #TODO: test
+                    output = viewer.view(outputfile, **flask.request.values)
                     if isinstance(output, flask.Response):
                         return output
                     else:
