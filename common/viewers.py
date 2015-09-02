@@ -82,7 +82,7 @@ class SimpleTableViewer(AbstractViewer):
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
-        file = csv.reader(file.read(), delimiter=self.delimiter)
+        file = csv.reader(file, delimiter=self.delimiter)
         for line in file:
             yield line
 
