@@ -305,7 +305,7 @@ class CLAMFile:
 
     def read(self):
         """Loads all lines in memory"""
-        return "\n".join(self.readlines())
+        return "\n".join(iter(self))
 
     def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""

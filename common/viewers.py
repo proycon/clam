@@ -130,7 +130,7 @@ class FoLiAViewer(AbstractViewer):
         if sys.version < '3':
             xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
         else:
-            xml_doc = etree.parse(StringIO("".join(file.readlines())))
+            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
         return str(transform(xml_doc))
 
 
@@ -146,7 +146,7 @@ class SoNaRViewer(AbstractViewer):
         if sys.version < '3':
             xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
         else:
-            xml_doc = etree.parse(StringIO("".join(file.readlines())))
+            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
 
         return str(transform(xml_doc))
 
