@@ -103,8 +103,15 @@ STYLE = 'classic'
 
 # ======== ENABLED FORMATS ===========
 
-#Here you can specify an extra formats module
-CUSTOM_FORMATS_MODULE = None
+#In CUSTOM_FORMATS you can specify a list of Python classes corresponding to extra formats.
+#You can define the classes first, and then put them in CUSTOM_FORMATS, as shown in this example:
+
+#class MyXMLFormat(CLAMMetaData):
+#    attributes = {}
+#    name = "My XML format"
+#    mimetype = 'text/xml'
+
+# CUSTOM_FORMATS = [ MyXMLFormat ]
 
 # ======= INTERFACE OPTIONS ===========
 

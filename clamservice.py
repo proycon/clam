@@ -2366,6 +2366,10 @@ def set_defaults():
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
 
+    if not 'CUSTOM_FORMATS' in settingkeys:
+        settings.CUSTOM_FORMATS = []
+    clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS #dependency injection
+
     if not 'ACTIONS' in settingkeys:
         settings.ACTIONS = []
 

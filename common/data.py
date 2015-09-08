@@ -41,6 +41,8 @@ VERSION = '0.99'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
+CUSTOM_FORMATS = []  #will be injected
+
 class BadRequest(Exception):
      def __init__(self):
         pass
@@ -1179,9 +1181,13 @@ class CLAMMetaData(object):
             format = node.attrib['format']
 
             formatclass = None
-            if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
+            for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
+                if C.__name__ == format:
+                    formatclass = C
+                    break
+            if formatclass is None and format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
                 formatclass = vars(clam.common.formats)[format]
-            if not formatclass:
+            if formatclass is None:
                 raise Exception("Format class " + format + " not found!")
 
             data = {}
