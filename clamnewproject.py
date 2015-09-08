@@ -167,7 +167,7 @@ def main():
             url += ':' + str(PORT)
         url += '/'
 
-    s2 = "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid , " after which you can point your browser or CLAM client to " + url + ".\n\n"
+    s2 = "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid + " after which you can point your browser or CLAM client to " + url + ".\n\n"
     print( s2,file=sys.stderr)
 
     print( "All of this information can be read in the " + dir + "/INSTRUCTIONS file",file=sys.stderr)
