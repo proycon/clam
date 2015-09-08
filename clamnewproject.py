@@ -135,7 +135,7 @@ def main():
             elif FORCEURL and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
             elif line[:9] == "COMMAND =":
-                line = "COMMAND = \"" + dir + "/" + sysid + "-wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
+                line = "COMMAND = \"" + dir + "/" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             fout.write(line)
         fin.close()
         fout.close()
@@ -143,11 +143,11 @@ def main():
         print("WARNING: Service configuration file " + dir + '/' + sysid + ".py already seems to exists, courageously refusing to overwrite",file=sys.stderr)
         sys.exit(2)
 
-    if not os.path.exists(dir + '/' + sysid + '-wrapper.py'):
-        shutil.copyfile(clampath + '/wrappers/template.py', dir + '/' + sysid + '-wrapper.py')
-        os.chmod(dir + '/' + sysid + '-wrapper.py', 0o755)
+    if not os.path.exists(dir + '/' + sysid + '_wrapper.py'):
+        shutil.copyfile(clampath + '/wrappers/template.py', dir + '/' + sysid + '_wrapper.py')
+        os.chmod(dir + '/' + sysid + '_wrapper.py', 0o755)
     else:
-        print("WARNING: System wrapper file " + dir + '/' + sysid + '-wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
+        print("WARNING: System wrapper file " + dir + '/' + sysid + 'wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
     s = "Your new CLAM project has been set up!\n\n"
@@ -167,7 +167,7 @@ def main():
             url += ':' + str(PORT)
         url += '/'
 
-    s2 = "STARTING CLAM? Whilst you are in the process of building your CLAM webservice, you can start and test your webservice using the built-in development webserver: $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid + " after which you can point your browser or CLAM client to " + url + ".\n\n"
+    s2 = "STARTING CLAM?\nWhilst you are in the process of building your CLAM webservice, \nyou can start and test your webservice using the built-in development webserver:\n $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid + "\nafter which you can point your browser or CLAM client to:\n" + url + ".\n\n"
     print( s2,file=sys.stderr)
 
     print( "All of this information can be read in the " + dir + "/INSTRUCTIONS file",file=sys.stderr)
