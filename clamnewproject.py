@@ -150,8 +150,8 @@ def main():
         print("WARNING: System wrapper file " + dir + '/' + sysid + '-wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    s = "Your new CLAM project has been set up!\n"
-    s += "WHAT'S NEXT? Now you can edit your service configuration file " +  dir + '/' + sysid + ".py and your system wrapper script " +   dir + '/' + sysid + "-wrapper.py . Consult the CLAM Documentation and/or instruction videos on http://proycon.github.com/clam for further details.\n\n"
+    s = "Your new CLAM project has been set up!\n\n"
+    s += "WHAT'S NEXT?\n Now you can edit your service configuration file " +  dir + '/' + sysid + ".py,\nand your system wrapper script " +   dir + '/' + sysid + "-wrapper.py .\nConsult the CLAM Documentation and/or instruction videos on https://proycon.github.io/clam for further details.\n\n"
 
     print(s,file=sys.stderr)
 
@@ -172,7 +172,7 @@ def main():
 
     print( "All of this information can be read in the " + dir + "/INSTRUCTIONS file",file=sys.stderr)
 
-    with open(dir + "/INSTRUCTIONS",'w') as f:
+    with io.open(dir + "/INSTRUCTIONS",'w',encoding='utf-8') as f:
         f.write(s + s2)
 
 
