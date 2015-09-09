@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>CLAM Formats &mdash; CLAM 0.9.4 documentation</title>
+    <title>CLAM Formats &mdash; CLAM 0.99 documentation</title>
     
-    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.9.4',
+        URL_ROOT:    './',
+        VERSION:     '0.99',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,12 +23,12 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="CLAM 0.9.4 documentation" href="index.html" />
+    <link rel="top" title="CLAM 0.99 documentation" href="index.html" />
     <link rel="next" title="CLAM Parameters" href="parameters.html" />
     <link rel="prev" title="CLAM Data API" href="data.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -45,82 +43,167 @@
         <li class="right" >
           <a href="data.html" title="CLAM Data API"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">CLAM 0.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 0.99 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-common.formats">
 <span id="clam-formats"></span><h1>CLAM Formats<a class="headerlink" href="#module-common.formats" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
+<dt id="common.formats.AlpinoXMLFormat">
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">AlpinoXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.AlpinoXMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="common.formats.AlpinoXMLFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.AlpinoXMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.AlpinoXMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.AlpinoXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.AlpinoXMLFormat.name">
+<code class="descname">name</code><em class="property"> = 'Alpino XML'</em><a class="headerlink" href="#common.formats.AlpinoXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.AlpinoXMLFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.AlpinoXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.formats.BinaryDataFormat">
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">BinaryDataFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.BinaryDataFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="common.formats.BinaryDataFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.BinaryDataFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.BinaryDataFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/octet-stream'</em><a class="headerlink" href="#common.formats.BinaryDataFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.BinaryDataFormat.name">
+<code class="descname">name</code><em class="property"> = 'Application-specific Binary Data'</em><a class="headerlink" href="#common.formats.BinaryDataFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.formats.CSVFormat">
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">CSVFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.CSVFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="common.formats.CSVFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#common.formats.CSVFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.CSVFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/csv'</em><a class="headerlink" href="#common.formats.CSVFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.CSVFormat.name">
+<code class="descname">name</code><em class="property"> = 'Comma separated file'</em><a class="headerlink" href="#common.formats.CSVFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="common.formats.DCOIFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">DCOIFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.DCOIFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">DCOIFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.DCOIFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.DCOIFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.DCOIFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.DCOIFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.DCOIFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.DCOIFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.DCOIFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.DCOIFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'DCOI format'</em><a class="headerlink" href="#common.formats.DCOIFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'DCOI format'</em><a class="headerlink" href="#common.formats.DCOIFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.DCOIFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.DCOIFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.DCOIFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.formats.DjVuFormat">
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">DjVuFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.DjVuFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="common.formats.DjVuFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.DjVuFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.DjVuFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/x-djvu'</em><a class="headerlink" href="#common.formats.DjVuFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.DjVuFormat.name">
+<code class="descname">name</code><em class="property"> = 'DjVu format'</em><a class="headerlink" href="#common.formats.DjVuFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.ExampleFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">ExampleFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.ExampleFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">ExampleFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ExampleFormat" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an Example format, please inspect its source code if you want to create custom formats!</p>
 <dl class="attribute">
 <dt id="common.formats.ExampleFormat.allowcustomattributes">
-<tt class="descname">allowcustomattributes</tt><em class="property"> = True</em><a class="headerlink" href="#common.formats.ExampleFormat.allowcustomattributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">allowcustomattributes</code><em class="property"> = True</em><a class="headerlink" href="#common.formats.ExampleFormat.allowcustomattributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="common.formats.ExampleFormat.httpheaders">
-<tt class="descname">httpheaders</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.ExampleFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ExampleFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="common.formats.ExampleFormat.loadinlinemetadata">
-<tt class="descname">loadinlinemetadata</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.ExampleFormat.loadinlinemetadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">loadinlinemetadata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ExampleFormat.loadinlinemetadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.ExampleFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.ExampleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.ExampleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="common.formats.ExampleFormat.saveinlinemetadata">
-<tt class="descname">saveinlinemetadata</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.ExampleFormat.saveinlinemetadata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">saveinlinemetadata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ExampleFormat.saveinlinemetadata" title="Permalink to this definition">¶</a></dt>
 <dd><p>If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.ExampleFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = None</em><a class="headerlink" href="#common.formats.ExampleFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = None</em><a class="headerlink" href="#common.formats.ExampleFormat.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="common.formats.ExampleFormat.validate">
-<tt class="descname">validate</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.ExampleFormat.validate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ExampleFormat.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add your validation method here, should return True or False</p>
 </dd></dl>
 
@@ -128,434 +211,454 @@
 
 <dl class="class">
 <dt id="common.formats.FoLiAXMLFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">FoLiAXMLFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.FoLiAXMLFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">FoLiAXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.FoLiAXMLFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.FoLiAXMLFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.FoLiAXMLFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.FoLiAXMLFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'FoLiA XML'</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'FoLiA XML'</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.FoLiAXMLFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.FoLiAXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.GifImageFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">GifImageFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.GifImageFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">GifImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.GifImageFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.GifImageFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.GifImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.GifImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.GifImageFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'image/gif'</em><a class="headerlink" href="#common.formats.GifImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'image/gif'</em><a class="headerlink" href="#common.formats.GifImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.GifImageFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Gif Image'</em><a class="headerlink" href="#common.formats.GifImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Gif Image'</em><a class="headerlink" href="#common.formats.GifImageFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.HTMLFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">HTMLFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.HTMLFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">HTMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.HTMLFormat" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTML Format Definition. This format has one required attribute: encoding</p>
 <dl class="attribute">
 <dt id="common.formats.HTMLFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#common.formats.HTMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#common.formats.HTMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="common.formats.HTMLFormat.httpheaders">
-<tt class="descname">httpheaders</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.HTMLFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.HTMLFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.HTMLFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/html'</em><a class="headerlink" href="#common.formats.HTMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/html'</em><a class="headerlink" href="#common.formats.HTMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.JpegImageFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">JpegImageFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.JpegImageFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">JpegImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.JpegImageFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.JpegImageFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.JpegImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.JpegImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.JpegImageFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'image/jpeg'</em><a class="headerlink" href="#common.formats.JpegImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'image/jpeg'</em><a class="headerlink" href="#common.formats.JpegImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.JpegImageFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Jpeg Image'</em><a class="headerlink" href="#common.formats.JpegImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Jpeg Image'</em><a class="headerlink" href="#common.formats.JpegImageFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.KBXMLFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">KBXMLFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.KBXMLFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">KBXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.KBXMLFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.KBXMLFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.KBXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.KBXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.KBXMLFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Koninklijke Bibliotheek XML-formaat'</em><a class="headerlink" href="#common.formats.KBXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Koninklijke Bibliotheek XML-formaat'</em><a class="headerlink" href="#common.formats.KBXMLFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.KBXMLFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.KBXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.KBXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.MP3AudioFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">MP3AudioFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.MP3AudioFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">MP3AudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.MP3AudioFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.MP3AudioFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MP3AudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MP3AudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MP3AudioFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'audio/mpeg'</em><a class="headerlink" href="#common.formats.MP3AudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'audio/mpeg'</em><a class="headerlink" href="#common.formats.MP3AudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MP3AudioFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'MP3 Audio File'</em><a class="headerlink" href="#common.formats.MP3AudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'MP3 Audio File'</em><a class="headerlink" href="#common.formats.MP3AudioFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.MSWordFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">MSWordFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.MSWordFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">MSWordFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.MSWordFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.MSWordFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MSWordFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MSWordFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MSWordFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'application/msword'</em><a class="headerlink" href="#common.formats.MSWordFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'application/msword'</em><a class="headerlink" href="#common.formats.MSWordFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MSWordFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Microsoft Word format'</em><a class="headerlink" href="#common.formats.MSWordFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Microsoft Word format'</em><a class="headerlink" href="#common.formats.MSWordFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MSWordFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.MSWordFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.MSWordFormat.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.MpegVideoFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">MpegVideoFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.MpegVideoFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">MpegVideoFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.MpegVideoFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.MpegVideoFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MpegVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.MpegVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MpegVideoFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'video/mpeg'</em><a class="headerlink" href="#common.formats.MpegVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'video/mpeg'</em><a class="headerlink" href="#common.formats.MpegVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.MpegVideoFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Mpeg Video'</em><a class="headerlink" href="#common.formats.MpegVideoFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Mpeg Video'</em><a class="headerlink" href="#common.formats.MpegVideoFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.OggAudioFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">OggAudioFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.OggAudioFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">OggAudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.OggAudioFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.OggAudioFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OggAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OggAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OggAudioFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#common.formats.OggAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#common.formats.OggAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OggAudioFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Ogg Audio File'</em><a class="headerlink" href="#common.formats.OggAudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Ogg Audio File'</em><a class="headerlink" href="#common.formats.OggAudioFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.OggVideoFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">OggVideoFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.OggVideoFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">OggVideoFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.OggVideoFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.OggVideoFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OggVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OggVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OggVideoFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#common.formats.OggVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#common.formats.OggVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OggVideoFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Ogg Video File'</em><a class="headerlink" href="#common.formats.OggVideoFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Ogg Video File'</em><a class="headerlink" href="#common.formats.OggVideoFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.OpenDocumentTextFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">OpenDocumentTextFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.OpenDocumentTextFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">OpenDocumentTextFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.OpenDocumentTextFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.OpenDocumentTextFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OpenDocumentTextFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'application/vnd.oasis.opendocument.text'</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'application/vnd.oasis.opendocument.text'</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.OpenDocumentTextFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Open Document Text Format'</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Open Document Text Format'</em><a class="headerlink" href="#common.formats.OpenDocumentTextFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.PDFFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">PDFFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.PDFFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">PDFFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.PDFFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.PDFFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.PDFFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.PDFFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.PDFFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'application/pdf'</em><a class="headerlink" href="#common.formats.PDFFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'application/pdf'</em><a class="headerlink" href="#common.formats.PDFFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.PDFFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'PDF'</em><a class="headerlink" href="#common.formats.PDFFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'PDF'</em><a class="headerlink" href="#common.formats.PDFFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.PlainTextFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">PlainTextFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.PlainTextFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">PlainTextFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.PlainTextFormat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plain Text Format Definition. This format has one required attribute: encoding</p>
 <dl class="attribute">
 <dt id="common.formats.PlainTextFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#common.formats.PlainTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#common.formats.PlainTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="common.formats.PlainTextFormat.httpheaders">
-<tt class="descname">httpheaders</tt><big>(</big><big>)</big><a class="headerlink" href="#common.formats.PlainTextFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.PlainTextFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.PlainTextFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.PlainTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.PlainTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.PngImageFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">PngImageFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.PngImageFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">PngImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.PngImageFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.PngImageFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.PngImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.PngImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.PngImageFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'image/png'</em><a class="headerlink" href="#common.formats.PngImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'image/png'</em><a class="headerlink" href="#common.formats.PngImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.PngImageFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'PNG Image'</em><a class="headerlink" href="#common.formats.PngImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'PNG Image'</em><a class="headerlink" href="#common.formats.PngImageFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.TICCLShadowOutputXML">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">TICCLShadowOutputXML</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.TICCLShadowOutputXML" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">TICCLShadowOutputXML</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.TICCLShadowOutputXML" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.TICCLShadowOutputXML.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TICCLShadowOutputXML.name">
-<tt class="descname">name</tt><em class="property"> = 'Ticcl Shadow Output'</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Ticcl Shadow Output'</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TICCLShadowOutputXML.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.TICCLShadowOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.TICCLVariantOutputXML">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">TICCLVariantOutputXML</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.TICCLVariantOutputXML" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">TICCLVariantOutputXML</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.TICCLVariantOutputXML" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.TICCLVariantOutputXML.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TICCLVariantOutputXML.name">
-<tt class="descname">name</tt><em class="property"> = 'Ticcl Variant Output'</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Ticcl Variant Output'</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TICCLVariantOutputXML.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.TICCLVariantOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.TadpoleFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">TadpoleFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.TadpoleFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">TadpoleFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.TadpoleFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.TadpoleFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {'lemmatisation': ['yes', 'no'], 'morphologicalanalysis': ['yes', 'no'], 'mwudetection': ['yes', 'no'], 'parsing': ['yes', 'no'], 'tokenisation': 'yes', 'postagging': ['yes', 'no']}</em><a class="headerlink" href="#common.formats.TadpoleFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {'mwudetection': ['yes', 'no'], 'parsing': ['yes', 'no'], 'tokenisation': 'yes', 'postagging': ['yes', 'no'], 'lemmatisation': ['yes', 'no'], 'morphologicalanalysis': ['yes', 'no']}</em><a class="headerlink" href="#common.formats.TadpoleFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TadpoleFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.TadpoleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#common.formats.TadpoleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.TadpoleFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Tadpole Columned Output Format'</em><a class="headerlink" href="#common.formats.TadpoleFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Tadpole Columned Output Format'</em><a class="headerlink" href="#common.formats.TadpoleFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="common.formats.TiffImageFormat">
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">TiffImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.TiffImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="common.formats.TiffImageFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.TiffImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.TiffImageFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/tiff'</em><a class="headerlink" href="#common.formats.TiffImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="common.formats.TiffImageFormat.name">
+<code class="descname">name</code><em class="property"> = 'Tiff Image'</em><a class="headerlink" href="#common.formats.TiffImageFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.UndefinedXMLFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">UndefinedXMLFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.UndefinedXMLFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">UndefinedXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.UndefinedXMLFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.UndefinedXMLFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.UndefinedXMLFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Undefined XML Format'</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Undefined XML Format'</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.UndefinedXMLFormat.scheme">
-<tt class="descname">scheme</tt><em class="property"> = ''</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#common.formats.UndefinedXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.WaveAudioFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">WaveAudioFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.WaveAudioFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">WaveAudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.WaveAudioFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.WaveAudioFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.WaveAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.WaveAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.WaveAudioFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'audio/wav'</em><a class="headerlink" href="#common.formats.WaveAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'audio/wav'</em><a class="headerlink" href="#common.formats.WaveAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.WaveAudioFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'Wave Audio File'</em><a class="headerlink" href="#common.formats.WaveAudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'Wave Audio File'</em><a class="headerlink" href="#common.formats.WaveAudioFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.XMLStyleSheet">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">XMLStyleSheet</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.XMLStyleSheet" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">XMLStyleSheet</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.XMLStyleSheet" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.XMLStyleSheet.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.XMLStyleSheet.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.XMLStyleSheet.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.XMLStyleSheet.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'application/xslt+xml'</em><a class="headerlink" href="#common.formats.XMLStyleSheet.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'application/xslt+xml'</em><a class="headerlink" href="#common.formats.XMLStyleSheet.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.XMLStyleSheet.name">
-<tt class="descname">name</tt><em class="property"> = 'XML Stylesheet'</em><a class="headerlink" href="#common.formats.XMLStyleSheet.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'XML Stylesheet'</em><a class="headerlink" href="#common.formats.XMLStyleSheet.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="common.formats.ZIPFormat">
-<em class="property">class </em><tt class="descclassname">common.formats.</tt><tt class="descname">ZIPFormat</tt><big>(</big><em>file</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#common.formats.ZIPFormat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">common.formats.</code><code class="descname">ZIPFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.formats.ZIPFormat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="attribute">
 <dt id="common.formats.ZIPFormat.attributes">
-<tt class="descname">attributes</tt><em class="property"> = {}</em><a class="headerlink" href="#common.formats.ZIPFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#common.formats.ZIPFormat.attributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.ZIPFormat.mimetype">
-<tt class="descname">mimetype</tt><em class="property"> = 'application/zip'</em><a class="headerlink" href="#common.formats.ZIPFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mimetype</code><em class="property"> = 'application/zip'</em><a class="headerlink" href="#common.formats.ZIPFormat.mimetype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="common.formats.ZIPFormat.name">
-<tt class="descname">name</tt><em class="property"> = 'ZIP Archive'</em><a class="headerlink" href="#common.formats.ZIPFormat.name" title="Permalink to this definition">¶</a></dt>
+<code class="descname">name</code><em class="property"> = 'ZIP Archive'</em><a class="headerlink" href="#common.formats.ZIPFormat.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -566,7 +669,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="data.html"
@@ -574,12 +677,14 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="parameters.html"
                         title="next chapter">CLAM Parameters</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/formats.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/formats.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -596,7 +701,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -611,12 +716,12 @@
         <li class="right" >
           <a href="data.html" title="CLAM Data API"
              >previous</a> |</li>
-        <li><a href="index.html">CLAM 0.9.4 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 0.99 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Maarten van Gompel.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
