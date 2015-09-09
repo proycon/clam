@@ -28,24 +28,15 @@ def read(fname):
 
 setup(
     name = "CLAM",
-<<<<<<< HEAD
-    version = "0.9.13.2",
-=======
     version = "0.99",
->>>>>>> python3flask
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
     license = "GPL",
     keywords = "clam webservice rest nlp computational_linguistics rest",
     url = "http://proycon.github.com/clam",
-<<<<<<< HEAD
     packages=['clam','clam.common','clam.config','clam.external','clam.external.poster','clam.wrappers'],
     long_description=read('README.rst'),
-=======
-    packages=['clam','clam.common','clam.config','clam.wrappers'],
-    long_description=read('README'),
->>>>>>> python3flask
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
