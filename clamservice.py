@@ -1630,8 +1630,12 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 flask.make_response("Unable to extract archive",500)
             out, _ = process.communicate() #waits for process to end
 
-            if isinstance(out, bytes):
-                out = str(out,'utf-8')
+            if sys.version < '3':
+                if isinstance(out, str):
+                    out = unicode(out,'utf-8') #pylint: disable=undefined-variable
+            else:
+                if isinstance(out, bytes):
+                    out = str(out,'utf-8')
 
             #Read filename results
 
