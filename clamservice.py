@@ -1503,7 +1503,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         metafile = Project.path(project, user) + 'input/.' + filename + '.METADATA'
         flask.request.files['metafile'].save(metafile)
         try:
-            with open(metafile,'r',encoding='utf-8') as f:
+            with io.open(metafile,'r',encoding='utf-8') as f:
                 metadata = clam.common.data.CLAMMetaData.fromxml(f.read())
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
