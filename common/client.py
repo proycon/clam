@@ -312,7 +312,7 @@ class CLAMClient:
         """Parse CLAM Upload XML Responses. For internal use"""
         if not isinstance(node,ElementTree._Element):
             try:
-                node = ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
+                node = clam.common.data.parsexmlstring(node)
             except:
                 raise Exception(node)
         if node.tag != 'clamupload':
