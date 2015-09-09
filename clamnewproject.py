@@ -155,7 +155,7 @@ def main():
         f.write("import sys\nsys.path.append(\"" + dir + "\")\nimport " + sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +sysid+ ")")
     os.chmod(dir + '/' + sysid + '.wsgi', 0o755)
 
-    with io.open(dir+'/nginx-withurlprefix-sample.conf') as f:
+    with io.open(dir+'/nginx-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
 location /{sysid}/static { alias {clamdir}/static; }
 location = /{sysid} { rewrite ^ /{sysid}/; }
