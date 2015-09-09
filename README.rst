@@ -52,36 +52,42 @@ Installation On Linux
 Easy install is part of the Python setup tools and can install CLAM globally on
 your system for you from the Python Package Index. This is the easiest method
 of installing CLAM, as it will automatically fetch and install any
-dependencies.  This procedure downloads CLAM for you automatically.
-Alternatively, you can use ``pip`` (usually part  of the ``python-pip``
-package). We recommend to use a virtual environment (``virtualenv``) if you
+dependencies. We recommend to use a virtual environment (``virtualenv``) if you
 want to install CLAM locally as a user, if you want to install globally,
 prepend the following commands with ``sudo``:
 
- $ easy_install clam
+CLAM can be installed from the Python Package Index using pip. Pip is usually
+part of the ``python3-pip`` package or similar. It downloads CLAM
+automatically.
+
+ $ pip3 install clam
 
 If you already downloaded CLAM manually (from github), you can do::
 
- $ ./setup.py install
+ $ python3 setup.py install
 
-If easy_install is not yet installed on your system, install it using: 
+If pip3 is not yet installed on your system, install it using: 
  on debian-based linux systems (including Ubuntu)::
 
-  $ apt-get install python-setuptools 
+  $ apt-get install python3-pip 
   
 on RPM-based linux systems::
 
-  $ yum install python-setuptools
-
-on MacOS X: (follow the manual steps further down this document)
+  $ yum install python3-pip
 
 Note that sudo/root access is needed to install globally. Ask your system administrator
-to install it.  Alternatively, you can install in a local custom path  using the
--d flag, this however complicates matters as you need to take care to add these
-local directories to your python library path:
+to install it. Alternatively, you can install it locally in a Python virtual
+environment:
 
- $ easy_install -d /path/to/dir clam
+ $ virtualenv --python=python3 clamenv
 
+ $ . clamenv/bin/activate
+
+ (clamenv)$ pip3 install clam
+
+ It is also possible to use Python 2.7 instead of Python 3, adapt the commands
+ as necessary.
+ 
 
 Installation on Mac OS X
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,11 +117,13 @@ pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
 Note: It is important to regularly keep CLAM up to date as fixes and
 improvements are implemented on a regular basis. Update CLAM using::
 
- $ easy_install -U clam
-
 or if you used pip::
 
  $ pip install -U clam
+
+or if you used easy_install::
+
+ $ easy_install -U clam
 
 
 Installing a particular clam webservice for production use
@@ -133,14 +141,9 @@ mywebservice.py, then the development server can be started as follows::
 
  $ clamservice -P /path/to/mywebservice mywebservice
 
-For production, however, it is strongly recommended to embed CLAM in Apache.
-This is the typically task of a system administrator, as certain skills are
-necessary and assumed.
-
-Embedding CLAM in Apache is accomplished through WSGI, for which you need to
-have the package libapache2-mod-wsgi installed (Debian/Ubuntu).  Next it
-involves the writing of a small WSGI script and adaptation of the Apache
-configuration to load this script. All this is explained in detail in the CLAM
+For production, however, it is strongly recommended to embed CLAM in Apache or
+nginx. This is the typically task of a system administrator, as certain skills are
+necessary and assumed. All this is explained in detail in the CLAM
 Manual, obtainable from http://proycon.github.io/clam/ . 
 
 
