@@ -10,9 +10,6 @@
 #       Centre for Language Studies
 #       Radboud University Nijmegen
 #
-#       Induction for Linguistic Knowledge Research Group
-#       Tilburg University
-#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -27,24 +24,26 @@ import shutil
 
 try:
     import clam
+    CLAMDIR = os.path.abspath(clam.__path__[0])
 except ImportError:
-    print("ERROR: Unable to find CLAM. Either something went wrong during installation or you did not install CLAM globally and are in a directory from which it can not be accessed.",file=sys.stderr)
+    print("ERROR: Unable to find CLAM. Did you install it properly? Is your PYTHONPATH or virtual environment correct?",file=sys.stderr)
     sys.exit(2)
 
 import getopt
 
 def usage():
-        print("Syntax: clamnewproject.py system_id [options]",file=sys.stderr)
-        print("Description: This tool sets up a new CLAM project for you. Replace 'system_id' with a short ID/name for your project, this ID is for internal use only and will be used in various filenames, no spaces or other special characters allowed.",file=sys.stderr)
-        print("Options:",file=sys.stderr)
-        print("\t-d [dir]      - Directory prefix, rather than in current working directory",file=sys.stderr)
-        print("\t-f            - Force use of a directory that already exists",file=sys.stderr)
-        print("\t-h            - This help message",file=sys.stderr)
-        print("Configuration shortcuts:",file=sys.stderr)
-        print("\t-n [name]     - A human-readable name. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
-        print("\t-H [hostname] - Hostname. Shortcut option, can be also set in service configuration file later. ",file=sys.stderr)
-        print("\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
-        print("\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
+    print("Syntax: clamnewproject system_id [options]",file=sys.stderr)
+    print("Description: This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.",file=sys.stderr)
+    print("Options:",file=sys.stderr)
+    print("\t-d [dir]      - Directory prefix, rather than in current working directory",file=sys.stderr)
+    print("\t-f            - Force use of a directory that already exists",file=sys.stderr)
+    print("\t-h            - This help message",file=sys.stderr)
+    print("Configuration shortcuts:",file=sys.stderr)
+    print("\t-n [name]     - A human-readable name. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
+    print("\t-H [hostname] - Hostname. Shortcut option, can be also set in service configuration file later. ",file=sys.stderr)
+    print("\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
+    print("\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
+    print("\t-U [uwsgiport]- UWSGI port to use for this webservice when deployed in production environments (default: 8888).",file=sys.stderr)
 
 
 def main():
@@ -63,6 +62,8 @@ def main():
     dirprefix = os.getcwd()
     force = False
     name = ""
+    pythonversion = '3'
+    uwsgiport ='8888'
 
     try:
         opts, args = getopt.getopt(sys.argv[2:], "hd:cH:p:u:fn:")
@@ -84,10 +85,14 @@ def main():
             sys.exit(0)
         elif o == '-u':
             FORCEURL = a
+        elif o == '-U':
+            uwsgiport = a
         elif o == '-f':
             force = True
         elif o == '-n':
             name = a
+        elif o == '-P':
+            pythonversion = a
         else:
             usage()
             print("ERROR: Unknown option: ", o)
@@ -95,9 +100,8 @@ def main():
 
 
 
-    clampath = clam.__path__[0]
 
-    if not os.path.exists(clampath + '/config/template.py') or not os.path.exists(clampath + '/wrappers/template.py'):
+    if not os.path.exists(CLAMDIR + '/config/template.py') or not os.path.exists(CLAMDIR + '/wrappers/template.py'):
         print("ERROR: Templates not found. Unable to create new project",file=sys.stderr)
         sys.exit(2)
 
@@ -116,7 +120,7 @@ def main():
         f.close()
 
     if not os.path.exists(dir + '/' + sysid + '.py'):
-        fin = io.open(clampath + '/config/template.py','r',encoding='utf-8')
+        fin = io.open(CLAMDIR + '/config/template.py','r',encoding='utf-8')
         fout = io.open(dir + '/' + sysid + '.py','w',encoding='utf-8')
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
@@ -129,13 +133,10 @@ def main():
                 line = "PORT = \"" + str(PORT) + "\"\n"
             elif line[:6] == "ROOT =":
                 line = "ROOT = \"" + dir + "/userdata\"\n"
-            elif line[:10] == "#CLAMDIR =":
-                clamdir = os.path.dirname(clam.__file__)
-                line = "#CLAMDIR = \"" + clamdir + "\" #(automatically detected)\n"
             elif FORCEURL and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
             elif line[:9] == "COMMAND =":
-                line = "COMMAND = \"" + dir + "/" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
+                line = "COMMAND = WEBSERVICEDIR + \"" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             fout.write(line)
         fin.close()
         fout.close()
@@ -144,14 +145,104 @@ def main():
         sys.exit(2)
 
     if not os.path.exists(dir + '/' + sysid + '_wrapper.py'):
-        shutil.copyfile(clampath + '/wrappers/template.py', dir + '/' + sysid + '_wrapper.py')
+        shutil.copyfile(CLAMDIR + '/wrappers/template.py', dir + '/' + sysid + '_wrapper.py')
         os.chmod(dir + '/' + sysid + '_wrapper.py', 0o755)
     else:
-        print("WARNING: System wrapper file " + dir + '/' + sysid + 'wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
+        print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    s = "Your new CLAM project has been set up!\n\n"
-    s += "WHAT'S NEXT?\n Now you can edit your service configuration file " +  dir + '/' + sysid + ".py,\nand your system wrapper script " +   dir + '/' + sysid + "-wrapper.py .\nConsult the CLAM Documentation and/or instruction videos on https://proycon.github.io/clam for further details.\n\n"
+    with io.open(dir + '/'+sysid +'.wsgi') as f:
+        f.write("import sys\nsys.path.append(\"" + dir + "\")\nimport " + sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +sysid+ ")")
+    os.chmod(dir + '/' + sysid + '.wsgi', 0o755)
+
+    with io.open(dir+'/nginx-withurlprefix-sample.conf') as f:
+        f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
+location /{sysid}/static { alias {clamdir}/static; }
+location = /{sysid} { rewrite ^ /{sysid}/; }
+location /{sysid} { try_files $uri @{sysid}; }
+location @{sysid} {
+    include uwsgi_params;
+    uwsgi_pass 127.0.0.1:{uwsgiport};
+}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+
+
+    with io.open(dir+'/nginx-sample.conf') as f:
+        f.write("""#Nginx example configuration using uwsgi, assuming your service runs at the root of the virtualhost, insert this in your server block in your nginx.conf
+location /static { alias {clamdir}/static; }
+location / { try_files $uri @{sysid}; }
+location @{sysid} {
+    include uwsgi_params;
+    uwsgi_pass 127.0.0.1:{uwsgiport};
+}
+}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+
+
+
+
+    if pythonversion >= '3':
+        uwsgiplugin = 'python3'
+    else:
+        uwsgiplugin = 'python'
+
+    with io.open(dir+'/apache-withurlprefix-sample.conf') as f:
+        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
+
+ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
+
+Alias /{sysid}/static {clamdir}/static
+<Directory {clamdir}/static/>
+    Order deny,allow
+    Allow from all
+</Directory>
+""".format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
+
+    with io.open(dir+'/apache-withurlprefix-sample.conf') as f:
+        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service runs at the virtualhost root, insert this in your server block in your nginx.conf
+
+ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
+
+Alias /static {clamdir}/static
+<Directory {clamdir}/static/>
+    Order deny,allow
+    Allow from all
+</Directory>
+""".format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
+
+    with io.open(dir + '/startserver_production.sh') as f:
+        f.write("""#!/bin/bash
+if [ ! -z $VIRTUAL_ENV ]; then; 
+    uwsgi --plugin {uwsgiplugin} --virtualenv $VIRTUAL_ENV --socket 127.0.0.1:{uwsgiport} --chdir $VIRTUAL_ENV --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
+else 
+    uwsgi --plugin {uwsgiplugin} --socket 127.0.0.1:{uwsgiport} --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
+fi
+""".format(dir=dir, sysid=sysid), uwsgiplugin =uwsgiplugin,pythonversion=pythonversion, uwsgiport=uwsgiport)
+    os.chmod(dir + '/startserver_production.sh', 0o755)
+
+    with io.open(dir + '/startserver_development.sh') as f:
+        f.write("""#!/bin/bash
+if [ -z $PYTHONPATH ]; then
+    export PYTHONPATH={dir}
+else
+    export PYTHONPATH={dir}:$PYTHONPATH
+fi
+clamservice {sysid}
+""".format(dir=dir,sysid=sysid, pythonversion=pythonversion))
+    os.chmod(dir + '/startserver_development.sh', 0o755)
+
+
+
+    s = """
+**Your new CLAM project has been set up!**
+
+BUILD YOUR WEBSERVICE
+
+To develop your webservice, edit your service configuration file {dir}/{sysid}.py ,
+and your system wrapper script {dir}/{sysid}_wrapper.py .
+Consult the CLAM Documentation and/or instruction videos on https://proycon.github.io/clam 
+for further details on how to do this.
+
+""".formats(dir=dir,sysid=sysid)
+
 
     print(s,file=sys.stderr)
 
@@ -167,14 +258,45 @@ def main():
             url += ':' + str(PORT)
         url += '/'
 
-    s2 = "STARTING CLAM?\nWhilst you are in the process of building your CLAM webservice, \nyou can start and test your webservice using the built-in development webserver:\n $ clamservice -P " + dirprefix + "/" + sysid + ' ' + sysid + "\nafter which you can point your browser or CLAM client to:\n" + url + ".\n\n"
+    s2 = """
+START YOUR WEBSERVICE
+-------------------------
+
+Whilst you are in the process of building your CLAM webservice, you can start
+and test your webservice using the built-in development webserver, start it
+with ./startserver_development.sh . This takes care of any installation as well.
+Once started, you can point your browser to the URL advertised by this script.
+
+
+DEPLOYING YOUR WEBSERVICE (for system administrators)
+-------------------------
+
+For production use, we recommend using uwsgi in combination with a webserver
+such as Apache (with mod_uwsgi_proxy), or nginx. A wsgi script and sample
+configuration has been generated  as a starting point. Use the
+./startserver_production.sh script to launch CLAM using uwsgi.
+""".formats(dir=dir,sysid=sysid)
+
     print( s2,file=sys.stderr)
 
-    print( "All of this information can be read in the " + dir + "/INSTRUCTIONS file",file=sys.stderr)
+    print( "\n(All of this information can be read again in the INSTRUCTIONS file)",file=sys.stderr)
 
     with io.open(dir + "/INSTRUCTIONS",'w',encoding='utf-8') as f:
         f.write(s + s2)
 
+    if pythonversion >= '3':
+        pip = 'pip3'
+    else:
+        pip = 'pip'
+
+    with io.open(dir + "/INSTALL",'w',encoding='utf-8') as f:
+        f.write("""Install CLAM from the Python package index with: 
+
+ $ {pip} install CLAM
+
+You may need to use sudo for global installation. We recommend the use of Python virtual environment.
+
+The webservice runs from this directory directly. No further installation is necessary.""".format(pip=pip))
 
 
 if __name__ == "__main__":

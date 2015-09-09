@@ -16,6 +16,9 @@
 
 #Consult the CLAM manual for extensive documentation
 
+#If we run on Python 2.7, behave as much as Python 3 as possible
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 from clam.common.parameters import *
 from clam.common.formats import *
 from clam.common.converters import *
@@ -24,9 +27,12 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import clam
 import sys
+import os
 
 REQUIRE_VERSION = 0.99
-CLAMDIR = clam.__path__[0]
+
+CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
+WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
 
 # ======== GENERAL INFORMATION ===========
 
@@ -44,26 +50,30 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 # ======== LOCATION ===========
 
-#The root directory for CLAM, all project files, (input & output) and
-#pre-installed corpora will be stored here. Set to an absolute path:
-ROOT = "/tmp/clam.projects/"
+#Add a section for your host:
 
-#The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
-PORT= 8080
+host = os.uname()[1]
+if host == "yourhostname":
 
-#The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
-#Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
-#HOST = 'localhost'
+    #The root directory for CLAM, all project files, (input & output) and
+    #pre-installed corpora will be stored here. Set to an absolute path:
+    ROOT = "/tmp/clam.projects/"
 
-#If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it
-#doesn't run at the root of the server, you can specify a URL prefix here:
-#URLPREFIX = "/myservice/"
+    #The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
+    PORT= 8080
 
-#Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
-#FORCEURL = "http://myclamservice.com"
+    #The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
+    #Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
+    HOST = 'yourhostname'
 
-#The location of where CLAM is installed (will be determined automatically if not set)
-#CLAMDIR = "/path/to/clam"
+    #If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it
+    #doesn't run at the root of the server, you can specify a URL prefix here:
+    #URLPREFIX = "/myservice/"
+
+    #Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
+    #FORCEURL = "http://yourhostname.com"
+else:
+    raise Exception("I don't know where I'm running from! Add a section in the configuration corresponding to this host (" + os.uname()[1]+")")
 
 
 
@@ -173,7 +183,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = CLAMDIR + "/wrappers/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = WEBSERVICEDIR + "/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 #COMMAND = None   #Set to none if you only use the action paradigm
 
