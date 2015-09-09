@@ -33,7 +33,7 @@ import clam.common.formats
 import clam.common.data
 
 VERSION = '0.99'
-if VERSION != clam.common.data.APIVERSION:
+if VERSION != clam.common.data.VERSION:
     raise Exception("Version mismatch beween Client API ("+VERSION+") and Data API ("+clam.common.data.VERSION+")!")
 
 
