@@ -291,7 +291,7 @@ configuration has been generated  as a starting point. Use the
     with io.open(dir + "/INSTALL",'w',encoding='utf-8') as f:
         f.write("""Install CLAM from the Python package index with: 
 
- $ {pip} install CLAM
+ $ {pip} install clam
 
 You may need to use sudo for global installation. We recommend the use of Python virtual environment.
 
