@@ -151,7 +151,7 @@ def main():
         print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    with io.open(dir + '/'+sysid +'.wsgi') as f:
+    with io.open(dir + '/'+sysid +'.wsgi','w',encoding='utf-8') as f:
         f.write("import sys\nsys.path.append(\"" + dir + "\")\nimport " + sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +sysid+ ")")
     os.chmod(dir + '/' + sysid + '.wsgi', 0o755)
 
@@ -166,7 +166,7 @@ location @{sysid} {
 }""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
 
 
-    with io.open(dir+'/nginx-sample.conf') as f:
+    with io.open(dir+'/nginx-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service runs at the root of the virtualhost, insert this in your server block in your nginx.conf
 location /static { alias {clamdir}/static; }
 location / { try_files $uri @{sysid}; }
@@ -196,7 +196,7 @@ Alias /{sysid}/static {clamdir}/static
 </Directory>
 """.format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
 
-    with io.open(dir+'/apache-withurlprefix-sample.conf') as f:
+    with io.open(dir+'/apache-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service runs at the virtualhost root, insert this in your server block in your nginx.conf
 
 ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
@@ -208,7 +208,7 @@ Alias /static {clamdir}/static
 </Directory>
 """.format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
 
-    with io.open(dir + '/startserver_production.sh') as f:
+    with io.open(dir + '/startserver_production.sh','w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
 if [ ! -z $VIRTUAL_ENV ]; then; 
     uwsgi --plugin {uwsgiplugin} --virtualenv $VIRTUAL_ENV --socket 127.0.0.1:{uwsgiport} --chdir $VIRTUAL_ENV --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
@@ -218,7 +218,7 @@ fi
 """.format(dir=dir, sysid=sysid), uwsgiplugin =uwsgiplugin,pythonversion=pythonversion, uwsgiport=uwsgiport)
     os.chmod(dir + '/startserver_production.sh', 0o755)
 
-    with io.open(dir + '/startserver_development.sh') as f:
+    with io.open(dir + '/startserver_development.sh','w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
 if [ -z $PYTHONPATH ]; then
     export PYTHONPATH={dir}
