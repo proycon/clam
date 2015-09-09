@@ -40,14 +40,16 @@ to read this prior to starting with CLAM.
 
 IMPORTANT NOTICE: It's discouraged to download the zip packages or tarballs
 from github, either properly use git instead, or install CLAM from the Python
-Package Index (http://pypi.python.org/pypi/CLAM), through easy_install, which
+Package Index (http://pypi.python.org/pypi/CLAM), through pip, which
 it the recommended way:
 
- $ sudo easy_install clam     
+ $ sudo pip3 install clam     
 
-This will download CLAM automatically. If you obtained the git version and what
+(This is for Python 3, the Python 2.7 variant is usually called pip.
+
+This will download CLAM automatically. If you obtained the git version and want
 to install that:
 
- $ sudo ./setup.py install
+ $ sudo python3 setup.py install
 
 For further installation instructions, please read the supplied INSTALL file.
