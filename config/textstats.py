@@ -62,10 +62,10 @@ ADMINS = ['anonymous'] #Define which of the above users are admins (never set th
 PROJECTS_PUBLIC = False
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
-REQUIREMEMORY = 10
+#REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 4.0
+#MAXLOADAVG = 4.0
 
 
 # ======== WEB-APPLICATION STYLING =============

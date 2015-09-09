@@ -50,10 +50,10 @@ PORT= 8080
 USERS = {'proycon': pwhash('proycon',SYSTEM_ID,'secret'), 'antal': pwhash('antal',SYSTEM_ID,'secret')}
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
-REQUIREMEMORY = 10
+#REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 4.0
+#MAXLOADAVG = 4.0
 
 
 # ======== WEB-APPLICATION STYLING =============
