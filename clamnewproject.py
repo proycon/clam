@@ -184,7 +184,7 @@ location @{sysid} {{
         uwsgiplugin = 'python'
 
     with io.open(dir+'/apache-withurlprefix-sample.conf','w',encoding='utf-8') as f:
-        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
+        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your VirtualHost in your Apache configuration
 
 ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
 
@@ -196,7 +196,7 @@ Alias /{sysid}/static {clamdir}/static
 """.format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
 
     with io.open(dir+'/apache-withurlprefix-sample.conf','w',encoding='utf-8') as f:
-        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service runs at the virtualhost root, insert this in your server block in your nginx.conf
+        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service runs at the virtualhost root, insert this in your VirtualHost in your Apache configuration
 
 ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
 
