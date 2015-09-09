@@ -12,15 +12,23 @@
 #
 ###############################################################
 
+
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import glob
 import os
-from sys import stdout,stderr
+import sys
 import datetime
-from urllib2 import Request
 import io
 
-LOG = stdout
-DEBUGLOG = stderr
+if sys.version < '3':
+    from codecs import getwriter
+    DEBUGLOG = getwriter('utf-8')(sys.stderr)
+    LOG = getwriter('utf-8')(sys.stdout)
+else:
+    DEBUGLOG = sys.stderr
+    LOG = sys.stdout
+
 DEBUG = False
 
 def globsymlinks(pattern, recursion=True):
@@ -87,14 +95,13 @@ def xmlescape(s):
 
 
 
+def withheaders(response, contenttype="text/xml; charset=UTF-8", extra={}):
+    response.headers['Content-Type'] = contenttype
+    try:
+        for key, value in extra.items():
+            response.headers[key] = value
+    except AttributeError: #no dictionary? could be generator/list of tuples
+        for key, value in extra:
+            response.headers[key] = value
+    return response
 
-
-class RequestWithMethod(Request):
-  def __init__(self, *args, **kwargs):
-    self._method = kwargs.get('method')
-    if self._method:
-        del kwargs['method']
-    Request.__init__(self, *args, **kwargs)
-
-  def get_method(self):
-    return self._method if self._method else super(RequestWithMethod, self).get_method()

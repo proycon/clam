@@ -20,6 +20,9 @@
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
 
+#If we run on Python 2.7, behave as much as Python 3 as possible
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 #import some general python modules:
 import sys
 import os

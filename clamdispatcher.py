@@ -15,6 +15,7 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import os
@@ -23,7 +24,7 @@ import subprocess
 import time
 import signal
 
-VERSION = '0.9.12'
+VERSION = '0.99'
 
 sys.path.append(sys.path[0] + '/..')
 
@@ -40,7 +41,7 @@ def total_seconds(delta):
 
 def main():
     if len(sys.argv) < 4:
-        print >>sys.stderr,"[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ... got: " + " ".join(sys.argv[1:])
+        print("[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ... got: " + " ".join(sys.argv[1:]), file=sys.stderr)
         f = open('.done','w')
         f.write(str(1))
         f.close()
@@ -51,7 +52,7 @@ def main():
     if '/' in sys.argv[1]:
         #os.environ['PYTHONPATH'] = sys.argv[1]
         for path in sys.argv[1].split(':'):
-            print >>sys.stderr,"[CLAM Dispatcher] Adding to PYTHONPATH: " + path
+            print("[CLAM Dispatcher] Adding to PYTHONPATH: " + path, file=sys.stderr)
             sys.path.append(path)
         offset = 1
 
@@ -63,14 +64,15 @@ def main():
         if projectdir[-1] != '/':
             projectdir += '/'
 
+    print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
+
     cmd = sys.argv[3+offset]
     for arg in sys.argv[4+offset:]:
         cmd += " " + shellsafe(arg,'"')
 
-    print >>sys.stderr, "[CLAM Dispatcher] Started (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")"
 
     if not cmd:
-        print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: No command specified!"
+        print("[CLAM Dispatcher] FATAL ERROR: No command specified!", file=sys.stderr)
         if projectdir:
             f = open(projectdir + '.done','w')
             f.write(str(1))
@@ -78,7 +80,7 @@ def main():
             if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
     elif projectdir and not os.path.isdir(projectdir):
-        print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist"
+        print("[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist", file=sys.stderr)
         f = open(projectdir + '.done','w')
         f.write(str(1))
         f.close()
@@ -86,10 +88,11 @@ def main():
         return 1
 
     try:
-        exec "import " + settingsmodule + " as settings"
+        #exec("import " + settingsmodule + " as settings")
+        settings = __import__(settingsmodule , globals(), locals(),0)
     except ImportError as e:
-        print >>sys.stderr, "[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e)
-        print >>sys.stderr, "[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)"
+        print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
+        print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
         if projectdir:
             f = open(projectdir + '.done','w')
             f.write(str(1))
@@ -104,7 +107,7 @@ def main():
     if not 'DISPATCHER_MAXTIME' in settingkeys:
         settings.DISPATCHER_MAXTIME = 0
 
-    print >>sys.stderr, "[CLAM Dispatcher] Running " + cmd
+    print("[CLAM Dispatcher] Running " + cmd, file=sys.stderr)
 
     if projectdir:
         process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
@@ -113,14 +116,14 @@ def main():
     begintime = datetime.datetime.now()
     if process:
         pid = process.pid
-        print >>sys.stderr, "[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")"
+        print("[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
             f = open(projectdir + '.pid','w')
             f.write(str(pid))
             f.close()
     else:
-        print >>sys.stderr, "[CLAM Dispatcher] Unable to launch process"
+        print("[CLAM Dispatcher] Unable to launch process", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
             f = open(projectdir + '.done','w')
@@ -140,10 +143,10 @@ def main():
         try:
             returnedpid, statuscode = os.waitpid(pid, os.WNOHANG)
             if returnedpid != 0:
-                print >>sys.stderr, "[CLAM Dispatcher] Process ended (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s) "
+                print("[CLAM Dispatcher] Process ended (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s) ", file=sys.stderr)
                 done = True
         except OSError: #no such process
-            print >>sys.stderr, "[CLAM Dispatcher] Process lost! (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s)"
+            print("[CLAM Dispatcher] Process lost! (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ", " + str(d)+"s)", file=sys.stderr)
             statuscode = 1
             done = True
 
@@ -154,7 +157,7 @@ def main():
             if projectdir and os.path.exists(projectdir + '.abort'):
                 abort = True
             if abort:
-                print >>sys.stderr, "[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)"
+                print("[CLAM Dispatcher] ABORTING PROCESS ON SIGNAL! (" + str(d)+"s)", file=sys.stderr)
                 os.system("sleep 30 && kill -9 " + str(pid) + " &") #deathtrap in case the process doesn't listen within 30 seconds
                 os.kill(pid, signal.SIGTERM)
                 os.waitpid(pid, 0)
@@ -183,13 +186,13 @@ def main():
         if settings.DISPATCHER_MAXRESMEM > 0 and total_seconds(datetime.datetime.now() - lastpolltime) >= settings.DISPATCHER_POLLINTERVAL:
             resmem = mem(pid)
             if resmem > settings.DISPATCHER_MAXRESMEM * 1024:
-                print >>sys.stderr, "[CLAM Dispatcher] PROCESS EXCEEDS MAXIMUM RESIDENT MEMORY USAGE (" + str(resmem) + ' >= ' + str(settings.DISPATCHER_MAXRESMEM) + ')... ABORTING'
+                print("[CLAM Dispatcher] PROCESS EXCEEDS MAXIMUM RESIDENT MEMORY USAGE (" + str(resmem) + ' >= ' + str(settings.DISPATCHER_MAXRESMEM) + ')... ABORTING', file=sys.stderr)
                 abort = True
                 abortchecktime = lastpolltime
                 statuscode = 2
             lastpolltime = datetime.datetime.now()
         elif settings.DISPATCHER_MAXTIME > 0 and d > settings.DISPATCHER_MAXTIME:
-            print >>sys.stderr, "[CLAM Dispatcher] PROCESS TIMED OUT.. NO COMPLETION WITHIN " + str(d) + " SECONDS ... ABORTING"
+            print("[CLAM Dispatcher] PROCESS TIMED OUT.. NO COMPLETION WITHIN " + str(d) + " SECONDS ... ABORTING", file=sys.stderr)
             abort = True
             statuscode = 3
 
@@ -200,7 +203,7 @@ def main():
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
     d = total_seconds(datetime.datetime.now() - begintime)
-    print >>sys.stderr, "[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s"
+    print("[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s", file=sys.stderr)
 
     return statuscode
 

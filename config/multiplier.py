@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -19,6 +19,7 @@
 
 #This is an example for CLAM showing the use of Actions
 
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -28,7 +29,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = "0.9.11"
+REQUIRE_VERSION = "0.99"
 
 # ======== GENERAL INFORMATION ===========
 

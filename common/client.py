@@ -3,46 +3,48 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Client --
+# -- CLAM Client  --
 #       by Maarten van Gompel (proycon)
-#       http://proycon.github.com/clam
+#       https://proycon.github.io/clam
 #
-#       Centre for Language Studies
+#       Centre for Language and Speech Technology / Language Machines
 #       Radboud University Nijmegen
-#
-#       Induction for Linguistic Knowledge Research Group
-#       Tilburg University
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import os.path
 import sys
-import urllib2
-from urllib import urlencode
-import pycurl
+import requests
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor #pylint: disable=import-error
 from lxml import etree as ElementTree
-from StringIO import StringIO
-import base64
-from clam.external.poster.encode import multipart_encode
-from clam.external.poster.streaminghttp import register_openers, StreamingHTTPHandler
-
-
+if sys.version < '3':
+    from StringIO import StringIO #pylint: disable=import-error
+    from io import IOBase
+else:
+    from io import StringIO, IOBase, BytesIO
 
 import clam.common.status
 import clam.common.parameters
 import clam.common.formats
-from clam.common.data import CLAMData, CLAMFile, CLAMInputFile, CLAMOutputFile, CLAMMetaData, InputTemplate, OutputTemplate, VERSION as DATAAPIVERSION, BadRequest, NotFound, PermissionDenied, ServerError, AuthRequired,NoConnection, UploadError, ParameterError, TimeOut, processhttpcode
-from clam.common.util import RequestWithMethod
+import clam.common.data
 
-VERSION = '0.9.13'
-if VERSION != DATAAPIVERSION:
-    raise Exception("Version mismatch beween Client API ("+clam.common.data.VERSION+") and Data API ("+DATAAPIVERSION+")!")
+VERSION = '0.99'
+if VERSION != clam.common.data.VERSION:
+    raise Exception("Version mismatch beween Client API ("+VERSION+") and Data API ("+clam.common.data.VERSION+")!")
 
-# Register poster's streaming http handlers with urllib2
-register_openers()
 
+#for debug of requests:
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
+
+def donereadingupload(encoder):
+    """Called when the uploaded file has been read"""
+    #encoder.encoder.fields['file'][1].seek(0)
+    pass
 
 class CLAMClient:
     def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None):
@@ -78,109 +80,102 @@ class CLAMClient:
     def initauth(self):
         """Initialise authentication, for internal use"""
         global VERSION
-        if self.authenticated:
-            #for file upload we use urllib2:
-            self.passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            # this creates a password manager
-            self.passman.add_password(None, self.url, self.user, self.password) #realm will be automagically detected
-            authhandler = urllib2.HTTPDigestAuthHandler(self.passman)
-            opener = urllib2.build_opener(authhandler)
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
-        elif self.oauth:
+
+        headers = {'User-agent': 'CLAMClientAPI-' + VERSION}
+        if self.oauth:
             if not self.oauth_access_token:
-                opener = urllib2.build_opener()
-                opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-                urllib2.install_opener(opener)
-                request = RequestWithMethod(self.url,method='GET')
-                try:
-                    response = urllib2.urlopen(request)
-                except Exception, e:
-                    try:
-                        statuscode = int(e.code)
-                    except AttributeError:
-                        raise e
+                r = requests.get(self.url,headers=headers)
+                if r.status_code == 404:
+                    raise clam.common.data.NotFound("Authorization provider not found")
+                elif r.status_code == 403:
+                    raise clam.common.data.PermissionDenied("Authorization provider denies access")
+                elif not (r.status_code >= 200 and r.status_code <= 299):
+                    raise Exception("An error occured, return code " + str(r.status_code))
 
-                    if statuscode >= 200 and statuscode < 300:
-                        #this is no error!
-                        return self._parse(e.read())
-                    elif statuscode == 404:
-                        raise NotFound("Authorization provider not found")
-                    elif statuscode == 403:
-                        raise PermissionDenied("Authorization provider denies access")
-                    else:
-                        raise
 
-                data = self._parse(response.read())
+                data = self._parse(r.text)
                 if data is True: #indicates failure
-                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + response.geturl())
+                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + r.geturl())
                 else:
                     self.oauth_access_token = data.oauth_access_token
 
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            opener.addheaders = [('Authorization', 'Bearer ' + self.oauth_access_token)]
-            urllib2.install_opener(opener)
-        else:
-            opener = urllib2.build_opener()
-            opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-            urllib2.install_opener(opener)
+            headers['Authorization'] = 'Bearer ' + self.oauth_access_token
+        return headers
 
 
+    def register_custom_formats(self, custom_formats):
+        """custom_formats is a list of Python classes holding custom formats the webservice may use. These must be registered with the client before the client can be used."""
+        clam.common.data.CUSTOM_FORMATS = custom_formats
 
+
+    def initrequest(self, data=None):
+        params = {'headers': self.initauth() }
+        if self.authenticated and not self.oauth:
+           params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password)
+        if data:
+           params['data'] = data
+        return params
 
     def request(self, url='', method = 'GET', data = None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
-        if self.authenticated or self.oauth: self.initauth()
-        if data:
-            request = RequestWithMethod(self.url + url,data,method=method)
+        requestparams = self.initrequest(data)
+
+
+        if method == 'POST':
+            request = requests.post
+        elif method == 'DELETE':
+            request = requests.delete
+        elif method == 'PUT':
+            request = requests.put
         else:
-            request = RequestWithMethod(self.url + url,method=method)
-        try:
-            response = urllib2.urlopen(request)
-        except Exception, e:
-            try:
-                statuscode = int(e.code)
-            except AttributeError:
-                raise e
+            request = requests.get
 
-            if statuscode >= 200 and statuscode < 300:
-                #this is no error!
-                return self._parse(e.read())
-            elif statuscode == 400:
-                raise BadRequest()
-            elif statuscode == 401:
-                raise AuthRequired()
-            elif statuscode == 403:
-                content = e.read()
-                data = self._parse(content)
-                if data:
-                    raise PermissionDenied(data)
-                else:
-                    raise PermissionDenied(content)
-            elif statuscode == 404 and data:
-                raise NotFound(e.read())
-            elif statuscode == 500:
-                raise ServerError(e.read())
-            elif statuscode == 405:
-                raise ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
-            elif statuscode == 408:
-                raise TimeOut()
+        r = request(self.url + url,**requestparams)
+
+        if r.status_code == 400:
+            raise clam.common.data.BadRequest()
+        elif r.status_code == 401:
+            raise clam.common.data.AuthRequired()
+        elif r.status_code == 403:
+            content = r.text
+            data = self._parse(content)
+            if data:
+                if data.errors:
+                    print("DEBUG: errors found",file=sys.stderr)
+                    error = data.parametererror()
+                    print("DEBUG: parametererror=" + str(error),file=sys.stderr)
+                    for parametergroup, parameters in data.parameters:
+                        for parameter in parameters:
+                            print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
+                    if error:
+                        raise clam.common.data.ParameterError(error)
+                print(content,file=sys.stderr)
+                raise clam.common.data.PermissionDenied(data)
             else:
-                raise
+                raise clam.common.data.PermissionDenied(content)
+        elif r.status_code == 404 and data:
+            raise clam.common.data.NotFound(r.text)
+        elif r.status_code == 500:
+            raise clam.common.data.ServerError(r.text)
+        elif r.status_code == 405:
+            raise clam.common.data.ServerError("Server returned 405: Method not allowed for " + method + " on " + self.url + url)
+        elif r.status_code == 408:
+            raise clam.common.data.TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r.status_code))
 
-        return self._parse(response.read())
+        return self._parse(r.text)
 
 
     def _parse(self, content):
         """Parses CLAM XML data and returns a ``CLAMData`` object. For internal use. Raises `ParameterError` exception on parameter errors."""
         if content.find('<clam') != -1:
-            data = CLAMData(content,self)
+            data = clam.common.data.CLAMData(content,self)
             if data.errors:
                 error = data.parametererror()
                 if error:
-                    raise ParameterError(error)
+                    raise clam.common.data.ParameterError(error)
             return data
         else:
             return True
@@ -195,7 +190,7 @@ class CLAMClient:
             data = self.request(project + '/')
         except:
             raise
-        if not isinstance(data, CLAMData):
+        if not isinstance(data, clam.common.data.CLAMData):
             raise Exception("Unable to retrieve CLAM Data")
         else:
             return data
@@ -218,7 +213,7 @@ class CLAMClient:
         else:
             method = 'GET'
 
-        return self.request('/actions/' + id, method, urlencode(kwargs))
+        return self.request('/actions/' + id, method, kwargs)
 
 
 
@@ -237,7 +232,7 @@ class CLAMClient:
             if isinstance(parameters[key],list) or isinstance(parameters[key],tuple):
                 parameters[key] = ",".join(parameters[key])
 
-        return self.request(project + '/', 'POST', urlencode(parameters))
+        return self.request(project + '/', 'POST', parameters)
 
     def startsafe(self, project, **parameters):
         """Start a run. ``project`` is the ID of the project, and ``parameters`` are keyword arguments for
@@ -252,7 +247,7 @@ class CLAMClient:
             for parametergroup, paramlist in data.parameters:
                 for parameter in paramlist:
                     if parameter.error:
-                        raise ParameterError(parameter.error)
+                        raise clam.common.data.ParameterError(parameter.error)
             return data
         except:
             raise
@@ -284,15 +279,14 @@ class CLAMClient:
             client.downloadarchive("myproject","allresults.zip","zip")
 
         """
-        #MAYBE TODO: Redo??
-        self.initauth()
-        req = urllib2.urlopen(self.url + project + '/output/?format=' + format)
+        requestparams = self.initrequest()
+        requestparams['data'] = {'format':format}
+        r = requests.get(self.url + project + '/output/',**requestparams)
         CHUNK = 16 * 1024
-        while True:
-            chunk = req.read(CHUNK)
-            if not chunk: break
-            targetfile.write(chunk)
-
+        for chunk in r.iter_content(chunk_size=CHUNK):
+            if chunk: # filter out keep-alive new chunks
+                targetfile.write(chunk)
+                targetfile.flush()
 
     def getinputfilename(self, inputtemplate, filename):
         """Determine the final filename for an input file given an inputtemplate and a given filename.
@@ -318,7 +312,7 @@ class CLAMClient:
         """Parse CLAM Upload XML Responses. For internal use"""
         if not isinstance(node,ElementTree._Element):
             try:
-                node = ElementTree.parse(StringIO(node)).getroot()
+                node = clam.common.data.parsexmlstring(node)
             except:
                 raise Exception(node)
         if node.tag != 'clamupload':
@@ -327,15 +321,15 @@ class CLAMClient:
             if node.tag == 'upload':
                 for subnode in node:
                     if subnode.tag == 'error':
-                        raise UploadError(subnode.text)
+                        raise clam.common.data.UploadError(subnode.text)
                     if subnode.tag == 'parameters':
                         if 'errors' in subnode.attrib and subnode.attrib['errors'] == 'yes':
                             errormsg = "The submitted metadata did not validate properly" #default
                             for parameternode in subnode:
                                 if 'error' in parameternode.attrib:
                                     errormsg = parameternode.attrib['error']
-                                    raise ParameterError(errormsg + " (parameter="+parameternode.attrib['id']+")")
-                            raise ParameterError(errormsg)
+                                    raise clam.common.data.ParameterError(errormsg + " (parameter="+parameternode.attrib['id']+")")
+                            raise clam.common.data.ParameterError(errormsg)
         return True
 
 
@@ -362,90 +356,71 @@ class CLAMClient:
             client.addinputfile("myproject", "someinputtemplate", "/path/to/local/file", parameter1="blah", parameterX=3.5)
 
         """
-        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
-        elif not isinstance(inputtemplate, InputTemplate):
+        elif not isinstance(inputtemplate, clam.common.data.InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
-        if isinstance(sourcefile, file):
-            sourcefile = sourcefile.name
+        if not isinstance(sourcefile, IOBase):
+            sourcefile = open(sourcefile,'rb')
+            if 'filename' in kwargs:
+                filename = self.getinputfilename(inputtemplate, kwargs['filename'])
+            else:
+                filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile.name) )
 
-        if 'filename' in kwargs:
-            filename = self.getinputfilename(inputtemplate, kwargs['filename'])
-        else:
-            filename = self.getinputfilename(inputtemplate, os.path.basename(sourcefile) )
-
-        data = {"file": (pycurl.FORM_FILE, sourcefile) , 'inputtemplate': inputtemplate.id}
+        data = {"file": (filename,sourcefile,inputtemplate.formatclass.mimetype), 'inputtemplate': inputtemplate.id}
         for key, value in kwargs.items():
             if key == 'filename':
                 pass #nothing to do
             elif key == 'metadata':
-                assert isinstance(value, CLAMMetaData)
+                assert isinstance(value, clam.common.data.CLAMMetaData)
                 data['metadata'] =  value.xml()
             elif key == 'metafile':
-                data['metafile'] = (pycurl.FORM_FILE, value)  #open(value,'r')
+                data['metafile'] = open(value,'rb')
             else:
                 data[key] = value
 
 
-        #streamhandler = StreamingHTTPHandler(debuglevel=6)
-        #if self.authenticated:
-        #    opener = urllib2.build_opener(streamhandler, urllib2.HTTPDigestAuthHandler(self.passman))
-        #else:
-        #    opener = urllib2.build_opener(streamhandler)
-        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        #urllib2.install_opener(opener)
+        requestparams = self.initrequest(data)
+        if 'auth'in requestparams:
+            #TODO: streaming support doesn't work with authentication unfortunately, disabling streaming for now:
+            del data['file']
+            requestparams['data'] = data
+            requestparams['files'] = [('file', (filename,sourcefile, inputtemplate.formatclass.mimetype))]
+            if 'metafile' in kwargs:
+                del data['metafile']
+                requestparams['files'].append(('metafile',('.'+ filename + '.METADATA', open(kwargs['metafile'],'rb'), 'text/xml')))
+        else:
+            #streaming support
+            encodeddata = MultipartEncoder(fields=requestparams['data']) #from requests-toolbelt, necessary for streaming support
+            requestparams['data'] = encodeddata
+            requestparams['headers']['Content-Type'] = encodeddata.content_type
+        r = requests.post(self.url + project + '/input/' + filename,**requestparams)
+        sourcefile.close()
 
-        #opener = register_openers() #for streaming upload (poster)
-        #opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        #if self.authenticated:
-        #    opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
-        #    pass
-        #urllib2.install_opener(opener)
+        if r.status_code == 400:
+            raise clam.common.data.BadRequest()
+        elif r.status_code == 401:
+            raise clam.common.data.AuthRequired()
+        elif r.status_code == 403:
+            if r.text[0] == '<':
+                #XML response
+                return self._parseupload(r.text)
+            else:
+                raise clam.common.data.PermissionDenied(r.text)
+        elif r.status_code == 404:
+            raise clam.common.data.NotFound(r.text)
+        elif r.status_code == 500:
+            raise clam.common.data.ServerError(r.text)
+        elif r.status_code == 405:
+            raise clam.common.data.ServerError("Server returned 405: Method not allowed for POST on " + self.url + project + '/input/' + filename)
+        elif r.status_code == 408:
+            raise clam.common.data.TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r.status_code))
 
-        #if self.authenticated:
-        #    request = urllib2.Request(self.url + project + '/input/' + filename, "")
-        #    response = urllib2.urlopen(request)
-        #    print dir(request)
-        #    print request.headers
-
-
-        #datagen, headers = multipart_encode(data)
-
-        # Create the Request object
-        #request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        #print dir(request)
-        #print request.headers
-        #print request.get_header("Authorization")
-        #try:
-        #    response = urllib2.urlopen(request)
-        #    xml = response.read()
-        #except urllib2.HTTPError, e:
-        #    xml = e.read()
-
-
-        buf = StringIO()
-        # Initialize pycurl
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, self.url + project + '/input/' + filename)
-        fields = list(data.items())
-        c.setopt(c.HTTPPOST, fields)
-        if self.authenticated:
-            c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
-            c.setopt(c.USERPWD, self.user + ':' + self.password)
-        elif self.oauth:
-            c.setopt(c.HTTPHEADER, [ 'Authorization: Bearer %s' % str(self.oauth_access_token) ])
-        c.setopt(c.WRITEFUNCTION, buf.write)
-        c.perform()
-        code = processhttpcode(c.getinfo(c.HTTP_CODE),[403]) #raises exception when not successful
-        xml = buf.getvalue()
-        c.close()
-
-        try:
-            return self._parseupload(xml)
-        except:
-            raise
+        return self._parseupload(r.text)
 
 
 
@@ -472,10 +447,10 @@ class CLAMClient:
             client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))
 
         """
-        if isinstance( inputtemplate, str) or isinstance( inputtemplate, unicode):
+        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
-        elif not isinstance(inputtemplate, InputTemplate):
+        elif not isinstance(inputtemplate, clam.common.data.InputTemplate):
             raise Exception("inputtemplate must be instance of InputTemplate. Get from CLAMData.inputtemplate(id)")
 
 
@@ -489,7 +464,7 @@ class CLAMClient:
             if key == 'filename':
                 pass #nothing to do
             elif key == 'metadata':
-                assert isinstance(value, CLAMMetaData)
+                assert isinstance(value, clam.common.data.CLAMMetaData)
                 data['metadata'] =  value.xml()
             elif key == 'metafile':
                 data['metafile'] = open(value,'r')
@@ -497,22 +472,31 @@ class CLAMClient:
                 data[key] = value
 
 
-        opener = register_openers()
-        opener.addheaders = [('User-agent', 'CLAMClientAPI-' + VERSION)]
-        if self.authenticated:
-            opener.add_handler( urllib2.HTTPDigestAuthHandler(self.passman) )
-        datagen, headers = multipart_encode(data)
+        requestparams = self.initrequest(data)
+        r = requests.post(self.url + project + '/input/' + filename,**requestparams)
 
-        # Create the Request object
-        request = urllib2.Request(self.url + project + '/input/' + filename, datagen, headers)
-        try:
-            xml = urllib2.urlopen(request).read()
-        except urllib2.HTTPError, e:
-            xml = e.read()
-        try:
-            return self._parseupload(xml)
-        except:
-            raise
+        if r.status_code == 400:
+            raise clam.common.data.BadRequest()
+        elif r.status_code == 401:
+            raise clam.common.data.AuthRequired()
+        elif r.status_code == 403:
+            if r.text[0] == '<':
+                #XML response
+                return self._parseupload(r.text)
+            else:
+                raise clam.common.data.PermissionDenied(r.text)
+        elif r.status_code == 404:
+            raise clam.common.data.NotFound(r.text)
+        elif r.status_code == 500:
+            raise clam.common.data.ServerError(r.text)
+        elif r.status_code == 405:
+            raise clam.common.data.ServerError("Server returned 405: Method not allowed for POST on " + self.url + project + '/input/' + filename)
+        elif r.status_code == 408:
+            raise clam.common.data.TimeOut()
+        elif not (r.status_code >= 200 and r.status_code <= 299):
+            raise Exception("An error occured, return code " + str(r.status_code))
+
+        return self._parseupload(r.text)
 
 
 
@@ -522,6 +506,6 @@ class CLAMClient:
 
     def download(self, project, filename, targetfilename, loadmetadata=False):
         """Download an output file"""
-        f = CLAMOutputFile(self.url + project,  filename, loadmetadata, self)
+        f = clam.common.data.CLAMOutputFile(self.url + project,  filename, loadmetadata, self)
         f.copy(targetfilename)
 

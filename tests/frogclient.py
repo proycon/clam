@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -12,6 +12,8 @@
 #       Licensed under GPLv3
 #
 ###############################################################
+
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import os
@@ -53,8 +55,8 @@ for arg in sys.argv[1:]:
     elif os.path.isdir(arg):
         files += [ x for x in glob.glob(arg + '/*') if x[0] != '.' ]
     else:
-        print >>sys.stderr, "Unknown argument, or file/directory does not exist: " + arg
-        print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
+        print("Unknown argument, or file/directory does not exist: " + arg,file=sys.stderr)
+        print("Syntax: frogclient.py [OPTIONS] URL TEXTFILES",file=sys.stderr)
         print >>sys.stderr, "Options: -t\tTokenise only"
         print >>sys.stderr, "         -v\tTokenise only (verbosely)"
         print >>sys.stderr, "         -P\tDisable parser"
@@ -65,13 +67,13 @@ if not url or not files:
     sys.exit(1)    
 
 
-print "Connecting to server..."
+print("Connecting to server...")
 
         
 #create client, connect to server, url is the full URL to the base of your webservice.
 clamclient = CLAMClient(url)
 
-print "Creating project..."
+print("Creating project...")
    
 #this is the name of our project, it consists in part of randomly generated bits (so multiple clients don't use the same project and can run similtaneously)
 
@@ -85,30 +87,30 @@ clamclient.create(project)
 
 
 
-print "Uploading Files..."
+print("Uploading Files...")
 
 
 #Upload the files (names were passed on the command line) to the webservice, always indicating
 #the format.
 for f in files:
-    print "\tUploading " + f + " to webservice..."
+    print("\tUploading " + f + " to webservice...")
     #This invokes the actual upload
     clamclient.upload(project, open(f), PlainTextFormat('utf-8') )
 
 
 
-print "Starting Frog..."
+print("Starting Frog...")
 
 #Now we invoke the webservice with the parameters that were passed on the command line, effectively
 #starting the project. The start() method takes a project name and a set of keyword arguments, the keywords here
 #correspond with the parameter IDs defined by your webservice.
 data = clamclient.start(project, tok=tok,skip=skip) #start the process with the specified parameters
 if data.errors:
-    print >>sys.stderr,"An error occured: " + data.errormsg
+    print("An error occured: " + data.errormsg,file=sys.stderr)
     for parametergroup, paramlist in data.parameters:
         for parameter in paramlist:
             if parameter.error:
-                print >>sys.stderr,"Error in parameter " + parameter.id + ": " + parameter.error
+                print("Error in parameter " + parameter.id + ": " + parameter.error,file=sys.stderr)
     clamclient.delete(project) #delete our project (remember, it was temporary, otherwise clients would leave a mess)
     sys.exit(1)
 
@@ -116,14 +118,14 @@ if data.errors:
 while data.status != clam.common.status.DONE:
     time.sleep(5) #wait 5 seconds before polling status
     data = clamclient.get(project) #get status again
-    print "\tFROG IS RUNNING: " + str(data.completion) + '% -- ' + data.statusmessage
+    print("\tFROG IS RUNNING: " + str(data.completion) + '% -- ' + data.statusmessage)
 
 #Good, all is done! We should have some output...
-print "Frog is done."
+print("Frog is done.")
 
 #Download all output files to current directory
 for outputfile in data.output:
-    print "\tDownloading " + str(outputfile) + " (" + outputfile.format.name + ") ..."
+    print("\tDownloading " + str(outputfile) + " (" + outputfile.format.name + ") ...")
     f = codecs.open(os.path.basename(str(outputfile)),'w','utf-8')
     for line in outputfile:
         f.write(line)
@@ -133,4 +135,4 @@ for outputfile in data.output:
 #delete our project (remember, it was temporary, otherwise clients would leave a mess)
 clamclient.delete(project)
 
-print "All done! Have a nice day!"
+print("All done! Have a nice day!")

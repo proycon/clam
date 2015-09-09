@@ -1,11 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
+
+#** NOTE: Make sure the shebang (first line in this file) refers to the Python interpreter you
+#want to use, which may be either Python 3 or 2 **
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
 # -- WSGI script for launching CLAM (from within a webserver) --
 #       by Maarten van Gompel (proycon)
-#       http://proycon.github.io/clam
+#       https://proycon.github.io/clam
 #
 #       Copy and adapt this script for your particular service!
 #
@@ -13,18 +16,25 @@
 #
 ###############################################################
 
-
 import sys
 import os
+import site
 
-#** If CLAM is not by default in your PYTHONPATH, you need specify the directory that contains the subdirectory 'clam' here (and uncomment all lines): **
-#CLAMPARENTDIR = '/path/to/clam'
-#sys.path.append(CLAMPARENTDIR)
-#os.environ['PYTHONPATH'] = CLAMPARENTDIR
+#** This is the directory that contains your service configuration file, adapt it: **
+WEBSERVICEDIR = '/path/to/yourwebservice/'
 
-WEBSERVICEDIR = '/path/to/yourwebservice/' #this is the directory that contains your service configuration file
 sys.path.append(WEBSERVICEDIR)
-os.environ['PYTHONPATH'] = WEBSERVICEDIR # + ':' + CLAMPARENTDIR
+os.environ['PYTHONPATH'] = WEBSERVICEDIR
+
+VIRTUALENV=None
+
+#** If you installed CLAM locally in a virtual environment, uncomment and set the following **
+#VIRTUALENV = "/path/to/virtualenv"
+
+if VIRTUALENV:
+    site.addsitedir(VIRTUALENV + '/lib/python'+str(sys.version_info.major) + '.' + str(sys.version_info.minor) + '/site-packages')
+    activate_env = VIRTUALENV + '/bin/activate_this.py'
+    exec(compile(open(activate_env).read(), activate_env, 'exec'))
 
 import yourwebservice #** import your configuration module here! **
 import clam.clamservice

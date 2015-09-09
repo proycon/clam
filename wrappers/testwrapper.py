@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -61,28 +61,28 @@ for i in range(0,10):
 
 
 #Example: output all selected parameters
-print "PARAMETERS:"
+print("PARAMETERS:")
 for parametergroup, parameters in clamdata.parameters:
     for parameter in parameters:
         if parameter.value: #check if it is set
-            print "\t" + parameter.name + ": " + str(parameter.value)
+            print("\t" + parameter.name + ": " + str(parameter.value))
 
 #Query a specific parameter:
-print "\tYour favourite colour is " + clamdata['colourchoice']
+print("\tYour favourite colour is " + clamdata['colourchoice'])
 
-print "INPUT FILES:"
+print("INPUT FILES:")
 
 #Iterate over all inputfiles:
 for inputfile in clamdata.input:
-    print "\t" + str(inputfile)
+    print("\t" + str(inputfile))
     if isinstance(inputfile.metadata, clam.common.formats.PlainTextFormat) or isinstance(inputfile.metadata, clam.common.formats.TokenizedTextFormat): #if the input file is a plain text format
-        print "\tProcessing " + str(inputfile)
+        print("\tProcessing " + str(inputfile))
         clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...")
 
         #invoke 'rev' through the shell to reverse the input, note the use of the shellsafe() function that wraps our input in the specified quotes (second parameter) and makes sure the value doesn't break out of the quoted environment!
         os.system("rev " + shellsafe(str(inputfile),'"') + " > " + shellsafe(outputdir + os.path.basename(str(inputfile)),'"'))
     else:
-        print "\tSkipping " + str(inputfile)
+        print("\tSkipping " + str(inputfile))
         clam.common.status.write(statusfile, "Skipping " + os.path.basename(str(inputfile)) + ", invalid format")
 
 clam.common.status.write(statusfile, "Done",100)

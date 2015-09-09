@@ -10,17 +10,23 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
 
 try:
-    import web
+    import flask
 except ImportError:
     pass
-import urllib2
-from urllib import urlencode
+import requests
 import os.path
 from lxml import etree
 import csv
-from StringIO import StringIO
+import sys
+if sys.version < '3':
+    from StringIO import StringIO #pylint: disable=import-error
+else:
+    from io import StringIO,  BytesIO
+
+from clam.common.util import withheaders
 
 class AbstractViewer(object):
 
@@ -40,17 +46,19 @@ class AbstractViewer(object):
         return False
 
     def view(self, file, **kwargs):
-        """Returns the view itself, in xhtml (it's recommended to use web.py's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
-        url = self.url(file) + urlencode(kwargs)
+        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
+        url = self.url(file)
         if url: #is the resource external?
             if self.embed:
                 #fetch
-                req = urllib2.urlopen(url)
-                for line in req.readlines():
-                    yield line
+                if kwargs:
+                    req = requests.get(url,data=kwargs)
+                else:
+                    req = requests.get(url)
+                return withheaders(flask.make_reponse(req.iter_lines()), self.mimetype)
             else:
                 #redirect
-                raise web.seeother(url)
+                return flask.redirect(url)
 
 
 
@@ -74,36 +82,13 @@ class SimpleTableViewer(AbstractViewer):
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
-        #Load all in memory to prevent unicode issues (not ideal)
-        data = file.readlines()
-        if any( ( isinstance(x, unicode) for x in data ) ):
-            data = u"\n".join(data)
-            data = data.encode('utf-8')
-        else:
-            data = "\n".join(data)
-        if self.quotechar:
-            file = csv.reader(StringIO(data), delimiter=self.delimiter, quotechar=self.quotechar)
-        else:
-            file = csv.reader(StringIO(data), delimiter=self.delimiter)
+        file = csv.reader(file, delimiter=self.delimiter)
         for line in file:
-            yield [ unicode(x,'utf-8') for x in line ] #todo, can't really assume utf-8
+            yield line
 
     def view(self,file,**kwargs):
-        render = web.template.render('templates')
-        return render.crudetableviewer( file, self)
+        return flask.render_template('crudetableviewer.html',file=file,tableviewer=self)
 
-
-
-
-class FrogViewer(AbstractViewer):
-    id = 'frogviewer'
-    name = "Frog Viewer"
-
-
-
-    def view(self,file,**kwargs):
-        render = web.template.render('templates')
-        return render.crudetableviewer( file, "\t")
 
 class XSLTViewer(AbstractViewer):
     id = 'xsltviewer'
@@ -122,13 +107,12 @@ class XSLTViewer(AbstractViewer):
         xslt_doc = etree.parse(self.xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        #f = file.open()
         lines = file.readlines()
         if lines:
-            if isinstance(lines[0], unicode):
+            if sys.version < '3' and isinstance(lines[0], unicode): #pylint: disable=undefined-variable
                 xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
             else:
-                xml_doc = etree.parse(StringIO("".join(lines) ))
+                xml_doc = etree.parse(BytesIO("".join(lines).encode('utf-8') ))
         else:
             return "(no data)"
 
@@ -143,9 +127,10 @@ class FoLiAViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        #f = file.open()
-
-        xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        if sys.version < '3':
+            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        else:
+            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
         return str(transform(xml_doc))
 
 
@@ -158,8 +143,10 @@ class SoNaRViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        #f = file.open()
-        xml_doc = etree.parse(StringIO("".join(file.readlines())))
+        if sys.version < '3':
+            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        else:
+            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
 
         return str(transform(xml_doc))
 

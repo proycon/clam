@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 
@@ -6,87 +6,87 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Settings --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
-#       
+#       http://proycon.github.io/clam/
+#       Centre for Language and Speech Technology  / Language Machines
+#       Radboud University Nijmegen
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 from clam.common.parameters import *
 from clam.common.formats import *
+from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.converters import *
 from clam.common.digestauth import pwhash
-from sys import path 
-from os import uname, environ
+import clam
+import os
 from base64 import b64decode as D
 
-REQUIRE_VERSION = 0.7
+REQUIRE_VERSION = 0.99
+CLAMDIR = clam.__path__[0]
 
 SYSTEM_ID = "ucto"
 SYSTEM_NAME = "Ucto Tokeniser"
 SYSTEM_DESCRIPTION = 'Ucto is a unicode-compliant tokeniser. It takes input in the form of one or more untokenised texts, and subsequently tokenises them. Several languages are supported, but the software is extensible to other languages.'
 
-#Root directory for CLAM
-ROOT = path[0] + "/../ucto.clam/"
-PORT = 8080
 
 #Users and passwords
 USERS = None #Enable this instead if you want no authentication
-#USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!! 
 
 
-# ================ Server specific configurations for CLAM ===============
-host = uname()[1]
-if host == 'galactica' or host == 'roma': #proycon's laptop/server
-    CLAMDIR = "/home/proycon/work/clam"
-    ROOT = "/home/proycon/work/ucto.clam/"
-    PORT = 9001
-    BINDIR = "/home/proycon/local/bin/"
-elif host == 'applejack': #Nijmegen
-    if not 'CLAMTEST' in environ:
-        #live production environment/
-        CLAMDIR = "/scratch2/www/webservices-lst/live/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
+# ================ Server specific configuration for CLAM ===============
+host = os.uname()[1]
+if 'VIRTUAL_ENV' in os.environ and os.path.exists(os.environ['VIRTUAL_ENV'] +'/bin/ucto'):
+    # Virtual Environment (LaMachine)
+    ROOT = os.environ['VIRTUAL_ENV'] + "/ucto.clam/"
+    PORT = 8802
+    BINDIR = os.environ['VIRTUAL_ENV'] + '/bin/'
+
+    if host == 'applejack': #configuration for server in Nijmegen
         HOST = "webservices-lst.science.ru.nl"
-        PORT = 80    
-    else:
-        #test environment
-        CLAMDIR = "/scratch2/www/webservices-lst/test/repo/clam"
-        ROOT = "/scratch2/www/webservices-lst/test/writable/ucto/"
-        HOST = "webservices-lst.science.ru.nl"
-        PORT = 81        
-    URLPREFIX = "ucto"
-    BINDIR = "/vol/customopt/uvt-ru/bin/"    
-    USERS_MYSQL = {
-        'host': 'mysql-clamopener.science.ru.nl', 
-        'user': 'clamopener',        
-        'password': D(open(environ['CLAMOPENER_KEYFILE']).read().strip()),
-        'database': 'clamopener',
-        'table': 'clamusers_clamusers'
-    }
-    REALM = "WEBSERVICES-LST"
-elif host == 'echo' or host == 'nomia' or host == 'echo.uvt.nl' or host == 'nomia.uvt.nl': #Tilburg    
-    #Assuming ILK server
-    CLAMDIR = "/var/www/clam"
-    BINDIR = "/var/www/bin/"
-    ROOT = "/var/www/clamdata/ucto/"
-    HOST = 'webservices.ticc.uvt.nl'
-    PORT = 80
-    URLPREFIX = 'ucto'
-    #WEBSERVICEGHOST = 'ws'
-    #REALM = 'CLAM-TICC'
-    #USERS_MYSQL = {
-    #    'host': 'stheno.uvt.nl',
-    #    'user': 'clamopener',
-    #    'password': '',
-    #    'database': 'clamopener',
-    #    'table': 'clamusers_clamusers',        
-    #}
+        URLPREFIX = 'ucto'
+
+        if not 'CLAMTEST' in os.environ:
+            ROOT = "/scratch2/www/webservices-lst/live/writable/ucto/"
+            if 'CLAMSSL' in os.environ:
+                PORT = 443
+            else:
+                PORT = 80
+        else:
+            ROOT = "/scratch2/www/webservices-lst/test/writable/ucto/"
+            PORT = 81
+
+        USERS_MYSQL = {
+            'host': 'mysql-clamopener.science.ru.nl',
+            'user': 'clamopener',
+            'password': D(open(os.environ['CLAMOPENER_KEYFILE']).read().strip()),
+            'database': 'clamopener',
+            'table': 'clamusers_clamusers'
+        }
+        DEBUG = False
+        REALM = "WEBSERVICES-LST"
+        DIGESTOPAQUE = open(os.environ['CLAM_DIGESTOPAQUEFILE']).read().strip()
+        SECRET_KEY = open(os.environ['CLAM_SECRETKEYFILE']).read().strip()
+        ADMINS = ['proycon','antalb','wstoop']
+elif os.path.exists('/usr/bin/ucto') and os.path.exists("/home/vagrant") and os.getuid() == 998:
+    # Virtual Machine (LaMachine)
+    ROOT = "/home/vagrant/ucto.clam/"
+    PORT = 8802
+    BINDIR = '/usr/bin/'
+elif os.path.exists('/usr/bin/ucto') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
+    # Docker (LaMachine)
+    ROOT = "/root/ucto.clam/"
+    PORT = 8802
+    BINDIR = '/usr/bin/'
+elif host == "hostnameofyoursystem":
+    #**** adapt hostname and add custom configuration for your system here ****
+    raise NotImplementedError
 else:
-    raise Exception("I don't know where I'm running from! Got " + host)    
+    raise Exception("I don't know where I'm running from! Got " + host)
 
 
 

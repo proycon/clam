@@ -8,7 +8,7 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -21,10 +21,9 @@ from clam.common.formats import *
 from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
-from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = 0.5
+REQUIRE_VERSION = 0.9
 
 # ======== GENERAL INFORMATION ===========
 
@@ -57,7 +56,7 @@ USERS = None #no user authentication
 
 ADMINS = ['admin'] #Define which of the above users are admins
 
-#Do you want all projects to be public to all users? Otherwise projects are 
+#Do you want all projects to be public to all users? Otherwise projects are
 #private and only open to their owners and users explictly granted access.
 PROJECTS_PUBLIC = False
 
@@ -83,10 +82,10 @@ PROFILES = []
 
 #Example:
 
-#PROFILES = [ 
+#PROFILES = [
     #Profile(
-        #InputTemplate('textinput', PlainTextFormat,"Input text document",  
-            #StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),  
+        #InputTemplate('textinput', PlainTextFormat,"Input text document",
+            #StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             #ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
             #StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
             #IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
@@ -102,38 +101,38 @@ PROFILES = []
             #extension='.stats',
             #multi=True
         #),
-        #OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ', 
-            #CopyMetaField('language','textinput.language'), 
-            #CopyMetaField('encoding','textinput.encoding'), 
+        #OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ',
+            #CopyMetaField('language','textinput.language'),
+            #CopyMetaField('encoding','textinput.encoding'),
             #SimpleTableViewer(),
             #extension='.freqlist',
             #multi=True
         #),
         #OutputTemplate('overallstats', PlainTextFormat, 'Overall Statistics',
             #SetMetaField('encoding','ascii'),
-            #ParameterCondition(author_set=True, 
-                #then=ParameterMetaField('author','author'), 
+            #ParameterCondition(author_set=True,
+                #then=ParameterMetaField('author','author'),
             #),
             #filename='overall.stats',
             #unique=True
-        #), 
+        #),
         #OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
             #SetMetaField('encoding','utf-8'),
-            #ParameterCondition(author_set=True, 
-                #then=ParameterMetaField('author','author'), 
+            #ParameterCondition(author_set=True,
+                #then=ParameterMetaField('author','author'),
             #),
             #SimpleTableViewer(),
             #filename='overall.freqlist',
             #unique=True
-        #), 
-        #ParameterCondition(createlexicon=True, 
+        #),
+        #ParameterCondition(createlexicon=True,
             #then=OutputTemplate('lexicon', PlainTextFormat, 'Lexicon',
                 #SetMetaField('encoding','utf-8'),
                 #filename='overall.lexicon',
                 #unique=True
-            #)            
+            #)
         #)
-    #) 
+    #)
 #]
 
 # ======== COMMAND ===========
@@ -143,14 +142,14 @@ PROFILES = []
 #absolute paths is preferred. The current working directory will be
 #set to the project directory.
 #
-#You can make use of the following special variables, 
+#You can make use of the following special variables,
 #which will be automatically set by CLAM:
 #     $INPUTDIRECTORY  - The directory where input files are uploaded.
 #     $OUTPUTDIRECTORY - The directory where the system should output
 #                        its output files.
-#     $STATUSFILE      - Filename of the .status file where the system 
-#                        should output status messages. 
-#     $DATAFILE        - Filename of the clam.xml file describing the 
+#     $STATUSFILE      - Filename of the .status file where the system
+#                        should output status messages.
+#     $DATAFILE        - Filename of the clam.xml file describing the
 #                        system and chosen configuration.
 #     $USERNAME        - The username of the currently logged in user
 #                        (set to "anonymous" if there is none)
@@ -166,8 +165,8 @@ COMMAND = ""
 PARAMETERS = []
 
 #Example:
-#PARAMETERS =  [ 
-    #('Main', [ 
+#PARAMETERS =  [
+    #('Main', [
        #BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
        #ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
        #IntegerParameter(id='freqlistlimit',name='Limit frequencylist',description='Limit entries in frequencylist to the top scoring ones. Value of zero (no limit) or higher',minvalue=0, maxvalue=99999999),

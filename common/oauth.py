@@ -5,6 +5,8 @@
 #   OAUTH_AUTH_URL = clam.common.oauth.GOOGLE_AUTH_URL
 #   etc...
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import json
 from requests_oauthlib import OAuth2Session
 from Crypto.Cipher import AES
@@ -43,23 +45,6 @@ def FACEBOOK_USERNAME_FUNCTION(oauthsession):
     return r.content #TODO: parse and get username!!!!!
 
 
-
-
-class auth(object):
-    def __init__(self, client_id, oauth_access_token, username_function):
-        oauthsession = OAuth2Session(client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
-        self.username = username_function(oauthsession)
-        self.oauth_access_token = oauth_access_token
-
-
-    def __call__(self, f):
-        def wrapper(*arguments, **keywords):
-            if not (self.username is None):
-                arguments += ( (self.username, self.oauth_access_token) ,)
-                return f(*arguments, **keywords)
-            else:
-                raise OAuthError("No valid username returned by OAUTH_USERNAME_FUNCTION")
-        return wrapper
 
 def encrypt(encryptionsecret, oauth_access_token, ip):
     BLOCK_SIZE = 16

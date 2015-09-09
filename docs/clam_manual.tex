@@ -38,12 +38,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.9.12 - revision 1.1} \\[0.5cm]
+{\bf \small version 0.99 - revision 1.2} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - November 26th, 2014 (last revision)} \\[0.5cm] 
+\emph{November 11th, 2014 (date published) - September 9th, 2015 (last revision)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -162,97 +162,115 @@ interface.
 
 \section{Technical details}
 
-CLAM is written in Python 2.6 \citep{PYTHON}, and is built on the webpy
-framework.\footnote{http://webpy.org} It can run
-stand-alone thanks to the built-in cherrypy
-webserver;\footnote{http://cherrypy.org} no additional webserver
-is needed to test your service. In production environments, it is however
-strongly recommended that CLAM is integrated into a real webserver. Supported
-are: Apache, nginx or lighthttpd, though others may work too.
+CLAM is written in Python \citep{PYTHON}, and is built on the Flask
+framework.\footnote{http://flask.pocoo.org} It can run stand-alone thanks to
+the built-in webserver; no additional webserver is needed to test your service.
+In production environments, it is however strongly recommended that CLAM is
+integrated into a real webserver. Supported are: Apache, nginx or lighthttpd,
+though others may work too.
 
 The software is designed for Unix-based systems (e.g. Linux or BSD) only. It
-also has been verified to run on Mac OS X, although this is less well supported
-and more difficult to install. Windows is not supported.
+also has been verified to run on Mac OS X as well. Windows is not supported.
 
 \subsection{Installation}
 
 CLAM is available from the Python Package Index; a standardised framework and
-repository for the installation of all kinds of Python packages. Using the
-Python Package Index, installation is easy on Debian/Ubuntu based Linux
-distributions:
+repository for the installation of all kinds of Python packages. Prior to
+installation you will have two choices to make:
+
+\begin{enumerate}
+    \item Install CLAM \emph{globally} or \emph{locally}? Global installation requires root
+        privileges, for local installation we will be using a Python virtual
+        environment
+    \item Use Python 2.7 or Python 3.3 or higher \emph{(Python 3 is recommended whenever possible)}
+\end{enumerate}
+
+For global installation on Python 3, issue the following:
 
 { \small
-\begin{verbatim} $ sudo easy_install clam \end{verbatim}
+\begin{verbatim} $ sudo pip3 install clam \end{verbatim}
 }
-
 
 This will automatically download and globally install the latest version of
 CLAM for you. If you already have CLAM installed and just want to update it,
 run the following:
 
 { \small
-\begin{verbatim} $ sudo easy_install -U clam \end{verbatim}
+\begin{verbatim} $ sudo pip3 install -U clam \end{verbatim}
 }
 
-It it wise to repeatedly issue this command (every month or so), as
-updates are released on a regular basis.
+It is recommended to regularly check for updates in this way.
 
-In case \texttt{easy\_install} is not yet available on your system, you first need to
-install it. On a Debian/Ubuntu based distribution this can be done as follows: 
+If you want to use Python 2.7 instead of Python 3, use \texttt{pip2} instead of
+\texttt{pip3}.  Alternatively, the executable \texttt{pip} may link to either
+the Python 3 or Python 2 version depending on your distribution, consult which
+version you have with \texttt{pip --version}. If pip is not available at all
+yet, you will need to install the package \texttt{python3-pip} or
+\texttt{python-pip} (Python 2).  On a Debian/Ubuntu based distribution this can
+be done as follows. Package names may differ for other distributions:
 
 { \small
-\begin{verbatim} $ sudo apt-get install python-setuptools \end{verbatim}
+\begin{verbatim} $ sudo apt-get install python3-pip \end{verbatim}
 }
-
-Or for Red Hat/Fedora/CentOS:
-
-{ \small
-\begin{verbatim} # yum install python-setuptools \end{verbatim}
-}
-
-For other Linux distributions, and for Mac OS X with homebrew, fink, or
-macports, a similar package should exist. 
 
 After installation, CLAM is installed globally alongside all other Python
-packages, usually in a path such as \texttt{/usr/lib/python2.7/dist-packages}.
+packages, usually in a path such as \texttt{/usr/lib/python3.4/dist-packages}.
 The exact path and your Python version may differ. You can verify the
 availability of CLAM by opening an interactive Python interpreter and writing:
 `'\texttt{import clam}''
 
 If you do not have root access on your system and instead want to install CLAM
-locally in your home directory's python package directory, then invoke
-\texttt{easy\_install} with the \texttt{--user} flag. This will install CLAM in
-a path such as \texttt{~/.local/lib/python2.7/site-packages}.
+locally, then we recommend using a Python Virtual Environment.
+
+To create a virtual environment, which we name \emph{clamenv} here, but you can
+choose any name you want, issue the following command:
 
 { \small
-\begin{verbatim} $ easy_install --user clam \end{verbatim}
+\begin{verbatim} $ virtualenv --python=python3 clamenv \end{verbatim}
 }
 
-Alternatively, other custom paths can be specified using the \texttt{--prefix}
-flag, but this forces the user to manually ensure the target directory is part
-of the user's \texttt{\$PYTHONPATH}.
+To enter the virtual environment, type the following (note the period):
+
+{ \small
+\begin{verbatim} $ . clamenv/bin/activate.sh \end{verbatim}
+}
+
+This will change your prompt by inserting the name of the virtual environment.
+Now you can proceed with to install CLAM locally:
+
+{ \small
+\begin{verbatim} $ pip install clam \end{verbatim}
+}
+
+Note you will need to activate the virtual environment any time you open a new
+terminal and want to use CLAM. 
+
+If \texttt{virtualenv} is not yet available on your system, install the package
+\texttt{python3-virtualenv} or \texttt{python-virtualenv} first:
+
+{ \small
+\begin{verbatim} $ sudo apt-get install python3-virtualenv \end{verbatim}
+}
 
 \subsubsection{Installation Details} 
  
-The following software is required to run CLAM, the \emph{easy install} process
+The following software is required to run CLAM, the installation process
 explained above should obtain and install all of these dependencies
 automatically, except for Python itself:
 
 \begin{itemize}
-\item python 2.6 (or a higher 2.x version, 2.5 may also work but is less tested. However, note that CLAM does not support 3.x yet)
-\item python-webpy, version 0.33 or higher
-\item python-lxml, version 2 or higher
-\item python-pycurl
-\item python-mysqldb (optional, needed only for MySQL support)
+\item python 3.3 or higher    (2.7 is also still supported)
+\item python3-flask
+\item python3-lxml
+\item python3-requests 
+\item python3-requests-oauthlib 
+\item python3-mysqldb (optional, needed only for MySQL support)
 \end{itemize}
 
 For development and testing, each CLAM webservice can run stand-alone on any
 TCP port of your choice (make sure the port is open in your firewall) using the
 built-in webserver. For production environments, it is strongly recommended
 that you plug CLAM into a more advanced webserver (Apache, nginx, lighttpd). 
-
-If you want to run in the supplied test units, an additional dependency is
-needed: \texttt{python-unittest2}.
 
 If you look in the directory where CLAM has been installed, the following files
 may be of particular interest:
@@ -284,7 +302,7 @@ some additional work. This is explained in later sections for Apache and nginx.
 
 \subsubsection{Git \& Github}
 
-Though the Python Package Index is now the recommended way of installing and
+Though the Python Package Index is the recommended way of installing and
 keeping CLAM up to date, all CLAM code is hosted on github and can be
 cloned directly from its git repository at
 \texttt{http://github.com/proycon/clam}, using \texttt{git}. Cloning this CLAM
@@ -297,75 +315,177 @@ $ git clone git://github.com/proycon/clam.git
 }
  
 This will create a directory \texttt{clam} in your current working directory.
-To install CLAM globally or in your local Python packages, you can use the
-included \texttt{setup.py} script. Alternatively, you may work directly from
-this checked out copy. The advantage of this would be that you have easier
-access to the sources of CLAM and can more easily modify them. Moreover, not
-having a global installation allows you to run different versions of CLAM
-concurrently, although it is still always recommended to keep your CLAM copy up
-to date. Using git and github is also strongly encouraged if you are a
-developer seeking to improve CLAM itself, and possibly sending in patches.
+To install CLAM globally or in your local Python virtual environment, use the
+included \texttt{setup.py} script:
 
-Especially people migrating from earlier versions of CLAM may already have
-adopted this way of working. Do note that if you do not use \texttt{setup.py}
-then the commands \texttt{clamservice} and \texttt{clamnewproject} are only
-available directly as \texttt{clamservice.py} and \texttt{clamnewproject.py}
-from within the \texttt{clam} directory. 
+{ \small
+\begin{verbatim}
+$ python3 ./setup.py install
+\end{verbatim}
+}
 
-\subsection{Using CLAM with Apache 2}
+Use \emph{sudo} for global installation, or ensure you are in a virtual
+environment for local installation. Cloning from github directly is only
+recommended for people who want to contribute to CLAM development itself.
 
-In order to run a CLAM webservice in Apache, you have to install and configure
-several files. We will be using WSGI, through \texttt{mod\_wsgi}, a gateway interface
-between Apache and Python. The following instructions assume you are at least
+People migrating from earlier versions of CLAM may have adopted a
+workflow that uses the clam repository from github directly, without running
+\texttt{setup.py}. This is no longer recommended.
+
+\subsection{LaMachine: pre-installed CLAM environment}
+
+We also offer \emph{LaMachine}, an environment with CLAM and various CLAM
+webservices pre-installed, along with a lot of other NLP software. It is available
+as a Virtual Machine, Docker app, as well as a virtual environment through a
+native installation script. It is designed to facilitate installation of our
+software. See \url{https://github.com/proycon/lamachine} for
+details. 
+
+\subsection{Deploying CLAM with Apache 2 through mod\_proxy\_uwsgi)}
+\label{sec:uwsgi}
+
+Deploying CLAM with a webserver is strongly recommended for production
+environments. In this section we will install CLAM with Apache through
+\texttt{mod\_proxy\_uwsgi}, a modern gateway interface between Apache and
+Python.  
+
+The following instructions assume you are at least
 basically familiar with Apache 2 configuration and Linux server administration
-in general.
+in general, it will require root privileges so you may have to delegate the
+task to your server administrator.
 
 \begin{enumerate}[leftmargin=5mm]
-\item Install \texttt{mod\_wsgi} for Apache 2, if not already
+\item Install \texttt{mod\_proxy\_uwsgi} for Apache 2, if not already
 present on the system. In Debian and Ubuntu this is available as a package
-named \texttt{libapache2-mod-wsgi}.  
-
+named \texttt{libapache2-mod-proxy-uwsgi}.
+\item Install the necessary Python plugin for uwsgi. Depending on the Python
+    version you use, in Debian and Ubuntu these are available as packages
+    named \texttt{uwsgi-plugin-python3} and \texttt{uwsgi-plugin-python}
+    (Python 2), you can have both installed at the same time.
 \item Next we need to write a simple
 WSGI-script, which is a Python script that will be invoked by the
 webserver. An example script can be copied from
 \url{https://github.com/proycon/clam/blob/master/config/example.wsgi} and
 is shown in full below. Copy this to somewhere like
-\texttt{yourwebservice.wsgi} and adapt the script. If CLAM is not installed in a standard location
-where Python can find it, make sure to explicitly specify its parent
-directory according to the instructions in the example.
+\texttt{yourwebservice.wsgi} and adapt the script according to the instructions
+within it.
 
 { \small
 \begin{verbatim}
-#!/usr/bin/env python
-import sys
+#!/usr/bin/env python3
+#-*- coding:utf-8 -*-
+
+#** NOTE: Make sure the shebang (first line in this file) refers to the Python interpreter you
+#want to use, which may be either Python 3 or 2 **
+
 import os
+import site
 
-#** If CLAM is not by default in your PYTHONPATH, you need 
-#to specify the directory that contains the
-#subdirectory 'clam' here (and uncomment all lines): **
-#CLAMPARENTDIR = '/path/to/clam' 
-#sys.path.append(CLAMPARENTDIR)
-#os.environ['PYTHONPATH'] = CLAMPARENTDIR
+#** This is the directory that contains your service configuration file, adapt it: **
+WEBSERVICEDIR = '/path/to/yourwebservice/'
 
-#this is the directory that contains your service configuration file
-WEBSERVICEDIR = '/path/to/yourwebservice/' 
 sys.path.append(WEBSERVICEDIR)
-os.environ['PYTHONPATH'] = WEBSERVICEDIR #+':' + CLAMPARENTDIR
+os.environ['PYTHONPATH'] = WEBSERVICEDIR
+
+VIRTUALENV=None
+
+#** If you installed CLAM locally in a virtual environment, uncomment and set the following **
+#VIRTUALENV = "/path/to/virtualenv"
+
+if VIRTUALENV:
+    site.addsitedir(VIRTUALENV + '/lib/python'+str(sys.version_info.major) + '.' + str(sys.version_info.minor) + '/site-packages')
+    activate_env = VIRTUALENV + '/bin/activate_this.py'
+    exec(compile(open(activate_env).read(), activate_env, 'exec'))
 
 import yourwebservice #** import your configuration module here! **
 import clam.clamservice
-application = clam.clamservice.run_wsgi(yourwebservice)
-\end{verbatim}
+application\end{verbatim}
 }
  
 \item Configure your service configuration file as explained in
 Section~\ref{sec:serviceconfig}. Take special note of
 Subsection~\ref{sec:sadmin} where you are instructed to configure the
 hostname, port, and optionally a URL prefix to use if the service is not
-assigned a virtualhost of its own. If CLAM is not installed in a default
-location, make sure \texttt{CLAMDIR} is properly set.
-\item Configure Apache to let it know about WSGI and your service. I assume the
+assigned to the root of a virtualhost of its own. 
+\item Run your webservice, tweak the process and thread parameters as required
+    for your load. If your webservice runs at the root, without a
+    URLPREFIX, use:
+{ \small
+\begin{verbatim}
+uwsgi --plugin python --socket :3031 --chdir /path/to/yourwebservice \ 
+--wsgi-file /path/to/yourwebservice/yourwebservice.wsgi \
+--master --processes 4 --threads 2
+\end{verbatim}
+}
+If you have a URLPREFIX, ``yourwebservice`` in this example, then use:
+{ \small
+\begin{verbatim}
+uwsgi --plugin python --socket :3031 --chdir /path/to/yourwebservice \
+--mount /yourwebservice=/path/to/yourwebservice/yourwebservice.wsgi \
+--manage-script-name --master --processes 4 --threads 2
+\end{verbatim}
+}
+
+Note that the socket port here does not correspond to the webservice port, the
+port here is for uwsgi only and should \textbf{NOT} be publicly accessible!
+Alternatively, you can use UNIX sockets too using the flag \texttt{--socket
+/tmp/yourwebservice.sock}, which should be faster even.
+\item Configure Apache to let it know about your service. I assume the
 reader is acquainted with basic Apache configuration and will only elaborate
+on the specifics for CLAM. Adapt and add the following to any of your sites
+in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
+\texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is
+assumed you configured your service configuration file with
+\texttt{URLPREFIX} set to \emph{``yourservice''}.
+
+{\small
+\begin{verbatim}
+ ProxyPass /yourwebservice uwsgi://127.0.0.1:3031/
+
+ Alias /yourwebservice/static /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static
+ <Directory /path/to/clam/static/>
+    Order deny,allow
+    Allow from all
+ </Directory>
+\end{verbatim}
+}
+
+If you use UNIX sockets rather than TCP sockets, change the first line to:
+{\small
+\begin{verbatim}
+ ProxyPass /yourwebservice unix:/tmp/yourwebservice.sock|uwsgi://
+\end{verbatim}
+}
+
+Make sure to adapt the static alias to where CLAM is
+installed and where the \path{static} directory is found, this depends on your
+installation and versions and is subject to change on an upgrade.
+
+\item It is always recommended to add some form of authentication or more restrictive
+access. You can either let CLAM handle authentication (\emph{HTTP Digest
+Authentication} or \emph{OAuth2}), or you can let Apache itself handle
+authentication and not use CLAM's authentication mechanism.  
+\item Restart Apache
+\end{enumerate}
+
+
+\subsection{Deploying CLAM with Apache 2 through mod\_wsgi)}
+
+If you do not yet have or do not want to use \texttt{mod\_proxy\_uwsgi}, you can use
+\texttt{mod\_wsgi} instead. This module is more common, but has some drawbacks.
+The most notable drawback is that you are stuck on serving either Python 2 or Python
+3 applications on a server, but never a mix of both.
+
+\begin{enumerate}[leftmargin=5mm]
+\item Install \texttt{mod\_wsgi} for Apache 2, if not already
+present on the system. In Debian and Ubuntu this is available as a package
+named \texttt{libapache2-mod-wsgi} for Python 2 and
+\texttt{libapache2-mod-wsgi-py3} for Python 3. The latter is recommended for
+CLAM, but you can only have one.  
+\item Write a WSGI-script and setup your service configuration as explained in
+    steps 3 and 4 of the previous section.
+\item Configure Apache to let it know about WSGI and your service. 
+    I assume the reader is acquainted with basic Apache configuration and will only elaborate
 on the specifics for CLAM. Adapt and add the following to any of your sites
 in \texttt{/etc/apache2/sites-enabled} (or optionally directly in
 \texttt{httpd.conf}), within any \texttt{VirtualHost} context. Here it is
@@ -380,7 +500,7 @@ assumed you configured your service configuration file with
      home=/path/to/yourwebservice threads=15 maximum-requests=10000
  WSGIProcessGroup yourservice
  WSGIPassAuthorization On
- Alias /yourwebservice/static /path/to/clam/static/ 
+ Alias /yourwebservice/static /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static
  <Directory /path/to/clam/static/>
     Order deny,allow
     Allow from all
@@ -388,21 +508,21 @@ assumed you configured your service configuration file with
 \end{verbatim}
 }
 
+
 The \texttt{WSGIScriptAlias} and \texttt{WSGIDaemonProcess} directives go on
 one line, but were wrapped here
 for presentational purposes. Needless to say, all paths need to be adapted
 according to your setup and the configuration can be extended further as
-desired. The path \path{/path/to/clam/static/} should be changed to where CLAM is
-installed and where the \path{static} directory is found. Depending on your
-installation and versions, this will be a directory like: \\
-\path{/usr/local/lib/python2.7/dist-packages/CLAM-0.9.8.3-py2.7.egg/clam/static}
+desired. Make sure to adapt the static alias to where CLAM is
+installed and where the \path{static} directory is found, this depends on your
+installation and versions and is subject to change on an upgrade.
+
 
 \item It is always recommended to add some form of authentication or more restrictive
 access. You can either let CLAM handle authentication (\emph{HTTP Digest
 Authentication} or \emph{OAuth2}), in which case you need to set \texttt{WSGIPassAuthorization
 On}, as by default it is disabled, or you can let Apache itself handle
 authentication and not use CLAM's authentication mechanism.  
-
 \item Restart Apache. 
 \end{enumerate}
 
@@ -425,11 +545,10 @@ directory it will run in. The number of threads, processes, and
 maximum-requests can also be configured to optimise performance and system
 resources according to your needs.
 
-\subsection{Using CLAM with nginx}
+\subsection{Using CLAM with nginx and uwsgi}
+\label{sec:uwsginginx}
 
-With nginx (version 0.8 or above), CLAM can be set up over WSGI or FastCGI.
-With Apache we already explored a WSGI option above, so we will now take a look
-at FastCGI:
+With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
 
 \begin{enumerate}[leftmargin=5mm]
 \item Nginx misses a mime-type we need. Add the following
@@ -440,72 +559,71 @@ at FastCGI:
 \end{verbatim}
 }
 
-\item Configure your service configuration file as explained in
-  Section~\ref{sec:serviceconfig}. Take special note of Subsection~\ref{sec:sadmin} where you are instructed to configure the hostname, port, and optionally a URL prefix to use if the service is not assigned a virtualhost of its own.
+\item Follow steps 2, 3, 4 and 5 in Section~\ref{sec:uwsgi}.
 
-\item Make a script \texttt{start\_yourservice.sh} which will start the daemon for FastCGI. Change \texttt{UID} and \texttt{GID} with user ID/group ID you intend to use. Note that the IP and port can be set to anything you like, as long as you use the same consistently throughout the configuration.
-{ \small
+\item Add and adapt the following configuration to a server in \\
+    \path{/etc/nginx/sites-enabled}. If you serve the application at the
+        root, not using a \texttt{URLPREFIX}, then the configuration is as
+        follows:
+{\small
 \begin{verbatim}
- #!/bin/bash
- spawn-fcgi -u UID -g GID -d /path/to/clam \
-   -a 127.0.0.1 -p 9002 -- /path/to/clam/clamservice.py
-\end{verbatim}
-}
-
-\item Make a script \texttt{stop\_yourservice.sh} as a convenient shortcut to stop the service again:
-{ \small
-\begin{verbatim}
- #!/bin/bash
- kill `pgrep -f "python /path/to/clam/clamservice.py"`
-\end{verbatim}
-}
-
-\item Add and adapt the following configuration to a server in \\ \path{/etc/nginx/sites-enabled} . Note that in this example we assume that \texttt{URLPREFIX} in the service configuration file is set to an empty string (or not set at all), effectively exposing CLAM at the root of the server. You may configure a \texttt{URLPREFIX} when desired. In that case, take care to update the below \texttt{location} and directives accordingly:
-{ \small
-\begin{verbatim}
- root /path/to/clam;
-
- location / {
-    fastcgi_param REQUEST_METHOD $request_method;
-    fastcgi_param QUERY_STRING $query_string;
-    fastcgi_param CONTENT_TYPE $content_type;
-    fastcgi_param CONTENT_LENGTH $content_length;
-    fastcgi_param GATEWAY_INTERFACE CGI/1.1;
-    fastcgi_param SERVER_SOFTWARE nginx/$nginx_version;
-    fastcgi_param REMOTE_ADDR $remote_addr;
-    fastcgi_param REMOTE_PORT $remote_port;
-    fastcgi_param SERVER_ADDR $server_addr;
-    fastcgi_param SERVER_PORT $server_port;
-    fastcgi_param SERVER_NAME $server_name;
-    fastcgi_param SERVER_PROTOCOL $server_protocol;
-    fastcgi_param SCRIPT_FILENAME $fastcgi_script_name;
-    fastcgi_param PATH_INFO $fastcgi_script_name;
-    fastcgi_pass 127.0.0.1:9002;
- }
-
- location /static/ {
-    root /path/to/clam;
-    if (-f $request_filename) {
-       rewrite ^/static/(.*)$  /static/$1 break;
+    location /static {
+        alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
     }
- }
+
+    location / { try_files $uri @yourwebservice; }
+    location @yourwebservice {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1:3031;
+    }
 \end{verbatim}
 }
-\item Launch \texttt{start\_yourservice.sh}  and (re)start nginx.
+If you do use a \texttt{URLPREFIX}, ``yourwebservice'' in this example, then
+use this configuration:
+{\small
+\begin{verbatim}
+    location /yourwebservice/static {
+        alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
+    }
+
+    location = /yourwebservice { rewrite ^ /yourwebservice/; }
+    location /yourwebservice { try_files $uri @yourwebservice; }
+    location @yourwebservice {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1:3031;
+    }
+\end{verbatim}
+}
+In both cases, if you use unix sockets instead of TCP sockets, modify the \texttt{uwsgi\_pass} directive
+to \texttt{uwsgi\_pass unix:/tmp/uwsgi.sock;}. Also make sure to adapt the static alias to where CLAM is
+installed and where the \path{static} directory is found, this depends on your
+installation and versions and is subject to change on an upgrade.
+\item Restart nginx.
 \end{enumerate}
 
+\subsection{Deploying CLAM with other webservers}
 
-\subsection{Using CLAM with other webservers}
+The above configurations with Apache and Nginx are just the configurations we
+tested. Other webservers (such as for example lighttpd), should work too. 
 
-You are not limited to using either Apache with WSGI or nginx with FastCGI; we
-tested only these two. It should also be possible to get CLAM working on other
-Unix based webservers, such as for example lighttpd. Although we have no
-CLAM-specific instructions, you may find instructions for WebPy, the framework
-CLAM uses, at \url{http://webpy.org/}, and can adapt these to CLAM.
+\subsection{Overriding host, port and urlprefix at runtime}
 
+CLAM must know precisely with at which host, port and URLPREFIX it will be
+served, otherwise browsers will refuse to render the web interface and you will
+get an error ``error loading stylesheet'', or a blank page entirely.  The same
+CLAM service can never be accessed through different aliases.
 
+The HOST, PORT and URLPREFIX are configured in the service configuration file,
+CLAM will attempt to automatically guess them when they are not explicitly set.
+It is possible, however, to override these when launching or deploying the
+webserver, without changing the service configuration itself. If you use the
+development server, using \texttt{clamservice}, then you can pass the
+\texttt{-u} flag with the full URL CLAM should use. You can also set an
+environment variable \texttt{CLAMFORCEURL}, which has the same effect. This
+latter option also works when deploying CLAM through WSGI.
 
-
+The most common use for this is when serving CLAM behind a reverse proxy, where
+automatic hostname detection could never work.
 
 \subsection{Troubleshooting}
 
@@ -522,7 +640,7 @@ You may possibly encounter one of the following issues when attempting to access
   stylesheets from other sources for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
 \item \textbf{I get an error ``No template named response''} -- Check whether
   \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
-\item \textbf{I'm using CLAM through Apache and WSGI, but authentication does
+\item \textbf{I'm using CLAM through Apache and mod\_wsgi, but authentication does
   not work and I am always logged in as anonymous} -- Check that
   \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and
   \texttt{USERS}, \texttt{USERS\_MYSQL} or \texttt{OAUTH} is configured in your service configuration file.
@@ -583,11 +701,12 @@ there may be multiple wrapper scripts for different actions.
 
 \section{Beginning a new CLAM project}
 
-You start a new CLAM project using the \texttt{clamnewproject} tool. It takes
-one argument: an identifier for your system. This identifier is for internal
-use and for use in filenames and may not contain any spaces or other special
-characters. Mind that this ID is case sensitive, so it is recommended to keep
-it all lower case. Example:
+You start a new CLAM project using the \texttt{clamnewproject} tool. The tool
+generates all the necessary files, which you have to edit.  The tool takes one
+argument: an identifier for your system. This identifier is for internal use,
+possibly for use in URLs, and for use in filenames and may not contain any
+spaces or other special characters. Mind that this ID is case sensitive, so it
+is strongly recommended to keep it all lower case. Example:
 
 { \small
 \begin{verbatim}
@@ -597,22 +716,34 @@ $ clamnewproject myfirstproject
 
 The tool will create a directory named after the identifier, in which two
 template files are created which are similarly named after the chosen
-identifier. Both are Python scripts which you are expected to edit:
+identifier. Both are Python scripts which you are expected to edit, they are
+heavily commented to help you along, along with the documentation you are reading, this should
+provide you with all knowledge necessary to make a webservice.
 
-\begin{enumerate}
+\begin{itemize}
 \item \texttt{myfirstproject.py} - Service Configuration File
-\item \texttt{myfirstproject-wrapper.py} - System Wrapper Script.
-\end{enumerate}
+\item \texttt{myfirstproject\_wrapper.py} - System Wrapper Script.
+\end{itemize}
 
-These template files then need to be edited for your particular application.
-They are heavily commented to guide you. An \texttt{INSTRUCTIONS} file will be
+Moreover, some scripts and sample configurations are generated:
+
+\begin{itemize}
+\item \texttt{startserver\_development.sh} - Start your webservice using the development server
+\item \texttt{startserver\_production.sh} - Start your webservice using the production server using uwsgi. To use this you will need to configure your webservice (e.g. Apache or nginx).
+\item \texttt{*.conf} - Sample configuration files for production environments using a Apache 2 or Nginx. Consult sections~\ref{sec:uwsgi} and~\ref{sec:uwsginginx} for details.
+\end{itemize}
+
+These template files need to be edited for your particular application.  They
+are heavily commented to guide you. An \texttt{INSTRUCTIONS} file will be
 created in your project directory, containing instructions on what files to
-edit and  how to start the clam service for your specific project.
+edit and how to start the clam service for your specific project. Starting your
+webservice is as easy as running \texttt{startserver\_development.sh}, the
+script will inform you to what URL to direct your browser once the webservice is running.
 
-You can choose not to make use of the system wrapper script and instead either
+You can choose not to make use of the generated system wrapper script and instead either
 write one from scratch in another language of your choice, or directly let CLAM
 invoke your application. Moreover, this generated wrapper script is intended for the
-project paradigm, not the action paradigm.
+project paradigm, the action paradigm does not make use of it.
 
 The next section will provide a detailed overview of the various ways to
 configure the service configuration file, and the section thereafter will deal
@@ -628,10 +759,9 @@ formats are expected under what circumstances. The service configuration is
 itself a Python script, but knowledge of Python is not essential for you to be
 able to make your own service configurations. 
 
-The server configuration files reside in the \texttt{config/} directory. Making
-a new webservice starts with copying the sample \texttt{template.py} and
-editing your copy. When reading this section, it may help your understanding to
-inspect this file alongside.
+It is assumed you are using the \texttt{clamnewproject} tool, which generates a
+template service configuration you can edit. When reading this section, it may
+help your understanding to inspect this file alongside.
 
 One of the first things to configure is the root path (\texttt{ROOT}). All
 projects will be confined to the \texttt{projects/} directory within this root
@@ -639,7 +769,6 @@ path, each project having its own subdirectory. When your NLP application or
 wrapper script is launched, the current working directory will be set to this
 project directory. Pre-installed corpora should be put in the \texttt{corpora/}
 directory. The \texttt{ROOT} will be automatically created upon the first run.
-
 
 \subsection{Server Administration}
 \label{sec:sadmin}
@@ -650,13 +779,15 @@ end-users will use. An attempt will be made to detect this automatically if no
 hostname is specified. A mismatch in the name you define and the hostname the
 user uses may result in unexpected behaviour. \footnote{Most likely, the XSLT
 stylesheet will refuse to render the web application interface due to this
-mismatch.}. CLAM comes with a built-in webserver, which will be used when
-invoked directly from the command-line. \footnote{Unless FastCGI mode is
-enabled.}
+mismatch.}. CLAM comes with a built-in development webserver, started using the
+\texttt{startserver\_development.sh} script in your project. 
 
-When CLAM runs in an existing webserver without its own virtual host, it is
-often configured at a different URL rather than the webserver root. In this
-case, the value of \texttt{URLPREFIX} should be configured accordingly.
+When CLAM runs in a production environment using an existing webserver without
+its own virtual host, it is often configured at a different URL rather than the
+webserver root. In this case, the value of \texttt{URLPREFIX} should be
+configured accordingly. If you want your webservice to run at
+\url{http://yourhost.com/yourwebservice/} for instance, then the
+\texttt{URLPREFIX} should be set to \texttt{yourwebservice}.
 
 In order to keep server load manageable, three methods are configurable in the
 service configuration file. First, you can set the variable
@@ -684,9 +815,9 @@ dispatcher will check with a certain interval, configured in
 exceeded and will take the necessary action.  
   
 
-If for some reason you do not want to make use of the web application in CLAM,
-then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want
-to make the webservice available at a different URL than where the
+If for some reason you do not want to make use of the web-based user interface
+in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If
+you want to make the webservice available at a different URL than where the
 webapplication is located, there is a small trick you can apply by setting
 \texttt{WEBSERVICEGHOST} to a URL prefix that the webservice will be made
 available on \emph{without} webapplication support. If you set for example
@@ -710,7 +841,7 @@ Authentication, contrary to HTTP Basic Authentication, computes a hash of the
 username and password client-side and transmits that hash, rather than a
 plaintext password. User passwords are therefore only available to CLAM in
 hashed form. User authentication is not mandatory, but for any world-accessible
-environment it is most strongly recommended, for obvious security reasons. 
+environment it is most strongly recommended, for obvious security reasons.
 
 A list of user accounts and passwords can be defined in \texttt{USERS} in the
 service configuration file itself. This is a simple method allowing you to
@@ -1021,7 +1152,7 @@ variables you can use that will be automatically set by CLAM.
 \item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} -- The username of the logged-in user.
 \item \texttt{\$PROJECT} -- The ID of the project
-\item \texttt{\$OAUTH\_ACCESS\_TOKEN} -- The unencrypted OAuth access token\footnote{At this is passed as a command line parameter, it may be exposed in the process list to other users on the machine CLAM is hosted on}.
+\item \texttt{\$OAUTH\_ACCESS\_TOKEN} -- The unencrypted OAuth access token\footnote{As this is passed as a command line parameter, it may be exposed in the process list to other users on the machine CLAM is hosted on!}.
 \end{itemize}
 
 
@@ -1229,7 +1360,7 @@ The definition for \texttt{InputTemplate} takes three mandatory arguments:
 
 \begin{enumerate}[leftmargin=5mm]
 \item \texttt{id} -- An ID for the InputTemplate. This will be used internally and by automated clients.
-\item \texttt{format} -- This points to a Format class, indicating the kind of format that this input template accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there.
+\item \texttt{format} -- This points to a Format class, indicating the kind of format that this input template accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there. Custom format classes can also be defined in the service configuration itself, after which you need to add these classes to the \texttt{CUSTOM\_FORMATS} list.
 \item \texttt{label} -- A human readable label for the input template. This is how it will be known to users in the web application and displayed in its selection menus.
 \end{enumerate}
 
@@ -2101,7 +2232,7 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Get index of all projects}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised} \\ 
 \hline
 \end{supertabular}
@@ -2115,28 +2246,30 @@ This appendix provides a full specification of the RESTful interface to CLAM:
 \multicolumn{2}{|c|}{\textbf{Get a project}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & This returns the current state of the project in CLAM XML format. Depending on the state this contains a specification of all accepted parameters, all input files, and all output files. Note that errors in parameter validation are encoded in the CLAM XML response; the system will still return a 200 response. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Create new empty project}} \\
 \hline
 \textbf{Method} & \texttt{PUT} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{201 - Created}, \texttt{401 - Unauthorised}, \texttt{403 - Forbidden} \emph{(Invalid project ID)},  \texttt{403 - Forbidden} \emph{(No project name)} \\ 
 \textbf{Description} & This is necessary before attempting to upload any files; it initialises an empty new project. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Start a project with specified parameters}} \\
 \hline
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} &  Accepted parameters are defined in the Service Configuration file (and thus differ per service). The parameter ID corresponds to the parameter keys in the querystring \\
+\textbf{Request Parameters} &  Accepted parameters are defined in the Service
+Configuration file (and thus differ per service). The parameter ID corresponds
+to the parameter keys in the request parameters \\
 \textbf{Response} & \texttt{202 - Accepted} \& CLAM XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found},  \texttt{403 - Permission Denied} \& CLAM XML, \texttt{500 - Internal Server Error} \\ 
 \textbf{Description} & This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. The parameters are provided in the query string; the input files are provided in separate POST requests to \texttt{/[project]/input/[filename]}, prior to this query. If any parameter errors occur or no profiles match the input files and parameters, a 403 response will be returned with errors marked in the CLAM XML. If a \texttt{500 - Server Error} is returned, CLAM most likely is not able to invoke the underlying application or the server has insufficient free resources. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete a project}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & The parameter \texttt{abortonly} can be set to 1 if you
+\textbf{Request Parameters} & The parameter \texttt{abortonly} can be set to 1 if you
 only want to abort a running process without deleting the entire project \\
 \textbf{Response} & \texttt{200 - OK}, \texttt{401 - Unauthorised},  \texttt{404 - Not Found}\\ 
 \textbf{Description} & Deletes a project. Any running processes will be aborted. \\ 
@@ -2152,14 +2285,14 @@ only want to abort a running process without deleting the entire project \\
 \multicolumn{2}{|c|}{\textbf{Get an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the specified input file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an input file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Deletes the specified input file. \\
 \hline
@@ -2167,10 +2300,11 @@ only want to abort a running process without deleting the entire project \\
 \hline
 \textbf{URL} & \texttt{/[project]/input/[filename]} or \texttt{/[project]/input/[inputtemplate]/[filename]}\\
 \textbf{Method} & \texttt{POST} \\
-\textbf{Querystring} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
+\textbf{Request Parameters} & \texttt{inputtemplate$=[inputtemplate\_id]$} \linebreak \texttt{file=$[HTTP file]*$} \linebreak \texttt{url$=[download-url]*$} \linebreak \texttt{contents$=[text-content]*$} \linebreak \texttt{metafile=$[HTTP file]$} \linebreak \texttt{metadata=$[CLAM Metadata XML]$} \linebreak Other accepted parameters are defined in the various Input Templates in the Service Configuration file (and thus differs per service and input template). The parameter ID corresponds to the parameter keys in the query string. \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM-Upload XML,\texttt{403 - Permission Denied} \& CLAM-Upload XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
-\textbf{Description} & This method adds a new input file. Response is returned
-in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
+\textbf{Description} & This method adds a new input file, which is transmitted
+in the \texttt{multipart/form-data} encoding along with request parameters and metadata parameters.
+. The response is returned in CLAM-Upload XML (distinct from CLAM XML!). Two arguments are mandatory: the
 input template, which designates what kind of file will be added and points to
 one of the InputTemplate IDs the webservice supports, and \emph{one of the}\/
 query arguments marked with an asterisk. Adding a file can proceed either by
@@ -2178,7 +2312,7 @@ uploading it from the client machine \texttt{(file)}, by downloading it from
 another URL \texttt{(url)}, or by passing the contents in the POST message
 itself \texttt{(contents)}. Only one of these can be used at a time. \linebreak
 Metadata can be passed in \emph{three} different ways: 1) by simply specifying
-a metadata field as parameter to the querystring, with the same ID as defined
+a metadata field as request parameters, with the same ID as defined
 in the input template. 2) setting the \texttt{metafile} attribute to an HTTP file, or 3) by setting  \texttt{metadata} to the full XML string of the metadata specification. \\
 \hline  
 \end{supertabular}
@@ -2192,14 +2326,14 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get an output file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the specified output file. \\ 
 \hline
 \multicolumn{2}{|c|}{\textbf{Delete an output file}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Deletes the specified output file. \\
 \hline
@@ -2213,7 +2347,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get the metadat for an output file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the metadata for the specified output file. \\ 
 \hline
@@ -2226,7 +2360,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM Metadata XML, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Retrieves the metadata for the specified input file. \\ 
 \hline
@@ -2242,7 +2376,7 @@ in the input template. 2) setting the \texttt{metafile} attribute to an HTTP fil
 \multicolumn{2}{|c|}{\textbf{Retrieve all output files as an archive}} \\
 \hline
 \textbf{Method} & \texttt{GET} \\
-\textbf{Querystring} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
+\textbf{Request Parameters} & \texttt{format$=zip|tar.gz|tar.bz2$}  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & Offers a single archive, of the desired format,
 including all output files \\
@@ -2250,7 +2384,7 @@ including all output files \\
 \multicolumn{2}{|c|}{\textbf{Delete all output files}} \\
 \hline
 \textbf{Method} & \texttt{DELETE} \\
-\textbf{Querystring} & -  \\
+\textbf{Request Parameters} & -  \\
 \textbf{Response} & \texttt{200 - OK} \& File contents, \texttt{401 - Unauthorised} \\ 
 \textbf{Description} & Deletes all output files and resets the project for another run. \\
 \hline
@@ -2265,7 +2399,7 @@ including all output files \\
 \multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
 \hline
 \textbf{Method} & \texttt{GET} and/or \texttt{POST}, may be constrained by the action \\
-\textbf{Querystring} & Determined by the action  \\
+\textbf{Request Parameters} & Determined by the action  \\
 \textbf{Response} & \texttt{200 - OK} \& Result data determined by the action, \texttt{401 - Unauthorised}, \texttt{404 - Not Found} \\ 
 \textbf{Description} & This is a remote procedure call to run the specified
 action and obtain the results. The parameters are specific to the action. \\ 

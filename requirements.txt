@@ -1,5 +1,6 @@
-web.py>=0.33
+flask>=0.10
 lxml>=2.2
-pycurl
+requests
 requests_oauthlib
+requests_toolbelt
 pycrypto

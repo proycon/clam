@@ -1,4 +1,4 @@
-import codecs
+import io
 import time
 
 READY = 0
@@ -8,7 +8,7 @@ DONE = 2
 
 def write(statusfile, statusmessage, completion = 0, timestamp = False, encoding = 'utf-8'):
     if statusfile:
-        f = codecs.open(statusfile, 'a', encoding)
+        f = io.open(statusfile, 'a', encoding=encoding)
         if not timestamp:
             timestamp = int(time.time())
         if isinstance(completion, float) and completion >= 0.0 and completion <= 1.0:

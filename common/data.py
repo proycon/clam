@@ -3,48 +3,45 @@
 
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- CLAM Data API - Common data structures --
+# -- CLAM Data API  --
 #       by Maarten van Gompel (proycon)
-#       http://proycon.github.com/clam
+#       https://proycon.github.io/clam
 #
-#       Centre for Language Studies
+#       Centre for Language and Speech Technology / Language Machines
 #       Radboud University Nijmegen
-#
-#       Induction for Linguistic Knowledge Research Group
-#       Tilburg University
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 from lxml import etree as ElementTree
-from StringIO import StringIO
-import urllib2
-
-
+import sys
+if sys.version < '3':
+    from StringIO import StringIO #pylint: disable=import-error
+else:
+    from io import StringIO,  BytesIO
+import requests
 import os.path
-import codecs
-try:
-    import simplejson as json
-except ImportError:
-    import json
+import io
+import json
 import time
 from copy import copy
-import pycurl
-
 import clam.common.parameters
 import clam.common.status
 import clam.common.util
 import clam.common.viewers
-from clam.common.util import RequestWithMethod
 
 
 
 #clam.common.formats is deliberately imported _at the end_
 
-VERSION = '0.9.13'
+VERSION = '0.99'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
+
+CUSTOM_FORMATS = []  #will be injected
 
 class BadRequest(Exception):
      def __init__(self):
@@ -109,6 +106,10 @@ class TimeOut(Exception):
     def __str__(self):
         return "Connection with server timed-out"
 
+if sys.version < '3':
+    class FileNotFoundError(IOError):
+        pass
+
 def processhttpcode(code, allowcodes=[]):
     if not isinstance(code, int): code = int(code)
     if (code >= 200 and code <= 299) or code in allowcodes:
@@ -125,6 +126,20 @@ def processhttpcode(code, allowcodes=[]):
         raise ServerError()
     else:
         raise UploadError()
+
+
+def parsexmlstring(node):
+    if sys.version < '3' and isinstance(node,unicode): #pylint: disable=undefined-variable
+        return ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
+    elif sys.version >= '3' and isinstance(node,str):
+        return ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
+    elif sys.version < '2' and isinstance(node,str):
+        return ElementTree.parse(StringIO(node)).getroot()
+    elif sys.version >= '3' and isinstance(node,bytes):
+        return ElementTree.parse(BytesIO(node)).getroot()
+    else:
+        raise Exception("Expected XML string, don't know how to parse type " + str(type(node)))
+
 
 
 
@@ -157,9 +172,9 @@ class CLAMFile:
             try:
                 self.loadmetadata()
             except IOError:
-                pass
+                pass #if metadata not found
             except HTTPError:
-                pass
+                pass #if metadata not found
 
         self.viewers = []
         self.converters = []
@@ -203,43 +218,57 @@ class CLAMFile:
         if not self.remote:
             metafile = self.projectpath + self.basedir + '/' + self.metafilename()
             if os.path.exists(metafile):
-                f = open(metafile, 'r')
+                f = io.open(metafile, 'r',encoding='utf-8')
                 xml = "".join(f.readlines())
                 f.close()
             else:
                 raise IOError(2, "No metadata found, expected " + metafile )
         else:
-            if self.client: self.client.initauth()
-            try:
-                response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename + '/metadata'))
-                xml = response.read()
-            except:
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
+            response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+            if response.status_code != 200:
                 extramsg = ""
                 if not self.client: extramsg = "No client was associated with this CLAMFile, associating a client is necessary when authentication is needed"
                 raise HTTPError(2, "Can't download metadata for " + self.filename + ". " + extramsg)
+            xml = response.text
 
             #if response.status != 200: #TODO: Verify
             #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
 
         #parse metadata
-        self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
+        try:
+            self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
+        except ElementTree.XMLSyntaxError:
+            raise ValueError("Metadata is not XML! Contents: " + xml)
 
     def __iter__(self):
-        """Read the lines of the file, one by one. This only works for local files, remote files are loaded into memory first. Use ``copy()`` instead if you want to download a large remote file."""
+        """Read the lines of the file, one by one without loading the file into memory."""
         if not self.remote:
+            fullpath = self.projectpath + self.basedir + '/' + self.filename
+            if not os.path.exists(fullpath):
+                raise FileNotFoundError("No such file or directory: " + fullpath )
             if self.metadata and 'encoding' in self.metadata:
-                for line in codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines():
+                for line in io.open(fullpath, 'r', encoding=self.metadata['encoding']).readlines():
                     yield line
             else:
-                for line in open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines():
+                for line in io.open(fullpath, 'r').readlines():
                     yield line
         else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
-            if self.client: self.client.initauth()
-            response = urllib2.urlopen(urllib2.Request( fullpath))
-            for line in response.readlines():
-                if not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata :
-                    yield unicode(line, self.metadata['encoding'])
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
+            requestparams['stream'] = True
+            response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+            for line in response.iter_lines():
+                if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata: #pylint: disable=undefined-variable
+                    yield unicode(line, self.metadata['encoding']) #pylint: disable=undefined-variable
+                if sys.version[0] >= '3' and not isinstance(line,str) and self.metadata and 'encoding' in self.metadata :
+                    yield str(line, self.metadata['encoding'])
                 else:
                     yield line
 
@@ -264,54 +293,37 @@ class CLAMFile:
 
             return True
         else:
-            if self.client: self.client.initauth()
-            urllib2.urlopen(RequestWithMethod( self.projectpath + self.basedir + '/' + self.filename,method='DELETE'))
+            if self.client:
+                requestparams = self.client.initrequest()
+            else:
+                requestparams = {}
+            r = requests.delete( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
             return True
 
 
     def readlines(self):
         """Loads all lines in memory"""
-        #if not self.remote:
-        #    if self.metadata and 'encoding' in self.metadata:
-        #       return codecs.open(self.projectpath + self.basedir + '/' + self.filename, 'r', self.metadata['encoding']).readlines()
-        #    else:
-        #       return open(self.projectpath + self.basedir + '/' + self.filename, 'r').readlines()
-        #else:
-        #    response = urllib2.urlopen(urllib2.Request( self.projectpath + self.basedir + '/' + self.filename))
-        #    content = response.read()
-        #    if not isinstance(content,unicode) and self.metadata and 'encoding' in self.metadata :
-        #        content = unicode(content, self.metadata['encoding'])
-        #    return response
         return list(iter(self))
+
+    def read(self):
+        """Loads all lines in memory"""
+        return "\n".join(iter(self))
 
     def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""
-        if self.remote:
-            if self.projectpath.endswith('/'):
-                url = self.projectpath + self.basedir + '/' + self.filename
-            else:
-                url = self.projectpath + '/' + self.basedir + '/' + self.filename
-            f = open(target,'wb')
-            c = pycurl.Curl()
-            c.setopt(pycurl.URL, url)
-            if self.client and self.client.authenticated:
-                c.setopt(c.HTTPAUTH, c.HTTPAUTH_DIGEST)
-                c.setopt(c.USERPWD, self.client.user + ':' + self.client.password)
-            c.setopt(c.WRITEDATA, f)
-            c.setopt(c.USERAGENT, "CLAMCLientAPI-" + VERSION)
-            c.setopt(c.CONNECTTIMEOUT, 60)
-            c.setopt(c.TIMEOUT, timeout)
-            c.perform()
-            processhttpcode(c.getinfo(c.HTTP_CODE)) #raises exception when not successful
-            c.close()
+
+        if self.metadata and 'encoding' in self.metadata:
+            f = io.open(target,'w', encoding=self.metadata['encoding'])
+            for line in self:
+                f.write(line)
         else:
-            if self.metadata and 'encoding' in self.metadata:
-                f = codecs.open(target,'w', self.metadata['encoding'])
-                for line in self:
-                    f.write(line)
-            else:
-                f = open(target,'w')
-                for line in self:
+            f = io.open(target,'wb')
+            for line in self:
+                if sys.version < '3' and isinstance(line,unicode): #pylint: disable=undefined-variable
+                    f.write(line.encode('utf-8'))
+                elif sys.version >= '3' and isinstance(line,str):
+                    f.write(line.encode('utf-8'))
+                else:
                     f.write(line)
         f.close()
 
@@ -335,7 +347,7 @@ class CLAMOutputFile(CLAMFile):
 def getclamdata(filename):
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance."""
-    f = open(filename,'r')
+    f = io.open(filename,'r',encoding='utf-8')
     xml = f.read(os.path.getsize(filename))
     f.close()
     return CLAMData(xml, None, True)
@@ -500,7 +512,7 @@ class CLAMData(object):
     def parseresponse(self, xml, localroot = False):
         """Parses CLAM XML, there's usually no need to call this directly"""
         global VERSION
-        root = ElementTree.parse(StringIO(xml)).getroot()
+        root = parsexmlstring(xml)
         if root.tag != 'clam':
             raise FormatError()
 
@@ -855,7 +867,7 @@ class Profile(object):
                                 metafilename = os.path.dirname(outputfilename)
                                 if metafilename: metafilename += '/'
                                 metafilename += '.' + os.path.basename(outputfilename) + '.METADATA'
-                                f = codecs.open(projectpath + '/output/' + metafilename,'w','utf-8')
+                                f = io.open(projectpath + '/output/' + metafilename,'w',encoding='utf-8')
                                 f.write(metadata.xml())
                                 f.close()
                     else:
@@ -863,7 +875,7 @@ class Profile(object):
 
 
     def xml(self, indent = ""):
-        """Produce XML output for the profile""" #(independent of web.py for support in CLAM API)
+        """Produce XML output for the profile"""
         xml = "\n" + indent + "<profile"
         xml += ">\n"
         xml += indent + " <input>\n"
@@ -892,7 +904,7 @@ class Profile(object):
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
 
         args = []
 
@@ -978,7 +990,7 @@ class CLAMProvenanceData(object):
     def fromxml(node):
         """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag == 'provenance':
             if node.attrib['type'] == 'clam':
                 serviceid = node.attrib['id']
@@ -1141,7 +1153,7 @@ class CLAMMetaData(object):
 
     def save(self, filename):
         """Save metadata to XML file"""
-        f = codecs.open(filename,'w','utf-8')
+        f = io.open(filename,'w',encoding='utf-8')
         f.write(self.xml())
         f.close()
 
@@ -1164,14 +1176,18 @@ class CLAMMetaData(object):
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag == 'CLAMMetaData':
             format = node.attrib['format']
 
             formatclass = None
-            if format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
+            for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
+                if C.__name__ == format:
+                    formatclass = C
+                    break
+            if formatclass is None and format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
                 formatclass = vars(clam.common.formats)[format]
-            if not formatclass:
+            if formatclass is None:
                 raise Exception("Format class " + format + " not found!")
 
             data = {}
@@ -1316,7 +1332,7 @@ class InputTemplate(object):
     def fromxml(node):
         """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'inputtemplate')
 
         id = node.attrib['id']
@@ -1383,7 +1399,7 @@ class InputTemplate(object):
         return json.dumps(d)
 
     def __eq__(self, other):
-        if isinstance(other, str):
+        if isinstance(other, str) or (sys.version < '3' and isinstance(other,unicode)): #pylint: disable=undefined-variable
             return self.id == other
         else: #object
             return other.id == self.id
@@ -1475,7 +1491,7 @@ class AbstractMetaField(object): #for OutputTemplate only
     def fromxml(node):
         """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         if node.tag.lower() != 'meta':
             raise Exception("Expected meta tag but got '" + node.tag + "' instead")
 
@@ -1660,7 +1676,7 @@ class OutputTemplate(object):
     def fromxml(node):
         """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'outputtemplate')
 
         id = node.attrib['id']
@@ -1942,7 +1958,7 @@ class ParameterCondition(object):
     def fromxml(node):
         """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'parametercondition')
 
         kwargs = {}
@@ -2120,7 +2136,7 @@ class Action(object):
     def fromxml(node):
         """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
         if not isinstance(node,ElementTree._Element):
-            node = ElementTree.parse(StringIO(node)).getroot()
+            node = parsexmlstring(node)
         assert(node.tag.lower() == 'action')
 
         kwargs = {}
@@ -2150,59 +2166,59 @@ class Action(object):
         return Action(*args, **kwargs)
 
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
-        #parameters are local
+    #parameters are local
+    if filename.find('$') != -1:
+        for parameter in sorted(parameters, key= lambda x: len(x.id),reverse=True):#cmp=lambda x,y: len(x.id) - len(y.id)):
+            if parameter and parameter.hasvalue:
+                filename = filename.replace('$' + parameter.id, str(parameter.value))
         if filename.find('$') != -1:
-            for parameter in sorted(parameters, cmp=lambda x,y: len(x.id) - len(y.id)):
-                if parameter and parameter.hasvalue:
-                    filename = filename.replace('$' + parameter.id, str(parameter.value))
-            if filename.find('$') != -1:
-                if project: filename = filename.replace('$PROJECT', project)
-                if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
+            if project: filename = filename.replace('$PROJECT', project)
+            if not inputtemplate.unique: filename = filename.replace('$SEQNR', str(nextseq))
 
-        #BACKWARD COMPATIBILITY:
-        if not inputtemplate.unique:
-            if '#' in filename: #resolve number in filename
-                filename = filename.replace('#',str(nextseq))
+    #BACKWARD COMPATIBILITY:
+    if not inputtemplate.unique:
+        if '#' in filename: #resolve number in filename
+            filename = filename.replace('#',str(nextseq))
 
-        clam.common.util.printdebug("Determined input filename: " + filename)
+    clam.common.util.printdebug("Determined input filename: " + filename)
 
 
-        return filename
+    return filename
 
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
-        #MAYBE TODO: make more efficient
+    #MAYBE TODO: make more efficient
+    if filename.find('$') != -1:
+        for id, parameter in sorted(globalparameters.items(), key=lambda x: len(x[0]),reverse=True): #, cmp=lambda x,y: len(y[0]) - len(x[0])):
+            if parameter and parameter.hasvalue:
+                filename = filename.replace('$' + parameter.id, str(parameter.value))
         if filename.find('$') != -1:
-            for id, parameter in sorted(globalparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
-                if parameter and parameter.hasvalue:
-                    filename = filename.replace('$' + parameter.id, str(parameter.value))
-            if filename.find('$') != -1:
-                for id, value in sorted(localparameters.items(), cmp=lambda x,y: len(y[0]) - len(x[0])):
-                    if value != None:
-                        filename = filename.replace('$' + id, str(value))
-            if filename.find('$') != -1:
-                if inputfilename:
-                    inputfilename = os.path.basename(inputfilename)
-                    raw = inputfilename.split('.',1)
-                    inputstrippedfilename = raw[0]
-                    if len(raw) > 1:
-                        inputextension = raw[1]
-                    else:
-                        inputextension = ""
-                    filename = filename.replace('$INPUTFILENAME', inputfilename)
-                    filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
-                    filename = filename.replace('$INPUTEXTENSION', inputextension)
-                if project: filename = filename.replace('$PROJECT', project)
-                if not outputtemplate.unique:
-                    filename = filename.replace('$SEQNR', str(nextseq))
+            for id, value in sorted(localparameters.items(), key=lambda x:len(x[0]),reverse=True): # cmp=lambda x,y: len(y[0]) - len(x[0])):
+                if value != None:
+                    filename = filename.replace('$' + id, str(value))
+        if filename.find('$') != -1:
+            if inputfilename:
+                inputfilename = os.path.basename(inputfilename)
+                raw = inputfilename.split('.',1)
+                inputstrippedfilename = raw[0]
+                if len(raw) > 1:
+                    inputextension = raw[1]
+                else:
+                    inputextension = ""
+                filename = filename.replace('$INPUTFILENAME', inputfilename)
+                filename = filename.replace('$INPUTSTRIPPEDFILENAME', inputstrippedfilename)
+                filename = filename.replace('$INPUTEXTENSION', inputextension)
+            if project: filename = filename.replace('$PROJECT', project)
+            if not outputtemplate.unique:
+                filename = filename.replace('$SEQNR', str(nextseq))
 
-        #BACKWARD COMPATIBILITY:
-        if not outputtemplate.unique:
-            if '#' in filename: #resolve number in filename
-                filename = filename.replace('#',str(nextseq))
+    #BACKWARD COMPATIBILITY:
+    if not outputtemplate.unique:
+        if '#' in filename: #resolve number in filename
+            filename = filename.replace('#',str(nextseq))
 
-        clam.common.util.printdebug("Determined output filename: " + filename)
+    clam.common.util.printdebug("Determined output filename: " + filename)
 
-        return filename
+    return filename
 
 
 

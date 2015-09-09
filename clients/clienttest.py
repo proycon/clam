@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 import sys
@@ -16,11 +16,11 @@ clamclient = CLAMClient('http://localhost:8080/')
 
 
 #index of all projects
-print "INDEX OF ALL PROJECTS"
+print("INDEX OF ALL PROJECTS")
 index = clamclient.index()
 for project in index.projects:
-    print "\t" + project        
-    
+    print("\t" + project)
+
 
 #this is the name of our test project
 project = "clienttest"
@@ -42,14 +42,14 @@ if data.status == clam.common.status.READY: #should always be the case, since we
     f.close()
 
     #upload it (of course we could better use a StringIO here)
-    print "Uploading file..."
+    print("Uploading file...")
     clamclient.upload(project, open('/tmp/tst'), PlainTextFormat('utf-8') )
 
-    #print the parameters we have 
-    print "PARAMETERS:"
+    #print the parameters we have
+    print("PARAMETERS:")
     for parametergroup, parameters in data.parameters:
         for parameter in parameters:
-            print "\t" + parameter.name + ": " + str(parameter.value)
+            print("\t" + parameter.name + ": " + str(parameter.value))
 
     #set some parameters (by their ID)
     #note that using this method, exceptions will be raised automatically when the parameter values do not validate!
@@ -63,27 +63,27 @@ if data.status == clam.common.status.READY: #should always be the case, since we
 
     data = clamclient.start(project, **data.passparameters())
     if data.errors:
-        print >>sys.stderr,"An error occured: " + data.errormsg
+        print("An error occured: " + data.errormsg,file=sys.stderr)
         sys.exit(1)
-    
+
 
     while data.status != clam.common.status.DONE:
         time.sleep(5) #wait 5 seconds
         data = clamclient.get(project) #get status again
-        print "STATUS: " + str(data.completion) + '% -- ' + data.statusmessage
-    
+        print("STATUS: " + str(data.completion) + '% -- ' + data.statusmessage)
 
-    
+
+
     #yay, we're done!
     #List all output files:
-    print "OUTPUT FILES:"
+    print("OUTPUT FILES:")
     for outputfile in data.output:
-        print "\tFILE: " + str(outputfile) + " (" + outputfile.format.name + ")"
-        print "\tCONTENTS: "
+        print("\tFILE: " + str(outputfile) + " (" + outputfile.format.name + ")")
+        print("\tCONTENTS: ")
         #Download and immediately read the output file
         for line in outputfile:
-            print "\t\t" + line.encode('utf-8'),
-        print
+            print("\t\t" + line.encode('utf-8'),end='')
+        print()
 
 
 

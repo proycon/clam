@@ -1,18 +1,24 @@
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
-# -- Parameter classes --
+# -- CLAM Parameter Classes --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       https://proycon.github.io/clam
+#
+#       Centre for Language and Speech Technology / Language Machines
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
+import sys
 from lxml import etree as ElementTree
-from StringIO import StringIO
+if sys.version < '3':
+    from StringIO import StringIO
+else:
+    from io import StringIO,  BytesIO
 from clam.common.util import xmlescape
 
 class AbstractParameter(object):
@@ -112,12 +118,15 @@ class AbstractParameter(object):
                     xml += ' ' + key + '="' + str(int(v))+ '"'
                 elif isinstance(v, list):
                     xml += ' ' + key + '="'+xmlescape(",".join(v))+ '"'
-                elif isinstance(v, unicode) or isinstance(v, str)  :
+                elif isinstance(v, str)  or ( sys.version < '3' and isinstance(v, unicode)):
                     xml += ' ' + key + '="'+xmlescape(v)+ '"'
                 else:
                     xml += ' ' + key + '="'+xmlescape(str(v))+ '"'
         if self.hasvalue:
-            xml += ' value="'+xmlescape(unicode(self.value)) + '"'
+            if sys.version < '3':
+                xml += ' value="'+xmlescape(unicode(self.value)) + '"'
+            else:
+                xml += ' value="'+xmlescape(str(self.value)) + '"'
         if self.error:
             xml += ' error="'+xmlescape(self.error) + '"'
         xml += " />"
@@ -125,13 +134,14 @@ class AbstractParameter(object):
 
     def __str__(self):
         if self.value:
-            if isinstance(self.value, unicode):
+            if sys.version < '3' and isinstance(self.value, unicode):
                 return self.value.encode('utf-8')
-            return str(self.value)
+            else:
+                return str(self.value)
         else:
             return ""
 
-    def __unicode__(self):
+    def __unicode__(self): #for python 2 only
         if self.value:
             return self.value
         else:
@@ -187,6 +197,7 @@ class AbstractParameter(object):
             name = ''
             description = ''
             kwargs = {}
+            error = None
             for attrib, value in node.attrib.items():
                 if attrib == 'id':
                     id = value
@@ -196,6 +207,8 @@ class AbstractParameter(object):
                     name = value
                 elif attrib == 'description':
                     description = value
+                elif attrib == 'error':
+                    error = value
                 else:
                     kwargs[attrib] = value
 
@@ -213,7 +226,10 @@ class AbstractParameter(object):
                         else:
                             kwargs['value'] = subtag.attrib['id']
 
-            return globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+            parameter = globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+            if error:
+                parameter.error = error #prevent error from getting reset
+            return parameter
         else:
             raise Exception("No such parameter exists: " + node.tag)
 
@@ -241,7 +257,7 @@ class BooleanParameter(AbstractParameter):
 
     def set(self, value = True):
         """Set the boolean parameter"""
-        if value is True or value == 1 or ( (isinstance(value, str) or isinstance(value, unicode)) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ):
+        if value is True or value == 1 or ( (isinstance(value, str) or (sys.version < '3' and isinstance(value, unicode))) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ):
             value = True
         else:
             value = False
@@ -291,10 +307,10 @@ class StringParameter(AbstractParameter):
 
         self.maxlength = 0 #unlimited
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'maxlength':
                 self.maxlength = int(value)
-                del kwargs[key]
+                del kwargs['maxlength']
 
         super(StringParameter,self).__init__(id,name,description, **kwargs)
 
@@ -364,7 +380,7 @@ class ChoiceParameter(AbstractParameter):
         if 'multi' in kwargs and kwargs['multi']:
             self.value = []
 
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'multi':
                 self.multi = bool(value) #boolean
                 del kwargs[key]
@@ -505,7 +521,7 @@ class IntegerParameter(AbstractParameter):
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
                 del kwargs[key]
@@ -566,7 +582,7 @@ class FloatParameter(AbstractParameter):
         #defaults
         if not 'default' in kwargs and not 'value' in kwargs:
             self.value = 0.0
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = float(value)
                 del kwargs[key]

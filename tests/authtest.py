@@ -13,13 +13,15 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 import sys
 import os
 import time
 import glob
 import random
-import codecs
 import unittest
+import io
 
 #We may need to do some path magic in order to find the clam.* imports
 
@@ -43,20 +45,16 @@ class AuthServiceTest(unittest.TestCase):
 
     def test1_index(self):
         """No Access Test - Testing inability to access index with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.index)
+        self.assertRaises( AuthRequired, self.client.index)
 
     def test2_create(self):
         """No Access Test - Testing inability to create project with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.create, 'basicservicetest')
+        self.assertRaises( AuthRequired, self.client.create, 'basicservicetest')
 
     def test3_project(self):
         """No Access Test - No project state retrieval with wrong user credentials"""
-        self.assertRaises( PermissionDenied, self.client.get, 'basicservicetest')
+        self.assertRaises( AuthRequired, self.client.get, 'basicservicetest')
 
-    def test4_wait(self):
-        """No Access Test - Waiting 30s for lock to expire"""
-        time.sleep(30)
-        self.assertTrue(True)
 
 class BasicServiceTest(unittest.TestCase):
     """Test basic operations with authentication"""
@@ -109,11 +107,17 @@ class BasicServiceTest(unittest.TestCase):
 
     def test2_4_upload(self):
         """Basic Service Test - File upload with extension"""
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
-        f.write(u"On espère que tout ça marche bien.")
+        f = io.open('/tmp/servicetest.txt','w',encoding='utf-8')
+        f.write("On espère que tout ça marche bien.")
         f.close()
         data = self.client.get('basicservicetest')
         success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)
+
+    def test2_4b_upload(self):
+        """Basic Service Test - Passing contents explicitly"""
+        data = self.client.get('basicservicetest')
+        success = self.client.addinput('basicservicetest', data.inputtemplate('textinput'),"On espère que tout ça marche bien.",filename='servicetest.txt', language='fr')
         self.assertTrue(success)
 
     def test2_5_upload(self):
@@ -137,7 +141,7 @@ class BasicServiceTest(unittest.TestCase):
 
     def test2_7_upload(self):
         """Basic Service Test - File upload without extension"""
-        f = codecs.open('/tmp/servicetest','w','utf-8')
+        f = io.open('/tmp/servicetest','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
         data = self.client.get('basicservicetest')
@@ -171,17 +175,16 @@ class BasicServiceTest(unittest.TestCase):
         try:
             success = self.client.addinputfile('basicservicetest', data.inputtemplate('textinput'),'/tmp/servicetest', language='nonexistant')
             self.assertFalse(success)
-        except ParameterError, e:
-            print e
+        except ParameterError as e:
             self.assertTrue(True)
 
     def test2_B_metadata(self):
         """Basic Service Test - Upload with explicit metadata file"""
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
-        f.write(u"On espère que tout ça marche bien.")
+        f = io.open('/tmp/servicetest.txt','w',encoding='utf-8')
+        f.write("On espère que tout ça marche bien.")
         f.close()
-        f = codecs.open('/tmp/servicetest.txt.METADATA','w','utf-8')
-        f.write(u"""<?xml version="1.0" encoding="UTF-8"?>
+        f = io.open('/tmp/servicetest.txt.METADATA','w',encoding='utf-8')
+        f.write("""<?xml version="1.0" encoding="UTF-8"?>
 <CLAMMetaData format="PlainTextFormat" mimetype="text/plain" inputtemplate="textinput">
 <meta id="encoding">utf-8</meta>
 <meta id="author">proycon</meta>
@@ -204,7 +207,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         self.client = CLAMClient(self.url,'proycon','secret')
         self.project = 'extservicetest'
         self.client.create(self.project)
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f = io.open('/tmp/servicetest.txt','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
 
@@ -242,8 +245,9 @@ class ExtensiveServiceTest(unittest.TestCase):
         try:
             data = self.client.start(self.project, casesensitive='nonexistant')
             self.assertTrue(data)
-        except ParameterError, e:
+        except ParameterError as e:
             self.assertTrue(True)
+
 
     def test3_conditionaloutput(self):
         """Extensive Service Test - Output conditional on parameter"""
@@ -284,13 +288,13 @@ class ArchiveUploadTest(unittest.TestCase):
         self.client = CLAMClient(self.url,'proycon','secret')
         self.project = 'archivetest'
         self.client.create(self.project)
-        f = codecs.open('/tmp/servicetest.txt','w','utf-8')
+        f = io.open('/tmp/servicetest.txt','w',encoding='utf-8')
         f.write(u"On espère que tout ça marche bien.")
         f.close()
-        f = codecs.open('/tmp/servicetest2.txt','w','utf-8')
+        f = io.open('/tmp/servicetest2.txt','w',encoding='utf-8')
         f.write(u"Non, rien de rien, non je ne regrette rien.")
         f.close()
-        f = codecs.open('/tmp/servicetest3.txt','w','utf-8')
+        f = io.open('/tmp/servicetest3.txt','w',encoding='utf-8')
         f.write(u"Ni le mal qu'on m'a fait, ni le bien, tout ça me semble égal!")
         f.close()
         os.system('zip /tmp/servicetest.zip /tmp/servicetest.txt /tmp/servicetest2.txt /tmp/servicetest3.txt')
@@ -320,4 +324,4 @@ class ArchiveUploadTest(unittest.TestCase):
         success = self.client.delete(self.project)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

@@ -14,15 +14,19 @@
 #
 ###############################################################
 
+from __future__ import print_function, unicode_literals, division, absolute_import
+
 from clam.common.parameters import *
 from clam.common.formats import *
 from clam.common.converters import *
 from clam.common.viewers import *
 from clam.common.data import *
 from clam.common.digestauth import pwhash
+import clam
 import sys
 
-REQUIRE_VERSION = 0.9
+REQUIRE_VERSION = 0.99
+CLAMDIR = clam.__path__[0]
 
 # ======== GENERAL INFORMATION ===========
 
@@ -58,10 +62,10 @@ ADMINS = ['anonymous'] #Define which of the above users are admins (never set th
 PROJECTS_PUBLIC = False
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
-REQUIREMEMORY = 10
+#REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime')
-MAXLOADAVG = 4.0
+#MAXLOADAVG = 4.0
 
 
 # ======== WEB-APPLICATION STYLING =============
@@ -167,7 +171,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = CLAMDIR + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
