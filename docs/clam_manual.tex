@@ -182,7 +182,7 @@ installation you will have two choices to make:
     \item Install CLAM \emph{globally} or \emph{locally}? Global installation requires root
         privileges, for local installation we will be using a Python virtual
         environment
-    \item Use Python 2.7 or Python 3? \emph{(Python 3 is recommended whenever possible)}
+    \item Use Python 2.7 or Python 3.3 or higher \emph{(Python 3 is recommended whenever possible)}
 \end{enumerate}
 
 For global installation on Python 3, issue the following:
@@ -302,7 +302,7 @@ some additional work. This is explained in later sections for Apache and nginx.
 
 \subsubsection{Git \& Github}
 
-Though the Python Package Index is now the recommended way of installing and
+Though the Python Package Index is the recommended way of installing and
 keeping CLAM up to date, all CLAM code is hosted on github and can be
 cloned directly from its git repository at
 \texttt{http://github.com/proycon/clam}, using \texttt{git}. Cloning this CLAM
@@ -451,7 +451,7 @@ assumed you configured your service configuration file with
 }
 
 If you use UNIX sockets rather than TCP sockets, change the first line to:
-{\small{
+{\small
 \begin{verbatim}
  ProxyPass /yourwebservice unix:/tmp/yourwebservice.sock|uwsgi://
 \end{verbatim}
@@ -546,6 +546,7 @@ maximum-requests can also be configured to optimise performance and system
 resources according to your needs.
 
 \subsection{Using CLAM with nginx and uwsgi}
+\label{sec:uwsginginx}
 
 With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
 
@@ -639,7 +640,7 @@ You may possibly encounter one of the following issues when attempting to access
   stylesheets from other sources for security reasons. Check your settings for HOST, PORT,  and URLPREFIX, and whether you accessed the service by the same URL.
 \item \textbf{I get an error ``No template named response''} -- Check whether
   \texttt{CLAMDIR} is set in your service configuration file and whether it points to the directory in which CLAM resides (the directory containing \texttt{clamservice.py})
-\item \textbf{I'm using CLAM through Apache and mod_wsgi, but authentication does
+\item \textbf{I'm using CLAM through Apache and mod\_wsgi, but authentication does
   not work and I am always logged in as anonymous} -- Check that
   \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and
   \texttt{USERS}, \texttt{USERS\_MYSQL} or \texttt{OAUTH} is configured in your service configuration file.
@@ -700,11 +701,12 @@ there may be multiple wrapper scripts for different actions.
 
 \section{Beginning a new CLAM project}
 
-You start a new CLAM project using the \texttt{clamnewproject} tool. It takes
-one argument: an identifier for your system. This identifier is for internal
-use and for use in filenames and may not contain any spaces or other special
-characters. Mind that this ID is case sensitive, so it is recommended to keep
-it all lower case. Example:
+You start a new CLAM project using the \texttt{clamnewproject} tool. The tool
+generates all the necessary files, which you have to edit.  The tool takes one
+argument: an identifier for your system. This identifier is for internal use,
+possibly for use in URLs, and for use in filenames and may not contain any
+spaces or other special characters. Mind that this ID is case sensitive, so it
+is strongly recommended to keep it all lower case. Example:
 
 { \small
 \begin{verbatim}
@@ -714,22 +716,34 @@ $ clamnewproject myfirstproject
 
 The tool will create a directory named after the identifier, in which two
 template files are created which are similarly named after the chosen
-identifier. Both are Python scripts which you are expected to edit:
+identifier. Both are Python scripts which you are expected to edit, they are
+heavily commented to help you along, along with the documentation you are reading, this should
+provide you with all knowledge necessary to make a webservice.
 
-\begin{enumerate}
+\begin{itemize}
 \item \texttt{myfirstproject.py} - Service Configuration File
 \item \texttt{myfirstproject\_wrapper.py} - System Wrapper Script.
-\end{enumerate}
+\end{itemize}
 
-These template files then need to be edited for your particular application.
-They are heavily commented to guide you. An \texttt{INSTRUCTIONS} file will be
+Moreover, some scripts and sample configurations are generated:
+
+\begin{itemize}
+\item \texttt{startserver\_development.sh} - Start your webservice using the development server
+\item \texttt{startserver\_production.sh} - Start your webservice using the production server using uwsgi. To use this you will need to configure your webservice (e.g. Apache or nginx).
+\item \texttt{*.conf} - Sample configuration files for production environments using a Apache 2 or Nginx. Consult sections~\ref{sec:uwsgi} and~\ref{sec:uwsginginx} for details.
+\end{itemize}
+
+These template files need to be edited for your particular application.  They
+are heavily commented to guide you. An \texttt{INSTRUCTIONS} file will be
 created in your project directory, containing instructions on what files to
-edit and  how to start the clam service for your specific project.
+edit and how to start the clam service for your specific project. Starting your
+webservice is as easy as running \texttt{startserver\_development.sh}, the
+script will inform you to what URL to direct your browser once the webservice is running.
 
-You can choose not to make use of the system wrapper script and instead either
+You can choose not to make use of the generated system wrapper script and instead either
 write one from scratch in another language of your choice, or directly let CLAM
 invoke your application. Moreover, this generated wrapper script is intended for the
-project paradigm, not the action paradigm.
+project paradigm, the action paradigm does not make use of it.
 
 The next section will provide a detailed overview of the various ways to
 configure the service configuration file, and the section thereafter will deal
@@ -745,10 +759,9 @@ formats are expected under what circumstances. The service configuration is
 itself a Python script, but knowledge of Python is not essential for you to be
 able to make your own service configurations. 
 
-The server configuration files reside in the \texttt{config/} directory. Making
-a new webservice starts with copying the sample \texttt{template.py} and
-editing your copy. When reading this section, it may help your understanding to
-inspect this file alongside.
+It is assumed you are using the \texttt{clamnewproject} tool, which generates a
+template service configuration you can edit. When reading this section, it may
+help your understanding to inspect this file alongside.
 
 One of the first things to configure is the root path (\texttt{ROOT}). All
 projects will be confined to the \texttt{projects/} directory within this root
@@ -756,7 +769,6 @@ path, each project having its own subdirectory. When your NLP application or
 wrapper script is launched, the current working directory will be set to this
 project directory. Pre-installed corpora should be put in the \texttt{corpora/}
 directory. The \texttt{ROOT} will be automatically created upon the first run.
-
 
 \subsection{Server Administration}
 \label{sec:sadmin}
@@ -767,13 +779,15 @@ end-users will use. An attempt will be made to detect this automatically if no
 hostname is specified. A mismatch in the name you define and the hostname the
 user uses may result in unexpected behaviour. \footnote{Most likely, the XSLT
 stylesheet will refuse to render the web application interface due to this
-mismatch.}. CLAM comes with a built-in webserver, which will be used when
-invoked directly from the command-line. \footnote{Unless FastCGI mode is
-enabled.}
+mismatch.}. CLAM comes with a built-in development webserver, started using the
+\texttt{startserver\_development.sh} script in your project. 
 
-When CLAM runs in an existing webserver without its own virtual host, it is
-often configured at a different URL rather than the webserver root. In this
-case, the value of \texttt{URLPREFIX} should be configured accordingly.
+When CLAM runs in a production environment using an existing webserver without
+its own virtual host, it is often configured at a different URL rather than the
+webserver root. In this case, the value of \texttt{URLPREFIX} should be
+configured accordingly. If you want your webservice to run at
+\url{http://yourhost.com/yourwebservice/} for instance, then the
+\texttt{URLPREFIX} should be set to \texttt{yourwebservice}.
 
 In order to keep server load manageable, three methods are configurable in the
 service configuration file. First, you can set the variable
@@ -801,9 +815,9 @@ dispatcher will check with a certain interval, configured in
 exceeded and will take the necessary action.  
   
 
-If for some reason you do not want to make use of the web application in CLAM,
-then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If you want
-to make the webservice available at a different URL than where the
+If for some reason you do not want to make use of the web-based user interface
+in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If
+you want to make the webservice available at a different URL than where the
 webapplication is located, there is a small trick you can apply by setting
 \texttt{WEBSERVICEGHOST} to a URL prefix that the webservice will be made
 available on \emph{without} webapplication support. If you set for example
@@ -827,7 +841,7 @@ Authentication, contrary to HTTP Basic Authentication, computes a hash of the
 username and password client-side and transmits that hash, rather than a
 plaintext password. User passwords are therefore only available to CLAM in
 hashed form. User authentication is not mandatory, but for any world-accessible
-environment it is most strongly recommended, for obvious security reasons. 
+environment it is most strongly recommended, for obvious security reasons.
 
 A list of user accounts and passwords can be defined in \texttt{USERS} in the
 service configuration file itself. This is a simple method allowing you to
@@ -1138,7 +1152,7 @@ variables you can use that will be automatically set by CLAM.
 \item \texttt{\$DATAFILE} -- The absolute path to the data file that CLAM outputs in the project directory. This data file, in CLAM XML format, contains all parameters along with their selected values. Furthermore it contains the inputformats and outputformats, and a listing of uploaded input files and/or pre-installed corpora. System wrapper scripts can read this file to obtain all necessary information, and as such this method is preferred over using \$PARAMETERS. If the system wrapper script is written in Python, the CLAM Data API can be used to read this file, requiring little effort on the part of the developer. 
 \item \texttt{\$USERNAME} -- The username of the logged-in user.
 \item \texttt{\$PROJECT} -- The ID of the project
-\item \texttt{\$OAUTH\_ACCESS\_TOKEN} -- The unencrypted OAuth access token\footnote{At this is passed as a command line parameter, it may be exposed in the process list to other users on the machine CLAM is hosted on}.
+\item \texttt{\$OAUTH\_ACCESS\_TOKEN} -- The unencrypted OAuth access token\footnote{As this is passed as a command line parameter, it may be exposed in the process list to other users on the machine CLAM is hosted on!}.
 \end{itemize}
 
 
@@ -1346,7 +1360,7 @@ The definition for \texttt{InputTemplate} takes three mandatory arguments:
 
 \begin{enumerate}[leftmargin=5mm]
 \item \texttt{id} -- An ID for the InputTemplate. This will be used internally and by automated clients.
-\item \texttt{format} -- This points to a Format class, indicating the kind of format that this input template accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there.
+\item \texttt{format} -- This points to a Format class, indicating the kind of format that this input template accepts. Formats are defined in \texttt{clam/common/formats.py}. Custom formats can be added there. Custom format classes can also be defined in the service configuration itself, after which you need to add these classes to the \texttt{CUSTOM\_FORMATS} list.
 \item \texttt{label} -- A human readable label for the input template. This is how it will be known to users in the web application and displayed in its selection menus.
 \end{enumerate}
 
