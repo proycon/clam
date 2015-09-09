@@ -157,24 +157,23 @@ def main():
 
     with io.open(dir+'/nginx-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
-location /{sysid}/static { alias {clamdir}/static; }
-location = /{sysid} { rewrite ^ /{sysid}/; }
-location /{sysid} { try_files $uri @{sysid}; }
-location @{sysid} {
+location /{sysid}/static {{ alias {clamdir}/static; }}
+location = /{sysid} {{ rewrite ^ /{sysid}/; }}
+location /{sysid} {{ try_files $uri @{sysid}; }}
+location @{sysid} {{
     include uwsgi_params;
     uwsgi_pass 127.0.0.1:{uwsgiport};
-}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+}}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
 
 
     with io.open(dir+'/nginx-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service runs at the root of the virtualhost, insert this in your server block in your nginx.conf
-location /static { alias {clamdir}/static; }
-location / { try_files $uri @{sysid}; }
-location @{sysid} {
+location /static {{ alias {clamdir}/static; }}
+location / {{ try_files $uri @{sysid}; }}
+location @{sysid} {{
     include uwsgi_params;
     uwsgi_pass 127.0.0.1:{uwsgiport};
-}
-}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+}}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
 
 
 
@@ -184,7 +183,7 @@ location @{sysid} {
     else:
         uwsgiplugin = 'python'
 
-    with io.open(dir+'/apache-withurlprefix-sample.conf') as f:
+    with io.open(dir+'/apache-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
 
 ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
@@ -215,7 +214,7 @@ if [ ! -z $VIRTUAL_ENV ]; then;
 else 
     uwsgi --plugin {uwsgiplugin} --socket 127.0.0.1:{uwsgiport} --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
 fi
-""".format(dir=dir, sysid=sysid), uwsgiplugin =uwsgiplugin,pythonversion=pythonversion, uwsgiport=uwsgiport)
+""".format(dir=dir, sysid=sysid, uwsgiplugin=uwsgiplugin,pythonversion=pythonversion, uwsgiport=uwsgiport))
     os.chmod(dir + '/startserver_production.sh', 0o755)
 
     with io.open(dir + '/startserver_development.sh','w',encoding='utf-8') as f:
@@ -241,7 +240,7 @@ and your system wrapper script {dir}/{sysid}_wrapper.py .
 Consult the CLAM Documentation and/or instruction videos on https://proycon.github.io/clam 
 for further details on how to do this.
 
-""".formats(dir=dir,sysid=sysid)
+""".format(dir=dir,sysid=sysid)
 
 
     print(s,file=sys.stderr)
@@ -269,13 +268,13 @@ Once started, you can point your browser to the URL advertised by this script.
 
 
 DEPLOYING YOUR WEBSERVICE (for system administrators)
--------------------------
+-------------------------------------------------------
 
 For production use, we recommend using uwsgi in combination with a webserver
 such as Apache (with mod_uwsgi_proxy), or nginx. A wsgi script and sample
 configuration has been generated  as a starting point. Use the
 ./startserver_production.sh script to launch CLAM using uwsgi.
-""".formats(dir=dir,sysid=sysid)
+""".format(dir=dir,sysid=sysid)
 
     print( s2,file=sys.stderr)
 
