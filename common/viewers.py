@@ -127,10 +127,11 @@ class FoLiAViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        if sys.version < '3':
-            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
+        lines = file.readlines()
+        if sys.version < '3' and isinstance(lines[0], unicode): #pylint: disable=undefined-variable
+            xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
         else:
-            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
+            xml_doc = etree.parse(BytesIO("".join(lines).encode('utf-8') ))
         return str(transform(xml_doc))
 
 
