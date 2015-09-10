@@ -344,12 +344,17 @@ class CLAMInputFile(CLAMFile):
 class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
-def getclamdata(filename):
+def getclamdata(filename, custom_formats = []):
     """This function reads the CLAM Data from an XML file. Use this to read
-    the clam.xml file from your system wrapper. It returns a CLAMData instance."""
+    the clam.xml file from your system wrapper. It returns a CLAMData instance.
+    
+    If you make use of CUSTOM_FORMATS, you need to pass the CUSTOM_FORMATS list as 2nd argument.
+    """
     f = io.open(filename,'r',encoding='utf-8')
     xml = f.read(os.path.getsize(filename))
     f.close()
+    if custom_formats: 
+        clam.common.data.CUSTOM_FORMATS = custom_formats #dependency injection for CUSTOM_FORMATS
     return CLAMData(xml, None, True)
 
 

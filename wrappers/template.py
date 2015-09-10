@@ -34,6 +34,7 @@ import string
 import clam.common.data
 import clam.common.status
 
+
 #make a shortcut to the shellsafe() function
 shellsafe = clam.common.data.shellsafe
 
@@ -42,8 +43,13 @@ datafile = sys.argv[1]
 statusfile = sys.argv[2]
 outputdir = sys.argv[3]
 
-#Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml))
-clamdata = clam.common.data.getclamdata(datafile)
+#If you make use of CUSTOM_FORMATS, you need to import your service configuration file here and set clam.common.data.CUSTOM_FORMATS
+#Alternatively, you can import any other settings from your service configuration file as well:
+
+#from yourserviceconf import CUSTOM_FORMATS
+
+#Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml)), always pass CUSTOM_FORMATS as second argument if you make use of it!
+clamdata = clam.common.data.getclamdata(datafile) 
 
 #You now have access to all data. A few properties at your disposition now are:
 # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output
