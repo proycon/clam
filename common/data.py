@@ -161,7 +161,7 @@ class AuthenticationRequired(Exception):
 class CLAMFile:
     basedir = ''
 
-    def __init__(self, projectpath, filename, loadmetadata = True, client = None):
+    def __init__(self, projectpath, filename, loadmetadata = True, client = None, requiremetadata=False):
         """Create a CLAMFile object, providing immediate transparent access to CLAM Input and Output files, remote as well as local! And including metadata."""
         self.remote = (projectpath[0:7] == 'http://' or projectpath[0:8] == 'https://')
         self.projectpath = projectpath
@@ -172,9 +172,11 @@ class CLAMFile:
             try:
                 self.loadmetadata()
             except IOError:
-                pass #if metadata not found
+                if requiremetadata:
+                    raise
             except HTTPError:
-                pass #if metadata not found
+                if requiremetadata:
+                    raise
 
         self.viewers = []
         self.converters = []
@@ -585,7 +587,7 @@ class CLAMData(object):
                      if filenode.tag == 'file':
                          for n in filenode:
                             if n.tag == 'name':
-                                self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client) )
+                                self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client,True) )
             elif node.tag == 'output':
                  for filenode in node:
                      if filenode.tag == 'file':
