@@ -34,6 +34,7 @@ import string
 import clam.common.data
 import clam.common.status
 
+#When the wrapper is started, the current working directory corresponds to the project directory, input files are in input/ , output files should go in output/ . 
 
 #make a shortcut to the shellsafe() function
 shellsafe = clam.common.data.shellsafe
@@ -64,6 +65,8 @@ clam.common.status.write(statusfile, "Starting...")
 #   inputtemplate = inputfile.metadata.inputtemplate
 #   inputfilepath = str(inputfile)
 #   encoding = inputfile.metadata['encoding'] #Example showing how to obtain metadata parameters
+
+#(Note: This iteration will fail if you change the current working directory, so make sure to set it back to the initial path if you do need to change it)
 
 #-- Grab a specific input file? (by input template) --
 #inputfile = clamdata.inputfile('replace-with-inputtemplate-id')
