@@ -1366,10 +1366,11 @@ class InputTemplate(object):
             if C.__name__ == format:
                 formatcls = C
                 break
-        if formatcls is None and format in vars(clam.common.formats):
-            formatcls = vars(clam.common.formats)[format]
-        else:
-            raise Exception("Expected format class '" + format+ "', but not defined!")
+        if formatcls is None:
+            if format in vars(clam.common.formats):
+                formatcls = vars(clam.common.formats)[format]
+            else:
+                raise Exception("Expected format class '" + format+ "', but not defined!")
 
         args = []
         for subnode in node:
@@ -1710,10 +1711,11 @@ class OutputTemplate(object):
             if C.__name__ == format:
                 formatcls = C
                 break
-        if formatcls is None and format in vars(clam.common.formats):
-            formatcls = vars(clam.common.formats)[format]
-        else:
-            raise Exception("Specified format not defined! (" + format + ")")
+        if formatcls is None:
+            if format in vars(clam.common.formats):
+                formatcls = vars(clam.common.formats)[format]
+            else:
+                raise Exception("Specified format not defined! (" + format + ")")
 
         args = []
         for subnode in node:
