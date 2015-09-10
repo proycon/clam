@@ -1355,7 +1355,12 @@ class InputTemplate(object):
                 kwargs['acceptarchive'] = False
 
         #find formatclass
-        if format in vars(clam.common.formats):
+        formatscls = None
+        for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
+            if C.__name__ == format:
+                formatcls = C
+                break
+        if formatcls in None and format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
         else:
             raise Exception("Expected format class '" + format+ "', but not defined!")
@@ -1694,10 +1699,15 @@ class OutputTemplate(object):
                 kwargs['unique'] = False
 
         #find formatclass
-        if format in vars(clam.common.formats):
+        formatscls = None
+        for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
+            if C.__name__ == format:
+                formatcls = C
+                break
+        if formatcls in None and format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
         else:
-            raise Exception("Specified format not defined!")
+            raise Exception("Specified format not defined! (" + format + ")")
 
         args = []
         for subnode in node:
