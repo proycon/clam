@@ -256,7 +256,7 @@ class CLAMFile:
                 for line in io.open(fullpath, 'r', encoding=self.metadata['encoding']).readlines():
                     yield line
             else:
-                for line in io.open(fullpath, 'r').readlines():
+                for line in io.open(fullpath, 'rb').readlines():
                     yield line
         else:
             fullpath = self.projectpath + self.basedir + '/' + self.filename
