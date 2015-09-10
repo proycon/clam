@@ -44,7 +44,7 @@ statusfile = sys.argv[2]
 outputdir = sys.argv[3]
 
 #If you make use of CUSTOM_FORMATS, you need to import your service configuration file here and set clam.common.data.CUSTOM_FORMATS
-#Alternatively, you can import any other settings from your service configuration file as well:
+#Moreover, you can import any other settings from your service configuration file as well:
 
 #from yourserviceconf import CUSTOM_FORMATS
 
