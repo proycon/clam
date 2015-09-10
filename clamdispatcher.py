@@ -28,7 +28,7 @@ VERSION = '0.99'
 
 sys.path.append(sys.path[0] + '/..')
 
-from clam.common.data import shellsafe
+import clam.common.data
 #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 
@@ -68,7 +68,7 @@ def main():
 
     cmd = sys.argv[3+offset]
     for arg in sys.argv[4+offset:]:
-        cmd += " " + shellsafe(arg,'"')
+        cmd += " " + clam.common.data.shellsafe(arg,'"')
 
 
     if not cmd:
@@ -90,6 +90,12 @@ def main():
     try:
         #exec("import " + settingsmodule + " as settings")
         settings = __import__(settingsmodule , globals(), locals(),0)
+        try:
+            if settings.CUSTOM_FORMATS:
+                clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS
+                print("[CLAM Dispatcher] Dependency injection for custom formats succeeded", file=sys.stderr)
+        except AttributeError:
+            pass
     except ImportError as e:
         print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
         print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
