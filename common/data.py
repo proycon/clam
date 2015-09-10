@@ -1365,7 +1365,7 @@ class InputTemplate(object):
             if C.__name__ == format:
                 formatcls = C
                 break
-        if formatcls in None and format in vars(clam.common.formats):
+        if formatcls is None and format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
         else:
             raise Exception("Expected format class '" + format+ "', but not defined!")
@@ -1709,7 +1709,7 @@ class OutputTemplate(object):
             if C.__name__ == format:
                 formatcls = C
                 break
-        if formatcls in None and format in vars(clam.common.formats):
+        if formatcls is None and format in vars(clam.common.formats):
             formatcls = vars(clam.common.formats)[format]
         else:
             raise Exception("Specified format not defined! (" + format + ")")
