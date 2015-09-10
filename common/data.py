@@ -1360,7 +1360,7 @@ class InputTemplate(object):
                 kwargs['acceptarchive'] = False
 
         #find formatclass
-        formatscls = None
+        formatcls = None
         for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
             if C.__name__ == format:
                 formatcls = C
@@ -1704,7 +1704,7 @@ class OutputTemplate(object):
                 kwargs['unique'] = False
 
         #find formatclass
-        formatscls = None
+        formatcls = None
         for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
             if C.__name__ == format:
                 formatcls = C
