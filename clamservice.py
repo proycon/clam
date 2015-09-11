@@ -481,7 +481,7 @@ def getbinarydata(path, buffersize=16*1024):
     with io.open(path,'rb') as f:
         while True:
             data = f.read(buffersize)
-            if data is None:
+            if not data:
                 break
             else:
                 yield data
@@ -1180,7 +1180,7 @@ class Project:
             if contentencoding:
                 extraheaders['Content-Encoding'] = contentencoding
 
-            return withheaders(flask.Response( (line for line in getbinarydata(path)) ), contenttype, extraheaders )
+            return withheaders(flask.Response( getbinarydata(path) ), contenttype, extraheaders )
 
 
     @staticmethod
@@ -2193,10 +2193,10 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start2', self.auth.require_login(Project.start), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new2', self.auth.require_login(Project.new), methods=['PUT'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete2', self.auth.require_login(Project.delete), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip2', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
 
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
@@ -2212,7 +2212,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_download_zip4', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
