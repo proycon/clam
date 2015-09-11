@@ -281,12 +281,15 @@ class CLAMClient:
         """
         requestparams = self.initrequest()
         requestparams['data'] = {'format':format}
+        if isinstance(targetfile,str) or (sys.version < '3' and isinstance(targetfile,unicode)): #pylint: disable=undefined-variable
+                targetfile = open(targetfile,'wb')
         r = requests.get(self.url + project + '/output/',**requestparams)
         CHUNK = 16 * 1024
         for chunk in r.iter_content(chunk_size=CHUNK):
             if chunk: # filter out keep-alive new chunks
                 targetfile.write(chunk)
                 targetfile.flush()
+        targetfile.close()
 
     def getinputfilename(self, inputtemplate, filename):
         """Determine the final filename for an input file given an inputtemplate and a given filename.
