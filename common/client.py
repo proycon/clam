@@ -279,11 +279,9 @@ class CLAMClient:
             client.downloadarchive("myproject","allresults.zip","zip")
 
         """
-        requestparams = self.initrequest()
-        requestparams['data'] = {'format':format}
         if isinstance(targetfile,str) or (sys.version < '3' and isinstance(targetfile,unicode)): #pylint: disable=undefined-variable
                 targetfile = open(targetfile,'wb')
-        r = requests.get(self.url + project + '/output/',**requestparams)
+        r = requests.get(self.url + project + '/output/' + format,**self.initrequest())
         CHUNK = 16 * 1024
         for chunk in r.iter_content(chunk_size=CHUNK):
             if chunk: # filter out keep-alive new chunks
