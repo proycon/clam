@@ -201,6 +201,21 @@ class ExtensiveServiceTest(unittest.TestCase):
                 #print outputfile.metadata.provenance.outputtemplate_id
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
 
+    def test1b_downloadarchive(self):
+        """Extensive Service Test - Download Archive (ZIP)""" 
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)
+        data = self.client.start(self.project)
+        self.assertTrue(data)
+        self.assertFalse(data.errors)
+        while data.status != clam.common.status.DONE:
+            time.sleep(1) #wait 1 second before polling status
+            data = self.client.get(self.project) #get status again
+        self.assertFalse(data.errors)
+        self.assertTrue(isinstance(data.output, list))
+        self.client.downloadarchive(self.project,'/tmp/target.zip','zip')
+
     def test2_parametererror(self):
         """Extensive Service Test - Global parameter error"""
         data = self.client.get(self.project)
