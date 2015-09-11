@@ -1180,7 +1180,7 @@ class Project:
             if contentencoding:
                 extraheaders['Content-Encoding'] = contentencoding
 
-            return withheaders(flask.make_response(getbinarydata(path)), contenttype, extraheaders)
+            return withheaders(flask.Response( (line for line in getbinarydata(path)) ), contenttype, extraheaders )
 
 
     @staticmethod
