@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ page.lang }}">
+<html>
+<head>    
+	<meta http-equiv="content-type" content="application/xhtml+xml; charset=utf-8"/>
+    <meta name="author" content="Maarten van Gompel (proycon)" />
+    <title>{{ page.title }} {% if page.subtitle %}:: {{ page.subtitle }}{% endif %}</title>
+	<meta name="keywords" content="{{ page.keywords }}" />
+	<meta name="description" content="{{ page.description }}" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic,900" />
+	<link rel="StyleSheet" href="style/lamalayout.css" type="text/css" />
+	<link rel="StyleSheet" href="style/custom.css" type="text/css" />
+</head>
+<body>
+    <div id="gradient"></div>
+
+    <div id="menu">
+    	<ul>
+            {% for item in page.menu %}
+    		<li><a href="{{ item.url }}">{{ item.label }}</a></li>
+            {% endfor %}
+    	</ul>
+    </div>
+
+    {% if page.cover %}
+    <div id="cover">
+      <div id="rulogobox">
+        <span class="text">Centre for Language and Speech Technology</span>
+        <span id="rulogo"></span> 
+      </div>
+      <span id="icon"></span>      
+      <h1 id="title">
+      	{{ page.title }}
+      </h1>
+      {% if page.slogan %}
+      <div id="slogan">
+      	&ldquo;{{ page.slogan }}&bdquo;
+      </div>
+      <div id="lamalogo"></div>
+      {% endif %}
+    </div>
+    <div id="covershadow"></div>
+    {% endif %}
+
+
+	<div id="content">    	
+ 		{{ content }}
+ 	</div>
+ 	
+ 	<div id="footer">
+        by {{ page.author }}<br />
+        {% if page.extracredit %}
+        [ {{ page.extracredit }} ]<br />
+        {% endif %}
+        Language Machines <strong>//</strong> Centre for Language and Speech Technology <strong>//</strong> Centre for Language Studies <strong>//</strong> Radboud University Nijmegen
+ 	</div>
+</body>
+</html>

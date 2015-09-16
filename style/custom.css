@@ -1,0 +1,20 @@
+div#cover {
+    background-position: 0px -160px;
+    min-height: 380px;
+    sh
+}
+
+h1#title {
+    color: #dcdcdc;
+    text-shadow: 2px 2px 24px rgba(0,0,0,0.8);
+}
+
+#gradient {
+    background: rgba(0, 0, 0, 0) linear-gradient(rgba(211, 200, 180, 0.7), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
+}
+
+#architecture {
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+}

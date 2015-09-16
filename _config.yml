@@ -1,0 +1,27 @@
+---
+exclude: [bundle]
+defaults:
+   - 
+    scope:
+     path: ""
+     type: pages
+    values: 
+     layout: lamalayout
+     title: CLAM
+     author: Maarten van Gompel (proycon)
+     subtitle: Computational Linguistics Application Mediator
+     keywords: clam, webservice, rest, restful, nlp, computational linguistics, clarin
+     description: CLAM allows you to quickly and transparently transform your command-line tool into a professional RESTful webservice and web-based user-interface, allowing both human end-users as well as automated clients to use your tool.
+     lang: en
+     menu: 
+      - label: Home
+        url: https://proycon.github.io/clam/
+      - label: Source
+        url: https://github.com/proycon/clam/
+      - label: Documentation
+        url: https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf
+      - label: Python API Reference
+        url: http://packages.python.org/CLAM
+      - label: Python Package Index
+        url: https://pypi.python.org/pypi/CLAM
+---

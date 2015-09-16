@@ -1,43 +1,63 @@
 ---
-layout: ilkng
-title: CLAM
-subtitle: Computational Linguistics Application Mediator
-keywords: clam, webservice, rest, restful, nlp, computational linguistics, clarin
-description: CLAM allows you to quickly and transparently transform your Natural Language Processing application into a RESTful webservice, with which both human end-users as well as automated clients can interact. 
-lang: en
-homelabel: Home
-sourcelabel: Source
-documentationlabel: Documentation
+cover: true
+slogan: Build RESTful webservices and user interfaces for your command-line tools 
+extracredit: clam cover photo by <a href="http://m1n1mal.deviantart.com/art/Clam-136549703">m1n1maL</a>
 ---
 
-<div class="leftbox">
+<section>
 
-<p><strong>CLAM</strong> allows you to quickly and transparently transform your Natural Language Processing application into a <a href="http://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a> webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around the system, allowing end-users or automated clients to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application once it is completed.</p>
+<h2>What is CLAM?</h2>
 
-<p><strong>CLAM</strong> is set up in a universal fashion, requiring minimal effort on the part of the service developer. Your actual NLP application is treated as a black box, of which only the parameters, input formats and output formats need to be described. Your application itself needs not be network aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.</p>
+<p><strong>CLAM</strong> allows you to quickly and transparently transform your
+command line application into a <a
+href="http://en.wikipedia.org/wiki/Representational_state_transfer">RESTful</a>
+webservice and web interface, with which both human end-users as well as
+automated clients can interact.</p>
 
-<p><strong>CLAM</strong> is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users.</p>
+<p><strong>CLAM</strong> expects a description of your system and
+wraps itself around the system, allowing end-users or automated clients to
+upload input files to your application, start your application with specific
+parameters of their choice, and download and view the output of the application
+once it is completed.</p>
 
-<p><strong>CLAM</strong> is free software; you can redistribute it and/or modify it under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a> as published by the <a href="http://www.fsf.org/">Free Software Foundation</a>.</p>
+<p><strong>CLAM</strong> is set up in a universal fashion, requiring minimal
+effort on the part of the service developer. Your actual application is
+treated as a black box, of which only the parameters, input formats and output
+formats need to be described. Your application itself needs not be network
+aware in any way, nor aware of CLAM, and the handling and validation of input
+can be taken care of by CLAM.</p>
 
-<p><strong>CLAM</strong> is written by Maarten van Gompel, Centre of Language Studies, Radboud University Nijmegen. </p>
+<p><strong>CLAM</strong> is entirely written in Python and runs on UNIX-derived
+systems. A Python API is provided, but knowledge of Python is not necessary to
+use CLAM. CLAM communicates using a transparent XML format, and uses XSL
+transformation offers a full web 2.0 web-interface for human end users.</p>
 
-</div>
+<p><strong>CLAM</strong> is free software; you can redistribute it and/or
+modify it under the terms of the <a
+href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a> as
+published by the <a href="http://www.fsf.org/">Free Software
+Foundation</a>.</p>
 
-<div class="rightbox">
+<p><strong>CLAM</strong> is written by Maarten van Gompel, Centre of Language
+Studies, Radboud University Nijmegen. </p>
+
+</section>
+
+<section>
+
 <h2>Documentation</h2>
 
 Please consult the CLAM Manual for extensive documentation:
 
 <ul>
 	<li><a href="https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf">CLAM Manual (PDF)</a></li>
-	<li><a href="http://packages.python.org/CLAM/">CLAM API Reference</a></li>
+	<li><a href="http://packages.python.org/CLAM/">CLAM Python API Reference</a></li>
 </ul>
 
-</div>
+</section>
 
+<section>
 
-<div class="rightbox">
 <h2>Support</h2>
 
 <p>
@@ -48,58 +68,67 @@ For additional support and announcements please join the <a href="https://lists.
 
 <p><strong>CLAM</strong> support is funded by the <a href="http://www.clarin.nl">NWO CLARIN-NL</a> programme.</p>
 
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-</div>
+</section>
 
 
-<div class="leftbox">
+
+<section>
 
 <h2>Download and installation</h2>
 
 <p>CLAM is maintained at the <a href="http://pypi.python.org/pypi/CLAM/">Python Package Index</a>. It is available for Linux and other UNIX-like distributions and is intended for users who want to build a webservice around their own tool, want to write a client for existing CLAM webservices, or are system administrators setting up existing CLAM services. </p>
 
-<p>To automatically download and install CLAM from the <strong>Python Package Index</strong>, the convenient tool <tt>easy_install</tt> is available:</p>
+<p>To automatically download and install CLAM from the <strong>Python Package Index</strong>, the convenient tool <tt>pip</tt> is available:</p>
 
-<p>
-<tt>$ sudo easy_install clam</tt>
-</p>
+<code data-lang="bash">
+$ sudo pip install clam
+</code>
 
-<p>If <tt>easy_install</tt> is not yet available on your system, install it by installing the package <tt>python-setuptools</tt>:
+<p>If <tt>pip</tt> is not yet available on your system, install it by installing the package <tt>python-pip</tt>:
 <ul>
-<li> For Debian/Ubuntu based systems: <tt>$ sudo apt-get install python-setuptools</tt></li>
-<li> For Red Hat/Fedora/CentOS based systems: <tt># yum install python-setuptools</tt></li> 
+<li> For Debian/Ubuntu based systems: <code>$ sudo apt-get install python-pip</code></li>
+<li> For Red Hat/Fedora/CentOS based systems: <code># yum install python-pip</code></li> 
 </ul>
 </p>
 
-<p>The source code is also available through the source code repository at <a href="http://github.com/proycon/clam">github</a>, and can be cloned as follows: <tt>$ git clone git://github.com/proycon/clam.git</tt></p>
+<p>The source code is also available through the source code repository at <a href="https://github.com/proycon/clam">github</a>, and can be cloned as follows: <tt>$ git clone git://github.com/proycon/clam.git</tt></p>
  
 <p>
 Please consult the <a href="https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf">CLAM Manual</a> for further instructions. After reading the manual, it is recommended to watch the CLAM tutorial videos at the bottom of this page.
 </p>
 
-</div>
+</section>
 
 
 
-<div style="clear:both; margin-top: 20px;" class="rightbox">
+<section>
+
 <h2>Architecture</h2>
 
-<img src="architecture.png" alt="CLAM architecture" />
+<img class="big" src="architecture.png" alt="CLAM architecture" />
 
 <p>CLAM has a layered architecture, with at the core the NLP application(s) you want to turn into a webservice. The application itself can remain untouched and unaware of CLAM. The scheme on the right illustrates the various layers.</p>
 
 <p>Read more in the CLAM Manual and also see the <a href="clam_poster.png">CLAM poster</a> presented at CLIN 21.</p>
-</div>
 
-<div class="leftbox">
+</section>
+
+
+<section>
+
+<h2>Screenshot</h2>
+
+<p>A screenshot of a CLAM web interface can be found below, the interface is generic and automatically generated on the basis of your <em>service configuration</em></p>
+
+<img class="big" src="screenshot_wide.png" alt="CLAM architecture" />
+
+</section>
+
+<section>
 
 <h2>Instruction videos</h2>
 
+<p>The instruction videos are fairly outdated, new ones will be made shortly</p>
 
 <iframe title="YouTube video player" width="320" height="260" src="http://www.youtube.com/embed/T9B3wKLLXYo" frameborder="0" allowfullscreen></iframe><br />
 <strong>Part I</strong> - In this first video we will create a simple webservice around an ad-hoc NLP application.<br />
@@ -113,4 +142,5 @@ Please consult the <a href="https://github.com/proycon/clam/raw/master/docs/clam
 <iframe title="YouTube video player" width="320" height="260" src="http://www.youtube.com/embed/guvtndqjVds" frameborder="0" allowfullscreen></iframe><br />
 <strong>Part IV</strong> - In this video we will see how to write a client in Python to connect to the webservice we created earlier. We will use the CLAM Client API<br />
 
-</div>
+</section>
+
