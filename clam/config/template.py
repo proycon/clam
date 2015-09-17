@@ -185,7 +185,10 @@ PROFILES = [
 #
 COMMAND = WEBSERVICEDIR + "/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
-#COMMAND = None   #Set to none if you only use the action paradigm
+#Or for the shell variant:
+#COMMAND = WEBSERVICEDIR + "/your-wrapper-script.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS"
+
+#Or if you only use the action paradigm, set COMMAND = None
 
 # ======== PARAMETER DEFINITIONS ===========
 

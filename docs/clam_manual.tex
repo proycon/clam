@@ -43,7 +43,7 @@
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - September 9th, 2015 (last revision)} \\[0.5cm] 
+\emph{November 11th, 2014 (date published) - September 17th, 2015 (last revision)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -714,15 +714,18 @@ $ clamnewproject myfirstproject
 \end{verbatim}
 }
 
-The tool will create a directory named after the identifier, in which two
+The tool will create a directory named after the identifier, in which three
 template files are created which are similarly named after the chosen
-identifier. Both are Python scripts which you are expected to edit, they are
-heavily commented to help you along, along with the documentation you are reading, this should
+identifier. You are expected to edit the service configuration file, a Python
+script, and one of the two system wrapper scripts (choose Python or Bash, or write
+one from scratch in your favourite language). The scripts are heavily commented
+to help you along, along with the documentation you are reading, this should
 provide you with all knowledge necessary to make a webservice.
 
 \begin{itemize}
 \item \texttt{myfirstproject.py} - Service Configuration File
-\item \texttt{myfirstproject\_wrapper.py} - System Wrapper Script.
+\item \texttt{myfirstproject\_wrapper.py} - System Wrapper Script in Python (this is recommended over the bash version for more complex webservices)
+\item \texttt{myfirstproject\_wrapper.sh} - System Wrapper Script in Bash (only suggested for simple webservices)
 \end{itemize}
 
 Moreover, some scripts and sample configurations are generated:
@@ -740,10 +743,10 @@ edit and how to start the clam service for your specific project. Starting your
 webservice is as easy as running \texttt{startserver\_development.sh}, the
 script will inform you to what URL to direct your browser once the webservice is running.
 
-You can choose not to make use of the generated system wrapper script and instead either
-write one from scratch in another language of your choice, or directly let CLAM
-invoke your application. Moreover, this generated wrapper script is intended for the
-project paradigm, the action paradigm does not make use of it.
+You can choose not to make use of one of the generated system wrapper scripts
+and instead either write one from scratch in another language of your choice,
+or directly let CLAM invoke your application. Moreover, a wrapper is intended
+for the project paradigm, the action paradigm does not make use of it.
 
 The next section will provide a detailed overview of the various ways to
 configure the service configuration file, and the section thereafter will deal

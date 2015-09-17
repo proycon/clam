@@ -5,7 +5,7 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Webservice --
 #       by Maarten van Gompel (proycon)
-#       http://proycon.github.com/clam
+#       https://proycon.github.io/clam
 #
 #       Centre for Language Studies
 #       Radboud University Nijmegen
@@ -101,7 +101,7 @@ def main():
 
 
 
-    if not os.path.exists(CLAMDIR + '/config/template.py') or not os.path.exists(CLAMDIR + '/wrappers/template.py'):
+    if not os.path.exists(CLAMDIR + '/config/template.py') or not os.path.exists(CLAMDIR + '/wrappers/template.sh') or not os.path.exists(CLAMDIR + '/wrappers/template.py'):
         print("ERROR: Templates not found. Unable to create new project",file=sys.stderr)
         sys.exit(2)
 
@@ -137,6 +137,8 @@ def main():
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
             elif line[:9] == "COMMAND =":
                 line = "COMMAND = WEBSERVICEDIR + \"" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
+            elif line[:10] == "#COMMAND =":
+                line = "#COMMAND = WEBSERVICEDIR + \"" + sysid + "_wrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS\"\n"
             fout.write(line)
         fin.close()
         fout.close()
@@ -149,6 +151,13 @@ def main():
         os.chmod(dir + '/' + sysid + '_wrapper.py', 0o755)
     else:
         print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
+        sys.exit(2)
+
+    if not os.path.exists(dir + '/' + sysid + '_wrapper.sh'):
+        shutil.copyfile(CLAMDIR + '/wrappers/template.sh', dir + '/' + sysid + '_wrapper.sh')
+        os.chmod(dir + '/' + sysid + '_wrapper.sh', 0o755)
+    else:
+        print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.sh already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
     with io.open(dir + '/'+sysid +'.wsgi','w',encoding='utf-8') as f:
@@ -235,10 +244,11 @@ clamservice {sysid}
 
 BUILD YOUR WEBSERVICE
 
-To develop your webservice, edit your service configuration file {dir}/{sysid}.py ,
-and your system wrapper script {dir}/{sysid}_wrapper.py .
-Consult the CLAM Documentation and/or instruction videos on https://proycon.github.io/clam 
-for further details on how to do this.
+To develop your webservice, edit your service configuration file
+{dir}/{sysid}.py , and your system wrapper script {dir}/{sysid}_wrapper.py , or
+{dir}/{sysid}_wrapper.sh if you prefer to use a simple shell script rather than
+Python.  Consult the CLAM Documentation and/or instruction videos on
+https://proycon.github.io/clam for further details on how to do this.
 
 """.format(dir=dir,sysid=sysid)
 
