@@ -11,4 +11,4 @@ addons:
 install: 
     - pip install -r requirements.txt
     - python setup.py install
-script:  bash tests/test.sh
+script:  bash clam/tests/test.sh
