@@ -129,6 +129,12 @@ table.files td.actions {
     text-decoration: small-caps;  
     border-bottom:  1px solid #ca9c4d;
 }
+
+input[type="text"], select, textarea, #editorfilename, #urluploadfile {
+    background: #ddd;
+    border: 1px solid #cfbf9d;
+}
+
 input.start {
     font-weight: bold;
     font-size: 160%;
@@ -177,6 +183,7 @@ input.uploadbutton {
 	background: #bfbfbf;
 	color: white;	
 	border:#bfbfbf solid 1px;
+    opacity: 0.6;
 }
 
 #tabs li {
@@ -211,15 +218,24 @@ a:visited {
 }
 
 input.uploadbutton, input.submitaction {
-	background: #880000;
+	background: #8a4949;
 	padding: 7px;
 	color: white;
 	font-weight: normal;
 	font-size: 12px;
+    border-radius: 5px;
+}
+
+#container .qq-upload-button {
+    background: #8a4949;
+    border-radius: 5px;
+}
+#container .qq-upload-button:hover {
+    background: #aa0000;
 }
 
 input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton {
-	background: #880000;
+	background: #8a4949;
 	padding: 2px;
 	color: white;
 	font-weight: normal;
@@ -227,6 +243,8 @@ input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton {
 	width: 180px;
 	border: none;
 	cursor: pointer;
+    border-radius: 5px;
+    margin: 1px;
 }
 input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, input#deletebutton:hover {
 	background: #EE0000;	
@@ -234,14 +252,16 @@ input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, inp
 
 input.uploadbutton:hover {
 	background: #AA0000;
+    border-radius: 5px;
 }
 
 div#startbutton input {
-	background: #880000;
+	background: #8a4949;
 	padding: 14px;
 	color: white;
 	font-weight: bold;
 	font-size: 26px;
+    border-radius: 5px;
 }
 
 div#startbutton input:hover {
