@@ -48,6 +48,7 @@ def usage():
     print(" create [project] - Create a new empty project with the specified ID",file=sys.stderr)
     print(" delete [project] - Delete the specified project (aborts any run)",file=sys.stderr)
     #prin(" reset  [project] - Delete a project's output and reset",file=sys.stderr)
+    print(" start [project]  - Start the project",file=sys.stderr)
     print(" status [project] - Get a project's status",file=sys.stderr)
     print(" input  [project] - Get a list of input files",file=sys.stderr)
     print(" output [project] - Get a list of output files",file=sys.stderr)
@@ -143,6 +144,11 @@ def main():
         #        print("Expected project ID"
         #        sys.exit(2)
         #    client.reset(args[0])
+        elif command == 'start':
+            if len(args) < 1:
+                print("Expected project ID",file=sys.stderr)
+                sys.exit(2)
+            client.start(args[0])
         elif command == 'xml':
             if len(args) ==1:
                 data = client.get(args[0])
