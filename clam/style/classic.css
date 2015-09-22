@@ -234,7 +234,8 @@ input.uploadbutton, input.submitaction {
     background: #aa0000;
 }
 
-input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton {
+
+input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton, input#startprojectbutton {
 	background: #8a4949;
 	padding: 2px;
 	color: white;
@@ -246,7 +247,7 @@ input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton {
     border-radius: 5px;
     margin: 1px;
 }
-input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, input#deletebutton:hover {
+input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, input#deletebutton:hover, input#startprojectbutton:hover {
 	background: #EE0000;	
 }
 
@@ -254,6 +255,7 @@ input.uploadbutton:hover {
 	background: #AA0000;
     border-radius: 5px;
 }
+
 
 div#startbutton input {
 	background: #8a4949;
