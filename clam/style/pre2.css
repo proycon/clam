@@ -1,22 +1,10 @@
 body {
-	background: url(static/back.png);
+    background: #E6DCCA;
     font-family: sans-serif;
     font-size: 12px;
 }
-#gradient {
-    display: block;
-    background: rgba(0, 0, 0, 0) linear-gradient(rgba(211, 200, 180, 0.7), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
-    height: 100%;
-    left: 0;
-    margin: 0;
-    padding: 0;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: -100;
-}
 #container {
-    background: rgba(0, 0, 0, 0) linear-gradient(rgba(207, 191, 157, 0.4), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
+	background: #cfbf9d;
 	border-radius: 12px;
     -moz-border-radius: 12px; /* CSS3 for older Mozilla */
     -webkit-border-radius: 12px; /* CSS3 for Safari */
@@ -43,8 +31,11 @@ h3 {
     border-bottom:  1px solid #a6956f;
 }
 #header {
-	background: rgba(155,140,107,0.5);
-    margin: 0px;
+	background: #cfbf9d;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;    
+    margin-bottom:5px;
 }
 #header h1 {
     color: white;
@@ -58,39 +49,13 @@ h3 {
     border: none;
 }
 
-#covershadow {
-    display: block;
-    background-color: #837e75;
-    padding: 0px;
-    height: 8px;
-    width: 100%;
-    bottom: 0px;
-    margin-bottom: 15px;
-    left: 50%;
-    z-index: 5;
-    -webkit-box-shadow: 0px 2px 4px #000000;
-       -moz-box-shadow: 0px 2px 4px #000000;
-            box-shadow: 0px 2px 4px #000000;
+div.box {
+	border-radius: 12px;
+    -moz-border-radius: 12px; /* CSS3 for older Mozilla */
+    -webkit-border-radius: 12px; /* CSS3 for Safari */
+    background: #f6f6f6;
 }
 
-div.box {
-    background: #f6f6f6;
-    border-radius: 20px;
-	-moz-box-shadow: 5px 5px 5px #666;
-	-webkit-box-shadow: 5px 5px 5px #666;
-	box-shadow: 5px 5px 5px #666;
-	padding: 10px;
-	border: #aaa solid 1px;
-	margin-bottom:10px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 95%;
-}
-#footer {
-    margin-left: auto;
-    margin-right: auto;
-    padding: 10px;
-}
 table.files, table#projects {
     border: #ca9c4d;
 }
@@ -132,8 +97,6 @@ table.files td.actions {
 input.start {
     font-weight: bold;
     font-size: 160%;
-    min-width: 100px;
-    width: 20%;
 }
 
 input.uploadbutton {

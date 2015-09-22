@@ -874,7 +874,7 @@ class Project:
         sufresources, resmsg = sufficientresources()
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
-            return flask.make_response("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.",503)
+            return flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503)
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
 

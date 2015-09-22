@@ -10,7 +10,9 @@
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <xsl:call-template name="head" />
   <body>
+    <div id="gradient"></div>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><xsl:if test="@project"><h2><xsl:value-of select="@project"/></h2></xsl:if></div>
+    <div id="covershadow"></div>
     <div id="container">
 
         <xsl:choose>
