@@ -25,10 +25,10 @@ sys.path.append(sys.path[0] + '/..')
 os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 
-from clam.common.client import CLAMClient, NotFound, PermissionDenied, ServerError, AuthRequired
-from clam.common.data import ParameterCondition
+from clam.common.client import CLAMClient
+from clam.common.data import ParameterCondition, NotFound, PermissionDenied, ServerError, AuthRequired
 
-VERSION = '0.9'
+VERSION = '0.99'
 
 def usage():
     print("clamclient.py [[options]] [url] [command] [command-arguments]",file=sys.stderr)
