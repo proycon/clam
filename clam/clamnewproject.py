@@ -136,9 +136,9 @@ def main():
             elif FORCEURL and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + FORCEURL + "\"\n"
             elif line[:9] == "COMMAND =":
-                line = "COMMAND = WEBSERVICEDIR + \"" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
+                line = "COMMAND = WEBSERVICEDIR + \"/" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             elif line[:10] == "#COMMAND =":
-                line = "#COMMAND = WEBSERVICEDIR + \"" + sysid + "_wrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS\"\n"
+                line = "#COMMAND = WEBSERVICEDIR + \"/" + sysid + "_wrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS\"\n"
             fout.write(line)
         fin.close()
         fout.close()
