@@ -130,7 +130,7 @@ table.files td.actions {
     border-bottom:  1px solid #ca9c4d;
 }
 
-input[type="text"], select, textarea, #editorfilename, #urluploadfile {
+input[type="text"], select, textarea, #editorfilename, #urluploadfile, #projectname {
     background: #ddd;
     border: 1px solid #cfbf9d;
 }
