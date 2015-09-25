@@ -57,7 +57,7 @@ want to install CLAM locally as a user, if you want to install globally,
 prepend the following commands with ``sudo``:
 
 CLAM can be installed from the Python Package Index using pip. Pip is usually
-part of the ``python3-pip`` package or similar. It downloads CLAM
+part of the ``python3-pip`` package or similar. It downloads CLAM and all dependencies
 automatically.
 
  $ pip3 install clam
@@ -87,7 +87,10 @@ environment:
 
  It is also possible to use Python 2.7 instead of Python 3, adapt the commands
  as necessary.
- 
+
+CLAM also has some optional dependencies. For MySQL support, install
+``mysqlclient`` using pip. For `FoLiA <https://proycon.github.io/folia>`_
+support, install ``FoLiA-Tools`` using pip.
 
 Installation on Mac OS X
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
