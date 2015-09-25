@@ -255,16 +255,17 @@ If \texttt{virtualenv} is not yet available on your system, install the package
 \subsubsection{Installation Details} 
  
 The following software is required to run CLAM, the installation process
-explained above should obtain and install all of these dependencies
+explained above should obtain and install all the mandatory dependencies
 automatically, except for Python itself:
 
 \begin{itemize}
 \item python 3.3 or higher    (2.7 is also still supported)
-\item python3-flask
-\item python3-lxml
-\item python3-requests 
-\item python3-requests-oauthlib 
-\item python3-mysqldb (optional, needed only for MySQL support)
+\item flask
+\item lxml
+\item requests 
+\item requests-oauthlib 
+\item mysqlclient (optional, needed only for MySQL support)
+\item FoLiA-Tools (optional, needed only for FoLiA support)
 \end{itemize}
 
 For development and testing, each CLAM webservice can run stand-alone on any
