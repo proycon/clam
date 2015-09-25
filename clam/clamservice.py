@@ -1004,7 +1004,7 @@ class Project:
             #this is a request for everything
             requestarchive = True
             return Project.getarchive(project,user)
-        elif filename == "folia.xsl":
+        elif filename in ("folia.xsl","folia2html.xsl"):
             return foliaxsl()
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
@@ -1200,7 +1200,7 @@ class Project:
         if filename.strip('/') == "":
             #this is a request for the index
             return flask.make_response("Permission denied",403)
-        elif filename == "folia.xsl":
+        elif filename in ("folia.xsl","folia2html.xsl"):
             return foliaxsl()
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
