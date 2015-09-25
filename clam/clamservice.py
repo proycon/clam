@@ -1877,7 +1877,7 @@ def interfacedata(): #no auth
 
 def foliaxsl():
     if foliatools is not None:
-        return withheaders(flask.make_response(io.open(foliatools.__path__ + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl')
+        return withheaders(flask.make_response(io.open(foliatools.__path__[0] + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl')
     else:
         return flask.make_response("folia.xsl is not available, no FoLiA Tools installed on this server",404)
 
