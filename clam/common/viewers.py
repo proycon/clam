@@ -133,7 +133,7 @@ class FoLiAViewer(AbstractViewer):
     def view(self, file, **kwargs):
         if foliatools is None:
             raise Exception("FoliA-Tools are not installed,  these are required for FoLiA visualisation! pip install FoLiA-tools")
-        xslfile = os.path.dirname(foliatools.__path__[0]) + "/folia2html.xsl"
+        xslfile = foliatools.__path__[0] + "/folia2html.xsl"
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
