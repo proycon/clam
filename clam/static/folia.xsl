@@ -110,6 +110,11 @@
                 .s:hover .cor { 
 					background: #cfd0ed;
                 }
+                .word:hover svg.bigtree {
+                    position: fixed;
+                    left: 0px;
+                    margin: 0px;
+                }
 
 				#text {
 					border: 1px solid #628f8b;
@@ -621,32 +626,6 @@
     </xsl:for-each>
     </xsl:for-each>
 
-    <xsl:for-each select="$ancestors">
-    <xsl:for-each select="folia:syntax">
-        <span class="attrlabel">Syntactic Unit</span>
-        <span class="attrvalue">
-            <xsl:call-template name="su2svg">
-                <xsl:with-param name="id" select="$id" />
-            </xsl:call-template>
-        </span><br/>
-    </xsl:for-each>
-    <!--
-    <xsl:for-each select="folia:syntax">
-        <xsl:for-each select="//folia:su">
-    </xsl:call-template>
-            <xsl:if test=".//folia:wref[@id=$id]">
-                <span class="attrlabel">Syntactic Unit</span>
-                <span class="attrvalue">
-                    <span class="spanclass"><xsl:value-of select="@class" /></span>
-                        <xsl:call-template name="span">
-                            <xsl:with-param name="id" select="$id" />
-                        </xsl:call-template>
-                </span><br/>
-            </xsl:if>
-        </xsl:for-each>
-    </xsl:for-each>
-    -->
-    </xsl:for-each>
 
 
     <xsl:for-each select="$ancestors">
@@ -711,6 +690,16 @@
     </xsl:for-each>
     </xsl:for-each>
 
+    <xsl:for-each select="$ancestors">
+    <xsl:for-each select="folia:syntax">
+        <span class="attrlabel">Syntax</span>
+        <span class="attrvalue">
+            <xsl:call-template name="su2svg">
+                <xsl:with-param name="id" select="$id" />
+            </xsl:call-template>
+        </span><br/>
+    </xsl:for-each>
+    </xsl:for-each>
 </xsl:template>
 
 
@@ -822,15 +811,29 @@
     </xsl:for-each>
   </xsl:variable>
 
+  <xsl:variable name="viewwidth"><xsl:value-of select="sum($layout/folia:su/@width) * 2 * $su.scale" /></xsl:variable>
+  <xsl:variable name="viewheight"><xsl:value-of select="$maxDepth * 2 * $su.scale" /></xsl:variable>
+
+  
+  <xsl:variable name="rescale">
+      <xsl:choose>
+          <xsl:when test="$viewwidth &gt; 1024"><xsl:value-of select="1024 div $viewwidth" /></xsl:when>
+          <xsl:otherwise>1</xsl:otherwise>
+      </xsl:choose>
+  </xsl:variable>
+
+    <xsl:if test="$viewwidth &gt; 800">(See pop out)</xsl:if>
   <!-- Create SVG wrapper -->
-  <svg viewbox="0 0 {sum($layout/folia:su/@width) * 2 * $su.scale} {$maxDepth * 2 * $su.scale}"
-            width="{sum($layout/folia:su/@width) * 2 * $su.scale}"
-            height="{$maxDepth*2 * $su.scale + 25}px"
-            preserveAspectRatio="xMidYMid meet">
-        <!--<g transform="translate(0,-{$su.scale div 2}) scale({$su.scale})">-->
-      <xsl:apply-templates select="$layout/folia:su" mode="layout2svg"/>
-      <!--</g>-->
+  <svg viewbox="0 0 {$viewwidth}px {$viewheight}px" width="{$viewwidth}" height="{$viewheight + 25}px" preserveAspectRatio="xMidYMid meet">
+      <xsl:if test="$viewwidth &gt; 800">
+          <xsl:attribute name="class">bigtree</xsl:attribute>
+      </xsl:if>
+      <g transform="scale({$rescale})">-->
+        <rect x="0" y="0" width="{$viewwidth}" height="{$viewheight+25}" style="fill: #b4d4d1;"  />
+        <xsl:apply-templates select="$layout/folia:su" mode="layout2svg"/>
+      </g>
   </svg>
+
 </xsl:template>
 
 <!-- Draw one node -->
