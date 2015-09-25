@@ -814,25 +814,32 @@
   <xsl:variable name="viewwidth"><xsl:value-of select="sum($layout/folia:su/@width) * 2 * $su.scale" /></xsl:variable>
   <xsl:variable name="viewheight"><xsl:value-of select="$maxDepth * 2 * $su.scale" /></xsl:variable>
 
-  
-  <xsl:variable name="rescale">
-      <xsl:choose>
-          <xsl:when test="$viewwidth &gt; 1024"><xsl:value-of select="1024 div $viewwidth" /></xsl:when>
-          <xsl:otherwise>1</xsl:otherwise>
-      </xsl:choose>
-  </xsl:variable>
 
-    <xsl:if test="$viewwidth &gt; 800">(See pop out)</xsl:if>
-  <!-- Create SVG wrapper -->
-  <svg viewbox="0 0 {$viewwidth}px {$viewheight}px" width="{$viewwidth}" height="{$viewheight + 25}px" preserveAspectRatio="xMidYMid meet">
-      <xsl:if test="$viewwidth &gt; 800">
-          <xsl:attribute name="class">bigtree</xsl:attribute>
-      </xsl:if>
-      <g transform="scale({$rescale})">-->
-        <rect x="0" y="0" width="{$viewwidth}" height="{$viewheight+25}" style="fill: #b4d4d1;"  />
-        <xsl:apply-templates select="$layout/folia:su" mode="layout2svg"/>
-      </g>
-  </svg>
+   <xsl:choose>
+        <xsl:when test="$viewwidth &gt; 1920">(Syntax tree too large to show)</xsl:when>
+        <xsl:otherwise>
+
+            <xsl:variable name="rescale">
+                <xsl:choose>
+                    <xsl:when test="$viewwidth &gt; 1024"><xsl:value-of select="1024 div $viewwidth" /></xsl:when>
+                    <xsl:otherwise>1</xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+
+                <xsl:if test="$viewwidth &gt; 800">(See pop out)</xsl:if>
+            <!-- Create SVG wrapper -->
+            <svg viewbox="0 0 {$viewwidth}px {$viewheight}px" width="{$viewwidth}" height="{$viewheight + 25}px" preserveAspectRatio="xMidYMid meet">
+                <xsl:if test="$viewwidth &gt; 800">
+                    <xsl:attribute name="class">bigtree</xsl:attribute>
+                </xsl:if>
+                <g transform="scale({$rescale})">-->
+                    <rect x="0" y="0" width="{$viewwidth}" height="{$viewheight+25}" style="fill: #b4d4d1;"  />
+                    <xsl:apply-templates select="$layout/folia:su" mode="layout2svg"/>
+                </g>
+            </svg>
+
+    </xsl:otherwise>
+  </xsl:choose>
 
 </xsl:template>
 
@@ -859,7 +866,7 @@
   <text x="{$x  * $su.scale}" y="{($y - 0.5) * $su.scale}" style="text-anchor: middle; font-size: 9px; font-weight: normal; fill: #000055;">
     <xsl:value-of select="@class"/>
   </text>
-  <text x="{$x  * $su.scale}" y="{($y + 0.3) * $su.scale}" style="text-anchor: middle; font-size: 7px; font-weight: normal;">
+  <text x="{$x  * $su.scale}" y="{($y + 0.3) * $su.scale}" style="text-anchor: middle; font-size: 9px; font-weight: normal;">
     <xsl:for-each select="folia:wref">
         <xsl:choose>
             <xsl:when test="@t">
