@@ -62,6 +62,11 @@ except ImportError:
     print("WARNING: No MySQL support available in your version of Python! pip install mysqlclient if you plan on using MySQL for authentication",file=sys.stderr)
 
 try:
+    import foliatools
+except ImportError:
+    foliatools = None
+
+try:
     import uwsgi
     UWSGI = True
 except ImportError:
@@ -1871,7 +1876,11 @@ def interfacedata(): #no auth
     return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript')
 
 def foliaxsl():
-    return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8').read()),'text/xsl')
+    if foliatools is not None:
+        return withheaders(flask.make_response(io.open(foliatools.__path__ + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl')
+    else:
+        return flask.make_response("folia.xsl is not available, no FoLiA Tools installed on this server",404)
+
 
 def styledata():
     return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8').read()),'text/css')
