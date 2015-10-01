@@ -1276,10 +1276,13 @@ class Project:
                 return withheaders(flask.make_response(msg),'text/plain', {'Content-Length': len(msg)}) #200
 
     @staticmethod
+    def addinputfile_nofile(project, credentials=None):
+        return Project.addinputfile(project,'',credentials)
+
+    @staticmethod
     def addinputfile(project, filename, credentials=None):
         """Add a new input file, this invokes the actual uploader"""
 
-        #TODO: test support for uploading metadata files
 
         user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
@@ -2206,6 +2209,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input' 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST'] )
 
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
@@ -2226,6 +2230,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/' 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status/', 'project_status_json', Project.status_json, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload/', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
