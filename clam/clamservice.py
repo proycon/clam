@@ -300,9 +300,6 @@ def index(credentials = None):
 
 
 
-def argtest(a,b,c,credentials = None):
-    return flask.make_response("a="+str(a)+", b="+str(b)+", c=" + str(c))
-
 def info(credentials=None):
     """Get info"""
     projects = []
@@ -1277,6 +1274,7 @@ class Project:
 
     @staticmethod
     def addinputfile_nofile(project, credentials=None):
+        printdebug('Addinputfile_nofile' )
         return Project.addinputfile(project,'',credentials)
 
     @staticmethod
@@ -1294,18 +1292,18 @@ class Project:
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
                 inputtemplate = None
-                for s in settings.INPUTSOURCES:
-                    if s.id == postdata['inputsource']:
-                        inputsource = s
+                for profile in settings.PROFILES:
+                    for t in profile.input:
+                        for s in t.inputsources:
+                            if s.id == postdata['inputsource']:
+                                inputsource = s
+                                inputsource.inputtemplate = t.id
+                                inputtemplate = t
+                                break
                 if not inputsource:
-                    for profile in settings.PROFILES:
-                        for t in profile.input:
-                            for s in t.inputsources:
-                                if s.id == postdata['inputsource']:
-                                    inputsource = s
-                                    inputsource.inputtemplate = t.id
-                                    inputtemplate = t
-                                    break
+                    for s in settings.INPUTSOURCES:
+                        if s.id == postdata['inputsource']:
+                            inputsource = s
                 if not inputsource:
                     return flask.make_response("No such inputsource exists",403)
                 if not inputtemplate:
@@ -1313,7 +1311,8 @@ class Project:
                         for t in profile.input:
                             if inputsource.inputtemplate == t.id:
                                 inputtemplate = t
-                assert (inputtemplate != None)
+                if inputtemplate is None:
+                    return flask.make_response("No input template found for inputsource",500)
                 if inputsource.isfile():
                     if inputtemplate.filename:
                         filename = inputtemplate.filename
@@ -2186,7 +2185,6 @@ class CLAMService(object):
         self.service = flask.Flask("clam")
         self.service.secret_key = settings.SECRET_KEY
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/argtest/<a>/<b>/<c>/', 'test', self.auth.require_login(argtest), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
@@ -2209,7 +2207,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input' 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input', 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
 
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
@@ -2230,7 +2228,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/' 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/', 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status/', 'project_status_json', Project.status_json, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload/', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
