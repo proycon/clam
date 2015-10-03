@@ -7,28 +7,13 @@ import os
 import sys
 from setuptools import setup
 
-try:
-   os.chdir(os.path.dirname(sys.argv[0]))
-except:
-   pass
-
-if not os.path.exists('clam'):
-    print("Preparing build",file=sys.stderr)
-    if not os.path.exists('build'): os.mkdir('build')
-    os.chdir('build')
-    if not os.path.exists('clam'): os.mkdir('clam')
-    os.system('cp -Rpfv ../*py ../*cfg ../static ../style ../templates ../tests ../config ../common ../clients ../clamopener ../external ../wrappers ../docs clam/')
-    os.system('find clam/ -type l | xargs rm')
-    os.system('mv -f clam/setup.py clam/setup.cfg .')
-    os.system('cp -f ../README.rst ../INSTALL ../ChangeLog ../COPYING .')
-
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "CLAM",
-    version = "0.99",
+    version = "0.99.4",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
@@ -58,6 +43,6 @@ setup(
             'clamclient = clam.clamclient:main'
         ]
     },
-    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','docs/clam_manual.pdf','docs/clam.rng','clients/*.py','tests/*.py'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','wrappers/template.sh'] },
     install_requires=['flask >= 0.10','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto']
 )

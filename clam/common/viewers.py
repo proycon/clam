@@ -26,6 +26,11 @@ if sys.version < '3':
 else:
     from io import StringIO,  BytesIO
 
+try:
+    import foliatools
+except:
+    foliatools = None
+
 from clam.common.util import withheaders
 
 class AbstractViewer(object):
@@ -126,7 +131,9 @@ class FoLiAViewer(AbstractViewer):
     name = "FoLiA Viewer"
 
     def view(self, file, **kwargs):
-        xslfile = os.path.dirname(__file__) + "/../static/folia.xsl"
+        if foliatools is None:
+            raise Exception("FoliA-Tools are not installed,  these are required for FoLiA visualisation! pip install FoLiA-tools")
+        xslfile = foliatools.__path__[0] + "/folia2html.xsl"
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 

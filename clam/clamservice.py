@@ -62,6 +62,11 @@ except ImportError:
     print("WARNING: No MySQL support available in your version of Python! pip install mysqlclient if you plan on using MySQL for authentication",file=sys.stderr)
 
 try:
+    import foliatools
+except ImportError:
+    foliatools = None
+
+try:
     import uwsgi
     UWSGI = True
 except ImportError:
@@ -294,9 +299,6 @@ def index(credentials = None):
     )))
 
 
-
-def argtest(a,b,c,credentials = None):
-    return flask.make_response("a="+str(a)+", b="+str(b)+", c=" + str(c))
 
 def info(credentials=None):
     """Get info"""
@@ -874,7 +876,7 @@ class Project:
         sufresources, resmsg = sufficientresources()
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
-            return flask.make_response("There are not enough system resources available to accomodate your request. " + resmsg + " .Please try again later.",503)
+            return flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503)
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
 
@@ -999,7 +1001,7 @@ class Project:
             #this is a request for everything
             requestarchive = True
             return Project.getarchive(project,user)
-        elif filename == "folia.xsl":
+        elif filename in ("folia.xsl","folia2html.xsl"):
             return foliaxsl()
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
@@ -1195,7 +1197,7 @@ class Project:
         if filename.strip('/') == "":
             #this is a request for the index
             return flask.make_response("Permission denied",403)
-        elif filename == "folia.xsl":
+        elif filename in ("folia.xsl","folia2html.xsl"):
             return foliaxsl()
         elif len(raw) >= 2:
             #This MAY be a viewer/metadata request, check:
@@ -1271,10 +1273,14 @@ class Project:
                 return withheaders(flask.make_response(msg),'text/plain', {'Content-Length': len(msg)}) #200
 
     @staticmethod
+    def addinputfile_nofile(project, credentials=None):
+        printdebug('Addinputfile_nofile' )
+        return Project.addinputfile(project,'',credentials)
+
+    @staticmethod
     def addinputfile(project, filename, credentials=None):
         """Add a new input file, this invokes the actual uploader"""
 
-        #TODO: test support for uploading metadata files
 
         user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
@@ -1286,18 +1292,18 @@ class Project:
             if 'inputsource' in postdata and postdata['inputsource']:
                 inputsource = None
                 inputtemplate = None
-                for s in settings.INPUTSOURCES:
-                    if s.id == postdata['inputsource']:
-                        inputsource = s
+                for profile in settings.PROFILES:
+                    for t in profile.input:
+                        for s in t.inputsources:
+                            if s.id == postdata['inputsource']:
+                                inputsource = s
+                                inputsource.inputtemplate = t.id
+                                inputtemplate = t
+                                break
                 if not inputsource:
-                    for profile in settings.PROFILES:
-                        for t in profile.input:
-                            for s in t.inputsources:
-                                if s.id == postdata['inputsource']:
-                                    inputsource = s
-                                    inputsource.inputtemplate = t.id
-                                    inputtemplate = t
-                                    break
+                    for s in settings.INPUTSOURCES:
+                        if s.id == postdata['inputsource']:
+                            inputsource = s
                 if not inputsource:
                     return flask.make_response("No such inputsource exists",403)
                 if not inputtemplate:
@@ -1305,7 +1311,8 @@ class Project:
                         for t in profile.input:
                             if inputsource.inputtemplate == t.id:
                                 inputtemplate = t
-                assert (inputtemplate != None)
+                if inputtemplate is None:
+                    return flask.make_response("No input template found for inputsource",500)
                 if inputsource.isfile():
                     if inputtemplate.filename:
                         filename = inputtemplate.filename
@@ -1871,7 +1878,11 @@ def interfacedata(): #no auth
     return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript')
 
 def foliaxsl():
-    return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/static/folia.xsl','r',encoding='utf-8').read()),'text/xsl')
+    if foliatools is not None:
+        return withheaders(flask.make_response(io.open(foliatools.__path__[0] + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl')
+    else:
+        return flask.make_response("folia.xsl is not available, no FoLiA Tools installed on this server",404)
+
 
 def styledata():
     return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8').read()),'text/css')
@@ -2174,7 +2185,6 @@ class CLAMService(object):
         self.service = flask.Flask("clam")
         self.service.secret_key = settings.SECRET_KEY
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/argtest/<a>/<b>/<c>/', 'test', self.auth.require_login(argtest), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
@@ -2197,6 +2207,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input', 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
 
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
@@ -2217,6 +2228,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/', 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status/', 'project_status_json', Project.status_json, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload/', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )

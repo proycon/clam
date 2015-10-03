@@ -5,20 +5,24 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Wrapper script Template --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#       https://proycon.github.io/clam
+#       Centre for Language and Speech Technology
+#       Radboud University Nijmegen
 #
 #       Licensed under GPLv3
 #
 ###############################################################
 
-#This is a test wrapper, meant to illustrate how easy it is to set
-#up a wrapper script for your system using Python and the CLAM Client API.
-#We make use of the XML configuration file that CLAM outputs, rather than
-#passing all parameters on the command line.
+#This is a template wrapper which you can use a basis for writing your own
+#system wrapper script. The system wrapper script is called by CLAM, it's job it
+#to call your actual tool.
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
+
+#This wrapper script uses Python and the CLAM Data API.
+#We make use of the XML settings file that CLAM outputs, rather than
+#passing all parameters on the command line.
+
 
 #If we run on Python 2.7, behave as much as Python 3 as possible
 from __future__ import print_function, unicode_literals, division, absolute_import

@@ -5,6 +5,10 @@ body {
     margin: 0px;
 }
 
+#gradient, #covershadow {
+    display: none;
+}
+
 #header {
 	text-align: center;
 	padding: 10px;
