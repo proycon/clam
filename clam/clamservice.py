@@ -2525,6 +2525,7 @@ if __name__ == "__main__":
         if settings.DEBUG:
             DEBUG = True
             setdebug(True)
+            warning("DEBUG is enabled, never use this in publicly exposed environments as it is a security risk !!!")
     except:
         pass
     try:
@@ -2546,7 +2547,7 @@ if __name__ == "__main__":
 
     if settings.URLPREFIX:
         settings.STANDALONEURLPREFIX = settings.URLPREFIX
-        warning("WARNING: Using URLPREFIX in standalone mode! Are you sure this is what you want?")
+        warning("Using URLPREFIX in standalone mode! Are you sure this is what you want?")
         #raise Exception("Can't use URLPREFIX when running in standalone mode!")
     settings.URLPREFIX = '' #standalone server always runs at the root
 
