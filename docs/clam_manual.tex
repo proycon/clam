@@ -1970,7 +1970,7 @@ explicitly by specifying \texttt{method="GET"} or \texttt{method="POST"}.
 
 When a script is called, CLAM looks at its return code to determine whether
 execution was successful ($0$). If not, CLAM will return the standard error
-output in a ``HTTP 500 -- Internal Server Error'' reply. If define your own
+output in a ``HTTP 500 -- Internal Server Error'' reply. If you define your own
 errors and return standard \emph{output} in an HTTP 403 reply, use return code
 $3$; for standard output in an HTTP 404 reply, use return code $4$. These are just defaults, all return
 codes are configurable through the keyword arguments \texttt{returncodes200},
