@@ -79,7 +79,7 @@ elif os.path.exists('/usr/bin/ucto') and os.path.exists("/home/vagrant") and os.
     BINDIR = '/usr/bin/'
 elif os.path.exists('/usr/bin/ucto') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
     # Docker (LaMachine)
-    ROOT = "/root/ucto.clam/"
+    ROOT = "/clamdata/ucto.clam/"
     PORT = 8802
     BINDIR = '/usr/bin/'
 elif host == "hostnameofyoursystem":

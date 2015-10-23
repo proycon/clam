@@ -79,7 +79,7 @@ elif os.path.exists('/usr/bin/timbl') and os.path.exists("/home/vagrant") and os
     BINDIR = '/usr/bin/'
 elif os.path.exists('/usr/bin/timbl') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
     # Docker (LaMachine)
-    ROOT = "/root/timbl.clam/"
+    ROOT = "/clamdata/timbl.clam/"
     PORT = 8804
     BINDIR = '/usr/bin/'
 elif host == "hostnameofyoursystem":

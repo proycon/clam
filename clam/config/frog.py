@@ -81,7 +81,7 @@ elif os.path.exists('/usr/bin/frog') and os.path.exists("/home/vagrant") and os.
     BINDIR = '/usr/bin/'
 elif os.path.exists('/usr/bin/frog') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
     # Docker (LaMachine)
-    ROOT = "/root/frog.clam/"
+    ROOT = "/clamdata/frog.clam/"
     PORT = 8801
     BINDIR = '/usr/bin/'
 elif host == "hostnameofyoursystem":

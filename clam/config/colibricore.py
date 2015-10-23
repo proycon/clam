@@ -78,7 +78,7 @@ elif os.path.exists('/usr/bin/colibri-patternmodeller') and os.path.exists("/hom
     BINDIR = '/usr/bin/'
 elif os.path.exists('/usr/bin/colibri-patternmodeller') and os.getuid() == 0 and os.path.exists('/etc/arch-release'):
     # Docker (LaMachine)
-    ROOT = "/root/colibricore.clam/"
+    ROOT = "/clamdata/colibricore.clam/"
     PORT = 8803
     BINDIR = '/usr/bin/'
 elif host == "hostnameofyoursystem":
