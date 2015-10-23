@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.99.4",
+    version = "0.99.5",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
@@ -43,6 +43,6 @@ setup(
             'clamclient = clam.clamclient:main'
         ]
     },
-    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','wrappers/template.sh'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','wrappers/template.sh','config/*.wsgi'] },
     install_requires=['flask >= 0.10','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto']
 )
