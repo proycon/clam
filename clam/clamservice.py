@@ -1929,7 +1929,8 @@ class ActionHandler(object):
         params = []
         for parameter in action.parameters:
             if not parameter.id in data:
-                return flask.make_response("Missing parameter: " + parameter.id,403)
+                if parameter.required:
+                    return flask.make_response("Missing parameter: " + parameter.id,403)
             else:
                 if parameter.paramflag:
                     flag = parameter.paramflag
@@ -1938,7 +1939,7 @@ class ActionHandler(object):
                 if not parameter.set(data[parameter.id]):
                     return flask.make_response("Invalid value for parameter " + parameter.id + ": " + parameter.error,403)
                 else:
-                    params.append( ( flag, parameter.value) )
+                    params.append( ( flag, parameter.value, parameter.id) )
         return params
 
 
@@ -1949,10 +1950,10 @@ class ActionHandler(object):
         userdir =  settings.ROOT + "projects/" + user + '/'
 
         if action.command:
+            cmd = action.command
+
             parameters = ""
-            for flag, value in ActionHandler.collect_parameters(action):
-                if parameters: parameters += " "
-                if flag: parameters += flag + " "
+            for flag, value, paramid in ActionHandler.collect_parameters(action):
 
                 if sys.version[0] == '2':
                     if isinstance(value, unicode):#pylint: disable=undefined-variable
@@ -1961,9 +1962,14 @@ class ActionHandler(object):
                         value = str(value)
                 elif not isinstance(value, str):
                     value = str(value)
-                if value: parameters += clam.common.data.shellsafe(value,'"')
+                if value: 
+                    if cmd.find('$' + paramid + '$') != -1:
+                        cmd = cmd.replace('$' + paramid + '$', clam.common.data.shellsafe(value,'"'))
+                    else:
+                        if parameters: parameters += " "
+                        if flag: parameters += flag + " "
+                        parameters += clam.common.data.shellsafe(value,'"')
 
-            cmd = action.command
             cmd = cmd.replace('$PARAMETERS', parameters)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token if oauth_access_token else "")
@@ -1991,7 +1997,7 @@ class ActionHandler(object):
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
-                if settings.DEBUG:
+                if DEBUG:
                     if sys.version >= '3':
                         printdebug("    action stdout:\n" + str(stdoutdata,'utf-8')) 
                         printdebug("    action stderr:\n" + str(stderrdata,'utf-8')) 
