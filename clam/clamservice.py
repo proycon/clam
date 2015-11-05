@@ -2011,7 +2011,7 @@ class ActionHandler(object):
                 else:
                     return flask.make_response(e,500)
             if not isinstance(r, flask.Response):
-                return withheaders(flask.make_response(r), action.mimetype)
+                return withheaders(flask.make_response(str(r)), action.mimetype)
             else:
                 return r
         else:
