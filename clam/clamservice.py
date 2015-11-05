@@ -2035,19 +2035,19 @@ class ActionHandler(object):
 
 
     @staticmethod
-    def GET(actionid):
+    def GET(actionid, credentials=None):
         return ActionHandler.run(actionid, 'GET')
 
     @staticmethod
-    def POST(actionid):
+    def POST(actionid, credentials=None):
         return ActionHandler.run(actionid, 'POST')
 
     @staticmethod
-    def PUT(actionid):
+    def PUT(actionid, credentials=None):
         return ActionHandler.run(actionid, 'PUT')
 
     @staticmethod
-    def DELETE(actionid):
+    def DELETE(actionid, credentials=None):
         return ActionHandler.run(actionid, 'DELETE')
 
 
