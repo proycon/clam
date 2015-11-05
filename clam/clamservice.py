@@ -1917,7 +1917,7 @@ def uploader(project, credentials=None):
 class ActionHandler(object):
 
     @staticmethod
-    def find_action( action_id, method):
+    def find_action( actionid, method):
         for action in settings.ACTIONS:
             if action.id == action.id and (not action.method or method == action.method):
                 return action
@@ -1943,8 +1943,8 @@ class ActionHandler(object):
 
 
     @staticmethod
-    def do( action_id, method, user="anonymous", oauth_access_token=""):
-        action = ActionHandler.find_action(action_id, 'GET')
+    def do( actionid, method, user="anonymous", oauth_access_token=""):
+        action = ActionHandler.find_action(actionid, 'GET')
 
         userdir =  settings.ROOT + "projects/" + user + '/'
 
@@ -1986,7 +1986,7 @@ class ActionHandler(object):
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
-            printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + action_id + " with " + action.command + ": " + repr(cmd) + " ..." )
+            printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + actionid + " with " + action.command + ": " + repr(cmd) + " ..." )
             process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
@@ -1998,7 +1998,7 @@ class ActionHandler(object):
                 elif process.returncode in action.returncodes404:
                     return withheaders(flask.make_response(stdoutdata, 404), action.mimetype)
                 else:
-                    return flask.make_response("Process for action " +  action_id + " failed\n" + stderrdata,500)
+                    return flask.make_response("Process for action " +  actionid + " failed\n" + stderrdata,500)
             else:
                 return flask.make_response("Unable to launch process",500)
         elif action.function:
@@ -2015,40 +2015,40 @@ class ActionHandler(object):
             else:
                 return r
         else:
-            raise Exception("No command or function defined for action " + action_id)
+            raise Exception("No command or function defined for action " + actionid)
 
     @staticmethod
-    def do_auth(action_id, method, credentials=None):
+    def do_auth(actionid, method, credentials=None):
         user, oauth_access_token = parsecredentials(credentials)
-        return ActionHandler.do(action_id, method, user, oauth_access_token)
+        return ActionHandler.do(actionid, method, user, oauth_access_token)
 
     @staticmethod
-    def run(action_id, method):
+    def run(actionid, method):
         #check whether the action requires authentication or allows anonymous users:
-        action = ActionHandler.find_action(action_id, method)
+        action = ActionHandler.find_action(actionid, method)
         if action.allowanonymous:
             user = "anonymous"
             oauth_access_token = ""
-            return ActionHandler.do(action_id, method,user,oauth_access_token)
+            return ActionHandler.do(actionid, method,user,oauth_access_token)
         else:
-            return ActionHandler.do_auth(action_id, method)
+            return ActionHandler.do_auth(actionid, method)
 
 
     @staticmethod
-    def GET(action_id):
-        return ActionHandler.run(action_id, 'GET')
+    def GET(actionid):
+        return ActionHandler.run(actionid, 'GET')
 
     @staticmethod
-    def POST(action_id):
-        return ActionHandler.run(action_id, 'POST')
+    def POST(actionid):
+        return ActionHandler.run(actionid, 'POST')
 
     @staticmethod
-    def PUT(action_id):
-        return ActionHandler.run(action_id, 'PUT')
+    def PUT(actionid):
+        return ActionHandler.run(actionid, 'PUT')
 
     @staticmethod
-    def DELETE(action_id):
-        return ActionHandler.run(action_id, 'DELETE')
+    def DELETE(actionid):
+        return ActionHandler.run(actionid, 'DELETE')
 
 
 def sufficientresources():
