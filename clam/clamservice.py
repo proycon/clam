@@ -1991,6 +1991,13 @@ class ActionHandler(object):
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
+                if settings.DEBUG:
+                    if sys.version >= '3':
+                        printdebug("    action stdout:\n" + str(stdoutdata,'utf-8')) 
+                        printdebug("    action stderr:\n" + str(stderrdata,'utf-8')) 
+                    else:
+                        printdebug("    action stdout:\n" + unicode(stdoutdata,'utf-8')) 
+                        printdebug("    action stderr:\n" + unicode(stderrdata,'utf-8')) 
                 if process.returncode in action.returncodes200:
                     return withheaders(flask.make_response(stdoutdata,200),action.mimetype) #200
                 elif process.returncode in action.returncodes403:
@@ -2011,7 +2018,10 @@ class ActionHandler(object):
                 else:
                     return flask.make_response(e,500)
             if not isinstance(r, flask.Response):
-                return withheaders(flask.make_response(str(r)), action.mimetype)
+                if sys.version >= '3':
+                    return withheaders(flask.make_response(str(r)), action.mimetype)
+                else:
+                    return withheaders(flask.make_response(unicode(r,'utf-8')), action.mimetype)
             else:
                 return r
         else:
