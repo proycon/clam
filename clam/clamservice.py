@@ -1992,7 +1992,7 @@ class ActionHandler(object):
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
                 if process.returncode in action.returncodes200:
-                    return withheaders(flas.mask_response(stdoutdata,200),action.mimetype) #200
+                    return withheaders(flask.mask_response(stdoutdata,200),action.mimetype) #200
                 elif process.returncode in action.returncodes403:
                     return withheaders(flask.make_response(stdoutdata,403), action.mimetype)
                 elif process.returncode in action.returncodes404:
