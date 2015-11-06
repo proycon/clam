@@ -49,8 +49,8 @@ class ActionServiceTest(unittest.TestCase):
 
     def test2_action(self):
         """Action Test (Command) - Unicode"""
-        result = self.client.action('uppercase',text="tést")
-        self.assertEqual(result.strip(), "TéST") #tr doesn't do unicode well
+        result = self.client.action('uppercase',text="téstя")
+        self.assertEqual(result.strip(), "TéSTя") #tr doesn't do unicode well
 
     def test3_action(self):
         """Action Test (Function)"""
