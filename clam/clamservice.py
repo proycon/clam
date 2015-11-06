@@ -1968,10 +1968,8 @@ class ActionHandler(object):
             for flag, value, paramid in collectedparams:
 
                 if sys.version[0] == '2':
-                    if isinstance(value, unicode):#pylint: disable=undefined-variable
-                        value = value.encode('utf-8')
-                    elif not isinstance(value, str):
-                        value = str(value)
+                    if isinstance(value, str):
+                        value = unicode(value,'utf-8')
                 elif not isinstance(value, str):
                     value = str(value)
                 if value: 
@@ -2045,6 +2043,7 @@ class ActionHandler(object):
                 if sys.version >= '3':
                     return withheaders(flask.make_response(str(r)), action.mimetype)
                 else:
+                    if isinstance(r, int) or isinstance(r,float): r = str(r)
                     return withheaders(flask.make_response(unicode(r,'utf-8')), action.mimetype)
             else:
                 return r
