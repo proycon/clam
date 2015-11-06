@@ -116,7 +116,7 @@ class CLAMClient:
            params['data'] = data
         return params
 
-    def request(self, url='', method = 'GET', data = None):
+    def request(self, url='', method = 'GET', data = None, parse=True, encoding=None):
         """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
 
         requestparams = self.initrequest(data)
@@ -132,6 +132,8 @@ class CLAMClient:
             request = requests.get
 
         r = request(self.url + url,**requestparams)
+        if encoding is not None:
+            r.encoding = encoding
 
         if r.status_code == 400:
             raise clam.common.data.BadRequest()
@@ -139,19 +141,22 @@ class CLAMClient:
             raise clam.common.data.AuthRequired()
         elif r.status_code == 403:
             content = r.text
-            data = self._parse(content)
-            if data:
-                if data.errors:
-                    print("DEBUG: errors found",file=sys.stderr)
-                    error = data.parametererror()
-                    print("DEBUG: parametererror=" + str(error),file=sys.stderr)
-                    for parametergroup, parameters in data.parameters:
-                        for parameter in parameters:
-                            print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
-                    if error:
-                        raise clam.common.data.ParameterError(error)
-                print(content,file=sys.stderr)
-                raise clam.common.data.PermissionDenied(data)
+            if parse:
+                data = self._parse(content)
+                if data:
+                    if data.errors:
+                        print("DEBUG: errors found",file=sys.stderr)
+                        error = data.parametererror()
+                        print("DEBUG: parametererror=" + str(error),file=sys.stderr)
+                        for parametergroup, parameters in data.parameters:
+                            for parameter in parameters:
+                                print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
+                        if error:
+                            raise clam.common.data.ParameterError(error)
+                    print(content,file=sys.stderr)
+                    raise clam.common.data.PermissionDenied(data)
+                else:
+                    raise clam.common.data.PermissionDenied(content)
             else:
                 raise clam.common.data.PermissionDenied(content)
         elif r.status_code == 404 and data:
@@ -165,7 +170,10 @@ class CLAMClient:
         elif not (r.status_code >= 200 and r.status_code <= 299):
             raise Exception("An error occured, return code " + str(r.status_code))
 
-        return self._parse(r.text)
+        if parse:
+            return self._parse(r.text)
+        else:
+            return r.text
 
 
     def _parse(self, content):
@@ -206,14 +214,20 @@ class CLAMClient:
 
 
     def action(self, id, **kwargs):
-        """Query an action, specify the parameters for the action as keyword parameters. An optional keyword parameter method='GET' (default) or method='POST' can be set."""
+        """Query an action, specify the parameters for the action as keyword parameters. An optional keyword parameter method='GET' (default) or method='POST' can be set. The character set encoding of the response can be configured using the encoding keyword parameter (defaults to utf-8 by default)"""
+
         if 'method' in kwargs:
             method = kwargs['method']
             del kwargs['method']
         else:
             method = 'GET'
+        if 'encoding' in kwargs:
+            encoding = kwargs['encoding']
+            del kwargs['encoding']
+        else:
+            encoding = 'utf-8'
 
-        return self.request('/actions/' + id, method, kwargs)
+        return self.request('actions/' + id, method, kwargs, False,encoding)
 
 
 

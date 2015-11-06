@@ -1919,9 +1919,9 @@ class ActionHandler(object):
     @staticmethod
     def find_action( actionid, method):
         for action in settings.ACTIONS:
-            if action.id == action.id and (not action.method or method == action.method):
+            if action.id == actionid and (not action.method or method == action.method):
                 return action
-        return flask.make_response("Action does not exist",404)
+        raise Exception("No such action: " + actionid)
 
     @staticmethod
     def collect_parameters(action):
@@ -1930,14 +1930,14 @@ class ActionHandler(object):
         for parameter in action.parameters:
             if not parameter.id in data:
                 if parameter.required:
-                    return flask.make_response("Missing parameter: " + parameter.id,403)
+                    raise clam.common.data.ParameterError("Missing parameter: " + parameter.id)
             else:
                 if parameter.paramflag:
                     flag = parameter.paramflag
                 else:
                     flag = None
                 if not parameter.set(data[parameter.id]):
-                    return flask.make_response("Invalid value for parameter " + parameter.id + ": " + parameter.error,403)
+                    raise clam.common.data.ParameterError("Invalid value for parameter " + parameter.id + ": " + parameter.error)
                 else:
                     params.append( ( flag, parameter.value, parameter.id) )
         return params
@@ -1945,7 +1945,14 @@ class ActionHandler(object):
 
     @staticmethod
     def do( actionid, method, user="anonymous", oauth_access_token=""):
-        action = ActionHandler.find_action(actionid, 'GET')
+        try:
+            printdebug("Looking for action " + actionid)
+            action = ActionHandler.find_action(actionid, 'GET')
+        except:
+            return flask.make_response("Action does not exist",404)
+
+        printdebug("Performing action " + action.id)
+
 
         userdir =  settings.ROOT + "projects/" + user + '/'
 
@@ -1953,7 +1960,12 @@ class ActionHandler(object):
             cmd = action.command
 
             parameters = ""
-            for flag, value, paramid in ActionHandler.collect_parameters(action):
+            try:
+                collectedparams =ActionHandler.collect_parameters(action)
+            except clam.common.data.ParameterError as e:
+                return flask.make_response(str(e),403)
+
+            for flag, value, paramid in collectedparams:
 
                 if sys.version[0] == '2':
                     if isinstance(value, unicode):#pylint: disable=undefined-variable
@@ -1997,13 +2009,19 @@ class ActionHandler(object):
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
+                if sys.version >= '3':
+                    stdoutdata = str(stdoutdata,'utf-8')
+                    stderrdata = str(stderrdata,'utf-8')
+                else:
+                    stdoutdata = unicode(stdoutdata,'utf-8')
+                    stderrdata = unicode(stderrdata,'utf-8')
                 if DEBUG:
                     if sys.version >= '3':
-                        printdebug("    action stdout:\n" + str(stdoutdata,'utf-8')) 
-                        printdebug("    action stderr:\n" + str(stderrdata,'utf-8')) 
+                        printdebug("    action stdout:\n" + stdoutdata) 
+                        printdebug("    action stderr:\n" + stderrdata) 
                     else:
-                        printdebug("    action stdout:\n" + unicode(stdoutdata,'utf-8')) 
-                        printdebug("    action stderr:\n" + unicode(stderrdata,'utf-8')) 
+                        printdebug("    action stdout:\n" + stdoutdata)
+                        printdebug("    action stderr:\n" + stderrdata)
                 if process.returncode in action.returncodes200:
                     return withheaders(flask.make_response(stdoutdata,200),action.mimetype) #200
                 elif process.returncode in action.returncodes403:

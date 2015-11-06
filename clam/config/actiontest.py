@@ -123,11 +123,17 @@ COMMAND = None
 PARAMETERS =  []
 
 
+def multiply(x,y):
+    return x * y
 # ======== ACTIONS ===========
 
 ACTIONS = [
-        Action(id="uppercase",name="Uppercaser",description="Convert a string to upper case", command="echo $text$ | tr '[:lower:]' '[:upper:]'", parameters=[
+    Action(id="uppercase",name="Uppercaser",description="Convert a string to upper case", command="echo $text$ | tr '[:lower:]' '[:upper:]'", parameters=[
             StringParameter(id="text", name="Text", required=True),
+    ]),
+    Action(id="multiply",name="Multiplier",description="Multiply two numbers", function=multiply, parameters=[
+            IntegerParameter(id="x", name="First value", required=True),
+            IntegerParameter(id="y", name="Second value", required=True)
     ])
 ]
 

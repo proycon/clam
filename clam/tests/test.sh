@@ -83,6 +83,24 @@ echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 sleep 2 
 
+echo "Starting clam service 'actiontest'" >&2
+clamservice -d clam.config.actiontest 2> actiontest.server.log &
+sleep 5
+
+echo "Running actions tests:" >&2
+python actiontest.py 
+if [ $? -ne 0 ]; then
+   echo "ERROR: Action test failed!!" >&2
+   GOOD=0
+   echo "<--------------------- actiontest.server.log --------------------------------->" >&2
+   cat actiontest.server.log >&2
+   echo "</-------------------- actiontest.server.log --------------------------------->" >&2
+fi
+
+echo "Stopping clam service" >&2
+kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
+sleep 2 
+
 if [ $GOOD -eq 1 ]; then
     echo "Done, all tests passed!" >&2
     exit 0
