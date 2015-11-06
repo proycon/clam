@@ -121,6 +121,8 @@ def main():
     except:
         print("[CLAM Dispatcher] Running " + repr(cmd), file=sys.stderr) #unicode-issues on Python 2
 
+    if sys.version[0] == '2' and isinstance(cmd,unicode):
+        cmd = cmd.encode('utf-8')
     if projectdir:
         process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
     else:
