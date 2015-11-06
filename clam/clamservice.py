@@ -2003,6 +2003,8 @@ class ActionHandler(object):
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + actionid + " with " + action.command + ": " + repr(cmd) + " ..." )
+            if sys.version[0] == '2' and isinstance(cmd,unicode):
+                cmd = cmd.encode('utf-8')
             process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
