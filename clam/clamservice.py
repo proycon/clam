@@ -1968,10 +1968,10 @@ class ActionHandler(object):
             for flag, value, paramid in collectedparams:
                 if sys.version[0] == '2':
                     if isinstance(value, str):
-                        value = unicode(value,'utf-8')
+                        value = unicode(value,'utf-8') #pylint: disable=undefined-variable
                 elif not isinstance(value, str):
                     value = str(value)
-                if value: 
+                if value:
                     try:
                         if cmd.find('$' + paramid + '$') != -1:
                             cmd = cmd.replace('$' + paramid + '$', clam.common.data.shellsafe(value,'"'))
@@ -2006,7 +2006,7 @@ class ActionHandler(object):
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + actionid + " with " + action.command + ": " + repr(cmd) + " ..." )
-            if sys.version[0] == '2' and isinstance(cmd,unicode):
+            if sys.version[0] == '2' and isinstance(cmd,unicode): #pylint: disable=undefined-variable
                 cmd = cmd.encode('utf-8')
             process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
@@ -2016,12 +2016,12 @@ class ActionHandler(object):
                     stdoutdata = str(stdoutdata,'utf-8')
                     stderrdata = str(stderrdata,'utf-8')
                 else:
-                    stdoutdata = unicode(stdoutdata,'utf-8')
-                    stderrdata = unicode(stderrdata,'utf-8')
+                    stdoutdata = unicode(stdoutdata,'utf-8') #pylint: disable=undefined-variable
+                    stderrdata = unicode(stderrdata,'utf-8') #pylint: disable=undefined-variable
                 if DEBUG:
                     if sys.version >= '3':
-                        printdebug("    action stdout:\n" + stdoutdata) 
-                        printdebug("    action stderr:\n" + stderrdata) 
+                        printdebug("    action stdout:\n" + stdoutdata)
+                        printdebug("    action stderr:\n" + stderrdata)
                     else:
                         printdebug("    action stdout:\n" + stdoutdata)
                         printdebug("    action stderr:\n" + stderrdata)
@@ -2049,7 +2049,7 @@ class ActionHandler(object):
                     return withheaders(flask.make_response(str(r)), action.mimetype)
                 else:
                     if isinstance(r, int) or isinstance(r,float): r = str(r)
-                    return withheaders(flask.make_response(unicode(r,'utf-8')), action.mimetype)
+                    return withheaders(flask.make_response(unicode(r,'utf-8')), action.mimetype) #pylint: disable=undefined-variable
             else:
                 return r
         else:
