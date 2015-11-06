@@ -1966,19 +1966,22 @@ class ActionHandler(object):
                 return flask.make_response(str(e),403)
 
             for flag, value, paramid in collectedparams:
-
                 if sys.version[0] == '2':
                     if isinstance(value, str):
                         value = unicode(value,'utf-8')
                 elif not isinstance(value, str):
                     value = str(value)
                 if value: 
-                    if cmd.find('$' + paramid + '$') != -1:
-                        cmd = cmd.replace('$' + paramid + '$', clam.common.data.shellsafe(value,'"'))
-                    else:
-                        if parameters: parameters += " "
-                        if flag: parameters += flag + " "
-                        parameters += clam.common.data.shellsafe(value,'"')
+                    try:
+                        if cmd.find('$' + paramid + '$') != -1:
+                            cmd = cmd.replace('$' + paramid + '$', clam.common.data.shellsafe(value,'"'))
+                        else:
+                            if parameters: parameters += " "
+                            if flag: parameters += flag + " "
+                            parameters += clam.common.data.shellsafe(value,'"')
+                    except ValueError as e:
+                        return flask.make_response("Parameter " + paramid + " has an invalid value...",403)
+
 
             cmd = cmd.replace('$PARAMETERS', parameters)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
