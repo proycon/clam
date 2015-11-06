@@ -67,6 +67,8 @@ def main():
     print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
 
     cmd = sys.argv[3+offset]
+    if sys.version[0] == '2' and isinstance(cmd,str):
+        cmd = unicode(cmd,'utf-8')
     for arg in sys.argv[4+offset:]:
         cmd += " " + clam.common.data.shellsafe(arg,'"')
 
@@ -113,7 +115,11 @@ def main():
     if not 'DISPATCHER_MAXTIME' in settingkeys:
         settings.DISPATCHER_MAXTIME = 0
 
-    print("[CLAM Dispatcher] Running " + cmd, file=sys.stderr)
+
+    try:
+        print("[CLAM Dispatcher] Running " + cmd, file=sys.stderr)
+    except:
+        print("[CLAM Dispatcher] Running " + repr(cmd), file=sys.stderr) #unicode-issues on Python 2
 
     if projectdir:
         process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)

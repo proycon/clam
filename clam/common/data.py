@@ -2245,6 +2245,8 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
 
 def shellsafe(s, quote=''):
     """Returns the value string, wrapped in the specified quotes (if not empty), but checks and raises an Exception if the string is at risk of causing code injection"""
+    if sys.version[0] == '2' and not isinstance(s,unicode):
+        s = unicode(s,'utf-8')
     if len(s) > 1024:
             raise ValueError("Variable value rejected for security reasons: too long")
     if quote:
