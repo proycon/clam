@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.99.11",
+    version = "0.99.12",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
@@ -26,7 +26,7 @@ setup(
         "Development Status :: 4 - Beta",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Topic :: Text Processing :: Linguistic",
-        "Programming Language :: Python :: 2.7", 
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3", #3.0, 3.1 and 3.2 are not supported by flask
         "Programming Language :: Python :: 3.4", #3.0, 3.1 and 3.2 are not supported by flask
         "Operating System :: POSIX",
