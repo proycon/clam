@@ -13,10 +13,10 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "0.99.12",
+    version = "0.99.13",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
-    description = ("Computational Linguistics Application Mediator. Turn command-line NLP tools into fully-fledged RESTful webservices."),
+    description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with a auto-generated web-interface for human end-users."),
     license = "GPL",
     keywords = "clam webservice rest nlp computational_linguistics rest",
     url = "https://proycon.github.io/clam",
