@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-#-*- coding:utf-8 -*-
-
 ###############################################################
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Client for Text Statistics webservice --

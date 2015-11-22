@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Should run in a Python virtual environment ideally
+
 TESTDIR=`dirname $0`
 cd $TESTDIR
 
