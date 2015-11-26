@@ -143,13 +143,13 @@ class HTTPDigestAuth(HTTPAuth):
         else:
             self.realm = "Default realm"
 
-        self.noncememory = NonceMemory(noncedir) 
-    
+        self.noncememory = NonceMemory(noncedir)
+
         if 'nonceexpiration' in kwargs:
             self.nonceexpiration = int(kwargs['nonceexpiration'])
         else:
             self.nonceexpiration = 900
-            
+
 
         self.printdebug("Initialising Digest Authentication with realm " + self.realm)
 
@@ -162,11 +162,11 @@ class HTTPDigestAuth(HTTPAuth):
         def default_generate_opaque(nonce):
             opaque, ip, expiretime = self.noncememory.get(nonce)
             return opaque
-            
+
         def default_verify_opaque(nonce, checkopaque):
             opaque, ip, expiretime = self.noncememory.get(nonce)
             return opaque == checkopaque
-        
+
         self.generate_nonce(default_generate_nonce)
         self.generate_opaque(default_generate_opaque)
         self.verify_nonce(default_verify_nonce)
@@ -399,8 +399,8 @@ class NonceMemory:
             return self.readnoncefile(noncefile) #returns (opaque,ip,expiretime) tuple
         else:
             raise KeyError("No such nonce: " + nonce)
-        
-    def readnoncefile(self, noncefile):    
+
+    def readnoncefile(self, noncefile):
         with open(noncefile,'r') as f:
             opaque = f.readline().strip()
             ip = f.readline().strip()
@@ -414,6 +414,6 @@ class NonceMemory:
             opaque,ip, expiretime = self.readnoncefile(noncefile)
             if time.time() > expiretime:
                 os.unlink(noncefile)
-            
-        
-        
+
+
+
