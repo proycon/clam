@@ -2319,10 +2319,23 @@ def set_defaults():
     if not 'BASICAUTH' in settingkeys:
         settings.BASICAUTH = False #default is HTTP Digest
     if not 'LISTPROJECTS' in settingkeys:
-        if 'PROJECTS_PUBLIC' in settingkeys:
-            settings.LISTPROJECTS = settings.PROJECTS_PUBLIC #backward compatibility
-        else:
-            settings.LISTPROJECTS = True
+        settings.LISTPROJECTS = True
+    if not 'ALLOWSHARE' in settingkeys:
+        settings.ALLOWSHARE = True
+    if not 'ALLOWANONSHARE' in settingkeys:
+        settings.ALLOWANONSHARE = True
+    if not 'ALLOWSHAREUPLOAD' in settingkeys:
+        settings.ALLOWSHAREUPLOAD = False
+    if not 'ALLOWSHARERUN' in settingkeys:
+        settings.ALLOWSHARERUN = 
+    if not 'ALLOWSHAREDELETE' in settingkeys:
+        settings.ALLOWSHAREDELETE = False
+    if not 'ALLOWANONSHAREUPLOAD' in settingkeys:
+        settings.ALLOWSHAREUPLOAD = False
+    if not 'ALLOWANONSHARERUN' in settingkeys:
+        settings.ALLOWSHARERUN = False
+    if not 'ALLOWANONSHAREDELETE' in settingkeys:
+        settings.ALLOWSHAREDELETE = False
     if not 'PROFILES' in settingkeys:
         settings.PROFILES = []
     if not 'INPUTSOURCES' in settingkeys:
@@ -2357,6 +2370,8 @@ def set_defaults():
         else:
             print("WARNING: clamdispatcher not found!!",file=sys.stderr)
             settings.DISPATCHER = 'clamdispatcher'
+    if 'PROJECT_PUBLIC' in settingkeys:
+        print("NOTICE: PROJECTS_PUBLIC directive is obsolete and has no effect. You may be looking for LISTPROJECTS or ALLOWSHARE instead",file=sys.stderr)
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
     if not 'DIGESTOPAQUE' in settingkeys:

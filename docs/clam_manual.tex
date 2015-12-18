@@ -820,22 +820,18 @@ exceeded and will take the necessary action.
   
 
 If for some reason you do not want to make use of the web-based user interface
-in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. If
-you want to make the webservice available at a different URL than where the
-webapplication is located, there is a small trick you can apply by setting
-\texttt{WEBSERVICEGHOST} to a URL prefix that the webservice will be made
-available on \emph{without} webapplication support. If you set for example
-\texttt{WEBSERVICEGHOST = 'ws'}, then there will be an additional ``ghosted''
-webservice without webapplication interface running on
-\texttt{http://yourdomain.com/ws/}. This option is included to accommodate the
-wish to apply two distinct authentication schemes outside of CLAM. 
+in CLAM, then you can disable it by setting \texttt{ENABLEWEBAPP = False}. Note
+that this is \textbf{not} a security measure! Everything is technically still
+as accessible. You can also disable project listing, in which case projects are
+only accessible if users know the exact project name. Set \texttt{LISTPROJECTS
+= False}.
 
 CLAM offers a limited web-based administrative interface that allows you to
 view what users and projects there are,  access their files, abort runs, and
 delete projects. This interface can be accessed on the \texttt{/admin/} URL,
 but requires that the logged-in user is in the list of \texttt{ADMINS} in the
-service configuration file. The administrative interface itself does not offer
-any means to adjust configuration options.
+service configuration file. The administrative interface itself does not, and
+will never, offer any means to adjust service configuration options.
 
 \subsection{User Authentication}
 
