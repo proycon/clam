@@ -2327,7 +2327,7 @@ def set_defaults():
     if not 'ALLOWSHAREUPLOAD' in settingkeys:
         settings.ALLOWSHAREUPLOAD = False
     if not 'ALLOWSHARERUN' in settingkeys:
-        settings.ALLOWSHARERUN = 
+        settings.ALLOWSHARERUN = True
     if not 'ALLOWSHAREDELETE' in settingkeys:
         settings.ALLOWSHAREDELETE = False
     if not 'ALLOWANONSHAREUPLOAD' in settingkeys:
