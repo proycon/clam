@@ -2370,7 +2370,7 @@ def set_defaults():
         else:
             print("WARNING: clamdispatcher not found!!",file=sys.stderr)
             settings.DISPATCHER = 'clamdispatcher'
-    if 'PROJECT_PUBLIC' in settingkeys:
+    if 'PROJECTS_PUBLIC' in settingkeys:
         print("NOTICE: PROJECTS_PUBLIC directive is obsolete and has no effect. You may be looking for LISTPROJECTS or ALLOWSHARE instead",file=sys.stderr)
     if not 'REALM' in settingkeys:
         settings.REALM = settings.SYSTEM_ID
