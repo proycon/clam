@@ -257,11 +257,12 @@ def index(credentials = None):
     """Get list of projects"""
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
-    for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
-        if os.path.isdir(f):
-            d = datetime.datetime.fromtimestamp(os.stat(f)[8])
-            project = os.path.basename(f)
-            projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+    if settings.LISTPROJECTS:
+        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
+            if os.path.isdir(f):
+                d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+                project = os.path.basename(f)
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
 
     errors = "no"
     errormsg = ""
@@ -529,10 +530,6 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
                 return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
-            #if not settings.PROJECTS_PUBLIC:
-            #    f = codecs.open(settings.ROOT + "projects/" + user + '/' + project + '/.users','w','utf-8')
-            #    f.write(user + "\n")
-            #    f.close()
 
 
     @staticmethod
@@ -2321,8 +2318,11 @@ def set_defaults():
         settings.ADMINS = []
     if not 'BASICAUTH' in settingkeys:
         settings.BASICAUTH = False #default is HTTP Digest
-    if not 'PROJECTS_PUBLIC' in settingkeys:
-        settings.PROJECTS_PUBLIC = True
+    if not 'LISTPROJECTS' in settingkeys:
+        if 'PROJECTS_PUBLIC' in settingkeys:
+            settings.LISTPROJECTS = settings.PROJECTS_PUBLIC #backward compatibility
+        else:
+            settings.LISTPROJECTS = True
     if not 'PROFILES' in settingkeys:
         settings.PROFILES = []
     if not 'INPUTSOURCES' in settingkeys:
