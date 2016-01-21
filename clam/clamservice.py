@@ -253,8 +253,46 @@ def parsecredentials(credentials):
 
 #Are tied into flask later because at this point we don't have an app instance yet
 
+def entryshortcut(credentials = None):
+    user, oauth_access_token = parsecredentials(credentials)
+    rq = flask.request.values
+    if 'project' in rq:
+        if rq['project'].lower() in ('new','create'):
+            projectprefix = rq['projectprefix'] if 'projectprefix' in rq else 'P'
+            project = projectprefix + str("%034x" % random.getrandbits(128))
+            Project.create(project,user)
+        else:
+            project = rq['project']
+
+        for profile in settings.PROFILES:
+            for inputtemplate in profile.input:
+                data = {'filename':'', 'inputtemplate': inputtemplate.id}
+                if inputtemplate.id + '_filename' in rq:
+                    data['filename'] = rq[inputtemplate.id + '_filename']
+                elif inputtemplate.filename:
+                    data['filename'] = inputtemplate.filename
+                elif inputtemplate.extension:
+                    pass #should be handled by addfile automatically
+
+                if inputtemplate.id in rq:
+                    data['contents'] = rq[inputtemplate.id]
+                elif inputtemplate.id + '_url' in rq:
+                    data['url'] = rq[inputtemplate.id + '_url']
+                if ('url' in data or 'contents' in data):
+                    addfile(project,data['filename'], user, data)
+
+        return Project.get(project,credentials)
+
+    return None #no shortcut found
+
 def index(credentials = None):
-    """Get list of projects"""
+    """Get list of projects or shortcut to other functionality"""
+
+    #handle shortcut
+    shortcutresponse = entryshortcut(credentials)
+    if shortcutresponse is not None:
+        return shortcutresponse
+
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
     if settings.LISTPROJECTS:
@@ -538,7 +576,6 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
                 return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
-
 
     @staticmethod
     def pid(project, user):
@@ -1427,7 +1464,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 nextseq = seq + 1 #next available sequence number
 
 
-    if not filename: #Actually, I don't think this can occur at this stage, but we'll leave it in to be sure
+    if not filename: #Actually, I don't think this can occur at this stage, but we'll leave it in to be sure (yes it can, when the entry shortcut is used!)
         if inputtemplate.filename:
             filename = inputtemplate.filename
         elif inputtemplate.extension:
@@ -2233,13 +2270,13 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
-        #self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry/', 'entry', entry, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry/', 'entry', entry, methods=['GET'] )
 
         #versions without trailing slash so no automatic 301 redirect is needed
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
-        #self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry', 'entry2', entry, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry', 'entry2', entry, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
