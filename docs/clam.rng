@@ -45,6 +45,18 @@ RelaxNG schema for CLAM XML
 		    <a:documentation>A human readable description of the service.</a:documentation>
 		    <text />
 		</element>
+        <optional>
+            <element name="version">
+                <a:documentation>Defines the version of the system (the underlying tool or the webservice itself)</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="email">
+                <a:documentation>Defines the e-mail address of the contact person for this system</a:documentation>
+                <text />
+            </element>
+        </optional>
 		<optional>
 		    <element name="projects">
 		        <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>

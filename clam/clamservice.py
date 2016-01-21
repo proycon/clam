@@ -206,7 +206,7 @@ class Login(object):
         if not 'access_token' in d:
             return flask.make_response('No access token received from authorization provider',403)
 
-        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))))
+        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, system_version=settings.SYSTEM_VERSION, system_email=settings.SYSTEM_EMAIL, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))))
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
@@ -274,6 +274,8 @@ def index(credentials = None):
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
+            system_version=settings.SYSTEM_VERSION,
+            system_email=settings.SYSTEM_EMAIL,
             user=user,
             project=None,
             url=getrooturl(),
@@ -321,6 +323,8 @@ def info(credentials=None):
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
+            system_version=settings.SYSTEM_VERSION,
+            system_email=settings.SYSTEM_EMAIL,
             user=user,
             project=None,
             url=getrooturl(),
@@ -374,6 +378,8 @@ class Admin:
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
+                system_version=settings.SYSTEM_VERSION,
+                system_email=settings.SYSTEM_EMAIL,
                 user=user,
                 url=getrooturl(),
                 usersprojects = sorted(usersprojects.items()),
@@ -402,6 +408,8 @@ class Admin:
                     system_id=settings.SYSTEM_ID,
                     system_name=settings.SYSTEM_NAME,
                     system_description=settings.SYSTEM_DESCRIPTION,
+                    system_version=settings.SYSTEM_VERSION,
+                    system_email=settings.SYSTEM_EMAIL,
                     user=targetuser,
                     project=project,
                     inputfiles=sorted(inputfiles),
@@ -783,6 +791,8 @@ class Project:
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
+                system_version=settings.SYSTEM_VERSION,
+                system_email=settings.SYSTEM_EMAIL,
                 user=user,
                 project=project,
                 url=getrooturl(),
@@ -2223,11 +2233,13 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
+        #self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry/', 'entry', entry, methods=['GET'] )
 
         #versions without trailing slash so no automatic 301 redirect is needed
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+        #self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry', 'entry2', entry, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
@@ -2310,8 +2322,14 @@ def set_defaults():
         if not s in settingkeys:
             error("ERROR: Service configuration incomplete, missing setting: " + s)
 
+
+
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
+    if not 'SYSTEM_VERSION' in settingkeys:
+        settings.SYSTEM_VERSION = "0"
+    if not 'SYSTEM_EMAIL' in settingkeys:
+        settings.SYSTEM_EMAIL = None
     if not 'USERS' in settingkeys:
         settings.USERS = None
     if not 'ADMINS' in settingkeys:

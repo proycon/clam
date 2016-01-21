@@ -472,6 +472,9 @@ class CLAMData(object):
 
         self.system_id = ""
         self.system_name = ""
+        self.system_version = ""
+        self.system_email = ""
+        self.description = ""
 
         #: String containing the base URL of the webserivice
         self.baseurl = ''
@@ -556,7 +559,13 @@ class CLAMData(object):
             self.oauth_access_token = root.attrib['oauth_access_token']
 
         for node in root:
-            if node.tag == 'status':
+            if node.tag == "description":
+                self.description = node.value
+            elif node.tag == "version":
+                self.system_version = node.value
+            elif node.tag == "email":
+                self.system_email = node.value
+            elif node.tag == 'status':
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
                 self.completion  = node.attrib['completion']
