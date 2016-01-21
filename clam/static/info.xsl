@@ -134,7 +134,7 @@
 
          <ul>
             <xsl:for-each select="//InputTemplate">
-                <li><strong><xsl:value-of select="@label" />:</strong>
+                <li><strong><xsl:value-of select="@label" />:</strong> <em>(<xsl:value-of select="@format" />)</em>
                 <ul>
                     <li><tt><xsl:value-of select="@id" /></tt> -- The contents of a file for this input template (corresponds to <tt>contents</tt> in the non-shortcut method).</li>
                     <li><tt><xsl:value-of select="@id" />_url</tt> -- An URL from which to download the file for this input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
