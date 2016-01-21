@@ -253,7 +253,7 @@ def parsecredentials(credentials):
 
 #Are tied into flask later because at this point we don't have an app instance yet
 
-def entryshortcut(credentials = None):
+def entryshortcut(credentials = None, fromstart=False):
     user, oauth_access_token = parsecredentials(credentials)
     rq = flask.request.values
     if 'project' in rq:
@@ -281,7 +281,13 @@ def entryshortcut(credentials = None):
                 if ('url' in data or 'contents' in data):
                     addfile(project,data['filename'], user, data)
 
-        return Project.get(project,credentials)
+        if 'start' in rq and rq['start'].lower() in ('1','yes','true'):
+            if fromstart:
+                return None #continue as normal, invoking start again would bring endless recursion
+            else:
+                return Project.start(project, credentials)
+        else:
+            return Project.get(project,credentials)
 
     return None #no shortcut found
 
@@ -899,6 +905,12 @@ class Project:
     def start(project, credentials=None):
         """Start execution"""
         global settingsmodule
+
+        #handle shortcut
+        shortcutresponse = entryshortcut(credentials, True) #protected against endless recursion, will return None to continue starting
+        if shortcutresponse is not None:
+            return shortcutresponse
+
         user, oauth_access_token = parsecredentials(credentials)
         Project.create(project, user)
         #if user and not Project.access(project, user):
