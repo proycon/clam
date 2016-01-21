@@ -260,9 +260,9 @@ def entryshortcut(credentials = None):
         if rq['project'].lower() in ('new','create'):
             projectprefix = rq['projectprefix'] if 'projectprefix' in rq else 'P'
             project = projectprefix + str("%034x" % random.getrandbits(128))
-            Project.create(project,user)
         else:
             project = rq['project']
+        Project.create(project,user)
 
         for profile in settings.PROFILES:
             for inputtemplate in profile.input:
