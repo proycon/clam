@@ -560,11 +560,11 @@ class CLAMData(object):
 
         for node in root:
             if node.tag == "description":
-                self.description = node.value
+                self.description = node.text
             elif node.tag == "version":
-                self.system_version = node.value
+                self.system_version = node.text
             elif node.tag == "email":
-                self.system_email = node.value
+                self.system_email = node.text
             elif node.tag == 'status':
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
