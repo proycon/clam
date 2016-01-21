@@ -2270,13 +2270,13 @@ class CLAMService(object):
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry/', 'entry', entry, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry/', 'entry', entryshortcut, methods=['GET','POST'] )
 
         #versions without trailing slash so no automatic 301 redirect is needed
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry', 'entry2', entry, methods=['GET'] )
+        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/entry', 'entry2', entryshortcut, methods=['GET','POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
