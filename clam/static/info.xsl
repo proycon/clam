@@ -117,9 +117,41 @@
     			</ul>
 			</li>
     	 </ol>
+
+
+         <h4>Project entry shortcut</h4>
+         
+         <p>Steps one to three can be combined in a single HTTP GET or POST query
+         that is, however, less RESTful and offers less flexibily. It does, however, facilitate use from simpler
+         callers. Issue a <tt>HTTP GET</tt> or <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/</tt>. The following parameter is
+         mandatory, you will be directed to the project page after the request.</p>
+
+         <ul>
+             <li><tt>project</tt> -- The name of the project, it will be created if it does not exist yet. Set the value to <em>new</em> if you want CLAM to create a random project name for you.</li>
+         </ul>
+
+         <p>The shortcut allows for the adding of files, use the following parameters:</p>
+
+         <ul>
+            <xsl:for-each select="//InputTemplate">
+                <li><strong><xsl:value-of select="@label" />:</strong>
+                <ul>
+                    <li><tt><xsl:value-of select="@id" /></tt> -- The contents of a file for the give input template (corresponds to <tt>contents</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" />_url</tt> -- An URL from which to download the file for the give input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" />_filename</tt> -- The desired filename for the added file (corresponds to (<tt>filename</tt> in the non-shortcut method).</li>
+                </ul></li>
+            </xsl:for-each>
+         </ul>
+
+         <p>To automatically start the system, pass the parameter <tt>start</tt> with value 1. By default, the system will not be started yet. You can pass any global parameters as usual.</p>
+
+         <p>Note that the shortcut method is limited to add only one file per input template, and it does not support actual file uploads, only downloads and explicit passing of content.</p>
+ 
          
         </xsl:if>
         <xsl:if test="count(/clam/actions/action) > 0">
+
+
 
         <h4>Actions</h4>
 

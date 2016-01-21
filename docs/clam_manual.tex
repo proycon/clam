@@ -38,7 +38,7 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.99 - revision 1.3} \\[0.5cm]
+{\bf \small version 0.99.17$+$ - revision 1.4} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
@@ -2390,13 +2390,14 @@ including all output files \\
 \hline
 \end{supertabular}
 
+
 \medskip
 
 \begin{supertabular}{|l|p{10cm}|}
 \hline
 \textbf{URL} & \texttt{/actions/[action\_id]/} \\
 \hline
-\multicolumn{2}{|c|}{\textbf{Get the metadata for an input file}} \\
+\multicolumn{2}{|c|}{\textbf{Run an action}} \\
 \hline
 \textbf{Method} & \texttt{GET} and/or \texttt{POST}, may be constrained by the action \\
 \textbf{Request Parameters} & Determined by the action  \\
@@ -2406,6 +2407,46 @@ action and obtain the results. The parameters are specific to the action. \\
 \hline
 \end{supertabular}
 
+\medskip
+
+\begin{supertabular}{|l|p{10cm}|}
+\hline
+& \textbf{Project entry shortcut} \\ 
+& This is a shortcut method (available since CLAM v0.99.17) that combines the steps of project
+creation, file adding and upload, in one single GET or POST request. Although
+more limited than the invididual calls, and less RESTful, it facilitates the
+job for simpler callers.  \\ 
+\textbf{URL} & \texttt{/} or \texttt{/entry/} \\ 
+\hline
+\multicolumn{2}{|c|}{\textbf{Single-entry shortcut method for project creation, file
+addition, and starting the system}} \\
+\hline
+\textbf{Method} & \texttt{GET} or \texttt{POST} \\
+\textbf{Request Parameters} & \texttt{project$=[name|new]$} (mandatory),
+selects and if necessary creates the project with the specified name. If the
+value is set to \emph{new}, a random project name will be generated. \linebreak
+\texttt{\{inputtemplate\}$=[contents]$} -- Pass file contents for the specified input
+    templateJ (the variable name is the inputtemplate ID), this corresponds to the
+    \texttt{contents} variable in the non-shortcut method. \linebreak
+    \texttt{\{inputtemplate\}\_url$=[url]$} -- Pass a url where to obtain the file
+    for the specified input
+    templateJ (the variable name contains the inputtemplate ID), this corresponds to the
+    \texttt{url} variable in the non-shortcut method. \linebreak
+    \texttt{\{inputtemplate\}\_filename$=[filename]$} -- Sets the desired filename for the
+    specified input template, use in combination with one of the two parameters
+    above. Not needed when the webservice assigns a fixed filename. \linebreak
+\texttt{start$=[0|1]$} -- Set this parameter to 1 if you want the project to start
+automatically. The default is not to start automatically.  \linebreak 
+Other accepted parameters are defined in the Service
+Configuration file (and thus differ per service). The parameter ID corresponds
+to the parameter keys in the request parameters \\
+\textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised},
+\texttt{403 - Permission denied} \\ 
+\hline
+\end{supertabular}
+
+
+
 If OAuth authentication is enabled and no access token is passed, almost all URLs
 return \texttt{HTTP 303 - See Other} and redirect to the authentication
 provider. At this stage, user input may be required, stopping automated
@@ -2413,8 +2454,6 @@ clients. After the user input, or if no user input is required, the
 authorization provider should relay the user back to a special CLAM login page with another
 \texttt{HTTP 303}. This implies the client should then redo the request with
 the proper access token. See the section on OAuth2 authentication for more details.
-
-
 %\chapter{Predefined Formats}
 
 %The following formats are pre-defined in CLAM. Each is a python class derived from \texttt{CLAMMetaData}, and defined in \texttt{clam/common/formats.py}:
