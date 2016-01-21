@@ -136,14 +136,14 @@
             <xsl:for-each select="//InputTemplate">
                 <li><strong><xsl:value-of select="@label" />:</strong>
                 <ul>
-                    <li><tt><xsl:value-of select="@id" /></tt> -- The contents of a file for the give input template (corresponds to <tt>contents</tt> in the non-shortcut method).</li>
-                    <li><tt><xsl:value-of select="@id" />_url</tt> -- An URL from which to download the file for the give input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
-                    <li><tt><xsl:value-of select="@id" />_filename</tt> -- The desired filename for the added file (corresponds to (<tt>filename</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" /></tt> -- The contents of a file for this input template (corresponds to <tt>contents</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" />_url</tt> -- An URL from which to download the file for this input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" />_filename</tt> -- The desired filename for the added file (corresponds to (<tt>filename</tt> in the non-shortcut method). Will be automatically generated when not provided and if possible.</li>
                 </ul></li>
             </xsl:for-each>
          </ul>
 
-         <p>To automatically start the system, pass the parameter <tt>start</tt> with value 1. By default, the system will not be started yet. You can pass any global parameters as usual.</p>
+         <p>To automatically start the system, pass the parameter <tt>start</tt> with value 1. By default, the system will not be started yet. You can pass any global parameters by ID.</p>
 
          <p>Note that the shortcut method is limited to add only one file per input template, and it does not support actual file uploads, only downloads and explicit passing of content.</p>
  
