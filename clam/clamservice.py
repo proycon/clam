@@ -926,7 +926,7 @@ class Project:
         global settingsmodule
 
         #handle shortcut
-        shortcutresponse = entryshortcut(credentials, True) #protected against endless recursion, will return None to continue starting
+        shortcutresponse = entryshortcut(credentials, True) #protected against endless recursion, will return None when no shortcut is found, True when one is found and starting should continue
         if shortcutresponse is not None and shortcutresponse is not True:
             return shortcutresponse
 
