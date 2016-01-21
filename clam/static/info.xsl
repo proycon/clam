@@ -137,7 +137,7 @@
                 <li><strong><xsl:value-of select="@label" /></strong><xsl:text> </xsl:text><em>(<xsl:value-of select="@format" />)</em>:
                 <ul>
                     <li><tt><xsl:value-of select="@id" /></tt> -- The contents of a file for this input template (corresponds to <tt>contents</tt> in the non-shortcut method).</li>
-                    <li><tt><xsl:value-of select="@id" />_url</tt> -- An URL from which to download the file for this input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
+                    <li><tt><xsl:value-of select="@id" />_url</tt> -- A URL from which to download the file for this input template (corresponds to <tt>url</tt> in the non-shortcut method).</li>
                     <li><tt><xsl:value-of select="@id" />_filename</tt> -- The desired filename for the added file (corresponds to (<tt>filename</tt> in the non-shortcut method). Will be automatically generated when not provided and if possible.</li>
                 </ul></li>
             </xsl:for-each>
