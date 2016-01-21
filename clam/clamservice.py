@@ -285,23 +285,28 @@ def entryshortcut(credentials = None, fromstart=False):
                 if ('url' in data or 'contents' in data):
                     #copy local parameters
                     for key, value in rq.items():
-                        if key.beginswith(inputtemplate.id + '_') and key not in (inputtemplate.id+'_filename',inputtemplate.id+'_url'):
+                        if key.startswith(inputtemplate.id + '_') and key not in (inputtemplate.id+'_filename',inputtemplate.id+'_url'):
                             data[key[len(inputtemplate.id+'_'):]] = value
 
-                    addfileresult = json.loads(addfile(project,data['filename'], user, data, None, 'true_on_success'))
+                    addfileresult = addfile(project,data['filename'], user, data, None, 'true_on_success')
                     if addfileresult is not True:
                         return addfileresult
 
 
         if 'start' in rq and rq['start'].lower() in ('1','yes','true'):
-            if fromstart:
-                return None #continue as normal, invoking start again would bring endless recursion
+            if not fromstart: #prevent endless recursion
+                startresponse = Project.start(project, credentials)
+                if startresponse.status_code != 202:
+                    return startresponse
             else:
-                return Project.start(project, credentials)
-        else:
-            return Project.get(project,credentials)
+                return True #signals start to do a redirect itself after starting (otherwise GET parameters stick on subsequent reloads)
 
-    return None #no shortcut found
+        if oauth_access_token:
+            return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+        else:
+            return flask.redirect(getrooturl() + '/' + project)
+
+    return None
 
 def index(credentials = None):
     """Get list of projects or shortcut to other functionality"""
@@ -922,7 +927,7 @@ class Project:
 
         #handle shortcut
         shortcutresponse = entryshortcut(credentials, True) #protected against endless recursion, will return None to continue starting
-        if shortcutresponse is not None:
+        if shortcutresponse is not None and shortcutresponse is not True:
             return shortcutresponse
 
         user, oauth_access_token = parsecredentials(credentials)
@@ -1016,7 +1021,15 @@ class Project:
                 f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
                 f.write(str(pid))
                 f.close()
-                return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),202) #returns 202 - Accepted
+                if shortcutresponse is True:
+                    #redirect to project page to lose parameters in URL
+                    if oauth_access_token:
+                        return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+                    else:
+                        return flask.redirect(getrooturl() + '/' + project)
+                else:
+                    #normal response (202)
+                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),202) #returns 202 - Accepted
             else:
                 return flask.make_response("Unable to launch process",500)
 
