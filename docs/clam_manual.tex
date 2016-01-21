@@ -2438,8 +2438,10 @@ value is set to \emph{new}, a random project name will be generated. \linebreak
 \texttt{start$=[0|1]$} -- Set this parameter to 1 if you want the project to start
 automatically. The default is not to start automatically.  \linebreak 
 Other accepted parameters are defined in the Service
-Configuration file (and thus differ per service). The parameter ID corresponds
-to the parameter keys in the request parameters \\
+Configuration file (and thus differ per service). For global parameters, the parameter ID corresponds
+to the parameter keys in the request parameters, for parameters pertaining to
+a specific input template, prepend the ID of the input template and an
+underscore to the parameter ID (\texttt{\{inputtemplate\}\_}). \\
 \textbf{Response} & \texttt{200 - OK} \& CLAM XML, \texttt{401 - Unauthorised},
 \texttt{403 - Permission denied} \\ 
 \hline

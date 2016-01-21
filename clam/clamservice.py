@@ -262,7 +262,10 @@ def entryshortcut(credentials = None, fromstart=False):
             project = projectprefix + str("%034x" % random.getrandbits(128))
         else:
             project = rq['project']
-        Project.create(project,user)
+
+        createresponse = Project.create(project,user)
+        if createresponse is not None:
+            return createresponse
 
         for profile in settings.PROFILES:
             for inputtemplate in profile.input:
@@ -278,8 +281,17 @@ def entryshortcut(credentials = None, fromstart=False):
                     data['contents'] = rq[inputtemplate.id]
                 elif inputtemplate.id + '_url' in rq:
                     data['url'] = rq[inputtemplate.id + '_url']
+
                 if ('url' in data or 'contents' in data):
-                    addfile(project,data['filename'], user, data)
+                    #copy local parameters
+                    for key, value in rq.items():
+                        if key.beginswith(inputtemplate.id + '_') and key not in (inputtemplate.id+'_filename',inputtemplate.id+'_url'):
+                            data[key[len(inputtemplate.id+'_'):]] = value
+
+                    addfileresult = json.loads(addfile(project,data['filename'], user, data, None, 'true_on_success'))
+                    if addfileresult is not True:
+                        return addfileresult
+
 
         if 'start' in rq and rq['start'].lower() in ('1','yes','true'):
             if fromstart:
@@ -582,6 +594,8 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
                 return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
+
+        return None #checks rely on this
 
     @staticmethod
     def pid(project, user):
@@ -1899,7 +1913,9 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
 
 
-    if fatalerror:
+    if returntype == 'boolean':
+        return jsonoutput['success']
+    elif fatalerror:
         #fatal error return error message with 403 code
         printlog('Fatal Error during upload: ' + fatalerror)
         return flask.make_response(head + fatalerror,403)
@@ -1915,6 +1931,8 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         #everything ok, return JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
         return withheaders(flask.make_response(json.dumps(jsonoutput)), 'application/json')
+    elif returntype == 'true_on_success':
+        return True
     else:
         printdebug('Invalid return type')
         raise Exception("invalid return type")
