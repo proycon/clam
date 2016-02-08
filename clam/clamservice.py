@@ -2629,7 +2629,7 @@ if __name__ == "__main__":
     parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
-    parser.add_argument('-v','--version',help="Version", action='store_true',required=False)
+    parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('settingsmodule', type=str, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
     args = parser.parse_args()
 
@@ -2646,9 +2646,6 @@ if __name__ == "__main__":
         FORCEURL = args.forceurl
     if 'pythonpath' in args:
         PYTHONPATH = args.pythonpath
-    if 'version' in args and args.version:
-        print("CLAM version " + str(VERSION))
-        sys.exit(0)
 
     settingsmodule = args.settingsmodule
 

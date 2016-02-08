@@ -29,8 +29,8 @@ except ImportError:
     print("ERROR: Unable to find CLAM. Did you install it properly? Is your PYTHONPATH or virtual environment correct?",file=sys.stderr)
     sys.exit(2)
 
+from clam.common.data import VERSION
 import argparse
-
 
 def main():
     parser = argparse.ArgumentParser(description="This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -42,6 +42,7 @@ def main():
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in prodution environments", action='store',default=8888,required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
+    parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('sysid',type=str, help='System ID')
     args = parser.parse_args()
 
