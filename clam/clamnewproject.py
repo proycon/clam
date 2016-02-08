@@ -29,86 +29,36 @@ except ImportError:
     print("ERROR: Unable to find CLAM. Did you install it properly? Is your PYTHONPATH or virtual environment correct?",file=sys.stderr)
     sys.exit(2)
 
-import getopt
-
-def usage():
-    print("Syntax: clamnewproject system_id [options]",file=sys.stderr)
-    print("Description: This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.",file=sys.stderr)
-    print("Options:",file=sys.stderr)
-    print("\t-d [dir]      - Directory prefix, rather than in current working directory",file=sys.stderr)
-    print("\t-f            - Force use of a directory that already exists",file=sys.stderr)
-    print("\t-h            - This help message",file=sys.stderr)
-    print("Configuration shortcuts:",file=sys.stderr)
-    print("\t-n [name]     - A human-readable name. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
-    print("\t-H [hostname] - Hostname. Shortcut option, can be also set in service configuration file later. ",file=sys.stderr)
-    print("\t-p [port]     - Port.  Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
-    print("\t-u [url]      - Force URL. Shortcut option, can be also set in service configuration file later.",file=sys.stderr)
-    print("\t-U [uwsgiport]- UWSGI port to use for this webservice when deployed in production environments (default: 8888).",file=sys.stderr)
+import argparse
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1][0] == '-':
-        usage()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-n','--name',type=str, help="A human-readable name. Shortcut option, can be also set in service configuration file later", action='store', required=False)
+    parser.add_argument('-d','--dirprefix',type=str, help="Directory prefix, rather than in current working directory", action='store', default=os.getcwd(), required=False)
+    parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
+    parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',default=8080,required=False)
+    parser.add_argument('-P','--pythonversion', type=str,help="Python version (2 or 3)", action='store',default='3',required=False)
+    parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
+    parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in prodution environments", action='store',default=8888,required=False)
+    parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
+    parser.add_argument('sysid', type=str, help='System ID', required=True)
+    args = parser.parse_args()
 
-    sysid = sys.argv[1]
-    if ' ' in sysid or '.' in sysid or '-' in sysid or ',' in sysid or ':' in sysid or ':' in sysid or '(' in sysid or ')' in sysid or '/' in sysid or "'" in sysid or '"' in sysid:
+
+    if ' ' in args.sysid or '.' in args.sysid or '-' in args.sysid or ',' in args.sysid or ':' in args.sysid or ':' in args.sysid or '(' in args.sysid or ')' in args.sysid or '/' in args.sysid or "'" in args.sysid or '"' in args.sysid:
         print("Invalid characters in system ID. Only alphanumerics and underscores are allowed.",file=sys.stderr)
         sys.exit(2)
-
-
-    HOST = FORCEURL = None
-    PORT = 8080
-    dirprefix = os.getcwd()
-    force = False
-    name = ""
-    pythonversion = '3'
-    uwsgiport ='8888'
-
-    try:
-        opts, args = getopt.getopt(sys.argv[2:], "hd:cH:p:u:fn:")
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(str(err))
-        usage()
-        sys.exit(2)
-
-    for o, a in opts:
-        if o == '-d':
-            dirprefix = a
-        elif o == '-H':
-            HOST = a
-        elif o == '-p':
-            PORT = int(a)
-        elif o == '-h':
-            usage()
-            sys.exit(0)
-        elif o == '-u':
-            FORCEURL = a
-        elif o == '-U':
-            uwsgiport = a
-        elif o == '-f':
-            force = True
-        elif o == '-n':
-            name = a
-        elif o == '-P':
-            pythonversion = a
-        else:
-            usage()
-            print("ERROR: Unknown option: ", o)
-            sys.exit(2)
-
-
 
 
     if not os.path.exists(CLAMDIR + '/config/template.py') or not os.path.exists(CLAMDIR + '/wrappers/template.sh') or not os.path.exists(CLAMDIR + '/wrappers/template.py'):
         print("ERROR: Templates not found. Unable to create new project",file=sys.stderr)
         sys.exit(2)
 
-    dir = dirprefix + "/" +sysid
+    dir = args.dirprefix + "/" + args.sysid
 
     if os.path.exists(dir):
-        if not force:
+        if 'force' not in args or not args.force:
             print("ERROR: Directory " +dir + " already exists.. Unable to make new CLAM project. Add -f (force) if you want to continue nevertheless ",file=sys.stderr)
             sys.exit(2)
     else:
@@ -119,50 +69,50 @@ def main():
         f = open(dir+ "/__init__.py",'w')
         f.close()
 
-    if not os.path.exists(dir + '/' + sysid + '.py'):
+    if not os.path.exists(dir + '/' + args.sysid + '.py'):
         fin = io.open(CLAMDIR + '/config/template.py','r',encoding='utf-8')
-        fout = io.open(dir + '/' + sysid + '.py','w',encoding='utf-8')
+        fout = io.open(dir + '/' + args.sysid + '.py','w',encoding='utf-8')
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
-                line =  "SYSTEM_ID = \"" + sysid + "\""
-            elif name and line[:13] == "SYSTEM_NAME =":
-                line = "SYSTEM_NAME = \"" + name + "\"\n"
-            elif HOST and line[:7] == "#HOST =":
-                line = "HOST = \"" + HOST + "\"\n"
-            elif PORT and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
-                line = "PORT = \"" + str(PORT) + "\"\n"
+                line =  "SYSTEM_ID = \"" + args.sysid + "\""
+            elif 'name' in args  and line[:13] == "SYSTEM_NAME =":
+                line = "SYSTEM_NAME = \"" + args.name + "\"\n"
+            elif 'hostname' in args and line[:7] == "#HOST =":
+                line = "HOST = \"" + args.hostname+ "\"\n"
+            elif 'port' in args  and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
+                line = "PORT = \"" + str(args.port) + "\"\n"
             elif line[:6] == "ROOT =":
                 line = "ROOT = \"" + dir + "/userdata\"\n"
-            elif FORCEURL and line[:9] == '#FORCEURL':
-                line = "FORCEURL = \"" + FORCEURL + "\"\n"
+            elif 'forceurl' in args and line[:9] == '#FORCEURL':
+                line = "FORCEURL = \"" + args.forceurl + "\"\n"
             elif line[:9] == "COMMAND =":
-                line = "COMMAND = WEBSERVICEDIR + \"/" + sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
+                line = "COMMAND = WEBSERVICEDIR + \"/" + args.sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             elif line[:10] == "#COMMAND =":
-                line = "#COMMAND = WEBSERVICEDIR + \"/" + sysid + "_wrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS\"\n"
+                line = "#COMMAND = WEBSERVICEDIR + \"/" + args.sysid + "_wrapper.sh $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY $PARAMETERS\"\n"
             fout.write(line)
         fin.close()
         fout.close()
     else:
-        print("WARNING: Service configuration file " + dir + '/' + sysid + ".py already seems to exists, courageously refusing to overwrite",file=sys.stderr)
+        print("WARNING: Service configuration file " + dir + '/' + args.sysid + ".py already seems to exists, courageously refusing to overwrite",file=sys.stderr)
         sys.exit(2)
 
-    if not os.path.exists(dir + '/' + sysid + '_wrapper.py'):
-        shutil.copyfile(CLAMDIR + '/wrappers/template.py', dir + '/' + sysid + '_wrapper.py')
-        os.chmod(dir + '/' + sysid + '_wrapper.py', 0o755)
+    if not os.path.exists(dir + '/' + args.sysid + '_wrapper.py'):
+        shutil.copyfile(CLAMDIR + '/wrappers/template.py', dir + '/' + args.sysid + '_wrapper.py')
+        os.chmod(dir + '/' + args.sysid + '_wrapper.py', 0o755)
     else:
-        print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
+        print("WARNING: System wrapper file " + dir + '/' + args.sysid + '_wrapper.py already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    if not os.path.exists(dir + '/' + sysid + '_wrapper.sh'):
-        shutil.copyfile(CLAMDIR + '/wrappers/template.sh', dir + '/' + sysid + '_wrapper.sh')
-        os.chmod(dir + '/' + sysid + '_wrapper.sh', 0o755)
+    if not os.path.exists(dir + '/' + args.sysid + '_wrapper.sh'):
+        shutil.copyfile(CLAMDIR + '/wrappers/template.sh', dir + '/' + args.sysid + '_wrapper.sh')
+        os.chmod(dir + '/' + args.sysid + '_wrapper.sh', 0o755)
     else:
-        print("WARNING: System wrapper file " + dir + '/' + sysid + '_wrapper.sh already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
+        print("WARNING: System wrapper file " + dir + '/' + args.sysid + '_wrapper.sh already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    with io.open(dir + '/'+sysid +'.wsgi','w',encoding='utf-8') as f:
-        f.write("import sys\nsys.path.append(\"" + dir + "\")\nimport " + sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +sysid+ ")")
-    os.chmod(dir + '/' + sysid + '.wsgi', 0o755)
+    with io.open(dir + '/'+args.sysid +'.wsgi','w',encoding='utf-8') as f:
+        f.write("import sys\nsys.path.append(\"" + dir + "\")\nimport " + args.sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +args.sysid+ ")")
+    os.chmod(dir + '/' + args.sysid + '.wsgi', 0o755)
 
     with io.open(dir+'/nginx-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", insert this in your server block in your nginx.conf
@@ -172,7 +122,7 @@ location /{sysid} {{ try_files $uri @{sysid}; }}
 location @{sysid} {{
     include uwsgi_params;
     uwsgi_pass 127.0.0.1:{uwsgiport};
-}}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+}}""".format(sysid=args.sysid,clamdir=CLAMDIR, uwsgiport=args.uwsgiport))
 
 
     with io.open(dir+'/nginx-sample.conf','w',encoding='utf-8') as f:
@@ -182,12 +132,12 @@ location / {{ try_files $uri @{sysid}; }}
 location @{sysid} {{
     include uwsgi_params;
     uwsgi_pass 127.0.0.1:{uwsgiport};
-}}""".format(sysid=sysid,clamdir=CLAMDIR, uwsgiport=uwsgiport))
+}}""".format(sysid=args.sysid,clamdir=CLAMDIR, uwsgiport=args.uwsgiport))
 
 
 
 
-    if pythonversion >= '3':
+    if args.pythonversion >= '3':
         uwsgiplugin = 'python3'
     else:
         uwsgiplugin = 'python'
@@ -202,7 +152,7 @@ Alias /{sysid}/static {clamdir}/static
     Order deny,allow
     Allow from all
 </Directory>
-""".format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
+""".format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
 
     with io.open(dir+'/apache-withurlprefix-sample.conf','w',encoding='utf-8') as f:
         f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service runs at the virtualhost root, insert this in your VirtualHost in your Apache configuration
@@ -214,7 +164,7 @@ Alias /static {clamdir}/static
     Order deny,allow
     Allow from all
 </Directory>
-""".format(clamdir=CLAMDIR,sysid=sysid,uwsgiport=uwsgiport))
+""".format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
 
     with io.open(dir + '/startserver_production.sh','w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
@@ -223,7 +173,7 @@ if [ ! -z $VIRTUAL_ENV ]; then;
 else 
     uwsgi --plugin {uwsgiplugin} --socket 127.0.0.1:{uwsgiport} --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
 fi
-""".format(dir=dir, sysid=sysid, uwsgiplugin=uwsgiplugin,pythonversion=pythonversion, uwsgiport=uwsgiport))
+""".format(dir=dir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
     os.chmod(dir + '/startserver_production.sh', 0o755)
 
     with io.open(dir + '/startserver_development.sh','w',encoding='utf-8') as f:
@@ -234,7 +184,7 @@ else
     export PYTHONPATH={dir}:$PYTHONPATH
 fi
 clamservice {sysid}
-""".format(dir=dir,sysid=sysid, pythonversion=pythonversion))
+""".format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
     os.chmod(dir + '/startserver_development.sh', 0o755)
 
 
@@ -250,21 +200,21 @@ To develop your webservice, edit your service configuration file
 Python.  Consult the CLAM Documentation and/or instruction videos on
 https://proycon.github.io/clam for further details on how to do this.
 
-""".format(dir=dir,sysid=sysid)
+""".format(dir=dir,sysid=args.sysid)
 
 
     print(s,file=sys.stderr)
 
-    if FORCEURL:
-        url = FORCEURL
+    if args.forceurl:
+        url = args.forceurl
     else:
         url = "http://"
-        if HOST:
-            url += HOST
+        if 'hostname' in args and args.hostname:
+            url += args.hostname
         else:
             url += os.uname()[1]
-        if PORT and PORT != 80:
-            url += ':' + str(PORT)
+        if 'port' in args and args.port != 80:
+            url += ':' + str(args.port)
         url += '/'
 
     s2 = """
@@ -284,7 +234,7 @@ For production use, we recommend using uwsgi in combination with a webserver
 such as Apache (with mod_uwsgi_proxy), or nginx. A wsgi script and sample
 configuration has been generated  as a starting point. Use the
 ./startserver_production.sh script to launch CLAM using uwsgi.
-""".format(dir=dir,sysid=sysid)
+""".format(dir=dir,sysid=args.sysid)
 
     print( s2,file=sys.stderr)
 
@@ -293,7 +243,7 @@ configuration has been generated  as a starting point. Use the
     with io.open(dir + "/INSTRUCTIONS",'w',encoding='utf-8') as f:
         f.write(s + s2)
 
-    if pythonversion >= '3':
+    if args.pythonversion >= '3':
         pip = 'pip3'
     else:
         pip = 'pip'
