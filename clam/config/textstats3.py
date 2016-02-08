@@ -37,7 +37,7 @@ SYSTEM_ID = "textstats"
 SYSTEM_NAME = "Text Statistics (CLAM Demo)"
 
 #An informative description for this system:
-SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext files. It is a demo for CLAM."
+SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext files. It is a demo for CLAM. Это демо для Клам.."
 
 # ======== LOCATION ===========
 

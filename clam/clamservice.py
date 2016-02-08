@@ -2400,6 +2400,11 @@ def set_defaults():
         if not s in settingkeys:
             error("ERROR: Service configuration incomplete, missing setting: " + s)
 
+    if sys.version < '3':
+        if isinstance(settingkeys['SYSTEM_DESCRIPTION'],str):
+            settings.SYSTEM_DESCRIPTION = unicode(settingkeys['SYSTEM_DESCRIPTION'],'utf-8') #pylint: disable=undefined-variable
+        if isinstance(settingkeys['SYSTEM_NAME'],str):
+            settings.SYSTEM_NAME = unicode(settingkeys['SYSTEM_NAME'],'utf-8') #pylint: disable=undefined-variable
 
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
