@@ -73,7 +73,7 @@ except ImportError:
     UWSGI = False
 
 
-VERSION = '0.99'
+VERSION = '2.0'
 
 DEBUG = False
 
