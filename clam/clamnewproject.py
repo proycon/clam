@@ -42,7 +42,7 @@ def main():
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in prodution environments", action='store',default=8888,required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
-    parser.add_argument('sysid', type=str, help='System ID', required=True)
+    parser.add_argument('sysid',type=str, help='System ID')
     args = parser.parse_args()
 
 
@@ -75,15 +75,15 @@ def main():
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
                 line =  "SYSTEM_ID = \"" + args.sysid + "\""
-            elif 'name' in args  and line[:13] == "SYSTEM_NAME =":
+            elif 'name' in args and args.name and line[:13] == "SYSTEM_NAME =":
                 line = "SYSTEM_NAME = \"" + args.name + "\"\n"
-            elif 'hostname' in args and line[:7] == "#HOST =":
+            elif 'hostname' in args and args.hostname and line[:7] == "#HOST =":
                 line = "HOST = \"" + args.hostname+ "\"\n"
-            elif 'port' in args  and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
+            elif 'port' in args and args.port and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
                 line = "PORT = \"" + str(args.port) + "\"\n"
             elif line[:6] == "ROOT =":
                 line = "ROOT = \"" + dir + "/userdata\"\n"
-            elif 'forceurl' in args and line[:9] == '#FORCEURL':
+            elif 'forceurl' in args and args.forceurl and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + args.forceurl + "\"\n"
             elif line[:9] == "COMMAND =":
                 line = "COMMAND = WEBSERVICEDIR + \"/" + args.sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
