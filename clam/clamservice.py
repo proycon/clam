@@ -2619,14 +2619,12 @@ if __name__ == "__main__":
     PYTHONPATH = None
 
     parser = argparse.ArgumentParser(description="Start a CLAM webservice; turns command-line tools into RESTful webservice, including a web-interface for human end-users.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-d','--debug',help="Enable debug mode", action='store_true')
+    parser.add_argument('-d','--debug',help="Enable debug mode", action='store_true', required=False)
     parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
     parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
     parser.add_argument('-v','--version',help="Version", action='store_true',required=False)
-
-    parser.add_argument('-i','--number',dest="num", type=int,help="", action='store',default="",required=False)
     parser.add_argument('settingsmodule', nargs=1, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
     args = parser.parse_args()
 
