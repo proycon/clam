@@ -30,7 +30,7 @@ import random
 import re
 import hashlib
 import requests
-import getopt
+import argparse
 import time
 import socket
 import json
@@ -2618,51 +2618,36 @@ if __name__ == "__main__":
     PORT = HOST = FORCEURL = None
     PYTHONPATH = None
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hdH:p:vu:P:")
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(str(err))
-        usage()
-        sys.exit(2)
+    parser = argparse.ArgumentParser(description="Start a CLAM webservice; turns command-line tools into RESTful webservice, including a web-interface for human end-users.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-d','--debug',help="Enable debug mode", action='store_true')
+    parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
+    parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
+    parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
+    parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
+    parser.add_argument('-v','--version',help="Version", action='store_true',required=False)
 
-    for o, a in opts:
-        if o == '-d':
-            DEBUG = True
-            setdebug(True)
-        elif o == '-H':
-            HOST = a
-        elif o == '-p':
-            PORT = int(a)
-        elif o == '-P':
-            PYTHONPATH = a
-        elif o == '-h':
-            usage()
-            sys.exit(0)
-        elif o == '-u':
-            FORCEURL = a
-        elif o == '-v':
-            print("CLAM WebService version " + str(VERSION))
-            sys.exit(0)
-        else:
-            usage()
-            print("ERROR: Unknown option: ", o,file=sys.stderr)
-            sys.exit(2)
-
-    if (len(args) == 1):
-        settingsmodule = args[0]
-    elif (len(args) > 1):
-        print("ERROR: Too many arguments specified",file=sys.stderr)
-        usage()
-        sys.exit(2)
-    else:
-        print("ERROR: No settings module specified!",file=sys.stderr)
-        usage()
-        sys.exit(2)
+    parser.add_argument('-i','--number',dest="num", type=int,help="", action='store',default="",required=False)
+    parser.add_argument('settingsmodule', nargs=1, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
+    args = parser.parse_args()
 
 
 
+    if 'debug' in args and args.debug:
+        DEBUG = True
+        setdebug(True)
+    if 'port' in args:
+        PORT = args.port
+    if 'hostname' in args:
+        HOST = args.hostname
+    if 'forceurl' in args:
+        FORCEURL = args.forceurl
+    if 'pythonpath' in args:
+        PYTHONPATH = args.pythonpath
+    if 'version' in args and args.version:
+        print("CLAM version " + str(VERSION))
+        sys.exit(0)
 
+    settingsmodule = args.settingsmodule
 
     if PYTHONPATH:
         sys.path.append(PYTHONPATH)
