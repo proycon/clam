@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "2.0.0",
+    version = "2.0.1",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with a auto-generated web-interface for human end-users."),
@@ -23,7 +23,7 @@ setup(
     packages=['clam','clam.common','clam.config','clam.wrappers'],
     long_description=read('README.rst'),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Topic :: Text Processing :: Linguistic",
         "Programming Language :: Python :: 2.7",
