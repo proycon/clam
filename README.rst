@@ -5,6 +5,9 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: https://travis-ci.org/proycon/clam.svg?branch=master
     :target: https://travis-ci.org/proycon/clam
 
+.. image:: http://applejack.science.ru.nl/lamabadge.php/clam
+   :target: http://applejack.science.ru.nl/languagemachines/
+
 *by Maarten van Gompel, Centre for Language and Speech Technology, Radboud University Nijmegen*
 
 *Licensed under GPLv3*
