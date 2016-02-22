@@ -408,12 +408,14 @@ class NonceMemory:
         return (opaque, ip, expiretime)
 
 
-    def __del__(self):
+    def cleanup(self):
         """do cleanup on destruction, delete expired nonces"""
         for noncefile in glob(self.path + '/*.nonce'):
             opaque,ip, expiretime = self.readnoncefile(noncefile)
             if time.time() > expiretime:
                 os.unlink(noncefile)
 
+    def __del__(self):
+        self.cleanup()
 
 
