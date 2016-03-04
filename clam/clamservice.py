@@ -315,7 +315,7 @@ def getprojects(user):
     if os.path.exists(os.path.join(path,'.index')):
         with io.open(os.path.join(path,'.index'),'r',encoding='utf-8') as f:
             data = json.load(f)
-            totalsize = data['totalsize']
+            totalsize = float(data['totalsize'])
             projects = data['projects']
     else:
         for f in glob.glob(path + '/*'):
@@ -327,7 +327,7 @@ def getprojects(user):
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
         with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
             json.dump({'totalsize': totalsize, 'projects': projects},f)
-    return projects, totalsize
+    return projects, round(totalsize)
 
 def index(credentials = None):
     """Get list of projects or shortcut to other functionality"""
@@ -339,6 +339,7 @@ def index(credentials = None):
 
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
+    totalsize = 0;
     if settings.LISTPROJECTS:
         projects, totalsize = getprojects(user)
 
@@ -370,6 +371,7 @@ def index(credentials = None):
             profiles=settings.PROFILES,
             datafile=None,
             projects=projects,
+            totalsize=totalsize,
             actions=settings.ACTIONS,
             disableinterface=not settings.ENABLEWEBAPP,
             info=False,
@@ -863,9 +865,6 @@ class Project:
         customhtml = ""
         if statuscode == clam.common.status.READY:
             customhtml = settings.CUSTOMHTML_PROJECTSTART
-            projects, totalsize = getprojects(user)
-        else:
-            totalsize = 0
 
         inputpaths = []
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
@@ -915,7 +914,6 @@ class Project:
                 profiles=settings.PROFILES,
                 datafile=datafile,
                 projects=[],
-                totalsize=totalsize,
                 actions=settings.ACTIONS,
                 disableinterface=not settings.ENABLEWEBAPP,
                 info=False,

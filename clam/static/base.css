@@ -325,3 +325,9 @@ pre.pythoncode strong {
 #errorbox {
 	width: 70%;
 }
+.diskusage {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-size: 80%;
+}

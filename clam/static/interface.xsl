@@ -647,6 +647,7 @@
            </xsl:for-each>
           </tbody>
         </table>
+        <div class="diskusage">Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB</div>
         </div>
         </xsl:if>
 
