@@ -275,3 +275,13 @@ div#actionindex p {
 div#actionindex form {
     margin-left: 30px;
 }
+
+span.running {
+    color: #b216fb;
+    font-weight: bold;
+}
+
+span.staging {
+    color: #b3943f;
+    font-weight: bold;
+}

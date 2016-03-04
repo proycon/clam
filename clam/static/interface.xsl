@@ -618,11 +618,32 @@
         <h2>Projects</h2>
         <table id="projects">
           <thead>
-            <tr><th style="width: 50%;">Project ID</th><th>Size</th><th>Last changed</th></tr>
+              <tr><th style="width: 50%;">Project ID</th><th>Status</th><th>Size</th><th>Last changed</th></tr>
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-               <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@size" /> MB</td><td><xsl:value-of select="@time" /></td></tr>
+               <tr>
+                   <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></td>
+                   <td>
+                       <xsl:choose>
+                           <xsl:when test="@status = 0">
+                               <span class="staging">staging</span>
+                           </xsl:when>
+                       </xsl:choose>
+                       <xsl:choose>
+                           <xsl:when test="@status = 1">
+                               <span class="running">running</span>
+                           </xsl:when>
+                       </xsl:choose>
+                       <xsl:choose>
+                           <xsl:when test="@status = 2">
+                               <span class="done">done</span>
+                           </xsl:when>
+                       </xsl:choose>
+                    </td>
+                   <td><xsl:value-of select="@size" /> MB</td>
+                   <td><xsl:value-of select="@time" /></td>
+               </tr>
            </xsl:for-each>
           </tbody>
         </table>
