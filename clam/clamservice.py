@@ -863,6 +863,9 @@ class Project:
         customhtml = ""
         if statuscode == clam.common.status.READY:
             customhtml = settings.CUSTOMHTML_PROJECTSTART
+            projects, totalsize = getprojects(user)
+        else:
+            totalsize = 0
 
         inputpaths = []
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
@@ -912,6 +915,7 @@ class Project:
                 profiles=settings.PROFILES,
                 datafile=datafile,
                 projects=[],
+                totalsize=totalsize,
                 actions=settings.ACTIONS,
                 disableinterface=not settings.ENABLEWEBAPP,
                 info=False,
