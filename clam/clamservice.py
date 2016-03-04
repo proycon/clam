@@ -594,8 +594,10 @@ class Project:
             with open(os.path.join(path,'.du'),'r') as f:
                 return float(f.read().strip())
         else:
+            size = str(computediskusage(path))
             with open(os.path.join(path,'.du'),'w') as f:
-                f.write(str(computediskusage(path)))
+                f.write(size)
+            return size
 
     @staticmethod
     def create(project, credentials):

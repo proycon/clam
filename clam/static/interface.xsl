@@ -618,11 +618,11 @@
         <h2>Projects</h2>
         <table id="projects">
           <thead>
-            <tr><th>Project ID</th><th>Last changed</th></tr>
+            <tr><th style="width: 50%;">Project ID</th><th>Size</th><th>Last changed</th></tr>
           </thead>
           <tbody>
            <xsl:for-each select="projects/project">
-               <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><td><xsl:value-of select="@size" /> MB</td></td><td><xsl:value-of select="@time" /></td></tr>
+               <tr><td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></td><td><xsl:value-of select="@size" /> MB</td><td><xsl:value-of select="@time" /></td></tr>
            </xsl:for-each>
           </tbody>
         </table>
