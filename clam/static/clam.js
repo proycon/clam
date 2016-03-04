@@ -184,6 +184,22 @@ function initclam() {
        });
    }    
 
+   $('.quickdelete').click(function(projectname){
+         $.ajax({ 
+            type: "DELETE", 
+            url: baseurl + '/' + projectname + '/', 
+            dataType: "text", 
+            beforeSend: oauthheader,
+            crossDomain: true,
+            xhrFields: {
+              withCredentials: true
+            },
+            success: function(response){ 
+
+            });
+        });
+    });
+
    //Abort and delete a project
    if ($("#deletebutton").length) {
        $("#deletebutton").click(function(event){
@@ -487,6 +503,10 @@ function initclam() {
 
 }  //initclam
 
+
+function showquickdelete() {
+    $('.quickdelete').show();
+}
 
 function addformdata(parent, data) {
     var fields = $(parent).find(':input');    

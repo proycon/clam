@@ -331,3 +331,6 @@ pre.pythoncode strong {
     text-align: center;
     font-size: 80%;
 }
+.quickdelete {
+    display: hide;
+}

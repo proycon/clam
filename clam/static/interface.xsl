@@ -623,7 +623,11 @@
           <tbody>
            <xsl:for-each select="projects/project">
                <tr>
-                   <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></td>
+                   <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
+                       <button class="quickdelete">
+                           <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
+                           Delete</button>
+                   </td>
                    <td>
                        <xsl:choose>
                            <xsl:when test="@status = 0">
@@ -647,7 +651,10 @@
            </xsl:for-each>
           </tbody>
         </table>
-        <div class="diskusage">Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB</div>
+        <div class="diskusage">
+            Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB
+            <a href="javacript:showquickdelete()">Show delete buttons</a>
+        </div>
         </div>
         </xsl:if>
 
