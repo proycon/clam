@@ -324,7 +324,7 @@ def getprojects(user):
                 project = os.path.basename(f)
                 projectsize = Project.getdiskusage(user,project )
                 totalsize += projectsize
-                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2)  ) )
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
         with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
             json.dump({'totalsize': totalsize, 'projects': projects},f)
     return projects, totalsize
@@ -743,7 +743,6 @@ class Project:
 
     @staticmethod
     def status(project, user):
-        global DATEMATCH
         if Project.running(project, user):
             statuslog, completion = Project.statuslog(project, user)
             if statuslog:
@@ -763,6 +762,15 @@ class Project:
                     return (clam.common.status.DONE, "Done", statuslog, 100)
         else:
             return (clam.common.status.READY, "Accepting new input files and selection of parameters", [], 0)
+
+    @staticmethod
+    def simplestatus(project, user):
+        if Project.done(project, user):
+            return clam.common.status.DONE
+        elif Project.running(project, user):
+            return clam.common.status.RUNNING
+        else:
+            return clam.common.status.READY
 
     @staticmethod
     def status_json(project, credentials=None):
