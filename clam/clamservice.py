@@ -615,6 +615,10 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user)
             if not os.path.isdir(settings.ROOT + "projects/" + user): #verify:
                 return flask.make_response("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully",403)
+
+        if os.path.exists(os.path.join(settings.ROOT + "projects/" + user,'.index')):
+            os.unlink(os.path.join(settings.ROOT + "projects/" + user,'.index'))
+
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project)
@@ -1080,6 +1084,8 @@ class Project:
             shutil.rmtree(Project.path(project, user))
             msg += " Deleted"
         msg = msg.strip()
+        if os.path.exists(os.path.join(settings.ROOT + "projects/" + user,'.index')):
+            os.unlink(os.path.join(settings.ROOT + "projects/" + user,'.index'))
         return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg)})  #200
 
 

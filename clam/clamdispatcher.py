@@ -216,6 +216,10 @@ def main():
         f.close()
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
+        #remove project index cache (has to be recomputed next time because this project now has a different size)
+        if os.path.exists(os.path.join(projectdir,'..','.index')):
+            os.unlink(os.path.join(projectdir,'..','.index'))
+
     d = total_seconds(datetime.datetime.now() - begintime)
     print("[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s", file=sys.stderr)
 
