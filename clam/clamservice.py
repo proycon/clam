@@ -47,7 +47,7 @@ import clam.common.formats
 import clam.common.auth
 import clam.common.oauth
 import clam.common.data
-from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders
+from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
@@ -308,6 +308,27 @@ def entryshortcut(credentials = None, fromstart=False):
 
     return None
 
+def getprojects(user):
+    projects = []
+    totalsize = 0
+    path = settings.ROOT + "projects/" + user
+    if os.path.exists(os.path.join(path,'.index')):
+        with io.open(os.path.join(path,'.index'),'r',encoding='utf-8') as f:
+            data = json.load(f)
+            totalsize = data['totalsize']
+            projects = data['projects']
+    else:
+        for f in glob.glob(path + '/*'):
+            if os.path.isdir(f):
+                d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+                project = os.path.basename(f)
+                projectsize = Project.getdiskusage(user,project )
+                totalsize += projectsize
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), projectsize  ) )
+        with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
+            json.dump({'totalsize': totalsize, 'projects': projects},f)
+    return projects, totalsize
+
 def index(credentials = None):
     """Get list of projects or shortcut to other functionality"""
 
@@ -319,11 +340,7 @@ def index(credentials = None):
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
     if settings.LISTPROJECTS:
-        for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
-            if os.path.isdir(f):
-                d = datetime.datetime.fromtimestamp(os.stat(f)[8])
-                project = os.path.basename(f)
-                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+        projects, totalsize = getprojects(user)
 
     errors = "no"
     errormsg = ""
@@ -569,6 +586,16 @@ class Project:
         """Get the path to the project (static method)"""
         user, oauth_access_token = parsecredentials(credentials)
         return settings.ROOT + "projects/" + user + '/' + project + "/"
+
+    @staticmethod
+    def getdiskusage(user, project):
+        path = settings.ROOT + "projects/" + user + '/' + project + "/"
+        if os.path.exists(os.path.join(path,'.du')):
+            with open(os.path.join(path,'.du'),'r') as f:
+                return float(f.read().strip())
+        else:
+            with open(os.path.join(path,'.du'),'w') as f:
+                f.write(str(computediskusage(path)))
 
     @staticmethod
     def create(project, credentials):

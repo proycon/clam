@@ -41,6 +41,15 @@ def globsymlinks(pattern, recursion=True):
                 for linkf,realf in globsymlinks(d + '/' + os.path.basename(pattern),recursion):
                     yield linkf,realf
 
+def computediskusage(path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size / 1024 / 1024 #MB
+
+
 def setlog(log):
     global LOG
     LOG = log

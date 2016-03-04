@@ -28,8 +28,8 @@
 
 {% if not project %}
     <projects>
-        {% for p, time in projects %}
-            <project xlink:type="simple" xlink:href="{{ url }}/{{ p }}" time="{{ time }}">{{ p }}</project>
+        {% for p, time, size in projects %}
+            <project xlink:type="simple" xlink:href="{{ url }}/{{ p }}" time="{{ time }}" size="{{ size }}">{{ p }}</project>
         {% endfor %}
     </projects>
 {% endif %}
