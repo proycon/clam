@@ -324,7 +324,7 @@ def getprojects(user):
                 project = os.path.basename(f)
                 projectsize = Project.getdiskusage(user,project )
                 totalsize += projectsize
-                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), projectsize  ) )
+                projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2)  ) )
         with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
             json.dump({'totalsize': totalsize, 'projects': projects},f)
     return projects, totalsize
