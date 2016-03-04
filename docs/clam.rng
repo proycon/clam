@@ -72,6 +72,12 @@ RelaxNG schema for CLAM XML
 		                <attribute name="time">
 		                    <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>    
 		                </attribute>		                
+		                <attribute name="status">
+		                    <a:documentation>The status code of the project: 0 = staging, accepting input, 1 = running, 2 = completed, presenting output</a:documentation>    
+		                </attribute>		                
+		                <attribute name="size">
+		                    <a:documentation>The size of the project on disk, in MB</a:documentation>    
+		                </attribute>		                
 		                <text />
 		            </element>
 		        </zeroOrMore>
