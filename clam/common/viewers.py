@@ -89,6 +89,12 @@ class SimpleTableViewer(AbstractViewer):
         else:
             self.wordwrap = True
 
+        if 'customcss' in kwargs:
+            self.customcss = kwargs['customcss']
+        else:
+            self.customcss = ""
+
+
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
@@ -97,7 +103,7 @@ class SimpleTableViewer(AbstractViewer):
             yield line
 
     def view(self,file,**kwargs):
-        return flask.render_template('crudetableviewer.html',file=file,tableviewer=self, wordwrap=self.wordwrap)
+        return flask.render_template('crudetableviewer.html',file=file,tableviewer=self, wordwrap=self.wordwrap, customcss=self.customcss)
 
 
 class XSLTViewer(AbstractViewer):
