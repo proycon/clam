@@ -526,6 +526,7 @@ function quickdelete(projectname) {
         success: function(response){ 
             $('#projectrow_' + projectname).hide();
             $('#projects_info').html("Deleted project " + projectname);
+            $('.diskusage span').html("(Reload page to see total disk use)");
         }});
 }
 

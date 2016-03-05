@@ -653,7 +653,7 @@
           </tbody>
         </table>
         <div class="diskusage">
-            Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB<br />
+            <span>Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB</span><br />
             <button onclick="showquickdelete()">Show delete buttons</button>
         </div>
         </div>
