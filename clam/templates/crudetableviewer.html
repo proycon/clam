@@ -35,7 +35,9 @@
         font-size: 12px;
         background: white;
         border: 1px solid #ca9c4d;
-
+        {% if not wordwrap %} 
+        white-space: nowrap;
+        {% endif %} 
     }
 </style>
 </head>

@@ -84,6 +84,11 @@ class SimpleTableViewer(AbstractViewer):
         else:
             self.delimiter = '\t'
 
+        if 'wordwrap' in kwargs:
+            self.wordwrap = kwargs['wordwrap']
+        else:
+            self.wordwrap = True
+
         super(SimpleTableViewer,self).__init__(**kwargs)
 
     def read(self, file):
@@ -92,7 +97,7 @@ class SimpleTableViewer(AbstractViewer):
             yield line
 
     def view(self,file,**kwargs):
-        return flask.render_template('crudetableviewer.html',file=file,tableviewer=self)
+        return flask.render_template('crudetableviewer.html',file=file,tableviewer=self, wordwrap=self.wordwrap)
 
 
 class XSLTViewer(AbstractViewer):
