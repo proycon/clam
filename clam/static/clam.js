@@ -147,7 +147,11 @@ function initclam() {
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
-                    alert("Unable to create project, the server returned an error (HTTP " + response.status + "). Did you perhaps use spaces or special characters in the ID? Only underscores and alphanumeric characters are allowed.");   
+                    if (response.responseText) {
+                        alert(response.responseText);   
+                    } else {
+                        alert("Unable to create project, the server returned an error (HTTP " + response.status + "):  Did you perhaps use spaces or special characters in the ID? Only underscores and alphanumeric characters are allowed.");   
+                    }
                 }
             }
          });

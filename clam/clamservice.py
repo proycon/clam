@@ -625,8 +625,8 @@ class Project:
         if settings.USERQUOTA > 0:
             _, totalsize = getprojects(user)
             if totalsize > settings.USERQUOTA:
+                printlog("User " + user + " exceeded quota, refusing to create new project...")
                 return flask.make_response("Unable to create new project because you are exceeding your disk quota (max " + str(settings.USERQUOTA) + " MB, you now use " + str(totalsize) + " MB). Please delete some projects and try again.",403)
-
 
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
@@ -965,7 +965,9 @@ class Project:
     def new(project, credentials=None):
         """Create an empty project"""
         user, oauth_access_token = parsecredentials(credentials)
-        Project.create(project, user)
+        response = Project.create(project, user)
+        if response is not None:
+            return response
         msg = "Project " + project + " has been created for user " + user
         if oauth_access_token:
             extraloc = '?oauth_access_token=' + oauth_access_token
@@ -984,7 +986,9 @@ class Project:
             return shortcutresponse
 
         user, oauth_access_token = parsecredentials(credentials)
-        Project.create(project, user)
+        response = Project.create(project, user)
+        if response is not None:
+            return response
         #if user and not Project.access(project, user):
         #    return flask.make_response("Access denied to project " + project +  " for user " + user,401) #401
 
@@ -1421,7 +1425,9 @@ class Project:
 
 
         user, oauth_access_token = parsecredentials(credentials)
-        Project.create(project, user)
+        response = Project.create(project, user)
+        if response is not None:
+            return response
         postdata = flask.request.values
 
         if filename == '':
@@ -1602,7 +1608,9 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
 
     #Create the project (no effect if already exists)
-    Project.create(project, user)
+    response = Project.create(project, user)
+    if response is not None:
+        return response
 
 
     printdebug("(Obtaining filename for uploaded file)")
