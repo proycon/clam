@@ -73,7 +73,7 @@ except ImportError:
     UWSGI = False
 
 
-VERSION = '2.0'
+VERSION = '2.1'
 
 DEBUG = False
 
@@ -2482,6 +2482,8 @@ def set_defaults():
         settings.ALLOWSHARERUN = False
     if not 'ALLOWANONSHAREDELETE' in settingkeys:
         settings.ALLOWSHAREDELETE = False
+    if not 'USERQUOTA' in settingkeys:
+        settings.USERQUOTA = 0
     if not 'PROFILES' in settingkeys:
         settings.PROFILES = []
     if not 'INPUTSOURCES' in settingkeys:

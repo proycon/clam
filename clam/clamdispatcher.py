@@ -24,7 +24,7 @@ import subprocess
 import time
 import signal
 
-VERSION = '2.0'
+VERSION = '2.1'
 
 sys.path.append(sys.path[0] + '/..')
 
