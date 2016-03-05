@@ -105,6 +105,8 @@ MAXLOADAVG = 1.0
 DISK = '/dev/sda1' #set this to the disk where ROOT is on
 MINDISKSPACE = 10
 
+#The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
+#USERQUOTA = 100
 
 # ======== WEB-APPLICATION STYLING =============
 
