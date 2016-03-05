@@ -184,7 +184,7 @@ if [ -z $PYTHONPATH ]; then
 else
     export PYTHONPATH={dir}:$PYTHONPATH
 fi
-clamservice {sysid}
+clamservice -d {sysid}
 """.format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
     os.chmod(dir + '/startserver_development.sh', 0o755)
 
