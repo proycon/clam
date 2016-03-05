@@ -332,5 +332,6 @@ pre.pythoncode strong {
     font-size: 80%;
 }
 .quickdelete {
-    display: hide;
+    display: none;
+    float: right;
 }
