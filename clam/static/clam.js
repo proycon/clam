@@ -181,7 +181,11 @@ function initclam() {
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
-                    alert("Unable to delete project (" + response.status + ")");   
+                    if (response.responseText) {
+                        alert(response.responseText);   
+                    } else {
+                        alert("Unable to delete project (" + response.status + ")");   
+                    }
                 }
             }
          });         
@@ -210,7 +214,11 @@ function initclam() {
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
-                    alert("Unable to delete project (" + response.status + ")");   
+                    if (response.responseText) {
+                        alert(response.responseText);   
+                    } else {
+                        alert("Unable to delete project (" + response.status + ")");   
+                    }
                 }
             }
          });         
@@ -234,7 +242,11 @@ function initclam() {
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
-                    alert("Unable to delete output files (" + status + ")");   
+                    if (response.responseText) {
+                        alert(response.responseText);   
+                    } else {
+                        alert("Unable to delete output files (" + status + ")");   
+                    }
                 }
             }
          });         
@@ -448,7 +460,7 @@ function initclam() {
                     }
                 },
                 error: function(response, errortype){
-                    alert(response);
+                    alert(response.responseText);   
                 }          
         });     
    });
@@ -483,7 +495,11 @@ function initclam() {
                       window.location.href = baseurl + '/' + project + "/";
                     }
                 } else {
-                    alert("Error, unable to add file ("+response.status+")");
+                    if (response.responseText) {
+                        alert(response.responseText);   
+                    } else {
+                        alert("Error, unable to add file ("+response.status+")");
+                    }
                 }
                 //processuploadresponse(response.responseXML, '#nonexistant');                
             }
