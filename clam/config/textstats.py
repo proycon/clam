@@ -64,6 +64,8 @@ ADMINS = ['anonymous'] #Define which of the above users are admins (never set th
 #Maximum load average at which processes are still started (first number reported by 'uptime')
 #MAXLOADAVG = 4.0
 
+#The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
+USERQUOTA = 10
 
 # ======== WEB-APPLICATION STYLING =============
 
@@ -84,6 +86,7 @@ INTERFACEOPTIONS = "inputfromweb"
 CUSTOMHTML_INDEX = "<p>This is a <strong>CLAM</strong> demo</p>"
 #CUSTOMHTML_PROJECTSTART = ""
 #CUSTOMHTML_PROJECTDONE = ""
+
 
 # ======== PREINSTALLED DATA ===========
 
