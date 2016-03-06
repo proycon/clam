@@ -314,7 +314,12 @@ def getprojects(user):
     path = settings.ROOT + "projects/" + user
     if os.path.exists(os.path.join(path,'.index')):
         with io.open(os.path.join(path,'.index'),'r',encoding='utf-8') as f:
-            data = json.load(f)
+            try:
+                data = json.load(f)
+            except ValueError:
+                printlog("Invalid json in .index")
+                os.unlink(os.path.join(path,'.index'))
+                return getprojects(user)
             totalsize = float(data['totalsize'])
             projects = data['projects']
     else:
@@ -325,8 +330,12 @@ def getprojects(user):
                 projectsize = Project.getdiskusage(user,project )
                 totalsize += projectsize
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
-        with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
-            json.dump({'totalsize': totalsize, 'projects': projects},f)
+            with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
+                if sys.version < '3':
+                    data = json.dumps({'totalsize': totalsize, 'projects': projects}, ensure_ascii=False)
+                    f.write(data)
+                else:
+                    json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
     return projects, round(totalsize)
 
 def index(credentials = None):
