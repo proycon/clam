@@ -18,6 +18,15 @@ function initclam() {
        $('#customhtml').html(s);
    }
 
+   if ($('#projectname').length) {
+    $( "#projectname" ).keydown(function( event ) {
+         if ( event.which == 32 ) {
+            $('#projectname').val($('#projectname').val() + '_');
+            event.preventDefault();
+         }
+    });
+   }
+
    /*
    if ($('#customtextindex').length > 0) {
        $.ajax({

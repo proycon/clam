@@ -619,7 +619,7 @@ class Project:
 
         user, oauth_access_token = parsecredentials(credentials)
         if not Project.validate(project):
-            return flask.make_response('Invalid project ID',403)
+            return flask.make_response('Invalid project ID. Note that only alphanumerical characters are allowed.',403)
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
         if not project:
             return flask.make_response('No project name',403)
