@@ -614,7 +614,7 @@
             <h3>Start a new Project</h3>    
             	<p>A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
                 Project ID: <input id="projectname" type="projectname" value="" />
-                <input id="startprojectbutton" type="button" value="Start project" />
+                <input id="startprojectbutton" type="button" value="Create project" />
         </div>
         <div id="index" class="box">
         <h2>Projects</h2>

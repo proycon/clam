@@ -143,6 +143,10 @@ function initclam() {
        $('#projectname').keypress(function(e){ if (e.which == 13) $('#startprojectbutton').focus().click(); });
 
        $("#startprojectbutton").click(function(event){
+         if ($('#projectname').val() === "") {
+             alert("No project ID specified");   
+             return;
+         }
          $.ajax({ 
             type: "PUT", 
             url: baseurl + '/' + $("#projectname").val() + "/", 
