@@ -2493,7 +2493,7 @@ def set_defaults():
         settings.BASICAUTH = False #default is HTTP Digest
     if not 'LISTPROJECTS' in settingkeys:
         settings.LISTPROJECTS = True
-    if not 'ALLOWSHARE' in settingkeys:
+    if not 'ALLOWSHARE' in settingkeys: #TODO: all there are not implemented yet
         settings.ALLOWSHARE = True
     if not 'ALLOWANONSHARE' in settingkeys:
         settings.ALLOWANONSHARE = True

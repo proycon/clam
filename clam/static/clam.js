@@ -92,7 +92,12 @@ function initclam() {
         if (inputtemplate != null) {
             if (inputtemplate.filename) {
                 $('#editorfilename').val(inputtemplate.filename);
+                $('.editorfilenamerow').hide();
+            } else {
+                $('.editorfilenamerow').show();
             }
+        } else {
+            $('.editorfilenamerow').show();
         }
     });
 

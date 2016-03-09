@@ -370,7 +370,7 @@
                  <tr><th><label for="editorparameters">Parameters:</label></th><td>
                     <div id="editorparameters" class="parameters"><em>Select a type first</em></div>
                  </td></tr>
-                 <tr><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
+                 <tr class="editorfilenamerow"><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
                  <tr><th></th><td><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
                 </table>
             </div>
