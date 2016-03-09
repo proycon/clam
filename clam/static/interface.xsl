@@ -190,11 +190,13 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel<br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a>
+<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel - 
+    <a href="https://proycon.github.io/clam">https://proycon.github.io/clam</a>
+    <br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a>
 
-<span class="extracredits">
-    <strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and its successor <a href="http://www.clariah.nl">CLARIAH</a>.
-</span>
+    <span class="extracredits">
+        <strong>CLAM</strong> is funded by <a href="http://www.clarin.nl/">CLARIN-NL</a> and its successor <a href="http://www.clariah.nl">CLARIAH</a>.
+    </span>
 </div>
 
 </xsl:template>
