@@ -42,9 +42,8 @@ def total_seconds(delta):
 def main():
     if len(sys.argv) < 4:
         print("[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ... got: " + " ".join(sys.argv[1:]), file=sys.stderr)
-        f = open('.done','w')
-        f.write(str(1))
-        f.close()
+        with open('.done','w') as f:
+            f.write(str(1))
         if os.path.exists('.pid'): os.unlink('.pid')
         return 1
 
@@ -72,20 +71,17 @@ def main():
     for arg in sys.argv[4+offset:]:
         cmd += " " + clam.common.data.shellsafe(arg,'"')
 
-
     if not cmd:
         print("[CLAM Dispatcher] FATAL ERROR: No command specified!", file=sys.stderr)
         if projectdir:
-            f = open(projectdir + '.done','w')
-            f.write(str(1))
-            f.close()
+            with open(projectdir + '.done','w') as f:
+                f.write(str(1))
             if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
     elif projectdir and not os.path.isdir(projectdir):
         print("[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist", file=sys.stderr)
-        f = open(projectdir + '.done','w')
-        f.write(str(1))
-        f.close()
+        with open(projectdir + '.done','w') as f:
+            f.write(str(1))
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
 
@@ -102,9 +98,8 @@ def main():
         print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
         print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
         if projectdir:
-            f = open(projectdir + '.done','w')
-            f.write(str(1))
-            f.close()
+            with open(projectdir + '.done','w') as f:
+                f.write(str(1))
         return 1
 
     settingkeys = dir(settings)
@@ -114,7 +109,6 @@ def main():
         settings.DISPATCHER_MAXRESMEM = 0
     if not 'DISPATCHER_MAXTIME' in settingkeys:
         settings.DISPATCHER_MAXTIME = 0
-
 
     try:
         print("[CLAM Dispatcher] Running " + cmd, file=sys.stderr)
@@ -133,16 +127,14 @@ def main():
         print("[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
-            f = open(projectdir + '.pid','w')
-            f.write(str(pid))
-            f.close()
+            with open(projectdir + '.pid','w') as f:
+                f.write(str(pid))
     else:
         print("[CLAM Dispatcher] Unable to launch process", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
-            f = open(projectdir + '.done','w')
+            with open(projectdir + '.done','w') as f:
             f.write(str(1))
-            f.close()
         return 1
 
     #intervalf = lambda s: min(s/10.0, 15)
@@ -211,9 +203,8 @@ def main():
             statuscode = 3
 
     if projectdir:
-        f = open(projectdir + '.done','w')
-        f.write(str(statuscode))
-        f.close()
+        with open(projectdir + '.done','w') as f:
+            f.write(str(statuscode))
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
         #remove project index cache (has to be recomputed next time because this project now has a different size)
