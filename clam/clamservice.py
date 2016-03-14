@@ -2590,7 +2590,7 @@ def set_defaults():
     if not 'OAUTH_USERNAME_FUNCTION' in settingkeys:
         settings.OAUTH_USERNAME_FUNCTION = None
     if not 'OAUTH_AUTH_FUNCTION' in settingkeys:
-        settings.OAUTH_AUTH_FUNCTION = clam.config.oauth.DEFAULT_AUTH_FUNCTION
+        settings.OAUTH_AUTH_FUNCTION = clam.common.oauth.DEFAULT_AUTH_FUNCTION
     if not 'SECRET_KEY' in settingkeys:
         print("WARNING: No explicit SECRET_KEY set in service configuration, generating one at random! This may cause problems with session persistence in production environments!" ,file=sys.stderr)
         settings.SECRET_KEY = "%032x" % random.getrandbits(128)
