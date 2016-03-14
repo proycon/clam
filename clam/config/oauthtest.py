@@ -27,6 +27,7 @@ import sys
 
 REQUIRE_VERSION = 2.1
 CLAMDIR = clam.__path__[0]
+DEBUG = True
 
 # ======== GENERAL INFORMATION ===========
 
