@@ -37,7 +37,10 @@ GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
 def GITHUB_USERNAME_FUNCTION(oauthsession):
     r = oauthsession.get('https://api.github.com/user')
-    rj = json.loads(r.content)
+    if sys.version >= '3':
+        rj = json.loads(str(r.content,'utf-8'))
+    else:
+        rj = json.loads(r.content)
     if not 'login' in rj:
         raise OAuthError("Login not found in json reply from github: " + repr(rj))
     return rj['login']
@@ -71,11 +74,10 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
+    if sys.version >= '3':
+        clear = str(clear,'ascii')
     try:
         oauth_access_token, ip = clear.strip().split(':')
-        if sys.version >= '3':
-            oauth_access_token = str(oauth_access_token,'ascii')
-            ip = str(ip,'ascii')
     except:
         #prevent leaks in debug mode
         encryptionsecret = "SECRET"
