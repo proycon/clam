@@ -46,10 +46,17 @@ SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext 
 ROOT = "/tmp/clam.textstats/"
 
 #The URL of the system
-PORT= 8080
+PORT= 443 #SSL
+
+#Adapt this if you want to run it yourself
+HOST = "anaproy.nl"
+URLPREFIX = "clamtest"
+
 
 # ======== AUTHENTICATION & SECURITY ===========
 
+#To run this yourself, you'll need to register and get a
+#client_id/client_secret for your own authentication provider
 OAUTH = True
 OAUTH_CLIENT_ID = "clamtest"
 OAUTH_CLIENT_SECRET = open('/home/proycon/.clamtest_oauth_secret','r').read().strip()
