@@ -38,12 +38,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 0.99.17$+$ - revision 1.4} \\[0.5cm]
+{\bf \small version 2.1$+$ - revision 1.5} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - September 25th, 2015 (last revision)} \\[0.5cm] 
+\emph{November 11th, 2014 (date published) - March 14th, 2016 (last revision)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -1050,8 +1050,8 @@ Authentication: Bearer 1234567890
 
 The alternative way is by passing it along with the HTTP GET/POST request. This
 is considered less secure as your browser may log it in its history, and the
-server in its access logs. It can still not be intercepted, however, as it is
-transmitted over HTTPS.
+server in its access logs. It can still not be intercepted by anyone in the
+middle, however, as it is transmitted over HTTPS.
 
 { \small
 \begin{verbatim}
@@ -1063,7 +1063,7 @@ Automated clients can avoid this method, but it is necessarily used by the
 web-based interface. To mitigage security concerns, the access token you
 receive is encrypted by CLAM and bound to your IP. The passphrase for token
 encryption has to be configured through \texttt{OAUTH\_ENCRYPTIONSECRET} in
-your secrive confifuration file. The web interface will furthermore explicitly
+your service configuration file. The web interface will furthermore explicitly
 ask users to log out. Logging out is done by revoking the access token with the
 authorization provider. For this to work, your authentication provider must
 offer a revoke URL, as described in RFC7009\footnote{
@@ -1082,7 +1082,7 @@ their browser history and cache, which is clearly sub-optimal.
 The only information CLAM needs from the authorization provider is a username.
 The setting \texttt{OAUTH\_USERNAME\_FUNCTION} refers to a (Python) function
 that obtains this from your resource provider after you have been
-authenticated. It gets a single argument, the instance \texttt{oauthsession}
+authenticated. It gets a single argument, the \texttt{oauthsession}
 instance, and returns the username as a string.  The following example shows
 how to implement this function for a resource provider that returns the
 username in JSON format. This, however, is completely provider-specific so
