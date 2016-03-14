@@ -99,7 +99,7 @@ ADMINS = None #List of usernames that are administrator and can access the admin
 REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
-MAXLOADAVG = 1.0
+MAXLOADAVG = 4.0
 
 #Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
 DISK = '/dev/sda1' #set this to the disk where ROOT is on
