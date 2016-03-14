@@ -59,7 +59,7 @@ URLPREFIX = "clamtest"
 #To run this yourself, you'll need to register and get a
 #client_id/client_secret for your own authentication provider
 OAUTH = True
-OAUTH_CLIENT_ID = "clamtest"
+OAUTH_CLIENT_ID = "41a6255e59770dbd365a"
 OAUTH_CLIENT_SECRET = open('/home/proycon/.clamtest_oauth_secret','r').read().strip()
 OAUTH_AUTH_URL = GITHUB_AUTH_URL
 OAUTH_TOKEN_URL = GITHUB_TOKEN_URL
