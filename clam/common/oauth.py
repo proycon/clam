@@ -7,6 +7,7 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
+import sys
 import json
 from requests_oauthlib import OAuth2Session
 from Crypto.Cipher import AES
@@ -62,13 +63,19 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
         encryptionsecret = "SECRET"
         oauth_access_token = "SECRET"
         raise OAuthError("Error in access token encryption")
-    return encoded
+    if sys.version < '3':
+        return encoded
+    else:
+        return str(encoded,'ascii')
 
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
     try:
         oauth_access_token, ip = clear.strip().split(':')
+        if sys.version >= '3':
+            oauth_access_token = str(oauth_access_token,'ascii')
+            ip = str(ip,'ascii')
     except:
         #prevent leaks in debug mode
         encryptionsecret = "SECRET"

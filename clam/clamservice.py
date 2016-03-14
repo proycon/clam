@@ -202,7 +202,7 @@ class Login(object):
         except:
             return flask.make_response('No state passed',403)
 
-        d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state' + state )
+        d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state=' + state )
         if not 'access_token' in d:
             return flask.make_response('No access token received from authorization provider',403)
 
