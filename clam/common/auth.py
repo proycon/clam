@@ -269,7 +269,10 @@ class ForwardedAuth(HTTPAuth):
                     username = self.username(**self.settings)
                 except KeyError:
                     return self.auth_error_callback()
-                args.append(username) #add username as parameter to the wrapped function
+                #add username as parameter to the wrapped function
+                kwargs['credentials'] = username
+            else:
+                kwargs['credentials'] = 'anonymous'
             return f(*args, **kwargs)
         return decorated
 
@@ -356,7 +359,8 @@ class OAuth2(HTTPAuth):
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     username = self.username_function(oauthsession)
                     if username:
-                        args.append( (username, oauth_access_token) ) #add (username, oauth_access_token)tuple as parameter to the wrapped function
+                        #add (username, oauth_access_token) tuple as parameter to the wrapped function
+                        kwargs['credentials'] =  (username, oauth_access_token)
                         return f(*args, **kwargs)
                     else:
                         self.printdebug("Could not obtain username from OAuth session")
