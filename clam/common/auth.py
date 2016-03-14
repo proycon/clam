@@ -254,7 +254,7 @@ class ForwardedAuth(HTTPAuth):
     def authenticate_header(self):
         return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
 
-    def login_required(self, f):
+    def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
             auth = flask.request.authorization
@@ -281,6 +281,10 @@ class ForwardedAuth(HTTPAuth):
 
 class OAuth2(HTTPAuth):
     def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, printdebug=None, scope=None):
+        def default_auth_error():
+            return "Unauthorized Access (OAuth2)"
+
+
         self.client_id = client_id
         self.encryptionsecret = encryptionsecret
         self.auth_url = auth_url #Remote URL
@@ -292,60 +296,79 @@ class OAuth2(HTTPAuth):
             self.printdebug = printdebug
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
+        self.error_handler(default_auth_error)
 
-    def login_required(self, f):
+    def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            authheader = flask.request.headers['authorization']
-            oauth_access_token = None
-            if authheader and authheader[:6].lower() == "bearer":
-                oauth_access_token = authheader[7:]
-                self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-            elif authheader and authheader[:5].lower() == "token":
-                oauth_access_token = authheader[6:]
-                self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-            else:
-                #Is the token submitted in the GET/POST data? (as oauth_access_token)
-                try:
-                    oauth_access_token = flask.request.values['oauth_access_token']
-                    self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                except:
-                    self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
+            auth = flask.request.authorization
+            # We need to ignore authentication headers for OPTIONS to avoid
+            # unwanted interactions with CORS.
+            # Chrome and Firefox issue a preflight OPTIONS request to check
+            # Access-Control-* headers, and will fail if it returns 401.
+            if flask.request.method != 'OPTIONS':
+                if not auth:
+                    self.printdebug("No authorization header found (401)")
+                    return self.auth_error_callback()
 
-            if not oauth_access_token:
-                #No access token yet, start login process
-                self.printdebug("No access token available yet, starting login process")
-
-                #redirect_url = getrooturl() + '/login'
-
-                kwargs = {'redirect_uri': self.redirect_url}
-                if settings.OAUTH_SCOPE:
-                    kwargs['scope'] = self.scope
-                oauthsession = OAuth2Session(client_id, **kwargs)
-                auth_url, state = self.auth_function(oauthsession, self.auth_url)
-
-                #Redirect to Authentication Provider
-                self.printdebug("Redirecting to authentication provider: " + self.auth_url)
-
-                return flask.redirect(auth_url)
-            else:
-                #Decrypt access token
-                try:
-                    oauth_access_token, ip = clam.common.oauth.decrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token)
-                except clam.common.oauth.OAuthError:
-                    return flask.make_response("Error decrypting access token",403)
-
-                if ip != flask.request.headers.get('REMOTE_ADDR', ''):
-                    self.printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.headers.get('REMOTE_ADDR',''))
-                    return flask.make_response("Access token not valid for this IP",403)
-
-                oauthsession = OAuth2Session(client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
-                username = self.username_function(oauthsession)
-                if username:
-                    args.append( (username, oauth_access_token) ) #add (username, oauth_access_token)tuple as parameter to the wrapped function
-                    return f(*args, **kwargs)
+                oauth_access_token = None
+                #Obtain access token
+                if auth and auth[:6].lower() == "bearer":
+                    oauth_access_token = auth[7:]
+                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
+                elif auth and auth[:5].lower() == "token":
+                    oauth_access_token = auth[6:]
+                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
                 else:
-                    return flask.make_response("Could not obtain username from OAuth session",403)
+                    #Is the token submitted in the GET/POST data? (as oauth_access_token)
+                    try:
+                        oauth_access_token = flask.request.values['oauth_access_token']
+                        self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
+                    except:
+                        self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
+
+                if not oauth_access_token:
+                    #No access token yet, start login process
+                    self.printdebug("No access token available yet, starting login process")
+
+                    #redirect_url = getrooturl() + '/login'
+
+                    kwargs = {'redirect_uri': self.redirect_url}
+                    if self.scope:
+                        kwargs['scope'] = self.scope
+                    oauthsession = OAuth2Session(self.client_id, **kwargs)
+                    auth_url, state = self.auth_function(oauthsession, self.auth_url)
+
+                    #Redirect to Authentication Provider
+                    self.printdebug("Redirecting to authentication provider: " + self.auth_url)
+
+                    return flask.redirect(auth_url) #TODO: this will probably fail?
+                else:
+                    #Decrypt access token
+                    try:
+                        oauth_access_token, ip = clam.common.oauth.decrypt(self.encryptionsecret, oauth_access_token)
+                    except clam.common.oauth.OAuthError:
+                        self.printdebug("Error decrypting access token")
+                        return self.auth_error_callback()
+                        #return flask.make_response("Error decrypting access token",403)
+
+                    if ip != flask.request.headers.get('REMOTE_ADDR', ''):
+                        self.printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.headers.get('REMOTE_ADDR',''))
+                        #return flask.make_response("Access token not valid for this IP",403)
+                        return self.auth_error_callback()
+
+                    oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
+                    username = self.username_function(oauthsession)
+                    if username:
+                        args.append( (username, oauth_access_token) ) #add (username, oauth_access_token)tuple as parameter to the wrapped function
+                        return f(*args, **kwargs)
+                    else:
+                        self.printdebug("Could not obtain username from OAuth session")
+                        return self.auth_error_callback()
+            else:
+                #what do we do if request method is OPTIONS?
+                kwargs['credentials'] = 'anonymous'
+            return f(*args,**kwargs)
         return decorated
 
 class NonceMemory:
