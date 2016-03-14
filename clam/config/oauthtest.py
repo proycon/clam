@@ -24,6 +24,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 from clam.common.oauth import GITHUB_AUTH_URL, GITHUB_TOKEN_URL, GITHUB_USERNAME_FUNCTION
 import sys
+import random
 
 REQUIRE_VERSION = 2.1
 CLAMDIR = clam.__path__[0]
@@ -64,7 +65,6 @@ OAUTH_CLIENT_SECRET = open('/home/proycon/.clamtest_oauth_secret','r').read().st
 OAUTH_AUTH_URL = GITHUB_AUTH_URL
 OAUTH_TOKEN_URL = GITHUB_TOKEN_URL
 OAUTH_USERNAME_FUNCTION = GITHUB_USERNAME_FUNCTION
-OAUTH_ENCRYPTIONSECRET = "notreallyverysecret"
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
 #REQUIREMEMORY = 10

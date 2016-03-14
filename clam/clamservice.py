@@ -2552,7 +2552,7 @@ def set_defaults():
     if not 'DIGESTOPAQUE' in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128) #TODO: not used now
     if not 'OAUTH_ENCRYPTIONSECRET' in settingkeys:
-        settings.OAUTH_ENCRYPTIONSECRET = None
+        settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(32)
     if not 'ENABLEWEBAPP' in settingkeys:
         settings.ENABLEWEBAPP = True
     if not 'REMOTEHOST' in settingkeys:
