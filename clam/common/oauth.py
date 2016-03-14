@@ -15,6 +15,10 @@ import base64
 class OAuthError(Exception):
     pass
 
+def DEFAULT_AUTH_FUNCTION(oauthsession, authurl):
+    """Default auth function, returns auth_url, state tuple"""
+    return oauthsession.authorization_url(authurl)
+
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
 GOOGLE_TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
 GOOGLE_SCOPE = [

@@ -307,10 +307,6 @@ class OAuth2(HTTPAuth):
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
-                if not auth:
-                    self.printdebug("No authorization header found (401)")
-                    return self.auth_error_callback()
-
                 oauth_access_token = None
                 #Obtain access token
                 if auth and auth[:6].lower() == "bearer":
@@ -342,7 +338,7 @@ class OAuth2(HTTPAuth):
                     #Redirect to Authentication Provider
                     self.printdebug("Redirecting to authentication provider: " + self.auth_url)
 
-                    return flask.redirect(auth_url) #TODO: this will probably fail?
+                    return flask.redirect(auth_url)
                 else:
                     #Decrypt access token
                     try:
