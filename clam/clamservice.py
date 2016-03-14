@@ -14,10 +14,10 @@
 #
 ###############################################################
 
+#pylint: disable=redefined-builtin,trailing-whitespace,superfluous-parens,bad-classmethod-argument,wrong-import-order,wrong-import-position,ungrouped-imports
+
 from __future__ import print_function, unicode_literals, division, absolute_import #for python 2
 
-import flask
-import werkzeug
 import shutil
 import os
 import io
@@ -29,13 +29,14 @@ import datetime
 import random
 import re
 import hashlib
-import requests
 import argparse
 import time
 import socket
 import json
 import mimetypes
-from copy import copy #shallow copy (use deepcopy for deep)
+import flask
+import werkzeug
+import requests
 
 if __name__ == "__main__":
     sys.path.append(sys.path[0] + '/..')
@@ -108,7 +109,7 @@ def userdb_lookup_dict(user, **authsettings):
 
 def userdb_lookup_mysql(user, **authsettings):
     printdebug("Looking up user " + user + " in MySQL")
-    host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()
+    host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()  #pylint: disable=unused-variable
     if denylist and user in denylist:
         printdebug("User in denylist")
         raise KeyError
@@ -143,6 +144,7 @@ def userdb_lookup_mysql(user, **authsettings):
 
 
 def validate_users_mysql():
+    #pylint: disable=unsupported-membership-test,unsubscriptable-object
     if not settings.USERS_MYSQL:
         raise Exception("No USERS_MYSQL configured")
     if 'host' in settings.USERS_MYSQL:
@@ -191,15 +193,14 @@ def validate_users_mysql():
 class Login(object):
     @staticmethod
     def GET():
-        global auth
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
             code = flask.request.values['code']
-        except:
+        except KeyError:
             return flask.make_response('No code passed',403)
         try:
             state = flask.request.values['state']
-        except:
+        except KeyError:
             return flask.make_response('No state passed',403)
 
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state=' + state )
@@ -218,7 +219,7 @@ class Logout(object):
 
     @staticmethod
     def GET(credentials = None):
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.OAUTH_REVOKE_URL:
             return flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
         else:
@@ -253,10 +254,10 @@ def parsecredentials(credentials):
 
 #Are tied into flask later because at this point we don't have an app instance yet
 
-def entryshortcut(credentials = None, fromstart=False):
+def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-many-return-statements
     user, oauth_access_token = parsecredentials(credentials)
     rq = flask.request.values
-    if 'project' in rq:
+    if 'project' in rq: #pylint: disable=too-many-nested-blocks
         if rq['project'].lower() in ('new','create'):
             projectprefix = rq['projectprefix'] if 'projectprefix' in rq else 'P'
             project = projectprefix + str("%034x" % random.getrandbits(128))
@@ -310,7 +311,7 @@ def entryshortcut(credentials = None, fromstart=False):
 
 def getprojects(user):
     projects = []
-    totalsize = 0
+    totalsize = 0.0
     path = settings.ROOT + "projects/" + user
     if os.path.exists(os.path.join(path,'.index')):
         with io.open(os.path.join(path,'.index'),'r',encoding='utf-8') as f:
@@ -348,7 +349,7 @@ def index(credentials = None):
 
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
-    totalsize = 0;
+    totalsize = 0.0
     if settings.LISTPROJECTS:
         projects, totalsize = getprojects(user)
 
@@ -357,6 +358,7 @@ def index(credentials = None):
 
     corpora = CLAMService.corpusindex()
 
+    #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
@@ -388,7 +390,7 @@ def index(credentials = None):
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
             oauth_access_token=oauth_encrypt(oauth_access_token)
-    )))
+            ))) #pylint: disable=bad-continuation
 
 
 
@@ -476,7 +478,7 @@ class Admin:
         )), "text/html; charset=UTF-8" )
 
     @staticmethod
-    def handler(command, targetuser, project, credentials=None):
+    def handler(command, targetuser, project, credentials=None): #pylint: disable=too-many-return-statements
         user, oauth_access_token = parsecredentials(credentials)
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
@@ -524,7 +526,7 @@ class Admin:
 
     @staticmethod
     def downloader(targetuser, project, type, filename, credentials=None):
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.ADMINS or not user in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
@@ -535,7 +537,7 @@ class Admin:
                 raise flask.abort(404)
         elif type == 'output':
             try:
-                outputfile = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename)
+                outputfile = clam.common.data.CLAMOutputFile(Project.path(project, targetuser), filename) #pylint: disable=redefined-variable-type
             except:
                 raise flask.abort(404)
         else:
@@ -595,7 +597,7 @@ class Project:
     @staticmethod
     def path(project, credentials):
         """Get the path to the project (static method)"""
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         return settings.ROOT + "projects/" + user + '/' + project + "/"
 
     @staticmethod
@@ -611,13 +613,13 @@ class Project:
             return size
 
     @staticmethod
-    def create(project, credentials):
+    def create(project, credentials): #pylint: disable=too-many-return-statements
         """Create project skeleton if it does not already exist (static method)"""
 
         if not settings.COMMAND:
             return flask.make_response("Projects disabled, no command configured",404)
 
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not Project.validate(project):
             return flask.make_response('Invalid project ID. Note that only alphanumerical characters are allowed.',403)
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
@@ -719,7 +721,7 @@ class Project:
     @staticmethod
     def exists(project, credentials):
         """Check if the project exists"""
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         printdebug("Checking if project " + project + " exists for " + user)
         return os.path.isdir(Project.path(project, user))
 
@@ -728,37 +730,35 @@ class Project:
         statuslog = []
         statusfile = Project.path(project,user) + ".status"
         totalcompletion = 0
-        if os.path.isfile(statusfile):
+        if os.path.isfile(statusfile): #pylint: disable=too-many-nested-blocks
             prevmsg = None
-            f = open(statusfile)
-            for line in f:
-                line = line.strip()
-                if line:
-                    message = ""
-                    completion = 0
-                    timestamp = ""
-                    for field in line.split("\t"):
-                        if field:
-                            if field[-1] == '%' and field[:-1].isdigit():
-                                completion = int(field[:-1])
-                                if completion > 0:
-                                    totalcompletion = completion
-                            elif DATEMATCH.match(field):
-                                if field.isdigit():
+            with open(statusfile) as f:
+                for line in f: #pylint: disable=too-many-nested-blocks
+                    line = line.strip()
+                    if line:
+                        message = ""
+                        completion = 0
+                        timestamp = ""
+                        for field in line.split("\t"):
+                            if field:
+                                if field[-1] == '%' and field[:-1].isdigit():
+                                    completion = int(field[:-1])
+                                    if completion > 0:
+                                        totalcompletion = completion
+                                elif DATEMATCH.match(field):
+                                    if field.isdigit():
                                         try:
                                             d = datetime.datetime.fromtimestamp(float(field))
                                             timestamp = d.strftime("%d/%b/%Y %H:%M:%S")
-                                        except:
+                                        except ValueError:
                                             pass
-                            else:
-                                message += " " + field
+                                else:
+                                    message += " " + field
 
-                    if message and (message != prevmsg):
-                        #print "STATUSLOG: t=",timestamp,"c=",completion,"msg=" + message.strip()
-                        statuslog.append( (message.strip(), timestamp, completion) )
-                        prevmsg = message
-            msg = f.read(os.path.getsize(statusfile))
-            f.close()
+                        if message and (message != prevmsg):
+                            #print "STATUSLOG: t=",timestamp,"c=",completion,"msg=" + message.strip()
+                            statuslog.append( (message.strip(), timestamp, completion) )
+                            prevmsg = message
             statuslog.reverse()
         return statuslog, totalcompletion
 
@@ -842,7 +842,7 @@ class Project:
     @staticmethod
     def inputindexbytemplate(project, user, inputtemplate):
         """Retrieve sorted index for the specified input template"""
-        index = []
+        index = [] #pylint: disable=redefined-outer-name
         prefix = Project.path(project, user) + 'input/'
         for linkf, f in globsymlinks(prefix + '.*.INPUTTEMPLATE.' + inputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
@@ -856,7 +856,7 @@ class Project:
     @staticmethod
     def outputindexbytemplate(project, user, outputtemplate):
         """Retrieve sorted index for the specified input template"""
-        index = []
+        index = [] #pylint: disable=redefined-outer-name
         prefix = Project.path(project, user) + 'output/'
         for linkf, f in globsymlinks(prefix + '.*.OUTPUTTEMPLATE.' + outputtemplate.id + '.*'):
             seq = int(linkf.split('.')[-1])
@@ -871,8 +871,6 @@ class Project:
     #main view
     @staticmethod
     def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token=""):
-        global VERSION
-
         #check if there are invalid parameters:
         if not errormsg:
             errors = "no"
@@ -887,7 +885,7 @@ class Project:
 
         inputpaths = []
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
-            inputpaths = Project.inputindex(project, user)
+            inputpaths = Project.inputindex(project, user) #pylint: disable=redefined-variable-type
 
 
 
@@ -899,10 +897,10 @@ class Project:
                 printlog("Child process failed, exited with non zero-exit code.")
             customhtml = settings.CUSTOMHTML_PROJECTDONE
         else:
-            outputpaths = []
+            outputpaths = [] #pylint: disable=redefined-variable-type
 
 
-        for parametergroup, parameterlist in parameters:
+        for parametergroup, parameterlist in parameters: #pylint: disable=unused-variable
             for parameter in parameterlist:
                 if parameter.error:
                     errors = "yes"
@@ -985,9 +983,8 @@ class Project:
         return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #HTTP CREATED
 
     @staticmethod
-    def start(project, credentials=None):
+    def start(project, credentials=None): #pylint: disable=too-many-return-statements
         """Start execution"""
-        global settingsmodule
 
         #handle shortcut
         shortcutresponse = entryshortcut(credentials, True) #protected against endless recursion, will return None when no shortcut is found, True when one is found and starting should continue
@@ -1061,7 +1058,7 @@ class Project:
             pythonpath = ''
             try:
                 pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
-            except:
+            except AttributeError:
                 pass
             if pythonpath:
                 pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
@@ -1106,7 +1103,7 @@ class Project:
             abortonly = bool(data['abortonly'])
         else:
             abortonly = False
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not Project.exists(project, user):
             return flask.make_response("No such project: " + project + " for user " + user,404)
         statuscode, _, _, _  = Project.status(project, user)
@@ -1140,8 +1137,8 @@ class Project:
         return Project.getarchive(project, user,'tar.bz2')
 
     @staticmethod
-    def getoutputfile(project, filename, credentials=None):
-        user, oauth_access_token = parsecredentials(credentials)
+    def getoutputfile(project, filename, credentials=None): #pylint: disable=too-many-return-statements
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         raw = filename.split('/')
 
         viewer = None
@@ -1229,7 +1226,7 @@ class Project:
     def deleteoutputfile(project, filename, credentials=None):
         """Delete an output file"""
 
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if filename: filename = filename.replace("..","") #Simple security
 
         if not filename or len(filename) == 0:
@@ -1338,10 +1335,8 @@ class Project:
 
     @staticmethod
     def getinputfile(project, filename, credentials=None):
-
-        viewer = None
         requestid = None
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
 
         raw = filename.split('/')
 
@@ -1398,7 +1393,7 @@ class Project:
     def deleteinputfile(project, filename, credentials=None):
         """Delete an input file"""
 
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         filename = filename.replace("..","") #Simple security
 
         if len(filename) == 0:
@@ -1429,17 +1424,17 @@ class Project:
         return Project.addinputfile(project,'',credentials)
 
     @staticmethod
-    def addinputfile(project, filename, credentials=None):
+    def addinputfile(project, filename, credentials=None): #pylint: disable=too-many-return-statements
         """Add a new input file, this invokes the actual uploader"""
 
 
-        user, oauth_access_token = parsecredentials(credentials)
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         response = Project.create(project, user)
         if response is not None:
             return response
         postdata = flask.request.values
 
-        if filename == '':
+        if filename == '': #pylint: disable=too-many-nested-blocks
             #Handle inputsource
             printdebug('Addinputfile: checking for input source' )
             if 'inputsource' in postdata and postdata['inputsource']:
@@ -1494,17 +1489,7 @@ class Project:
 
 
 
-
-    @staticmethod
-    def extract(project,filename, archivetype):
-        #OBSOLETE?
-        #namelist = None
-        subfiles = []
-
-        #return [ subfile for subfile in subfiles ] #return only the files that actually exist
-
-
-def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'):
+def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'): #pylint: disable=too-many-return-statements
     """Add a new input file, this invokes the actual uploader"""
 
     inputtemplate_id = flask.request.headers.get('Inputtemplate','')
@@ -1565,7 +1550,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     else:
         nextseq = 1 #will hold the next sequence number for this inputtemplate (in multi-mode only)
 
-    for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate):
+    for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate): #pylint: disable=unused-variable
         if inputtemplate.unique:
             return flask.make_response("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)",403) #(it will have to be explicitly deleted by the client first)
         else:
@@ -1602,7 +1587,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         return flask.make_response("Adding files for this inputtemplate must proceed through inputsource",403) #403
 
     if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:
-            return flask.make_response("Invalid converter specified: " + postdata['converter'],403) #403
+        return flask.make_response("Invalid converter specified: " + postdata['converter'],403) #403
 
     #Make sure the filename is secure
     validfilename = True
@@ -1669,7 +1654,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 metadata = clam.common.data.CLAMMetaData.fromxml(f.read())
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
-        except Exception as e:
+        except Exception as e: #pylint: disable=broad-except
             printlog("Uploaded metadata is invalid! " + str(e))
             metadata = None
             errors = True
@@ -1681,7 +1666,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             metadata = clam.common.data.CLAMMetaData.fromxml(postdata['metadata'])
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
-        except:
+        except: #pylint: disable=bare-except
             printlog("Uploaded metadata is invalid!")
             metadata = None
             errors = True
@@ -1704,14 +1689,14 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     metadata = clam.common.data.CLAMMetaData.fromxml(open(metafilename,'r').readlines())
                     errors, parameters = inputtemplate.validate(metadata, user)
                     validmeta = True
-                except:
+                except: #pylint: disable=bare-except
                     printlog("Uploaded metadata is invalid!")
                     metadata = None
                     errors = True
                     parameters = []
                     validmeta = False
             else:
-                 flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
+                flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
     else:
         errors, parameters = inputtemplate.validate(postdata, user)
         validmeta = True #will be checked later
@@ -1720,7 +1705,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     #  ----------- Check if archive are allowed -------------
     archive = False
     addedfiles = []
-    if not errors and inputtemplate.acceptarchive:
+    if not errors and inputtemplate.acceptarchive: #pylint: disable=too-many-nested-blocks
         printdebug('(Archive test)')
         # -------- Are we an archive? If so, determine what kind
         archivetype = None
@@ -1761,14 +1746,13 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             if not xhrpost:
                 flask.request.files['file'].save(Project.path(project,user) + archive)
             elif xhrpost:
-                f = open(Project.path(project,user) + archive,'wb') #TODO: test
-                while True:
-                    chunk = flask.request.stream.read(16384)
-                    if chunk:
-                        f.write(chunk)
-                    else:
-                        break
-                f.close()
+                with open(Project.path(project,user) + archive,'wb') as f:
+                    while True:
+                        chunk = flask.request.stream.read(16384)
+                        if chunk:
+                            f.write(chunk)
+                        else:
+                            break
             printdebug('(Archive transfer completed)')
             # =============== Extract archive ======================
 
@@ -1788,7 +1772,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             printlog("Extracting '" + archive + "'" )
             try:
                 process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            except:
+            except: #pylint: disable=bare-except
                 flask.make_response("Unable to extract archive",500)
             out, _ = process.communicate() #waits for process to end
 
@@ -1832,7 +1816,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
 
     output = head
-    for filename in addedfiles:
+    for filename in addedfiles: #pylint: disable=too-many-nested-blocks
         output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
 
         if not errors:
@@ -1893,14 +1877,13 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         return flask.make_response("Input file " + str(filename) + " is not in the expected encoding!",403)
                 elif 'accesstoken' in postdata and 'filename' in postdata:
                     printdebug('(Receiving data directly from post body)')
-                    f = open(Project.path(project,user) + 'input/' + filename,'wb') #TODO: test
-                    while True:
-                        chunk = flask.request.stream.read(16384)
-                        if chunk:
-                            f.write(chunk)
-                        else:
-                            break
-                    f.close()
+                    with open(Project.path(project,user) + 'input/' + filename,'wb') as f:
+                        while True:
+                            chunk = flask.request.stream.read(16384)
+                            if chunk:
+                                f.write(chunk)
+                            else:
+                                break
 
                 printdebug('(File transfer completed)')
 
@@ -1957,7 +1940,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         printdebug('(Invoking converter)')
                         try:
                             success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
-                        except:
+                        except: #pylint: disable=bare-except 
                             success = False
                         if not success:
                             conversionerror = True
@@ -2103,7 +2086,7 @@ class ActionHandler(object):
 
 
     @staticmethod
-    def do( actionid, method, user="anonymous", oauth_access_token=""):
+    def do( actionid, method, user="anonymous", oauth_access_token=""): #pylint: disable=too-many-return-statements
         try:
             printdebug("Looking for action " + actionid)
             action = ActionHandler.find_action(actionid, 'GET')
@@ -2115,7 +2098,7 @@ class ActionHandler(object):
 
         userdir =  settings.ROOT + "projects/" + user + '/'
 
-        if action.command:
+        if action.command: #pylint: disable=too-many-nested-blocks
             cmd = action.command
 
             parameters = ""
@@ -2195,10 +2178,10 @@ class ActionHandler(object):
             else:
                 return flask.make_response("Unable to launch process",500)
         elif action.function:
-            args = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
+            actionargs = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
             try:
-                r = action.function(*args) #200
-            except Exception as e:
+                r = action.function(*actionargs) #200
+            except Exception as e: #pylint: disable=broad-except
                 if isinstance(e, werkzeug.exceptions.HTTPException):
                     raise
                 else:
@@ -2253,24 +2236,22 @@ def sufficientresources():
         if not os.path.exists('/proc/meminfo'):
             printlog("WARNING: No /proc/meminfo available on your system! Not Linux? Skipping memory requirement check!")
         else:
-            memfree = cached = 0
-            f = open('/proc/meminfo')
-            for line in f:
-                if line[0:8] == "MemFree:":
-                    memfree = float(line[9:].replace('kB','').strip()) #in kB
-                if line[0:8] == "Cached:":
-                    cached = float(line[9:].replace('kB','').strip()) #in kB
-            f.close()
+            memfree = cached = 0.0
+            with open('/proc/meminfo') as f:
+                for line in f:
+                    if line[0:8] == "MemFree:":
+                        memfree = float(line[9:].replace('kB','').strip()) #in kB
+                    if line[0:8] == "Cached:":
+                        cached = float(line[9:].replace('kB','').strip()) #in kB
             if settings.REQUIREMEMORY * 1024 > memfree + cached:
                 return False, str(settings.REQUIREMEMORY * 1024) + " kB memory is required but only " + str(memfree + cached) + " is available."
     if settings.MAXLOADAVG > 0:
         if not os.path.exists('/proc/loadavg'):
             printlog("WARNING: No /proc/loadavg available on your system! Not Linux? Skipping load average check!")
         else:
-            f = open('/proc/loadavg')
-            line = f.readline()
-            loadavg = float(line.split(' ')[0])
-            f.close()
+            with open('/proc/loadavg') as f:
+                line = f.readline()
+                loadavg = float(line.split(' ')[0])
             if settings.MAXLOADAVG < loadavg:
                 return False, "System load too high: " + str(loadavg) + ", max is " + str(settings.MAXLOADAVG)
     if settings.MINDISKSPACE and settings.DISK:
@@ -2278,9 +2259,8 @@ def sufficientresources():
         ret = os.system('df -mP ' + settings.DISK + " | gawk '{ print $4; }'  > " + dffile)
         if ret == 0:
             try:
-                f = open(dffile,'r')
-                free = int(f.readlines()[-1])
-                f.close()
+                with open(dffile,'r') as f:
+                    free = int(f.readlines()[-1])
                 if free < settings.MINDISKSPACE:
                     os.unlink(dffile)
                     return False, "Not enough diskspace, " + str(free) + " MB free, need at least " + str(settings.MINDISKSPACE) + " MB"
@@ -2295,24 +2275,23 @@ def sufficientresources():
 
 
 def usage():
-        print( "Syntax: clamservice.py [options] clam.config.yoursystem",file=sys.stderr)
-        print("Options:",file=sys.stderr)
-        print("\t-d            - Enable debug mode",file=sys.stderr)
-        print("\t-H [hostname] - Hostname",file=sys.stderr)
-        print("\t-p [port]     - Port",file=sys.stderr)
-        print("\t-u [url]      - Force URL",file=sys.stderr)
-        print("\t-h            - This help message",file=sys.stderr)
-        print("\t-P [path]     - Python Path from which the settings module can be imported",file=sys.stderr)
-        print("\t-v            - Version information",file=sys.stderr)
-        print("(Note: Running clamservice directly from the command line uses the built-in",file=sys.stderr)
-        print("web-server. This is great for development purposes but not recommended",file=sys.stderr)
-        print("for production use. Use the WSGI interface with for instance Apache instead.)",file=sys.stderr)
+    print( "Syntax: clamservice.py [options] clam.config.yoursystem",file=sys.stderr)
+    print("Options:",file=sys.stderr)
+    print("\t-d            - Enable debug mode",file=sys.stderr)
+    print("\t-H [hostname] - Hostname",file=sys.stderr)
+    print("\t-p [port]     - Port",file=sys.stderr)
+    print("\t-u [url]      - Force URL",file=sys.stderr)
+    print("\t-h            - This help message",file=sys.stderr)
+    print("\t-P [path]     - Python Path from which the settings module can be imported",file=sys.stderr)
+    print("\t-v            - Version information",file=sys.stderr)
+    print("(Note: Running clamservice directly from the command line uses the built-in",file=sys.stderr)
+    print("web-server. This is great for development purposes but not recommended",file=sys.stderr)
+    print("for production use. Use the WSGI interface with for instance Apache instead.)",file=sys.stderr)
 
 class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
 
     def __init__(self, mode = 'debug'):
-        global VERSION
         printlog("Starting CLAM WebService, version " + str(VERSION) + " ...")
         if not settings.ROOT or not os.path.isdir(settings.ROOT):
             error("Specified root path " + settings.ROOT + " not found")
@@ -2344,14 +2323,14 @@ class CLAMService(object):
         else:
             lastparameter = None
             try:
-                for parametergroup, parameters in settings.PARAMETERS:
+                for parametergroup, parameters in settings.PARAMETERS: #pylint: disable=unused-variable
                     for parameter in parameters:
                         assert isinstance(parameter, clam.common.parameters.AbstractParameter)
                         lastparameter = parameter
             except AssertionError:
                 msg = "Syntax error in parameter specification."
                 if lastparameter:
-                     msg += "Last part parameter: ", lastparameter.id
+                    msg += "Last part parameter: ", lastparameter.id
                 error(msg)
 
         if settings.OAUTH:
@@ -2359,23 +2338,23 @@ class CLAMService(object):
             self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=settings.OAUTH_SCOPE)
         elif settings.USERS:
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
                 warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.USERS_MYSQL:
             validate_users_mysql()
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
                 warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
-            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER)
+            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER) #pylint: disable=redefined-variable-type
         else:
             warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
-            self.auth = clam.common.auth.NoAuth()
+            self.auth = clam.common.auth.NoAuth() #pylint: disable=redefined-variable-type
 
 
 
@@ -2451,18 +2430,16 @@ class CLAMService(object):
 
     @staticmethod
     def corpusindex():
-            """Get list of pre-installed corpora"""
-            corpora = []
-            for f in glob.glob(settings.ROOT + "corpora/*"):
-                if os.path.isdir(f):
-                    corpora.append(os.path.basename(f))
-            return corpora
+        """Get list of pre-installed corpora"""
+        corpora = []
+        for f in glob.glob(settings.ROOT + "corpora/*"):
+            if os.path.isdir(f):
+                corpora.append(os.path.basename(f))
+        return corpora
 
 
 
 def set_defaults():
-    global LOG
-
     #Default settings
     settingkeys = dir(settings)
 
@@ -2493,7 +2470,7 @@ def set_defaults():
         settings.BASICAUTH = False #default is HTTP Digest
     if not 'LISTPROJECTS' in settingkeys:
         settings.LISTPROJECTS = True
-    if not 'ALLOWSHARE' in settingkeys: #TODO: all there are not implemented yet
+    if not 'ALLOWSHARE' in settingkeys: #TODO: all these are not implemented yet
         settings.ALLOWSHARE = True
     if not 'ALLOWANONSHARE' in settingkeys:
         settings.ALLOWANONSHARE = True
@@ -2647,11 +2624,11 @@ def test_dirs():
     if not os.path.isdir(settings.SESSIONDIR):
         warning("Session directory does not exist yet, creating...")
         os.makedirs(settings.SESSIONDIR)
-        
+
     if not settings.PARAMETERS:
-            warning("No parameters specified in settings module!")
+        warning("No parameters specified in settings module!")
     if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
-            warning("No user authentication enabled, this is not recommended for production environments!")
+        warning("No user authentication enabled, this is not recommended for production environments!")
     if settings.OAUTH:
         if not settings.OAUTH_CLIENT_ID:
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_ID not specified!")
@@ -2670,7 +2647,6 @@ def test_dirs():
 
 
 def test_version():
-    global VERSION
     #Check version
     req = str(settings.REQUIRE_VERSION).split('.')
     ver = str(VERSION).split('.')
@@ -2727,19 +2703,19 @@ if __name__ == "__main__":
         sys.path.append(PYTHONPATH)
 
     import_string = "import " + settingsmodule + " as settings"
-    exec(import_string)
+    exec(import_string) #pylint: disable=exec-used
 
     try:
         if settings.DEBUG:
             DEBUG = True
             setdebug(True)
             warning("DEBUG is enabled, never use this in publicly exposed environments as it is a security risk !!!")
-    except:
+    except: #not sure why?
         pass
     try:
         if settings.LOGFILE:
             setlogfile(settings.LOGFILE)
-    except:
+    except: #not sure why?
         pass
 
     test_version()
@@ -2766,7 +2742,7 @@ if __name__ == "__main__":
 
 def run_wsgi(settings_module):
     """Run CLAM in WSGI mode"""
-    global settingsmodule, DEBUG
+    global settingsmodule, DEBUG #pylint: disable=global-statement
     printdebug("Initialising WSGI service")
 
     globals()['settings'] = settings_module
