@@ -304,7 +304,10 @@ class OAuth2(HTTPAuth):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            auth = flask.request.authorization
+            try:
+                authheader = flask.request.headers['Authorization']
+            except KeyError:
+                authheader = None
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
@@ -312,11 +315,11 @@ class OAuth2(HTTPAuth):
             if flask.request.method != 'OPTIONS':
                 oauth_access_token = None
                 #Obtain access token
-                if auth and auth[:6].lower() == "bearer":
-                    oauth_access_token = auth[7:]
+                if authheader and authheader[:6].lower() == "bearer":
+                    oauth_access_token = authheader[7:]
                     self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-                elif auth and auth[:5].lower() == "token":
-                    oauth_access_token = auth[6:]
+                elif authheader and authheader[:5].lower() == "token":
+                    oauth_access_token = authheader[6:]
                     self.printdebug("Oauth access token obtained from HTTP request Authentication header")
                 else:
                     #Is the token submitted in the GET/POST data? (as oauth_access_token)
@@ -324,7 +327,7 @@ class OAuth2(HTTPAuth):
                         oauth_access_token = flask.request.values['oauth_access_token']
                         self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
                     except:
-                        self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers))
+                        self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
 
                 if not oauth_access_token:
                     #No access token yet, start login process

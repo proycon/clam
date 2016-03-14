@@ -74,9 +74,9 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
-    if sys.version >= '3':
-        clear = str(clear,'ascii')
     try:
+        if sys.version >= '3':
+            clear = str(clear,'ascii')
         oauth_access_token, ip = clear.strip().split(':')
     except:
         #prevent leaks in debug mode
