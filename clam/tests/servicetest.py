@@ -14,11 +14,11 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
+#pylint: disable=wrong-import-position, unused-wildcard-import
+
 import sys
 import os
 import time
-import glob
-import random
 import unittest
 import io
 
@@ -29,7 +29,7 @@ os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 
 #Import the CLAM Client API and CLAM Data API and other dependencies
 from clam.common.client import *
-from clam.common.data import *
+from clam.common.data import * #pylint: disable=redefined-builtin
 from clam.common.formats import *
 import clam.common.status
 
@@ -139,7 +139,7 @@ class BasicServiceTest(unittest.TestCase):
             self.assertFalse(success)
         except ParameterError as e:
             print(e)
-            self.assertTrue(True)
+            self.assertTrue(True) #pylint: disable=redundant-unittest-assert
 
     def test2_B_metadata(self):
         """Basic Service Test - Upload with explicit metadata file"""
@@ -201,7 +201,7 @@ class ExtensiveServiceTest(unittest.TestCase):
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'statsbydoc')
 
     def test1b_downloadarchive(self):
-        """Extensive Service Test - Download Archive (ZIP)""" 
+        """Extensive Service Test - Download Archive (ZIP)"""
         data = self.client.get(self.project)
         success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
         self.assertTrue(success)
@@ -223,8 +223,8 @@ class ExtensiveServiceTest(unittest.TestCase):
         try:
             data = self.client.start(self.project, casesensitive='nonexistant')
             self.assertTrue(data)
-        except ParameterError as e:
-            self.assertTrue(True)
+        except ParameterError:
+            self.assertTrue(True) #pylint: disable=redundant-unittest-assert
 
     def test3_conditionaloutput(self):
         """Extensive Service Test - Output conditional on parameter"""
@@ -254,7 +254,7 @@ class ExtensiveServiceTest(unittest.TestCase):
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')
 
     def tearDown(self):
-        success = self.client.delete(self.project)
+        self.client.delete(self.project)
 
 
 
@@ -298,7 +298,7 @@ class ArchiveUploadTest(unittest.TestCase):
         self.assertTrue('servicetest3.txt' in [ x.filename for x in data.input ])
 
     def tearDown(self):
-        success = self.client.delete(self.project)
+        self.client.delete(self.project)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

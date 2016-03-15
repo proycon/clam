@@ -12,6 +12,8 @@
 #
 ###############################################################
 
+#pylint: disable=wrong-import-position
+
 import unittest
 import sys
 import os
@@ -228,7 +230,7 @@ class ChoiceParameterTest(unittest.TestCase):
         """Choice parameter - sanity check"""
         self.assertTrue(self.parameter.id == 'test')
         self.assertTrue(self.parameter.name == self.parameter.description == 'test')
-        self.assertTrue(self.parameter.multi == False)
+        self.assertTrue(self.parameter.multi is False)
         self.assertTrue(len(self.parameter.choices) == 3)
 
     def test2_set_value(self):
@@ -256,7 +258,7 @@ class MultiChoiceParameterTest(unittest.TestCase):
         """MultiChoice parameter - sanity check"""
         self.assertTrue(self.parameter.id == 'test')
         self.assertTrue(self.parameter.name == self.parameter.description == 'test')
-        self.assertTrue(self.parameter.multi == True)
+        self.assertTrue(self.parameter.multi is True)
         self.assertTrue(len(self.parameter.choices) == 3)
 
     def test2_set_value(self):
@@ -287,7 +289,7 @@ class MultiChoiceParameterTest(unittest.TestCase):
         xml = """<ChoiceParameter id="skip" name="Skip modules" description="Are there any components you want to skip? Skipping components you do not need may speed up the process considerably." flag="--skip=" multi="true"> <choice id="t">Tokeniser</choice> <choice id="m" selected="1">Multi-Word Detector</choice> <choice id="p" selected="1">Parser</choice> <choice id="c" selected="1">Chunker / Shallow parser</choice> <choice id="n" selected="1">Named Entity Recognition</choice></ChoiceParameter>"""
         parameter = clam.common.parameters.AbstractParameter.fromxml(xml)
         self.assertTrue(isinstance(parameter, clam.common.parameters.ChoiceParameter))
-        self.assertTrue(parameter.multi == True)
+        self.assertTrue(parameter.multi is True)
         self.assertTrue(len(parameter.choices) == 5)
         self.assertTrue(isinstance(parameter.value, list))
         self.assertTrue(not 't' in parameter.value)
@@ -313,7 +315,7 @@ class ParameterProcessingTest(unittest.TestCase):
         ]
         self.groups = [
             ('Main',
-                self.nogroups
+             self.nogroups
             )
         ]
         #valid settings
@@ -355,7 +357,7 @@ class ParameterProcessingTest(unittest.TestCase):
         """Parameter Processing - Value check (group)"""
         errors, parameters, _ = clam.common.data.processparameters(self.postdata, self.groups)
         self.assertFalse(errors)
-        group, parameters = parameters[0]
+        group, parameters = parameters[0] #pylint: disable=unused-variable
         self.assertTrue(parameters[0].value == self.postdata['teststring'])
         self.assertTrue(parameters[1].value == self.postdata['testchoice'])
         self.assertFalse(parameters[2].hasvalue)
@@ -364,14 +366,14 @@ class ParameterProcessingTest(unittest.TestCase):
 
     def test5_commandline(self):
         """Parameter Processing - Command line argument check"""
-        errors, parameters, commandlineargs = clam.common.data.processparameters(self.postdata, self.groups)
+        errors, parameters, commandlineargs = clam.common.data.processparameters(self.postdata, self.groups) #pylint: disable=unused-variable
         self.assertFalse(errors)
         self.assertTrue(commandlineargs == ['-s test', '-c c', '-i 4', '-b']) #order same as defined
 
     def test6_required(self):
         """Parameter Processing - Forgetting a required parameter (independent)"""
         postdata = {'teststring': 'test', 'testbool': True, 'testint': 4}
-        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups) #pylint: disable=unused-variable
         self.assertTrue(errors)
         self.assertTrue(parameters[1].id == 'testchoice')
         self.assertTrue(parameters[1].error)
@@ -379,7 +381,7 @@ class ParameterProcessingTest(unittest.TestCase):
     def test7_require(self):
         """Parameter Processing - Forgetting a required parameter (dependent)"""
         postdata = {'teststring': 'test',  'testint': 4,'testchoice':'c'}
-        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups) #pylint: disable=unused-variable
         self.assertTrue(errors)
         self.assertTrue(parameters[0].id == 'teststring')
         self.assertTrue(parameters[0].error)
@@ -387,7 +389,7 @@ class ParameterProcessingTest(unittest.TestCase):
     def test8_forbid(self):
         """Parameter Processing - Setting a forbidden parameter combination (dependent)"""
         postdata = {'teststring': 'test',  'testint': 4,'testfloat':0.5, 'testchoice':'c', 'testbool':False}
-        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups)
+        errors, parameters, commandlineargs = clam.common.data.processparameters(postdata, self.nogroups) #pylint: disable=unused-variable
         self.assertTrue(errors)
         self.assertTrue(parameters[2].id == 'testfloat')
         self.assertTrue(parameters[2].error)

@@ -12,15 +12,13 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-try:
-    import flask
-except ImportError:
-    pass
-import requests
-import os.path
-from lxml import etree
+#pylint: disable=wrong-import-order
+
 import csv
 import sys
+import os.path
+import requests
+from lxml import etree
 if sys.version < '3':
     from StringIO import StringIO #pylint: disable=import-error
 else:
@@ -28,8 +26,12 @@ else:
 
 try:
     import foliatools
-except:
+except ImportError:
     foliatools = None
+try:
+    import flask
+except ImportError:
+    pass
 
 from clam.common.util import withheaders
 

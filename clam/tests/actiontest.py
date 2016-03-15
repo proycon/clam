@@ -14,13 +14,11 @@
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
+#pylint: disable=wrong-import-position, unused-wildcard-import
+
 import sys
 import os
-import time
-import glob
-import random
 import unittest
-import io
 
 #We may need to do some path magic in order to find the clam.* imports
 
@@ -29,9 +27,8 @@ os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 
 #Import the CLAM Client API and CLAM Data API and other dependencies
 from clam.common.client import *
-from clam.common.data import *
+from clam.common.data import * #pylint: disable=redefined-builtin
 from clam.common.formats import *
-import clam.common.status
 
 
 class ActionServiceTest(unittest.TestCase):

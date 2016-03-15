@@ -332,7 +332,7 @@ class CLAMClient:
                 raise Exception(node)
         if node.tag != 'clamupload':
             raise Exception("Not a valid CLAM upload response")
-        for node2 in node:
+        for node2 in node: #pylint: disable=too-many-nested-blocks
             if node2.tag == 'upload':
                 for subnode in node2:
                     if subnode.tag == 'error':

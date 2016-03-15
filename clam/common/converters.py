@@ -11,12 +11,14 @@
 #
 ###############################################################
 
+#pylint: disable=redefined-builtin
+
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-import flask
 import shutil
 import io
 import os
+import flask
 from clam.common.data import CLAMMetaData, CLAMOutputFile
 from clam.common.util import withheaders
 import clam.common.formats
@@ -52,7 +54,7 @@ class CharEncodingConverter(AbstractConverter):
     label = "CharEncodingConverter" #to be overriden in instance creation
 
     def __init__(self, id,  **kwargs):
-        if not 'label' in kwargs:
+        if 'label' not in kwargs:
             raise Exception("No label specified for EncodingConvertor!")
 
         if 'fromcharset' in kwargs:
@@ -112,7 +114,7 @@ class PDFtoTextConverter(AbstractConverter):
         returncode = os.system(self.converttool + ' -layout ' + filepath + '.convertsource.pdf ' + filepath)
         os.unlink(filepath + '.convertsource.pdf')
 
-        return (returncode == 0)
+        return returncode == 0
 
 
 class PDFtoHTMLConverter(AbstractConverter):
@@ -131,7 +133,7 @@ class PDFtoHTMLConverter(AbstractConverter):
         returncode = os.system(self.converttool + ' -layout ' + filepath + '.convertsource.pdf ' + filepath)
         os.unlink(filepath + '.convertsource.pdf')
 
-        return (returncode == 0)
+        return returncode == 0
 
 
 class MSWordConverter(AbstractConverter):
@@ -150,5 +152,5 @@ class MSWordConverter(AbstractConverter):
         returncode = os.system(self.converttool + ' -x ' + filepath + '.convertsource.doc > ' + filepath)
         os.unlink(filepath + '.convertsource.doc')
 
-        return (returncode == 0)
+        return returncode == 0
 
