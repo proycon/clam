@@ -12,6 +12,7 @@
 #
 ###############################################################
 
+#pylint: disable=global-statement
 
 from __future__ import print_function, unicode_literals, division, absolute_import
 
@@ -43,7 +44,7 @@ def globsymlinks(pattern, recursion=True):
 
 def computediskusage(path):
     total_size = 0
-    for dirpath, dirnames, filenames in os.walk(path):
+    for dirpath, dirnames, filenames in os.walk(path): #pylint: disable=unused-variable
         for f in filenames:
             fp = os.path.join(dirpath, f)
             total_size += os.path.getsize(fp)
@@ -59,12 +60,10 @@ def setdebug(debug):
     DEBUG = debug
 
 def printlog(msg):
-    global LOG
     now = datetime.datetime.now()
     if LOG: LOG.write("------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
 
 def printdebug(msg):
-    global DEBUG, DEBUGLOG
     if DEBUG: DEBUGLOG.write("CLAM DEBUG: " + msg + "\n")
 
 def setlogfile(filename):
@@ -90,11 +89,11 @@ def xmlescape(s):
             else:
                 s2 += c
         elif c == '<':
-                s2 += "&lt;"
+            s2 += "&lt;"
         elif c == '>':
-                s2 += "&gt;"
+            s2 += "&gt;"
         elif c == '"':
-                s2 += "&quot;"
+            s2 += "&quot;"
         elif begin == -1:
             s2 += c
     if begin != -1:
@@ -104,7 +103,8 @@ def xmlescape(s):
 
 
 
-def withheaders(response, contenttype="text/xml; charset=UTF-8", extra={}):
+def withheaders(response, contenttype="text/xml; charset=UTF-8", extra=None):
+    if extra is None: extra = {}
     response.headers['Content-Type'] = contenttype
     try:
         for key, value in extra.items():
