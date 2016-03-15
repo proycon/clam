@@ -14,20 +14,22 @@
 #
 ###############################################################
 
+#pylint: disable=wrong-import-order
+
 from __future__ import print_function, unicode_literals, division, absolute_import
 
-from lxml import etree as ElementTree
 import sys
-if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error
-else:
-    from io import StringIO,  BytesIO
 import requests
 import os.path
 import io
 import json
 import time
 from copy import copy
+from lxml import etree as ElementTree
+if sys.version < '3':
+    from StringIO import StringIO #pylint: disable=import-error
+else:
+    from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
 import clam.common.parameters
 import clam.common.status
 import clam.common.util
@@ -44,15 +46,16 @@ DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 CUSTOM_FORMATS = []  #will be injected
 
 class BadRequest(Exception):
-     def __init__(self):
-        pass
-     def __str__(self):
+    def __init__(self):
+        super(BadRequest, self).__init__()
+    def __str__(self):
         return "Bad Request"
 
 class NotFound(Exception):
     """Raised on 404 - Not Found Errors"""
     def __init__(self, msg=""):
         self.msg = msg
+        super(NotFound, self).__init__()
     def __str__(self):
         return "Not Found: " +  self.msg
 
@@ -60,6 +63,7 @@ class PermissionDenied(Exception):
     """Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
     def __init__(self, msg = ""):
         self.msg = msg
+        super(PermissionDenied, self).__init__()
     def __str__(self):
         if isinstance(clam.common.data,CLAMData):
             return "Permission Denied"
@@ -70,6 +74,7 @@ class ServerError(Exception):
     """Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side."""
     def __init__(self, msg = ""):
         self.msg = msg
+        super(ServerError, self).__init__()
     def __str__(self):
         return "Server Error: " + self.msg
 
@@ -77,12 +82,13 @@ class AuthRequired(Exception):
     """Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
     def __init__(self, msg = ""):
         self.msg = msg
+        super(AuthRequired, self).__init__()
     def __str__(self):
         return "Authorization Required: " + self.msg
 
 class NoConnection(Exception):
     def __init__(self):
-        pass
+        super(NoConnection, self).__init__()
     def __str__(self):
         return "Can't establish a connection with the server"
 
@@ -90,6 +96,7 @@ class NoConnection(Exception):
 class UploadError(Exception):
     def __init__(self, msg = ""):
         self.msg = msg
+        super(UploadError, self).__init__()
     def __str__(self):
         return "Error during Upload: " + self.msg
 
@@ -97,20 +104,23 @@ class ParameterError(Exception):
     """Raised on Parameter Errors, i.e. when a parameter does not validate, is missing, or is otherwise set incorrectly."""
     def __init__(self, msg = ""):
         self.msg = msg
+        super(ParameterError, self).__init__()
     def __str__(self):
         return "Error setting parameter: " + self.msg
 
 class TimeOut(Exception):
     def __init__(self):
-        pass
+        super(TimeOut, self).__init__()
     def __str__(self):
         return "Connection with server timed-out"
 
 if sys.version < '3':
-    class FileNotFoundError(IOError):
+    #Python 2 used IOError instead, create a subclass
+    class FileNotFoundError(IOError): #pylint: disable=redefined-builtin
         pass
 
-def processhttpcode(code, allowcodes=[]):
+def processhttpcode(code, allowcodes=None):
+    if allowcodes is None: allowcodes = ()
     if not isinstance(code, int): code = int(code)
     if (code >= 200 and code <= 299) or code in allowcodes:
         return code
@@ -144,11 +154,12 @@ def parsexmlstring(node):
 
 
 class FormatError(Exception):
-     """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
-     def __init__(self, value):
-         self.value = value
-     def __str__(self):
-         return "Not a valid CLAM XML response"
+    """This Exception is raised when the CLAM response is not in the valid CLAM XML format"""
+    def __init__(self, value):
+        self.value = value
+        super(FormatError,self).__init__()
+    def __str__(self):
+        return "Not a valid CLAM XML response"
 
 class HTTPError(Exception):
     """This Exception is raised when certain data (such a metadata), can't be retrieved over HTTP"""
@@ -237,8 +248,6 @@ class CLAMFile:
                 raise HTTPError(2, "Can't download metadata for " + self.filename + ". " + extramsg)
             xml = response.text
 
-            #if response.status != 200: #TODO: Verify
-            #        raise IOError(2, "Can't download metadata from "+ self.projectpath + self.basedir + '/' + self.filename + '/metadata' + " , got HTTP response " + str(response.status) + "!")
 
         #parse metadata
         try:
@@ -290,8 +299,8 @@ class CLAMFile:
 
             #also remove any .*.INPUTTEMPLATE.* links that pointed to this file: simply remove all dead links
             for linkf,realf in clam.common.util.globsymlinks(self.projectpath + self.basedir + '/.*.INPUTTEMPLATE.*'):
-                    if not os.path.exists(realf):
-                        os.unlink(linkf)
+                if not os.path.exists(realf):
+                    os.unlink(linkf)
 
             return True
         else:
@@ -299,7 +308,7 @@ class CLAMFile:
                 requestparams = self.client.initrequest()
             else:
                 requestparams = {}
-            r = requests.delete( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
+            requests.delete( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
             return True
 
 
@@ -346,17 +355,17 @@ class CLAMInputFile(CLAMFile):
 class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
-def getclamdata(filename, custom_formats = []):
-    global CUSTOM_FORMATS 
+def getclamdata(filename, custom_formats=None):
+    global CUSTOM_FORMATS  #pylint: disable=global-statement
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance.
-    
+
     If you make use of CUSTOM_FORMATS, you need to pass the CUSTOM_FORMATS list as 2nd argument.
     """
     f = io.open(filename,'r',encoding='utf-8')
     xml = f.read(os.path.getsize(filename))
     f.close()
-    if custom_formats: 
+    if custom_formats:
         CUSTOM_FORMATS = custom_formats #dependency injection for CUSTOM_FORMATS
     return CLAMData(xml, None, True)
 
@@ -368,12 +377,12 @@ def processparameter(postdata, parameter, user=None):
     if parameter.access(user):
         try:
             postvalue = parameter.valuefrompostdata(postdata)
-        except:
+        except Exception: #pylint: disable=broad-except
             clam.common.util.printlog("Invalid value, unable to interpret parameter " + parameter.id + ", ...")
             parameter.error = "Invalid value, unable to interpret"
             return True, parameter, ''
 
-        if not (postvalue is None):
+        if postvalue is not None:
             clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue))
             if parameter.set(postvalue): #may generate an error in parameter.error
                 p = parameter.compilearg() #shell-safe
@@ -391,52 +400,52 @@ def processparameter(postdata, parameter, user=None):
     return errors, parameter, commandlineparam
 
 def processparameters(postdata, parameters, user=None):
-        #we're going to modify parameter values, this we can't do
-        #on the global variable, that won't be thread-safe, we first
-        #make a (shallow) copy and act on that
+    #we're going to modify parameter values, this we can't do
+    #on the global variable, that won't be thread-safe, we first
+    #make a (shallow) copy and act on that
 
-        commandlineparams = [] #for $PARAMETERS
-        errors = False
+    commandlineparams = [] #for $PARAMETERS
+    errors = False
 
-        newparameters = [] #in same style as input (i.e. with or without groups)
-        tempparlist = [] #always a list of parameters
+    newparameters = [] #in same style as input (i.e. with or without groups)
+    tempparlist = [] #always a list of parameters
 
-        if all([isinstance(x,tuple) for x in parameters ]):
-            for parametergroup, parameterlist in parameters:
-                newparameterlist = []
-                for parameter in parameterlist:
-                    error, parameter, commandlineparam = processparameter(postdata, copy(parameter), user)
-                    errors = errors or error
-                    newparameterlist.append(parameter)
-                    tempparlist.append(parameter)
-                    if commandlineparam:
-                        commandlineparams.append(commandlineparam)
-                newparameters.append( (parametergroup, newparameterlist) )
-        elif all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters]):
-            for parameter in parameters:
+    if all([isinstance(x,tuple) for x in parameters ]):
+        for parametergroup, parameterlist in parameters:
+            newparameterlist = []
+            for parameter in parameterlist:
                 error, parameter, commandlineparam = processparameter(postdata, copy(parameter), user)
                 errors = errors or error
-                newparameters.append(copy(parameter))
+                newparameterlist.append(parameter)
+                tempparlist.append(parameter)
                 if commandlineparam:
                     commandlineparams.append(commandlineparam)
-            tempparlist = newparameters
-        else:
-            raise Exception("Invalid parameters")
+            newparameters.append( (parametergroup, newparameterlist) )
+    elif all([isinstance(x,clam.common.parameters.AbstractParameter) for x in parameters]):
+        for parameter in parameters:
+            error, parameter, commandlineparam = processparameter(postdata, copy(parameter), user)
+            errors = errors or error
+            newparameters.append(copy(parameter))
+            if commandlineparam:
+                commandlineparams.append(commandlineparam)
+        tempparlist = newparameters
+    else:
+        raise Exception("Invalid parameters")
 
-        #solve dependency issues now all values have been set:
-        for parameter in tempparlist:
-            if parameter.constrainable() and (parameter.forbid or parameter.require):
-                for parameter2 in tempparlist:
-                    if parameter.forbid and parameter2.id in parameter.forbid and parameter2.constrainable():
-                        parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
-                        clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
-                        errors = True
-                    if parameter.require and parameter2.id in parameter.require and not parameter2.constrainable():
-                        parameter.error = parameter2.error = "Parameter '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
-                        clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
-                        errors = True
+    #solve dependency issues now all values have been set:
+    for parameter in tempparlist:
+        if parameter.constrainable() and (parameter.forbid or parameter.require):
+            for parameter2 in tempparlist:
+                if parameter.forbid and parameter2.id in parameter.forbid and parameter2.constrainable():
+                    parameter.error = parameter2.error = "Setting parameter '" + parameter.name + "' together with '" + parameter2.name + "'  is forbidden"
+                    clam.common.util.printlog("Setting " + parameter.id + " and " + parameter2.id + "' together is forbidden")
+                    errors = True
+                if parameter.require and parameter2.id in parameter.require and not parameter2.constrainable():
+                    parameter.error = parameter2.error = "Parameter '" + parameter.name + "' has to be set with '" + parameter2.name + "'  is"
+                    clam.common.util.printlog("Setting " + parameter.id + " requires you also set " + parameter2.id )
+                    errors = True
 
-        return errors, newparameters, commandlineparams
+    return errors, newparameters, commandlineparams
 
 class CLAMData(object):
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
@@ -522,10 +531,9 @@ class CLAMData(object):
 
     def parseresponse(self, xml, localroot = False):
         """Parses CLAM XML, there's usually no need to call this directly"""
-        global VERSION
         root = parsexmlstring(xml)
         if root.tag != 'clam':
-            raise FormatError()
+            raise FormatError("CLAM root tag not found")
 
         #if root.attrib['version'][0:3] != VERSION[0:3]:
         #    raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])
@@ -539,7 +547,7 @@ class CLAMData(object):
         if 'baseurl' in root.attrib:
             self.baseurl = root.attrib['baseurl']
             if self.project:
-                if localroot == True: #implicit, assume CWD
+                if localroot is True: #implicit, assume CWD
                     self.remote = False
                     self.projecturl = '' #relative directory (assume CWD is project directory, as is the case when wrapper scripts are called)
                 elif localroot: #explicit
@@ -558,7 +566,7 @@ class CLAMData(object):
         if 'oauth_access_token' in root.attrib:
             self.oauth_access_token = root.attrib['oauth_access_token']
 
-        for node in root:
+        for node in root: #pylint: disable=too-many-nested-blocks
             if node.tag == "description":
                 self.description = node.text
             elif node.tag == "version":
@@ -592,26 +600,26 @@ class CLAMData(object):
                     if subnode.tag == 'profile':
                         self.profiles.append(Profile.fromxml(subnode))
             elif node.tag == 'input':
-                 for filenode in node:
-                     if filenode.tag == 'file':
-                         for n in filenode:
+                for filenode in node:
+                    if filenode.tag == 'file':
+                        for n in filenode:
                             if n.tag == 'name':
                                 self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client,True) )
             elif node.tag == 'output':
-                 for filenode in node:
-                     if filenode.tag == 'file':
+                for filenode in node:
+                    if filenode.tag == 'file':
                         for n in filenode:
                             if n.tag == 'name':
                                 self.output.append( CLAMOutputFile( self.projecturl, n.text, True, self.client ) )
             elif node.tag == 'projects':
-                 self.projects = []
-                 for projectnode in node:
+                self.projects = []
+                for projectnode in node:
                     if projectnode.tag == 'project':
                         self.projects.append(projectnode.text)
 
     def commandlineargs(self):
         commandlineargs = []
-        for parametergroup, parameters in self.parameters:
+        for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:
                 p = parameter.compilearg()
                 if p:
@@ -619,41 +627,41 @@ class CLAMData(object):
         return " ".join(commandlineargs)
 
 
-    def parameter(self, id):
+    def parameter(self, parameter_id):
         """Return the specified global parameter (the entire object, not just the value)"""
-        for parametergroup, parameters in self.parameters:
+        for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:
-                if parameter.id == id:
+                if parameter.id == parameter_id:
                     return parameter
-        raise KeyError("No such parameter exists: " + id )
+        raise KeyError("No such parameter exists: " + parameter_id )
 
-    def __getitem__(self, id):
+    def __getitem__(self, parameter_id):
         """Return the value of the specified global parameter"""
         try:
-            return self.parameter(id).value
+            return self.parameter(parameter_id).value
         except KeyError:
             raise
 
-    def __setitem__(self, id, value):
+    def __setitem__(self, parameter_id, value):
         """Set the value of the specified global parameter"""
-        for parametergroup, parameters in self.parameters:
+        for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:
-                if parameter.id == id:
+                if parameter.id == parameter_id:
                     parameter.set(value)
                     return True
         raise KeyError
 
-    def __contains__(self, id):
+    def __contains__(self, parameter_id):
         """Check if a global parameter with the specified ID exists. Returns a boolean."""
-        for parametergroup, parameters in self.parameters:
+        for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:
-                if parameter.id == id:
+                if parameter.id == parameter_id:
                     return True
         return False
 
     def parametererror(self):
         """Return the first parameter error, or False if there is none"""
-        for parametergroup, parameters in self.parameters:
+        for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:
                 if parameter.error:
                     return parameter.error
@@ -662,7 +670,7 @@ class CLAMData(object):
     def passparameters(self):
         """Return all parameters as {id: value} dictionary"""
         paramdict = {}
-        for parametergroup, params in self.parameters:
+        for parametergroup, params in self.parameters: #pylint: disable=unused-variable
             for parameter in params:
                 if parameter.value:
                     if isinstance(parameter.value, list):
@@ -679,11 +687,11 @@ class CLAMData(object):
             l += profile.input
         return l
 
-    def inputtemplate(self,id):
+    def inputtemplate(self,template_id):
         """Return the inputtemplate with the specified ID. This is used to resolve a inputtemplate ID to an InputTemplate object instance"""
         for profile in self.profiles:
             for inputtemplate in profile.input:
-                if inputtemplate.id == id:
+                if inputtemplate.id == template_id:
                     return inputtemplate
         raise Exception("No such input template!")
 
@@ -765,21 +773,21 @@ class Profile(object):
             if isinstance(o, ParameterCondition):
                 for o in o.allpossibilities():
                     if not o:
-                       continue
+                        continue
                     if not isinstance(o, OutputTemplate):
                         raise Exception("ParameterConditions in profiles must always evaluate to OutputTemplate, not " + o.__class__.__name__ + "!")
-                    parent = o._findparent(self.input)
+                    parent = o.findparent(self.input)
                     if parent:
                         o.parent = parent
                         if not o.parent and (not (o.filename and o.unique)):
                             raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
             elif not o.parent:
-                    o.parent = o._findparent(self.input)
-                    if not o.parent and (not (o.filename and o.unique)):
-                        raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
+                o.parent = o.findparent(self.input)
+                if not o.parent and (not (o.filename and o.unique)):
+                    raise Exception("Outputtemplate '" + o.id + "' has no parent defined, and none could be found automatically!")
 
         #Sanity check (note: does not consider ParameterConditions!)
-        for o in self.output:
+        for o in self.output: #pylint: disable=too-many-nested-blocks
             for o2 in self.output:
                 if not isinstance(o, ParameterCondition) and not isinstance(o2, ParameterCondition) and o.id != o2.id:
                     if o.filename == o2.filename:
@@ -821,7 +829,7 @@ class Profile(object):
                 continue
             assert isinstance(outputtemplate, OutputTemplate)
             if outputtemplate.parent:
-                if not outputtemplate._getparent(self) in  optional_absent:
+                if outputtemplate.getparent(self) not in optional_absent: #pylint: disable=protected-access
                     return True, optional_absent
             else:
                 return True, optional_absent
@@ -854,13 +862,13 @@ class Profile(object):
         parameters = sanitizeparameters(parameters)
 
         match, optional_absent = self.match(projectpath, parameters) #Does the profile match?
-        if match:
+        if match: #pylint: disable=too-many-nested-blocks
 
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
 
             inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
-            for seqnr, filename, inputtemplate in inputfiles:
+            for seqnr, filename, inputtemplate in inputfiles: #pylint: disable=unused-variable
                 inputfiles_full.append(CLAMInputFile(projectpath, filename))
 
             for outputtemplate in self.output:
@@ -875,7 +883,7 @@ class Profile(object):
 
                         create = True
                         if outputtemplate.parent:
-                            if outputtemplate._getparent(self) in optional_absent:
+                            if outputtemplate.getparent(self) in optional_absent:
                                 create = False
 
                         if create:
@@ -920,7 +928,7 @@ class Profile(object):
     @staticmethod
     def fromxml(node):
         """Return a profile instance from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
 
         args = []
@@ -947,7 +955,7 @@ class RawXMLProvenanceData(object):
         self.data = data
 
     def xml(self):
-        if isinstance(self.data, ElementTree._Element):
+        if isinstance(self.data, ElementTree._Element): #pylint: disable=protected-access
             return ElementTree.tostring(self.data, pretty_print = True)
         else:
             return self.data
@@ -980,7 +988,7 @@ class CLAMProvenanceData(object):
         if all([ isinstance(x,CLAMInputFile) for x in inputfiles ]):
             self.inputfiles = [ (x.filename, x.metadata) for x in inputfiles ] #list of (filename, CLAMMetaData) objects of all input files
         else:
-            assert (all([ isinstance(x, tuple) and len(x) == 2 and isinstance(x[1], CLAMMetaData) for x in inputfiles ]))
+            assert all([ isinstance(x, tuple) and len(x) == 2 and isinstance(x[1], CLAMMetaData) for x in inputfiles ])
             self.inputfiles = inputfiles
 
 
@@ -997,7 +1005,7 @@ class CLAMProvenanceData(object):
                 parameters = self.parameters.values()
             elif isinstance(self.parameters, list):
                 parameters = self.parameters
-            for parameter in parameters: #TODO Later: make ordered?
+            for parameter in parameters:
                 xml += parameter.xml(indent +"  ") + "\n"
             xml += indent + " </parameters>\n"
         xml += indent + "</provenance>"
@@ -1006,9 +1014,9 @@ class CLAMProvenanceData(object):
     @staticmethod
     def fromxml(node):
         """Return a CLAMProvenanceData instance from the given XML description. Node can be a string or an lxml.etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
-        if node.tag == 'provenance':
+        if node.tag == 'provenance': #pylint: disable=too-many-nested-blocks
             if node.attrib['type'] == 'clam':
                 serviceid = node.attrib['id']
                 servicename = node.attrib['name']
@@ -1085,7 +1093,7 @@ class CLAMMetaData(object):
         self.loadinlinemetadata()
         for key, value in kwargs.items():
             if key == 'provenance':
-                assert (isinstance(value, CLAMProvenanceData))
+                assert isinstance(value, CLAMProvenanceData)
                 self.provenance = value
             elif key == 'inputtemplate':
                 if isinstance(value, InputTemplate):
@@ -1097,7 +1105,7 @@ class CLAMMetaData(object):
         if self.attributes:
             if not self.allowcustomattributes:
                 for key, value in kwargs.items():
-                    if not key in self.attributes:
+                    if key not in self.attributes: #pylint: disable=unsupported-membership-test
                         raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes. (format: " + self.__class__.__name__ + ", file: " + str(file) + ")")
 
             for key, valuerange in self.attributes.items():
@@ -1105,7 +1113,7 @@ class CLAMMetaData(object):
                     if not key in self and not False in valuerange :
                         raise ValueError("Required metadata attribute " + key +  " not specified")
                     elif self[key] not in valuerange:
-                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key])) + " (format: " + self.__class__.__name__ + ", file: " + str(file) + ")"
+                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key])) + " (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" #pylint: disable=unsubscriptable-object
                 elif valuerange is False: #Any value is allowed, and this attribute is not required
                     pass #nothing to do
                 elif valuerange is True: #Any value is allowed, this attribute is *required*
@@ -1132,11 +1140,11 @@ class CLAMMetaData(object):
 
     def __setitem__(self, key, value):
         """Set a metadata field to a specific value"""
-        if self.attributes != None and not key in self.attributes:
+        if self.attributes is not None and not key in self.attributes: #pylint: disable=unsupported-membership-test
             if not self.allowcustomattributes:
                 raise KeyError("Trying to set metadata field '" + key + "', but no custom attributes are allowed by the format")
-        elif self.attributes and key in self.attributes:
-            maxvalues = self.attributes[key]
+        elif self.attributes and key in self.attributes: #pylint: disable=unsupported-membership-test
+            maxvalues = self.attributes[key] #pylint: disable=unsubscriptable-object
             if isinstance(maxvalues, list):
                 if not value in maxvalues:
                     raise ValueError("Invalid value '" + str(value) + "' for metadata field '" + key + "'")
@@ -1152,9 +1160,9 @@ class CLAMMetaData(object):
             xml = ""
         xml += indent + "<CLAMMetaData format=\"" + self.__class__.__name__ + "\""
         if self.mimetype:
-             xml += " mimetype=\""+self.mimetype+"\""
+            xml += " mimetype=\""+self.mimetype+"\""
         if self.schema:
-             xml += " schema=\""+self.schema+"\""
+            xml += " schema=\""+self.schema+"\""
         if self.inputtemplate:
             xml += " inputtemplate=\""+self.inputtemplate+"\""
         xml += ">\n"
@@ -1170,9 +1178,8 @@ class CLAMMetaData(object):
 
     def save(self, filename):
         """Save metadata to XML file"""
-        f = io.open(filename,'w',encoding='utf-8')
-        f.write(self.xml())
-        f.close()
+        with io.open(filename,'w',encoding='utf-8') as f:
+            f.write(self.xml())
 
     def validate(self):
         """Validate the metadata"""
@@ -1192,20 +1199,20 @@ class CLAMMetaData(object):
     @staticmethod
     def fromxml(node, file=None):
         """Read metadata from XML. Static method returning an CLAMMetaData instance (or rather; the appropriate subclass of CLAMMetaData) from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
         if node.tag == 'CLAMMetaData':
-            format = node.attrib['format']
+            dataformat = node.attrib['format']
 
             formatclass = None
             for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
-                if C.__name__ == format:
+                if C.__name__ == dataformat:
                     formatclass = C
                     break
-            if formatclass is None and format in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[format], CLAMMetaData):
-                formatclass = vars(clam.common.formats)[format]
+            if formatclass is None and dataformat in vars(clam.common.formats) and issubclass(vars(clam.common.formats)[dataformat], CLAMMetaData):
+                formatclass = vars(clam.common.formats)[dataformat]
             if formatclass is None:
-                raise Exception("Format class " + format + " not found!")
+                raise Exception("Format class " + dataformat + " not found!")
 
             data = {}
             if 'inputtemplate' in node.attrib:
@@ -1232,31 +1239,23 @@ class CLAMMetaData(object):
 
 class CMDIMetaData(CLAMMetaData):
     """Direct CMDI Metadata support, not implemented yet, reserved for future use"""
-    #TODO LATER: implement
+    #MAYBE TODO LATER: implement
     pass
-
-
-
-
-
-
-
-
 
 
 class InputTemplate(object):
     """This class represents an input template. A slot with a certain format and function to which input files can be uploaded"""
 
-    def __init__(self, id, formatclass, label, *args, **kwargs):
-        assert (issubclass(formatclass, CLAMMetaData))
-        assert (not '/' in id and not '.' in id)
+    def __init__(self, template_id, formatclass, label, *args, **kwargs):
+        assert issubclass(formatclass, CLAMMetaData)
+        assert not '/' in template_id and not '.' in template_id
         self.formatclass = formatclass
-        self.id = id
+        self.id = template_id
         self.label = label
 
         self.parameters = []
         self.converters = []
-        self.viewers = [] #TODO Later: Support viewers in InputTemplates?
+        self.viewers = [] #MAYBE TODO Later: Support viewers in InputTemplates?
         self.inputsources = []
 
         self.unique = True #may mark input/output as unique
@@ -1348,12 +1347,12 @@ class InputTemplate(object):
     @staticmethod
     def fromxml(node):
         """Static method returning an InputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
-        assert(node.tag.lower() == 'inputtemplate')
+        assert node.tag.lower() == 'inputtemplate'
 
-        id = node.attrib['id']
-        format = node.attrib['format']
+        template_id = node.attrib['id']
+        dataformat = node.attrib['format']
         label = node.attrib['label']
         kwargs = {}
         if 'filename' in node.attrib:
@@ -1361,40 +1360,34 @@ class InputTemplate(object):
         if 'extension' in node.attrib:
             kwargs['extension'] = node.attrib['extension']
         if 'unique' in node.attrib:
-            if node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1':
-                kwargs['unique'] = True
-            else:
-                kwargs['unique'] = False
+            kwargs['unique'] =  node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1'
         if 'acceptarchive' in node.attrib:
-            if node.attrib['acceptarchive'].lower() == 'yes' or node.attrib['acceptarchive'].lower() == 'true' or node.attrib['acceptarchive'].lower() == '1':
-                kwargs['acceptarchive'] = True
-            else:
-                kwargs['acceptarchive'] = False
+            kwargs['acceptarchive'] = node.attrib['acceptarchive'].lower() == 'yes' or node.attrib['acceptarchive'].lower() == 'true' or node.attrib['acceptarchive'].lower() == '1'
 
         #find formatclass
         formatcls = None
         for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
-            if C.__name__ == format:
+            if C.__name__ == dataformat:
                 formatcls = C
                 break
         if formatcls is None:
-            if format in vars(clam.common.formats):
-                formatcls = vars(clam.common.formats)[format]
+            if dataformat in vars(clam.common.formats):
+                formatcls = vars(clam.common.formats)[dataformat]
             else:
-                raise Exception("Expected format class '" + format+ "', but not defined!")
+                raise Exception("Expected format class '" + dataformat+ "', but not defined!")
 
         args = []
         for subnode in node:
             if subnode.tag in vars(clam.common.parameters):
                 args.append(vars(clam.common.parameters)[subnode.tag].fromxml(subnode))
             elif subnode.tag == 'converter':
-                pass #TODO: Reading converters from XML is not implemented (and not necessary at this stage)
+                pass #MAYBE TODO: Reading converters from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'viewer':
-                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
+                pass #MAYBE TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
             else:
                 raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
 
-        return InputTemplate(id,formatcls,label, *args, **kwargs)
+        return InputTemplate(template_id,formatcls,label, *args, **kwargs)
 
 
 
@@ -1437,9 +1430,9 @@ class InputTemplate(object):
         results = []
 
         if projectpath[-1] == '/':
-             inputpath = projectpath + 'input/'
+            inputpath = projectpath + 'input/'
         else:
-             inputpath = projectpath + '/input/'
+            inputpath = projectpath + '/input/'
 
         for linkf,realf in clam.common.util.globsymlinks(inputpath + '/.*.INPUTTEMPLATE.' + self.id + '.*'):
             seqnr = int(linkf.split('.')[-1])
@@ -1468,9 +1461,9 @@ class InputTemplate(object):
 
         if not validatedata:
             assert inputdata
-            errors,parameters = self.validate(inputdata,user)
+            errors, parameters = self.validate(inputdata,user) #pylint: disable=unused-variable
         else:
-            errors, parameters = validatedata
+            errors, parameters = validatedata #pylint: disable=unused-variable
 
         #scan errors and set metadata
         success = True
@@ -1501,7 +1494,7 @@ class AbstractMetaField(object): #for OutputTemplate only
 
     def xml(self, operator='set', indent = ""):
         """Serialize the metadata field to XML"""
-        xml = indent + "<meta id=\"" + self.key + "\"";
+        xml = indent + "<meta id=\"" + self.key + "\""
         if operator != 'set':
             xml += " operator=\"" + operator + "\""
         if not self.value:
@@ -1513,7 +1506,7 @@ class AbstractMetaField(object): #for OutputTemplate only
     @staticmethod
     def fromxml(node):
         """Static method returning an MetaField instance (any subclass of AbstractMetaField) from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
         if node.tag.lower() != 'meta':
             raise Exception("Expected meta tag but got '" + node.tag + "' instead")
@@ -1599,10 +1592,10 @@ class ParameterMetaField(AbstractMetaField):
             return False
 
 class OutputTemplate(object):
-    def __init__(self, id, formatclass, label, *args, **kwargs):
-        assert (issubclass(formatclass, CLAMMetaData))
-        assert (not '/' in id and not '.' in id)
-        self.id = id
+    def __init__(self, template_id, formatclass, label, *args, **kwargs):
+        assert issubclass(formatclass, CLAMMetaData)
+        assert '/' not in template_id and '.' not in template_id
+        self.id = template_id
         self.formatclass = formatclass
         self.label = label
 
@@ -1641,7 +1634,8 @@ class OutputTemplate(object):
             elif key == 'removeextension' or key=='removeextensions':
                 #remove the following extension(s) (prior to adding the extension specified)
                 if value is True:
-                    self.removeextensions = True #will remove all (only 1 level though)
+                    #will remove all (only 1 level though)
+                    self.removeextensions = True #pylint: disable=redefined-variable-type
                 elif value is False:
                     pass
                 elif not isinstance(value,list):
@@ -1698,12 +1692,12 @@ class OutputTemplate(object):
     @staticmethod
     def fromxml(node):
         """Static method return an OutputTemplate instance from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
-        assert(node.tag.lower() == 'outputtemplate')
+        assert node.tag.lower() == 'outputtemplate'
 
-        id = node.attrib['id']
-        format = node.attrib['format']
+        template_id = node.attrib['id']
+        dataformat = node.attrib['format']
         label = node.attrib['label']
         kwargs = {}
         if 'filename' in node.attrib:
@@ -1711,51 +1705,48 @@ class OutputTemplate(object):
         if 'extension' in node.attrib:
             kwargs['extension'] = node.attrib['extension']
         if 'unique' in node.attrib:
-            if node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1':
-                kwargs['unique'] = True
-            else:
-                kwargs['unique'] = False
+            kwargs['unique'] = node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1'
 
         #find formatclass
         formatcls = None
         for C in CUSTOM_FORMATS: #CUSTOM_FORMATS will be injected by clamservice.py
-            if C.__name__ == format:
+            if C.__name__ == dataformat:
                 formatcls = C
                 break
         if formatcls is None:
-            if format in vars(clam.common.formats):
-                formatcls = vars(clam.common.formats)[format]
+            if dataformat in vars(clam.common.formats):
+                formatcls = vars(clam.common.formats)[dataformat]
             else:
-                raise Exception("Specified format not defined! (" + format + ")")
+                raise Exception("Specified format not defined! (" + dataformat + ")")
 
         args = []
         for subnode in node:
             if subnode.tag == 'parametercondition':
                 args.append(ParameterCondition.fromxml(subnode))
             elif subnode.tag == 'converter':
-                pass #TODO: Reading converters from XML is not implemented (and not necessary at this stage)
+                pass #MAYBE TODO: Reading converters from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'viewer':
-                pass #TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
+                pass #MAYBE TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
             else:
                 args.append(AbstractMetaField.fromxml(subnode))
 
-        return OutputTemplate(id,formatcls,label, *args, **kwargs)
+        return OutputTemplate(template_id,formatcls,label, *args, **kwargs)
 
 
 
     def __eq__(self, other):
         return other.id == self.id
 
-    def _findparent(self, inputtemplates):
+    def findparent(self, inputtemplates):
         """Find the most suitable parent, that is: the first matching unique/multi inputtemplate"""
         for inputtemplate in inputtemplates:
             if self.unique == inputtemplate.unique:
                 return inputtemplate.id
         return None
 
-    def _getparent(self, profile):
+    def getparent(self, profile):
         """Resolve a parent ID"""
-        assert (self.parent)
+        assert self.parent
         for inputtemplate in profile.input:
             if inputtemplate == self.parent:
                 return inputtemplate
@@ -1766,11 +1757,11 @@ class OutputTemplate(object):
 
         project = os.path.basename(projectpath)
 
-        if self.parent:
+        if self.parent: #pylint: disable=too-many-nested-blocks
             #We have a parent, infer the correct filename
 
             #copy filename from parent
-            parent = self._getparent(profile)
+            parent = self.getparent(profile)
 
             #get input files for the parent InputTemplate
             parentinputfiles = parent.matchingfiles(projectpath)
@@ -1778,7 +1769,7 @@ class OutputTemplate(object):
                 raise Exception("OutputTemplate '"+self.id + "' has parent '" + self.parent + "', but no matching input files were found!")
 
             #Do we specify a full filename?
-            for seqnr, inputfilename, inputtemplate in parentinputfiles:
+            for seqnr, inputfilename, inputtemplate in parentinputfiles: #pylint: disable=unused-variable
 
                 if self.filename:
                     filename = self.filename
@@ -1808,9 +1799,9 @@ class OutputTemplate(object):
                         #Remove specified extension
                         for ext in self.removeextensions:
                             if ext:
-                                if (ext[0] != '.' and filename[-len(ext) - 1:] == '.' + ext):
+                                if ext[0] != '.' and filename[-len(ext) - 1:] == '.' + ext:
                                     filename = filename[:-len(ext) - 1]
-                                elif (ext[0] == '.' and filename[-len(ext):] == ext):
+                                elif ext[0] == '.' and filename[-len(ext):] == ext:
                                     filename = filename[:-len(ext)]
 
 
@@ -1833,16 +1824,14 @@ class OutputTemplate(object):
 
             filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0, project, None)
 
-
             yield filename, metadata
-
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
 
     def generatemetadata(self, parameters, parentfile, relevantinputfiles, provenancedata = None):
         """Generate metadata, given a filename, parameters and a dictionary of inputdata (necessary in case we copy from it)"""
-        assert isinstance(provenancedata,CLAMProvenanceData) or provenancedata == None
+        assert isinstance(provenancedata,CLAMProvenanceData) or provenancedata is None
 
         data = {}
 
@@ -1856,7 +1845,7 @@ class OutputTemplate(object):
                 metafield = metafield.evaluate(parameters)
                 if not metafield:
                     continue
-            assert(isinstance(metafield, AbstractMetaField))
+            assert isinstance(metafield, AbstractMetaField)
             metafield.resolve(data, parameters, parentfile, relevantinputfiles)
 
         if provenancedata:
@@ -1871,7 +1860,7 @@ class OutputTemplate(object):
 
 class ParameterCondition(object):
     def __init__(self, **kwargs):
-        if not 'then' in kwargs:
+        if 'then' not in kwargs:
             raise Exception("No 'then=' specified!")
 
         self.then = None
@@ -1971,7 +1960,7 @@ class ParameterCondition(object):
 
     def xml(self, indent = ""):
         xml = indent + "<parametercondition>\n" + indent + " <if>\n"
-        for key, value, evalf, operator in self.conditions:
+        for key, value, evalf, operator in self.conditions: #pylint: disable=unused-variable
             xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + clam.common.util.xmlescape(str(value)) + "</" + operator + ">\n"
         xml += indent + " </if>\n" + indent + " <then>\n"
         xml += self.then.xml(indent + "\t") + "\n"
@@ -1986,9 +1975,9 @@ class ParameterCondition(object):
     @staticmethod
     def fromxml(node):
         """Static method returning a ParameterCondition instance from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
-        assert(node.tag.lower() == 'parametercondition')
+        assert node.tag.lower() == 'parametercondition'
 
         kwargs = {}
 
@@ -2004,7 +1993,7 @@ class ParameterCondition(object):
                     found = True
             elif node.tag == 'then' or node.tag == 'else' or node.tag == 'otherwise':
                 #interpret statements:
-                for subnode in node: #TODO LATER: Support for multiple statement in then=, else= ?
+                for subnode in node: #MAYBE TODO LATER: Support for multiple statement in then=, else= ?
                     if subnode.tag.lower() == 'parametercondition':
                         kwargs[node.tag] = ParameterCondition.fromxml(subnode)
                     elif subnode.tag == 'meta':
@@ -2116,7 +2105,7 @@ class Action(object):
             assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in args  ])
             self.parameters = args
         else:
-            self.parameters = []
+            self.parameters = [] #pylint: disable=redefined-type
 
 
         if 'mimetype' in kwargs:
@@ -2164,9 +2153,9 @@ class Action(object):
     @staticmethod
     def fromxml(node):
         """Static method returning an Action instance from the given XML description. Node can be a string or an etree._Element."""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = parsexmlstring(node)
-        assert(node.tag.lower() == 'action')
+        assert node.tag.lower() == 'action'
 
         kwargs = {}
         args = []
@@ -2217,13 +2206,13 @@ def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, proje
 def resolveoutputfilename(filename, globalparameters, localparameters, outputtemplate, nextseq, project, inputfilename):
     #MAYBE TODO: make more efficient
     if filename.find('$') != -1:
-        for id, parameter in sorted(globalparameters.items(), key=lambda x: len(x[0]),reverse=True): #, cmp=lambda x,y: len(y[0]) - len(x[0])):
+        for parameter_id, parameter in sorted(globalparameters.items(), key=lambda x: len(x[0]),reverse=True): #, cmp=lambda x,y: len(y[0]) - len(x[0])):
             if parameter and parameter.hasvalue:
                 filename = filename.replace('$' + parameter.id, str(parameter.value))
         if filename.find('$') != -1:
-            for id, value in sorted(localparameters.items(), key=lambda x:len(x[0]),reverse=True): # cmp=lambda x,y: len(y[0]) - len(x[0])):
+            for parameter_id, value in sorted(localparameters.items(), key=lambda x:len(x[0]),reverse=True): # cmp=lambda x,y: len(y[0]) - len(x[0])):
                 if value != None:
-                    filename = filename.replace('$' + id, str(value))
+                    filename = filename.replace('$' + parameter_id, str(value))
         if filename.find('$') != -1:
             if inputfilename:
                 inputfilename = os.path.basename(inputfilename)
@@ -2269,10 +2258,10 @@ def escape(s, quote):
 
 def shellsafe(s, quote='', doescape=True):
     """Returns the value string, wrapped in the specified quotes (if not empty), but checks and raises an Exception if the string is at risk of causing code injection"""
-    if sys.version[0] == '2' and not isinstance(s,unicode):
-        s = unicode(s,'utf-8')
+    if sys.version[0] == '2' and not isinstance(s,unicode): #pylint: disable=undefined-variable
+        s = unicode(s,'utf-8') #pylint: disable=undefined-variable
     if len(s) > 1024:
-            raise ValueError("Variable value rejected for security reasons: too long")
+        raise ValueError("Variable value rejected for security reasons: too long")
     if quote:
         if quote in s:
             if doescape:
@@ -2286,4 +2275,5 @@ def shellsafe(s, quote='', doescape=True):
                 raise ValueError("Variable value rejected for security reasons: " + s)
         return s
 
-import clam.common.formats #yes, this is deliberately placed at the end!
+#yes, this is deliberately placed at the end!
+import clam.common.formats #pylint: disable=wrong-import-position

@@ -160,11 +160,11 @@ class HTTPDigestAuth(HTTPAuth):
             return self.noncememory.validate(nonce)
 
         def default_generate_opaque(nonce):
-            opaque, ip, expiretime = self.noncememory.get(nonce)
+            opaque, ip, expiretime = self.noncememory.get(nonce) #pylint: disable=unused-variable
             return opaque
 
         def default_verify_opaque(nonce, checkopaque):
-            opaque, ip, expiretime = self.noncememory.get(nonce)
+            opaque, ip, expiretime = self.noncememory.get(nonce) #pylint: disable=unused-variable
             return opaque == checkopaque
 
         self.generate_nonce(default_generate_nonce)
@@ -200,7 +200,7 @@ class HTTPDigestAuth(HTTPAuth):
         opaque = self.get_opaque(nonce)
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, nonce, opaque)
 
-    def authenticate(self, auth, password):
+    def authenticate(self, auth, password): #pylint: disable=too-many-return-statements
         if not auth.username:
             self.printdebug("Username missing in authorization header")
             return False
@@ -283,7 +283,7 @@ class ForwardedAuth(HTTPAuth):
         raise KeyError
 
 class OAuth2(HTTPAuth):
-    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, printdebug=None, scope=None):
+    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, printdebug=None, scope=None): #pylint: disable=super-init-not-called
         def default_auth_error():
             return "Unauthorized Access (OAuth2)"
 
@@ -326,7 +326,7 @@ class OAuth2(HTTPAuth):
                     try:
                         oauth_access_token = flask.request.values['oauth_access_token']
                         self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                    except:
+                    except KeyError:
                         self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
 
                 if not oauth_access_token:
@@ -339,7 +339,7 @@ class OAuth2(HTTPAuth):
                     if self.scope:
                         kwargs['scope'] = self.scope
                     oauthsession = OAuth2Session(self.client_id, **kwargs)
-                    auth_url, state = self.auth_function(oauthsession, self.auth_url)
+                    auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
 
                     #Redirect to Authentication Provider
                     self.printdebug("Redirecting to authentication provider: " + self.auth_url)
@@ -385,7 +385,7 @@ class NonceMemory:
         try:
             self.random.random()
         except NotImplementedError:
-            self.random = Random()
+            self.random = Random() #pylint: disable=redefined-variable-type
 
     def getnew(self, expiration=900, opaque=None):
         nonce = md5(str(self.random.random()).encode('utf-8')).hexdigest()
@@ -402,9 +402,8 @@ class NonceMemory:
     def validate(self, nonce):
         """Does the nonce exist and is it valid for the request?"""
         if self.debug: print("Checking nonce " + str(nonce),file=sys.stderr)
-        noncefile = self.path + '/' + nonce + '.nonce'
         try:
-            opaque, ip, expiretime = self.get(nonce)
+            opaque, ip, expiretime = self.get(nonce) #pylint: disable=unused-variable
             if expiretime < time.time():
                 if self.debug: print("Nonce expired",file=sys.stderr)
                 return False
@@ -437,7 +436,7 @@ class NonceMemory:
     def cleanup(self):
         """do cleanup on destruction, delete expired nonces"""
         for noncefile in glob(self.path + '/*.nonce'):
-            opaque,ip, expiretime = self.readnoncefile(noncefile)
+            opaque,ip, expiretime = self.readnoncefile(noncefile) #pylint: disable=unused-variable
             if time.time() > expiretime:
                 os.unlink(noncefile)
 

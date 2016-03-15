@@ -14,18 +14,20 @@
 #
 ###############################################################
 
+#pylint: disable=wrong-import-order
+
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 import os.path
 import sys
 import requests
-from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor #pylint: disable=import-error
+from requests_toolbelt import MultipartEncoder #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error
+    from StringIO import StringIO #pylint: disable=import-error,unused-import
     from io import IOBase
 else:
-    from io import StringIO, IOBase, BytesIO
+    from io import StringIO, IOBase, BytesIO  #pylint: disable=import-error,unused-import
 
 import clam.common.status
 import clam.common.parameters
@@ -79,8 +81,6 @@ class CLAMClient:
 
     def initauth(self):
         """Initialise authentication, for internal use"""
-        global VERSION
-
         headers = {'User-agent': 'CLAMClientAPI-' + VERSION}
         if self.oauth:
             if not self.oauth_access_token:
@@ -111,9 +111,9 @@ class CLAMClient:
     def initrequest(self, data=None):
         params = {'headers': self.initauth() }
         if self.authenticated and not self.oauth:
-           params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password)
+            params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password)
         if data:
-           params['data'] = data
+            params['data'] = data
         return params
 
     def request(self, url='', method = 'GET', data = None, parse=True, encoding=None):
@@ -139,7 +139,7 @@ class CLAMClient:
             raise clam.common.data.BadRequest()
         elif r.status_code == 401:
             raise clam.common.data.AuthRequired()
-        elif r.status_code == 403:
+        elif r.status_code == 403: #pylint: disable=too-many-nested-blocks
             content = r.text
             if parse:
                 data = self._parse(content)
@@ -148,7 +148,7 @@ class CLAMClient:
                         print("DEBUG: errors found",file=sys.stderr)
                         error = data.parametererror()
                         print("DEBUG: parametererror=" + str(error),file=sys.stderr)
-                        for parametergroup, parameters in data.parameters:
+                        for parametergroup, parameters in data.parameters: #pylint: disable=unused-variable
                             for parameter in parameters:
                                 print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
                         if error:
@@ -213,7 +213,7 @@ class CLAMClient:
 
 
 
-    def action(self, id, **kwargs):
+    def action(self, action_id, **kwargs):
         """Query an action, specify the parameters for the action as keyword parameters. An optional keyword parameter method='GET' (default) or method='POST' can be set. The character set encoding of the response can be configured using the encoding keyword parameter (defaults to utf-8 by default)"""
 
         if 'method' in kwargs:
@@ -227,7 +227,7 @@ class CLAMClient:
         else:
             encoding = 'utf-8'
 
-        return self.request('actions/' + id, method, kwargs, False,encoding)
+        return self.request('actions/' + action_id, method, kwargs, False,encoding)
 
 
 
@@ -238,10 +238,10 @@ class CLAMClient:
             response = client.start("myprojectname", parameter1="blah", parameterX=4.2)
 
         """
-        auth = None
-        if 'auth' in parameters:
-            auth = parameters['auth']
-            del parameters['auth']
+        #auth = None
+        #if 'auth' in parameters:
+        #    auth = parameters['auth']
+        #    del parameters['auth']
         for key in parameters:
             if isinstance(parameters[key],list) or isinstance(parameters[key],tuple):
                 parameters[key] = ",".join(parameters[key])
@@ -258,7 +258,7 @@ class CLAMClient:
 
         try:
             data = self.start(project, **parameters)
-            for parametergroup, paramlist in data.parameters:
+            for parametergroup, paramlist in data.parameters: #pylint: disable=unused-variable
                 for parameter in paramlist:
                     if parameter.error:
                         raise clam.common.data.ParameterError(parameter.error)
@@ -282,11 +282,11 @@ class CLAMClient:
         return self.abort(project)
 
 
-    def downloadarchive(self, project, targetfile, format = 'zip'):
+    def downloadarchive(self, project, targetfile, archiveformat = 'zip'):
         """Download all output files as a single archive:
 
         * *targetfile* - path for the new local file to be written
-        * *format* - the format of the archive, can be 'zip','gz','bz2'
+        * *archiveformat* - the format of the archive, can be 'zip','gz','bz2'
 
         Example::
 
@@ -294,8 +294,8 @@ class CLAMClient:
 
         """
         if isinstance(targetfile,str) or (sys.version < '3' and isinstance(targetfile,unicode)): #pylint: disable=undefined-variable
-                targetfile = open(targetfile,'wb')
-        r = requests.get(self.url + project + '/output/' + format,**self.initrequest())
+            targetfile = open(targetfile,'wb')
+        r = requests.get(self.url + project + '/output/' + archiveformat,**self.initrequest())
         CHUNK = 16 * 1024
         for chunk in r.iter_content(chunk_size=CHUNK):
             if chunk: # filter out keep-alive new chunks
@@ -325,16 +325,16 @@ class CLAMClient:
 
     def _parseupload(self, node):
         """Parse CLAM Upload XML Responses. For internal use"""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             try:
                 node = clam.common.data.parsexmlstring(node)
             except:
                 raise Exception(node)
         if node.tag != 'clamupload':
             raise Exception("Not a valid CLAM upload response")
-        for node in node:
-            if node.tag == 'upload':
-                for subnode in node:
+        for node2 in node:
+            if node2.tag == 'upload':
+                for subnode in node2:
                     if subnode.tag == 'error':
                         raise clam.common.data.UploadError(subnode.text)
                     if subnode.tag == 'parameters':

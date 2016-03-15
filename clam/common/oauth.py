@@ -9,9 +9,9 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 
 import sys
 import json
-from requests_oauthlib import OAuth2Session
-from Crypto.Cipher import AES
 import base64
+from Crypto.Cipher import AES
+from requests_oauthlib import OAuth2Session
 
 class OAuthError(Exception):
     pass
@@ -23,8 +23,8 @@ def DEFAULT_AUTH_FUNCTION(oauthsession, authurl):
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/auth"
 GOOGLE_TOKEN_URL = "https://accounts.google.com/o/oauth2/token"
 GOOGLE_SCOPE = [
-     "https://www.googleapis.com/auth/userinfo.email",
-     "https://www.googleapis.com/auth/userinfo.profile"
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
 ]
 GOOGLE_AUTH_FUNCTION = lambda oauthsession, authurl: oauthsession.authorization_url(authurl, access_type="offline",approval_prompt="force")
 

@@ -16,21 +16,17 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import sys
 from lxml import etree as ElementTree
 if sys.version < '3':
-    from StringIO import StringIO
+    from StringIO import StringIO #pylint: disable=import-error
 else:
-    from io import StringIO,  BytesIO
+    from io import StringIO #pylint: disable=wrong-import-order
 from clam.common.util import xmlescape
 
 class AbstractParameter(object):
     """This is the base class from which all parameter classes have to be derived."""
 
-
-
-    def __init__(self, id, name, description = '', **kwargs):
-
-
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         #: A unique alphanumeric ID
-        self.id = id
+        self.id = parameter_id
 
         #: The parameter flag that will be used when this parameter is passed on the commandline (using COMMAND= and $PARAMETERS) (by default set to None)
         self.paramflag = None
@@ -118,13 +114,13 @@ class AbstractParameter(object):
                     xml += ' ' + key + '="' + str(int(v))+ '"'
                 elif isinstance(v, list):
                     xml += ' ' + key + '="'+xmlescape(",".join(v))+ '"'
-                elif isinstance(v, str)  or ( sys.version < '3' and isinstance(v, unicode)):
+                elif isinstance(v, str)  or ( sys.version < '3' and isinstance(v, unicode)): #pylint: disable=undefined-variable
                     xml += ' ' + key + '="'+xmlescape(v)+ '"'
                 else:
                     xml += ' ' + key + '="'+xmlescape(str(v))+ '"'
         if self.hasvalue:
             if sys.version < '3':
-                xml += ' value="'+xmlescape(unicode(self.value)) + '"'
+                xml += ' value="'+xmlescape(unicode(self.value)) + '"' #pylint: disable=undefined-variable
             else:
                 xml += ' value="'+xmlescape(str(self.value)) + '"'
         if self.error:
@@ -134,7 +130,7 @@ class AbstractParameter(object):
 
     def __str__(self):
         if self.value:
-            if sys.version < '3' and isinstance(self.value, unicode):
+            if sys.version < '3' and isinstance(self.value, unicode): #pylint: disable=undefined-variable
                 return self.value.encode('utf-8')
             else:
                 return str(self.value)
@@ -189,10 +185,10 @@ class AbstractParameter(object):
     @staticmethod
     def fromxml(node):
         """Create a Parameter instance (of any class derived from AbstractParameter!) given its XML description. Node can be a string containing XML or an lxml _Element"""
-        if not isinstance(node,ElementTree._Element):
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag in globals():
-            id = ''
+            parameter_id = ''
             paramflag = ''
             name = ''
             description = ''
@@ -200,7 +196,7 @@ class AbstractParameter(object):
             error = None
             for attrib, value in node.attrib.items():
                 if attrib == 'id':
-                    id = value
+                    parameter_id = value
                 elif attrib == 'paramflag':
                     paramflag = value
                 elif attrib == 'name':
@@ -218,7 +214,7 @@ class AbstractParameter(object):
 
             for subtag in node: #parse possible subtags
                 if subtag.tag == 'choice': #extra parsing for choice parameter (TODO: put in a better spot)
-                    if not 'choices' in kwargs: kwargs['choices'] = {}
+                    if 'choices' not in kwargs: kwargs['choices'] = {}
                     kwargs['choices'][subtag.attrib['id']] = subtag.text
                     if 'selected' in subtag.attrib and (subtag.attrib['selected'] == '1' or subtag.attrib['selected'] == 'yes'):
                         if 'multi' in kwargs and (kwargs['multi'] == 'yes' or kwargs['multi'] == '1' or kwargs['multi'] == 'true'):
@@ -226,7 +222,7 @@ class AbstractParameter(object):
                         else:
                             kwargs['value'] = subtag.attrib['id']
 
-            parameter = globals()[node.tag](id, name, description, **kwargs) #return parameter instance
+            parameter = globals()[node.tag](parameter_id, name, description, **kwargs) #return parameter instance
             if error:
                 parameter.error = error #prevent error from getting reset
             return parameter
@@ -237,7 +233,7 @@ class AbstractParameter(object):
 class BooleanParameter(AbstractParameter):
     """A parameter that takes a Boolean (True/False) value. """
 
-    def __init__(self, id, name, description = '', **kwargs):
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         """Keyword arguments:
             reverse = True/False  - If True, the command line option flag gets outputted when the option is NOT checked.
         """
@@ -248,7 +244,7 @@ class BooleanParameter(AbstractParameter):
             if key == 'reverse':
                 self.reverse = value  #Option gets outputted when option is NOT checked
 
-        super(BooleanParameter,self).__init__(id,name,description, **kwargs)
+        super(BooleanParameter,self).__init__(parameter_id,name,description, **kwargs)
 
 
     def constrainable(self):
@@ -257,10 +253,7 @@ class BooleanParameter(AbstractParameter):
 
     def set(self, value = True):
         """Set the boolean parameter"""
-        if value is True or value == 1 or ( (isinstance(value, str) or (sys.version < '3' and isinstance(value, unicode))) and (value.lower() == "1" or value.lower() == "yes" or  value.lower() == "true" or value.lower() == "enabled") ):
-            value = True
-        else:
-            value = False
+        value = value in (True,1) or ( (isinstance(value, str) or (sys.version < '3' and isinstance(value, unicode))) and (value.lower() in ("1","yes","true","enabled"))) #pylint: disable=undefined-variable
         return super(BooleanParameter,self).set(value)
 
     def unset(self):
@@ -289,17 +282,17 @@ class BooleanParameter(AbstractParameter):
 class StaticParameter(AbstractParameter):
     """This is a parameter that can't be changed (it's a bit of a contradiction, I admit). But useful for some metadata specifications."""
 
-    def __init__(self, id, name, description = '', **kwargs):
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         if not 'value' in kwargs:
             raise ValueError("Static parameter expects value= !")
-        super(StaticParameter,self).__init__(id,name,description, **kwargs)
+        super(StaticParameter,self).__init__(parameter_id,name,description, **kwargs)
 
 
 
 class StringParameter(AbstractParameter):
     """String Parameter, taking a text value, presented as a one line input box"""
 
-    def __init__(self, id, name, description = '', **kwargs):
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         """Keyword arguments::
 
             ``maxlength`` - The maximum length of the value, in number of characters
@@ -312,7 +305,7 @@ class StringParameter(AbstractParameter):
                 self.maxlength = int(value)
                 del kwargs['maxlength']
 
-        super(StringParameter,self).__init__(id,name,description, **kwargs)
+        super(StringParameter,self).__init__(parameter_id,name,description, **kwargs)
 
 
     def validate(self,value):
@@ -348,7 +341,7 @@ class StringParameter(AbstractParameter):
 class ChoiceParameter(AbstractParameter):
     """Choice parameter, users have to choose one of the available values, or multiple values if instantiated with multi=True."""
 
-    def __init__(self, id, name, description, **kwargs):
+    def __init__(self, parameter_id, name, description, **kwargs):
         """Keyword arguments:
 
         choices - A list of choices. If keys and values are not the same, you can
@@ -360,7 +353,7 @@ class ChoiceParameter(AbstractParameter):
         """
 
 
-        if not 'choices' in kwargs:
+        if 'choices' not in kwargs:
             raise Exception("No parameter choices specified for parameter " + id + "!")
         self.choices = [] #list of key,value tuples
         for x in kwargs['choices']:
@@ -374,7 +367,7 @@ class ChoiceParameter(AbstractParameter):
         self.delimiter = ","
         self.showall = False
         self.multi = False
-        if not 'value' in kwargs and not 'default' in kwargs and (not 'multi' in kwargs or not kwargs['multi']):
+        if 'value' not in kwargs and 'default' not in kwargs and ('multi' not in kwargs or not kwargs['multi']):
             self.value = self.choices[0][0] #no default specified, first choice is default
 
         if 'multi' in kwargs and kwargs['multi']:
@@ -454,7 +447,7 @@ class ChoiceParameter(AbstractParameter):
                 else:
                     xml += ' ' + key + '="'+xmlescape(value)+ '"'
         if self.error:
-             xml += ' error="'+self.error + '"'
+            xml += ' error="'+self.error + '"'
         xml += ">"
         for key, value in self.choices:
             if self.value == key or (isinstance(self.value ,list) and key in self.value):
@@ -474,8 +467,8 @@ class ChoiceParameter(AbstractParameter):
                 values = []
                 for choicekey in [x[0] for x in self.choices]:
                     if choicekey in passedvalues:
-                            found = True
-                            values.append(choicekey)
+                        found = True
+                        values.append(choicekey)
             else:
                 values = []
                 for choicekey in [x[0] for x in self.choices]:
@@ -497,8 +490,8 @@ class ChoiceParameter(AbstractParameter):
 class TextParameter(StringParameter): #TextArea based
     """Text Parameter, taking a text value, presented as a multiline input box"""
 
-    def __init__(self, id, name, description = '', **kwargs):
-        super(TextParameter,self).__init__(id,name,description, **kwargs)
+    def __init__(self, parameter_id, name, description = '', **kwargs):
+        super(TextParameter,self).__init__(parameter_id,name,description, **kwargs)
 
     def compilearg(self):
         if self.value.find(" ") >= 0 or self.value.find(";") >= 0:
@@ -514,12 +507,12 @@ class TextParameter(StringParameter): #TextArea based
         return self.paramflag + sep + str(value)
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, id, name, description = '', **kwargs):
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         self.minvalue = 0
         self.maxvalue = 0 #unlimited
 
         #defaults
-        if not 'default' in kwargs and not 'value' in kwargs:
+        if 'default' not in kwargs and 'value' not in kwargs:
             self.value = 0
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
@@ -529,7 +522,7 @@ class IntegerParameter(AbstractParameter):
                 self.maxvalue = int(value)
                 del kwargs[key]
 
-        super(IntegerParameter,self).__init__(id,name,description, **kwargs)
+        super(IntegerParameter,self).__init__(parameter_id,name,description, **kwargs)
 
     def constrainable(self):
         """Should this parameter be used in checking contraints?"""
@@ -539,7 +532,7 @@ class IntegerParameter(AbstractParameter):
         self.error = None
         try:
             value = int(value)
-        except:
+        except ValueError:
             self.error = "Not a number"
             return False
         if self.minvalue == self.maxvalue and self.maxvalue == 0:
@@ -574,13 +567,13 @@ class IntegerParameter(AbstractParameter):
 
 
 class FloatParameter(AbstractParameter):
-    def __init__(self, id, name, description = '', **kwargs):
+    def __init__(self, parameter_id, name, description = '', **kwargs):
         self.minvalue = 0.0
         self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
 
 
         #defaults
-        if not 'default' in kwargs and not 'value' in kwargs:
+        if 'default' not in kwargs and 'value' not in kwargs:
             self.value = 0.0
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
@@ -590,7 +583,7 @@ class FloatParameter(AbstractParameter):
                 self.maxvalue = float(value)
                 del kwargs[key]
 
-        super(FloatParameter,self).__init__(id,name,description, **kwargs)
+        super(FloatParameter,self).__init__(parameter_id,name,description, **kwargs)
 
     def constrainable(self):
         """Should this parameter be used in checking contraints?"""
@@ -601,12 +594,12 @@ class FloatParameter(AbstractParameter):
         self.error = None
         try:
             value = float(value)
-        except:
+        except ValueError:
             self.error = "Not a valid number"
             return False
         if self.minvalue == self.maxvalue and self.maxvalue == 0:
             return True #no restraints
-        elif ((self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue))):
+        elif (self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue)):
             return True
         else:
             self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
