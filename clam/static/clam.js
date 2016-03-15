@@ -202,6 +202,123 @@ function pollstatus() {
 }
 
 
+function processuploadresponse(response, paramdiv) {
+      //Processes CLAM Upload XML
+      
+      //Clear all previous errors
+      $(paramdiv).find('.error').each(function(){ $(this).html(''); }); 
+      
+      $(response).find('upload').each(function(){       //for each uploaded file
+        //var children = $(this).children();
+        var inputtemplate = $(this).attr('inputtemplate');
+        
+        var errors = false;
+        $(this).find('error').each(function() {
+                errors = true;
+                alert($(this).text());
+        });
+        $(this).find('parameters').each(function(){ 
+             if ($(this).attr('errors') === 'no') {
+                    errors = false;
+             } else {
+                    errors = true;
+                    //propagate the parameter errors to the interface
+                    renderfileparameters(inputtemplate, paramdiv, true, this );
+             }
+        });        
+        
+        /*var metadataerror = false;
+        var conversionerror = false;
+        var parametererrors = false;
+        var valid = false;
+        for (var i = 0; i < children.length; i++) {
+            if ($(children[i]).is('parameters')) { //see if parameters validate
+                if ($(children[i]).attr('errors') == 'no') {
+                    parametererrors = false;
+                } else {
+                    parametererrors = true;
+                }
+            } else if ($(children[i]).is('metadataerror')) { //see if there is no metadata error
+                metadataerror = true;
+            } else if ($(children[i]).is('conversionerror')) { //see if there is no conversion error
+                conversionerror = true;
+            } else if ($(children[i]).is('valid')) {
+                if ($(children[i]).text() == "yes") {
+                    valid = true;
+                } else {
+                    valid = false;
+                }                
+            }
+        }
+          
+        if ((valid) && (!parametererrors) && (!metadataerror)) {*/
+            //good! 
+        
+        if (!errors) {
+        
+            
+            //Check if file already exists in input table
+            var found = false;
+            var data = tableinputfiles.fnGetData();
+            for (var i = 0; i < data.length; i++) {
+                if (data[i][0].match('>' + $(this).attr('name') + '<') !== null) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            //Add this file to the input table if it doesn't exist yet
+            if (!found) {
+                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] );
+            }
+            
+        }
+        
+        /* //TODO: Make errors nicer, instead of alerts, propagate to interface
+        } else if (metadataerror) {
+            alert("A metadata error occured, contact the service provider");
+        } else if (conversionerror) {
+            alert("The file you uploaded could not be converted with the specified converter");
+        } else if (parametererrors) {
+            alert("There were parameter errors");
+            //TODO: Specify what parameter errors occured
+        } else if (!valid) {
+            alert("The file you uploaded did not validate, it's probably not of the type you specified");
+        }*/
+    });  
+}
+
+
+function showquickdelete() {
+    $('.quickdelete').show();
+}
+
+function quickdelete(projectname) {
+        $.ajax({ 
+        type: "DELETE", 
+        url: baseurl + '/' + projectname + '/', 
+        dataType: "text", 
+        beforeSend: oauthheader,
+        crossDomain: true,
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function(response){ 
+            $('#projectrow_' + projectname).hide();
+            $('#projects_info').html("Deleted project " + projectname);
+            $('.diskusage span').html("(Reload page to see total disk use)");
+        }});
+}
+
+function addformdata(parent, data) {
+    var fields = $(parent).find(':input');    
+    $(fields).each(function(){ //also works on textarea, select, button!
+        if (this.name !== undefined) {
+            data[this.name] = $(this).val();
+        }
+    });
+}
+
 function initclam() { //eslint-disable-line no-unused-vars, complexity
    if (typeof(inputtemplates) === "undefined") {
         //something went wrong during loading, probably authentication issues, reload page
@@ -383,7 +500,6 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    //Abort execution without deleting project
    if ($("#abortbutton").length) {
        $("#abortbutton").click(function(){
-         var data = {'abortonly': true };
          $.ajax({ 
             type: "DELETE", 
             url: baseurl + '/' + project + '/?abortonly=true', 
@@ -393,7 +509,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             xhrFields: {
               withCredentials: true
             },
-            success: function(response){ 
+            success: function(){ 
                 if (oauth_access_token !== "") {
                   window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
                 } else {
@@ -728,122 +844,5 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    });
 
 }  //initclam
-
-
-function showquickdelete() {
-    $('.quickdelete').show();
-}
-
-function quickdelete(projectname) {
-        $.ajax({ 
-        type: "DELETE", 
-        url: baseurl + '/' + projectname + '/', 
-        dataType: "text", 
-        beforeSend: oauthheader,
-        crossDomain: true,
-        xhrFields: {
-            withCredentials: true
-        },
-        success: function(response){ 
-            $('#projectrow_' + projectname).hide();
-            $('#projects_info').html("Deleted project " + projectname);
-            $('.diskusage span').html("(Reload page to see total disk use)");
-        }});
-}
-
-function addformdata(parent, data) {
-    var fields = $(parent).find(':input');    
-    $(fields).each(function(){ //also works on textarea, select, button!
-        if (this.name !== undefined) {
-            data[this.name] = $(this).val();
-        }
-    });
-}
-
-function processuploadresponse(response, paramdiv) {
-      //Processes CLAM Upload XML
-      
-      //Clear all previous errors
-      $(paramdiv).find('.error').each(function(){ $(this).html(''); }); 
-      
-      $(response).find('upload').each(function(){       //for each uploaded file
-        //var children = $(this).children();
-        var inputtemplate = $(this).attr('inputtemplate');
-        
-        var errors = false;
-        $(this).find('error').each(function() {
-                errors = true;
-                alert($(this).text());
-        });
-        $(this).find('parameters').each(function(){ 
-             if ($(this).attr('errors') === 'no') {
-                    errors = false;
-             } else {
-                    errors = true;
-                    //propagate the parameter errors to the interface
-                    renderfileparameters(inputtemplate, paramdiv, true, this );
-             }
-        });        
-        
-        /*var metadataerror = false;
-        var conversionerror = false;
-        var parametererrors = false;
-        var valid = false;
-        for (var i = 0; i < children.length; i++) {
-            if ($(children[i]).is('parameters')) { //see if parameters validate
-                if ($(children[i]).attr('errors') == 'no') {
-                    parametererrors = false;
-                } else {
-                    parametererrors = true;
-                }
-            } else if ($(children[i]).is('metadataerror')) { //see if there is no metadata error
-                metadataerror = true;
-            } else if ($(children[i]).is('conversionerror')) { //see if there is no conversion error
-                conversionerror = true;
-            } else if ($(children[i]).is('valid')) {
-                if ($(children[i]).text() == "yes") {
-                    valid = true;
-                } else {
-                    valid = false;
-                }                
-            }
-        }
-          
-        if ((valid) && (!parametererrors) && (!metadataerror)) {*/
-            //good! 
-        
-        if (!errors) {
-        
-            
-            //Check if file already exists in input table
-            var found = false;
-            var data = tableinputfiles.fnGetData();
-            for (var i = 0; i < data.length; i++) {
-                if (data[i][0].match('>' + $(this).attr('name') + '<') !== null) {
-                    found = true;
-                    break;
-                }
-            }
-            
-            //Add this file to the input table if it doesn't exist yet
-            if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] );
-            }
-            
-        }
-        
-        /* //TODO: Make errors nicer, instead of alerts, propagate to interface
-        } else if (metadataerror) {
-            alert("A metadata error occured, contact the service provider");
-        } else if (conversionerror) {
-            alert("The file you uploaded could not be converted with the specified converter");
-        } else if (parametererrors) {
-            alert("There were parameter errors");
-            //TODO: Specify what parameter errors occured
-        } else if (!valid) {
-            alert("The file you uploaded did not validate, it's probably not of the type you specified");
-        }*/
-    });  
-}
 
 
