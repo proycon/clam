@@ -11,7 +11,194 @@
  ***********************************************************/
 
 /*eslint-env browser,jquery */
-/*global stage,progress,user,accesstoken,oauth_access_token,simplepolling, simpleupload, preselectinputtemplate*/
+/*global stage,progress,user,accesstoken,oauth_access_token,simplepolling, simpleupload, preselectinputtemplate,systemid, baseurl, inputtemplates*/
+/*eslint-disable quotes, no-alert */
+
+
+function getinputtemplate(id) {
+    for (var i = 0; i < inputtemplates.length; i++) {
+        if (inputtemplates[i].id == id) {
+           return inputtemplates[i];
+        }
+    }
+    return null;
+}
+
+function validateuploadfilename(filename, inputtemplate_id) {
+    var inputtemplate = getinputtemplate(inputtemplate_id);
+    if (inputtemplate === null) {
+        alert('Select a valid input type first!');
+        return false;
+    }
+    //var filename = sourcefilename.match(/[\/|\\]([^\\\/]+)$/); //os.path.basename
+    
+    if (inputtemplate.filename) {
+        //inputtemplate forces a filename:
+        filename = inputtemplate.filename;
+    } else if (inputtemplate.extension) {
+        //inputtemplate forces an extension:
+        var l = inputtemplate.extension.length;
+        var tmp = filename.substr(filename.length - l, l);
+        //if the desired extension is not provided yet (server will take care of case mismatch), add it:
+        if (filename.substr(filename.length - l - 1, l+1).toLowerCase() != '.' + inputtemplate.extension.toLowerCase()) {
+            filename = filename + '.' + inputtemplate.extension;
+        }
+    }
+    return filename;
+}
+
+
+
+
+function renderfileparameters(id, target, enableconverters, parametersxmloverride) {
+    if (id === "") {
+        $(target).html("");
+    } else {
+        $(target).find('.error').each(function(){ $(this).html(''); }); 
+        var inputtemplate = getinputtemplate(id);
+        if (inputtemplate) {
+            var xmldoc;
+            var result;
+            if (document.implementation && document.implementation.createDocument) {
+                //For decent browsers (Firefox, Opera, Chromium, etc...)                
+                if (parametersxmloverride === undefined) {
+                    xmldoc = $(inputtemplate.parametersxml);                    
+                } else {
+                    xmldoc = $(parametersxmloverride);
+                }
+                var found = false;
+                for (var i = 0; i < xmldoc.length; i++) {
+                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
+                        xmldoc = xmldoc[i];
+                        found = true;
+                    }                    
+                }
+                if (!found) {
+                    alert("You browser was unable render the metadata parameters...");
+                    return false;
+                }     
+
+                
+                xsltProcessor=new XSLTProcessor();
+                xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
+                            
+                result = xsltProcessor.transformToFragment(xmldoc, document);
+            } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
+                xmldoc=new ActiveXObject("Microsoft.XMLDOM");
+                xmldoc.async="false";
+                xmldoc.loadXML(inputtemplate.parametersxml);
+                result = xmldoc.transformNode(parametersxsl);
+            } else {
+                result = "<strong>Error: Unable to render parameter form!</strong>";
+            }
+            $(target).html(result);
+
+            if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {                
+                var s = "Automatic conversion from other format? <select name=\"converter\">";
+                s += "<option value=\"\">No</option>";
+                for (var j = 0; j < inputtemplate.converters.length; j++) {
+                    s += "<option value=\"" + inputtemplate.converters[j].id + "\">" + inputtemplate.converters[j].label + "</option>";
+                }
+                s += "</select><br />";
+                $(target).prepend(s);
+            }
+            if (inputtemplate.acceptarchive) {
+            	$(target).prepend("For easy mass upload, this input template also accepts <strong>archives</strong> (<tt>zip, tar.gz, tar.bz2</tt>) containing multiple files of exactly this specific type.<br />");
+            }
+        } else {
+            $(target).html("<strong>Error: Selected input template is invalid!</strong>");
+        }
+    }
+}
+
+
+function deleteinputfile(filename) {   
+    var found = -1;
+    var data = tableinputfiles.fnGetData();
+    for (var i = 0; i < data.length; i++) {
+        if (data[i][0].match('>' + filename + '<') !== null) {
+            found = i;
+            break;
+        }
+    }   
+    if (found >= 0) tableinputfiles.fnDeleteRow(found);
+    $.ajax({ 
+        type: "DELETE", 
+        beforeSend: oauthheader,
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+        url: baseurl + '/' + project + "/input/" + filename, 
+        dataType: "xml"
+    });    
+}
+
+function setinputsource(tempelement) {
+    var src = tempelement.value;
+    $('#usecorpus').val(src);
+    if (src === '') {
+        $('#inputfilesarea').show();
+        $('#uploadarea').show();
+    } else {
+        $('#inputfilesarea').hide();
+        $('#uploadarea').hide();
+    }
+}
+
+function setlocalinputsource(selector, target) {
+    var value = selector.val();
+    if (value !== "") { 
+        $(target+'_form').show();
+    } else {
+        $(target+'_form').hide();
+    }
+}
+
+function pollstatus() {
+	$.ajax({
+		type: 'GET',
+		url: baseurl + '/' + project + "/status/",
+        beforeSend: oauthheader,
+        crossDomain: true,
+        xhrFields: {
+          withCredentials: true
+        },
+		dataType: 'json', 
+		data: {accesstoken: accesstoken, user: user},
+		success: function(response){
+                if (response.statuscode != 1) {
+                    if (oauth_access_token !== "") {
+                      window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
+                    } else {
+                      window.location.href = baseurl + '/' + project + '/'; /* refresh */
+                    }
+                } else {
+                	if (response.completion > 0) {
+                		progress = response.completion;
+                		$('#progressbar').progressbar( "option", "value", progress );        
+                	}        		
+            		var statuslogcontent = "";
+            		for (var i = 0; i < response.statuslog.length - 1; i++) {
+            			var msg = response.statuslog[i][0];
+            			var t = response.statuslog[i][1];
+            			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
+            		}                 		                		
+            		$('#statuslogtable').html(statuslogcontent);
+                }
+                setTimeout(pollstatus,2000);                   
+        },
+        error: function(response,errortype){
+        	alert("Error obtaining status");
+        },        
+	});	
+}
+
+function oauthheader(req) { 
+  if (oauth_access_token !== "") {
+    req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
+  }
+}
 
 function initclam() { //eslint-disable-line no-unused-vars
    if (typeof(inputtemplates) == "undefined") {
@@ -87,8 +274,8 @@ function initclam() { //eslint-disable-line no-unused-vars
    var processed = [];
    for (var i = 0; i < inputtemplates.length; i++) {
         var duplicate = false;
-        for (var j = 0;j < processed.length; j++) {
-            if (inputtemplates[i].id  ==  inputtemplates[j].id) {
+        for (var j = 0; j < processed.length; j++) {
+            if (inputtemplates[i].id  ===  inputtemplates[j].id) {
                 duplicate = true;
                 break;
             }
@@ -657,190 +844,3 @@ function processuploadresponse(response, paramdiv) {
 }
 
 
-
-function getinputtemplate(id) {
-    for (var i = 0; i < inputtemplates.length; i++) {
-        if (inputtemplates[i].id == id) {
-           return inputtemplates[i];
-        }
-    }
-    return null;
-}
-
-function validateuploadfilename(filename, inputtemplate_id) {
-    var inputtemplate = getinputtemplate(inputtemplate_id);
-    if (inputtemplate === null) {
-        alert('Select a valid input type first!');
-        return false;
-    }
-    //var filename = sourcefilename.match(/[\/|\\]([^\\\/]+)$/); //os.path.basename
-    
-    if (inputtemplate.filename) {
-        //inputtemplate forces a filename:
-        filename = inputtemplate.filename;
-    } else if (inputtemplate.extension) {
-        //inputtemplate forces an extension:
-        var l = inputtemplate.extension.length;
-        var tmp = filename.substr(filename.length - l, l);
-        //if the desired extension is not provided yet (server will take care of case mismatch), add it:
-        if (filename.substr(filename.length - l - 1, l+1).toLowerCase() != '.' + inputtemplate.extension.toLowerCase()) {
-            filename = filename + '.' + inputtemplate.extension;
-        }
-    }
-    return filename;
-}
-
-
-
-
-function renderfileparameters(id, target, enableconverters, parametersxmloverride) {
-    if (id === "") {
-        $(target).html("");
-    } else {
-        $(target).find('.error').each(function(){ $(this).html(''); }); 
-        var inputtemplate = getinputtemplate(id);
-        if (inputtemplate) {
-            var xmldoc;
-            var result;
-            if (document.implementation && document.implementation.createDocument) {
-                //For decent browsers (Firefox, Opera, Chromium, etc...)                
-                if (parametersxmloverride === undefined) {
-                    xmldoc = $(inputtemplate.parametersxml);                    
-                } else {
-                    xmldoc = $(parametersxmloverride);
-                }
-                var found = false;
-                for (var i = 0; i < xmldoc.length; i++) {
-                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
-                        xmldoc = xmldoc[i];
-                        found = true;
-                    }                    
-                }
-                if (!found) {
-                    alert("You browser was unable render the metadata parameters...");
-                    return false;
-                }     
-
-                
-                xsltProcessor=new XSLTProcessor();
-                xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
-                            
-                result = xsltProcessor.transformToFragment(xmldoc, document);
-            } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
-                xmldoc=new ActiveXObject("Microsoft.XMLDOM");
-                xmldoc.async="false";
-                xmldoc.loadXML(inputtemplate.parametersxml);
-                result = xmldoc.transformNode(parametersxsl);
-            } else {
-                result = "<strong>Error: Unable to render parameter form!</strong>";
-            }
-            $(target).html(result);
-
-            if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {                
-                var s = "Automatic conversion from other format? <select name=\"converter\">";
-                s += "<option value=\"\">No</option>";
-                for (var j = 0; j < inputtemplate.converters.length; j++) {
-                    s += "<option value=\"" + inputtemplate.converters[j].id + "\">" + inputtemplate.converters[j].label + "</option>";
-                }
-                s += "</select><br />";
-                $(target).prepend(s);
-            }
-            if (inputtemplate.acceptarchive) {
-            	$(target).prepend("For easy mass upload, this input template also accepts <strong>archives</strong> (<tt>zip, tar.gz, tar.bz2</tt>) containing multiple files of exactly this specific type.<br />");
-            }
-        } else {
-            $(target).html("<strong>Error: Selected input template is invalid!</strong>");
-        }
-    }
-}
-
-
-
-
-function deleteinputfile(filename) {   
-    var found = -1;
-    var data = tableinputfiles.fnGetData();
-    for (var i = 0; i < data.length; i++) {
-        if (data[i][0].match('>' + filename + '<') !== null) {
-            found = i;
-            break;
-        }
-    }   
-    if (found >= 0) tableinputfiles.fnDeleteRow(found);
-    $.ajax({ 
-        type: "DELETE", 
-        beforeSend: oauthheader,
-        crossDomain: true,
-        xhrFields: {
-          withCredentials: true
-        },
-        url: baseurl + '/' + project + "/input/" + filename, 
-        dataType: "xml"
-    });    
-}
-
-function setinputsource(tempelement) {
-    var src = tempelement.value;
-    $('#usecorpus').val(src);
-    if (src === '') {
-        $('#inputfilesarea').show();
-        $('#uploadarea').show();
-    } else {
-        $('#inputfilesarea').hide();
-        $('#uploadarea').hide();
-    }
-}
-
-function setlocalinputsource(selector, target) {
-    var value = selector.val();
-    if (value !== "") { 
-        $(target+'_form').show();
-    } else {
-        $(target+'_form').hide();
-    }
-}
-
-function pollstatus() {
-	$.ajax({
-		type: 'GET',
-		url: baseurl + '/' + project + "/status/",
-        beforeSend: oauthheader,
-        crossDomain: true,
-        xhrFields: {
-          withCredentials: true
-        },
-		dataType: 'json', 
-		data: {accesstoken: accesstoken, user: user},
-		success: function(response){
-                if (response.statuscode != 1) {
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
-                    } else {
-                      window.location.href = baseurl + '/' + project + '/'; /* refresh */
-                    }
-                } else {
-                	if (response.completion > 0) {
-                		progress = response.completion;
-                		$('#progressbar').progressbar( "option", "value", progress );        
-                	}        		
-            		var statuslogcontent = "";
-            		for (var i = 0; i < response.statuslog.length - 1; i++) {
-            			var msg = response.statuslog[i][0];
-            			var t = response.statuslog[i][1];
-            			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
-            		}                 		                		
-            		$('#statuslogtable').html(statuslogcontent);
-                }
-                setTimeout(pollstatus,2000);                   
-        },
-        error: function(response,errortype){
-        	alert("Error obtaining status");
-        },        
-	});	
-}
-
-function oauthheader(req) { 
-  if (oauth_access_token !== "") {
-    req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
-  }
-}
