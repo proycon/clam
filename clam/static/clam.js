@@ -1,7 +1,17 @@
-
+/***********************************************************
+ * CLAM: Computational Linguistics Application Mediator
+ * 
+ *       by Maarten van Gompel (proycon)
+ *       https://proycon.github.io/clam
+ *
+ *       Centre for Language and Speech Technology / Language Machines
+ *       Radboud University Nijmegen
+ *
+ *       Licensed under GPLv3
+ ***********************************************************/
 
 function initclam() {
-   if (typeof(inputtemplates) == 'undefined') {
+   if (typeof(inputtemplates) == "undefined") {
    		//something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
@@ -9,19 +19,19 @@ function initclam() {
 
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
    //done alone in all browsers
-   if (($('#customhtml').length > 0) && $('#customhtml').html().search("&lt;") != 1) {
-       var lt = new RegExp("&lt;", 'g');  i
-       var gt = new RegExp("&gt;", 'g');  i
-       var s = $('#customhtml').html()
-       s = s.replace(lt,'<')
+   if (($("#customhtml").length > 0) && $("#customhtml").html().search("&lt;") != 1) {
+       var lt = new RegExp("&lt;", 'g');
+       var gt = new RegExp("&gt;", 'g');
+       var s = $("#customhtml").html();
+       s = s.replace(lt,'<');
        s = s.replace(gt,'>');
-       $('#customhtml').html(s);
+       $("#customhtml").html(s);
    }
 
-   if ($('#projectname').length) {
+   if ($("#projectname").length) {
     $( "#projectname" ).keydown(function( event ) {
          if ( event.which == 32 ) {
-            $('#projectname').val($('#projectname').val() + '_');
+            $("#projectname").val($("#projectname").val() + '_');
             event.preventDefault();
          }
     });
@@ -82,7 +92,7 @@ function initclam() {
         }
         if (duplicate) continue;
         processed.push(inputtemplates[i].id);     
-        if ((i == 0) && (preselectinputtemplate) ) {
+        if ((i === 0) && (preselectinputtemplate) ) {
             selected='selected="selected"';
         } else {
             selected="";
@@ -98,7 +108,7 @@ function initclam() {
    $("#editorinputtemplate").change(function(event){
         renderfileparameters($('#editorinputtemplate').val(),'#editorparameters',false);
         var inputtemplate = getinputtemplate('#editorinputtemplate');
-        if (inputtemplate != null) {
+        if (inputtemplate !== null) {
             if (inputtemplate.filename) {
                 $('#editorfilename').val(inputtemplate.filename);
                 $('.editorfilenamerow').hide();
@@ -140,16 +150,16 @@ function initclam() {
 
    //Create a new project'
     if ($("#startprojectbutton").length) {
-       $('#projectname').keypress(function(e){ if (e.which == 13) $('#startprojectbutton').focus().click(); });
+       $("#projectname").keypress(function(e){ if (e.which == 13) $('#startprojectbutton').focus().click(); });
 
        $("#startprojectbutton").click(function(event){
-         if ($('#projectname').val() === "") {
+         if ($("#projectname").val() === "") {
              alert("No project ID specified");   
              return;
          }
          $.ajax({ 
             type: "PUT", 
-            url: baseurl + '/' + $("#projectname").val() + "/", 
+            url: baseurl + "/" + $("#projectname").val() + "/", 
             dataType: "text", 
             beforeSend: oauthheader,
             crossDomain: true,
@@ -157,10 +167,10 @@ function initclam() {
               withCredentials: true
             },
             success: function(response){ 
-                if (oauth_access_token != "") {
-                  window.location.href = baseurl + '/' + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
+                if (oauth_access_token !== "") {
+                  window.location.href = baseurl + "/" + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
                 } else {
-                  window.location.href = baseurl + '/' + $("#projectname").val() + "/";
+                  window.location.href = baseurl + "/" + $("#projectname").val() + "/";
                 }
             },
             error: function(response){
@@ -191,7 +201,7 @@ function initclam() {
               withCredentials: true
             },
             success: function(response){ 
-                if (oauth_access_token != "") {
+                if (oauth_access_token !== "") {
                   window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
                 } else {
                   window.location.href = baseurl + '/'; /* back to index */
@@ -224,7 +234,7 @@ function initclam() {
               withCredentials: true
             },
             success: function(response){ 
-                if (oauth_access_token != "") {
+                if (oauth_access_token !== "") {
                   window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
                 } else {
                   window.location.href = baseurl + '/'; /* back to index */
@@ -274,7 +284,7 @@ function initclam() {
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(event){
-            if (oauth_access_token != "") {
+            if (oauth_access_token !== "") {
               window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
             } else {
               window.location.href = baseurl + '/'; /* back to index */
@@ -310,7 +320,7 @@ function initclam() {
 
 
    //Open in-browser editor
-   $("#openeditor").click(function(event){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); })
+   $("#openeditor").click(function(event){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); });
 
    $('#toggleinputfiles').click(function(event) { 
        $('#inputfilesarea').show(); 
@@ -402,18 +412,18 @@ function initclam() {
             debug: true
         }).on('submit', function(event, id, fileName) {
 		    	var inputtemplate_id = $('#uploadinputtemplate').val();
-		    	if (inputtemplate_id == "") {
+		    	if (inputtemplate_id === "") {
 		    		alert("Please select a desired input type first");
 		    		return false;
 		    	}		    		
-		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken  }		    		
+		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken };	    		
 		    	addformdata( '#uploadparameters', params );		 
 		    	$(this).fineUploader('setParams',params); 		    			    	
 		         
 		        return true;
 		}).on('complete', function(event, id, fileName, responseJSON) {
 				if (responseJSON.isarchive) {
-                    if (oauth_access_token != "") {
+                    if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
                     } else {
                       window.location.href = baseurl + '/' + project + "/";
@@ -424,7 +434,7 @@ function initclam() {
 			
 		}).on('click',function(){
 		    	var inputtemplate_id = $('#uploadinputtemplate').val();
-		    	if (inputtemplate_id == "") {
+		    	if (inputtemplate_id === "") {
 		    		alert("Please select a desired input type first");
 		    		return false;
 		    	}		
@@ -433,14 +443,14 @@ function initclam() {
 
    //simpleupload:
    if ( (typeof($('#uploadbutton')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {    
-       uploader = new AjaxUpload('uploadbutton', {action: baseurl + '/' + project + '/input/', name: 'file', data: {'inputtemplate': $('#uploadinputtemplate').val()} , 
-            onChange: function(filename,extension){
+       uploader = new AjaxUpload('uploadbutton', {action: baseurl + "/" + project + "/input/", name: "file", data: {"inputtemplate": $("#uploadinputtemplate").val()} , 
+            onChange: function(uploadfilename,extension){
                  var inputtemplate_id = $('#uploadinputtemplate').val();
-                 var filename = validateuploadfilename(filename,inputtemplate_id);
+                 var filename = validateuploadfilename(uploadfilename,inputtemplate_id);
                  if (!filename) {
                     return false;
                  } else {
-                     uploader._settings.action = baseurl + '/' + project + '/input/' + filename
+                     uploader._settings.action = baseurl + "/" + project + "/input/" + filename;
                      uploader._settings.data.inputtemplate = inputtemplate_id;
                      addformdata( '#uploadparameters', uploader._settings.data );
                  }
@@ -450,7 +460,7 @@ function initclam() {
                 $('#uploadprogress').show();           
             },  
             onComplete: function(file, response){
-                processuploadresponse(response, '#uploadparameters');
+                processuploadresponse(response, "#uploadparameters");
                 $('#uploadprogress').hide();
                 $('#clientupload').show();
             }       
@@ -471,7 +481,7 @@ function initclam() {
                   withCredentials: true
                 },
                 success: function(response){
-                    if (oauth_access_token != "") {
+                    if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
                     } else {
                       window.location.href = baseurl + '/' + project + "/";
@@ -497,7 +507,7 @@ function initclam() {
             },
             success: function(response){
                 //processuploadresponse(response, '#nonexistant');
-                if (oauth_access_token != "") {
+                if (oauth_access_token !== "") {
                   window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
                 } else {
                   window.location.href = baseurl + '/' + project + "/";
@@ -507,7 +517,7 @@ function initclam() {
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
-                    if (oauth_access_token != "") {
+                    if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
                     } else {
                       window.location.href = baseurl + '/' + project + "/";
@@ -551,7 +561,7 @@ function quickdelete(projectname) {
 function addformdata(parent, data) {
     var fields = $(parent).find(':input');    
     $(fields).each(function(){ //also works on textarea, select, button!
-        if (this.name != undefined) {
+        if (this.name !== undefined) {
             data[this.name] = $(this).val();
         }
     });
@@ -561,7 +571,7 @@ function processuploadresponse(response, paramdiv) {
       //Processes CLAM Upload XML
       
       //Clear all previous errors
-      $(paramdiv).find('.error').each(function(){ $(this).html('') }); 
+      $(paramdiv).find('.error').each(function(){ $(this).html(''); }); 
       
       $(response).find('upload').each(function(){       //for each uploaded file
         //var children = $(this).children();
@@ -616,7 +626,7 @@ function processuploadresponse(response, paramdiv) {
             var found = false;
             var data = tableinputfiles.fnGetData();
             for (var i = 0; i < data.length; i++) {
-                if (data[i][0].match('>' + $(this).attr('name') + '<') != null) {
+                if (data[i][0].match('>' + $(this).attr('name') + '<') !== null) {
                     found = true;
                     break;
                 }
@@ -624,7 +634,7 @@ function processuploadresponse(response, paramdiv) {
             
             //Add this file to the input table if it doesn't exist yet
             if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] )
+                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), '' ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] );
             }
             
         }
@@ -648,15 +658,15 @@ function processuploadresponse(response, paramdiv) {
 function getinputtemplate(id) {
     for (var i = 0; i < inputtemplates.length; i++) {
         if (inputtemplates[i].id == id) {
-           return inputtemplates[i]
+           return inputtemplates[i];
         }
     }
     return null;
 }
 
 function validateuploadfilename(filename, inputtemplate_id) {
-    var inputtemplate = getinputtemplate(inputtemplate_id)
-    if (inputtemplate == null) {
+    var inputtemplate = getinputtemplate(inputtemplate_id);
+    if (inputtemplate === null) {
         alert('Select a valid input type first!');
         return false;
     }
@@ -670,8 +680,8 @@ function validateuploadfilename(filename, inputtemplate_id) {
         var l = inputtemplate.extension.length;
         var tmp = filename.substr(filename.length - l, l);
         //if the desired extension is not provided yet (server will take care of case mismatch), add it:
-        if (!(filename.substr(filename.length - l - 1, l+1).toLowerCase() == '.' + inputtemplate.extension.toLowerCase())) {
-            filename = filename + '.' + inputtemplate.extension
+        if (filename.substr(filename.length - l - 1, l+1).toLowerCase() != '.' + inputtemplate.extension.toLowerCase()) {
+            filename = filename + '.' + inputtemplate.extension;
         }
     }
     return filename;
@@ -681,7 +691,7 @@ function validateuploadfilename(filename, inputtemplate_id) {
 
 
 function renderfileparameters(id, target, enableconverters, parametersxmloverride) {
-    if (id == "") {
+    if (id === "") {
         $(target).html("");
     } else {
         $(target).find('.error').each(function(){ $(this).html(''); }); 
@@ -691,7 +701,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             var result;
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)                
-                if (parametersxmloverride == undefined) {
+                if (parametersxmloverride === undefined) {
                     xmldoc = $(inputtemplate.parametersxml);                    
                 } else {
                     xmldoc = $(parametersxmloverride);
@@ -726,8 +736,8 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {                
                 var s = "Automatic conversion from other format? <select name=\"converter\">";
                 s += "<option value=\"\">No</option>";
-                for (var i = 0; i < inputtemplate.converters.length; i++) {
-                    s += "<option value=\"" + inputtemplate.converters[i].id + "\">" + inputtemplate.converters[i].label + "</option>";
+                for (var j = 0; j < inputtemplate.converters.length; j++) {
+                    s += "<option value=\"" + inputtemplate.converters[j].id + "\">" + inputtemplate.converters[j].label + "</option>";
                 }
                 s += "</select><br />";
                 $(target).prepend(s);
@@ -748,7 +758,7 @@ function deleteinputfile(filename) {
     var found = -1;
     var data = tableinputfiles.fnGetData();
     for (var i = 0; i < data.length; i++) {
-        if (data[i][0].match('>' + filename + '<') != null) {
+        if (data[i][0].match('>' + filename + '<') !== null) {
             found = i;
             break;
         }
@@ -769,7 +779,7 @@ function deleteinputfile(filename) {
 function setinputsource(tempelement) {
     var src = tempelement.value;
     $('#usecorpus').val(src);
-    if (src == '') {
+    if (src === '') {
         $('#inputfilesarea').show();
         $('#uploadarea').show();
     } else {
@@ -779,8 +789,8 @@ function setinputsource(tempelement) {
 }
 
 function setlocalinputsource(selector, target) {
-    var value = selector.val()
-    if (value != "") { 
+    var value = selector.val();
+    if (value !== "") { 
         $(target+'_form').show();
     } else {
         $(target+'_form').hide();
@@ -800,7 +810,7 @@ function pollstatus() {
 		data: {accesstoken: accesstoken, user: user},
 		success: function(response){
                 if (response.statuscode != 1) {
-                    if (oauth_access_token != "") {
+                    if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
                     } else {
                       window.location.href = baseurl + '/' + project + '/'; /* refresh */
@@ -827,7 +837,7 @@ function pollstatus() {
 }
 
 function oauthheader(req) { 
-  if (oauth_access_token != "") {
+  if (oauth_access_token !== "") {
     req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
   }
 }
