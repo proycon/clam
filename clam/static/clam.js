@@ -289,11 +289,11 @@ function processuploadresponse(response, paramdiv) {
 }
 
 
-function showquickdelete() {
+function showquickdelete() {//eslint-disable-line no-unused-vars
     $('.quickdelete').show();
 }
 
-function quickdelete(projectname) {
+function quickdelete(projectname) {//eslint-disable-line no-unused-vars
         $.ajax({ 
         type: "DELETE", 
         url: baseurl + '/' + projectname + '/', 
@@ -303,7 +303,7 @@ function quickdelete(projectname) {
         xhrFields: {
             withCredentials: true
         },
-        success: function(response){ 
+        success: function(){ 
             $('#projectrow_' + projectname).hide();
             $('#projects_info').html("Deleted project " + projectname);
             $('.diskusage span').html("(Reload page to see total disk use)");
@@ -313,7 +313,7 @@ function quickdelete(projectname) {
 function addformdata(parent, data) {
     var fields = $(parent).find(':input');    
     $(fields).each(function(){ //also works on textarea, select, button!
-        if (this.name !== undefined) {
+        if (this.name !== undefined) { //eslint-disable-line no-undefined 
             data[this.name] = $(this).val();
         }
     });
@@ -664,7 +664,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 $(document).scrollTop( $("#header").offset().top ); 
                 //$("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); 
             },            
-            error: function(response, errortype){
+            error: function(response, errortype){ //eslint-disable-line no-unused-vars
                 processuploadresponse(response.responseXML, '#editorparameters');
             }            
         });            
@@ -698,7 +698,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
                 },
-                error: function(response, errortype){
+                error: function(response, errortype){ //eslint-disable-line no-unused-vars
                     processuploadresponse(response.responseXML, '#urluploadparameters');
                     $('#urluploadprogress').hide();                     
                     $('#urlupload').show();
@@ -719,7 +719,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             //forceMultipart: true,
             autoUpload: true, 
             debug: true
-        }).on('submit', function(event, id, fileName) {
+        }).on('submit', function(e, id, fileName) { //eslint-disable-line no-unused-vars
                 var inputtemplate_id = $('#uploadinputtemplate').val();
                 if (inputtemplate_id === "") {
                     alert("Please select a desired input type first");
@@ -768,7 +768,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 $('#clientupload').hide();
                 $('#uploadprogress').show();           
             },  
-            onComplete: function(file, response){
+            onComplete: function(file, response){ //eslint-disable-line no-unused-vars
                 processuploadresponse(response, "#uploadparameters");
                 $('#uploadprogress').hide();
                 $('#clientupload').show();
@@ -778,7 +778,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
     
 
-   $('#inputsourceselect').click(function(event){ /* Doesn't exist???? */
+   $('#inputsourceselect').click(function(){ /* Doesn't exist???? */
         $.ajax({ 
                 type: "POST", 
                 url: baseurl + '/' + project + "/input/", 
@@ -802,7 +802,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
         });     
    });
    
-   $('#uploadinputsourcebutton').click(function(event){
+   $('#uploadinputsourcebutton').click(function(){
        $('#inputsourceupload').hide();
        $('#inputsourceprogress').show();
        $.ajax({
@@ -814,7 +814,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             xhrFields: {
               withCredentials: true
             },
-            success: function(response){
+            success: function(response){//eslint-disable-line no-unused-vars
                 //processuploadresponse(response, '#nonexistant');
                 if (oauth_access_token !== "") {
                   window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
@@ -822,7 +822,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                   window.location.href = baseurl + '/' + project + "/";
                 }
           },
-            error: function(response,errortype){
+            error: function(response,errortype){//eslint-disable-line no-unused-vars
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
