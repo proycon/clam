@@ -11,9 +11,17 @@
  ***********************************************************/
 
 /*eslint-env browser,jquery */
-/*global stage,progress,user,accesstoken,oauth_access_token, simpleupload, preselectinputtemplate,systemid, baseurl,project, inputtemplates,parametersxsl*/
+/*global stage,progress:true,user,accesstoken,oauth_access_token, preselectinputtemplate,baseurl,project, inputtemplates,parametersxsl:true, tableinputfiles:true */
+//global but not used: systemid
 /*eslint-disable quotes, no-alert,complexity,curly */
 
+var uploader;
+
+function oauthheader(req) { 
+  if (oauth_access_token !== "") {
+    req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
+  }
+}
 
 function getinputtemplate(id) {
     for (var i = 0; i < inputtemplates.length; i++) {
@@ -39,7 +47,7 @@ function validateuploadfilename(filename, inputtemplate_id) {
         //inputtemplate forces an extension:
         var l = inputtemplate.extension.length;
         //if the desired extension is not provided yet (server will take care of case mismatch), add it:
-        if (filename.substr(filename.length - l - 1, l+1).toLowerCase() != '.' + inputtemplate.extension.toLowerCase()) {
+        if (filename.substr(filename.length - l - 1, l+1).toLowerCase() !== '.' + inputtemplate.extension.toLowerCase()) {
             filename = filename + '.' + inputtemplate.extension;
         }
     }
@@ -193,14 +201,9 @@ function pollstatus() {
     }); 
 }
 
-function oauthheader(req) { 
-  if (oauth_access_token !== "") {
-    req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
-  }
-}
 
 function initclam() { //eslint-disable-line no-unused-vars, complexity
-   if (typeof(inputtemplates) == "undefined") {
+   if (typeof(inputtemplates) === "undefined") {
         //something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
@@ -219,7 +222,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    if ($("#projectname").length) {
     $( "#projectname" ).keydown(function( event ) {
-         if ( event.which == 32 ) {
+         if ( event.which === 32 ) {
             $("#projectname").val($("#projectname").val() + '_');
             event.preventDefault();
          }
@@ -281,6 +284,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
         }
         if (duplicate) continue;
         processed.push(inputtemplates[i].id);     
+        var selected;
         if ((i === 0) && (preselectinputtemplate) ) {
             selected='selected="selected"';
         } else {
@@ -292,9 +296,9 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
-   $("#uploadinputtemplate").change(function(event){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
-   $("#urluploadinputtemplate").change(function(event){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters',true);});
-   $("#editorinputtemplate").change(function(event){
+   $("#uploadinputtemplate").change(function(){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
+   $("#urluploadinputtemplate").change(function(){renderfileparameters($('#urluploadinputtemplate').val(),'#urluploadparameters',true);});
+   $("#editorinputtemplate").change(function(){
         renderfileparameters($('#editorinputtemplate').val(),'#editorparameters',false);
         var inputtemplate = getinputtemplate('#editorinputtemplate');
         if (inputtemplate !== null) {
@@ -330,7 +334,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 }
             }
        });
-      if (stage == 1) {
+      if (stage === 1) {
             $('#progressbar').progressbar({value: progress});
             setTimeout(pollstatus,2000);
        }
@@ -339,9 +343,9 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    //Create a new project'
     if ($("#startprojectbutton").length) {
-       $("#projectname").keypress(function(e){ if (e.which == 13) $('#startprojectbutton').focus().click(); });
+       $("#projectname").keypress(function(e){ if (e.which === 13) $('#startprojectbutton').focus().click(); });
 
-       $("#startprojectbutton").click(function(event){
+       $("#startprojectbutton").click(function(){
          if ($("#projectname").val() === "") {
              alert("No project ID specified");   
              return;
@@ -376,7 +380,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
        });
    }
 
-   //Abort execution without deleting project (TODO)
+   //Abort execution without deleting project
    if ($("#abortbutton").length) {
        $("#abortbutton").click(function(event){
          var data = {'abortonly': true };
@@ -633,7 +637,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    //simpleupload:
    if ( (typeof($('#uploadbutton')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {    
        uploader = new AjaxUpload('uploadbutton', {action: baseurl + "/" + project + "/input/", name: "file", data: {"inputtemplate": $("#uploadinputtemplate").val()} , 
-            onChange: function(uploadfilename,extension){
+            onChange: function(uploadfilename,extension){ //eslint-disable-line no-unused-vars
                  var inputtemplate_id = $('#uploadinputtemplate').val();
                  var filename = validateuploadfilename(uploadfilename,inputtemplate_id);
                  if (!filename) {
@@ -772,7 +776,7 @@ function processuploadresponse(response, paramdiv) {
                 alert($(this).text());
         });
         $(this).find('parameters').each(function(){ 
-             if ($(this).attr('errors') == 'no') {
+             if ($(this).attr('errors') === 'no') {
                     errors = false;
              } else {
                     errors = true;
