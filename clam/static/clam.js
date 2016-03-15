@@ -10,7 +10,10 @@
  *       Licensed under GPLv3
  ***********************************************************/
 
-function initclam() {
+/*eslint-env browser,jquery */
+/*global stage,progress,user,accesstoken,oauth_access_token,simplepolling, simpleupload, preselectinputtemplate*/
+
+function initclam() { //eslint-disable-line no-unused-vars
    if (typeof(inputtemplates) == "undefined") {
    		//something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
