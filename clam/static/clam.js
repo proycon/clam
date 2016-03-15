@@ -13,7 +13,7 @@
 /*eslint-env browser,jquery */
 /*global stage,progress:true,user,accesstoken,oauth_access_token, preselectinputtemplate,baseurl,project, inputtemplates,parametersxsl:true, tableinputfiles:true */
 //global but not used: systemid
-/*eslint-disable quotes, no-alert,complexity,curly */
+/*eslint-disable quotes, no-alert,complexity,curly,eqeqeq */
 
 var uploader;
 
@@ -174,7 +174,7 @@ function pollstatus() {
         dataType: 'json', 
         data: {accesstoken: accesstoken, user: user},
         success: function(response){
-                if (response.statuscode != 1) {
+                if (response.statuscode !== 1) {
                     if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
                     } else {
@@ -195,7 +195,7 @@ function pollstatus() {
                 }
                 setTimeout(pollstatus,2000);                   
         },
-        error: function(response,errortype){
+        error: function(response,errortype){ //eslint-disable-line no-unused-vars
             alert("Error obtaining status");
         },        
     }); 
@@ -359,7 +359,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             xhrFields: {
               withCredentials: true
             },
-            success: function(response){ 
+            success: function(){ 
                 if (oauth_access_token !== "") {
                   window.location.href = baseurl + "/" + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
                 } else {
@@ -382,7 +382,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    //Abort execution without deleting project
    if ($("#abortbutton").length) {
-       $("#abortbutton").click(function(event){
+       $("#abortbutton").click(function(){
          var data = {'abortonly': true };
          $.ajax({ 
             type: "DELETE", 
@@ -416,7 +416,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    //Abort and delete a project
    if ($("#deletebutton").length) {
-       $("#deletebutton").click(function(event){
+       $("#deletebutton").click(function(){
          $.ajax({ 
             type: "DELETE", 
             url: baseurl + '/' + project + '/', 
@@ -448,7 +448,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    //Restart a project (deleting only its output)
    if ($("#restartbutton").length) {
-       $("#restartbutton").click(function(event){
+       $("#restartbutton").click(function(){
          $.ajax({ 
             type: "DELETE", 
             url: baseurl + '/' + project + "/output/" , 
@@ -458,7 +458,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             xhrFields: {
               withCredentials: true
             },
-            success: function(xml){ 
+            success: function(){ 
                 window.location.href = ""; /* refresh */
             },
             error: function(response){
@@ -476,7 +476,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
    //Return to index
    if ($("#indexbutton").length) {
-       $("#indexbutton").click(function(event){
+       $("#indexbutton").click(function(){
             if (oauth_access_token !== "") {
               window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
             } else {
@@ -513,15 +513,15 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
 
 
    //Open in-browser editor
-   $("#openeditor").click(function(event){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); });
+   $("#openeditor").click(function(){  $("#editormask").show(); window.scroll(0,0); $("#editor").slideDown(); });
 
-   $('#toggleinputfiles').click(function(event) { 
+   $('#toggleinputfiles').click(function() { 
        $('#inputfilesarea').show(); 
        $('#toggleinputfiles').hide();
     } );
 
    //Submit data through in-browser editor
-   $("#editorsubmit").click(function(event){         
+   $("#editorsubmit").click(function(){         
         var filename = validateuploadfilename($('#editorfilename').val(), $('#editorinputtemplate').val());
         if (!filename) {
              alert("Please specify a filename");
@@ -557,7 +557,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    //$("#canceleditor").click(function(event){  $("#editor").slideUp(400, function(){ $("#editormask").hide(); } ); return false; });
 
    //Download and add from URL
-   $('#urluploadsubmit').click(function(event){
+   $('#urluploadsubmit').click(function(){
             var filename = validateuploadfilename($('#urluploadfile').val().split('/').reverse()[0] ,$('#urluploadinputtemplate').val());
             if (!filename) {
                alert("Please specify a filename");
@@ -614,7 +614,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 $(this).fineUploader('setParams',params);                               
                  
                 return true;
-        }).on('complete', function(event, id, fileName, responseJSON) {
+        }).on('complete', function(e, id, fileName, responseJSON) { //eslint-disable-line no-unused-vars
                 if (responseJSON.isarchive) {
                     if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
