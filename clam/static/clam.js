@@ -11,13 +11,13 @@
  ***********************************************************/
 
 /*eslint-env browser,jquery */
-/*global stage,progress,user,accesstoken,oauth_access_token,simplepolling, simpleupload, preselectinputtemplate,systemid, baseurl, inputtemplates*/
-/*eslint-disable quotes, no-alert */
+/*global stage,progress,user,accesstoken,oauth_access_token, simpleupload, preselectinputtemplate,systemid, baseurl,project, inputtemplates,parametersxsl*/
+/*eslint-disable quotes, no-alert,complexity,curly */
 
 
 function getinputtemplate(id) {
     for (var i = 0; i < inputtemplates.length; i++) {
-        if (inputtemplates[i].id == id) {
+        if (inputtemplates[i].id === id) {
            return inputtemplates[i];
         }
     }
@@ -38,7 +38,6 @@ function validateuploadfilename(filename, inputtemplate_id) {
     } else if (inputtemplate.extension) {
         //inputtemplate forces an extension:
         var l = inputtemplate.extension.length;
-        var tmp = filename.substr(filename.length - l, l);
         //if the desired extension is not provided yet (server will take care of case mismatch), add it:
         if (filename.substr(filename.length - l - 1, l+1).toLowerCase() != '.' + inputtemplate.extension.toLowerCase()) {
             filename = filename + '.' + inputtemplate.extension;
@@ -61,14 +60,14 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             var result;
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)                
-                if (parametersxmloverride === undefined) {
+                if (parametersxmloverride === undefined) { //eslint-disable-line no-undefined
                     xmldoc = $(inputtemplate.parametersxml);                    
                 } else {
                     xmldoc = $(parametersxmloverride);
                 }
                 var found = false;
                 for (var i = 0; i < xmldoc.length; i++) {
-                    if (xmldoc[i].nodeName.toLowerCase() == "parameters") {
+                    if (xmldoc[i].nodeName.toLowerCase() === "parameters") {
                         xmldoc = xmldoc[i];
                         found = true;
                     }                    
@@ -79,12 +78,12 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 }     
 
                 
-                xsltProcessor=new XSLTProcessor();
+                var xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start            
                             
                 result = xsltProcessor.transformToFragment(xmldoc, document);
             } else if (window.ActiveXObject) { //For evil sucky non-standard compliant browsers ( == Internet Explorer)            
-                xmldoc=new ActiveXObject("Microsoft.XMLDOM");
+                xmldoc=new ActiveXObject("Microsoft.XMLDOM"); //eslint-disable-line no-undef
                 xmldoc.async="false";
                 xmldoc.loadXML(inputtemplate.parametersxml);
                 result = xmldoc.transformNode(parametersxsl);
@@ -112,7 +111,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
 }
 
 
-function deleteinputfile(filename) {   
+function deleteinputfile(filename) {   //eslint-disable-line no-unused-vars
     var found = -1;
     var data = tableinputfiles.fnGetData();
     for (var i = 0; i < data.length; i++) {
@@ -134,7 +133,7 @@ function deleteinputfile(filename) {
     });    
 }
 
-function setinputsource(tempelement) {
+function setinputsource(tempelement) { //eslint-disable-line no-unused-vars
     var src = tempelement.value;
     $('#usecorpus').val(src);
     if (src === '') {
@@ -146,7 +145,7 @@ function setinputsource(tempelement) {
     }
 }
 
-function setlocalinputsource(selector, target) {
+function setlocalinputsource(selector, target) {//eslint-disable-line no-unused-vars
     var value = selector.val();
     if (value !== "") { 
         $(target+'_form').show();
@@ -200,7 +199,7 @@ function oauthheader(req) {
   }
 }
 
-function initclam() { //eslint-disable-line no-unused-vars
+function initclam() { //eslint-disable-line no-unused-vars, complexity
    if (typeof(inputtemplates) == "undefined") {
         //something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
