@@ -103,7 +103,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 $(target).prepend(s);
             }
             if (inputtemplate.acceptarchive) {
-            	$(target).prepend("For easy mass upload, this input template also accepts <strong>archives</strong> (<tt>zip, tar.gz, tar.bz2</tt>) containing multiple files of exactly this specific type.<br />");
+                $(target).prepend("For easy mass upload, this input template also accepts <strong>archives</strong> (<tt>zip, tar.gz, tar.bz2</tt>) containing multiple files of exactly this specific type.<br />");
             }
         } else {
             $(target).html("<strong>Error: Selected input template is invalid!</strong>");
@@ -156,17 +156,17 @@ function setlocalinputsource(selector, target) {
 }
 
 function pollstatus() {
-	$.ajax({
-		type: 'GET',
-		url: baseurl + '/' + project + "/status/",
+    $.ajax({
+        type: 'GET',
+        url: baseurl + '/' + project + "/status/",
         beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
           withCredentials: true
         },
-		dataType: 'json', 
-		data: {accesstoken: accesstoken, user: user},
-		success: function(response){
+        dataType: 'json', 
+        data: {accesstoken: accesstoken, user: user},
+        success: function(response){
                 if (response.statuscode != 1) {
                     if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
@@ -174,24 +174,24 @@ function pollstatus() {
                       window.location.href = baseurl + '/' + project + '/'; /* refresh */
                     }
                 } else {
-                	if (response.completion > 0) {
-                		progress = response.completion;
-                		$('#progressbar').progressbar( "option", "value", progress );        
-                	}        		
-            		var statuslogcontent = "";
-            		for (var i = 0; i < response.statuslog.length - 1; i++) {
-            			var msg = response.statuslog[i][0];
-            			var t = response.statuslog[i][1];
-            			statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
-            		}                 		                		
-            		$('#statuslogtable').html(statuslogcontent);
+                    if (response.completion > 0) {
+                        progress = response.completion;
+                        $('#progressbar').progressbar( "option", "value", progress );        
+                    }               
+                    var statuslogcontent = "";
+                    for (var i = 0; i < response.statuslog.length - 1; i++) {
+                        var msg = response.statuslog[i][0];
+                        var t = response.statuslog[i][1];
+                        statuslogcontent += '<tr><td class="time">' + t + '</td><td class="message">' + msg + '</td></tr>';
+                    }                                               
+                    $('#statuslogtable').html(statuslogcontent);
                 }
                 setTimeout(pollstatus,2000);                   
         },
         error: function(response,errortype){
-        	alert("Error obtaining status");
+            alert("Error obtaining status");
         },        
-	});	
+    }); 
 }
 
 function oauthheader(req) { 
@@ -202,7 +202,7 @@ function oauthheader(req) {
 
 function initclam() { //eslint-disable-line no-unused-vars
    if (typeof(inputtemplates) == "undefined") {
-   		//something went wrong during loading, probably authentication issues, reload page
+        //something went wrong during loading, probably authentication issues, reload page
         window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
 
@@ -332,8 +332,8 @@ function initclam() { //eslint-disable-line no-unused-vars
             }
        });
       if (stage == 1) {
-       		$('#progressbar').progressbar({value: progress});
-       		setTimeout(pollstatus,2000);
+            $('#progressbar').progressbar({value: progress});
+            setTimeout(pollstatus,2000);
        }
     }
 
@@ -499,13 +499,13 @@ function initclam() { //eslint-disable-line no-unused-vars
                          });
    
    $('#outputfiles').dataTable( {
-				"bJQueryUI": false,
-				"sPaginationType": "full_numbers"
-			});
+                "bJQueryUI": false,
+                "sPaginationType": "full_numbers"
+            });
    $('#projects').dataTable( {
-				"bJQueryUI": false,
-				"sPaginationType": "full_numbers"
-			});
+                "bJQueryUI": false,
+                "sPaginationType": "full_numbers"
+            });
 
 
 
@@ -588,12 +588,12 @@ function initclam() { //eslint-disable-line no-unused-vars
     });
 
    //Upload through browser
-   if ( (typeof($('#fineuploadarea')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {		
+   if ( (typeof($('#fineuploadarea')[0]) != 'undefined') && (typeof(project) != 'undefined') ) {        
         $('#fineuploadarea').fineUploader({        
-        	//element: $('#fineuploadarea')[0],     
+            //element: $('#fineuploadarea')[0],     
             request: {
-            	endpoint:  baseurl + '/' + project + '/upload/',
-            	inputName: 'filename',
+                endpoint:  baseurl + '/' + project + '/upload/',
+                inputName: 'filename',
             },  
             text: { uploadButton: "Upload a file" } ,            
             multiple: true,
@@ -601,34 +601,34 @@ function initclam() { //eslint-disable-line no-unused-vars
             autoUpload: true, 
             debug: true
         }).on('submit', function(event, id, fileName) {
-		    	var inputtemplate_id = $('#uploadinputtemplate').val();
-		    	if (inputtemplate_id === "") {
-		    		alert("Please select a desired input type first");
-		    		return false;
-		    	}		    		
-		    	var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken };	    		
-		    	addformdata( '#uploadparameters', params );		 
-		    	$(this).fineUploader('setParams',params); 		    			    	
-		         
-		        return true;
-		}).on('complete', function(event, id, fileName, responseJSON) {
-				if (responseJSON.isarchive) {
+                var inputtemplate_id = $('#uploadinputtemplate').val();
+                if (inputtemplate_id === "") {
+                    alert("Please select a desired input type first");
+                    return false;
+                }                   
+                var params = {inputtemplate: inputtemplate_id, user:user, accesstoken:accesstoken };                
+                addformdata( '#uploadparameters', params );      
+                $(this).fineUploader('setParams',params);                               
+                 
+                return true;
+        }).on('complete', function(event, id, fileName, responseJSON) {
+                if (responseJSON.isarchive) {
                     if (oauth_access_token !== "") {
                       window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
                     } else {
                       window.location.href = baseurl + '/' + project + "/";
                     }
-					return true;
-				} 
-		        processuploadresponse(responseJSON.xml, '#uploadparameters');
-			
-		}).on('click',function(){
-		    	var inputtemplate_id = $('#uploadinputtemplate').val();
-		    	if (inputtemplate_id === "") {
-		    		alert("Please select a desired input type first");
-		    		return false;
-		    	}		
-		});       
+                    return true;
+                } 
+                processuploadresponse(responseJSON.xml, '#uploadparameters');
+            
+        }).on('click',function(){
+                var inputtemplate_id = $('#uploadinputtemplate').val();
+                if (inputtemplate_id === "") {
+                    alert("Please select a desired input type first");
+                    return false;
+                }       
+        });       
    }
 
    //simpleupload:
@@ -657,7 +657,7 @@ function initclam() { //eslint-disable-line no-unused-vars
         }); 
    }
 
-	
+    
 
    $('#inputsourceselect').click(function(event){ /* Doesn't exist???? */
         $.ajax({ 
