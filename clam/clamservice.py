@@ -1027,9 +1027,8 @@ class Project:
             return flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
         else:
             #write clam.xml output file
-            f = io.open(Project.path(project, user) + "clam.xml",'wb')
-            f.write(Project.response(user, project, parameters, "",True, oauth_access_token).data)
-            f.close()
+            with io.open(Project.path(project, user) + "clam.xml",'wb') as f:
+                f.write(Project.response(user, project, parameters, "",True, oauth_access_token).data)
 
 
 
@@ -1081,9 +1080,8 @@ class Project:
             if process:
                 pid = process.pid
                 printlog("Started dispatcher with pid " + str(pid) )
-                f = open(Project.path(project, user) + '.pid','w') #will be handled by dispatcher!
-                f.write(str(pid))
-                f.close()
+                with open(Project.path(project, user) + '.pid','w') as f: #will be handled by dispatcher!
+                    f.write(str(pid))
                 if shortcutresponse is True:
                     #redirect to project page to lose parameters in URL
                     if oauth_access_token:

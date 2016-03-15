@@ -28,8 +28,7 @@ VERSION = '2.1'
 
 sys.path.append(sys.path[0] + '/..')
 
-import clam.common.data
-#os.environ['PYTHONPATH'] = sys.path[0] + '/..'
+import clam.common.data #pylint: disable=wrong-import-position
 
 
 def mem(pid, size="rss"):
@@ -42,9 +41,8 @@ def total_seconds(delta):
 def main():
     if len(sys.argv) < 4:
         print("[CLAM Dispatcher] ERROR: Invalid syntax, use clamdispatcher.py [pythonpath] settingsmodule projectdir cmd arg1 arg2 ... got: " + " ".join(sys.argv[1:]), file=sys.stderr)
-        f = open('.done','w')
-        f.write(str(1))
-        f.close()
+        with open('.done','w') as f:
+            f.write(str(1))
         if os.path.exists('.pid'): os.unlink('.pid')
         return 1
 
@@ -68,7 +66,7 @@ def main():
 
     cmd = sys.argv[3+offset]
     if sys.version[0] == '2' and isinstance(cmd,str):
-        cmd = unicode(cmd,'utf-8')
+        cmd = unicode(cmd,'utf-8') #pylint: disable=undefined-variable
     for arg in sys.argv[4+offset:]:
         cmd += " " + clam.common.data.shellsafe(arg,'"')
 
@@ -118,10 +116,10 @@ def main():
 
     try:
         print("[CLAM Dispatcher] Running " + cmd, file=sys.stderr)
-    except:
+    except (UnicodeDecodeError, UnicodeError, UnicodeEncodeError):
         print("[CLAM Dispatcher] Running " + repr(cmd), file=sys.stderr) #unicode-issues on Python 2
 
-    if sys.version[0] == '2' and isinstance(cmd,unicode):
+    if sys.version[0] == '2' and isinstance(cmd,unicode): #pylint: disable=undefined-variable
         cmd = cmd.encode('utf-8')
     if projectdir:
         process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
@@ -133,16 +131,14 @@ def main():
         print("[CLAM Dispatcher] Running with pid " + str(pid) + " (" + begintime.strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
-            f = open(projectdir + '.pid','w')
-            f.write(str(pid))
-            f.close()
+            with open(projectdir + '.pid','w') as f:
+                f.write(str(pid))
     else:
         print("[CLAM Dispatcher] Unable to launch process", file=sys.stderr)
         sys.stderr.flush()
         if projectdir:
-            f = open(projectdir + '.done','w')
-            f.write(str(1))
-            f.close()
+            with open(projectdir + '.done','w') as f:
+                f.write(str(1))
         return 1
 
     #intervalf = lambda s: min(s/10.0, 15)
@@ -202,7 +198,6 @@ def main():
             if resmem > settings.DISPATCHER_MAXRESMEM * 1024:
                 print("[CLAM Dispatcher] PROCESS EXCEEDS MAXIMUM RESIDENT MEMORY USAGE (" + str(resmem) + ' >= ' + str(settings.DISPATCHER_MAXRESMEM) + ')... ABORTING', file=sys.stderr)
                 abort = True
-                abortchecktime = lastpolltime
                 statuscode = 2
             lastpolltime = datetime.datetime.now()
         elif settings.DISPATCHER_MAXTIME > 0 and d > settings.DISPATCHER_MAXTIME:
@@ -211,9 +206,8 @@ def main():
             statuscode = 3
 
     if projectdir:
-        f = open(projectdir + '.done','w')
-        f.write(str(statuscode))
-        f.close()
+        with open(projectdir + '.done','w') as f:
+            f.write(str(statuscode))
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
         #remove project index cache (has to be recomputed next time because this project now has a different size)
