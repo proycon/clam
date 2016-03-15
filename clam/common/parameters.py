@@ -11,6 +11,8 @@
 #
 ###############################################################
 
+#pylint: disable=redefined-builtin
+
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
@@ -24,9 +26,9 @@ from clam.common.util import xmlescape
 class AbstractParameter(object):
     """This is the base class from which all parameter classes have to be derived."""
 
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         #: A unique alphanumeric ID
-        self.id = parameter_id
+        self.id = id
 
         #: The parameter flag that will be used when this parameter is passed on the commandline (using COMMAND= and $PARAMETERS) (by default set to None)
         self.paramflag = None
@@ -188,7 +190,7 @@ class AbstractParameter(object):
         if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
             node = ElementTree.parse(StringIO(node)).getroot()
         if node.tag in globals():
-            parameter_id = ''
+            id = ''
             paramflag = ''
             name = ''
             description = ''
@@ -196,7 +198,7 @@ class AbstractParameter(object):
             error = None
             for attrib, value in node.attrib.items():
                 if attrib == 'id':
-                    parameter_id = value
+                    id = value
                 elif attrib == 'paramflag':
                     paramflag = value
                 elif attrib == 'name':
@@ -222,7 +224,7 @@ class AbstractParameter(object):
                         else:
                             kwargs['value'] = subtag.attrib['id']
 
-            parameter = globals()[node.tag](parameter_id, name, description, **kwargs) #return parameter instance
+            parameter = globals()[node.tag](id, name, description, **kwargs) #return parameter instance
             if error:
                 parameter.error = error #prevent error from getting reset
             return parameter
@@ -233,7 +235,7 @@ class AbstractParameter(object):
 class BooleanParameter(AbstractParameter):
     """A parameter that takes a Boolean (True/False) value. """
 
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         """Keyword arguments:
             reverse = True/False  - If True, the command line option flag gets outputted when the option is NOT checked.
         """
@@ -244,7 +246,7 @@ class BooleanParameter(AbstractParameter):
             if key == 'reverse':
                 self.reverse = value  #Option gets outputted when option is NOT checked
 
-        super(BooleanParameter,self).__init__(parameter_id,name,description, **kwargs)
+        super(BooleanParameter,self).__init__(id,name,description, **kwargs)
 
 
     def constrainable(self):
@@ -282,17 +284,17 @@ class BooleanParameter(AbstractParameter):
 class StaticParameter(AbstractParameter):
     """This is a parameter that can't be changed (it's a bit of a contradiction, I admit). But useful for some metadata specifications."""
 
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         if not 'value' in kwargs:
             raise ValueError("Static parameter expects value= !")
-        super(StaticParameter,self).__init__(parameter_id,name,description, **kwargs)
+        super(StaticParameter,self).__init__(id,name,description, **kwargs)
 
 
 
 class StringParameter(AbstractParameter):
     """String Parameter, taking a text value, presented as a one line input box"""
 
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         """Keyword arguments::
 
             ``maxlength`` - The maximum length of the value, in number of characters
@@ -305,7 +307,7 @@ class StringParameter(AbstractParameter):
                 self.maxlength = int(value)
                 del kwargs['maxlength']
 
-        super(StringParameter,self).__init__(parameter_id,name,description, **kwargs)
+        super(StringParameter,self).__init__(id,name,description, **kwargs)
 
 
     def validate(self,value):
@@ -341,7 +343,7 @@ class StringParameter(AbstractParameter):
 class ChoiceParameter(AbstractParameter):
     """Choice parameter, users have to choose one of the available values, or multiple values if instantiated with multi=True."""
 
-    def __init__(self, parameter_id, name, description, **kwargs):
+    def __init__(self, id, name, description, **kwargs):
         """Keyword arguments:
 
         choices - A list of choices. If keys and values are not the same, you can
@@ -490,8 +492,8 @@ class ChoiceParameter(AbstractParameter):
 class TextParameter(StringParameter): #TextArea based
     """Text Parameter, taking a text value, presented as a multiline input box"""
 
-    def __init__(self, parameter_id, name, description = '', **kwargs):
-        super(TextParameter,self).__init__(parameter_id,name,description, **kwargs)
+    def __init__(self, id, name, description = '', **kwargs):
+        super(TextParameter,self).__init__(id,name,description, **kwargs)
 
     def compilearg(self):
         if self.value.find(" ") >= 0 or self.value.find(";") >= 0:
@@ -507,7 +509,7 @@ class TextParameter(StringParameter): #TextArea based
         return self.paramflag + sep + str(value)
 
 class IntegerParameter(AbstractParameter):
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0
         self.maxvalue = 0 #unlimited
 
@@ -522,7 +524,7 @@ class IntegerParameter(AbstractParameter):
                 self.maxvalue = int(value)
                 del kwargs[key]
 
-        super(IntegerParameter,self).__init__(parameter_id,name,description, **kwargs)
+        super(IntegerParameter,self).__init__(id,name,description, **kwargs)
 
     def constrainable(self):
         """Should this parameter be used in checking contraints?"""
@@ -567,7 +569,7 @@ class IntegerParameter(AbstractParameter):
 
 
 class FloatParameter(AbstractParameter):
-    def __init__(self, parameter_id, name, description = '', **kwargs):
+    def __init__(self, id, name, description = '', **kwargs):
         self.minvalue = 0.0
         self.maxvalue = -1.0 #unlimited if maxvalue < minvalue
 
@@ -583,7 +585,7 @@ class FloatParameter(AbstractParameter):
                 self.maxvalue = float(value)
                 del kwargs[key]
 
-        super(FloatParameter,self).__init__(parameter_id,name,description, **kwargs)
+        super(FloatParameter,self).__init__(id,name,description, **kwargs)
 
     def constrainable(self):
         """Should this parameter be used in checking contraints?"""
