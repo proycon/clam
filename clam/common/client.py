@@ -21,6 +21,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import os.path
 import sys
 import requests
+import certifi
 from requests_toolbelt import MultipartEncoder #pylint: disable=import-error
 from lxml import etree as ElementTree
 if sys.version < '3':
@@ -49,7 +50,7 @@ def donereadingupload(encoder):
     pass
 
 class CLAMClient:
-    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None):
+    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None):
         """Initialise the CLAM client (does not actually connect yet)
 
         * ``url`` - URL of the webservice
@@ -59,6 +60,10 @@ class CLAMClient:
         * ``oauth_access_token`` - OAuth2 Access Token (or None), if OAuth is
             enabled and no token is specified, the authorization provider will be called to obtain one.
             If this stage requires user interaction, it will fail.
+        * ``verify`` - Verify SSL certificates? Only makes sense when HTTPS is used.
+           Set to the path to a CA_BUNDLE file or directory with certificates of trusted CAs, used certify by default
+           Can be set to False to skip verification (not recommended)
+           Follows the syntax of the requests library (http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification)
         """
 
         #self.http = httplib2.Http()
@@ -66,6 +71,10 @@ class CLAMClient:
         self.url = url
         self.oauth = oauth
         self.oauth_access_token = oauth_access_token
+        if verify is None:
+            self.verify = certifi.where()
+        else:
+            self.verify = verify
         if user and password:
             self.authenticated = True
             self.user = user
@@ -84,7 +93,7 @@ class CLAMClient:
         headers = {'User-agent': 'CLAMClientAPI-' + VERSION}
         if self.oauth:
             if not self.oauth_access_token:
-                r = requests.get(self.url,headers=headers)
+                r = requests.get(self.url,headers=headers, verify=self.verify)
                 if r.status_code == 404:
                     raise clam.common.data.NotFound("Authorization provider not found")
                 elif r.status_code == 403:
@@ -114,10 +123,11 @@ class CLAMClient:
             params['auth'] = requests.auth.HTTPDigestAuth(self.user, self.password)
         if data:
             params['data'] = data
+        params['verify'] = self.verify
         return params
 
     def request(self, url='', method = 'GET', data = None, parse=True, encoding=None):
-        """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communicaton methods in this class, use those instead"""
+        """Issue a HTTP request and parse CLAM XML response, this is a low-level function called by all of the higher-level communication methods in this class, use those instead"""
 
         requestparams = self.initrequest(data)
 
