@@ -5,13 +5,13 @@
     <script type="text/javascript" src="{{ url }}/static/jquery-1.8.3.min.js"></script>
     <link rel="StyleSheet" href="{{ url }}/static/base.css" title="Base Stylesheet" type="text/css" />
     <style type="text/css">
-        .status0 {
+        .status_staging {
             color: black;
         }
-        .status1 {
+        .status_running {
             color: yellow;
         }
-        .status2 {
+        .status_done {
             color: green;
         }
         ul ul li {
@@ -24,7 +24,7 @@
             padding-left: 10px;
             padding-right: 10px;
         }
-        li span.date {
+        li span.date, li span.size {
             color: black;
             font-style: italic;
         }
@@ -38,24 +38,24 @@
 
         <ul>
         {% for user, projects in usersprojects: %}
-            <li><strong>{{ user }}</strong><ul>
-            {% for project, date, status in projects %}
+            <li><strong>{{ user }}</strong> ({{ totalsize[user] }} MB)<ul>
+            {% for project, date, size, status in projects %}
                 <li><a href="{{ url }}/admin/inspect/{{ user }}/{{ project }}">{{ project }}</a>
                 <span>
                 {% if status == 1 %}
                     <a href="{{ url }}/admin/abort/{{ user }}/{{ project }}" target="_blank">Abort run</a>
-                {% elif status == 2 %}
+                {% else %}
                     <a href="{{ url }}/admin/delete/{{ user }}/{{ project }}" target="_blank">Delete project</a>
                 {% endif %}
                 </span>
+                <span class="size">{{ size }} MB</span>
                 <span class="date">{{ date }}</span>
-                <span class="status{{ status }}">
                 {% if status == 0 %}
-                    staging
+                <span class="status_staging">staging</span>
                 {% elif status == 1 %}
-                    running
+                <span class="status_running">running</span>
                 {% elif status == 2 %}
-                    done
+                <span class="status_done">done</span>
                 {% endif %}
                 </span>
                 </li>

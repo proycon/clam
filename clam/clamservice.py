@@ -446,23 +446,16 @@ class Admin:
     def index(credentials=None):
         """Get list of projects"""
         user, oauth_access_token = parsecredentials(credentials)
-        if not settings.ADMINS or not user in settings.ADMINS:
+        if not settings.ADMINS or user not in settings.ADMINS:
             return flask.make_response('You shall not pass!!! You are not an administrator!',403)
 
         usersprojects = {}
+        totalsize = {}
         for f in glob.glob(settings.ROOT + "projects/*"):
             if os.path.isdir(f):
                 u = os.path.basename(f)
-                usersprojects[u] = []
-
-                for f2 in glob.glob(settings.ROOT + "projects/" + u + "/*"):
-                    if os.path.isdir(f2):
-                        d = datetime.datetime.fromtimestamp(os.stat(f2)[8])
-                        p = os.path.basename(f2)
-                        usersprojects[u].append( (p, d.strftime("%Y-%m-%d %H:%M:%S"), Project.status(p,u)[0]  ) )
-
-        for u in usersprojects:
-            usersprojects[u] = sorted(usersprojects[u])
+                usersprojects[u], totalsize[u] = getprojects(u)
+                usersprojects[u].sort()
 
         return withheaders(flask.make_response(flask.render_template('admin.html',
                 version=VERSION,
@@ -474,6 +467,7 @@ class Admin:
                 user=user,
                 url=getrooturl(),
                 usersprojects = sorted(usersprojects.items()),
+                totalsize=totalsize,
                 oauth_access_token=oauth_encrypt(oauth_access_token)
         )), "text/html; charset=UTF-8" )
 
