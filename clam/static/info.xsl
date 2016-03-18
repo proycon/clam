@@ -204,6 +204,7 @@
 <strong>import</strong> clam.common.status
 <strong>import</strong> random
 <strong>import</strong> sys
+<strong>import</strong> os
 <strong>import</strong> time
 
 <em>#create client, connect to server.</em>
@@ -303,6 +304,7 @@ data = clamclient.start(project)
 	</xsl:for-each>
       
     <em>	#Download the remote file</em>
+    localfilename = os.path.basename(str(outputfile))
     outputfile.copy(localfilename)
     
     <em>	#..or iterate over its (textual) contents one line at a time:</em>
