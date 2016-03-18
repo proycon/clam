@@ -274,7 +274,7 @@ class CLAMFile:
             else:
                 requestparams = {}
             requestparams['stream'] = True
-            response = requests.get(self.projectpath + self.basedir + '/' + self.filename + '/metadata', **requestparams)
+            response = requests.get(self.projectpath + self.basedir + '/' + self.filename, **requestparams)
             for line in response.iter_lines():
                 if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata: #pylint: disable=undefined-variable
                     yield unicode(line, self.metadata['encoding']) #pylint: disable=undefined-variable
