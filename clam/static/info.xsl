@@ -194,11 +194,11 @@
     	<div class="box">
     	 <h3>CLAM Client API for Python</h3>
     	 <p>
-    	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a <em>skeleton</em> Python script you can use as a <em>template</em> for your client to communicate with this webservice.
+    	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a <em>skeleton</em> Python 3 script you can use as a <em>template</em> for your client to communicate with this webservice.
     	 </p>
     	 
 <pre class="pythoncode">
-<em>#!/usr/bin/env python</em>
+<em>#!/usr/bin/env python3</em>
 <strong>import</strong> clam.common.client
 <strong>import</strong> clam.common.data
 <strong>import</strong> clam.common.status
@@ -211,8 +211,12 @@
 clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
 
 
-
 <xsl:if test="count(/clam/profiles/profile) > 0">
+
+<em>#If your webservice uses custom formats, you want import or redefine them here (each format is a Python class), and register them with the client:</em>
+<em>#class SomeCustomFormat(clam.common.data.CLAMMetaData):</em>
+<em>#    mimetype = 'text/plain'</em>
+<em>#clamclient.register_custom_formats([ SomeCustomFormat ])</em>
 
 <em>#Set a project name (it is recommended to include a sufficiently random naming component here, to allow for concurrent uses of the same client)</em>
 project = "projectname" + str(random.getrandbits(64))
@@ -270,11 +274,11 @@ data = clamclient.start(project)
 <em>#Always check for parameter errors! Don't just assume everything went well! Use startsafe() instead of start</em>
 <em>#to simply raise exceptions on parameter errors.</em>
 <strong>if</strong> data.errors:
-    <strong>print</strong> >>sys.stderr,"An error occured: " + data.errormsg
+    <strong>print</strong>("An error occured: " + data.errormsg, file=sys.stderr)
     <strong>for</strong> parametergroup, paramlist in data.parameters:
         <strong>for</strong> parameter in paramlist:
             <strong>if</strong> parameter.error:
-                <strong>print</strong> >>sys.stderr,"Error in parameter " + parameter.id + ": " + parameter.error
+                <strong>print</strong>("Error in parameter " + parameter.id + ": " + parameter.error, file=sys.stderr)
     clamclient.delete(project) #delete our project (remember, it was temporary, otherwise clients would leave a mess)
     sys.exit(1)
 
@@ -282,7 +286,7 @@ data = clamclient.start(project)
 <strong>while</strong> data.status != clam.common.status.DONE:
     time.sleep(5) #wait 5 seconds before polling status
     data = clamclient.get(project) #get status again
-    <strong>print</strong> >>sys.stderr, "\tRunning: " + str(data.completion) + '% -- ' + data.statusmessage
+    <strong>print</strong>("\tRunning: " + str(data.completion) + '% -- ' + data.statusmessage, file=sys.stderr)
 
 <em>#Iterate over output files</em>
 <strong>for</strong> outputfile <strong>in</strong> data.output:
@@ -302,7 +306,7 @@ data = clamclient.start(project)
     
     <em>	#..or iterate over its (textual) contents one line at a time:</em>
 	<strong>	for</strong> line <strong>in</strong> outputfile.readlines():
-		<strong>print</strong> line
+		<strong>print</strong>(line)
 
 <em>#delete the project (otherwise it would remain on server and clients would leave a mess)</em>
 clamclient.delete(project)
