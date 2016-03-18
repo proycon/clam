@@ -208,6 +208,7 @@
 
 <em>#create client, connect to server.</em>
 <em>#the latter two arguments are required for authenticated webservices, they can be omitted otherwise</em>
+<em>#if you use SSL (https) and SSL verification fails, you can pass a verify= parameter with the path to your certificate of certificate authority bundle</em>
 clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
 
 
