@@ -220,6 +220,8 @@ clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", 
 <em>#    mimetype = 'text/plain'</em>
 <em>#clamclient.register_custom_formats([ SomeCustomFormat ])</em>
 
+<br /><br />
+
 <em>#Set a project name (it is recommended to include a sufficiently random naming component here, to allow for concurrent uses of the same client)</em>
 project = "projectname" + str(random.getrandbits(64))
 
