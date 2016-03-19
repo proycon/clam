@@ -406,9 +406,11 @@ class NonceMemory:
             opaque, ip, expiretime = self.get(nonce) #pylint: disable=unused-variable
             if expiretime < time.time():
                 if self.debug: print("Nonce expired",file=sys.stderr)
+                self.remove(nonce)
                 return False
             elif ip != flask.request.remote_addr:
                 if self.debug: print("Nonce IP mismatch",file=sys.stderr)
+                self.remove(nonce)
                 return False
             else:
                 return True
@@ -416,6 +418,10 @@ class NonceMemory:
             if self.debug: print("Nonce " + nonce + " does not exist",file=sys.stderr)
             return False
 
+    def remove(self, nonce):
+        noncefile = self.path + '/' + nonce + '.nonce'
+        if os.path.exists(noncefile):
+            os.unlink(noncefile)
 
     def get(self, nonce):
         if not nonce: raise KeyError("No nonce supplied")
