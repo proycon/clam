@@ -143,13 +143,13 @@ class HTTPDigestAuth(HTTPAuth):
         else:
             self.realm = "Default realm"
 
-        self.noncememory = NonceMemory(noncedir)
 
         if 'nonceexpiration' in kwargs:
             self.nonceexpiration = int(kwargs['nonceexpiration'])
         else:
             self.nonceexpiration = 900
 
+        self.noncememory = NonceMemory(noncedir, self.nonceexpiration)
 
         self.printdebug("Initialising Digest Authentication with realm " + self.realm)
 
@@ -377,8 +377,9 @@ class OAuth2(HTTPAuth):
 class NonceMemory:
     """File-based nonce-memory (so it can work with multiple workers). Includes expiration per nonce and and IP-check"""
 
-    def __init__(self, path, debug=False):
+    def __init__(self, path, expiration,debug=False):
         self.path = path
+        self.expiration = expiration
         self.debug = debug
 
         self.random = SystemRandom()
@@ -387,7 +388,9 @@ class NonceMemory:
         except NotImplementedError:
             self.random = Random() #pylint: disable=redefined-variable-type
 
-    def getnew(self, expiration=900, opaque=None):
+    def getnew(self, expiration=None, opaque=None):
+        if expiration is None: expiration = self.expiration
+        self.cleanup() #first cleanup current nonces before making a new one, this has some I/O overhead but amount of nonces should be limited
         nonce = md5(str(self.random.random()).encode('utf-8')).hexdigest()
         if self.debug: print("Generated new nonce " + nonce,file=sys.stderr)
         if opaque is None:
@@ -440,13 +443,10 @@ class NonceMemory:
 
 
     def cleanup(self):
-        """do cleanup on destruction, delete expired nonces"""
+        """Delete expired nonces"""
+        t = time.time()
         for noncefile in glob(self.path + '/*.nonce'):
-            opaque,ip, expiretime = self.readnoncefile(noncefile) #pylint: disable=unused-variable
-            if time.time() > expiretime:
+            if os.path.getmtime(noncefile) + self.expiration > t:
                 os.unlink(noncefile)
-
-    def __del__(self):
-        self.cleanup()
 
 
