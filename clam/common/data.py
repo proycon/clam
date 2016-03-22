@@ -275,14 +275,19 @@ class CLAMFile:
                 requestparams = {}
             requestparams['stream'] = True
             response = requests.get(self.projectpath + self.basedir + '/' + self.filename, **requestparams)
-            for line in response.iter_lines():
-                if sys.version[0] < '3' and not isinstance(line,unicode) and self.metadata and 'encoding' in self.metadata: #pylint: disable=undefined-variable
-                    yield unicode(line, self.metadata['encoding']) #pylint: disable=undefined-variable
-                if sys.version[0] >= '3' and not isinstance(line,str) and self.metadata and 'encoding' in self.metadata :
-                    yield str(line, self.metadata['encoding'])
-                else:
+            if self.metadata and 'encoding' in self.metadata:
+                for line in response.iter_lines():
+                    #\n is stripped, re-add (should also work fine on binary files)
+                    if sys.version[0] < '3' and not isinstance(line,unicode): #pylint: disable=undefined-variable
+                        yield unicode(line, self.metadata['encoding']) + "\n" #pylint: disable=undefined-variable
+                    elif sys.version[0] >= '3' and not isinstance(line,str):
+                        yield str(line, self.metadata['encoding']) + "\n"
+                    else:
+                        yield line + b'\n'
+            else:
+                CHUNKSIZE = 64*1024
+                for line in response.iter_content(CHUNKSIZE):
                     yield line
-
 
     def delete(self):
         """Delete this file"""
@@ -324,19 +329,18 @@ class CLAMFile:
         """Copy or download this file to a new local file"""
 
         if self.metadata and 'encoding' in self.metadata:
-            f = io.open(target,'w', encoding=self.metadata['encoding'])
-            for line in self:
-                f.write(line)
-        else:
-            f = io.open(target,'wb')
-            for line in self:
-                if sys.version < '3' and isinstance(line,unicode): #pylint: disable=undefined-variable
-                    f.write(line.encode('utf-8'))
-                elif sys.version >= '3' and isinstance(line,str):
-                    f.write(line.encode('utf-8'))
-                else:
+            with io.open(target,'w', encoding=self.metadata['encoding']) as f:
+                for line in self:
                     f.write(line)
-        f.close()
+        else:
+            with io.open(target,'wb') as f:
+                for line in self:
+                    if sys.version < '3' and isinstance(line,unicode): #pylint: disable=undefined-variable
+                        f.write(line.encode('utf-8'))
+                    elif sys.version >= '3' and isinstance(line,str):
+                        f.write(line.encode('utf-8'))
+                    else:
+                        f.write(line)
 
     def validate(self):
         """Validate this file. Returns a boolean."""
