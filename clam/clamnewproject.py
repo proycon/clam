@@ -21,6 +21,7 @@ import sys
 import os
 import io
 import shutil
+import argparse
 
 try:
     import clam
@@ -30,7 +31,6 @@ except ImportError:
     sys.exit(2)
 
 from clam.common.data import VERSION
-import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
