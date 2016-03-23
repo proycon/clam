@@ -169,9 +169,9 @@ Alias /static {clamdir}/static
 
     with io.open(dir + '/startserver_production.sh','w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
-if [ ! -z $VIRTUAL_ENV ]; then; 
+if [ ! -z $VIRTUAL_ENV ]; then
     uwsgi --plugin {uwsgiplugin} --virtualenv $VIRTUAL_ENV --socket 127.0.0.1:{uwsgiport} --chdir $VIRTUAL_ENV --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
-else 
+else
     uwsgi --plugin {uwsgiplugin} --socket 127.0.0.1:{uwsgiport} --wsgi-file {dir}/{sysid}.wsgi --logto {sysid}.uwsgi.log --log-date --log-5xx --master --processes 2 --threads 2 --need-app
 fi
 """.format(dir=dir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
