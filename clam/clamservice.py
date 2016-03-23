@@ -398,11 +398,10 @@ def info(credentials=None):
     """Get info"""
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
-    for f in glob.glob(settings.ROOT + "projects/" + user + "/*"): #TODO LATER: Implement some kind of caching
-        if os.path.isdir(f):
-            d = datetime.datetime.fromtimestamp(os.stat(f)[8])
-            project = os.path.basename(f)
-            projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S") ) )
+
+    totalsize = 0.0
+    if settings.LISTPROJECTS:
+        projects, totalsize = getprojects(user)
 
     errors = "no"
     errormsg = ""
