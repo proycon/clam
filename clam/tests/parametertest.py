@@ -172,7 +172,7 @@ class StringParameterTest(unittest.TestCase):
     """String Parameter Test"""
 
     def setUp(self):
-        self.parameter = clam.common.parameters.StringParameter('test','test','test',paramflag='-t',maxlength=10)
+        self.parameter = clam.common.parameters.StringParameter('test','test','test',paramflag='-t',default="default",maxlength=10)
 
     def test1_sanity(self):
         """String parameter - sanity check"""
@@ -218,7 +218,13 @@ class StringParameterTest(unittest.TestCase):
         success = self.parameter.set("1234567890A")
         self.assertTrue(self.parameter.error == "Text too long, exceeding maximum of 10 characters allowed")
         self.assertFalse(success)
-        self.assertFalse(self.parameter.hasvalue)
+
+    def test6_default(self):
+        """String parameter - default value"""
+        self.assertTrue(self.parameter.error is None, self.parameter.error)
+        self.assertTrue(self.parameter.hasvalue)
+        self.assertTrue(self.parameter.value == "default")
+
 
 class ChoiceParameterTest(unittest.TestCase):
     """Choice Parameter Test"""

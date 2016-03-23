@@ -101,7 +101,7 @@ PROFILES = [
         InputTemplate('textinput', PlainTextFormat,"Input text document",
             StaticParameter(id='encoding',name='Encoding',description='The character encoding of the file', value='utf-8'),
             ChoiceParameter(id='language',name='Language',description='The language the text is in', choices=[('en','English'),('nl','Dutch'),('fr','French')]),
-            StringParameter(id='author',name='Author',description="The author's name", maxlength=100),
+            StringParameter(id='author',name='Author',description="The author's name",default="unspecified", maxlength=100),
             IntegerParameter(id='year',name='Year of Publication',description="The year of publication", minvalue=1900,maxvalue=2030),
             CharEncodingConverter(id='latin1',label='Convert from Latin-1',charset='iso-8859-1'),
             PDFtoTextConverter(id='pdfconv',label='Convert from PDF Document'),
