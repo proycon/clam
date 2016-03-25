@@ -718,6 +718,10 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             multiple: true,
             //forceMultipart: true,
             autoUpload: true, 
+            failedUploadTextDisplay: {
+                mode: 'custom',
+                responseProperty: 'error',
+            },
             debug: true
         }).on('submit', function(e, id, fileName) { //eslint-disable-line no-unused-vars
                 var inputtemplate_id = $('#uploadinputtemplate').val();

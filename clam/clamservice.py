@@ -1970,7 +1970,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         #Too bad, everything worked out but the file itself doesn't validate.
                         #output += "<valid>no</valid>"
                         fatalerror = "<error type=\"validation\">The file " + xmlescape(filename) + " did not validate, it is not in the proper expected format.</error>"
-                        jsonoutput['errors'] = "The file " + filename.replace("'","") + " did not validate, it is not in the proper expected format."
+                        jsonoutput['error'] = "The file " + filename.replace("'","") + " did not validate, it is not in the proper expected format."
                         jsonoutput['success'] = False
                         #remove upload
                         os.unlink(Project.path(project, user) + 'input/' + filename)
