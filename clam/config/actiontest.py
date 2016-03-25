@@ -128,7 +128,7 @@ def multiply(x,y):
 # ======== ACTIONS ===========
 
 ACTIONS = [
-    Action(id="uppercase",name="Uppercaser",description="Convert a string to upper case", command="echo $text$ | tr '[:lower:]' '[:upper:]'", parameters=[
+    Action(id="uppercase",name="Uppercaser",description="Convert a string to upper case", tmpdir=True, command="echo $text$ | tr '[:lower:]' '[:upper:]'", parameters=[
             StringParameter(id="text", name="Text", required=True),
     ]),
     Action(id="multiply",name="Multiplier",description="Multiply two numbers", function=multiply, parameters=[

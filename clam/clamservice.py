@@ -2140,7 +2140,8 @@ class ActionHandler(object):
                     return flask.make_response("Unable to create temporary action directory",500)
 
             cmd = cmd.replace('$PARAMETERS', parameters)
-            cmd = cmd.replace('$TMPDIRECTORY', tmpdir)
+            if tmpdir:
+                cmd = cmd.replace('$TMPDIRECTORY', tmpdir)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token if oauth_access_token else "")
             #everything should be shell-safe now
