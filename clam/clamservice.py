@@ -2129,6 +2129,7 @@ class ActionHandler(object):
                 passcwd = tmpdir
                 passdir = 'tmp://' + tmpdir
             else:
+                tmpdir = None
                 passdir = 'NONE'
                 passcwd = userdir
 
