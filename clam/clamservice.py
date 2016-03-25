@@ -1488,6 +1488,13 @@ class Project:
 def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'): #pylint: disable=too-many-return-statements
     """Add a new input file, this invokes the actual uploader"""
 
+
+    def errorresponse(msg, code=403):
+        if returntype == 'json':
+            return withheaders(flask.make_response("{success: false, error: '" + msg + "'}"),'application/json')
+        else:
+            return flask.make_response(msg,403) #(it will have to be explicitly deleted by the client first)
+
     inputtemplate_id = flask.request.headers.get('Inputtemplate','')
     inputtemplate = None
     metadata = None
@@ -1536,7 +1543,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         inputtemplate = t
         if not inputtemplate:
             printlog("No inputtemplate specified and filename " + filename + " does not uniquely match with any inputtemplate!")
-            return flask.make_response("No inputtemplate specified nor auto-detected for filename " + filename + "!",404)
+            return errorresponse("No inputtemplate specified nor auto-detected for filename " + filename + "!",404)
 
 
 
@@ -1548,7 +1555,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
     for seq, inputfile in Project.inputindexbytemplate(project, user, inputtemplate): #pylint: disable=unused-variable
         if inputtemplate.unique:
-            return flask.make_response("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)",403) #(it will have to be explicitly deleted by the client first)
+            return errorresponse("You have already submitted a file of this type, you can only submit one. Delete it first. (Inputtemplate=" + inputtemplate.id + ", unique=True)")
         else:
             if seq >= nextseq:
                 nextseq = seq + 1 #next available sequence number
@@ -1580,10 +1587,10 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 #return flask.make_response("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
 
     if inputtemplate.onlyinputsource and (not 'inputsource' in postdata or not postdata['inputsource']):
-        return flask.make_response("Adding files for this inputtemplate must proceed through inputsource",403) #403
+        return errorresponse("Adding files for this inputtemplate must proceed through inputsource")
 
     if 'converter' in postdata and postdata['converter'] and not postdata['converter'] in [ x.id for x in inputtemplate.converters]:
-        return flask.make_response("Invalid converter specified: " + postdata['converter'],403) #403
+        return errorresponse("Invalid converter specified: " + postdata['converter'])
 
     #Make sure the filename is secure
     validfilename = True
@@ -1594,7 +1601,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             break
 
     if not validfilename:
-        return flask.make_response("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;",403) #403
+        return errorresponse("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;")
 
 
     #Create the project (no effect if already exists)
@@ -1625,16 +1632,14 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 if s.id.lower() == postdata['inputsource'].lower():
                     inputsource = s
             if not inputsource:
-                return flask.make_response("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'",403)
+                return errorresponse("Specified inputsource '" + postdata['inputsource'] + "' does not exist for inputtemplate '"+inputtemplate.id+"'")
         sourcefile = os.path.basename(inputsource.path)
     elif 'accesstoken' in postdata and 'filename' in postdata:
         #XHR POST, data in body
         printlog("Adding client-side file " + filename + " to input files. Uploaded using XHR POST")
         sourcefile = postdata['filename']
     else:
-        return flask.make_response("No file, url or contents specified!",403)
-
-
+        return errorresponse("No file, url or contents specified!")
 
 
     #============================ Generate metadata ========================================
@@ -1870,7 +1875,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         f.write(postdata['contents'])
                         f.close()
                     except UnicodeError:
-                        return flask.make_response("Input file " + str(filename) + " is not in the expected encoding!",403)
+                        return errorresponse("Input file " + str(filename) + " is not in the expected encoding!")
                 elif 'accesstoken' in postdata and 'filename' in postdata:
                     printdebug('(Receiving data directly from post body)')
                     with open(Project.path(project,user) + 'input/' + filename,'wb') as f:
@@ -1982,15 +1987,19 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     elif fatalerror:
         #fatal error return error message with 403 code
         printlog('Fatal Error during upload: ' + fatalerror)
-        return flask.make_response(head + fatalerror,403)
+        return errorresponse(head + fatalerror,403)
     elif errors:
         #parameter errors, return XML output with 403 code
         printdebug('There were parameter errors during upload!')
-        return flask.make_response(output,403)
-    elif returntype == 'xml':
+        if returntype == 'json':
+            jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
+            return withheaders(flask.make_response(json.dumps(jsonoutput)), 'application/json')
+        else:
+            return flask.make_response(output,403)
+    elif returntype == 'xml': #success
         printdebug('Returning xml')
         return withheaders(flask.make_response(output), 'text/xml')
-    elif returntype == 'json':
+    elif returntype == 'json': #success
         printdebug('Returning json')
         #everything ok, return JSON output (caller decides)
         jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
