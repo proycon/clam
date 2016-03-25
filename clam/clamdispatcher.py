@@ -56,11 +56,16 @@ def main():
 
     settingsmodule = sys.argv[1+offset]
     projectdir = sys.argv[2+offset]
-    if projectdir == 'NONE': #Used for actions
+    if projectdir == 'NONE': #Actions
+        tmpdir = None
+        projectdir = None
+    elif projectdir.startswith('tmp://'): #Used for actions with a temporary dir
+        tmpdir = projectdir[6:]
         projectdir = None
     else:
         if projectdir[-1] != '/':
             projectdir += '/'
+        tmpdir = os.path.join(projectdir,'tmp')
 
     print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
 
@@ -213,6 +218,19 @@ def main():
         #remove project index cache (has to be recomputed next time because this project now has a different size)
         if os.path.exists(os.path.join(projectdir,'..','.index')):
             os.unlink(os.path.join(projectdir,'..','.index'))
+
+
+    if tmpdir and os.path.exists(tmpdir):
+        print("[CLAM Dispatcher] Removing temporary files", file=sys.stderr)
+        for filename in os.listdir(tmpdir):
+            filepath = os.path.join(tmpdir,filename)
+            try:
+                if os.path.isdir(filepath):
+                    shutil.rmtree(filepath)
+                else:
+                    os.unlink(filepath)
+            except: #pylint: disable=bare-except
+                print("[CLAM Dispatcher] Unable to remove " + filename, file=sys.stderr)
 
     d = total_seconds(datetime.datetime.now() - begintime)
     print("[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s", file=sys.stderr)

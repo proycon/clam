@@ -2138,6 +2138,12 @@ class Action(object):
         else:
             self.allowanonymous = False
 
+        if 'tmpdir' in kwargs:
+            self.tmpdir = kwargs['tmpdir']
+        else:
+            self.tmpdir = False
+
+
 
     def xml(self, indent = ""):
         if self.method:

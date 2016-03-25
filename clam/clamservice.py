@@ -648,6 +648,10 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
                 return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
+        if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp/'):
+            os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/tmp")
+            if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp'):
+                return flask.make_response("tmp directory " + settings.ROOT + "projects/" + user + '/' + project + "/tmp/  could not be created succesfully",403)
 
         return None #checks rely on this
 
@@ -1038,6 +1042,7 @@ class Project:
             #else:
             cmd = cmd.replace('$INPUTDIRECTORY', Project.path(project, user) + 'input/')
             cmd = cmd.replace('$OUTPUTDIRECTORY',Project.path(project, user) + 'output/')
+            cmd = cmd.replace('$TMPDIRECTORY',Project.path(project, user) + 'tmp/')
             cmd = cmd.replace('$STATUSFILE',Project.path(project, user) + '.status')
             cmd = cmd.replace('$DATAFILE',Project.path(project, user) + 'clam.xml')
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
@@ -2115,11 +2120,30 @@ class ActionHandler(object):
                     except ValueError as e:
                         return flask.make_response("Parameter " + paramid + " has an invalid value...",403)
 
+            if action.tmpdir is True or cmd.find('$TMPDIRECTORY') != -1:
+                tmpdir = os.path.join(settings.SESSIONDIR, 'atmp.' + str("%034x" % random.getrandbits(128)))
+                passdir = 'tmp://' + tmpdir
+                passcwd = tmpdir
+            elif action.tmpdir:
+                tmpdir = action.tmpdir
+                passcwd = tmpdir
+                passdir = 'tmp://' + tmpdir
+            else:
+                passdir = 'NONE'
+                passcwd = userdir
+
+            if tmpdir:
+                try:
+                    os.mkdir(tmpdir)
+                except: #pylint: disable=bare-except
+                    return flask.make_response("Unable to create temporary action directory",500)
 
             cmd = cmd.replace('$PARAMETERS', parameters)
+            cmd = cmd.replace('$TMPDIRECTORY', tmpdir)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token if oauth_access_token else "")
             #everything should be shell-safe now
+
 
             #run the action
             pythonpath = ''
@@ -2132,7 +2156,7 @@ class ActionHandler(object):
             else:
                 pythonpath = os.path.dirname(settings.__file__)
 
-            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' NONE ' + cmd
+            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + passdir + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
@@ -2141,7 +2165,7 @@ class ActionHandler(object):
             printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + actionid + " with " + action.command + ": " + repr(cmd) + " ..." )
             if sys.version[0] == '2' and isinstance(cmd,unicode): #pylint: disable=undefined-variable
                 cmd = cmd.encode('utf-8')
-            process = subprocess.Popen(cmd,cwd=userdir, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(cmd,cwd=passcwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
@@ -2158,6 +2182,8 @@ class ActionHandler(object):
                     else:
                         printdebug("    action stdout:\n" + stdoutdata)
                         printdebug("    action stderr:\n" + stderrdata)
+                if tmpdir:
+                    shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
                     return withheaders(flask.make_response(stdoutdata,200),action.mimetype) #200
                 elif process.returncode in action.returncodes403:
@@ -2591,8 +2617,7 @@ def set_defaults():
         settings.ACTIONS = []
 
     if not 'SESSIONDIR' in settingkeys:
-        settings.SESSIONDIR = settings.ROOT + 'sessions'
-
+        settings.SESSIONDIR = os.path.join(settings.ROOT,'sessions')
 
 
 def test_dirs():

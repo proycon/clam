@@ -1150,6 +1150,10 @@ variables you can use that will be automatically set by CLAM.
 \begin{itemize}
 \item \texttt{\$INPUTDIRECTORY} -- The absolute path to the input directory where all the input files from the user will be stored (possibly in subdirectories). This input directory is the \texttt{input/} subdirectory in the project directory.
 \item \texttt{\$OUTPUTDIRECTORY} -- The absolute path to the output directory. Your system should output all of its files here, as otherwise they are not accessible through CLAM.  This output directory is the \texttt{output/} subdirectory in the project directory.
+\item \texttt{\$TMPDIRECTORY} -- The absolute path to the a temporary
+    directory. The contents of the directory will be automatically cleared as
+    soon as your wrapper script terminates. Your system should output all of
+    its temporary files here.  This temporary directory is the \texttt{tmp/} subdirectory in the project directory.
 \item \texttt{\$STATUSFILE} -- The absolute path to a status file. Your system may write a short message to this status file, indicating the current status. This message will be displayed to the user in CLAM's interface. The status file contains a full log of all status messages, thus your system should write to this file in append mode. Each status message consists of one line terminated by a newline character. The line may contain three tab delimited elements that will be automatically detected: a percentage indicating the progress until completion (two digits with a \% sign), a Unix timestamp (a long number), and the status message itself (a UTF-8 string).
 \item \texttt{\$PARAMETERS} -- This variable will contain all parameter flags
   and the parameter values that have been selected by the user. It is
@@ -1899,9 +1903,10 @@ list. Consider the following example:
 \begin{verbatim}
 ACTIONS = [
   Action(id='multiply',name="Multiplier",
-  description="Multiply two
-  numbers",command="/path/to/multiply.sh $PARAMETERS",
+  description="Multiply two numbers",
+  command="/path/to/multiply.sh $PARAMETERS",
   mimetype="text/plain",
+  tmpdir=False,
   parameters=[
     IntegerParameter(id='x',name="Value 1"),
     IntegerParameter(id='y',name="Value 2"),
@@ -1981,6 +1986,13 @@ integers.
 When using Python functions, exceptions will be caught and returned to the
 end-user in a HTTP 500 reply (without traceback). For custom replies, Python
 functions may raise any instance of \texttt{web.webapi.HTTPError}.
+
+If the action invokes a script that outputs temporary files, you may set
+\texttt{tmpdir=True}, this will create a temporary directory for the duration
+of the action, which will be used as current working directory when the action
+runs, that will be automatically removed when the action ends. You may also
+explicitly pass this directory to the script you invoke with \texttt{command=} using the
+\texttt{\$TMPDIRECTORY} variable.
 
 If you enabled an authentication mechanism, as is recommended, it automatically
 applies to all actions. It is, however, possible to exempt certain actions from

@@ -177,6 +177,8 @@ PROFILES = [
 #     $INPUTDIRECTORY  - The directory where input files are uploaded.
 #     $OUTPUTDIRECTORY - The directory where the system should output
 #                        its output files.
+#     $TMPDIRECTORY    - The directory where the system should output
+#                        its temporary files.
 #     $STATUSFILE      - Filename of the .status file where the system
 #                        should output status messages.
 #     $DATAFILE        - Filename of the clam.xml file describing the
