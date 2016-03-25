@@ -206,7 +206,7 @@ function processuploadresponse(response, paramdiv) {
       //Processes CLAM Upload XML
       
       //Clear all previous errors
-      $(paramdiv).find('.error').each(function(){ $(this).html(''); }); 
+      $(paramdiv).find('div.error').each(function(){ $(this).html(''); }); 
       
       $(response).find('upload').each(function(){       //for each uploaded file
         //var children = $(this).children();
