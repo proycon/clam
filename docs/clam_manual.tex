@@ -1322,6 +1322,7 @@ All parameters can take the following extra keyword arguments:
 \item \textbf{\texttt{forbid}} -- Set this to a list of parameter IDs. If this parameter is set, none of the others in the list may be set.  If not, an error will be returned.
 \item \textbf{\texttt{allowusers}} -- Allow only the specified lists of usernames to see and set this parameter. If unset, all users will have access. You can decide whether to use this option or \texttt{denyusers}, or to allow access for all.
 \item \textbf{\texttt{denyusers}} -- Disallow the specified lists of usernames to see and set this parameter. If unset, no users are blocked from having access. You can decide whether to use this option or \texttt{allowusers}, or to allow access for all.
+\item \textbf{\texttt{validator}} -- This should be a Python function (or other callable) taking one argument (the parameter's value), and returning either boolean indication whether the value is valid, or a (boolean, errormsg) tuple.
 \end{itemize}
 
 The following example defines a boolean parameter with a parameter flag:

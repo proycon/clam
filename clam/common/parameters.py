@@ -48,6 +48,7 @@ class AbstractParameter(object):
         self.nospace = False
         self.require = []
         self.forbid = []
+        self.validator = None
 
         #: You can restrict this parameter to only be available to certain users, set the usernames you want to allow here, all others are denied
         self.allowusers = []
@@ -79,6 +80,8 @@ class AbstractParameter(object):
                 self.error = value
             elif key == 'flag' or key == 'option' or key == 'paramflag':
                 self.paramflag = value
+            elif key == 'validator':
+                self.validator = value
             else:
                 raise Exception("Unknown attribute specified for parameter: " + key + "=" + str(value))
 
@@ -88,8 +91,22 @@ class AbstractParameter(object):
 
     def validate(self,value):
         """Validate the parameter"""
-        self.error = None #reset error
-        return True
+        if self.validator is not None:
+            valid = self.validator(value)
+            if isinstance(valid, tuple) and len(valid) == 2:
+                valid, errormsg = valid
+            elif isinstance(valid, bool):
+                errormsg = "Invalid value"
+            else:
+                raise TypeError("Custom validator must return a boolean or a (bool, errormsg) tuple.")
+            if valid:
+                self.error = None
+            else:
+                self.error = errormsg
+            return valid
+        else:
+            self.error = None #reset error
+            return True
 
     def compilearg(self):
         """This method compiles the parameter into syntax that can be used on the shell, such as for example: --paramflag=value"""
@@ -298,6 +315,7 @@ class StringParameter(AbstractParameter):
         """Keyword arguments::
 
             ``maxlength`` - The maximum length of the value, in number of characters
+            ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple. 
         """
 
         self.maxlength = 0 #unlimited
@@ -316,7 +334,7 @@ class StringParameter(AbstractParameter):
             self.error = "Text too long, exceeding maximum of " + str(self.maxlength) + " characters allowed"
             return False
         else:
-            return True
+            return super(StringParameter,self).validate(value)
 
     def compilearg(self):
         needsquotes = False
@@ -352,6 +370,7 @@ class ChoiceParameter(AbstractParameter):
         multi   - (boolean) User may select multiple values? (parameter value will be a list)
         delimiter - The delimiter between multiple options (if multi=True), and
                     when used on the command line.
+        ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple. 
         """
 
 
@@ -399,7 +418,7 @@ class ChoiceParameter(AbstractParameter):
             if not v in [x[0] for x in self.choices]:
                 self.error = "Selected value was not an option! (" + str(v) + ")"
                 return False
-        return True
+        return super(ChoiceParameter,self).validate(values)
 
 
     def set(self, value):
@@ -537,10 +556,10 @@ class IntegerParameter(AbstractParameter):
         except ValueError:
             self.error = "Not a number"
             return False
-        if self.minvalue == self.maxvalue and self.maxvalue == 0:
-            return True #no restraints
+        if self.minvalue == self.maxvalue and self.maxvalue == 0: #no restraints
+            return super(IntegerParameter,self).validate(value)
         elif (self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue) ) :
-            return True
+            return super(IntegerParameter,self).validate(value)
         else:
             self.error = "Number must be a whole number between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False
@@ -599,10 +618,10 @@ class FloatParameter(AbstractParameter):
         except ValueError:
             self.error = "Not a valid number"
             return False
-        if self.minvalue == self.maxvalue and self.maxvalue == 0:
-            return True #no restraints
+        if self.minvalue == self.maxvalue and self.maxvalue == 0: #no restraints
+            return super(FloatParameter,self).validate(value)
         elif (self.maxvalue < self.minvalue) or ((value >= self.minvalue) and  (value <= self.maxvalue)):
-            return True
+            return super(FloatParameter,self).validate(value)
         else:
             self.error = "Number must be between " + str(self.minvalue) + " and " + str(self.maxvalue)
             return False

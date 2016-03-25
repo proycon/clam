@@ -36,6 +36,12 @@ fi
 
 echo "  ..ok" >&2
 
+echo "Running parameter tests:" >&2
+python parametertest.py 
+if [ $? -ne 0 ]; then
+   echo "ERROR: Parameter test failed!!" >&2
+   GOOD=0
+fi
 
 echo "Running data tests:" >&2
 python datatest.py 

@@ -172,7 +172,8 @@ class StringParameterTest(unittest.TestCase):
     """String Parameter Test"""
 
     def setUp(self):
-        self.parameter = clam.common.parameters.StringParameter('test','test','test',paramflag='-t',default="default",maxlength=10)
+        validator = lambda x: x != "blah"
+        self.parameter = clam.common.parameters.StringParameter('test','test','test',paramflag='-t',default="default",validator=validator, maxlength=10)
 
     def test1_sanity(self):
         """String parameter - sanity check"""
@@ -224,6 +225,12 @@ class StringParameterTest(unittest.TestCase):
         self.assertTrue(self.parameter.error is None, self.parameter.error)
         self.assertTrue(self.parameter.hasvalue)
         self.assertTrue(self.parameter.value == "default")
+
+    def test7_customvalidator(self):
+        """String parameter - Custom validator (testing for failure)"""
+        success = self.parameter.set("blah")
+        self.assertTrue(self.parameter.error is not None)
+        self.assertFalse(success)
 
 
 class ChoiceParameterTest(unittest.TestCase):
