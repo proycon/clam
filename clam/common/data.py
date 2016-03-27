@@ -604,8 +604,6 @@ class CLAMData(object):
                     if corpusnode.tag == 'corpus':
                         self.corpora.append(corpusnode.value)
             elif node.tag == 'profiles':
-                if 'matched' in node.attr:
-                    self.matchedprofiles = [ int(i) for i in node.attr['matched'].split(',') ]
                 for subnode in node:
                     if subnode.tag == 'profile':
                         self.profiles.append(Profile.fromxml(subnode))

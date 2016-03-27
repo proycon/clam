@@ -1033,7 +1033,7 @@ class Project:
             #everything good, write clam.xml output file and start
 
             with io.open(Project.path(project, user) + "clam.xml",'wb') as f:
-                f.write(Project.response(user, project, parameters, "",True, oauth_access_token, matchedprofiles_byindex, expectedoutput).data)
+                f.write(Project.response(user, project, parameters, "",True, oauth_access_token, ",".join([str(x) for x in matchedprofiles_byindex]), expectedoutput).data)
 
 
 
@@ -1096,7 +1096,7 @@ class Project:
                         return flask.redirect(getrooturl() + '/' + project)
                 else:
                     #normal response (202)
-                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token,matchedprofiles_byindex, expectedoutput),202) #returns 202 - Accepted
+                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), expectedoutput),202) #returns 202 - Accepted
             else:
                 return flask.make_response("Unable to launch process",500)
 
