@@ -2395,6 +2395,8 @@ class CLAMService(object):
 
 
         self.service = flask.Flask("clam")
+        self.service.jinja_env.trim_blocks = True
+        self.service.jinja_env.lstrip_blocks = True
         self.service.secret_key = settings.SECRET_KEY
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
