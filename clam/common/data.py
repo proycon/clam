@@ -995,12 +995,12 @@ class Program(dict):
             self.matchedprofiles=[]
         else:
             self.matchedprofiles=matchedprofiles
-        super().__init__()
+        super(Program,self).__init__()
 
     def update(self, src):
         self.projectpath = src.projectpath
         self.matchedprofiles=list(set(self.matchedprofiles+ src.matchedprofiles))
-        super().update(src)
+        super(Program,self).update(src)
 
     def add(self, outputfilename, outputtemplate, inputfilename=None, inputtemplate=None):
         """Add a new path to the program"""
