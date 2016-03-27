@@ -71,6 +71,18 @@
     </parameters>
 {% endif %}
 
+{% if (statuscode == 1 or statuscode == 2) and project and matchedprofiles and program %}
+    <program matchedprofiles="{{ matchedprofiles }}">
+        {% for outputfilename, (outputtemplate, inputfiles) in plan.items() %}
+        <outputfile name="{{outputfilename}}" template="{{outputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        
+            {% for inputfilename, inputtemplate in inputfiles.items() % }
+                <inputfile name="{{inputfilename}}" template="{{inputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" /> 
+            {% endfor %}
+        </outputfile>
+        {% endfor %}
+    </program>
+{% endif %}
+
 {% if (statuscode == 2 or datafile) and project %}
     <output>
         {% for outputfile in outputpaths %}

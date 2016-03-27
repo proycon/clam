@@ -463,6 +463,7 @@ class CLAMData(object):
                           the percentage towards completion.
         * ``parameters``      - List of parameters (but use the methods instead)
         * ``profiles``        - List of profiles (``[ Profile ]``)
+        * ``program``         - A Program instance (or None). Describes the expected outputfiles given the uploaded inputfiles. This is the concretisation of the matching profiles.
         * ``input``           - List of input files  (``[ CLAMInputFile ]``); use ``inputfiles()`` instead for easier access
         * ``output``          - List of output files (``[ CLAMOutputFile ]``)
         * ``projects``        - List of project IDs (``[ string ]``)
@@ -474,7 +475,7 @@ class CLAMData(object):
     Note that depending on the current status of the project, not all may be available.
     """
 
-    def __init__(self, xml, client=None, localroot = False):
+    def __init__(self, xml, client=None, localroot = False, projectpath=None):
         """Initialises a CLAMData object by passing pass a string containing the full CLAM XML response. It will be automatically parsed. This is usually not called directly but instantiated in system wrapper scripts using::
 
             data = clam.common.data.getclamdata("clam.xml")
@@ -508,10 +509,13 @@ class CLAMData(object):
         #: List of profiles ([ Profile ])
         self.profiles = []
 
+        #: Program instance. Describes the expected outputfiles given the uploaded inputfiles. This is the concretisation of the matching profiles.
+        self.program = None
+
         #:  List of pre-installed corpora
         self.corpora = []
 
-        #: List of output files ([ CLAMInputFile ])
+        #: List of input files ([ CLAMInputFile ])
         self.input = []
 
         #: List of output files ([ CLAMOutputFile ])
@@ -600,6 +604,8 @@ class CLAMData(object):
                     if corpusnode.tag == 'corpus':
                         self.corpora.append(corpusnode.value)
             elif node.tag == 'profiles':
+                if 'matched' in node.attr:
+                    self.matchedprofiles = [ int(i) for i in node.attr['matched'].split(',') ]
                 for subnode in node:
                     if subnode.tag == 'profile':
                         self.profiles.append(Profile.fromxml(subnode))
@@ -620,6 +626,26 @@ class CLAMData(object):
                 for projectnode in node:
                     if projectnode.tag == 'project':
                         self.projects.append(projectnode.text)
+            elif node.tag == 'program':
+                self.program = Program(self.projecturl, [ int(i) for i in node.attrib['matchedprofiles'].split(',') ] )
+                for outputfilenode in node:
+                    if outputfilenode.tag == 'outputfile':
+                        inputfound = False
+                        for inputfilenode in node:
+                            if inputfilenode.tag == 'inputfile':
+                                inputfound = True
+                                self.program.add(outputfilenode.attrib['name'], self.outputtemplate(outputfilenode.attrib['template']),inputfilenode.attrib['name'], self.inputtemplate(inputfilenode.attrib['template']))
+                        if not inputfound:
+                            self.program.add(outputfilenode.attrib['name'], self.outputtemplate(outputfilenode.attrib['template']))
+
+    def outputtemplate(self, template_id):
+        """Get an output template by ID"""
+        for profile in self.profiles:
+            for outputtemplate in profile.outputtemplates():
+                if outputtemplate == template_id:
+                    return outputtemplate
+        return KeyError("Outputtemplate " + template_id + " not found")
+
 
     def commandlineargs(self):
         commandlineargs = []
@@ -708,6 +734,10 @@ class CLAMData(object):
             raise Exception("Multiple input files matched. Use inputfiles() instead!")
         return inputfiles[0]
 
+    def matchingprofiles(self):
+        """Generator yielding all matching profiles"""
+        for i in self.matchedprofiles:
+            yield self.profiles[i]
 
     def inputfiles(self, inputtemplate=None):
         """Generator yielding all inputfiles for the specified inputtemplate, if ``inputtemplate=None``, inputfiles are returned regardless of inputtemplate."""
@@ -718,10 +748,9 @@ class CLAMData(object):
             if not inputtemplate or inputfile.metadata.inputtemplate == inputtemplate:
                 yield inputfile
 
-
-
-
-
+    def outputfiles(self, outputtemplate=None, inputtemplate=None):
+        """Generator yielding all outputfiles, either actually existing or expected. This method can therefore also be run when the outputfiles are not yet generated, in which case it will be based on the Program. If ``outputtemplate=None``, outputfiles are returned regardless of outputtemplate. if ``inputtemplate=None``, outputfiles are returned regardless of inputtemplate."""
+        #TODO!
 
 
 def sanitizeparameters(parameters):
@@ -741,16 +770,18 @@ def sanitizeparameters(parameters):
 
 
 def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl,printdebug=None):
-    """Given input files and parameters, produce metadata for outputfiles. Returns list of matched profiles if succesfull, empty list otherwise"""
+    """Given input files and parameters, produce metadata for outputfiles. Returns a list of matched profiles (empty if none match), and a program."""
 
     parameters = sanitizeparameters(parameters)
 
     matched = []
+    program = Program(projectpath)
     for profile in profiles:
         if profile.match(projectpath, parameters)[0]:
             matched.append(profile)
-            profile.generate(projectpath,parameters,serviceid,servicename,serviceurl)
-    return matched
+            program.update( profile.generate(projectpath,parameters,serviceid,servicename,serviceurl) )
+
+    return matched, program
 
 
 
@@ -860,10 +891,12 @@ class Profile(object):
 
 
     def generate(self, projectpath, parameters, serviceid, servicename,serviceurl):
-        """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute."""
+        """Generate output metadata on the basis of input files and parameters. Projectpath must be absolute. Returns a Program instance.  """
 
         #Make dictionary of parameters
         parameters = sanitizeparameters(parameters)
+
+        program = Program(projectpath, [self])
 
         match, optional_absent = self.match(projectpath, parameters) #Does the profile match?
         if match: #pylint: disable=too-many-nested-blocks
@@ -891,7 +924,7 @@ class Profile(object):
                                 create = False
 
                         if create:
-                            for outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
+                            for inputtemplate, inputfilename, outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
                                 clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)
                                 metafilename = os.path.dirname(outputfilename)
                                 if metafilename: metafilename += '/'
@@ -899,8 +932,11 @@ class Profile(object):
                                 f = io.open(projectpath + '/output/' + metafilename,'w',encoding='utf-8')
                                 f.write(metadata.xml())
                                 f.close()
+                                program.add(outputfilename, outputtemplate, inputfilename, inputtemplate)
                     else:
                         raise TypeError("OutputTemplate expected, but got " + outputtemplate.__class__.__name__)
+
+        return program
 
 
     def xml(self, indent = ""):
@@ -951,8 +987,55 @@ class Profile(object):
                             args.append(ParameterCondition.fromxml(subnode))
         return Profile(*args)
 
+class Program(dict):
+    """A Program is the concretisation of Profile. It describes the exact output files that will be created on the basis of what input files. This is in essence a dictionary
+    structured as follows: ``{outputfilename: (outputtemplate, inputfiles)}`` in which ``inputfiles`` is a dictionary ``{inputfilename: inputtemplate}``"""
 
+    def __init__(self, projectpath, matchedprofiles=None):
+        self.projectpath=projectpath
+        if matchedprofiles is None:
+            self.matchedprofiles=[]
+        else:
+            self.matchedprofiles=matchedprofiles
+        super().__init__()
 
+    def update(self, src):
+        self.projectpath = src.projectpath
+        self.matchedprofiles=list(set(self.matchedprofiles+ src.matchedprofiles))
+        super().update(src)
+
+    def add(self, outputfilename, outputtemplate, inputfilename=None, inputtemplate=None):
+        """Add a new path to the program"""
+        if outputfilename in self:
+            outputtemplate, inputfiles = self[outputfilename]
+            if inputfilename and inputtemplate:
+                inputfiles[inputfilename] = inputtemplate
+        else:
+            if inputfilename and inputtemplate:
+                self[outputfilename] = (outputtemplate, {inputfilename: inputtemplate})
+            else:
+                self[outputfilename] = (outputtemplate, {})
+
+    def outputpairs(self):
+        """Iterates over all (outputfilename, outputtemplate) pairs"""
+        for outputfilename, (outputtemplate, inputfiles) in self.items():
+            yield outputfilename, outputtemplate
+
+    def inputpairs(self, outputfilename):
+        """Iterates over all (inputfilename, inputtemplate) pairs for a specific output filename"""
+        for inputfilename, inputtemplate in self[outputfilename][1]:
+            yield inputfilename, inputtemplate
+
+    def getoutputfiles(self, outputfilename, loadmetadata=True, client=None,requiremetadata=False):
+        """Iterates over all output files for the specified outputfile. Returns CLAMOutputFile instances, the last three arguments are passed to its constructor."""
+        for outputfilename, outputtemplate in self.outputpairs():
+            yield CLAMOutputFile(self.projectpath, outputfilename, loadmetadata,client,requiremetadata)
+
+    def getinputfiles(self, outputfilename, loadmetadata=True, client=None,requiremetadata=False):
+        """Iterates over all input files for the specified outputfile. Returns CLAMInputFile instances, the last three arguments are passed to its constructor."""
+        for outputfilename, (outputtemplate, inputfiles) in self.items():
+            for inputfilename, inputtemplate in inputfiles:
+                yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata)
 
 class RawXMLProvenanceData(object):
     def __init__(self, data):
@@ -1757,7 +1840,7 @@ class OutputTemplate(object):
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
     def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None):
-        """Yields (outputfilename, metadata) tuples"""
+        """Yields (inputtemplate, inputfilename, outputfilename, metadata) tuples"""
 
         project = os.path.basename(projectpath)
 
@@ -1819,7 +1902,7 @@ class OutputTemplate(object):
                 #Resolve filename
                 filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr, project, inputfilename)
 
-                yield filename, metadata
+                yield inputtemplate, inputfilename, filename, metadata
 
         elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
@@ -1828,7 +1911,7 @@ class OutputTemplate(object):
 
             filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0, project, None)
 
-            yield filename, metadata
+            yield None, None, filename, metadata
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
