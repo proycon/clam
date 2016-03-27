@@ -75,7 +75,7 @@
     <program matchedprofiles="{{ matchedprofiles }}">
         {% for outputfilename, (outputtemplate, inputfiles) in plan.items() %}
         <outputfile name="{{outputfilename}}" template="{{outputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        
-            {% for inputfilename, inputtemplate in inputfiles.items() % }
+            {% for inputfilename, inputtemplate in inputfiles.items() %}
                 <inputfile name="{{inputfilename}}" template="{{inputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" /> 
             {% endfor %}
         </outputfile>
