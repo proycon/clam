@@ -939,27 +939,26 @@ class Profile(object):
 
     def xml(self, indent = ""):
         """Produce XML output for the profile"""
-        xml = "\n" + indent + "<profile"
-        xml += ">\n"
+        xml = "\n" + indent + "<profile>\n"
         xml += indent + " <input>\n"
         for inputtemplate in self.input:
-            xml += inputtemplate.xml(indent +"\t") + "\n"
+            xml += inputtemplate.xml(indent +"    ") + "\n"
         xml += indent + " </input>\n"
         xml += indent + " <output>\n"
         for outputtemplate in self.output:
-            xml += outputtemplate.xml(indent +"\t") + "\n" #works for ParameterCondition as well!
+            xml += outputtemplate.xml(indent +"    ") + "\n" #works for ParameterCondition as well!
         xml += indent + " </output>\n"
-        xml += indent + "</profile>"
+        xml += indent + "</profile>\n"
         return xml
 
     def out(self, indent = ""):
         o = indent + "Profile"
         o += indent + "\tInput"
         for inputtemplate in self.input:
-            o += inputtemplate.out(indent +"\t") + "\n"
+            o += inputtemplate.out(indent +"    ") + "\n"
         o += indent + "\tOutput"
         for outputtemplate in self.output:
-            o += outputtemplate.out(indent +"\t") + "\n"
+            o += outputtemplate.out(indent +"    ") + "\n"
 
         return o
 
@@ -1419,13 +1418,13 @@ class InputTemplate(object):
             xml +=" acceptarchive=\"no\""
         xml += ">\n"
         for parameter in self.parameters:
-            xml += parameter.xml(indent+"\t") + "\n"
+            xml += parameter.xml(indent+"    ") + "\n"
         if self.converters:
             for converter in self.converters:
-                xml += indent + "\t<converter id=\""+converter.id+"\">"+clam.common.util.xmlescape(converter.label)+"</converter>"
+                xml += indent + "    <converter id=\""+converter.id+"\">"+clam.common.util.xmlescape(converter.label)+"</converter>\n"
         if self.inputsources:
             for inputsource in self.inputsources:
-                xml += inputsource.xml(indent+"\t")
+                xml += inputsource.xml(indent+"    ")
         xml += indent + "</InputTemplate>"
         return xml
 
@@ -1769,7 +1768,7 @@ class OutputTemplate(object):
             xml +=" unique=\"no\""
         xml += ">\n"
         for metafield in self.metafields:
-            xml += metafield.xml(indent + "\t") + "\n"
+            xml += metafield.xml(indent + "    ") + "\n"
 
         xml += indent + "</OutputTemplate>"
         return xml
@@ -2048,11 +2047,11 @@ class ParameterCondition(object):
         for key, value, evalf, operator in self.conditions: #pylint: disable=unused-variable
             xml += indent + "  <" + operator + " parameter=\"" + key + "\">" + clam.common.util.xmlescape(str(value)) + "</" + operator + ">\n"
         xml += indent + " </if>\n" + indent + " <then>\n"
-        xml += self.then.xml(indent + "\t") + "\n"
+        xml += self.then.xml(indent + "    ") + "\n"
         xml += indent + " </then>\n"
         if self.otherwise:
             xml += indent + " <else>\n"
-            xml += self.otherwise.xml(indent + " \t") + "\n"
+            xml += self.otherwise.xml(indent + "     ") + "\n"
             xml += indent + " </else>"
         xml += indent + "</parametercondition>"
         return xml
@@ -2237,7 +2236,7 @@ class Action(object):
             allowanonymous = ""
         xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" " + allowanonymous + ">\n"
         for parameter in self.parameters:
-            xml += parameter.xml(indent+ "\t") + "\n"
+            xml += parameter.xml(indent+ "    ") + "\n"
         xml += indent + "</action>\n"
         return xml
 

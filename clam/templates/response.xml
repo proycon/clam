@@ -13,11 +13,11 @@
 {% else %}
 <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" baseurl="{{ url }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}">
 {% endif %}
-
+{############################################################################################}
     <description>{{ system_description }}</description>
     <version>{{ system_version }}</version>
     <email>{{ system_email }}</email>
-
+{############################################################################################}
 {% if customhtml %}
     <customhtml>
     <![CDATA[
@@ -25,7 +25,7 @@
     ]]>
     </customhtml>
 {% endif %}
-
+{############################################################################################}
 {% if not project %}
     <projects totalsize="{{ totalsize }}">
         {% for p, time, size, status in projects %}
@@ -33,7 +33,7 @@
         {% endfor %}
     </projects>
 {% endif %}
-
+{############################################################################################}
 {% if actions and not project %}
     <actions>
     {% for action in actions %}
@@ -41,7 +41,7 @@
     {% endfor %}
     </actions>
 {% endif %}
-
+{############################################################################################}
 {% if not datafile and project %}
     <status code="{{ statuscode }}" message="{{ statusmessage }}" completion="{{ completion }}" errors="{{ errors }}" errormsg="{{ errormsg }}">
     {% if statuscode == 1 or statuscode == 2 %}
@@ -51,11 +51,11 @@
     {% endif %}
     </status>
 {% endif %}
-
+{############################################################################################}
 {% if statuscode == 0 or statuscode == 2 or not project %}
     <profiles>
         {% for profile in profiles %}
-            {{ profile.xml()|safe }}
+            {{ profile.xml()|indent(8,false)|safe }}
         {% endfor %}
     </profiles>
     <parameters>
@@ -70,7 +70,7 @@
         {% endfor %}
     </parameters>
 {% endif %}
-
+{############################################################################################}
 {% if (statuscode == 1 or statuscode == 2) and project and matchedprofiles and program %}
     <program matchedprofiles="{{ matchedprofiles }}">
         {% for outputfilename, (outputtemplate, inputfiles) in program.items() %}
@@ -82,7 +82,7 @@
         {% endfor %}
     </program>
 {% endif %}
-
+{############################################################################################}
 {% if (statuscode == 2 or datafile) and project %}
     <output>
         {% for outputfile in outputpaths %}
@@ -91,45 +91,44 @@
             {% else %}
             <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}">                        
             {% endif %}
-            <name>{{ outputfile.filename }}</name>
+                <name>{{ outputfile.filename }}</name>
             {% if outputfile.viewers %}
-            <viewers>
-                {% for viewer in outputfile.viewers %}
-                <viewer xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ viewer.id }}">{{ viewer.name }}</viewer>
-                {% endfor %}
-            </viewers>
+                <viewers>
+                    {% for viewer in outputfile.viewers %}
+                    <viewer xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ viewer.id }}">{{ viewer.name }}</viewer>
+                    {% endfor %}
+                </viewers>
             {% endif %}
             {% if outputfile.converters %}
-            <converters>
-                {% for converter in outputfile.converters %}
-                <converter xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ converter.id }}">{{ converter.label }}</converter>
-                {% endfor %}
-            </converters>
+                <converters>
+                    {% for converter in outputfile.converters %}
+                    <converter xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ converter.id }}">{{ converter.label }}</converter>
+                    {% endfor %}
+                </converters>
             {% endif %}
             </file>
         {% endfor %}
     </output>
 {% endif %}
-
+{############################################################################################}
 {% if statuscode == 0 or statuscode == 2 or datafile or not project %}
-        <inputsources>
-            {% for inputsource in inputsources %}
-                <inputsource id="{{ inputsource.id }}">{{ inputsource.label }}</inputsource>
-            {% endfor %}
-        </inputsources> 
-        {% if project %}
-            <input>
-                {% for inputfile in inputpaths %}
-                    {% if inputfile.metadata and inputfile.metadata.inputtemplate %}
-                    <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfile.filename }}" template="{{ inputfile.metadata.inputtemplate }}">
-                    {% else %}
-                    <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfile.filename }}">
-                    {% endif %}
-                    <name>{{ inputfile.filename }}</name>
-                    </file>
-                {% endfor %}
-            </input>            
+    <inputsources>
+        {% for inputsource in inputsources %}
+        <inputsource id="{{ inputsource.id }}">{{ inputsource.label }}</inputsource>
+        {% endfor %}
+    </inputsources> 
+    {% if project %}
+    <input>
+      {% for inputfile in inputpaths %}
+        {% if inputfile.metadata and inputfile.metadata.inputtemplate %}
+        <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfile.filename }}" template="{{ inputfile.metadata.inputtemplate }}">
+        {% else %}
+        <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfile.filename }}">
         {% endif %}
+            <name>{{ inputfile.filename }}</name>
+        </file>
+      {% endfor %}
+    </input>            
+    {% endif %}
 {% endif %}
-
 </clam>
