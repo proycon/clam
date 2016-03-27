@@ -206,7 +206,7 @@ function processuploadresponse(response, paramdiv) {
       //Processes CLAM Upload XML
       
       //Clear all previous errors
-      $(paramdiv).find('.error').each(function(){ $(this).html(''); }); 
+      $(paramdiv).find('div.error').each(function(){ $(this).html(''); }); 
       
       $(response).find('upload').each(function(){       //for each uploaded file
         //var children = $(this).children();
@@ -718,6 +718,10 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             multiple: true,
             //forceMultipart: true,
             autoUpload: true, 
+            failedUploadTextDisplay: {
+                mode: 'custom',
+                responseProperty: 'error',
+            },
             debug: true
         }).on('submit', function(e, id, fileName) { //eslint-disable-line no-unused-vars
                 var inputtemplate_id = $('#uploadinputtemplate').val();
