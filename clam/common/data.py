@@ -649,6 +649,7 @@ class CLAMData(object):
 
 
     def commandlineargs(self):
+        """Obtain a string of all parameters, using the paramater flags they were defined with, in order to pass to an external command. This is shell-safe by definition."""
         commandlineargs = []
         for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
             for parameter in parameters:

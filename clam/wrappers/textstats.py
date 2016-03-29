@@ -149,6 +149,7 @@ if __name__ == "__main__":
         freqlistlimit = 0
 
 
+    #Solution B -- Iterate directly over input files
     for i, inputfile in enumerate(clamdata.input):
         #Update our status message to let CLAM know what we're doing
         clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))

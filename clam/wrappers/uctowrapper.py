@@ -40,15 +40,16 @@ if __name__ == "__main__":
     #You now have access to all data. A few properties at your disposition now are:
     # clamdata.system_id , clamdata.project, clamdata.user, clamdata.status , clamdata.parameters, clamdata.inputformats, clamdata.outputformats , clamdata.input , clamdata.output
 
+    #Output status to the statusfile
     clam.common.status.write(statusfile, "Starting...")
 
+    #Obtain all parameters, along with their flags, as a string suitable to pass to the tool, this is shell-safe by definition
+    commandlineargs = clamdata.commandlineargs()
 
-    commandlineargs = clamdata.commandlineargs() #shell-safe by definition
-
-
+    #l = len(clamdata.program)
     for i, inputfile in enumerate(clamdata.input):
         #Update our status message to let CLAM know what we're doing
-        clam.common.status.write(statusfile, "Processing " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
+        clam.common.status.write(statusfile, "Generating " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
 
         #We need one of the metadata fields
         language = inputfile.metadata['language']
