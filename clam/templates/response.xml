@@ -71,7 +71,7 @@
     </parameters>
 {% endif %}
 {############################################################################################}
-{% if (statuscode == 1 or statuscode == 2) and project and matchedprofiles and program %}
+{% if project and matchedprofiles and program %}
     <program matchedprofiles="{{ matchedprofiles }}">
         {% for outputfilename, (outputtemplate, inputfiles) in program.items() %}
         <outputfile name="{{outputfilename}}" template="{{outputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        

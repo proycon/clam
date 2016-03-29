@@ -1015,7 +1015,7 @@ class Project:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
             return flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503)
         if not errors: #We don't even bother running the profiler if there are errors
-            matchedprofiles, expectedoutput = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
+            matchedprofiles, program = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
             #converted matched profiles to a list of indices
             matchedprofiles_byindex = []
             for i, profile in enumerate(settings.PROFILES):
@@ -1031,9 +1031,8 @@ class Project:
             return flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml'} )
         else:
             #everything good, write clam.xml output file and start
-
             with io.open(Project.path(project, user) + "clam.xml",'wb') as f:
-                f.write(Project.response(user, project, parameters, "",True, oauth_access_token, ",".join([str(x) for x in matchedprofiles_byindex]), expectedoutput).data)
+                f.write(Project.response(user, project, parameters, "",True, oauth_access_token, ",".join([str(x) for x in matchedprofiles_byindex]), program).data)
 
 
 
@@ -1096,7 +1095,7 @@ class Project:
                         return flask.redirect(getrooturl() + '/' + project)
                 else:
                     #normal response (202)
-                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), expectedoutput),202) #returns 202 - Accepted
+                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program),202) #returns 202 - Accepted
             else:
                 return flask.make_response("Unable to launch process",500)
 

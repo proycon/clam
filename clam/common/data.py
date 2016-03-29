@@ -640,7 +640,7 @@ class CLAMData(object):
         """Get an output template by ID"""
         for profile in self.profiles:
             for outputtemplate in profile.outputtemplates():
-                if outputtemplate == template_id:
+                if outputtemplate.id == template_id:
                     return outputtemplate
         return KeyError("Outputtemplate " + template_id + " not found")
 
