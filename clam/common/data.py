@@ -632,7 +632,7 @@ class CLAMData(object):
                 for outputfilenode in node:
                     if outputfilenode.tag == 'outputfile':
                         inputfound = False
-                        for inputfilenode in node:
+                        for inputfilenode in outputfilenode:
                             if inputfilenode.tag == 'inputfile':
                                 inputfound = True
                                 self.program.add(outputfilenode.attrib['name'], self.outputtemplate(outputfilenode.attrib['template']),inputfilenode.attrib['name'], self.inputtemplate(inputfilenode.attrib['template']))

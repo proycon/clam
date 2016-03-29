@@ -965,12 +965,13 @@ class Project:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
             #    return flask.make_response("Access denied to project " +  project + " for user " + user, 401) #401
             datafile = os.path.join(Project.path(project,credentials),'clam.xml')
-            if Project.status(project,user) == clam.common.status.DONE and os.path.exists(datafile):
+            statuscode, statusmsg, statuslog, completion = Project.status(project, user) #pylint: disable=unused-variable
+            if statuscode == clam.common.status.DONE and os.path.exists(datafile):
                 f = io.open(datafile,'r',encoding='utf-8')
                 xmldata = f.read(os.path.getsize(datafile))
                 f.close()
                 data = clam.common.data.CLAMData(xmldata, None,False, Project.path(project,credentials), loadmetadata=False)
-                return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token,data.matchingprofiles, data.program) #200
+                return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token,','.join([str(x) for x in data.program.matchedprofiles]) if data.program else "", data.program) #200
             else:
                 return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
