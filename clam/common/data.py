@@ -1034,7 +1034,7 @@ class Program(dict):
     def getinputfiles(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):
         """Iterates over all input files for the specified outputfile (you may pass a CLAMOutputFile instance or a filename string). Yields (CLAMInputFile,str:inputtemplate_id) tuples. The last three arguments are passed to its constructor."""
         if isinstance(outputfile, CLAMOutputFile):
-            outputfilename = str(outputfile).replace(self.projectpath,'')
+            outputfilename = str(outputfile).replace(os.path.join(self.projectpath,'output/'),'')
         else:
             outputfilename = outputfile
         _, inputfiles = self[outputfilename]
@@ -1042,18 +1042,21 @@ class Program(dict):
             yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata), inputtemplate
 
     def getinputfile(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):
-        """Grabs one input file for the specified output filename (raises a KeyError exception if there is none). Shortcut for getinputfiles()"""
+        """Grabs one input file for the specified output filename (raises a KeyError exception if there is no such output, StopIteration if there are no input files for it). Shortcut for getinputfiles()"""
+        if isinstance(outputfile, CLAMOutputFile):
+            outputfilename = str(outputfile).replace(os.path.join(self.projectpath,'output/'),'')
+        else:
+            outputfilename = outputfile
+        if outputfilename not in self:
+            raise KeyError("No such outputfile " + outputfilename)
         try:
             return next(self.getinputfiles(outputfile,loadmetadata,client,requiremetadata))
         except StopIteration:
-            raise KeyError("No such outputfile " + repr(outputfile))
+            raise StopIteration("No input files for outputfile " + outputfilename)
 
     def getoutputfile(self, loadmetadata=True, client=None,requiremetadata=False):
-        """Grabs one output file (raises a KeyError exception if there is none). Shortcut for getoutputfiles()"""
-        try:
-            return next(self.getoutputfiles(loadmetadata,client,requiremetadata))
-        except StopIteration:
-            raise KeyError("No such outputfile ")
+        """Grabs one output file (raises a StopIteration exception if there is none). Shortcut for getoutputfiles()"""
+        return next(self.getoutputfiles(loadmetadata,client,requiremetadata))
 
 class RawXMLProvenanceData(object):
     def __init__(self, data):
