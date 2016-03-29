@@ -475,7 +475,7 @@ class CLAMData(object):
     Note that depending on the current status of the project, not all may be available.
     """
 
-    def __init__(self, xml, client=None, localroot = False, projectpath=None):
+    def __init__(self, xml, client=None, localroot = False, projectpath=None, loadmetadata=True):
         """Initialises a CLAMData object by passing pass a string containing the full CLAM XML response. It will be automatically parsed. This is usually not called directly but instantiated in system wrapper scripts using::
 
             data = clam.common.data.getclamdata("clam.xml")
@@ -520,6 +520,9 @@ class CLAMData(object):
 
         #: List of output files ([ CLAMOutputFile ])
         self.output = []
+
+        #: Automatically load metadata for input and output files? (default: True)
+        self.loadmetadata = loadmetadata
 
         #: List of projects ([ string ])
         self.projects = None
@@ -612,13 +615,13 @@ class CLAMData(object):
                     if filenode.tag == 'file':
                         for n in filenode:
                             if n.tag == 'name':
-                                self.input.append( CLAMInputFile( self.projecturl, n.text, True, self.client,True) )
+                                self.input.append( CLAMInputFile( self.projecturl, n.text, self.loadmetadata, self.client,True) )
             elif node.tag == 'output':
                 for filenode in node:
                     if filenode.tag == 'file':
                         for n in filenode:
                             if n.tag == 'name':
-                                self.output.append( CLAMOutputFile( self.projecturl, n.text, True, self.client ) )
+                                self.output.append( CLAMOutputFile( self.projecturl, n.text, self.loadmetadata, self.client ) )
             elif node.tag == 'projects':
                 self.projects = []
                 for projectnode in node:
