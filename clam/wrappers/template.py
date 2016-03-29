@@ -79,7 +79,7 @@ clam.common.status.write(statusfile, "Starting...")
         #(You can access output metadata using outputfile.metadata[parameter_id])
 #       outputfilepath = str(outputfile) #example showing how to obtain the path to the file
         #if you expect just a single input file for this output file, you can use this:
-#       inputfile, inputtemplate = next(clamdata.program.getinputfiles(outputfilename))
+#       inputfile, inputtemplate = clamdata.program.getinputfile(outputfilename)
         # ...do your thing... e.g., invoke a process that generates outputfilename on the basis of inputfilename (see the invoke your actual system example below)
         #(You can access input metadata using inputfile.metadata[parameter_id])
 

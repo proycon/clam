@@ -28,8 +28,8 @@ shellsafe = clam.common.data.shellsafe
 
 if __name__ == "__main__":
 
-    #this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
-    bindir = sys.argv[1]
+    #this script takes four arguments from CLAM: $BINDIR $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
+    bindir = sys.argv[1] #the directory containing the ucto executable
     datafile = sys.argv[2]
     statusfile = sys.argv[3]
     outputdir = sys.argv[4]
@@ -46,26 +46,42 @@ if __name__ == "__main__":
     #Obtain all parameters, along with their flags, as a string suitable to pass to the tool, this is shell-safe by definition
     commandlineargs = clamdata.commandlineargs()
 
-    #l = len(clamdata.program)
-    for i, inputfile in enumerate(clamdata.input):
+    l = len(clamdata.program) #total amount of output files, for computation of progress
+    for i, (outputfile, outputtemplate) in enumerate(clamdata.program.getoutputfiles()):
+        #Get path+filename for the outputfile
+        outputfilepath = str(outputfile)
+
         #Update our status message to let CLAM know what we're doing
-        clam.common.status.write(statusfile, "Generating " + os.path.basename(str(inputfile)) + "...", round((i/float(len(clamdata.input)))*100))
+        clam.common.status.write(statusfile, "Producing " + os.path.basename(outputfilepath) + "...", round((i/l)*100))
 
-        #We need one of the metadata fields
-        language = inputfile.metadata['language']
+        #We need one of the metadata fields (inherited from the input data), all of the output templates we defined have this parameter
+        language = outputfile.metadata['language']
 
+        #We have a one-one relationship between inputfiles and outputfiles, so we can grab the input file here:
+        inputfile, inputtemplate = clamdata.program.getinputfile(outputfile)
 
-        if clamdata['xml']:
+        #Which outputtemplate are we processing?
+        if outputtemplate.id == 'foliatokoutput':
+            #FoLiA XML output
             docid = None
             if 'documentid' in inputfile.metadata and inputfile.metadata['documentid']:
                 docid = inputfile.metadata['documentid']
             if not docid:
                 docid = "untitled"
-            os.system(bindir + 'ucto -L ' + shellsafe(language,"'") + ' -x ' + shellsafe(docid,"'") + ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.xml','"'))
-        elif clamdata['verbose']:
-            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.vtok',"'"))
-        else:
-            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' + commandlineargs + ' ' + shellsafe(str(inputfile),'"') + ' > ' + shellsafe(outputdir +'/'+ inputfile.filename.replace('.txt','') + '.tok',"'"))
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'") + ' -x ' +
+                      shellsafe(docid,"'") + ' ' + commandlineargs + ' ' +
+                      shellsafe(str(inputfile),'"') +
+                      ' > ' + shellsafe(outputfilepath,'"'))
+        elif outputtemplate.id == 'vtokoutput':
+            #Verbose output
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' +
+                      commandlineargs + ' ' + shellsafe(str(inputfile),'"') +
+                      ' > ' + shellsafe(outputfilepath,'"'))
+        elif outputtemplate.id == 'tokoutput':
+            #plain text output
+            os.system(bindir + 'ucto -L ' + shellsafe(language,"'")+ ' ' +
+                      commandlineargs + ' ' + shellsafe(str(inputfile),'"') +
+                      ' > ' + shellsafe(outputfilepath,'"'))
 
     #A nice status message to indicate we're done
     clam.common.status.write(statusfile, "Done",100) # status update
