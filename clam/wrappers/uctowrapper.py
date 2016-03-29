@@ -61,7 +61,7 @@ if __name__ == "__main__":
         inputfile, inputtemplate = clamdata.program.getinputfile(outputfile)
 
         #Which outputtemplate are we processing?
-        if outputtemplate.id == 'foliatokoutput':
+        if outputtemplate == 'foliatokoutput':
             #FoLiA XML output
             docid = None
             if 'documentid' in inputfile.metadata and inputfile.metadata['documentid']:

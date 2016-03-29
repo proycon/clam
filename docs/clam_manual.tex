@@ -2239,11 +2239,11 @@ Consider the following example that simply concatenates all input texts (input t
 \begin{verbatim}
 for outputfile, outputtemplate in clamdata.program.getoutputfiles():
   outputfilepath = str(outputfile)
-  if outputtemplate.id == 'outputtext':
+  if outputtemplate == 'outputtext':
     inputfiles_safe = ""
     for inputfile, inputtemplate in clamdata.program.getinputfiles(outputfilename):
         inputfilepath = str(inputfile)
-        if inputtemplate.id == 'inputtext': #check is a bit obsolete in this case
+        if inputtemplate == 'inputtext': #check is a bit obsolete in this case
             inputfiles_safe += " " + shellsafe(inputfilepath) 
     if inputfiles_safe:
         os.system("cat " + inputfiles_safe + " > " + shellsafe(outputfilepath))

@@ -635,9 +635,9 @@ class CLAMData(object):
                         for inputfilenode in outputfilenode:
                             if inputfilenode.tag == 'inputfile':
                                 inputfound = True
-                                self.program.add(outputfilenode.attrib['name'], self.outputtemplate(outputfilenode.attrib['template']),inputfilenode.attrib['name'], self.inputtemplate(inputfilenode.attrib['template']))
+                                self.program.add(outputfilenode.attrib['name'],outputfilenode.attrib['template'],inputfilenode.attrib['name'], inputfilenode.attrib['template'])
                         if not inputfound:
-                            self.program.add(outputfilenode.attrib['name'], self.outputtemplate(outputfilenode.attrib['template']))
+                            self.program.add(outputfilenode.attrib['name'],outputfilenode.attrib['template'])
 
     def outputtemplate(self, template_id):
         """Get an output template by ID"""
@@ -725,7 +725,7 @@ class CLAMData(object):
             for inputtemplate in profile.input:
                 if inputtemplate.id == template_id:
                     return inputtemplate
-        raise Exception("No such input template!")
+        raise Exception("No such input template: " + repr(template_id))
 
     def inputfile(self, inputtemplate=None):
         """Return the inputfile for the specified inputtemplate, if ``inputtemplate=None``, inputfile is returned regardless of inputtemplate. This function may only return 1 and returns an error when multiple input files can be returned, use ``inputfiles()`` instead."""
@@ -1002,6 +1002,10 @@ class Program(dict):
 
     def add(self, outputfilename, outputtemplate, inputfilename=None, inputtemplate=None):
         """Add a new path to the program"""
+        if isinstance(outputtemplate,OutputTemplate):
+            outputtemplate = outputtemplate.id
+        if isinstance(inputtemplate,InputTemplate):
+            inputtemplate = inputtemplate.id
         if outputfilename in self:
             outputtemplate, inputfiles = self[outputfilename]
             if inputfilename and inputtemplate:
@@ -1023,12 +1027,12 @@ class Program(dict):
             yield inputfilename, inputtemplate
 
     def getoutputfiles(self, loadmetadata=True, client=None,requiremetadata=False):
-        """Iterates over all output files and their output template. Yields (CLAMOutputFile, OutputTemplate) tuples. The last three arguments are passed to its constructor."""
+        """Iterates over all output files and their output template. Yields (CLAMOutputFile, str:outputtemplate_id) tuples. The last three arguments are passed to its constructor."""
         for outputfilename, outputtemplate in self.outputpairs():
             yield CLAMOutputFile(self.projectpath, outputfilename, loadmetadata,client,requiremetadata), outputtemplate
 
     def getinputfiles(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):
-        """Iterates over all input files for the specified outputfile (you may pass a CLAMOutputFile instance or a filename string). Yields (CLAMInputFile,InputTemplate) tuples. The last three arguments are passed to its constructor."""
+        """Iterates over all input files for the specified outputfile (you may pass a CLAMOutputFile instance or a filename string). Yields (CLAMInputFile,str:inputtemplate_id) tuples. The last three arguments are passed to its constructor."""
         if isinstance(outputfile, CLAMOutputFile):
             outputfilename = str(outputfile).replace(self.projectpath,'')
         else:
