@@ -253,6 +253,45 @@ RelaxNG schema for CLAM XML
 		            </element>
 		        </zeroOrMore>
 		    </element>
+            <optional>
+                <element name="program">
+                    <a:documentation>A Program is the concretisation of Profile. It describes the exact output files that will be created on the basis of what input files.</a:documentation>
+                    <oneOrMore>
+                        <element name="outputfile">
+                            <a:documentation>An output file</a:documentation>
+                            <attribute name="name">
+                                <a:documentation>The filename of the output file</a:documentation>
+                            </attribute>
+                            <attribute name="template">
+                                <a:documentation>The ID of the outputtemplate that produces this output file</a:documentation>
+                            </attribute>
+                            <attribute name="type" ns="http://www.w3.org/1999/xlink">
+                                <a:documentation>XLink type, always "simple"</a:documentation>    
+                            </attribute>
+                            <attribute name="href" ns="http://www.w3.org/1999/xlink">
+                                <a:documentation>XLink reference to the URL of the outputi file.</a:documentation>    
+                            </attribute>                        
+                            <zeroOrMore>
+                                <element name="inputfile">
+                                    <a:documentation>An input file that is used to produce the outputfile</a:documentation>
+                                    <attribute name="name">
+                                        <a:documentation>The filename of the input file</a:documentation>
+                                    </attribute>
+                                    <attribute name="template">
+                                        <a:documentation>The ID of the input template that produces this input file</a:documentation>
+                                    </attribute>
+                                    <attribute name="type" ns="http://www.w3.org/1999/xlink">
+                                        <a:documentation>XLink type, always "simple"</a:documentation>    
+                                    </attribute>
+                                    <attribute name="href" ns="http://www.w3.org/1999/xlink">
+                                        <a:documentation>XLink reference to the URL of the input file.</a:documentation>    
+                                    </attribute>                        
+                                </element>
+                            </zeroOrMore>
+                        </element> 
+                    </oneOrMore>
+                </element>
+            </optional>
 		    <optional>
 		    	<element name="inputsources">
 		    		<text />
