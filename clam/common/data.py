@@ -1026,8 +1026,8 @@ class Program(dict):
         for inputfilename, inputtemplate in self[outputfilename][1]:
             yield inputfilename, inputtemplate
 
-    def getoutputfiles(self, outputfilename, loadmetadata=True, client=None,requiremetadata=False):
-        """Iterates over all output files for the specified outputfile. Returns CLAMOutputFile instances, the last three arguments are passed to its constructor."""
+    def getoutputfiles(self, loadmetadata=True, client=None,requiremetadata=False):
+        """Iterates over all output files. Returns CLAMOutputFile instances, the last three arguments are passed to its constructor."""
         for outputfilename, outputtemplate in self.outputpairs():
             yield CLAMOutputFile(self.projectpath, outputfilename, loadmetadata,client,requiremetadata)
 

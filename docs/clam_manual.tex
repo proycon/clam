@@ -2043,16 +2043,19 @@ the big advantage that they can directly tie into the CLAM Data API, which
 handles things such as reading the \texttt{clam.xml} data file, makes all
 parameters and input files (with metadata) directly accessible, and offers a
 function to protect your variables against code injection when passing them to
-the shell.
+the shell. Using the Python for your wrapper is therefore recommended.
 
-If you used \texttt{clamnewproject} to begin your new clam service, then an example
-wrapper script will have been created for you, using the CLAM Data API.
+If you used \texttt{clamnewproject} to begin your new clam service, then two
+example wrapper scripts will have been created for you, one in Python using the
+CLAM Data API, and one using bash shell script. Choose one. These generated
+scripts are heavily commented to guide you in setting your wrapper script up.
+This documentation will add some further insights.
 
 \subsection{CLAM Data API}
 
-The key function of CLAM Data API is parsing the CLAM XML Data file that the
+The key function of CLAM Data API is to parse the CLAM XML Data file that the
 clam webservice uses to communicate with clients. This data is parsed and all
-its components are made available in an instance of a CLAMData class.
+its components are made available in an instance of a \texttt{CLAMData} class.
 
 Suppose your wrapper script is called with the following command definition:
 
@@ -2094,10 +2097,10 @@ variables available are:
 \item \texttt{clamdata.status}
 \item \texttt{clamdata.parameters}
 \item \texttt{clamdata.input}
+\item \texttt{clamdata.program}
 \end{itemize}
 
-
-Any global parameters are available from the \texttt{clamdata} instance, by
+Any global parameters set by the user are available from the \texttt{clamdata} instance, by
 using it like a Python dictionary, where the keys correspond to the Parameter ID:
 
 { \small
@@ -2140,9 +2143,9 @@ inputfilepath = str(inputfile)
 
 The variable \texttt{inputfilepath} in the above example will contain the full
 path to the file that was uploaded by the user for the specified input
-template. 
+template.
 
-Once you have a file, you can easily obtain any associated metadata in a
+Once you have a file, you can easily obtain any associated metadata parameters in a
 dictionary-like fashion, for instance:
 
 { \small
@@ -2164,7 +2167,7 @@ for inputfile in clamdata.input:
   
 The core of your wrapper script usually consists of a call to your external
 program. In Python this can be done through \texttt{os.system()}. Consider the
-following ficticious example of a program that translates an input text to the
+following fictitious example of a program that translates an input text to the
 language specified by a global parameter.
 
 { \small
@@ -2204,6 +2207,52 @@ otherwise forbidden. If no quotes are used, shellsafe does more stringent
 checks to prevent code injection. A Python exception is raised if the variable
 is not deemed safe, and the shell will not be invoked. CLAM itself will detect
 and produce an error log.
+
+\subsection{Program}
+
+A \emph{program} (programme) describes exactly what output files will be
+generated on the basis of what input files. It is the concretisation of the
+profiles. Profiles specify how input relates to output in a generic sense,
+using input and output templates. The program lists what exact output files
+will be generates, with filenames, on the basis of exactly which input files.
+The program is a read-only construct generated from the profiles and the input.
+It is present in the CLAM XML response, the clam XML data file, and accessible
+to your wrapper script.
+
+
+Keep in mind that this method allows you to iterate over the output files prior
+to their actual creation. Because it contains exact information on output and
+input files. It is the most elegant method to set up your wrapper script,
+avoiding any duplication of file names and allowing your wrapper to be set up
+in a filename agnostic way.
+
+In the following example. We obtain all output files and corresponding
+output templates using the \texttt{getoutputfiles()}. For each output file, we can
+request the input files (and corresponding input templates) using the
+\texttt{getinputfiles(outputfilename)}. 
+
+Consider the following example that simply concatenates all input texts (input template
+\texttt{inputtext}) to a single output text (output template
+\texttt{outputtext}) using the unix \texttt{cat} tool:
+
+{ \small
+\begin{verbatim}
+for outputfile, outputtemplate in clamdata.program.getoutputfiles():
+  outputfilepath = str(outputfile)
+  if outputtemplate.id == 'outputtext':
+    inputfiles_safe = ""
+    for inputfile, inputtemplate in clamdata.program.getinputfiles(outputfilename):
+        inputfilepath = str(inputfile)
+        if inputtemplate.id == 'inputtext': #check is a bit obsolete in this case
+            inputfiles_safe += " " + shellsafe(inputfilepath) 
+    if inputfiles_safe:
+        os.system("cat " + inputfiles_safe + " > " + shellsafe(outputfilepath))
+\end{verbatim}}
+
+The \texttt{outputfile} and \texttt{inputfile} variables are instances of
+\texttt{CLAMOutputFile} and \texttt{CLAMInputFile} respectively. Their metadata
+parameters can be accesses through \texttt{outputfile.metadata['parameter\_id']}
+and \texttt{inputfile.metadata['parameter\_id']}. 
 
 
 \chapter{Documentation for Service Clients}

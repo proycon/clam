@@ -9,6 +9,8 @@
 #       Centre for Language and Speech Technology
 #       Radboud University Nijmegen
 #
+#       (adapt or remove this header for your own code)
+#
 #       Licensed under GPLv3
 #
 ###############################################################
@@ -29,10 +31,6 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 
 #import some general python modules:
 import sys
-import os
-import codecs
-import re
-import string
 
 #import CLAM-specific modules. The CLAM API makes a lot of stuff easily accessible.
 import clam.common.data
@@ -43,7 +41,9 @@ import clam.common.status
 #make a shortcut to the shellsafe() function
 shellsafe = clam.common.data.shellsafe
 
-#this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY  (as configured at COMMAND= in the service configuration file)
+#this script takes three arguments from CLAM: $DATAFILE $STATUSFILE $OUTPUTDIRECTORY
+#(as configured at COMMAND= in the service configuration file, there you can
+#reconfigure which arguments are passed and in what order.
 datafile = sys.argv[1]
 statusfile = sys.argv[2]
 outputdir = sys.argv[3]
@@ -61,41 +61,68 @@ clamdata = clam.common.data.getclamdata(datafile)
 
 clam.common.status.write(statusfile, "Starting...")
 
-#SOME EXAMPLES (uncomment and adapt what you need)
 
-#-- Iterate over the program --
+#=========================================================================================================================
 
-# The 'program' describes exactly what output files will be generated on the
+# Below are some examples of how to access the input files and expected output
+# files. Choose and adapt one of examples A, B or C.
+
+#-- EXAMPLE A: Iterate over the program --
+
+# The 'program' describes exactly what output files will/should be generated on the
 # basis of what input files. It is the concretisation of the profiles and is the
 # most elegant method to set up your wrapper.
 
-#for outputfilename, outputtemplate in clamdata.program.getoutputpairs():
-#   if you expect just a single input file for this output file, you can use this:
-#   inputfilename, inputtemplate = next(clamdata.program.getinputpairs(outputfilename))
-#   ...do your thing... e.g., invoke a process that generates outputfilename on the basis of inputfilename (see the invoke your actual system example below)
+#for outputfile, outputtemplate in clamdata.program.getoutputfiles():
+#   if outputtemplate.id == 'some_template_id':
+        #(Use outputtemplate.id to match against output templates)
+        #(You can access output metadata using outputfile.metadata[parameter_id])
+#       outputfilepath = str(outputfile) #example showing how to obtain the path to the file
+        #if you expect just a single input file for this output file, you can use this:
+#       inputfile, inputtemplate = next(clamdata.program.getinputfiles(outputfilename))
+        # ...do your thing... e.g., invoke a process that generates outputfilename on the basis of inputfilename (see the invoke your actual system example below)
+        #(You can access input metadata using inputfile.metadata[parameter_id])
 
-#   if, on the other hand, you expect multiple input files, then you can iterate over them:
-#   for inputfilename, inputtemplate in clamdata.program.getinputpairs(outputfilename):
-#       ...
-#   ...do your thing... e.g., invoke a process that generates outputfilename on the basis all inputfilenames
+        #if, on the other hand, you expect multiple input files, then you can iterate over them:
+#       for inputfile, inputtemplate in clamdata.program.getinputfiles(outputfilename):
+#           if inputtemplate.id == 'some_input_template_id':
+#           inputfilepath = str(inputfile) #example showing how to obtain the path to the file
+            #...
+        #...do your thing... e.g., invoke a process that generates outputfilename on the basis all inputfilenames
 
-#-- Iterate over all input files? --
+#-- EXAMPLE B: Iterate over all input files? --
+
+# This example iterates over all input files, it can be a simpler
+# method for setting up your wrapper:
 
 #for inputfile in clamdata.input:
 #   inputtemplate = inputfile.metadata.inputtemplate
 #   inputfilepath = str(inputfile)
 #   encoding = inputfile.metadata['encoding'] #Example showing how to obtain metadata parameters
 
-#(Note: These iterations will fail if you change the current working directory, so make sure to set it back to the initial path if you do need to change it)
+#(Note: Both these iteration examples will fail if you change the current working directory, so make sure to set it back to the initial path if you do need to change it!!)
 
-#-- Grab a specific input file? (by input template) --
+#-- EXAMPLE C: Grab a specific input file? (by input template) --
+
+# Iteration over all input files is often not necessary either, you can just do:
+
 #inputfile = clamdata.inputfile('replace-with-inputtemplate-id')
 #inputfilepath = str(inputfile)
 
+#========================================================================================
+
+# Below is an example of how to read global parameters and how to invoke your
+# actual system. You may want to integrete these into one of the solution
+# examples A,B or C above.
+
 #-- Read global parameters? --
+
+# Global parameters are accessed by addressing the clamdata instance as-if were a simple dictionary.
+
 #parameter = clamdata['parameter_id']
 
 #-- Invoke your actual system? --
+
 # note the use of the shellsafe() function that wraps a variable in the
 # specified quotes (second parameter) and makes sure the value doesn't break
 # out of the quoted environment! Can be used without the quote too, but will be
