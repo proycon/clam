@@ -750,11 +750,6 @@ class CLAMData(object):
             if not inputtemplate or inputfile.metadata.inputtemplate == inputtemplate:
                 yield inputfile
 
-    def outputfiles(self, outputtemplate=None, inputtemplate=None):
-        """Generator yielding all outputfiles, either actually existing or expected. This method can therefore also be run when the outputfiles are not yet generated, in which case it will be based on the Program. If ``outputtemplate=None``, outputfiles are returned regardless of outputtemplate. if ``inputtemplate=None``, outputfiles are returned regardless of inputtemplate."""
-        #TODO!
-
-
 def sanitizeparameters(parameters):
     """Construct a dictionary of parameters, for internal use only"""
     if not isinstance(parameters,dict):
@@ -1028,15 +1023,33 @@ class Program(dict):
             yield inputfilename, inputtemplate
 
     def getoutputfiles(self, loadmetadata=True, client=None,requiremetadata=False):
-        """Iterates over all output files. Returns CLAMOutputFile instances, the last three arguments are passed to its constructor."""
+        """Iterates over all output files and their output template. Yields (CLAMOutputFile, OutputTemplate) tuples. The last three arguments are passed to its constructor."""
         for outputfilename, outputtemplate in self.outputpairs():
-            yield CLAMOutputFile(self.projectpath, outputfilename, loadmetadata,client,requiremetadata)
+            yield CLAMOutputFile(self.projectpath, outputfilename, loadmetadata,client,requiremetadata), outputtemplate
 
-    def getinputfiles(self, outputfilename, loadmetadata=True, client=None,requiremetadata=False):
-        """Iterates over all input files for the specified outputfile. Returns CLAMInputFile instances, the last three arguments are passed to its constructor."""
-        for outputfilename, (outputtemplate, inputfiles) in self.items():
-            for inputfilename, inputtemplate in inputfiles:
-                yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata)
+    def getinputfiles(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):
+        """Iterates over all input files for the specified outputfile (you may pass a CLAMOutputFile instance or a filename string). Yields (CLAMInputFile,InputTemplate) tuples. The last three arguments are passed to its constructor."""
+        if isinstance(outputfile, CLAMOutputFile):
+            outputfilename = str(outputfile).replace(self.projectpath,'')
+        else:
+            outputfilename = outputfile
+        _, inputfiles = self[outputfilename]
+        for inputfilename, inputtemplate in inputfiles:
+            yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata), inputtemplate
+
+    def getinputfile(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):
+        """Grabs one input file for the specified output filename (raises a KeyError exception if there is none). Shortcut for getinputfiles()"""
+        try:
+            return next(self.getinputfiles(outputfile,loadmetadata,client,requiremetadata))
+        except StopIteration:
+            raise KeyError("No such outputfile " + repr(outputfile))
+
+    def getoutputfile(self, loadmetadata=True, client=None,requiremetadata=False):
+        """Grabs one output file (raises a KeyError exception if there is none). Shortcut for getoutputfiles()"""
+        try:
+            return next(self.getoutputfiles(loadmetadata,client,requiremetadata))
+        except StopIteration:
+            raise KeyError("No such outputfile ")
 
 class RawXMLProvenanceData(object):
     def __init__(self, data):
