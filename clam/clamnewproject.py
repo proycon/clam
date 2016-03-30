@@ -53,7 +53,7 @@ def main():
 
 
     if not os.path.exists(CLAMDIR + '/config/template.py') or not os.path.exists(CLAMDIR + '/wrappers/template.sh') or not os.path.exists(CLAMDIR + '/wrappers/template.py'):
-        print("ERROR: Templates not found. Unable to create new project",file=sys.stderr)
+        print("ERROR: Templates not found (Looking for config and wrappers directories in" + CLAMDIR +"). Unable to create new project",file=sys.stderr)
         sys.exit(2)
 
     dir = args.dirprefix + "/" + args.sysid
