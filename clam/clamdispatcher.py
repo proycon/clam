@@ -70,9 +70,9 @@ def main():
     print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
 
     cmd = sys.argv[3+offset]
+    cmd = clam.common.data.unescapeshelloperators(cmd) #shell operators like pipes and redirects were passed in an escaped form
     if sys.version[0] == '2' and isinstance(cmd,str):
         cmd = unicode(cmd,'utf-8') #pylint: disable=undefined-variable
-    cmd = clam.common.data.unescapeshelloperators(cmd) #shell operators like pipes and redirects were passed in an escaped form
     for arg in sys.argv[4+offset:]:
         arg_u = clam.common.data.unescapeshelloperators(arg)
         if arg_u != arg:
