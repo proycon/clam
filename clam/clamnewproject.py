@@ -53,7 +53,7 @@ def main():
 
     for template in ('config/template.py','wrappers/template.py','wrappers/template.sh'):
         if not os.path.exists(os.path.join(CLAMDIR,template)):
-            print("ERROR: Templates not found (Could not find" + os.path.join(CLAMDIR,template) +"). Unable to create new project",file=sys.stderr)
+            print("ERROR: Templates not found (Could not find " + os.path.join(CLAMDIR,template) +"). Unable to create new project",file=sys.stderr)
             sys.exit(2)
 
     dir = args.dirprefix + "/" + args.sysid

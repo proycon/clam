@@ -29,6 +29,7 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3", #3.0, 3.1 and 3.2 are not supported by flask
         "Programming Language :: Python :: 3.4", #3.0, 3.1 and 3.2 are not supported by flask
+        "Programming Language :: Python :: 3.5", #3.0, 3.1 and 3.2 are not supported by flask
         "Operating System :: POSIX",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
