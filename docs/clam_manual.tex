@@ -43,7 +43,7 @@
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - March 14th, 2016 (last revision)} \\[0.5cm] 
+\emph{November 11th, 2014 (date published) - March 30th, 2016 (last revision)} \\[0.5cm] 
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -376,13 +376,15 @@ within it.
 #!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
-#** NOTE: Make sure the shebang (first line in this file) refers to the Python interpreter you
+#** NOTE: Make sure the shebang (first line in this file) 
+#refers to the Python interpreter you
 #want to use, which may be either Python 3 or 2 **
 
 import os
 import site
 
-#** This is the directory that contains your service configuration file, adapt it: **
+#** This is the directory that contains your service configuration file, 
+# adapt it: **
 WEBSERVICEDIR = '/path/to/yourwebservice/'
 
 sys.path.append(WEBSERVICEDIR)
@@ -390,11 +392,14 @@ os.environ['PYTHONPATH'] = WEBSERVICEDIR
 
 VIRTUALENV=None
 
-#** If you installed CLAM locally in a virtual environment, uncomment and set the following **
+#** If you installed CLAM locally in a virtual environment,
+# uncomment and set the following **
 #VIRTUALENV = "/path/to/virtualenv"
 
 if VIRTUALENV:
-    site.addsitedir(VIRTUALENV + '/lib/python'+str(sys.version_info.major) + '.' + str(sys.version_info.minor) + '/site-packages')
+    site.addsitedir(VIRTUALENV + '/lib/python'+ \
+        str(sys.version_info.major) + \
+        '.' + str(sys.version_info.minor) + '/site-packages')
     activate_env = VIRTUALENV + '/bin/activate_this.py'
     exec(compile(open(activate_env).read(), activate_env, 'exec'))
 
@@ -443,7 +448,8 @@ assumed you configured your service configuration file with
 \begin{verbatim}
  ProxyPass /yourwebservice uwsgi://127.0.0.1:3031/
 
- Alias /yourwebservice/static /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static
+ Alias /yourwebservice/static \ 
+   /usr/lib/python3.4/site-packages/clam-2.1-py3.4.egg/clam/static
  <Directory /path/to/clam/static/>
     Order deny,allow
     Allow from all
@@ -501,7 +507,8 @@ assumed you configured your service configuration file with
      home=/path/to/yourwebservice threads=15 maximum-requests=10000
  WSGIProcessGroup yourservice
  WSGIPassAuthorization On
- Alias /yourwebservice/static /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static
+ Alias /yourwebservice/static \ 
+   /usr/lib/python3.4/site-packages/clam-2.1-py3.4.egg/clam/static
  <Directory /path/to/clam/static/>
     Order deny,allow
     Allow from all
@@ -568,31 +575,31 @@ With nginx (version 0.8 or above), CLAM can be deployed using uwsgi.
         follows:
 {\small
 \begin{verbatim}
-    location /static {
-        alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
-    }
+location /static {
+  alias /usr/lib/python3.4/site-packages/clam-2.1-py3.4.egg/clam/static;
+}
 
-    location / { try_files $uri @yourwebservice; }
-    location @yourwebservice {
-        include uwsgi_params;
-        uwsgi_pass 127.0.0.1:3031;
-    }
+location / { try_files $uri @yourwebservice; }
+location @yourwebservice {
+  include uwsgi_params;
+  uwsgi_pass 127.0.0.1:3031;
+}
 \end{verbatim}
 }
 If you do use a \texttt{URLPREFIX}, ``yourwebservice'' in this example, then
 use this configuration:
 {\small
 \begin{verbatim}
-    location /yourwebservice/static {
-        alias /usr/lib/python3.4/site-packages/clam-0.99-py3.4.egg/clam/static;
-    }
+location /yourwebservice/static {
+  alias /usr/lib/python3.4/site-packages/clam-2.1-py3.4.egg/clam/static;
+}
 
-    location = /yourwebservice { rewrite ^ /yourwebservice/; }
-    location /yourwebservice { try_files $uri @yourwebservice; }
-    location @yourwebservice {
-        include uwsgi_params;
-        uwsgi_pass 127.0.0.1:3031;
-    }
+location = /yourwebservice { rewrite ^ /yourwebservice/; }
+location /yourwebservice { try_files $uri @yourwebservice; }
+location @yourwebservice {
+  include uwsgi_params;
+  uwsgi_pass 127.0.0.1:3031;
+}
 \end{verbatim}
 }
 In both cases, if you use unix sockets instead of TCP sockets, modify the \texttt{uwsgi\_pass} directive
