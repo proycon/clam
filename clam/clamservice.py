@@ -1834,8 +1834,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
 
     output = head
     for filename in addedfiles: #pylint: disable=too-many-nested-blocks
-        output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\">\n"
-
+        output += "<upload source=\""+sourcefile +"\" filename=\""+filename+"\" inputtemplate=\"" + inputtemplate.id + "\" templatelabel=\""+inputtemplate.label+"\" format=\""+inputtemplate.formatclass.__name__+"\">\n"
         if not errors:
             output += "<parameters errors=\"no\">"
         else:
