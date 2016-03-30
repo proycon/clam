@@ -74,9 +74,9 @@
 {% if project and matchedprofiles and program %}
     <program matchedprofiles="{{ matchedprofiles }}">
         {% for outputfilename, (outputtemplate, inputfiles) in program.items() %}
-        <outputfile name="{{outputfilename}}" template="{{outputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        
+        <outputfile name="{{outputfilename}}" template="{{outputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        
             {% for inputfilename, inputtemplate in inputfiles.items() %}
-                <inputfile name="{{inputfilename}}" template="{{inputtemplate.id}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" /> 
+                <inputfile name="{{inputfilename}}" template="{{inputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" /> 
             {% endfor %}
         </outputfile>
         {% endfor %}
