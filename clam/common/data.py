@@ -2389,5 +2389,39 @@ def shellsafe(s, quote='', doescape=True):
                 raise ValueError("Variable value rejected for security reasons: " + s)
         return s
 
+def escapeshelloperators(s):
+    inquote = False
+    indblquote = False
+    o = ""
+    for c in s:
+        if c == "'" and not indblquote:
+            inquote = not inquote
+        elif c == '"' and not inquote:
+            indblquote = not indblquote
+        elif not inquote and not indblquote:
+            if c == '|':
+                o += '%PIPE%'
+            elif c == '>':
+                o +=  '%OUT%'
+            elif c == '<':
+                o += '%IN%'
+            elif c == '&':
+                o += '%AMP%'
+            elif c == '!':
+                o += '%EXCL%'
+            else:
+                o += c
+        else:
+            o += c
+    return o
+
+def unescapeshelloperators(s):
+    s = s.replace('%PIPE%','|')
+    s = s.replace('%OUT%','>')
+    s = s.replace('%AMP%','&')
+    s = s.replace('%EXCL%','!')
+    s = s.replace('%IN%','<')
+    return s
+
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position

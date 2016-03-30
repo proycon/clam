@@ -72,8 +72,13 @@ def main():
     cmd = sys.argv[3+offset]
     if sys.version[0] == '2' and isinstance(cmd,str):
         cmd = unicode(cmd,'utf-8') #pylint: disable=undefined-variable
+    cmd = clam.common.data.unescapeshelloperators(cmd) #shell operators like pipes and redirects were passed in an escaped form
     for arg in sys.argv[4+offset:]:
-        cmd += " " + clam.common.data.shellsafe(arg,'"')
+        arg_u = clam.common.data.unescapeshelloperators(arg)
+        if arg_u != arg:
+            cmd += " " + arg_u #shell operator (pipe or something)
+        else:
+            cmd += " " + clam.common.data.shellsafe(arg,'"')
 
 
     if not cmd:
@@ -233,6 +238,9 @@ def main():
                 print("[CLAM Dispatcher] Unable to remove " + filename, file=sys.stderr)
 
     d = total_seconds(datetime.datetime.now() - begintime)
+    if statuscode > 127:
+        print("[CLAM Dispatcher] Status code out of range (" + str(statuscode) + "), setting to 127", file=sys.stderr)
+        statuscode = 127
     print("[CLAM Dispatcher] Finished (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "), exit code " + str(statuscode) + ", dispatcher wait time " + str(idle)  + "s, duration " + str(d) + "s", file=sys.stderr)
 
     return statuscode

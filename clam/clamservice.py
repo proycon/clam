@@ -1064,9 +1064,9 @@ class Project:
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$PROJECT',project) #alphanumberic only, shell-safe
             cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token)
+            cmd = clam.common.data.escapeshelloperators(cmd)
             #everything should be shell-safe now
-            if settings.COMMAND.find("2>") == -1:
-                cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
+            cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
 
             pythonpath = ''
             try:
@@ -2075,7 +2075,6 @@ def uploader(project, credentials=None):
 
 
 
-
 class ActionHandler(object):
 
     @staticmethod
@@ -2168,8 +2167,8 @@ class ActionHandler(object):
                 cmd = cmd.replace('$TMPDIRECTORY', tmpdir)
             cmd = cmd.replace('$USERNAME',user if user else "anonymous")
             cmd = cmd.replace('$OAUTH_ACCESS_TOKEN',oauth_access_token if oauth_access_token else "")
+            cmd = clam.common.data.escapeshelloperators(cmd)
             #everything should be shell-safe now
-
 
             #run the action
             pythonpath = ''
@@ -2208,6 +2207,7 @@ class ActionHandler(object):
                     else:
                         printdebug("    action stdout:\n" + stdoutdata)
                         printdebug("    action stderr:\n" + stderrdata)
+                printlog("Dispatcher finished with code " + str(process.returncode) )
                 if tmpdir:
                     shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
