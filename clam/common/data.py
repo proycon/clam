@@ -2416,11 +2416,18 @@ def escapeshelloperators(s):
     return o
 
 def unescapeshelloperators(s):
-    s = s.replace('%PIPE%','|')
-    s = s.replace('%OUT%','>')
-    s = s.replace('%AMP%','&')
-    s = s.replace('%EXCL%','!')
-    s = s.replace('%IN%','<')
+    if sys.version < '3':
+        s = s.replace(b'%PIPE%',b'|')
+        s = s.replace(b'%OUT%',b'>')
+        s = s.replace(b'%AMP%',b'&')
+        s = s.replace(b'%EXCL%',b'!')
+        s = s.replace(b'%IN%',b'<')
+    else:
+        s = s.replace('%PIPE%','|')
+        s = s.replace('%OUT%','>')
+        s = s.replace('%AMP%','&')
+        s = s.replace('%EXCL%','!')
+        s = s.replace('%IN%','<')
     return s
 
 #yes, this is deliberately placed at the end!
