@@ -1037,8 +1037,8 @@ class Program(dict):
             outputfilename = str(outputfile).replace(os.path.join(self.projectpath,'output/'),'')
         else:
             outputfilename = outputfile
-        _, inputfiles = self[outputfilename]
-        for inputfilename, inputtemplate in inputfiles:
+        outputtemplate, inputfiles = self[outputfilename]
+        for inputfilename, inputtemplate in inputfiles.items():
             yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata), inputtemplate
 
     def getinputfile(self, outputfile, loadmetadata=True, client=None,requiremetadata=False):

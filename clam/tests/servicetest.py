@@ -253,6 +253,34 @@ class ExtensiveServiceTest(unittest.TestCase):
                 outputfile.loadmetadata()
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')
 
+    def test4_program(self):
+        """Extensive Service Test - Program integrity test"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)
+        data = self.client.start(self.project, createlexicon=False)
+        self.assertTrue(data)
+        self.assertFalse(data.errors)
+        while data.status != clam.common.status.DONE:
+            time.sleep(1) #wait 1 second before polling status
+            data = self.client.get(self.project) #get status again
+        self.assertTrue(data.program)
+        self.assertEqual(data.program.matchedprofiles, [0])
+        self.assertEqual(len(data.program), 4)
+        outputfiles = list(data.program.getoutputfiles())
+        print(outputfiles,file=sys.stderr)
+        self.assertEqual(len(outputfiles), 4)
+        for outputfile, outputtemplate in outputfiles:
+            self.assertIn(outputtemplate, ('overallstats','overallfreqlist','statsbydoc','freqlistbydoc'))
+            if not outputtemplate.startswith('overall'):
+                inputfiles = list(data.program.getinputfiles(outputfile))
+                self.assertEqual(len(inputfiles), 1)
+                self.assertEqual(inputfiles[0][1], 'textinput')
+
+
+
+
+
     def tearDown(self):
         self.client.delete(self.project)
 
