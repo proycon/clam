@@ -21,6 +21,7 @@ import os
 import time
 import unittest
 import io
+import zipfile
 
 #We may need to do some path magic in order to find the clam.* imports
 
@@ -214,6 +215,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         self.assertFalse(data.errors)
         self.assertTrue(isinstance(data.output, list))
         self.client.downloadarchive(self.project,'/tmp/target.zip','zip')
+        self.assertEqual(zipfile.ZipFile('/tmp/target.zip').testzip(), None) #testing zip file integrity
 
     def test2_parametererror(self):
         """Extensive Service Test - Global parameter error"""
