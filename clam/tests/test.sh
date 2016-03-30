@@ -22,6 +22,15 @@ if [ $? -ne 0 ]; then
    GOOD=0
 fi
 
+cd /tmp
+clamnewproject -f clamnewprojecttest
+if [ $? -ne 0 ]; then
+   echo "ERROR: clamnewproject didn't run well" >&2
+   GOOD=0
+fi
+rm -Rf clamnewprojecttest 2> /dev/null
+cd -
+
 which clamdispatcher 2>/dev/null
 if [ $? -ne 0 ]; then
    echo "ERROR: clamdispatcher not found" >&2
