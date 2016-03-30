@@ -51,10 +51,10 @@ def main():
         print("Invalid characters in system ID. Only alphanumerics and underscores are allowed.",file=sys.stderr)
         sys.exit(2)
 
-
-    if not os.path.exists(os.path.join(CLAMDIR,'/config/template.py')) or not os.path.exists(os.path.join(CLAMDIR,'/wrappers/template.sh')) or not os.path.exists(os.path.join(CLAMDIR,'/wrappers/template.py')):
-        print("ERROR: Templates not found (Looking for config and wrappers directories in " + CLAMDIR +"). Unable to create new project",file=sys.stderr)
-        sys.exit(2)
+    for template in ('config/template.py','wrappers/template.py','wrappers.template.sh'):
+        if not os.path.exists(os.path.join(CLAMDIR,template)):
+            print("ERROR: Templates not found (Could not find" + os.path.join(CLAMDIR,template) +"). Unable to create new project",file=sys.stderr)
+            sys.exit(2)
 
     dir = args.dirprefix + "/" + args.sysid
 
