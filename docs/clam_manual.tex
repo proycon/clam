@@ -1992,7 +1992,7 @@ functions may raise any instance of \texttt{web.webapi.HTTPError}.
 If the action invokes a script that outputs temporary files, you may set
 \texttt{tmpdir=True}, this will create a temporary directory for the duration
 of the action, which will be used as current working directory when the action
-runs, that will be automatically removed when the action ends. You may also
+runs. It will be automatically removed when the action ends. You may also
 explicitly pass this directory to the script you invoke with \texttt{command=} using the
 \texttt{\$TMPDIRECTORY} variable.
 
