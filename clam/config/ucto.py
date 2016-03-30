@@ -126,7 +126,7 @@ PROFILES = [
             extension='txt',
             multi=True,
         ),
-        ParameterCondition(xml=True,
+        ParameterCondition(xml=True, #if the XML parameter is set to True...
         then=OutputTemplate('foliatokoutput', FoLiAXMLFormat, "Tokenised Text Document (FoLiA XML)",
                 SetMetaField('tokenisation','ucto'),
                 copymetadata=True,
@@ -134,9 +134,9 @@ PROFILES = [
                 extension='xml',
                 multi=True,                
              ),
-        otherwise=ParameterCondition(verbose=True,
+        otherwise=ParameterCondition(verbose=True, #if the verbose parameter is set to True
             then=OutputTemplate('vtokoutput', PlainTextFormat,"Verbosely Tokenised Text Document",
-                ParameterCondition(sentenceperline=True,
+                ParameterCondition(sentenceperline=True, #set some parameters that reflect the state of certain global paramaters
                     then=SetMetaField('sentenceperline','yes')
                 ),            
                 ParameterCondition(lowercase=True,
@@ -145,9 +145,9 @@ PROFILES = [
                 ParameterCondition(uppercase=True,
                     then=SetMetaField('uppercase','yes')
                 ),
-                copymetadata=True,
-                removeextension='txt',
-                extension='vtok',
+                copymetadata=True, #we want all metadata from the input template (language, author, etc) to be carried over to the output template
+                removeextension='txt', #remove this extension before adding the one below
+                extension='vtok', #add this extension
                 multi=True,
             ),
             otherwise=OutputTemplate('tokoutput', PlainTextFormat,"Tokenised Text Document",

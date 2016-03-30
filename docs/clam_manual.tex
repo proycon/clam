@@ -1616,6 +1616,7 @@ In addition to variables that refer to global or local parameters. There are som
 
 
 \subsection{Parameter Conditions}
+\label{sec:paramcond}
 
 It is not always possible to define all output templates straight away.
 Sometimes output templates are dependent on certain global parameters. For
@@ -2209,6 +2210,7 @@ is not deemed safe, and the shell will not be invoked. CLAM itself will detect
 and produce an error log.
 
 \subsection{Program}
+\label{sec:program}
 
 A \emph{program} (programme) describes exactly what output files will be
 generated on the basis of what input files. It is the concretisation of the
@@ -2265,8 +2267,12 @@ Two notable examples that are heavily commented:
 
 \begin{itemize}
     \item \texttt{textstats} -- A simple text statistics/frequency list example
-        for CLAM. 
-    \item \texttt{ucto} -- A real life sample wrapping the tokeniser ucto.
+        for CLAM. It is a portable sample that has no external dependencies, the implementation is pure
+        Python and done entirely in the wrapper script.
+    \item \texttt{ucto} -- A real life sample wrapping the tokeniser
+        ucto\footnote{\url{https://proycon.github.io/ucto}}. This example makes
+        use of the program (see section~\ref{sec:program}) and of parameter
+        conditions (see section~\ref{sec:paramcond}).
 \end{itemize}
 
 \chapter{Documentation for Service Clients}
