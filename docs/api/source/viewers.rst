@@ -1,7 +1,7 @@
-CLAM Viewerss
+CLAM Viewers
 ==================================
 
-.. automodule:: common.viewers
+.. automodule:: clam.common.viewers
     :members:
     :undoc-members:
 

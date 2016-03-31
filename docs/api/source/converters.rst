@@ -1,7 +1,7 @@
 CLAM Formats
 ==================================
 
-.. automodule:: common.converters
+.. automodule:: clam.common.converters
     :members:
     :undoc-members:
 
