@@ -2396,8 +2396,10 @@ def escapeshelloperators(s):
     for c in s:
         if c == "'" and not indblquote:
             inquote = not inquote
+            o += c
         elif c == '"' and not inquote:
             indblquote = not indblquote
+            o += c
         elif not inquote and not indblquote:
             if c == '|':
                 o += '%PIPE%'
