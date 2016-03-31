@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>CLAM Formats &mdash; CLAM 0.99 documentation</title>
+    <title>CLAM Formats &mdash; CLAM 2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.99',
+        VERSION:     '2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="CLAM 0.99 documentation" href="index.html" />
+    <link rel="top" title="CLAM 2.1 documentation" href="index.html" />
     <link rel="next" title="CLAM Data API" href="data.html" />
     <link rel="prev" title="CLAM Client API" href="client.html" /> 
   </head>
@@ -35,15 +35,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="data.html" title="CLAM Data API"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="client.html" title="CLAM Client API"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">CLAM 0.99 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,132 +49,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-common.converters">
-<span id="clam-formats"></span><h1>CLAM Formats<a class="headerlink" href="#module-common.converters" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="common.converters.AbstractConverter">
-<em class="property">class </em><code class="descclassname">common.converters.</code><code class="descname">AbstractConverter</code><span class="sig-paren">(</span><em>id</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.AbstractConverter" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="common.converters.AbstractConverter.acceptforinput">
-<code class="descname">acceptforinput</code><em class="property"> = []</em><a class="headerlink" href="#common.converters.AbstractConverter.acceptforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.AbstractConverter.acceptforoutput">
-<code class="descname">acceptforoutput</code><em class="property"> = []</em><a class="headerlink" href="#common.converters.AbstractConverter.acceptforoutput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.converters.AbstractConverter.convertforinput">
-<code class="descname">convertforinput</code><span class="sig-paren">(</span><em>filepath</em>, <em>metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.AbstractConverter.convertforinput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert from target format into one of the source formats. Relevant if converters are used in InputTemplates. Metadata already is metadata for the to-be-generated file. &#8216;filepath&#8217; is both the source and the target file, the source file will be erased and overwritten with the conversion result!</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="common.converters.AbstractConverter.convertforoutput">
-<code class="descname">convertforoutput</code><span class="sig-paren">(</span><em>outputfile</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.AbstractConverter.convertforoutput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Sourcefile is a CLAMOutputFile instance.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.AbstractConverter.label">
-<code class="descname">label</code><em class="property"> = '(ERROR: label not overriden from AbstractConverter!)'</em><a class="headerlink" href="#common.converters.AbstractConverter.label" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="common.converters.CharEncodingConverter">
-<em class="property">class </em><code class="descclassname">common.converters.</code><code class="descname">CharEncodingConverter</code><span class="sig-paren">(</span><em>id</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.CharEncodingConverter" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="common.converters.CharEncodingConverter.acceptforinput">
-<code class="descname">acceptforinput</code><em class="property"> = [&lt;class 'clam.common.formats.PlainTextFormat'&gt;]</em><a class="headerlink" href="#common.converters.CharEncodingConverter.acceptforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.CharEncodingConverter.acceptforoutput">
-<code class="descname">acceptforoutput</code><em class="property"> = [&lt;class 'clam.common.formats.PlainTextFormat'&gt;]</em><a class="headerlink" href="#common.converters.CharEncodingConverter.acceptforoutput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.converters.CharEncodingConverter.convertforinput">
-<code class="descname">convertforinput</code><span class="sig-paren">(</span><em>filepath</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.CharEncodingConverter.convertforinput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert from target format into one of the source formats. Relevant if converters are used in InputTemplates. Metadata already is metadata for the to-be-generated file.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="common.converters.CharEncodingConverter.convertforoutput">
-<code class="descname">convertforoutput</code><span class="sig-paren">(</span><em>outputfile</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.CharEncodingConverter.convertforoutput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Outputfile is a CLAMOutputFile instance.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.CharEncodingConverter.label">
-<code class="descname">label</code><em class="property"> = 'CharEncodingConverter'</em><a class="headerlink" href="#common.converters.CharEncodingConverter.label" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="common.converters.MSWordConverter">
-<em class="property">class </em><code class="descclassname">common.converters.</code><code class="descname">MSWordConverter</code><span class="sig-paren">(</span><em>id</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.MSWordConverter" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="common.converters.MSWordConverter.acceptforinput">
-<code class="descname">acceptforinput</code><em class="property"> = [&lt;class 'clam.common.formats.PlainTextFormat'&gt;]</em><a class="headerlink" href="#common.converters.MSWordConverter.acceptforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.converters.MSWordConverter.convertforinput">
-<code class="descname">convertforinput</code><span class="sig-paren">(</span><em>filepath</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.MSWordConverter.convertforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.MSWordConverter.converttool">
-<code class="descname">converttool</code><em class="property"> = 'catdoc'</em><a class="headerlink" href="#common.converters.MSWordConverter.converttool" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="common.converters.PDFtoHTMLConverter">
-<em class="property">class </em><code class="descclassname">common.converters.</code><code class="descname">PDFtoHTMLConverter</code><span class="sig-paren">(</span><em>id</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.PDFtoHTMLConverter" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="common.converters.PDFtoHTMLConverter.acceptforinput">
-<code class="descname">acceptforinput</code><em class="property"> = [&lt;class 'clam.common.formats.HTMLFormat'&gt;]</em><a class="headerlink" href="#common.converters.PDFtoHTMLConverter.acceptforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.converters.PDFtoHTMLConverter.convertforinput">
-<code class="descname">convertforinput</code><span class="sig-paren">(</span><em>filepath</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.PDFtoHTMLConverter.convertforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.PDFtoHTMLConverter.converttool">
-<code class="descname">converttool</code><em class="property"> = 'pdftohtml'</em><a class="headerlink" href="#common.converters.PDFtoHTMLConverter.converttool" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="common.converters.PDFtoTextConverter">
-<em class="property">class </em><code class="descclassname">common.converters.</code><code class="descname">PDFtoTextConverter</code><span class="sig-paren">(</span><em>id</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.PDFtoTextConverter" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="attribute">
-<dt id="common.converters.PDFtoTextConverter.acceptforinput">
-<code class="descname">acceptforinput</code><em class="property"> = [&lt;class 'clam.common.formats.PlainTextFormat'&gt;]</em><a class="headerlink" href="#common.converters.PDFtoTextConverter.acceptforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="common.converters.PDFtoTextConverter.convertforinput">
-<code class="descname">convertforinput</code><span class="sig-paren">(</span><em>filepath</em>, <em>metadata=None</em><span class="sig-paren">)</span><a class="headerlink" href="#common.converters.PDFtoTextConverter.convertforinput" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="common.converters.PDFtoTextConverter.converttool">
-<code class="descname">converttool</code><em class="property"> = 'pdftotext'</em><a class="headerlink" href="#common.converters.PDFtoTextConverter.converttool" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="clam-formats">
+<h1>CLAM Formats<a class="headerlink" href="#clam-formats" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -223,20 +96,17 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="data.html" title="CLAM Data API"
              >next</a> |</li>
         <li class="right" >
           <a href="client.html" title="CLAM Client API"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">CLAM 0.99 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2013, Maarten van Gompel.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
     </div>
   </body>
 </html>
