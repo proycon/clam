@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="CLAM 2.1 documentation" href="index.html" />
-    <link rel="next" title="CLAM Viewerss" href="viewers.html" />
+    <link rel="next" title="CLAM Viewers" href="viewers.html" />
     <link rel="prev" title="CLAM Formats" href="formats.html" /> 
   </head>
   <body role="document">
@@ -35,7 +35,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="viewers.html" title="CLAM Viewerss"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="viewers.html" title="CLAM Viewers"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="formats.html" title="CLAM Formats"
@@ -49,8 +52,263 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="clam-parameters">
-<h1>CLAM Parameters<a class="headerlink" href="#clam-parameters" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-clam.common.parameters">
+<span id="clam-parameters"></span><h1>CLAM Parameters<a class="headerlink" href="#module-clam.common.parameters" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="clam.common.parameters.AbstractParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">AbstractParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class from which all parameter classes have to be derived.</p>
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.access">
+<code class="descname">access</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.access" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method checks if the given user has access to see/set this parameter, based on the denyusers and/or allowusers option.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.allowusers">
+<code class="descname">allowusers</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.allowusers" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can restrict this parameter to only be available to certain users, set the usernames you want to allow here, all others are denied</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.compilearg">
+<code class="descname">compilearg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method compiles the parameter into syntax that can be used on the shell, such as for example: &#8211;paramflag=value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.constrainable">
+<code class="descname">constrainable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this  parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.denyusers">
+<code class="descname">denyusers</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.denyusers" title="Permalink to this definition">¶</a></dt>
+<dd><p>You can restrict this parameter to only be available to certain users, set the usernames you want to deny access here, all others are allowed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.description">
+<code class="descname">description</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>A clear description for this parameter, which the user will see</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.error">
+<code class="descname">error</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this parameter has any validation errors, this will be set to an error message (by default set to None, meaning no error)</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="clam.common.parameters.AbstractParameter.fromxml">
+<em class="property">static </em><code class="descname">fromxml</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.fromxml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Parameter instance (of any class derived from AbstractParameter!) given its XML description. Node can be a string containing XML or an lxml _Element</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.id">
+<code class="descname">id</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A unique alphanumeric ID</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.name">
+<code class="descname">name</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A representational name for this parameter, which the user will see</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.parameters.AbstractParameter.paramflag">
+<code class="descname">paramflag</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.parameters.AbstractParameter.paramflag" title="Permalink to this definition">¶</a></dt>
+<dd><p>The parameter flag that will be used when this parameter is passed on the commandline (using COMMAND= and $PARAMETERS) (by default set to None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate the parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.valuefrompostdata">
+<code class="descname">valuefrompostdata</code><span class="sig-paren">(</span><em>postdata</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.AbstractParameter.xml">
+<code class="descname">xml</code><span class="sig-paren">(</span><em>indent=''</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.AbstractParameter.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods renders an XML representation of this parameter, along with
+its selected value, and feedback on validation errors</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.BooleanParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">BooleanParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A parameter that takes a Boolean (True/False) value.</p>
+<dl class="method">
+<dt id="clam.common.parameters.BooleanParameter.compilearg">
+<code class="descname">compilearg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.BooleanParameter.constrainable">
+<code class="descname">constrainable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.BooleanParameter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value=True</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the boolean parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.BooleanParameter.unset">
+<code class="descname">unset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter.unset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.BooleanParameter.valuefrompostdata">
+<code class="descname">valuefrompostdata</code><span class="sig-paren">(</span><em>postdata</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.BooleanParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.ChoiceParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">ChoiceParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choice parameter, users have to choose one of the available values, or multiple values if instantiated with multi=True.</p>
+<dl class="method">
+<dt id="clam.common.parameters.ChoiceParameter.compilearg">
+<code class="descname">compilearg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method compiles the parameter into syntax that can be used on the shell, such as -paramflag=value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.ChoiceParameter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.ChoiceParameter.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.ChoiceParameter.valuefrompostdata">
+<code class="descname">valuefrompostdata</code><span class="sig-paren">(</span><em>postdata</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.ChoiceParameter.xml">
+<code class="descname">xml</code><span class="sig-paren">(</span><em>indent=''</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.ChoiceParameter.xml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods renders an XML representation of this parameter, along with
+its selected value, and feedback on validation errors</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.FloatParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">FloatParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.FloatParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="clam.common.parameters.FloatParameter.constrainable">
+<code class="descname">constrainable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.FloatParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.FloatParameter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.FloatParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.FloatParameter.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.FloatParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.FloatParameter.valuefrompostdata">
+<code class="descname">valuefrompostdata</code><span class="sig-paren">(</span><em>postdata</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.FloatParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.IntegerParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">IntegerParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.IntegerParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="clam.common.parameters.IntegerParameter.constrainable">
+<code class="descname">constrainable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.IntegerParameter.constrainable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should this parameter be used in checking contraints?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.IntegerParameter.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.IntegerParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.IntegerParameter.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.IntegerParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.IntegerParameter.valuefrompostdata">
+<code class="descname">valuefrompostdata</code><span class="sig-paren">(</span><em>postdata</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.IntegerParameter.valuefrompostdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.StaticParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">StaticParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.StaticParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a parameter that can&#8217;t be changed (it&#8217;s a bit of a contradiction, I admit). But useful for some metadata specifications.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.StringParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">StringParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.StringParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>String Parameter, taking a text value, presented as a one line input box</p>
+<dl class="method">
+<dt id="clam.common.parameters.StringParameter.compilearg">
+<code class="descname">compilearg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.StringParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.parameters.StringParameter.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.StringParameter.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.parameters.TextParameter">
+<em class="property">class </em><code class="descclassname">clam.common.parameters.</code><code class="descname">TextParameter</code><span class="sig-paren">(</span><em>id</em>, <em>name</em>, <em>description=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.TextParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text Parameter, taking a text value, presented as a multiline input box</p>
+<dl class="method">
+<dt id="clam.common.parameters.TextParameter.compilearg">
+<code class="descname">compilearg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.parameters.TextParameter.compilearg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -64,7 +322,7 @@
                         title="previous chapter">CLAM Formats</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="viewers.html"
-                        title="next chapter">CLAM Viewerss</a></p>
+                        title="next chapter">CLAM Viewers</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -93,7 +351,10 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="viewers.html" title="CLAM Viewerss"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="viewers.html" title="CLAM Viewers"
              >next</a> |</li>
         <li class="right" >
           <a href="formats.html" title="CLAM Formats"

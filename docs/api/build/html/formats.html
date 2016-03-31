@@ -35,6 +35,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -49,8 +52,617 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="clam-formats">
-<h1>CLAM Formats<a class="headerlink" href="#clam-formats" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-clam.common.formats">
+<span id="clam-formats"></span><h1>CLAM Formats<a class="headerlink" href="#module-clam.common.formats" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="clam.common.formats.AlpinoXMLFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">AlpinoXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.AlpinoXMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.AlpinoXMLFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.AlpinoXMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.AlpinoXMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.AlpinoXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.AlpinoXMLFormat.name">
+<code class="descname">name</code><em class="property"> = 'Alpino XML'</em><a class="headerlink" href="#clam.common.formats.AlpinoXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.AlpinoXMLFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.AlpinoXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.BinaryDataFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">BinaryDataFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.BinaryDataFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.BinaryDataFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.BinaryDataFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.BinaryDataFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/octet-stream'</em><a class="headerlink" href="#clam.common.formats.BinaryDataFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.BinaryDataFormat.name">
+<code class="descname">name</code><em class="property"> = 'Application-specific Binary Data'</em><a class="headerlink" href="#clam.common.formats.BinaryDataFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.CSVFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">CSVFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.CSVFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.CSVFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#clam.common.formats.CSVFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.CSVFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/csv'</em><a class="headerlink" href="#clam.common.formats.CSVFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.CSVFormat.name">
+<code class="descname">name</code><em class="property"> = 'Comma separated file'</em><a class="headerlink" href="#clam.common.formats.CSVFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.DCOIFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">DCOIFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.DCOIFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.DCOIFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.DCOIFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.DCOIFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.DCOIFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.DCOIFormat.name">
+<code class="descname">name</code><em class="property"> = 'DCOI format'</em><a class="headerlink" href="#clam.common.formats.DCOIFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.DCOIFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.DCOIFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.DjVuFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">DjVuFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.DjVuFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.DjVuFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.DjVuFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.DjVuFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/x-djvu'</em><a class="headerlink" href="#clam.common.formats.DjVuFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.DjVuFormat.name">
+<code class="descname">name</code><em class="property"> = 'DjVu format'</em><a class="headerlink" href="#clam.common.formats.DjVuFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.ExampleFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">ExampleFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ExampleFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an Example format, please inspect its source code if you want to create custom formats!</p>
+<dl class="attribute">
+<dt id="clam.common.formats.ExampleFormat.allowcustomattributes">
+<code class="descname">allowcustomattributes</code><em class="property"> = True</em><a class="headerlink" href="#clam.common.formats.ExampleFormat.allowcustomattributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.ExampleFormat.httpheaders">
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ExampleFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.ExampleFormat.loadinlinemetadata">
+<code class="descname">loadinlinemetadata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ExampleFormat.loadinlinemetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.ExampleFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#clam.common.formats.ExampleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.ExampleFormat.saveinlinemetadata">
+<code class="descname">saveinlinemetadata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ExampleFormat.saveinlinemetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.ExampleFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = None</em><a class="headerlink" href="#clam.common.formats.ExampleFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.ExampleFormat.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ExampleFormat.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add your validation method here, should return True or False</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.FoLiAXMLFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">FoLiAXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.FoLiAXMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.FoLiAXMLFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.FoLiAXMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.FoLiAXMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.FoLiAXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.FoLiAXMLFormat.name">
+<code class="descname">name</code><em class="property"> = 'FoLiA XML'</em><a class="headerlink" href="#clam.common.formats.FoLiAXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.FoLiAXMLFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.FoLiAXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.GifImageFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">GifImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.GifImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.GifImageFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.GifImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.GifImageFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/gif'</em><a class="headerlink" href="#clam.common.formats.GifImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.GifImageFormat.name">
+<code class="descname">name</code><em class="property"> = 'Gif Image'</em><a class="headerlink" href="#clam.common.formats.GifImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.HTMLFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">HTMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.HTMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTML Format Definition. This format has one required attribute: encoding</p>
+<dl class="attribute">
+<dt id="clam.common.formats.HTMLFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#clam.common.formats.HTMLFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.HTMLFormat.httpheaders">
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.HTMLFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.HTMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/html'</em><a class="headerlink" href="#clam.common.formats.HTMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.JpegImageFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">JpegImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.JpegImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.JpegImageFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.JpegImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.JpegImageFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/jpeg'</em><a class="headerlink" href="#clam.common.formats.JpegImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.JpegImageFormat.name">
+<code class="descname">name</code><em class="property"> = 'Jpeg Image'</em><a class="headerlink" href="#clam.common.formats.JpegImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.KBXMLFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">KBXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.KBXMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.KBXMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.KBXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.KBXMLFormat.name">
+<code class="descname">name</code><em class="property"> = 'Koninklijke Bibliotheek XML-formaat'</em><a class="headerlink" href="#clam.common.formats.KBXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.KBXMLFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.KBXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.MP3AudioFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">MP3AudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.MP3AudioFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.MP3AudioFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.MP3AudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MP3AudioFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'audio/mpeg'</em><a class="headerlink" href="#clam.common.formats.MP3AudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MP3AudioFormat.name">
+<code class="descname">name</code><em class="property"> = 'MP3 Audio File'</em><a class="headerlink" href="#clam.common.formats.MP3AudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.MSWordFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">MSWordFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.MSWordFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.MSWordFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.MSWordFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MSWordFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/msword'</em><a class="headerlink" href="#clam.common.formats.MSWordFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MSWordFormat.name">
+<code class="descname">name</code><em class="property"> = 'Microsoft Word format'</em><a class="headerlink" href="#clam.common.formats.MSWordFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MSWordFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.MSWordFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.MpegVideoFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">MpegVideoFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.MpegVideoFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.MpegVideoFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.MpegVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MpegVideoFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'video/mpeg'</em><a class="headerlink" href="#clam.common.formats.MpegVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.MpegVideoFormat.name">
+<code class="descname">name</code><em class="property"> = 'Mpeg Video'</em><a class="headerlink" href="#clam.common.formats.MpegVideoFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.OggAudioFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">OggAudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.OggAudioFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.OggAudioFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.OggAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OggAudioFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#clam.common.formats.OggAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OggAudioFormat.name">
+<code class="descname">name</code><em class="property"> = 'Ogg Audio File'</em><a class="headerlink" href="#clam.common.formats.OggAudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.OggVideoFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">OggVideoFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.OggVideoFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.OggVideoFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.OggVideoFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OggVideoFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'audio/ogg'</em><a class="headerlink" href="#clam.common.formats.OggVideoFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OggVideoFormat.name">
+<code class="descname">name</code><em class="property"> = 'Ogg Video File'</em><a class="headerlink" href="#clam.common.formats.OggVideoFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.OpenDocumentTextFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">OpenDocumentTextFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.OpenDocumentTextFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.OpenDocumentTextFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.OpenDocumentTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OpenDocumentTextFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/vnd.oasis.opendocument.text'</em><a class="headerlink" href="#clam.common.formats.OpenDocumentTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.OpenDocumentTextFormat.name">
+<code class="descname">name</code><em class="property"> = 'Open Document Text Format'</em><a class="headerlink" href="#clam.common.formats.OpenDocumentTextFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.PDFFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">PDFFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.PDFFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.PDFFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.PDFFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.PDFFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/pdf'</em><a class="headerlink" href="#clam.common.formats.PDFFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.PDFFormat.name">
+<code class="descname">name</code><em class="property"> = 'PDF'</em><a class="headerlink" href="#clam.common.formats.PDFFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.PlainTextFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">PlainTextFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.PlainTextFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plain Text Format Definition. This format has one required attribute: encoding</p>
+<dl class="attribute">
+<dt id="clam.common.formats.PlainTextFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {'language': False, 'encoding': True}</em><a class="headerlink" href="#clam.common.formats.PlainTextFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.formats.PlainTextFormat.httpheaders">
+<code class="descname">httpheaders</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.PlainTextFormat.httpheaders" title="Permalink to this definition">¶</a></dt>
+<dd><p>HTTP headers to output for this format. Yields (key,value) tuples.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.PlainTextFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#clam.common.formats.PlainTextFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.PngImageFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">PngImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.PngImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.PngImageFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.PngImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.PngImageFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/png'</em><a class="headerlink" href="#clam.common.formats.PngImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.PngImageFormat.name">
+<code class="descname">name</code><em class="property"> = 'PNG Image'</em><a class="headerlink" href="#clam.common.formats.PngImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.TICCLShadowOutputXML">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">TICCLShadowOutputXML</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.TICCLShadowOutputXML" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.TICCLShadowOutputXML.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.TICCLShadowOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TICCLShadowOutputXML.name">
+<code class="descname">name</code><em class="property"> = 'Ticcl Shadow Output'</em><a class="headerlink" href="#clam.common.formats.TICCLShadowOutputXML.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TICCLShadowOutputXML.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.TICCLShadowOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.TICCLVariantOutputXML">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">TICCLVariantOutputXML</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.TICCLVariantOutputXML" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.TICCLVariantOutputXML.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.TICCLVariantOutputXML.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TICCLVariantOutputXML.name">
+<code class="descname">name</code><em class="property"> = 'Ticcl Variant Output'</em><a class="headerlink" href="#clam.common.formats.TICCLVariantOutputXML.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TICCLVariantOutputXML.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.TICCLVariantOutputXML.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.TadpoleFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">TadpoleFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.TadpoleFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.TadpoleFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {'morphologicalanalysis': ['yes', 'no'], 'postagging': ['yes', 'no'], 'parsing': ['yes', 'no'], 'mwudetection': ['yes', 'no'], 'tokenisation': 'yes', 'lemmatisation': ['yes', 'no']}</em><a class="headerlink" href="#clam.common.formats.TadpoleFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TadpoleFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/plain'</em><a class="headerlink" href="#clam.common.formats.TadpoleFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TadpoleFormat.name">
+<code class="descname">name</code><em class="property"> = 'Tadpole Columned Output Format'</em><a class="headerlink" href="#clam.common.formats.TadpoleFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.TiffImageFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">TiffImageFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.TiffImageFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.TiffImageFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.TiffImageFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TiffImageFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'image/tiff'</em><a class="headerlink" href="#clam.common.formats.TiffImageFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.TiffImageFormat.name">
+<code class="descname">name</code><em class="property"> = 'Tiff Image'</em><a class="headerlink" href="#clam.common.formats.TiffImageFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.UndefinedXMLFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">UndefinedXMLFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.UndefinedXMLFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.UndefinedXMLFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/xml'</em><a class="headerlink" href="#clam.common.formats.UndefinedXMLFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.UndefinedXMLFormat.name">
+<code class="descname">name</code><em class="property"> = 'Undefined XML Format'</em><a class="headerlink" href="#clam.common.formats.UndefinedXMLFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.UndefinedXMLFormat.scheme">
+<code class="descname">scheme</code><em class="property"> = ''</em><a class="headerlink" href="#clam.common.formats.UndefinedXMLFormat.scheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.WaveAudioFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">WaveAudioFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.WaveAudioFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.WaveAudioFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.WaveAudioFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.WaveAudioFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'audio/wav'</em><a class="headerlink" href="#clam.common.formats.WaveAudioFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.WaveAudioFormat.name">
+<code class="descname">name</code><em class="property"> = 'Wave Audio File'</em><a class="headerlink" href="#clam.common.formats.WaveAudioFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.XMLStyleSheet">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">XMLStyleSheet</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.XMLStyleSheet" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.XMLStyleSheet.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.XMLStyleSheet.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.XMLStyleSheet.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/xslt+xml'</em><a class="headerlink" href="#clam.common.formats.XMLStyleSheet.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.XMLStyleSheet.name">
+<code class="descname">name</code><em class="property"> = 'XML Stylesheet'</em><a class="headerlink" href="#clam.common.formats.XMLStyleSheet.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.formats.ZIPFormat">
+<em class="property">class </em><code class="descclassname">clam.common.formats.</code><code class="descname">ZIPFormat</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.formats.ZIPFormat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.formats.ZIPFormat.attributes">
+<code class="descname">attributes</code><em class="property"> = {}</em><a class="headerlink" href="#clam.common.formats.ZIPFormat.attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.ZIPFormat.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'application/zip'</em><a class="headerlink" href="#clam.common.formats.ZIPFormat.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.formats.ZIPFormat.name">
+<code class="descname">name</code><em class="property"> = 'ZIP Archive'</em><a class="headerlink" href="#clam.common.formats.ZIPFormat.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -92,6 +704,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              >next</a> |</li>

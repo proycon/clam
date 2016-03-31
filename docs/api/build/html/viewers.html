@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>CLAM Viewerss &mdash; CLAM 2.1 documentation</title>
+    <title>CLAM Viewers &mdash; CLAM 2.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -34,6 +34,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.1 documentation</a> &raquo;</li> 
@@ -45,8 +48,125 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="clam-viewerss">
-<h1>CLAM Viewerss<a class="headerlink" href="#clam-viewerss" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-clam.common.viewers">
+<span id="clam-viewers"></span><h1>CLAM Viewers<a class="headerlink" href="#module-clam.common.viewers" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="clam.common.viewers.AbstractViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">AbstractViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.AbstractViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.AbstractViewer.id">
+<code class="descname">id</code><em class="property"> = 'abstractviewer'</em><a class="headerlink" href="#clam.common.viewers.AbstractViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.AbstractViewer.mimetype">
+<code class="descname">mimetype</code><em class="property"> = 'text/html'</em><a class="headerlink" href="#clam.common.viewers.AbstractViewer.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.AbstractViewer.name">
+<code class="descname">name</code><em class="property"> = 'Unspecified Viewer'</em><a class="headerlink" href="#clam.common.viewers.AbstractViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.AbstractViewer.url">
+<code class="descname">url</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.AbstractViewer.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the URL to view this resource, the link is usually an external service/website. If necessary, the file can be &#8216;pushed&#8217; to the service from here. file is a CLAMOutputFile instance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.AbstractViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.AbstractViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the view itself, in xhtml (it&#8217;s recommended to use flask&#8217;s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.viewers.FoLiAViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">FoLiAViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.FoLiAViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.FoLiAViewer.id">
+<code class="descname">id</code><em class="property"> = 'foliaviewer'</em><a class="headerlink" href="#clam.common.viewers.FoLiAViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.FoLiAViewer.name">
+<code class="descname">name</code><em class="property"> = 'FoLiA Viewer'</em><a class="headerlink" href="#clam.common.viewers.FoLiAViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.FoLiAViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.FoLiAViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.viewers.SimpleTableViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">SimpleTableViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.SimpleTableViewer.id">
+<code class="descname">id</code><em class="property"> = 'tableviewer'</em><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.SimpleTableViewer.name">
+<code class="descname">name</code><em class="property"> = 'Table viewer'</em><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.SimpleTableViewer.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.SimpleTableViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.viewers.SoNaRViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">SoNaRViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SoNaRViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.SoNaRViewer.id">
+<code class="descname">id</code><em class="property"> = 'sonarviewer'</em><a class="headerlink" href="#clam.common.viewers.SoNaRViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.SoNaRViewer.name">
+<code class="descname">name</code><em class="property"> = 'SoNaR Viewer'</em><a class="headerlink" href="#clam.common.viewers.SoNaRViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.SoNaRViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SoNaRViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.viewers.XSLTViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">XSLTViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.XSLTViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.XSLTViewer.id">
+<code class="descname">id</code><em class="property"> = 'xsltviewer'</em><a class="headerlink" href="#clam.common.viewers.XSLTViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.XSLTViewer.name">
+<code class="descname">name</code><em class="property"> = 'XML Viewer'</em><a class="headerlink" href="#clam.common.viewers.XSLTViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.XSLTViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.XSLTViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -85,6 +205,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              >previous</a> |</li>
