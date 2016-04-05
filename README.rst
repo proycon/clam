@@ -114,20 +114,20 @@ Running a test webservice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you installed CLAM using the above method, then you can launch a clam test
-webservice using the development server as follows:
+webservice using the development server as follows::
 
-$ clamservice -H localhost -p 8080 clam.config.textstats
+  $ clamservice -H localhost -p 8080 clam.config.textstats
  
 Navigate your browser to http://localhost:8080 and verify everything works
 
 Note: It is important to regularly keep CLAM up to date as fixes and
 improvements are implemented on a regular basis. Update CLAM using::
 
- $ pip install -U clam
+  $ pip install -U clam
 
 or if you used easy_install::
 
- $ easy_install -U clam
+  $ easy_install -U clam
 
 
 Installing a particular clam webservice for production use
@@ -143,7 +143,7 @@ For testing, the built-in development server can be used. Suppose the
 webservice configuration is in /path/to/mywebservice/ and is called
 mywebservice.py, then the development server can be started as follows::
 
- $ clamservice -P /path/to/mywebservice mywebservice
+  $ clamservice -P /path/to/mywebservice mywebservice
 
 For production, however, it is strongly recommended to embed CLAM in Apache or
 nginx. This is the typically task of a system administrator, as certain skills are
