@@ -108,6 +108,9 @@ MINDISKSPACE = 10
 #The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
 #USERQUOTA = 100
 
+#The secret key is used internally for cryptographically signing session data, in production environments, you'll want to set this to a persistent value. If not set it will be randomly generated.
+#SECRET_KEY = 'mysecret'
+
 # ======== WEB-APPLICATION STYLING =============
 
 #Choose a style (has to be defined as a CSS file in clam/style/ ). You can copy, rename and adapt it to make your own style

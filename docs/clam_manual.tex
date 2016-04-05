@@ -907,6 +907,11 @@ one user to be the guest user, for instance the user named ``guest'', and set
 \texttt{denyusers=['guest']} on the parameters you do not want the guest user
 to use.
 
+In production environments, you will also want to set \texttt{SECRET\_KEY} to a
+string value that is kept strictly private. It is used for cryptographically
+signing session data and preventing CSRF attacks.\footnote{See also:
+http://flask.pocoo.org/docs/0.10/quickstart/\#sessions}
+
 \subsubsection{MySQL backend}
 
 Rather than using \texttt{USERS} to define a user database in your service
