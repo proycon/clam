@@ -120,9 +120,6 @@ $ clamservice -H localhost -p 8080 clam.config.textstats
  
 Navigate your browser to http://localhost:8080 and verify everything works
 
-If any problems occur during installation regarding pycurl, then install the
-pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
-
 Note: It is important to regularly keep CLAM up to date as fixes and
 improvements are implemented on a regular basis. Update CLAM using::
 
