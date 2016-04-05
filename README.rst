@@ -15,7 +15,7 @@ CLAM: Computational Linguistics Application Mediator
 
 *Licensed under GPLv3*
 		
-**Website:** http://proycon.github.io/clam 
+**Website:** https://proycon.github.io/clam 
 **Source repository:** https://github.com/proycon/clam/
 
 CLAM allows you to quickly and transparently transform your Natural Language
