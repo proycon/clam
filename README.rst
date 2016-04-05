@@ -5,11 +5,11 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: https://travis-ci.org/proycon/clam.svg?branch=master
     :target: https://travis-ci.org/proycon/clam
 
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.49064.svg
-   :target: http://dx.doi.org/10.5281/zenodo.49064
-
 .. image:: https://api.codacy.com/project/badge/grade/860767a6b995425bbb607fc852c418b7
     :target: https://www.codacy.com/app/proycon/clam
+
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.49064.svg
+   :target: http://dx.doi.org/10.5281/zenodo.49064
 
 .. image:: http://applejack.science.ru.nl/lamabadge.php/clam
    :target: http://applejack.science.ru.nl/languagemachines/
