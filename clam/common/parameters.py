@@ -92,7 +92,10 @@ class AbstractParameter(object):
     def validate(self,value):
         """Validate the parameter"""
         if self.validator is not None:
-            valid = self.validator(value)
+            try:
+                valid = self.validator(value)
+            except Exception as e:
+                import pdb; pdb.set_trace()
             if isinstance(valid, tuple) and len(valid) == 2:
                 valid, errormsg = valid
             elif isinstance(valid, bool):
@@ -128,7 +131,7 @@ class AbstractParameter(object):
         if self.paramflag:
             xml += ' flag="'+self.paramflag + '"'
         for key, v in self.kwargs.items():
-            if not key in ['value','error','name','description','flag','paramflag']:
+            if key not in ('value','error','name','description','flag','paramflag', 'validator'):
                 if isinstance(v, bool):
                     xml += ' ' + key + '="' + str(int(v))+ '"'
                 elif isinstance(v, list):
