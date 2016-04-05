@@ -16,7 +16,7 @@ setup(
     version = "2.1.2",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
-    description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with a auto-generated web-interface for human end-users."),
+    description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
     license = "GPL",
     keywords = "clam webservice rest nlp computational_linguistics rest",
     url = "https://proycon.github.io/clam",

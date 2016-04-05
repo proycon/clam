@@ -126,8 +126,6 @@ pycurl package supplied by your distribution (python-pycurl on Debian/ubuntu)
 Note: It is important to regularly keep CLAM up to date as fixes and
 improvements are implemented on a regular basis. Update CLAM using::
 
-or if you used pip::
-
  $ pip install -U clam
 
 or if you used easy_install::
