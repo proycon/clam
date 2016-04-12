@@ -23,6 +23,7 @@ import datetime
 import subprocess
 import time
 import signal
+import shutil
 
 VERSION = '2.1'
 
