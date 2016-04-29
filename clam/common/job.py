@@ -17,9 +17,12 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 
 import os
 import io
+import shutil
+from collections import defaultdict
+import flask #only used for rendering templates
+
 import clam.common.util
 import clam.common.data
-import flask #only used for rendering templates
 
 DISPATCHER = 'clamdispatcher'
 
@@ -38,27 +41,132 @@ class CLAMJob(object):
         self.projectpath = projectpath
         if self.projectpath[-1] != '/':
             self.projectpath += '/'
+        if not os.path.exists(self.projectpath):
+            os.mkdir(self.projectpath)
+        for d in ('input','output','tmp'):
+            if not os.path.exists(d):
+                os.mkdir(self.projectpath + '/' + d)
+
         self.errors = False
         self.parameters = []
         self.commandlineparams = []
         self.data = None
         self.async = async
-        self.oncompletion = oncompletion
+        self.nextseq = {} 
         if settingsmodule:
             self.SETTINGSMODULE = settingsmodule
             import_string = "import " + settingsmodule + " as localsettings"
             exec(import_string) #pylint: disable=exec-used
             #load external configuration
-            if hasattr(localsettings, 'PROFILES'):
-                self.PROFILES = localsettings.PROFILES
-            if hasattr(localsettings, 'PARAMETERS'):
-                self.PARAMETERS = localsettings.PARAMETERS
-            if hasattr(localsettings, 'COMMAND'):
-                self.COMMAND = localsettings.COMMAND
-            if hasattr(localsettings, 'SYSTEM_NAME'):
-                self.NAME = localsettings.SYSTEM_NAME
-            if hasattr(localsettings, 'SYSTEM_ID'):
-                self.id = localsettings.SYSTEM_ID
+            if hasattr(localsettings, 'PROFILES'): #pylint: disable=undefined-variable
+                self.PROFILES = localsettings.PROFILES #pylint: disable=undefined-variable
+            if hasattr(localsettings, 'PARAMETERS'): #pylint: disable=undefined-variable
+                self.PARAMETERS = localsettings.PARAMETERS #pylint: disable=undefined-variable
+            if hasattr(localsettings, 'COMMAND'): #pylint: disable=undefined-variable
+                self.COMMAND = localsettings.COMMAND #pylint: disable=undefined-variable
+            if hasattr(localsettings, 'SYSTEM_NAME'): #pylint: disable=undefined-variable
+                self.NAME = localsettings.SYSTEM_NAME #pylint: disable=undefined-variable
+            if hasattr(localsettings, 'SYSTEM_ID'): #pylint: disable=undefined-variable
+                self.id = localsettings.SYSTEM_ID #pylint: disable=undefined-variable
+
+    def addinputfile(self, sourcefile, **kwargs):
+        filename = os.path.basename(sourcefile)
+        if 'inputtemplate' in kwargs:
+            inputtemplate_id = kwargs['inputtemplate']
+            del kwargs['inputtemplate']
+        inputtemplate = None
+        for profile in self.PROFILES:
+            for t in profile.input:
+                if t.id == inputtemplate_id:
+                    inputtemplate = t
+        if not inputtemplate:
+            #Check if the specified filename can be uniquely associated with an inputtemplate
+            for profile in self.PROFILES:
+                for t in profile.input:
+                    if t.filename == filename:
+                        if inputtemplate:
+                            #we found another one, not unique!! reset and break
+                            inputtemplate = None
+                            break
+                        else:
+                            #good, we found one, don't break cause we want to make sure there is only one
+                            inputtemplate = t
+        if not inputtemplate:
+            #Inputtemplate not found
+            return Exception("Specified inputtemplate (" + inputtemplate_id + ") not found!")
+
+        if inputtemplate.filename:
+            filename = inputtemplate.filename
+
+        #See if other previously uploaded input files use this inputtemplate
+        if inputtemplate.unique:
+            if inputtemplate.id in self.nextseq:
+                raise Exception("You have already submitted a file of this type, you can only submit one. (Inputtemplate=" + inputtemplate.id + ", unique=True)")
+            self.nextseq[inputtemplate.id]  = 0
+        else:
+            if inputtemplate.id in self.nextseq:
+                self.nextseq[inputtemplate.id] += 1
+            else:
+                self.nextseq[inputtemplate.id] = 1
+
+        #Make sure the filename is secure
+        validfilename = True
+        DISALLOWED = ('/','&','|','<','>',';','"',"'","`","{","}","\n","\r","\b","\t")
+        for c in filename:
+            if c in DISALLOWED:
+                validfilename = False
+                break
+
+        if not validfilename:
+            return ValueError("Filename contains invalid symbols! Do not use /,&,|,<,>,',`,\",{,} or ;")
+
+        os.symlink(sourcefile, self.projectpath + '/input/' + filename)
+
+        #Create a file object
+        file = clam.common.data.CLAMInputFile(self.projectpath, filename, False) #get CLAMInputFile without metadata (chicken-egg problem, this does not read the actual file contents!
+
+        #generate metadata
+        errors, parameters = inputtemplate.validate(**kwargs)
+        validmeta = True
+        try:
+            #Now we generate the actual metadata object (unsaved yet though). We pass our earlier validation results to prevent computing it again
+            validmeta, metadata, parameters = inputtemplate.generate(file, (errors, parameters ))
+            if validmeta:
+                #And we tie it to the CLAMFile object
+                file.metadata = metadata
+                #Add inputtemplate ID to metadata
+                metadata.inputtemplate = inputtemplate.id
+            else:
+                metadataerror = "Undefined error"
+        except ValueError as msg:
+            validmeta = False
+            metadataerror = msg
+        except KeyError as msg:
+            validmeta = False
+            metadataerror = msg
+
+        if metadataerror:
+            raise Exception('Metadata could not be generated, ' + str(metadataerror) + ',  this usually indicates an error in profile configuration')
+        elif validmeta:
+            #validate the file
+            valid = file.validate()
+
+            if valid:
+                #Great! Everything ok, save metadata
+                metadata.save(self.projectpath + 'input/' + file.metafilename())
+
+                #And create symbolic link for inputtemplates
+                linkfilename = os.path.dirname(filename)
+                if linkfilename: linkfilename += '/'
+                linkfilename += '.' + os.path.basename(filename) + '.INPUTTEMPLATE' + '.' + inputtemplate.id + '.' + str(self.nextseq[inputtemplate.id])
+                os.symlink(self.projectpath + 'input/' + filename, self.projectpath + 'input/' + linkfilename)
+            else:
+                #Too bad, everything worked out but the file itself doesn't validate.
+                #remove upload
+                os.unlink(self.projectpath + 'input/' + filename)
+                raise ValueError("File did not validate, it is not in the proper expected format")
+
+
 
     def start(self, **kwargs):
         self.errors,self.parameters, self.commandlineparams = clam.common.data.processparameters(kwargs, self.PARAMETERS)
@@ -150,4 +258,7 @@ class CLAMJob(object):
 
     def run(self, data):
         raise NotImplementedError("run() method should be overloaded")
+
+    def clean(self):
+       shutil.rmtree(self.projectpath)
 
