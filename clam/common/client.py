@@ -35,7 +35,7 @@ import clam.common.parameters
 import clam.common.formats
 import clam.common.data
 
-VERSION = '2.1'
+VERSION = '2.2'
 if VERSION != clam.common.data.VERSION:
     raise Exception("Version mismatch beween Client API ("+VERSION+") and Data API ("+clam.common.data.VERSION+")!")
 
