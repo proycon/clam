@@ -24,8 +24,9 @@ import subprocess
 import time
 import signal
 import shutil
+from collections import defaultdict
 
-VERSION = '2.1'
+VERSION = '2.2'
 
 sys.path.append(sys.path[0] + '/..')
 
@@ -98,23 +99,26 @@ def main():
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
 
-    try:
-        #exec("import " + settingsmodule + " as settings")
-        settings = __import__(settingsmodule , globals(), locals(),0)
+    if settingsmodule != 'NONE':
         try:
-            if settings.CUSTOM_FORMATS:
-                clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS
-                print("[CLAM Dispatcher] Dependency injection for custom formats succeeded", file=sys.stderr)
-        except AttributeError:
-            pass
-    except ImportError as e:
-        print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
-        print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
-        if projectdir:
-            f = open(projectdir + '.done','w')
-            f.write(str(1))
-            f.close()
-        return 1
+            #exec("import " + settingsmodule + " as settings")
+            settings = __import__(settingsmodule , globals(), locals(),0)
+            try:
+                if settings.CUSTOM_FORMATS:
+                    clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS
+                    print("[CLAM Dispatcher] Dependency injection for custom formats succeeded", file=sys.stderr)
+            except AttributeError:
+                pass
+        except ImportError as e:
+            print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
+            print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
+            if projectdir:
+                f = open(projectdir + '.done','w')
+                f.write(str(1))
+                f.close()
+            return 1
+    else:
+        settings = defaultdict(int)
 
     settingkeys = dir(settings)
     if not 'DISPATCHER_POLLINTERVAL' in settingkeys:

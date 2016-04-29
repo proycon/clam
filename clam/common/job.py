@@ -31,7 +31,7 @@ class CLAMJob(object):
     PROFILES = None
     PARAMETERS = None
     COMMAND = None
-    SETTINGSMODULE = 'clam.config.dispatcheronly' #only needed for dispatching
+    SETTINGSMODULE = "NONE" #only needed for dispatching
 
     def __init__(self, projectpath, settingsmodule=None, async=False):
         self.id = self.__class__.__name__
