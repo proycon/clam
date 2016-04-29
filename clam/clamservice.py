@@ -810,31 +810,14 @@ class Project:
         return json.dumps({'success':True, 'statuscode':statuscode,'statusmsg':statusmsg, 'statuslog': statuslog, 'completion': completion})
 
     @staticmethod
-    def inputindex(project, user, d = ''):
-        prefix = Project.path(project, user) + 'input/'
-        for f in glob.glob(prefix + d + "/*"):
-            if os.path.basename(f)[0] != '.': #always skip all hidden files
-                if os.path.isdir(f):
-                    for result in Project.inputindex(project, user, f[len(prefix):]):
-                        yield result
-                else:
-                    file = clam.common.data.CLAMInputFile(Project.path(project,user), f[len(prefix):])
-                    file.attachviewers(settings.PROFILES) #attaches converters as well
-                    yield file
-
+    def inputindex(project, user):
+        for file in clam.common.data.inputindex(Project.path(project, user), settings.PROFILES):
+            yield file
 
     @staticmethod
     def outputindex(project, user, d = ''):
-        prefix = Project.path(project, user) + 'output/'
-        for f in glob.glob(prefix + d + "/*"):
-            if os.path.basename(f)[0] != '.': #always skip all hidden files
-                if os.path.isdir(f):
-                    for result in Project.outputindex(project, user, f[len(prefix):]):
-                        yield result
-                else:
-                    file = clam.common.data.CLAMOutputFile(Project.path(project,user), f[len(prefix):])
-                    file.attachviewers(settings.PROFILES) #attaches converters as well
-                    yield file
+        for file in clam.common.data.outputindex(Project.path(project, user), settings.PROFILES):
+            yield file
 
     @staticmethod
     def inputindexbytemplate(project, user, inputtemplate):

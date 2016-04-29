@@ -24,6 +24,7 @@ import os.path
 import io
 import json
 import time
+import glob
 from copy import copy
 from lxml import etree as ElementTree
 if sys.version < '3':
@@ -2352,6 +2353,30 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
 
     return filename
 
+def inputindex(projectdir,profiles,d = ''):
+    prefix = os.path.join(projectdir,'input')
+    for f in glob.glob(os.path.join(prefix , d, "*")):
+        if os.path.basename(f)[0] != '.': #always skip all hidden files
+            if os.path.isdir(f):
+                for result in inputindex(prefix, profiles, f[len(prefix):]):
+                    yield result
+            else:
+                file = clam.common.data.CLAMInputFile(projectdir, f[len(prefix):])
+                file.attachviewers(profiles) #attaches converters as well
+                yield file
+
+
+def outputindex(projectdir,profiles,d = ''):
+    prefix = os.path.join(projectdir,'output')
+    for f in glob.glob(os.path.join(prefix , d, "*")):
+        if os.path.basename(f)[0] != '.': #always skip all hidden files
+            if os.path.isdir(f):
+                for result in outputindex(prefix, profiles, f[len(prefix):]):
+                    yield result
+            else:
+                file = clam.common.data.CLAMOutputFile(projectdir, f[len(prefix):])
+                file.attachviewers(profiles) #attaches converters as well
+                yield file
 
 def escape(s, quote):
     s2 = ""
