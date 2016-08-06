@@ -5,6 +5,10 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: https://travis-ci.org/proycon/clam.svg?branch=master
     :target: https://travis-ci.org/proycon/clam
 
+.. image:: https://readthedocs.org/projects/clam/badge/?version=latest
+    :target: http://clam.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. image:: https://api.codacy.com/project/badge/grade/860767a6b995425bbb607fc852c418b7
     :target: https://www.codacy.com/app/proycon/clam
 
@@ -48,6 +52,7 @@ manual in ``docs/clam_manual.pdf`` , also accessible through the CLAM website
 at http://proycon.github.io/clam . It is recommended to read this prior to
 starting with CLAM. 
 
+API Documentation is available on http://clam.readthedocs.io
 
 Installation
 ----------------

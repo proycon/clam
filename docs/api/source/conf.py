@@ -23,7 +23,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.napoleon','sphinx.ext.autosummary']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -39,7 +39,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CLAM'
-copyright = u'2013, Maarten van Gompel'
+copyright = u'2016, Maarten van Gompel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
