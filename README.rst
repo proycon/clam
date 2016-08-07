@@ -57,15 +57,15 @@ API Documentation is available on http://clam.readthedocs.io
 Installation
 ----------------
 
-IMPORTANT NOTICE: It's discouraged to download the zip packages or tarballs
+It's discouraged to download the zip packages or tarballs
 from github, install CLAM from the `Python
 Package Index <http://pypi.python.org/pypi/CLAM>`_ or use git properly.
 
 Installation On Linux 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Easy install is part of the Python setup tools and can install CLAM globally on
-your system for you from the Python Package Index. This is the easiest method
+Installation from the Python Package Index using the  package manager *pip* it the recommended way to
+intall CLAM. This is the easiest method
 of installing CLAM, as it will automatically fetch and install any
 dependencies. We recommend to use a virtual environment (``virtualenv``) if you
 want to install CLAM locally as a user, if you want to install globally,
@@ -73,13 +73,13 @@ prepend the following commands with ``sudo``:
 
 CLAM can be installed from the Python Package Index using pip. Pip is usually
 part of the ``python3-pip`` package or similar. It downloads CLAM and all dependencies
-automatically.
+automatically:::
 
- $ pip3 install clam
+  $ pip3 install clam
 
 If you already downloaded CLAM manually (from github), you can do::
 
- $ python3 setup.py install
+  $ python3 setup.py install
 
 If pip3 is not yet installed on your system, install it using: 
  on debian-based linux systems (including Ubuntu)::
@@ -91,17 +91,17 @@ on RPM-based linux systems::
   $ yum install python3-pip
 
 Note that sudo/root access is needed to install globally. Ask your system administrator
-to install it. Alternatively, you can install it locally in a Python virtual
+to install it if you do not own the system. Alternatively, you can install it locally in a Python virtual
 environment:
 
- $ virtualenv --python=python3 clamenv
+  $ virtualenv --python=python3 clamenv
 
- $ . clamenv/bin/activate
+  $ . clamenv/bin/activate
 
- (clamenv)$ pip3 install clam
+  (clamenv)$ pip3 install clam
 
- It is also possible to use Python 2.7 instead of Python 3, adapt the commands
- as necessary.
+It is also possible to use Python 2.7 instead of Python 3, adapt the commands
+as necessary.
 
 CLAM also has some optional dependencies. For MySQL support, install
 ``mysqlclient`` using pip. For `FoLiA <https://proycon.github.io/folia>`_
@@ -116,8 +116,10 @@ Install a Python distribution such as `Anaconda <http://continuum.io/>`_ and fol
 Installation on Windows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- Not supported, delete Windows and install a decent OS ;)
- 
+CLAM does not support Windows, i.e. you can't run CLAM webservices on Windows.
+However, the CLAM Data API and client API will work, so clients connecting to
+CLAM webservices can run on Windows. Follow the same instructions as for Mac
+OS X.
 
 Running a test webservice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -157,7 +159,7 @@ mywebservice.py, then the development server can be started as follows::
 For production, however, it is strongly recommended to embed CLAM in Apache or
 nginx. This is the typically task of a system administrator, as certain skills are
 necessary and assumed. All this is explained in detail in the CLAM
-Manual, obtainable from http://proycon.github.io/clam/ . 
+Manual, obtainable from https://proycon.github.io/clam/ . 
 
 
 
