@@ -58,7 +58,7 @@ opts = ""
 if 'lowercase' in clamdata and clamdata['lowercase']:
     opts += " --lower"
 if 'n' in clamdata and clamdata['n']:
-    pts += " --ngram " + str(clamdata['n'])
+    opts += " --ngram " + str(clamdata['n'])
 
 r = os.system("FoLiA-stats --class=\"current\" --lang none -t 1 -o " + outputdir + "/output " + opts + " " + " ".join(inputfiles))
 
