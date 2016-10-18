@@ -132,6 +132,8 @@ class XSLTViewer(AbstractViewer):
             else:
                 if sys.version > '3' and isinstance(lines[0],str):
                     xml_doc = etree.parse(BytesIO("".join( ( x.encode('utf-8') for x in lines) ) ))
+                elif sys.version < '3' and isinstance(lines[0], str):
+                    xml_doc = etree.parse(StringIO(b"".join(lines) ))
                 else:
                     xml_doc = etree.parse(BytesIO(b"".join(lines) ))
         else:
