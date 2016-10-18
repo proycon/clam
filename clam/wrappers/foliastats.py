@@ -60,7 +60,7 @@ if 'lowercase' in clamdata and clamdata['lowercase']:
 if 'n' in clamdata and clamdata['n']:
     opts += " --ngram " + str(clamdata['n'])
 
-r = os.system("FoLiA-stats -t 1 -o " + outputdir + "/output " + opts + " " + " ".join(inputfiles))
+r = os.system("FoLiA-stats --class=\"current\" --lang none -t 1 -o " + outputdir + "/output " + opts + " " + " ".join(inputfiles))
 
 
 clam.common.status.write(statusfile, "Done",100)
