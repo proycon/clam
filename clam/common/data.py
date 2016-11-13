@@ -37,6 +37,10 @@ import clam.common.viewers
 
 VERSION = '2.1.6'
 
+#dirs for services shipped with CLAM itself
+CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
+WRAPPERDIR = os.path.abspath(os.path.dirname(__file__) + '/../wrappers/')
+
 #clam.common.formats is deliberately imported _at the end_
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')

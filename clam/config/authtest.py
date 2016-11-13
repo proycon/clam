@@ -150,7 +150,7 @@ PROFILES = [
 #                        (set to "anonymous" if there is none)
 #     $PARAMETERS      - List of chosen parameters, using the specified flags
 #
-COMMAND = sys.path[0] + "/wrappers/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
+COMMAND = WRAPPERDIR + "/textstats.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY"
 
 # ======== PARAMETER DEFINITIONS ===========
 
