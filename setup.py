@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "2.1.5",
+    version = "2.1.6",
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
@@ -36,8 +36,8 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'clamservice = clam.startclamservice:main',
-            'startclamservice = clam.startclamservice:main', #alias
+            'clamservice = clam.clamservice:main',
+            'startclamservice = clam.clamservice:main', #alias
             'clamnewproject = clam.clamnewproject:main', #alias
             'clamdispatcher = clam.clamdispatcher:main',
             'clamclient = clam.clamclient:main'

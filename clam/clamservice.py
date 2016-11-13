@@ -23,6 +23,7 @@ import os
 import io
 import stat
 import subprocess
+import importlib
 import glob
 import sys
 import datetime
@@ -37,10 +38,6 @@ import mimetypes
 import flask
 import werkzeug
 import requests
-
-if __name__ == "__main__":
-    sys.path.append(sys.path[0] + '/..')
-    #os.environ['PYTHONPATH'] = sys.path[0] + '/..'
 
 import clam.common.status
 import clam.common.parameters
@@ -2706,14 +2703,14 @@ def test_version():
     if not uptodate:
         error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
 
+def main():
+    global settingsmodule, DEBUG, settings
 
-if __name__ == "__main__":
     if len(sys.argv) < 2:
         usage()
         sys.exit(1)
 
     settingsmodule = None
-    fastcgi = False
     PORT = HOST = FORCEURL = None
     PYTHONPATH = None
 
@@ -2747,7 +2744,7 @@ if __name__ == "__main__":
         sys.path.append(PYTHONPATH)
 
     import_string = "import " + settingsmodule + " as settings"
-    exec(import_string) #pylint: disable=exec-used
+    settings = importlib.import_module(settingsmodule)
 
     try:
         if settings.DEBUG:
@@ -2817,3 +2814,6 @@ def run_wsgi(settings_module):
         return DebuggedApplication(CLAMService('wsgi').service.wsgi_app, True)
     else:
         return CLAMService('wsgi').service.wsgi_app
+
+if __name__ == '__main__':
+    main()
