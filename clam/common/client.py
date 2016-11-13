@@ -35,10 +35,6 @@ import clam.common.parameters
 import clam.common.formats
 import clam.common.data
 
-VERSION = '2.1'
-if VERSION != clam.common.data.VERSION:
-    raise Exception("Version mismatch beween Client API ("+VERSION+") and Data API ("+clam.common.data.VERSION+")!")
-
 
 #for debug of requests:
 #import logging
@@ -90,7 +86,7 @@ class CLAMClient:
 
     def initauth(self):
         """Initialise authentication, for internal use"""
-        headers = {'User-agent': 'CLAMClientAPI-' + VERSION}
+        headers = {'User-agent': 'CLAMClientAPI-' + clam.common.data.VERSION}
         if self.oauth:
             if not self.oauth_access_token:
                 r = requests.get(self.url,headers=headers, verify=self.verify)

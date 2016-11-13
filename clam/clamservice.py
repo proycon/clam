@@ -71,7 +71,7 @@ except ImportError:
     UWSGI = False
 
 
-VERSION = '2.1'
+VERSION = clam.common.data.VERSION
 
 DEBUG = False
 

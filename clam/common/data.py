@@ -35,11 +35,9 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-
+VERSION = '2.1.6'
 
 #clam.common.formats is deliberately imported _at the end_
-
-VERSION = '2.1'
 
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
@@ -545,9 +543,6 @@ class CLAMData(object):
         root = parsexmlstring(xml)
         if root.tag != 'clam':
             raise FormatError("CLAM root tag not found")
-
-        #if root.attrib['version'][0:3] != VERSION[0:3]:
-        #    raise Exception("Version mismatch, CLAM Data API has version " + VERSION + ", but response expects " + root.attrib['version'])
 
         self.system_id = root.attrib['id']
         self.system_name = root.attrib['name']
