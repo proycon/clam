@@ -1185,7 +1185,6 @@ class Project:
                         viewer = v
                 if viewer:
                     output = viewer.view(outputfile, **flask.request.values)
-                    print("TYPE", type(output),file=sys.stderr)
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
                     else:
@@ -2227,7 +2226,7 @@ class ActionHandler(object):
                     raise
                 else:
                     return flask.make_response(e,500)
-            if not isinstance(r, flask.Response):
+            if not isinstance(r, (flask.Response, werkzeug.wrappers.Response)):
                 if sys.version >= '3':
                     return withheaders(flask.make_response(str(r)), action.mimetype)
                 else:

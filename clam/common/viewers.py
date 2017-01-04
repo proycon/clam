@@ -49,24 +49,10 @@ class AbstractViewer(object):
                 value = bool(value)
                 self.embed = value
 
-    def url(self, file):
-        """Returns the URL to view this resource, the link is usually an external service/website. If necessary, the file can be 'pushed' to the service from here. file is a CLAMOutputFile instance"""
-        return False
 
     def view(self, file, **kwargs):
         """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
-        url = self.url(file)
-        if url: #is the resource external?
-            if self.embed:
-                #fetch
-                if kwargs:
-                    req = requests.get(url,data=kwargs)
-                else:
-                    req = requests.get(url)
-                return withheaders(flask.make_reponse(req.iter_lines()), self.mimetype)
-            else:
-                #redirect
-                return flask.redirect(url)
+        raise NotImplementedError
 
 
 class SimpleTableViewer(AbstractViewer):
@@ -197,14 +183,31 @@ class FLATViewer(AbstractViewer):
         else:
             self.url = ''
 
+        if 'configuration' in kwargs:
+            self.configuration = kwargs['configuration']
+            del kwargs['configuration']
+        else:
+            self.configuration = ''
+
+        if 'mode' in kwargs:
+            self.mode = kwargs['mode']
+            del kwargs['mode']
+        else:
+            self.mode = ''
+
         super(FLATViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
         #filename will contain a random component to prevent clashes
         filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
-        r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))])
+        r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))], data={'configuration':self.configuration,'mode':self.mode})
         #FLAT redirects after upload, we catch the redirect rather than following it automatically following it, and return it ourselves as our redirect
-        if 'location' in r.headers:
-            return flask.redirect(r.headers['location'])
+        if 'Location' in r.headers:
+            if self.url and self.url[-1] == '/' and r.headers['Location'][0] == '/':
+                url = self.url[:-1] + r.headers['Location']
+            else:
+                url = self.url + r.headers['Location']
+            return flask.redirect(url)
         else:
-            return str(r)
+            return "Invalid response from FLAT"
+
