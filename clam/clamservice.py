@@ -1185,7 +1185,8 @@ class Project:
                         viewer = v
                 if viewer:
                     output = viewer.view(outputfile, **flask.request.values)
-                    if isinstance(output, flask.Response):
+                    print("TYPE", type(output),file=sys.stderr)
+                    if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
                     else:
                         return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype) #streaming output
