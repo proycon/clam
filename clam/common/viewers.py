@@ -17,6 +17,7 @@ from __future__ import print_function, unicode_literals, division, absolute_impo
 import csv
 import sys
 import os.path
+import random
 import requests
 from lxml import etree
 if sys.version < '3':
@@ -66,7 +67,6 @@ class AbstractViewer(object):
             else:
                 #redirect
                 return flask.redirect(url)
-
 
 
 class SimpleTableViewer(AbstractViewer):
@@ -186,6 +186,25 @@ class SoNaRViewer(AbstractViewer):
         return str(transform(xml_doc))
 
 
+class FLATViewer(AbstractViewer):
+    id = 'flatviewer'
+    name = "Open in FLAT"
 
+    def __init__(self, **kwargs):
+        if 'url' in kwargs:
+            self.url = kwargs['url']
+            del kwargs['url']
+        else:
+            self.url = ''
 
+        super(FLATViewer,self).__init__(**kwargs)
 
+    def view(self, file, **kwargs):
+        #filename will contain a random component to prevent clashes
+        filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
+        r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))])
+        #FLAT redirects after upload, we catch the redirect rather than following it automatically following it, and return it ourselves as our redirect
+        if 'location' in r.headers:
+            return flask.redirect(r.headers['location'])
+        else:
+            return str(r)
