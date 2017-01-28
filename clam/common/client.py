@@ -151,15 +151,14 @@ class CLAMClient:
                 data = self._parse(content)
                 if data:
                     if data.errors:
-                        print("DEBUG: errors found",file=sys.stderr)
                         error = data.parametererror()
-                        print("DEBUG: parametererror=" + str(error),file=sys.stderr)
-                        for parametergroup, parameters in data.parameters: #pylint: disable=unused-variable
-                            for parameter in parameters:
-                                print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
+                        #print("DEBUG: parametererror=" + str(error),file=sys.stderr)
+                        #for parametergroup, parameters in data.parameters: #pylint: disable=unused-variable
+                        #    for parameter in parameters:
+                        #        print("DEBUG: ", parameter.id, parameter.error,file=sys.stderr)
                         if error:
                             raise clam.common.data.ParameterError(error)
-                    print(content,file=sys.stderr)
+                    #print(content,file=sys.stderr)
                     raise clam.common.data.PermissionDenied(data)
                 else:
                     raise clam.common.data.PermissionDenied(content)
