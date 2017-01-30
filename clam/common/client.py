@@ -46,7 +46,7 @@ def donereadingupload(encoder):
     pass
 
 class CLAMClient:
-    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None):
+    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None, loadmetadata=False):
         """Initialise the CLAM client (does not actually connect yet)
 
         * ``url`` - URL of the webservice
@@ -60,6 +60,7 @@ class CLAMClient:
            Set to the path to a CA_BUNDLE file or directory with certificates of trusted CAs, used certify by default
            Can be set to False to skip verification (not recommended)
            Follows the syntax of the requests library (http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification)
+        * ``loadmetadata`` - Automatically download and load all relevant metadata
         """
 
         #self.http = httplib2.Http()
@@ -82,6 +83,7 @@ class CLAMClient:
             self.user = None
             self.password = None
             self.initauth()
+        self.loadmetadata = loadmetadata
 
 
     def initauth(self):
@@ -184,7 +186,7 @@ class CLAMClient:
     def _parse(self, content):
         """Parses CLAM XML data and returns a ``CLAMData`` object. For internal use. Raises `ParameterError` exception on parameter errors."""
         if content.find('<clam') != -1:
-            data = clam.common.data.CLAMData(content,self)
+            data = clam.common.data.CLAMData(content,self, loadmetadata=self.loadmetadata)
             if data.errors:
                 error = data.parametererror()
                 if error:
@@ -524,8 +526,9 @@ class CLAMClient:
         """Alias for ``addinputfile()``"""
         return self.addinputfile(project, inputtemplate,sourcefile, **kwargs)
 
-    def download(self, project, filename, targetfilename, loadmetadata=False):
+    def download(self, project, filename, targetfilename, loadmetadata=None):
         """Download an output file"""
+        if loadmetadata is None: loadmetadata = self.loadmetadata
         f = clam.common.data.CLAMOutputFile(self.url + project,  filename, loadmetadata, self)
         f.copy(targetfilename)
 
