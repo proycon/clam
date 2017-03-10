@@ -1953,7 +1953,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         printdebug('(Invoking converter)')
                         try:
                             success = converter.convertforinput(Project.path(project, user) + 'input/' + filename, metadata)
-                        except: #pylint: disable=bare-except 
+                        except: #pylint: disable=bare-except
                             success = False
                         if not success:
                             conversionerror = True
@@ -2044,7 +2044,10 @@ def foliaxsl():
 
 
 def styledata():
-    return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8').read()),'text/css')
+    if settings.STYLE[0] == '/':
+        return withheaders(flask.make_response(io.open(settings.STYLE,'r',encoding='utf-8').read()),'text/css')
+    else:
+        return withheaders(flask.make_response(io.open(settings.CLAMDIR + '/style/' + settings.STYLE + '.css','r',encoding='utf-8').read()),'text/css')
 
 
 def uploader(project, credentials=None):
