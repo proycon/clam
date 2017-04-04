@@ -16,7 +16,7 @@
     <div id="container">
 
         <xsl:choose>
-         <xsl:when test="@project">    	
+         <xsl:when test="@project">
     		<div id="tabs">
     			<ol>
                     <xsl:choose>
@@ -28,59 +28,59 @@
                     </xsl:otherwise>
                     </xsl:choose>
 				    <xsl:choose>
-				        <xsl:when test="status/@code = 0">  
+				        <xsl:when test="status/@code = 0">
 				         <li class="active">2. Input &amp; Parameters</li>
 				         <li class="disabled">3. Processing</li>
 				         <li class="disabled">4. Output &amp; Visualisation</li>
 				        </xsl:when>
-				        <xsl:when test="status/@code = 1">  
+				        <xsl:when test="status/@code = 1">
 				         <li class="disabled">2. Input &amp; Parameters</li>
 				         <li class="active">3. Processing</li>
 				         <li class="disabled">4. Output &amp; Visualisation</li>
 				        </xsl:when>
-				        <xsl:when test="status/@code = 2">  
+				        <xsl:when test="status/@code = 2">
 				         <li class="disabled">2. Input &amp; Parameters</li>
 				         <li class="disabled">3. Processing</li>
 				         <li class="active">4. Output &amp; Visualisation</li>
-				        </xsl:when>				        
-				    </xsl:choose>    				
-    				
+				        </xsl:when>
+				    </xsl:choose>
+
     			</ol>
-    		</div>        
+    		</div>
 
           <xsl:if test="/clam/@oauth_access_token != ''">
             <xsl:call-template name="logout"/>
           </xsl:if>
-            
+
             <xsl:choose>
-                <xsl:when test="status/@code = 0">  
+                <xsl:when test="status/@code = 0">
                     <xsl:if test="/clam/customhtml">
                         <div id="customhtml" class="box">
-                            <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/> 
+                            <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/>
                         </div>
                     </xsl:if>
                 </xsl:when>
-                <xsl:when test="status/@code = 2">  
+                <xsl:when test="status/@code = 2">
                     <xsl:if test="/clam/customhtml">
                         <div id="customhtml" class="box">
-                            <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/> 
+                            <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/>
                         </div>
                     </xsl:if>
                 </xsl:when>
             </xsl:choose>
-            
+
             <xsl:apply-templates select="status"/>
             <xsl:choose>
-              <xsl:when test="status/@code = 0">  
-                <div id="input" class="box">            
+              <xsl:when test="status/@code = 0">
+                <div id="input" class="box">
                  <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
-                 <xsl:apply-templates select="profiles"/> 
+                 <xsl:apply-templates select="profiles"/>
                 </div>
-                <xsl:apply-templates select="parameters"/>  
+                <xsl:apply-templates select="parameters"/>
               </xsl:when>
               <xsl:when test="status/@code = 2">
                 <div id="input" class="box">
-                    <button id="toggleinputfiles">Show input files</button>  
+                    <button id="toggleinputfiles">Show input files</button>
                     <div style="clear: both"></div>
                     <div id="inputfilesarea" style="display: none">
                         <xsl:apply-templates select="input"/>
@@ -93,7 +93,7 @@
          <xsl:otherwise>
              <xsl:call-template name="clamindex" />
          </xsl:otherwise>
-        </xsl:choose>    
+        </xsl:choose>
         <xsl:call-template name="footer" />
 
     </div>
@@ -106,7 +106,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <xsl:if test="status/@code = 1 and (contains(/clam/@interfaceoptions,'secureonly') or contains(/clam/@interfaceoptions,'simplepolling'))" >
-      <meta http-equiv="refresh" content="2" />            
+      <meta http-equiv="refresh" content="2" />
     </xsl:if>
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
@@ -117,19 +117,19 @@
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js" />
-    
+
     <script type="text/javascript" src="{/clam/@baseurl}/data.js" />
 
     <xsl:choose>
      <xsl:when test="contains(/clam/@interfaceoptions,'simplepolling')">
          <script type="text/javascript" src="{/clam/@baseurl}/static/ajaxupload.js" />
      </xsl:when>
-     <xsl:otherwise>    
+     <xsl:otherwise>
          <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.fineuploader-3.1.min.js" />
      </xsl:otherwise>
     </xsl:choose>
     <script type="text/javascript" src="{/clam/@baseurl}/static/clam.js" />
-    
+
     <script type="text/javascript">
         <xsl:if test="status/@code = 1">
                 stage = 1;
@@ -138,11 +138,11 @@
         <xsl:if test="status/@code = 0">
                 stage = 0;
         </xsl:if>
-        <xsl:if test="status/@code = 2">        
+        <xsl:if test="status/@code = 2">
                 stage = 2;
         </xsl:if>
         <xsl:if test="/clam/@project">
-                project = '<xsl:value-of select="/clam/@project" />';                
+                project = '<xsl:value-of select="/clam/@project" />';
         </xsl:if>
         <xsl:if test="/clam/@accesstoken">
         		accesstoken = '<xsl:value-of select="/clam/@accesstoken" />';
@@ -158,9 +158,9 @@
         		user = 'anonymous';
         </xsl:otherwise>
         </xsl:choose>
-        
+
         simplepolling = false;
-        simpleupload = false;               
+        simpleupload = false;
         preselectinputtemplate = false;
 		<xsl:if test="contains(/clam/@interfaceoptions,'secureonly')">
 			simplepolling = true;
@@ -168,13 +168,13 @@
 		</xsl:if>
 		<xsl:if test="contains(/clam/@interfaceoptions,'simplepolling')">
 			simplepolling = true;
-		</xsl:if>		
+		</xsl:if>
 		<xsl:if test="contains(/clam/@interfaceoptions,'simpleupload')">
 			simpleupload = true;
-		</xsl:if>				
+		</xsl:if>
 		<xsl:if test="contains(/clam/@interfaceoptions,'preselectinputtemplate')">
 			preselectinputtemplate = true;
-		</xsl:if>				
+		</xsl:if>
         $(document).ready(function() {
             if ( (typeof(initclam) == 'undefined') )  {
                 alert("Error loading clam.js . Try refreshing the page?");
@@ -182,15 +182,15 @@
                 initclam();
             }
         });
-		                
+
     </script>
-            
-    
+
+
   </head>
 </xsl:template>
 
 <xsl:template name="footer">
-<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel - 
+<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel -
     <a href="https://proycon.github.io/clam">https://proycon.github.io/clam</a>
     <br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a>
 
@@ -211,7 +211,7 @@
 
 <xsl:template match="/clam/status">
     <div id="status" class="box">
-     <h2>Status</h2> 
+     <h2>Status</h2>
      <xsl:choose>
       <xsl:when test="@code = 0">
         <div id="actions">
@@ -221,7 +221,7 @@
       		<div id="errorbox" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
-     	</xsl:if>       	
+     	</xsl:if>
         <div id="statusmessage" class="ready"><xsl:value-of select="@message"/></div>
 
       </xsl:when>
@@ -233,7 +233,7 @@
       		<div id="errorbox" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
-     	</xsl:if>        
+     	</xsl:if>
         <div id="statusmessage" class="running"><xsl:value-of select="@message"/></div>
         <xsl:choose>
          <xsl:when test="@completion > 0">
@@ -251,12 +251,12 @@
       <xsl:when test="@code = 2">
         <div id="actions">
             <input id="indexbutton" type="button" value="Done, return to project index" /><input id="deletebutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
-        </div>     
+        </div>
         <xsl:if test="@errors = 'yes'">
       		<div id="errorbox" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
-     	</xsl:if>    
+     	</xsl:if>
         <div id="statusmessage" class="done"><xsl:value-of select="@message"/></div>
         <xsl:call-template name="log" />
       </xsl:when>
@@ -264,16 +264,16 @@
         <div id="statusmessage" class="other"><xsl:value-of select="@message"/></div>
       </xsl:otherwise>
      </xsl:choose>
-     
+
     </div>
 </xsl:template>
 
-<xsl:template name="log">    
+<xsl:template name="log">
         <div id="statuslog">
             <table id="statuslogtable">
                 <xsl:apply-templates select="log" />
             </table>
-        </div>     
+        </div>
 </xsl:template>
 
 <xsl:template match="/clam/status/log">
@@ -282,11 +282,11 @@
 
 <xsl:template match="/clam/profiles">
         <div id="uploadarea">
-            
-            <xsl:if test="profile/input/InputTemplate/inputsource">
-            
+
+            <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
+
             <h3>Add already available resources</h3>
-            
+
             <div id="inputsourceupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
                     <select id="uploadinputsource">
@@ -301,17 +301,17 @@
                     </xsl:for-each>
                     </xsl:for-each>
                     </select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />            
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />
             </div>
             <div id="inputsourceprogress">
                 <strong>Gathering files... Please wait...</strong><br />
                 <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-            </div>            
-            
+            </div>
+
             </xsl:if>
-        
+
             <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
-            
+
             <div class="uploadform">
                 <h3>Upload a file from disk</h3>
                 <p>Use this to upload files from your computer to the system.</p>
@@ -320,28 +320,28 @@
                 <div id="clientupload">
                     <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates"></select><br />
                     <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file(s) you are about to upload:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><em>Select a type first</em></div>
-                    <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text> 
+                    <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text>
                     <xsl:choose>
                     <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
                     	<input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />
                     </xsl:when>
                     <xsl:otherwise>
                     	<div id="fineuploadarea"></div>
-                    </xsl:otherwise>                    
+                    </xsl:otherwise>
                     </xsl:choose>
                 </div>
                 <div id="uploadprogress">
                         <strong>Upload in progress... Please wait...</strong><br />
                         <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
                 </div>
-            
+
 
             </div>
-            
+
             </xsl:if>
 
             <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
-            
+
             <h3>Grab a file from the web</h3>
             <div id="urlupload">
                 <p>Retrieves an input file from another location on the web.</p>
@@ -350,22 +350,22 @@
                 <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" value="http://" /><br />
                 <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
             </div>
-            
+
             </xsl:if>
-            
+
             <div id="urluploadprogress">
                         <strong>Download in progress... Please wait...</strong><br />
                         <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-            </div>    
+            </div>
 
  			<xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
 
             <h3>Add input from browser</h3>
             <p>You can create and add new files on the spot from within your browser. Type your text, choose the desired input type, fill the necessary parameters and choose a filename. Press <em>"Add to files"</em> when all done.</p>
-            
-			<div id="editor">                            
+
+			<div id="editor">
                 <table>
-                 <tr><th><label for="editorcontents">Input text:</label></th><td><textarea id="editorcontents"></textarea></td></tr>                     
+                 <tr><th><label for="editorcontents">Input text:</label></th><td><textarea id="editorcontents"></textarea></td></tr>
                  <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
                   <select id="editorinputtemplate" class="inputtemplates"></select>
                  </td></tr>
@@ -376,17 +376,17 @@
                  <tr><th></th><td><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
                 </table>
             </div>
-            
+
             </xsl:if>
-            
+
         </div>
 </xsl:template>
 
 
 <xsl:template match="/clam/input">
         <h2>Input</h2>
-        
-        
+
+
         <!--
         <xsl:if test="/clam/inputsources/inputsource">
             <div id="corpusselection">
@@ -413,7 +413,7 @@
                 </tr>
             </thead>
             <tbody>
-                <xsl:apply-templates select="file" /> 
+                <xsl:apply-templates select="file" />
             </tbody>
         </table>
         </div>
@@ -463,7 +463,7 @@
 
 <xsl:template match="/clam/output/file">
     <tr>
-        
+
         <td class="file">
         <xsl:choose>
         <xsl:when test="./viewers/viewer[1]">
@@ -478,7 +478,7 @@
         <xsl:variable name="template" select="@template" />
         <td><xsl:value-of select="//OutputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="//OutputTemplate[@id = $template]/@format"/></td>
-        
+
         <td>
             <xsl:for-each select="./viewers/viewer">
                 <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
@@ -486,7 +486,7 @@
             <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
             <xsl:if test="@template">
                 <xsl:text> | </xsl:text>
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>                
+                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>
             </xsl:if>
         </td>
     </tr>
@@ -531,7 +531,7 @@
             </xsl:otherwise>
             </xsl:choose>
             <ul>
-              <xsl:apply-templates select="file"/>  
+              <xsl:apply-templates select="file"/>
             </ul>
         </div>
     </xsl:for-each>
@@ -543,16 +543,16 @@
 <xsl:template match="file">
     <xsl:choose>
     <xsl:when test="@validated = 'yes'">
-        <li class="ok"><tt><xsl:value-of select="@name" /></tt>: OK</li>    
+        <li class="ok"><tt><xsl:value-of select="@name" /></tt>: OK</li>
     </xsl:when>
     <xsl:otherwise>
-        <li class="failed"><tt><xsl:value-of select="@name" /></tt>: Failed</li>    
+        <li class="failed"><tt><xsl:value-of select="@name" /></tt>: Failed</li>
     </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
 
 <xsl:template name="clamindex">
-                
+
    		<div id="tabs">
 			<ol>
                 <xsl:choose>
@@ -567,8 +567,8 @@
 				<li class="disabled">3. Processing</li>
 				<li class="disabled">4. Output &amp; Visualisation</li>
 			</ol>
-		</div>   
-        
+		</div>
+
         <xsl:if test="/clam/@oauth_access_token != ''">
           <xsl:call-template name="logout"/>
         </xsl:if>
@@ -576,13 +576,13 @@
         <div id="description" class="box">
          <xsl:value-of select="description" />
         </div>
-        
+
         <xsl:if test="/clam/customhtml">
             <div id="customhtml" class="box">
-                <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" /> 
+                <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" />
             </div>
         </xsl:if>
-    
+
         <xsl:if test="count(/clam/actions/action) > 0">
             <div id="actionindex" class="box parameters">
                 <h2>Actions</h2>
@@ -611,7 +611,7 @@
 
         <xsl:if test="count(/clam/profiles/profile) > 0">
         <div id="startproject" class="box">
-            <h3>Start a new Project</h3>    
+            <h3>Start a new Project</h3>
             	<p>A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
                 Project ID: <input id="projectname" type="projectname" value="" />
                 <input id="startprojectbutton" type="button" value="Create project" />
