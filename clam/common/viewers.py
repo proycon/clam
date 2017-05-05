@@ -201,13 +201,13 @@ class FLATViewer(AbstractViewer):
         #filename will contain a random component to prevent clashes
         filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
         r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))], data={'configuration':self.configuration,'mode':self.mode})
-        #FLAT redirects after upload, we catch the redirect rather than following it automatically following it, and return it ourselves as our redirect
-        if 'Location' in r.headers:
+        #FLAT redirects after upload, we catch the redirect rather than following it automatically, and return it ourselves as our redirect
+        if r.status_code == 302 and 'Location' in r.headers:
             if self.url and self.url[-1] == '/' and r.headers['Location'][0] == '/':
                 url = self.url[:-1] + r.headers['Location']
             else:
                 url = self.url + r.headers['Location']
             return flask.redirect(url)
         else:
-            return "Invalid response from FLAT"
+            return "Unexpected response from FLAT (HTTP " + str(r.status_code) + "): " + r.text
 
