@@ -103,14 +103,22 @@ def xmlescape(s):
 
 
 
-def withheaders(response, contenttype="text/xml; charset=UTF-8", extra=None):
-    if extra is None: extra = {}
+def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
+    if headers is None: headers = {}
     response.headers['Content-Type'] = contenttype
     try:
-        for key, value in extra.items():
+        for key, value in headers.items():
+            if key == 'allow_origin':
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE'
+                response.headers['Access-Control-Allow-Headers'] = 'Authorization'
+                key = 'Access-Control-Allow-Origin'
             response.headers[key] = value
     except AttributeError: #no dictionary? could be generator/list of tuples
-        for key, value in extra:
+        for key, value in headers:
+            if key == 'allow_origin':
+                response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE'
+                response.headers['Access-Control-Allow-Headers'] = 'Authorization'
+                key = 'Access-Control-Allow-Origin'
             response.headers[key] = value
     return response
 

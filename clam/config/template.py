@@ -111,6 +111,9 @@ MINDISKSPACE = 10
 #The secret key is used internally for cryptographically signing session data, in production environments, you'll want to set this to a persistent value. If not set it will be randomly generated.
 #SECRET_KEY = 'mysecret'
 
+#Allow Asynchronous HTTP requests from **web browsers** in following domains (sets Access-Control-Allow-Origin HTTP headers), by default this is unrestricted
+#ALLOW_ORIGIN = "*"
+
 # ======== WEB-APPLICATION STYLING =============
 
 #Choose a style (has to be defined as a CSS file in clam/style/ ). You can copy, rename and adapt it to make your own style
