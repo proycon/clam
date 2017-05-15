@@ -4,11 +4,18 @@ python:
     - "2.7"
     - "3.3"
     - "3.4"
+notifications:
+  irc:
+    channels:
+      - "irc.uvt.nl#gitlama"
+    template:
+      - "%{repository_slug}#%{build_number} %{message} --> %{build_url}"
+    skip_join: true
 addons:
   apt:
     packages:
      - zip
-install: 
+install:
     - pip install -r requirements.txt
     - python setup.py install
 script:  bash clam/tests/test.sh
