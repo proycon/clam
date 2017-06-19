@@ -194,15 +194,15 @@ class Login(object):
         try:
             code = flask.request.values['code']
         except KeyError:
-            return flask.make_response('No code passed',403)
+            return withheaders(flask.make_response('No code passed',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         try:
             state = flask.request.values['state']
         except KeyError:
-            return flask.make_response('No state passed',403)
+            return withheaders(flask.make_response('No state passed',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=getrooturl() + '/login?code='+ code + '&state=' + state )
         if not 'access_token' in d:
-            return flask.make_response('No access token received from authorization provider',403)
+            return withheaders(flask.make_response('No access token received from authorization provider',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, system_version=settings.SYSTEM_VERSION, system_email=settings.SYSTEM_EMAIL, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))), headers={'allow-origin': settings.ALLOW_ORIGIN} )
 
@@ -218,16 +218,16 @@ class Logout(object):
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.OAUTH_REVOKE_URL:
-            return flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
+            return withheaders(flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
             if response.status_code >= 200 and response.status_code < 300:
-                return "Logout successful, have a nice day"
+                return withheaders(flask.make_response("Logout successful, have a nice day",200),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403)
+                return withheaders(flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        return "Logout successful, have a nice day"
+        return withheaders(flask.make_response("Logout successful, have a nice day",200),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 
 
@@ -242,7 +242,7 @@ def parsecredentials(credentials):
         user = 'anonymous'
 
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
-        return flask.make_response("Username invalid",403)
+        return withheaders(flask.make_response("Username invalid",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
     return user, oauth_access_token
 
 
@@ -300,9 +300,9 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
                 return True #signals start to do a redirect itself after starting (otherwise GET parameters stick on subsequent reloads)
 
         if oauth_access_token:
-            return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+            return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return flask.redirect(getrooturl() + '/' + project)
+            return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     return None
 
@@ -437,7 +437,7 @@ def info(credentials=None):
             customhtml=settings.CUSTOMHTML_INDEX,
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token)
-    )))
+    )), headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 class Admin:
     @staticmethod
@@ -535,7 +535,7 @@ class Admin:
             except:
                 raise flask.abort(404)
         else:
-            return flask.make_response('Invalid type',403)
+            return withheaders(flask.make_response('Invalid type',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if outputfile.metadata:
             headers = outputfile.metadata.httpheaders()
@@ -869,7 +869,7 @@ class Project:
 
     #main view
     @staticmethod
-    def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token="", matchedprofiles=None, program=None):
+    def response(user, project, parameters, errormsg = "", datafile = False, oauth_access_token="", matchedprofiles=None, program=None,http_code=200):
         #check if there are invalid parameters:
         if not errormsg:
             errors = "no"
@@ -940,7 +940,7 @@ class Project:
                 customhtml=customhtml,
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token)
-        )), headers={'allow_origin':settings.ALLOW_ORIGIN})
+        ),http_code), headers={'allow_origin':settings.ALLOW_ORIGIN})
 
 
     @staticmethod
@@ -963,7 +963,7 @@ class Project:
         """Main Get method: Get project state, parameters, outputindex"""
         user, oauth_access_token = parsecredentials(credentials)
         if not Project.exists(project, user):
-            return flask.make_response("Project " + project + " was not found for user " + user,404) #404
+            return withheaders(flask.make_response("Project " + project + " was not found for user " + user,404) ,headers={'allow_origin': settings.ALLOW_ORIGIN})#404
         else:
             #if user and not Project.access(project, user) and not user in settings.ADMINS:
             #    return flask.make_response("Access denied to project " +  project + " for user " + user, 401) #401
@@ -1025,7 +1025,7 @@ class Project:
         sufresources, resmsg = sufficientresources()
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
-            return flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503)
+            return withheaders(flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503),headers={'allow_origin': settings.ALLOW_ORIGIN})
         if not errors: #We don't even bother running the profiler if there are errors
             matchedprofiles, program = clam.common.data.profiler(settings.PROFILES, Project.path(project, user), parameters, settings.SYSTEM_ID, settings.SYSTEM_NAME, getrooturl(), printdebug)
             #converted matched profiles to a list of indices
@@ -1037,10 +1037,10 @@ class Project:
         if errors:
             #There are parameter errors, return 403 response with errors marked
             printlog("There are parameter errors, not starting.")
-            return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token),403, {'Content-Type':'application/xml','Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'} )
+            return Project.response(user, project, parameters,"",False,oauth_access_token, http_code=403)
         elif not matchedprofiles:
             printlog("No profiles matching, not starting.")
-            return flask.make_response(Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token),403, {'Content-Type':'application/xml', 'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'} )
+            return Project.response(user, project, parameters, "No profiles matching input and parameters, unable to start. Are you sure you added all necessary input files and set all necessary parameters?", False, oauth_access_token,http_code=403)
         else:
             #everything good, write clam.xml output file and start
             with io.open(Project.path(project, user) + "clam.xml",'wb') as f:
@@ -1107,9 +1107,9 @@ class Project:
                         return flask.redirect(getrooturl() + '/' + project)
                 else:
                     #normal response (202)
-                    return flask.make_response(Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program),202) #returns 202 - Accepted
+                    return Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program,http_code=202) #returns 202 - Accepted
             else:
-                return flask.make_response("Unable to launch process",500)
+                return withheaders(flask.make_response("Unable to launch process",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     @staticmethod
     def delete(project, credentials=None):
@@ -1180,7 +1180,7 @@ class Project:
                 if outputfile.metadata:
                     return withheaders(flask.make_response(outputfile.metadata.xml()) ,  headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
-                    return flask.make_response("No metadata found!",404)
+                    return withheaders(flask.make_response("No metadata found!",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
                 #attach viewer data (also attaches converters!
                 outputfile.attachviewers(settings.PROFILES)
@@ -1194,7 +1194,7 @@ class Project:
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
                     else:
-                        return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  {'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
+                        return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                 else:
                     #Check for converters
                     for c in outputfile.converters:
@@ -1498,7 +1498,7 @@ class Project:
                 else:
                     assert False
             else:
-                return flask.make_response("No filename or inputsource specified",403)
+                return withheaders(flask.make_response("No filename or inputsource specified",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
             #Simply forward to addfile
             return addfile(project,filename,user, postdata)
@@ -1513,7 +1513,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         if returntype == 'json':
             return withheaders(flask.make_response("{success: false, error: '" + msg + "'}"),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return flask.make_response(msg,403) #(it will have to be explicitly deleted by the client first)
+            return withheaders(flask.make_response(msg,403),headers={'allow_origin': settings.ALLOW_ORIGIN}) #(it will have to be explicitly deleted by the client first)
 
     inputtemplate_id = flask.request.headers.get('Inputtemplate','')
     inputtemplate = None
@@ -1534,7 +1534,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         if not inputtemplate:
             #Inputtemplate not found, send 404
             printlog("Specified inputtemplate (" + inputtemplate_id + ") not found!")
-            return flask.make_response("Specified inputtemplate (" + inputtemplate_id + ") not found!",404)
+            return withheaders(flask.make_response("Specified inputtemplate (" + inputtemplate_id + ") not found!",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
         printdebug('Inputtemplate explicitly provided: ' + inputtemplate.id )
     if not inputtemplate:
         #See if an inputtemplate is explicitly specified in the filename
@@ -1717,7 +1717,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     parameters = []
                     validmeta = False
             else:
-                flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
+                return flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
     else:
         errors, parameters = inputtemplate.validate(postdata, user)
         validmeta = True #will be checked later
@@ -1794,7 +1794,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             try:
                 process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             except: #pylint: disable=bare-except
-                flask.make_response("Unable to extract archive",500)
+                return flask.make_response("Unable to extract archive",500)
             out, _ = process.communicate() #waits for process to end
 
             if sys.version < '3':
@@ -2014,7 +2014,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
             return withheaders(flask.make_response(json.dumps(jsonoutput)), 'application/json', {'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return flask.make_response(output,403)
+            return withheaders(flask.make_response(output,403),headers={'allow_origin': settings.ALLOW_ORIGIN})
     elif returntype == 'xml': #success
         printdebug('Returning xml')
         return withheaders(flask.make_response(output), 'text/xml', {'allow_origin': settings.ALLOW_ORIGIN})
@@ -2148,7 +2148,7 @@ class ActionHandler(object):
                             if flag: parameters += flag + " "
                             parameters += clam.common.data.shellsafe(value,'"')
                     except ValueError as e:
-                        return flask.make_response("Parameter " + paramid + " has an invalid value...",403)
+                        return withheaders(flask.make_response("Parameter " + paramid + " has an invalid value...",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             if action.tmpdir is True or cmd.find('$TMPDIRECTORY') != -1:
                 tmpdir = os.path.join(settings.SESSIONDIR, 'atmp.' + str("%034x" % random.getrandbits(128)))
@@ -2224,9 +2224,9 @@ class ActionHandler(object):
                 elif process.returncode in action.returncodes404:
                     return withheaders(flask.make_response(stdoutdata, 404), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
                 else:
-                    return flask.make_response("Process for action " +  actionid + " failed\n" + stderrdata,500)
+                    return withheaders(flask.make_response("Process for action " +  actionid + " failed\n" + stderrdata,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return flask.make_response("Unable to launch process",500)
+                return withheaders(flask.make_response("Unable to launch process",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
         elif action.function:
             actionargs = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
             try:
