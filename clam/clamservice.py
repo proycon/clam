@@ -505,18 +505,18 @@ class Admin:
         elif command == 'abort':
             p = Project()
             if p.abort(project, targetuser):
-                return "Ok"
+                return withheaders(flask.make_response("Ok"),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return flask.make_response('Failed',403)
+                return withheaders(flask.make_response('Failed',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         elif command == 'delete':
             d = Project.path(project, targetuser)
             if os.path.isdir(d):
                 shutil.rmtree(d)
-                return "Ok"
+                return withheaders(flask.make_response("Ok"),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return flask.make_response('Not Found',403)
+                return withheaders(flask.make_response('Not Found',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return flask.make_response('No such command: ' + command,403)
+            return withheaders(flask.make_response('No such command: ' + command,403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     @staticmethod
     def downloader(targetuser, project, type, filename, credentials=None):
@@ -547,7 +547,7 @@ class Admin:
         try:
             return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
         except UnicodeError:
-            return flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
+            return withheaders(flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
         except FileNotFoundError:
             raise flask.abort(404)
         except IOError:
@@ -616,15 +616,15 @@ class Project:
 
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not Project.validate(project):
-            return flask.make_response('Invalid project ID. Note that only alphanumerical characters are allowed.',403)
+            return withheaders(flask.make_response('Invalid project ID. Note that only alphanumerical characters are allowed.',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         printdebug("Checking if " + settings.ROOT + "projects/" + user + '/' + project + " exists")
         if not project:
-            return flask.make_response('No project name',403)
+            return withheaders(flask.make_response('No project name',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         if not os.path.isdir(settings.ROOT + "projects/" + user):
             printlog("Creating user directory '" + user + "'")
             os.makedirs(settings.ROOT + "projects/" + user)
             if not os.path.isdir(settings.ROOT + "projects/" + user): #verify:
-                return flask.make_response("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully",403)
+                return withheaders(flask.make_response("Directory " + settings.ROOT + "projects/" + user + " could not be created succesfully",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 
         #checking user quota
@@ -632,7 +632,7 @@ class Project:
             _, totalsize = getprojects(user)
             if totalsize > settings.USERQUOTA:
                 printlog("User " + user + " exceeded quota, refusing to create new project...")
-                return flask.make_response("Unable to create new project because you are exceeding your disk quota (max " + str(settings.USERQUOTA) + " MB, you now use " + str(totalsize) + " MB). Please delete some projects and try again.",403)
+                return withheaders(flask.make_response("Unable to create new project because you are exceeding your disk quota (max " + str(settings.USERQUOTA) + " MB, you now use " + str(totalsize) + " MB). Please delete some projects and try again.",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project):
             printlog("Creating project '" + project + "'")
@@ -645,15 +645,15 @@ class Project:
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/input")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input'):
-                return flask.make_response("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully",403)
+                return withheaders(flask.make_response("Input directory " + settings.ROOT + "projects/" + user + '/' + project + "/input/  could not be created succesfully",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/output")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/output'):
-                return flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403)
+                return withheaders(flask.make_response("Output directory " + settings.ROOT + "projects/" + user + '/' + project + "/output/  could not be created succesfully",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/tmp")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp'):
-                return flask.make_response("tmp directory " + settings.ROOT + "projects/" + user + '/' + project + "/tmp/  could not be created succesfully",403)
+                return withheaders(flask.make_response("tmp directory " + settings.ROOT + "projects/" + user + '/' + project + "/tmp/  could not be created succesfully",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         return None #checks rely on this
 
@@ -1120,7 +1120,7 @@ class Project:
             abortonly = False
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not Project.exists(project, user):
-            return flask.make_response("No such project: " + project + " for user " + user,404)
+            return withheaders(flask.make_response("No such project: " + project + " for user " + user,404),headers={'allow_origin': settings.ALLOW_ORIGIN})
         statuscode, _, _, _  = Project.status(project, user)
         msg = ""
         if statuscode == clam.common.status.RUNNING:
@@ -1203,7 +1203,7 @@ class Project:
                     if converter:
                         return withheaders( flask.Response( ( line for line in converter.convertforoutput(outputfile) ),200), headers={'allow_origin': settings.ALLOW_ORIGIN}  )
                     else:
-                        return flask.make_response("No such viewer or converter:" + requestid,404)
+                        return withheaders(flask.make_response("No such viewer or converter:" + requestid,404),headers={'allow_origin': settings.ALLOW_ORIGIN})
         elif not requestarchive:
             #normal request - return file contents
 
@@ -1288,7 +1288,7 @@ class Project:
         """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
-            return flask.make_response('Another compression is already running',403)
+            return withheaders(flask.make_response('Another compression is already running',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
             if not format:
                 data = flask.request.values
@@ -1322,7 +1322,7 @@ class Project:
                 if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
                     os.unlink(Project.path(project, user) + "output/" + project + ".zip")
             else:
-                return flask.make_response('Invalid archive format',403) #TODO: message won't show
+                return withheaders(flask.make_response('Invalid archive format',403) ,headers={'allow_origin': settings.ALLOW_ORIGIN})#TODO: message won't show
 
             path = Project.path(project, user) + "output/" + project + "." + format
 
@@ -1333,7 +1333,7 @@ class Project:
                 printdebug(Project.path(project, user)+'output/')
                 process = subprocess.Popen(cmd, cwd=Project.path(project, user)+'output/', shell=True)
                 if not process:
-                    flask.make_response("Unable to make download package",500)
+                    return withheaders(flask.make_response("Unable to make download package",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     pid = process.pid
                     f = open(Project.path(project, user) + '.download','w')
@@ -1357,7 +1357,7 @@ class Project:
 
         if filename.strip('/') == "":
             #this is a request for the index
-            return flask.make_response("Permission denied",403)
+            return withheaders(flask.make_response("Permission denied",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
         elif filename in ("folia.xsl","folia2html.xsl"):
             return foliaxsl()
         elif len(raw) >= 2:
@@ -1376,7 +1376,7 @@ class Project:
                 if inputfile.metadata:
                     return withheaders(flask.make_response(inputfile.metadata.xml()), headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
-                    return flask.make_response("No metadata found!",404)
+                    return withheaders(flask.make_response("No metadata found!",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
                 raise flask.abort(404)
         else:
@@ -1399,7 +1399,7 @@ class Project:
                 printdebug("Returning input file " + str(inputfile) + " with mimetype " + mimetype)
                 return withheaders(flask.Response( (line for line in inputfile) ), mimetype, headers )
             except UnicodeError:
-                return flask.make_response("Input file " + str(inputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500)
+                return withheaders(flask.make_response("Input file " + str(inputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             except FileNotFoundError:
                 raise flask.abort(404)
             except IOError:
@@ -1469,14 +1469,14 @@ class Project:
                         if s.id == postdata['inputsource']:
                             inputsource = s
                 if not inputsource:
-                    return flask.make_response("No such inputsource exists",403)
+                    return withheaders(flask.make_response("No such inputsource exists",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 if not inputtemplate:
                     for profile in settings.PROFILES:
                         for t in profile.input:
                             if inputsource.inputtemplate == t.id:
                                 inputtemplate = t
                 if inputtemplate is None:
-                    return flask.make_response("No input template found for inputsource",500)
+                    return withheaders(flask.make_response("No input template found for inputsource",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 if inputsource.isfile():
                     if inputtemplate.filename:
                         filename = inputtemplate.filename
@@ -1717,7 +1717,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     parameters = []
                     validmeta = False
             else:
-                return flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500)
+                return withheaders(flask.make_response("No metadata found nor specified for inputsource " + inputsource.id ,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
     else:
         errors, parameters = inputtemplate.validate(postdata, user)
         validmeta = True #will be checked later
@@ -1794,7 +1794,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             try:
                 process = subprocess.Popen(cmd + " " + archive, cwd=Project.path(project,user), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             except: #pylint: disable=bare-except
-                return flask.make_response("Unable to extract archive",500)
+                return withheaders(flask.make_response("Unable to extract archive",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             out, _ = process.communicate() #waits for process to end
 
             if sys.version < '3':
@@ -2047,7 +2047,7 @@ def foliaxsl():
     if foliatools is not None:
         return withheaders(flask.make_response(io.open(foliatools.__path__[0] + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl', {'allow_origin': settings.ALLOW_ORIGIN})
     else:
-        return flask.make_response("folia.xsl is not available, no FoLiA Tools installed on this server",404)
+        return withheaders(flask.make_response("folia.xsl is not available, no FoLiA Tools installed on this server",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 
 def styledata():
@@ -2117,7 +2117,7 @@ class ActionHandler(object):
             printdebug("Looking for action " + actionid)
             action = ActionHandler.find_action(actionid, 'GET')
         except:
-            return flask.make_response("Action does not exist",404)
+            return withheaders(flask.make_response("Action does not exist",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         printdebug("Performing action " + action.id)
 
@@ -2131,7 +2131,7 @@ class ActionHandler(object):
             try:
                 collectedparams =ActionHandler.collect_parameters(action)
             except clam.common.data.ParameterError as e:
-                return flask.make_response(str(e),403)
+                return withheaders(flask.make_response(str(e),403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             for flag, value, paramid in collectedparams:
                 if sys.version[0] == '2':
@@ -2167,7 +2167,7 @@ class ActionHandler(object):
                 try:
                     os.mkdir(tmpdir)
                 except: #pylint: disable=bare-except
-                    return flask.make_response("Unable to create temporary action directory",500)
+                    return withheaders(flask.make_response("Unable to create temporary action directory",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             cmd = cmd.replace('$PARAMETERS', parameters)
             if tmpdir:
@@ -2235,7 +2235,7 @@ class ActionHandler(object):
                 if isinstance(e, werkzeug.exceptions.HTTPException):
                     raise
                 else:
-                    return flask.make_response(e,500)
+                    return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             if not isinstance(r, (flask.Response, werkzeug.wrappers.Response)):
                 if sys.version >= '3':
                     return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
