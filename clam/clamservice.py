@@ -1012,9 +1012,9 @@ class Project:
         statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
             if oauth_access_token:
-                return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+                return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return flask.redirect(getrooturl() + '/' + project)
+                return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
@@ -1102,9 +1102,9 @@ class Project:
                 if shortcutresponse is True:
                     #redirect to project page to lose parameters in URL
                     if oauth_access_token:
-                        return flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token)
+                        return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
                     else:
-                        return flask.redirect(getrooturl() + '/' + project)
+                        return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     #normal response (202)
                     return Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program,http_code=202) #returns 202 - Accepted
