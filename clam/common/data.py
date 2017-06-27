@@ -35,7 +35,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '2.1.13'
+VERSION = '2.1.14'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')

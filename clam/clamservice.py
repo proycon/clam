@@ -538,7 +538,7 @@ class Admin:
             return withheaders(flask.make_response('Invalid type',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if outputfile.metadata:
-            headers = outputfile.metadata.httpheaders()
+            headers = dict(list(outputfile.metadata.httpheaders()))
             mimetype = outputfile.metadata.mimetype
         else:
             headers = {}
@@ -1212,7 +1212,7 @@ class Project:
                 raise flask.abort(404)
 
             if outputfile.metadata:
-                headers = outputfile.metadata.httpheaders()
+                headers = dict(list(outputfile.metadata.httpheaders()))
                 mimetype = outputfile.metadata.mimetype
                 printdebug("No metadata found for output file " + str(outputfile))
             else:
@@ -1223,8 +1223,8 @@ class Project:
                     #guess mimetype
                     mimetype = mimetypes.guess_type(str(outputfile))[0]
                 if not mimetype: mimetype = 'application/octet-stream'
-            printdebug("Returning output file " + str(outputfile) + " with mimetype " + mimetype)
             headers['allow_origin'] = settings.ALLOW_ORIGIN
+            printdebug("Returning output file " + str(outputfile) + " with mimetype " + mimetype)
             try:
                 return withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
             except UnicodeError:
@@ -1387,7 +1387,7 @@ class Project:
                 raise flask.abort(404)
 
             if inputfile.metadata:
-                headers = inputfile.metadata.httpheaders()
+                headers = dict(list(inputfile.metadata.httpheaders()))
                 mimetype = inputfile.metadata.mimetype
             else:
                 printdebug("No metadata found for input file " + str(inputfile))
