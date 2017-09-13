@@ -279,11 +279,11 @@ class ForwardedAuth(HTTPAuth):
         raise KeyError
 
 class MultiAuth(object):
-    def __init__(self, main_auth, *args,printdebug=False):
+    def __init__(self, main_auth, *args,**kwargs):
         self.main_auth = main_auth
         self.additional_auth = args
-        if printdebug:
-            self.printdebug = printdebug
+        if 'printdebug' in kwargs:
+            self.printdebug = kwargs['printdebug']
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.printdebug("Initialized multiple authenticators: " + repr(self.main_auth) + "," + repr(self.additional_auth))
