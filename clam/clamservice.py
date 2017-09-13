@@ -2385,21 +2385,23 @@ class CLAMService(object):
                 error(msg)
 
         if settings.OAUTH:
-            warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=settings.OAUTH_SCOPE)
         elif settings.USERS:
+            digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
-                warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+                self.auth = clam.common.auth.MultiAuth(clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug), digest_auth) #pylint: disable=redefined-variable-type
+                if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+                self.auth = digest_auth
         elif settings.USERS_MYSQL:
             validate_users_mysql()
+            digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
-                warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+                self.auth = clam.common.auth.MultiAuth(clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug), digest_auth) #pylint: disable=redefined-variable-type
+                if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
-                self.auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+                self.auth = digest_auth
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER) #pylint: disable=redefined-variable-type
@@ -2519,8 +2521,6 @@ def set_defaults():
         settings.USERS = None
     if not 'ADMINS' in settingkeys:
         settings.ADMINS = []
-    if not 'BASICAUTH' in settingkeys:
-        settings.BASICAUTH = False #default is HTTP Digest
     if not 'LISTPROJECTS' in settingkeys:
         settings.LISTPROJECTS = True
     if not 'ALLOWSHARE' in settingkeys: #TODO: all these are not implemented yet
@@ -2658,6 +2658,13 @@ def set_defaults():
     if not 'ALLOW_ORIGIN' in settingkeys:
         settings.ALLOW_ORIGIN = '*'
 
+    if not 'ASSUMESSL' in settingkeys:
+        settings.ASSUMESSL = settings.PORT == 443
+
+    if not 'BASICAUTH' in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+        settings.BASICAUTH = True #Allowing HTTP Basic ALONGSIDE HTTP Digest
+    elif not 'BASICAUTH' in settingkeys:
+        settings.BASICAUTH = False #default is HTTP Digest
 
 def test_dirs():
     if not os.path.isdir(settings.ROOT):
@@ -2727,6 +2734,7 @@ def main():
     settingsmodule = None
     PORT = HOST = FORCEURL = None
     PYTHONPATH = None
+    ASSUMESSL = False
 
     parser = argparse.ArgumentParser(description="Start a CLAM webservice; turns command-line tools into RESTful webservice, including a web-interface for human end-users.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-d','--debug',help="Enable debug mode", action='store_true', required=False)
@@ -2734,6 +2742,7 @@ def main():
     parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
+    parser.add_argument('-b','--basicauth', help="Default to HTTP Basic Authentication on the development server (do not expose to the world without SSL)", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('settingsmodule', type=str, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
     args = parser.parse_args()
@@ -2751,6 +2760,8 @@ def main():
         FORCEURL = args.forceurl
     if 'pythonpath' in args:
         PYTHONPATH = args.pythonpath
+    if 'basicauth' in args:
+        ASSUMESSL = True
 
     settingsmodule = args.settingsmodule
 
@@ -2783,6 +2794,9 @@ def main():
         settings.FORCEURL = FORCEURL
     if PORT:
         settings.PORT = PORT
+    if ASSUMESSL:
+        settings.ASSUMESSL = ASSUMESSL
+        settings.BASICAUTH = True
 
     if settings.URLPREFIX:
         settings.STANDALONEURLPREFIX = settings.URLPREFIX

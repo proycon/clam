@@ -117,7 +117,7 @@ The most notable features of CLAM are:
 \item \textbf{Extensible} -- \emph{Due to a modular setup, CLAM is quite extensible}
 \item \textbf{Client and Data API} -- \emph{A rich Python API for writing CLAM Clients and system wrappers}
 \item \textbf{Authentication} -- \emph{A user-based authentication mechanism
-  through HTTP Digest is provided. Morever, OAuth2 is also supported for delegating
+  through HTTP Digest and/or HTTP Basic is provided. Morever, OAuth2 is also supported for delegating
   authentication}
 \item \textbf{Metadata and provenance data} -- \emph{Extensive support for metadata and provenance data is offered}
 \item \textbf{Automatic converters} -- \emph{Automatic converters enable conversion from an auxiliary format into the desired input format, and conversion from the produced output format into an auxiliary output format}
@@ -469,7 +469,7 @@ installed and where the \path{static} directory is found, this depends on your
 installation and versions and is subject to change on an upgrade.
 
 \item It is always recommended to add some form of authentication or more restrictive
-access. You can either let CLAM handle authentication (\emph{HTTP Digest
+access. You can either let CLAM handle authentication (\emph{HTTP Basic or Digest
 Authentication} or \emph{OAuth2}), or you can let Apache itself handle
 authentication and not use CLAM's authentication mechanism.
 \item Restart Apache
@@ -527,7 +527,7 @@ installation and versions and is subject to change on an upgrade.
 
 
 \item It is always recommended to add some form of authentication or more restrictive
-access. You can either let CLAM handle authentication (\emph{HTTP Digest
+access. You can either let CLAM handle authentication (\emph{HTTP Basic or Digest
 Authentication} or \emph{OAuth2}), in which case you need to set \texttt{WSGIPassAuthorization
 On}, as by default it is disabled, or you can let Apache itself handle
 authentication and not use CLAM's authentication mechanism.
@@ -536,7 +536,7 @@ authentication and not use CLAM's authentication mechanism.
 
 Note that we run WSGI in Daemon mode using the \texttt{WSGIDaemonProcess} and
 \texttt{WSGIProcessGroup} directives, as opposed to embedded mode. This is the
-recommended way of running CLAM, and is even mandatory when using HTTP Digest
+recommended way of running CLAM, and is even mandatory when using HTTP Basic/Digest
 Authentication. Whenever any code changes are made, simply
 \texttt{touch} the WSGI file (updating its modification time), and the changes
 will be immediately available. Embedded mode would require an apache restart
@@ -842,12 +842,20 @@ will never, offer any means to adjust service configuration options.
 
 \subsection{User Authentication}
 
-Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM
-implements HTTP Digest Authentication \cite{HTTPAUTH} and OAuth2 \cite{OAUTH2}. HTTP Digest
-Authentication, contrary to HTTP Basic Authentication, computes a hash of the
-username and password client-side and transmits that hash, rather than a
-plaintext password. User passwords are therefore only available to CLAM in
-hashed form. User authentication is not mandatory, but for any world-accessible
+Being a RESTful webservice, user authentication proceeds over HTTP itself. CLAM implements HTTP Basic Authentication,
+HTTP Digest Authentication \cite{HTTPAUTH} and OAuth2 \cite{OAUTH2}. HTTP Digest Authentication, contrary to HTTP Basic
+Authentication, computes a hash of the username and password client-side and transmits that hash, rather than a
+plaintext password. User passwords are therefore only available to CLAM in hashed form and are not transmitted
+unencrypted, even over a HTTP connection. HTTP Basic Authentication, conversely, should only be use over SSL (i.e.
+HTTPS), and CLAM will by default disallow it if it thinks it's not running on an SSL connection.
+
+CLAM itself does not provide SSL on the built-in development server as this is delegated to your production webserver
+(Apache or Nginx) instead. If you are using SSL but CLAM does not detect it, you can set \texttt{ASSUMESSL = True}. In
+this case HTTP Basic Authentication will be the default authentication mechanism since CLAM 2.2, but HTTP Digest
+Authentication is accepted too. If you're not on an SSL connection, CLAM will default to HTTP Digest Authentication
+only and disallow HTTP Basic Authentication.
+
+User authentication is not mandatory, but for any world-accessible
 environment it is most strongly recommended, for obvious security reasons.
 
 A list of user accounts and passwords can be defined in \texttt{USERS} in the

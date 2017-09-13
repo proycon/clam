@@ -21,6 +21,7 @@ import time
 import flask
 
 import clam.common.oauth
+from clam.common.digestauth import pwhash
 
 try:
     from requests_oauthlib import OAuth2Session
@@ -73,8 +74,10 @@ class HTTPAuth(object):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            self.printdebug("Handling HTTP Authentication (Basic/Digest)")
+            self.printdebug("Handling HTTP " + self.scheme + " Authentication")
             auth = flask.request.authorization
+
+
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
@@ -109,43 +112,32 @@ class HTTPAuth(object):
 
 
 class HTTPBasicAuth(HTTPAuth):
+
     def __init__(self, **kwargs):
         super(HTTPBasicAuth, self).__init__(**kwargs)
         if 'realm' in kwargs:
             self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
-        self.hash_password(None)
-        self.verify_password(None)
+        self.printdebug("Initialising Basic Authentication with realm " + self.realm)
+        self.scheme = "Basic"
 
-    def hash_password(self, f):
-        self.hash_password_callback = f
-        return f
-
-    def verify_password(self, f):
-        self.verify_password_callback = f
-        return f
-
+    def authenticate_header(self):
+        return 'Basic realm="{0}"'.format(self.realm)
 
     def authenticate(self, auth, stored_password):
-        client_password = auth.password
-        if self.verify_password_callback:
-            return self.verify_password_callback(auth.username, client_password)
-        if self.hash_password_callback:
-            try:
-                client_password = self.hash_password_callback(client_password)
-            except TypeError:
-                client_password = self.hash_password_callback(auth.username, client_password)
-        return client_password == stored_password
+        return pwhash(auth.username, self.realm, auth.password) == stored_password
 
 
 class HTTPDigestAuth(HTTPAuth):
+
     def __init__(self, noncedir, **kwargs):
         super(HTTPDigestAuth, self).__init__(**kwargs)
         if 'realm' in kwargs:
             self.realm = kwargs['realm']
         else:
             self.realm = "Default realm"
+        self.scheme = "Digest"
 
 
         if 'nonceexpiration' in kwargs:
@@ -285,6 +277,48 @@ class ForwardedAuth(HTTPAuth):
             if h in flask.request.headers:
                 return flask.request.headers[h]
         raise KeyError
+
+class MultiAuth(object):
+    def __init__(self, main_auth, *args,printdebug=False):
+        self.main_auth = main_auth
+        self.additional_auth = args
+        if printdebug:
+            self.printdebug = printdebug
+        else:
+            self.printdebug = lambda x: print(x,file=sys.stderr)
+        self.printdebug("Initialized multiple authenticators: " + repr(self.main_auth) + "," + repr(self.additional_auth))
+
+    def require_login(self, f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            self.printdebug("Handling Multiple Authenticators")
+            selected_auth = None
+            if 'Authorization' in flask.request.headers:
+                try:
+                    scheme, creds = flask.request.headers['Authorization'].split( None, 1)
+                    self.printdebug("Requested scheme = " + scheme)
+                except ValueError:
+                    # malformed Authorization header
+                    self.printdebug("Malformed authorization header")
+                    pass
+                else:
+                    for auth in self.additional_auth:
+                        if auth.scheme == scheme:
+                            selected_auth = auth
+                            break
+            else:
+                self.printdebug("No authorization header passed")
+                res = flask.make_response("Authorization required")
+                res.status_code = 401
+                res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                for auth in self.additional_auth:
+                    res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                return res
+
+            if selected_auth is None:
+                selected_auth = self.main_auth
+            return selected_auth.require_login(f)(*args, **kwargs)
+        return decorated
 
 class OAuth2(HTTPAuth):
     def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, printdebug=None, scope=None): #pylint: disable=super-init-not-called
