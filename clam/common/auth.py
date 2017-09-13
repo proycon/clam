@@ -59,6 +59,7 @@ class HTTPAuth(object):
     def error_handler(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
+            flask.request.data #clear receive buffer of pending data
             res = f(*args, **kwargs)
             if (sys.version >= '3' and isinstance(res, str)) or (sys.version < '3' and isinstance(res,unicode)): #pylint: disable=undefined-variable
                 res = flask.make_response(res)
@@ -72,6 +73,7 @@ class HTTPAuth(object):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
+            self.printdebug("Handling HTTP Authentication (Basic/Digest)")
             auth = flask.request.authorization
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
@@ -79,6 +81,7 @@ class HTTPAuth(object):
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
                 if not auth:
+                    self.printdebug("No authentication header supplied")
                     return self.auth_error_callback()
                 username = self.username(**self.settings)
                 self.printdebug("Obtained username: " + username)
@@ -96,6 +99,7 @@ class HTTPAuth(object):
                 kwargs['credentials'] = username
             else:
                 #add username as parameter to the wrapped function
+                self.printdebug("Handling preflight OPTIONS request (no authentication)")
                 kwargs['credentials'] = 'anonymous'
             return f(*args,**kwargs)
         return decorated
@@ -448,5 +452,4 @@ class NonceMemory:
         for noncefile in glob(self.path + '/*.nonce'):
             if os.path.getmtime(noncefile) + self.expiration > t:
                 os.unlink(noncefile)
-
 

@@ -1443,6 +1443,7 @@ class Project:
     def addinputfile(project, filename, credentials=None): #pylint: disable=too-many-return-statements
         """Add a new input file, this invokes the actual uploader"""
 
+        printdebug('Addinputfile: Initialising' )
 
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         response = Project.create(project, user)
