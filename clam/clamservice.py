@@ -246,6 +246,17 @@ def parsecredentials(credentials):
     return user, oauth_access_token
 
 
+def auth_type():
+    if settings.OAUTH:
+        return "oauth"
+    elif settings.PREAUTHHEADER:
+        return "preauth"
+    elif (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL):
+        return "basic"
+    elif settings.USERS or settings.USERS_MYSQL:
+        return "digest"
+    else:
+        return "none"
 
 ################# Views ##########################
 
@@ -387,7 +398,8 @@ def index(credentials = None):
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
             allow_origin=settings.ALLOW_ORIGIN,
-            oauth_access_token=oauth_encrypt(oauth_access_token)
+            oauth_access_token=oauth_encrypt(oauth_access_token),
+            auth_type=auth_type()
             )), headers={'allow_origin':settings.ALLOW_ORIGIN}) #pylint: disable=bad-continuation
 
 
@@ -436,7 +448,8 @@ def info(credentials=None):
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
             allow_origin=settings.ALLOW_ORIGIN,
-            oauth_access_token=oauth_encrypt(oauth_access_token)
+            oauth_access_token=oauth_encrypt(oauth_access_token),
+            auth_type=auth_type()
     )), headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 class Admin:
@@ -939,7 +952,8 @@ class Project:
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
                 allow_origin=settings.ALLOW_ORIGIN,
-                oauth_access_token=oauth_encrypt(oauth_access_token)
+                oauth_access_token=oauth_encrypt(oauth_access_token),
+                auth_type=auth_type()
         ),http_code), headers={'allow_origin':settings.ALLOW_ORIGIN})
 
 

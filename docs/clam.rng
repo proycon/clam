@@ -6,14 +6,14 @@ RelaxNG schema for CLAM XML
     by Maarten van Gompel
 	Centre for Language Studies
 	Radboud University
-    
+
     http://ilk.uvt.nl/clam
-    http://github.com/proycon/clam   
-        
+    http://github.com/proycon/clam
+
     Validation examples:
-     $ xmllint ‒‒relaxng clam.rng clamresponse.xml     
+     $ xmllint ‒‒relaxng clam.rng clamresponse.xml
      $ jing clam.rng clamresponse.xml
-    
+
     Licensed under the GNU General Public License v3
 -->
 
@@ -21,7 +21,7 @@ RelaxNG schema for CLAM XML
 	<element name="clam" xmlns="http://relaxng.org/ns/structure/1.0" xmlns:a="http://relaxng.org/ns/annotation/0.9">
 		<attribute name="id">
 		    <a:documentation>The ID of the webservice</a:documentation>
-		</attribute>	
+		</attribute>
 		<attribute name="version">
 		    <a:documentation>Defines the version of CLAM used</a:documentation>
 		</attribute>
@@ -39,6 +39,21 @@ RelaxNG schema for CLAM XML
 		<optional>
 		    <attribute name="project">
 		        <a:documentation>The ID of the project this CLAM document is representing. If not present, then the CLAM XML file represents a more general state of the system and provides a listing of projects</a:documentation>
+		    </attribute>
+		</optional>
+		<optional>
+		    <attribute name="interfaceoptions">
+		        <a:documentation>A set of options for rendering the user interface</a:documentation>
+		    </attribute>
+		</optional>
+		<optional>
+		    <attribute name="oauth_access_token">
+		        <a:documentation>Access token for OAuth (if used)</a:documentation>
+		    </attribute>
+		</optional>
+		<optional>
+		    <attribute name="authentication">
+		        <a:documentation>The authentication method used (basic, digest, oauth, preauth or none)</a:documentation>
 		    </attribute>
 		</optional>
 		<element name="description">
@@ -64,20 +79,20 @@ RelaxNG schema for CLAM XML
 		            <element name="project">
 		                <a:documentation>Link to one of the available projects.</a:documentation>
 		                <attribute name="type" ns="http://www.w3.org/1999/xlink">
-		                    <a:documentation>XLink type, always "simple"</a:documentation>    
+		                    <a:documentation>XLink type, always "simple"</a:documentation>
 		                </attribute>
 		                <attribute name="href" ns="http://www.w3.org/1999/xlink">
-		                    <a:documentation>XLink reference to the URL of the project. URL holds the CLAM XML document for the project</a:documentation>    
-		                </attribute>                        
+		                    <a:documentation>XLink reference to the URL of the project. URL holds the CLAM XML document for the project</a:documentation>
+		                </attribute>
 		                <attribute name="time">
-		                    <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>    
-		                </attribute>		                
+		                    <a:documentation>Time the project was last modified. In "YYYY-MM-DD hh:mm:ss" format</a:documentation>
+		                </attribute>
 		                <attribute name="status">
-		                    <a:documentation>The status code of the project: 0 = staging, accepting input, 1 = running, 2 = completed, presenting output</a:documentation>    
-		                </attribute>		                
+		                    <a:documentation>The status code of the project: 0 = staging, accepting input, 1 = running, 2 = completed, presenting output</a:documentation>
+		                </attribute>
 		                <attribute name="size">
-		                    <a:documentation>The size of the project on disk, in MB</a:documentation>    
-		                </attribute>		                
+		                    <a:documentation>The size of the project on disk, in MB</a:documentation>
+		                </attribute>
 		                <text />
 		            </element>
 		        </zeroOrMore>
@@ -106,10 +121,10 @@ RelaxNG schema for CLAM XML
 		                <a:documentation>Contains a log message from the actual underlying system. The element body contains the log message text.</a:documentation>
 		                <attribute name="completion">
 		                    <a:documentation>An integer value between 0 and 100 representing the level of completion at the time of loggin. Differs only when the project is in state 1. In state 0, value is always 0. In state 2, value is always 100.</a:documentation>
-		                </attribute>   
+		                </attribute>
 		                <attribute name="time">
-		                    <a:documentation>Time of the log message. Free format.</a:documentation>    
-		                </attribute>                 
+		                    <a:documentation>Time of the log message. Free format.</a:documentation>
+		                </attribute>
 		                <text />
 		            </element>
 		        </zeroOrMore>
@@ -117,32 +132,32 @@ RelaxNG schema for CLAM XML
 		</optional>
 		<optional>
 		    <element name="profiles">
-		        <a:documentation>Specifies the profiles accepted by this webservice. Profiles describe the input that the system can take and the output it will produce given that input and the configured parameters.</a:documentation>    
+		        <a:documentation>Specifies the profiles accepted by this webservice. Profiles describe the input that the system can take and the output it will produce given that input and the configured parameters.</a:documentation>
 		        <oneOrMore>
 		            <element name="profile">
 		                <element name="input">
-		                    <a:documentation>The input portion of a profile. Contains Input Templates. </a:documentation>    
+		                    <a:documentation>The input portion of a profile. Contains Input Templates. </a:documentation>
 		                    <zeroOrMore>
 		                        <element name="InputTemplate">
-		                            <a:documentation>An Input Template can be seen like an input 'slot' for a file of a particular type and with specific metadata.</a:documentation>                                 
+		                            <a:documentation>An Input Template can be seen like an input 'slot' for a file of a particular type and with specific metadata.</a:documentation>
 		                            <attribute name="id">
 		                                <a:documentation>A unique identifier (string) for this input template</a:documentation>
-		                            </attribute>                                   
+		                            </attribute>
 		                            <attribute name="format">
 		                                <a:documentation>The format associated with this input slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
-		                            </attribute>                                                                   
+		                            </attribute>
 		                            <attribute name="label">
 		                                <a:documentation>The human readable label associated with this input template. Users use this information to select their desired input template in the interface, so it should be a clear label.</a:documentation>
-		                            </attribute>             
-		                            <optional>                                                                                      
+		                            </attribute>
+		                            <optional>
 		                                <attribute name="mimetype">
 		                                    <a:documentation>If there is a mime-type associated with the chosen format for this input template, it will be represented here.</a:documentation>
-		                                </attribute>                                                                                                                                   
+		                                </attribute>
 		                            </optional>
 		                            <optional>
 		                                <attribute name="schema">
 		                                    <a:documentation>If there is a validation schema associated with the chosen format for this input template, it will be represented here.</a:documentation>
-		                                </attribute>                                                                                                                                   
+		                                </attribute>
 		                            </optional>
 		                            <optional>
 		                                <attribute name="filename">
@@ -153,17 +168,17 @@ RelaxNG schema for CLAM XML
 		                                <attribute name="extension">
 		                                    <a:documentation>If set, this is the extension that is required and automatically added for files uploaded using this input template</a:documentation>
 		                                </attribute>
-		                            </optional>                                
+		                            </optional>
 		                            <optional>
 		                                <attribute name="optional">
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this input template must be used (false) for this profile to work or is optional (true)</a:documentation>
 		                                </attribute>
-		                            </optional>                  
+		                            </optional>
 		                            <optional>
 		                                <attribute name="unique">
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this input template is unique and can only be used for uploading one file, or whether multiple files can be uploaded through this input template</a:documentation>
 		                                </attribute>
-		                            </optional>                                
+		                            </optional>
 		                            <ref name="parameters" />
 		                            <!-- TODO: PARAMETERS WITH PARAMETERCONDITION -->
 		                            <zeroOrMore>
@@ -188,28 +203,28 @@ RelaxNG schema for CLAM XML
 		                    </zeroOrMore>
 		                </element>
 		                <element name="output">
-		                    <a:documentation>The output portion of a profile. Contains Output Templates. </a:documentation>    
+		                    <a:documentation>The output portion of a profile. Contains Output Templates. </a:documentation>
 		                    <oneOrMore>
 		                        <element name="OutputTemplate">
-		                            <a:documentation>An Output Template can be seen like an output 'slot'. If all input conditions have been met, a file corresponding to each output template will be outputted.</a:documentation>                                 
+		                            <a:documentation>An Output Template can be seen like an output 'slot'. If all input conditions have been met, a file corresponding to each output template will be outputted.</a:documentation>
 		                            <attribute name="id">
 		                                <a:documentation>A unique identifier (string) for this output template</a:documentation>
-		                            </attribute>                                   
+		                            </attribute>
 		                            <attribute name="format">
 		                                <a:documentation>The format associated with this output slot (for example PlainTextFormat). Name should be equal to one of the format python classes available to CLAM. Can be extended in formats.py</a:documentation>
-		                            </attribute>                                                                   
+		                            </attribute>
 		                            <attribute name="label">
 		                                <a:documentation>The human readable label associated with this output template.</a:documentation>
-		                            </attribute>             
-		                            <optional>                                                                                      
+		                            </attribute>
+		                            <optional>
 		                                <attribute name="mimetype">
 		                                    <a:documentation>If there is a mime-type associated with the chosen format for this output template, it will be represented here.</a:documentation>
-		                                </attribute>                                                                                                                                   
+		                                </attribute>
 		                            </optional>
 		                            <optional>
 		                                <attribute name="schema">
 		                                    <a:documentation>If there is a validation schema associated with the chosen format for this output template, it will be represented here.</a:documentation>
-		                                </attribute>                                                                                                                                   
+		                                </attribute>
 		                            </optional>
 		                            <optional>
 		                                <attribute name="filename">
@@ -220,18 +235,18 @@ RelaxNG schema for CLAM XML
 		                                <attribute name="extension">
 		                                    <a:documentation>The extension that this output file will obtain, the other filename will be inherited from its input.</a:documentation>
 		                                </attribute>
-		                            </optional>                                   
+		                            </optional>
 		                            <optional>
 		                                <attribute name="unique">
 		                                    <a:documentation>Boolean value set to "true" or "false", determining whether this output template is unique and produces only one file, or whether multiple files can be produces using this input template</a:documentation>
 		                                </attribute>
-		                            </optional>   
+		                            </optional>
 									<zeroOrMore>
 										<choice>
 											<ref name="parametercondition" />
 											<ref name="meta" />
 										</choice>
-									</zeroOrMore>            
+									</zeroOrMore>
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
 		                        </element>
 		                    </oneOrMore>
@@ -266,11 +281,11 @@ RelaxNG schema for CLAM XML
                                 <a:documentation>The ID of the outputtemplate that produces this output file</a:documentation>
                             </attribute>
                             <attribute name="type" ns="http://www.w3.org/1999/xlink">
-                                <a:documentation>XLink type, always "simple"</a:documentation>    
+                                <a:documentation>XLink type, always "simple"</a:documentation>
                             </attribute>
                             <attribute name="href" ns="http://www.w3.org/1999/xlink">
-                                <a:documentation>XLink reference to the URL of the outputi file.</a:documentation>    
-                            </attribute>                        
+                                <a:documentation>XLink reference to the URL of the outputi file.</a:documentation>
+                            </attribute>
                             <zeroOrMore>
                                 <element name="inputfile">
                                     <a:documentation>An input file that is used to produce the outputfile</a:documentation>
@@ -281,14 +296,14 @@ RelaxNG schema for CLAM XML
                                         <a:documentation>The ID of the input template that produces this input file</a:documentation>
                                     </attribute>
                                     <attribute name="type" ns="http://www.w3.org/1999/xlink">
-                                        <a:documentation>XLink type, always "simple"</a:documentation>    
+                                        <a:documentation>XLink type, always "simple"</a:documentation>
                                     </attribute>
                                     <attribute name="href" ns="http://www.w3.org/1999/xlink">
-                                        <a:documentation>XLink reference to the URL of the input file.</a:documentation>    
-                                    </attribute>                        
+                                        <a:documentation>XLink reference to the URL of the input file.</a:documentation>
+                                    </attribute>
                                 </element>
                             </zeroOrMore>
-                        </element> 
+                        </element>
                     </oneOrMore>
                 </element>
             </optional>
@@ -298,7 +313,7 @@ RelaxNG schema for CLAM XML
 		    		<!-- TODO -->
 		    	</element>
 		    </optional>
-		</optional>        
+		</optional>
 	</element>
 </start>
 
@@ -309,7 +324,7 @@ RelaxNG schema for CLAM XML
       <element name="StaticParameter">
          <a:documentation>A dummy parameter taking a fixed value</a:documentation>
          <ref name="commonparameterattribs" />
-      </element>     
+      </element>
       <element name="BooleanParameter">
          <a:documentation>A parameter taking a boolean value</a:documentation>
          <ref name="commonparameterattribs" />
@@ -321,30 +336,30 @@ RelaxNG schema for CLAM XML
          <a:documentation>A parameter taking a (short) string value</a:documentation>
          <ref name="commonparameterattribs" />
          <optional><attribute name="maxlength" /></optional>
-      </element>     
+      </element>
      </zeroOrMore>
      <zeroOrMore>
       <element name="TextParameter">
          <a:documentation>A parameter taking a longer textual value</a:documentation>
          <ref name="commonparameterattribs" />
          <optional><attribute name="maxlength" /></optional>
-      </element>     
-     </zeroOrMore>     
+      </element>
+     </zeroOrMore>
      <zeroOrMore>
       <element name="IntegerParameter">
          <a:documentation>A parameter taking an integer number as value</a:documentation>
          <ref name="commonparameterattribs" />
          <optional><attribute name="minvalue" /></optional>
          <optional><attribute name="maxvalue" /></optional>
-      </element>     
-     </zeroOrMore>    
+      </element>
+     </zeroOrMore>
      <zeroOrMore>
       <element name="FloatParameter">
          <a:documentation>A parameter taking a floating point number as value</a:documentation>
          <ref name="commonparameterattribs" />
          <optional><attribute name="minvalue" /></optional>
-         <optional><attribute name="maxvalue" /></optional>         
-      </element>     
+         <optional><attribute name="maxvalue" /></optional>
+      </element>
      </zeroOrMore>
      <zeroOrMore>
      	<element name="ChoiceParameter">
@@ -360,7 +375,7 @@ RelaxNG schema for CLAM XML
      				<a:documentation>Attribute affecting presentation, if set to 'true' options are presented as checkboxes or radiobuttons instead of a pull-down list.</a:documentation>
      			</attribute>
      		</optional>
-			<optional>     		
+			<optional>
      			<attribute name="delimiter">
      				<a:documentation>The delimiter between multiple values, as propagated to the command line. Only applicable if multi=true</a:documentation>
      			</attribute>
@@ -375,12 +390,12 @@ RelaxNG schema for CLAM XML
     							<a:documentation>Determines whether the choice is selected or not. Value is 1 or 0. Multiple selections are only allowed if multi=true</a:documentation>
     						</attribute>
     					</optional>
-						<text />    					
+						<text />
      			</element>
      		</oneOrMore>
      	</element>
-     </zeroOrMore> 
-    </interleave>    
+     </zeroOrMore>
+    </interleave>
 </define>
 
 
@@ -393,7 +408,7 @@ RelaxNG schema for CLAM XML
     </attribute>
     <attribute name="description">
         <a:documentation>A description clarifying the use of this parameter</a:documentation>
-    </attribute>    
+    </attribute>
     <optional><attribute name="flag" /></optional>
     <optional>
         <attribute name="value">
@@ -403,8 +418,8 @@ RelaxNG schema for CLAM XML
     <optional>
         <attribute name="error">
             <a:documentation>If an error occurred validating this parameter, this will hold the error message</a:documentation>
-        </attribute>            
-    </optional>    
+        </attribute>
+    </optional>
 </define>
 
 <define name="meta">
@@ -423,58 +438,58 @@ RelaxNG schema for CLAM XML
 </define>
 
 
-<define name="conditions">		
+<define name="conditions">
 	<oneOrMore>
 		<choice>
 			<element name="equals">
 				<a:documentation>A condition that matches if the parameter's value equals the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
 			</element>
 			<element name="notequals">
 				<a:documentation>A condition that matches if the parameter's value does not equal the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
-			</element>			
+			</element>
 			<element name="lessthan">
 				<a:documentation>A condition that matches if the parameter's value is less than the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
 			</element>
 			<element name="lessequalthan">
 				<a:documentation>A condition that matches if the parameter's value is less or equal than the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
-			</element>	
+			</element>
 			<element name="greaterthan">
 				<a:documentation>A condition that matches if the parameter's value is greater than the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
 			</element>
 			<element name="greaterequalthan">
 				<a:documentation>A condition that matches if the parameter's value is greater or equal than the value of this element.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For paramters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
 			</element>
 			<element name="contains">
 				<a:documentation>A condition that matches if the parameter's value contains the value of this element. Useful for applying to choice parameters.</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
-			</element>			
+			</element>
 			<element name="set">
 				<a:documentation>YET TO BE DOCUMENTED</a:documentation>
-			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>				
+			  	<attribute name="parameter"><a:documentation>The ID of the parameter the condition is on. For parameters pertaining to input templates use 'templateid.parameterid'</a:documentation></attribute>
 			  	<text />
-			</element>				
+			</element>
 			<element name="disjunction">
 				<a:documentation>Create a disjunction of conditions</a:documentation>
 				<ref name="conditions" />
 			</element>
 		</choice>
-	</oneOrMore>		
+	</oneOrMore>
 </define>
 
-<define name="parametercondition">	
+<define name="parametercondition">
 	<element name="parametercondition">
 		<a:documentation>A parametercondition conditions metadata for outputtemplate on global parameters or parameters from input templates</a:documentation>
 		<element name="if">
@@ -490,7 +505,7 @@ RelaxNG schema for CLAM XML
 				</choice>
 			</zeroOrMore>
 		</element>
-		<optional>			
+		<optional>
 			<element name="else">
 				<a:documentation>Meta fields or further parameter conditions to apply when the conditions do not match</a:documentation>
 				<zeroOrMore>

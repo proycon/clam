@@ -10,7 +10,7 @@
   <body>
     <div id="container">
     	<div id="header"><h1><xsl:value-of select="@name"/></h1></div>
-    	
+
     	<div class="box">
     	 <h3>Introduction</h3>
     	 <p>
@@ -19,35 +19,36 @@
 		</div>
 
 		<div id="description" class="box">
-		 <h3>Description of <xsl:value-of select="@name"/></h3>		        
+		 <h3>Description of <xsl:value-of select="@name"/></h3>
          <xsl:value-of select="description" />
-        </div>       
-        
+        </div>
+
         <div id="restspec" class="box">
     	 <h3>RESTful Specification</h3>
-    	 
-         <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:    	
+
+         <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:
     	 </p>
 
          <xsl:if test="count(/clam/profiles/profile) > 0">
 
          <h4>Project Paradigm</h4>
-    	  
+
     	 <ol>
     		<li><strong>Create a <em>project</em></strong> - Issue a <tt>HTTP PUT</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em></tt>
 				<ul>
 					<li>Will respond with <tt>HTTP 201 Created</tt> if successful.</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+                    <li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if you specified if an error arises, most often due to an invalid Project ID; certain characters including spaces, slashes and ampersands, are not allowed.</li>
-				</ul> 
-    		</li>    	    		
+				</ul>
+                Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X PUT <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
+    		</li>
     		<li><strong>Upload one or more files</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/input/<em>{filename}</em></tt>. The POST request takes the following parameters:
     			<ul>
     				<li><tt>inputtemplate</tt> - The input template for this upload, determines the type of file that is expected. The <em><xsl:value-of select="@name"/></em> webservice defines the following Input Templates:
 						<ul>
 							<xsl:for-each select="//InputTemplate">
 								<li><tt>inputtemplate=<xsl:value-of select="@id" /></tt> - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). If you use this input template you can specify the following extra parameters:
-								<ul> 
+								<ul>
 								<xsl:apply-templates />
 								</ul>
 								</li>
@@ -58,17 +59,18 @@
     				<li><tt>contents</tt> - full string contents of the file (can be used as an alternative to of file)</li>
     				<li><tt>url</tt> - URL to the input file, will be grabbed from the web (alternative to file)</li>
     				<li><tt>metafile</tt> - HTTP file data of a file in CLAM Metadata XML format, specifying metadata for this file (for advanced use)</li>
-    				<li><tt>metadata</tt> - As above, but string contents instead of HTTP file (for advanced use)</li>     				
-    			</ul>
+    				<li><tt>metadata</tt> - As above, but string contents instead of HTTP file (for advanced use)</li>
+                </ul>
     			<br /><em>Responses</em>:
     			<ul>
 					<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns CLAM Upload XML with details on the uploaded files (they may have been renamed automatically)</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the upload is not valid, the file may not be of the correct type, have an invalid name, or there may be problems with specified parameters for the file. Returns CLAM Upload XML with the specific details</li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
-    			</ul>
+                </ul><br/>
+                Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -F "inputtemplate=<em>$inputtemplate</em>" -F "file=@<em>/path/to/file</em>" <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/input/<em>$filename</em></tt>  (further parameters are passed similarly with -F)
     		</li>
-    		
+
     		<li><strong>Start project execution with specified parameters</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>. The POST request takes the following parameters:
     			<ul>
 					<xsl:apply-templates />
@@ -76,11 +78,12 @@
 				<br /><em>Responses:</em>
 				<ul>
 					<li>Will respond with <tt>HTTP 202 Accepted</tt> if successful, and returns the CLAM XML for the project's current state.</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the system does not have sufficient files uploaded to run, or if there are parameter errors. Will return CLAM XML with the project's current state, including parameter errors. In the CLAM XML response, <tt>/CLAM/status/@errors</tt> (XPath) will be <em>yes</em> if errors occurred, <em>no</em> otherwise.</li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
-				</ul>
-			</li>    
+                </ul><br/>
+                Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X POST <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/</tt>  (further parameters are passed similarly with <tt>-d "<em>$parameter</em>=<em>$value</em>"</tt>, can be issued multiple times)
+			</li>
 			<li><strong>Poll the project status with a regular interval and check its status until it is flagged as finished</strong> - Issue (with a regular interval) a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt> .
 			<ul>
 			<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns the CLAM XML for the project's current state. The state of the project is stored in the CLAM XML response, in <tt>/CLAM/status/@code/</tt> (XPath), this code takes on one of three values:
@@ -88,39 +91,42 @@
 				<li>0 - The project is in an accepting state, accepting file uploads and waiting to be started</li>
 				<li>1 - The project is in execution</li>
 				<li>2 - The project has finished</li>
-			</ul> 
+			</ul>
 			</li>
-			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
-			</ul>    
+            </ul><br/>
+            Curl example (getting project state only, no intepretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
 			</li>
 			<li><strong>Retrieve the desired output file(s)</strong> - Issue a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/output/<em>{outputfilename}</em></tt>.  A list of available output files can be obtained by querying the project's state (HTTP GET on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>) and iterating over <tt>/CLAM/output/file/name</tt> (XPath). A <tt>template</tt> attribute will be available on these nodes indicating what output template was responsible for generating this file. The following output templates are defined for this webservice:
 				<ul>
 					<xsl:for-each select="//OutputTemplate">
 						<li><tt><xsl:value-of select="@id" /></tt> - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). </li>
 					</xsl:for-each>
-				</ul>			
-				<br /><em>Responses:</em>			
+				</ul>
+				<br /><em>Responses:</em>
 				<ul>
 					<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns the content of the file (along with the correct mime-type for it)</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the file or project does not exist</li>
-				</ul>
-			</li>		
+                </ul><br/>
+                Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/output/<em>$outputfilename</em></tt>
+			</li>
 			<li><strong>Delete the project</strong> (otherwise it will remain on the server and take up space) - Issue a <tt>HTTP DELETE</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>.
 <br /><em>Responses:</em>
 <ul>
     			<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns CLAM Upload XML with details on the uploaded files (they may have been renamed automatically)</li>
-    			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using HTTP Digest Authentication</li>
+    			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
     			<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the upload is not valid, the file may not be of the correct type, have an invalid name, or there may be problems with specified parameters for the file. Returns CLAM Upload XML with the specific details</li>
     			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
-    			</ul>
+                </ul><br/>
+                Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X DELETE <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
 			</li>
     	 </ol>
 
 
          <h4>Project entry shortcut</h4>
-         
+
          <p>Steps one to three can be combined in a single HTTP GET or POST query
          that is, however, less RESTful and offers less flexibily. It does, however, facilitate use from simpler
          callers. Issue a <tt>HTTP GET</tt> or <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/</tt>. The following parameter is
@@ -151,8 +157,8 @@
          <p>To automatically start the system, pass the parameter <tt>start</tt> with value 1. By default, the system will not be started yet. You can pass any global parameters by ID.</p>
 
          <p>Note that the shortcut method is limited to add only one file per input template, and it does not support actual file uploads, only downloads and explicit passing of content.</p>
- 
-         
+
+
         </xsl:if>
         <xsl:if test="count(/clam/actions/action) > 0">
 
@@ -167,7 +173,7 @@
           <li><strong><xsl:value-of select="@name" /></strong> -- <tt><xsl:value-of select="/clam/@baseurl" />/actions/<xsl:value-of select="@id" />/</tt><br />
               <em><xsl:value-of select="@description" /></em><br />
               <xsl:choose>
-              <xsl:when test="@method"> 
+              <xsl:when test="@method">
                 Method: <tt><xsl:value-of select="@method" /></tt><br />
               </xsl:when>
               <xsl:otherwise>
@@ -187,16 +193,16 @@
 
 
         </xsl:if>
-    	  
+
     	</div>
-    	
-    	
+
+
     	<div class="box">
     	 <h3>CLAM Client API for Python</h3>
     	 <p>
     	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a <em>skeleton</em> Python 3 script you can use as a <em>template</em> for your client to communicate with this webservice.
     	 </p>
-    	 
+
 <pre class="pythoncode">
 <em>#!/usr/bin/env python3</em>
 <strong>import</strong> clam.common.client
@@ -240,16 +246,16 @@ data = clamclient.get(project)
 <xsl:for-each select="./*">
 <em>#		<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
 <xsl:if test="@required = 'true'">
-	<em>#		this parameter is REQUIRED! </em>	
+	<em>#		this parameter is REQUIRED! </em>
 </xsl:if>
 <xsl:if test="name() = 'ChoiceParameter'">
 	<em>#		valid choices for this parameter: </em>
 	<xsl:for-each select="choice">
-		<em>#			<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em> 
-	</xsl:for-each>	
+		<em>#			<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em>
+	</xsl:for-each>
 </xsl:if>
 <xsl:if test="@multi = 'true'">
-	<em>#		Multiple choices may be combined for this parameter as a comma separated list </em>	
+	<em>#		Multiple choices may be combined for this parameter as a comma separated list </em>
 </xsl:if>
 </xsl:for-each>
 </xsl:for-each>
@@ -260,16 +266,16 @@ clamclient.addinputfile(project, data.inputtemplate(inputtemplate), localfilenam
 <xsl:for-each select="//parameters/parametergroup/*">
 <em>#<xsl:value-of select="@id" />=...  #(<xsl:value-of select="name()" />) -   <xsl:value-of select="@name" /> -  <xsl:value-of select="@description" /></em>
 <xsl:if test="@required = 'true'">
-	<em>#	this parameter is REQUIRED! </em>	
+	<em>#	this parameter is REQUIRED! </em>
 </xsl:if>
 <xsl:if test="name() = 'ChoiceParameter'">
 	<em>#	valid choices for this parameter: </em>
 	<xsl:for-each select="choice">
-		<em>#	<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em> 
-	</xsl:for-each>	
+		<em>#	<xsl:value-of select="@id" /> - <xsl:value-of select="." /></em>
+	</xsl:for-each>
 </xsl:if>
 <xsl:if test="@multi = 'true'">
-	<em>#	Multiple choices may be combined for this parameter as a comma separated list </em>	
+	<em>#	Multiple choices may be combined for this parameter as a comma separated list </em>
 </xsl:if>
 </xsl:for-each>
 data = clamclient.start(project)
@@ -297,18 +303,18 @@ data = clamclient.start(project)
     <strong>try</strong>:
         outputfile.loadmetadata() #metadata contains information on output template
     <strong>except</strong>:
-        <strong>continue</strong>          
-    
+        <strong>continue</strong>
+
     outputtemplate = outputfile.metadata.provenance.outputtemplate_id
     <em>	#You can check this value against the following predefined output templates, and determine desired behaviour based on the output template:</em>
     <xsl:for-each select="//OutputTemplate">
 	<em>	#if outputtemplate == "<xsl:value-of select="@id" />": #<xsl:value-of select="@label" /> (<xsl:value-of select="@format" />)</em>
 	</xsl:for-each>
-      
+
     <em>	#Download the remote file</em>
     localfilename = os.path.basename(str(outputfile))
     outputfile.copy(localfilename)
-    
+
     <em>	#..or iterate over its (textual) contents one line at a time:</em>
 	<strong>	for</strong> line <strong>in</strong> outputfile.readlines():
 		<strong>print</strong>(line)
@@ -326,22 +332,52 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 
 </pre>
     	</div>
-    	
-<div class="box">
+
+
+    <div class="box">
     	<h3>CLAM XML</h3>
-    	<p>To inspect the CLAM XML format, simply view the source of this current page, or any CLAM page. A formal schema definition in RelaxNG format will be available <a href="https://github.com/proycon/clam/blob/master/docs/clam.rng">here</a>. This documentation was automatically generated from the service description in CLAM XML format.</p>     	
-</div>    	
-            
+    	<p>To inspect the CLAM XML format, simply view the source of this current page, or any CLAM page. A formal schema definition in RelaxNG format will be available <a href="https://github.com/proycon/clam/blob/master/docs/clam.rng">here</a>. This documentation was automatically generated from the service description in CLAM XML format.</p>
+</div>
+
         <xsl:call-template name="footer" />
-               
-        
-        
+
+
+
     </div>
   </body>
   </html>
 </xsl:template>
 
+<xsl:template name="curlauth">
+    <xsl:choose>
+        <xsl:when test="/clam/@authentication = 'basic'">
+            --basic -u <em>$username</em> -p
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'digest'">
+            --digest -u <em>$username</em> -p
+        </xsl:when>
+    </xsl:choose>
+</xsl:template>
 
+<xsl:template name="authtype">
+    <xsl:choose>
+        <xsl:when test="/clam/@authentication = 'basic'">
+            HTTP Basic Authentication or HTTP Digest Authentication
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'digest'">
+            HTTP Digest Authentication
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'preauth'">
+            a custom application-specific scheme based on a pre-authenticated header
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'oauth'">
+            OAuth2
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'none'">
+            HTTP Basic/Digest Authentication usually, but authentication on this webservice is currently disabled
+        </xsl:when>
+    </xsl:choose>
+</xsl:template>
 
 
 <xsl:template name="head">
@@ -354,7 +390,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 </xsl:template>
 
 <xsl:template name="footer">
-<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel - 
+<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel -
     <a href="https://proycon.github.io/clam">https://proycon.github.io/clam</a>
     <br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a>
 
@@ -381,7 +417,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (boolean parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'yes'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>	
+	</xsl:if>
 	</li>
 </xsl:template>
 
@@ -390,7 +426,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (string parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'yes'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>	
+	</xsl:if>
 	</li>
 </xsl:template>
 
@@ -401,7 +437,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (text parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'yes'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>	
+	</xsl:if>
 	</li>
 </xsl:template>
 
@@ -410,7 +446,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (integer parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'yes'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>		
+	</xsl:if>
 	</li>
 </xsl:template>
 
@@ -418,7 +454,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (float parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'yes'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>		
+	</xsl:if>
 	</li>
 </xsl:template>
 
@@ -427,16 +463,16 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 	<li><tt><xsl:value-of select="@id" /></tt> - <strong><xsl:value-of select="@name" /></strong> (multiple-choice parameter) -  <xsl:value-of select="@description" />
 	<xsl:if test="@required = 'true'">
 		<strong>Note: This is a required parameter!</strong>
-	</xsl:if>		
+	</xsl:if>
 	<xsl:if test="@multi = 'true'">
 		<strong>Note: Multiple values may be combined for this parameter as a comma separated list</strong>
 	</xsl:if>
-	<br />Available value choices:		
+	<br />Available value choices:
 	<ul>
 		<xsl:for-each select="choice">
 			<li><em><xsl:value-of select="@id" /></em> - <xsl:value-of select="." /></li>
 		</xsl:for-each>
-	</ul>	
+	</ul>
 	</li>
 </xsl:template>
 

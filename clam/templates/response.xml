@@ -5,13 +5,13 @@
 <?xml-stylesheet type="text/xsl" href="{{ url }}/static/interface.xsl"?>
 {% endif %}
 {% if project and user %}
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" project="{{ project }}" user="{{ user }}" baseurl="{{ url }}" accesstoken="{{ accesstoken }}"  interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}">
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" project="{{ project }}" user="{{ user }}" baseurl="{{ url }}" accesstoken="{{ accesstoken }}"  interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}" authentication="{{ auth_type }}">
 {% elif project %}
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" project="{{ project }}" baseurl="{{ url }}" accesstoken="{{ accesstoken }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}">
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" project="{{ project }}" baseurl="{{ url }}" accesstoken="{{ accesstoken }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}" authentication="{{ auth_type }}">
 {% elif user %}
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" user="{{ user }}" baseurl="{{ url }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}">
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" user="{{ user }}" baseurl="{{ url }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}" authentication="{{ auth_type }}">
 {% else %}
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" baseurl="{{ url }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}">
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" baseurl="{{ url }}" interfaceoptions="{{ interfaceoptions }}" oauth_access_token="{{ oauth_access_token }}" authentication="{{ auth_type }}">
 {% endif %}
 {############################################################################################}
     <description>{{ system_description }}</description>
@@ -74,9 +74,9 @@
 {% if project and matchedprofiles and program %}
     <program matchedprofiles="{{ matchedprofiles }}">
         {% for outputfilename, (outputtemplate, inputfiles) in program.items() %}
-        <outputfile name="{{outputfilename}}" template="{{outputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">                        
+        <outputfile name="{{outputfilename}}" template="{{outputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfilename }}">
             {% for inputfilename, inputtemplate in inputfiles.items() %}
-                <inputfile name="{{inputfilename}}" template="{{inputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" /> 
+                <inputfile name="{{inputfilename}}" template="{{inputtemplate}}" xlink:type="simple" xlink:href="{{ url }}/{{ project }}/input/{{ inputfilename }}" />
             {% endfor %}
         </outputfile>
         {% endfor %}
@@ -89,7 +89,7 @@
             {% if outputfile.metadata and outputfile.metadata.provenance %}
             <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}" template="{{ outputfile.metadata.provenance.outputtemplate_id }}">
             {% else %}
-            <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}">                        
+            <file xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}">
             {% endif %}
                 <name>{{ outputfile.filename }}</name>
             {% if outputfile.viewers %}
@@ -116,7 +116,7 @@
         {% for inputsource in inputsources %}
         <inputsource id="{{ inputsource.id }}">{{ inputsource.label }}</inputsource>
         {% endfor %}
-    </inputsources> 
+    </inputsources>
     {% if project %}
     <input>
       {% for inputfile in inputpaths %}
@@ -128,7 +128,7 @@
             <name>{{ inputfile.filename }}</name>
         </file>
       {% endfor %}
-    </input>            
+    </input>
     {% endif %}
 {% endif %}
 </clam>
