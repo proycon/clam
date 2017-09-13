@@ -308,6 +308,7 @@ class MultiAuth(object):
                             break
             else:
                 self.printdebug("No authorization header passed")
+                flask.request.data #clear receive buffer of pending data
                 res = flask.make_response("Authorization required")
                 res.status_code = 401
                 res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
