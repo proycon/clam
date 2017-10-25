@@ -246,6 +246,7 @@ class ForwardedAuth(HTTPAuth):
             self.headers = [headers]
         else:
             self.headers = headers
+        self.printdebug("Forwarded authentication listens to headers: " + ",".join(self.headers))
 
     def authenticate_header(self):
         return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
@@ -253,17 +254,16 @@ class ForwardedAuth(HTTPAuth):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            auth = flask.request.authorization
+            self.printdebug("Processing forwarded auth")
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
-                if not auth:
-                    return self.auth_error_callback()
                 try:
                     username = self.username(**self.settings)
                 except KeyError:
+                    self.printdebug("Header not found")
                     return self.auth_error_callback()
                 #add username as parameter to the wrapped function
                 kwargs['credentials'] = username
@@ -273,8 +273,11 @@ class ForwardedAuth(HTTPAuth):
         return decorated
 
     def username(self, **kwargs):
+        self.printdebug("Checking headers")
         for h in self.headers:
+            self.printdebug("Looking for preauth header " + h)
             if h in flask.request.headers:
+                self.printdebug("Header found")
                 return flask.request.headers[h]
         raise KeyError
 
