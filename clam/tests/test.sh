@@ -4,6 +4,7 @@
 
 TESTDIR=`dirname $0`
 cd $TESTDIR
+HOSTNAME=$(hostname)
 
 
 echo "Checking installation..." >&2
@@ -105,7 +106,7 @@ clamservice -d clam.config.forwardauthtest 2> forwardauthtest.server.log &
 sleep 5
 
 #simple curl test:
-curl -f -H "REMOTE_USER: test" http://mhysa:8080/
+curl -f -H "REMOTE_USER: test" http://$HOSTNAME:8080/
 if [ $? -ne 0 ]; then
    echo "ERROR: Forwarded authentication failure" >&2
 fi
