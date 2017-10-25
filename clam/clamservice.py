@@ -2401,6 +2401,9 @@ class CLAMService(object):
         if settings.OAUTH:
             if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, printdebug=printdebug,scope=settings.OAUTH_SCOPE)
+        elif settings.PREAUTHHEADER:
+            warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
+            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.USERS:
             digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
             if settings.BASICAUTH:
@@ -2416,9 +2419,6 @@ class CLAMService(object):
                 if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
             else:
                 self.auth = digest_auth
-        elif settings.PREAUTHHEADER:
-            warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
-            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
         else:
             warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
             self.auth = clam.common.auth.NoAuth() #pylint: disable=redefined-variable-type

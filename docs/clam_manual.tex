@@ -38,12 +38,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 2.2$+$ - revision 1.7} \\[0.5cm]
+{\bf \small version 2.2$+$ - revision 1.8} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - March 10th, 2017 (last revision)} \\[0.5cm]
+\emph{November 11th, 2014 (date published) - October 25th, 2017 (last revision)} \\[0.5cm]
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -960,9 +960,8 @@ authenticated username. This should be set by an authentication system
 \emph{prior} to passing control to CLAM. An example of such a system is
 Shibboleth \footnote{http://shibboleth.net}.  Multiple headers may be specified
 in \texttt{PREAUTHHEADER}, using space as delimiter, effectively creating a
-fallback chain. When \texttt{PREAUTHONLY} is set to \texttt{False} (default),
-the ultimate fallback will be CLAM's built-in user system, unless this is set
-to \texttt{None}.
+fallback chain. If the header is not passed (which should never happen with properly
+configured middleware), a HTTP 401 reply will be returned.
 
 When such a forwarded authentication scheme is used, proper care has to be
 taken, by the middle layer, to ensure that the HTTP headers cannot be forged by
