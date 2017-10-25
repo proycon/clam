@@ -109,6 +109,7 @@ sleep 5
 curl -f -H "REMOTE_USER: test" http://$HOSTNAME:8080/
 if [ $? -ne 0 ]; then
    echo "ERROR: Forwarded authentication failure" >&2
+   GOOD=0
 fi
 
 
