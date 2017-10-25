@@ -46,14 +46,14 @@ fi
 echo "  ..ok" >&2
 
 echo "Running parameter tests:" >&2
-python parametertest.py 
+python parametertest.py
 if [ $? -ne 0 ]; then
    echo "ERROR: Parameter test failed!!" >&2
    GOOD=0
 fi
 
 echo "Running data tests:" >&2
-python datatest.py 
+python datatest.py
 if [ $? -ne 0 ]; then
    echo "ERROR: Data test failed!!" >&2
    GOOD=0
@@ -68,7 +68,7 @@ clamservice -d clam.config.textstats 2> servicetest.server.log &
 sleep 5
 
 echo "Running service tests:" >&2
-python servicetest.py 
+python servicetest.py
 if [ $? -ne 0 ]; then
     echo "ERROR: Service test failed!!" >&2
    GOOD=0
@@ -87,7 +87,7 @@ sleep 5
 
 
 echo "Running authentication tests:" >&2
-python authtest.py 
+python authtest.py
 if [ $? -ne 0 ]; then
    echo "ERROR: Authentication test failed!!" >&2
    GOOD=0
@@ -98,14 +98,29 @@ fi
 
 echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
-sleep 2 
+sleep 2
+
+echo "Starting clam service 'forwardauthtest'" >&2
+clamservice -d clam.config.forwardauthtest 2> forwardauthtest.server.log &
+sleep 5
+
+#simple curl test:
+curl -f -H "REMOTE_USER: test" http://mhysa:8080/
+if [ $? -ne 0 ]; then
+   echo "ERROR: Forwarded authentication failure" >&2
+fi
+
+
+echo "Stopping clam service" >&2
+kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
+sleep 2
 
 echo "Starting clam service 'actiontest'" >&2
 clamservice -d clam.config.actiontest 2> actiontest.server.log &
 sleep 5
 
 echo "Running actions tests:" >&2
-python actiontest.py 
+python actiontest.py
 if [ $? -ne 0 ]; then
    echo "ERROR: Action test failed!!" >&2
    GOOD=0
@@ -116,7 +131,7 @@ fi
 
 echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
-sleep 2 
+sleep 2
 
 if [ $GOOD -eq 1 ]; then
     echo "Done, all tests passed!" >&2
