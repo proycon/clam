@@ -108,10 +108,15 @@ sleep 5
 #simple curl test:
 curl -f -H "REMOTE_USER: test" http://$HOSTNAME:8080/
 if [ $? -ne 0 ]; then
-   echo "ERROR: Forwarded authentication failure" >&2
+   echo "ERROR: Forwarded authentication failure (false negative)" >&2
    GOOD=0
 fi
 
+curl -f http://$HOSTNAME:8080/
+if [ $? -eq 0 ]; then
+   echo "ERROR: Forwarded authentication failure (false positive)" >&2
+   GOOD=0
+fi
 
 echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
