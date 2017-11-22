@@ -203,11 +203,13 @@ class FLATViewer(AbstractViewer):
         r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))], data={'configuration':self.configuration,'mode':self.mode})
         #FLAT redirects after upload, we catch the redirect rather than following it automatically, and return it ourselves as our redirect
         if r.status_code == 302 and 'Location' in r.headers:
-            if self.url and self.url[-1] == '/' and r.headers['Location'][0] == '/':
+            if r.headers['Location'][:4].lower() == 'http': #location is an absolute URL
+                url = r.headers['Location']
+            elif self.url and self.url[-1] == '/' and r.headers['Location'][0] == '/':
                 url = self.url[:-1] + r.headers['Location']
             else:
                 url = self.url + r.headers['Location']
             return flask.redirect(url)
         else:
-            return "Unexpected response from FLAT (HTTP " + str(r.status_code) + "): " + r.text
+            return "Unexpected response from FLAT (HTTP " + str(r.status_code) + ", target was " + self.url + "): " + r.text
 
