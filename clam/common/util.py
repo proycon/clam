@@ -47,7 +47,11 @@ def computediskusage(path):
     for dirpath, dirnames, filenames in os.walk(path): #pylint: disable=unused-variable
         for f in filenames:
             fp = os.path.join(dirpath, f)
-            total_size += os.path.getsize(fp)
+            try:
+                total_size += os.path.getsize(fp)
+            except:
+                #may happen in case of dangling symlinks
+                pass
     return total_size / 1024 / 1024 #MB
 
 
