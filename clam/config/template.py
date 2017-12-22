@@ -161,7 +161,7 @@ PROFILES = [
             unique=True #set unique=True if the user may only upload a file for this input template once. Set multi=True if you the user may upload multiple of such files
         ),
         #------------------------------------------------------------------------------------------------------------------------
-        OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this input template',
+        OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this output template',
             SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
             extension='.stats', #set an extension or set a filename:
             #filename='filename.stats',
