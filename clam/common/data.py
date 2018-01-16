@@ -1491,6 +1491,8 @@ class InputTemplate(object):
                 pass #MAYBE TODO: Reading converters from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'viewer':
                 pass #MAYBE TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
+            elif subnode.tag == 'inputsource':
+                pass #MAYBE TODO: Reading input sources from XML is not implemented (and not necessary at this stage)
             else:
                 raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
 
