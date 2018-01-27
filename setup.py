@@ -8,11 +8,11 @@ from setuptools import setup
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return open(os.path.join(os.path.dirname(__file__), fname),'r',encoding='utf-8').read()
 
 setup(
     name = "CLAM",
-    version = "2.2.4", #also change in clam.common.data.VERSION
+    version = "2.2.5", #also change in clam.common.data.VERSION
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
