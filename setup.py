@@ -4,11 +4,12 @@
 from __future__ import print_function
 
 import os
+import io
 from setuptools import setup
 
 
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname),'r',encoding='utf-8').read()
+    return io.open(os.path.join(os.path.dirname(__file__), fname),'r',encoding='utf-8').read()
 
 setup(
     name = "CLAM",
