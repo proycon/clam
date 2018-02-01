@@ -95,10 +95,15 @@ class CSVFormat(CLAMMetaData):
     name = "Comma separated file"
     mimetype = 'text/csv'
 
-class UndefinedXMLFormat(CLAMMetaData):
-    name = "Undefined XML Format"
+class XMLFormat(CLAMMetaData):
+    name = "XML Format (not further specified)"
     mimetype = 'text/xml'
     scheme = ''
+UndefinedXMLFormat = XMLFormat #backward compatibility
+
+class JSONFormat(CLAMMetaData):
+    name = "JSON Format (not further specified)"
+    mimetype = 'application/json'
 
 class FoLiAXMLFormat(CLAMMetaData):
     attributes = {}
