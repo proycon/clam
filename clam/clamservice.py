@@ -2301,15 +2301,15 @@ def sufficientresources():
         if not os.path.exists('/proc/meminfo'):
             printlog("WARNING: No /proc/meminfo available on your system! Not Linux? Skipping memory requirement check!")
         else:
-            memfree = cached = 0.0
+            memavail = cached = 0.0
             with open('/proc/meminfo') as f:
                 for line in f:
-                    if line[0:8] == "MemFree:":
-                        memfree = float(line[9:].replace('kB','').strip()) #in kB
-                    if line[0:8] == "Cached:":
-                        cached = float(line[9:].replace('kB','').strip()) #in kB
-            if settings.REQUIREMEMORY * 1024 > memfree + cached:
-                return False, str(settings.REQUIREMEMORY * 1024) + " kB memory is required but only " + str(memfree + cached) + " is available."
+                    if line[0:13] == "MemAvailable:":
+                        memavail = float(line[13:].replace('kB','').strip()) #in kB
+                    if line[0:13] == "Cached:":
+                        cached = float(line[13:].replace('kB','').strip()) #in kB
+            if settings.REQUIREMEMORY * 1024 > memavail + cached:
+                return False, str(settings.REQUIREMEMORY * 1024) + " kB memory is required but only " + str(memavail + cached) + " is available."
     if settings.MAXLOADAVG > 0:
         if not os.path.exists('/proc/loadavg'):
             printlog("WARNING: No /proc/loadavg available on your system! Not Linux? Skipping load average check!")
