@@ -2306,7 +2306,7 @@ def sufficientresources():
                 for line in f:
                     if line[0:13] == "MemAvailable:":
                         memavail = float(line[14:].replace('kB','').strip()) #in kB
-                    if line[0:13] == "Cached:":
+                    if line[0:7] == "Cached:":
                         cached = float(line[14:].replace('kB','').strip()) #in kB
             if settings.REQUIREMEMORY * 1024 > memavail + cached:
                 return False, str(settings.REQUIREMEMORY * 1024) + " kB memory is required but only " + str(memavail + cached) + " is available."
