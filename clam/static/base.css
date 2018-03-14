@@ -90,7 +90,7 @@ div#loader {
 div#editor {
     -moz-border-radius: 12px; /* CSS3 for Mozilla */
     -webkit-border-radius: 12px; /* CSS3 for Safari */
-    margin: 5px;    
+    margin: 5px;
 }
 
 
@@ -113,7 +113,7 @@ div#editor {
 }
 #status img.progress {
     margin: 2px;
-    margin-left: 10px; 
+    margin-left: 10px;
 }
 
 
@@ -133,11 +133,11 @@ table.files, table#projects {
 table#projects td {
     padding: 3px;
     padding-left: 20px;
-    
+
 }
 
 table.files th {
-    font-weight: none;    
+    font-weight: none;
     width: 60%;
     padding: 4px;
 }
@@ -189,7 +189,7 @@ table.files li {
 #footer .extracredits {
     margin-top: 10px;
     display: block;
-    
+
 }
 
 .parameters table {
@@ -204,11 +204,11 @@ table.files li {
 .parameters th .description {
     font-weight: normal;
     font-style: italic;
-    margin-left: 20px; 
-    font-size: 90%;   
+    margin-left: 20px;
+    font-size: 90%;
 }
 .parameters th .error {
-    margin-left: 20px; 
+    margin-left: 20px;
     color: red;
 }
 .parameters th, .parameters td {
@@ -263,7 +263,7 @@ button#openeditor {
     overflow: auto;
 }
 #statuslog table {
-    width: 95%; 
+    width: 95%;
     text-align: left;
 }
 #statuslog td.time {
@@ -292,13 +292,15 @@ button#openeditor {
     font-weight: bold;
 }
 #toggleinputfiles {
-    float: right;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 pre.pythoncode em {
 	color: #2f7b11;
 	display: block;
-	margin: 0px; 
+	margin: 0px;
 }
 
 pre.pythoncode strong {
@@ -306,14 +308,14 @@ pre.pythoncode strong {
 
 #restspec tt {
 	color: #4b6f4a;
-	font-weight: bold;	
+	font-weight: bold;
 }
 #restspec ol>li {
 	margin-top: 10px;
 }
 #restspec tt em {
-	color: #818252;	
-	
+	color: #818252;
+
 }
 #actions {
 	width: 25%;
