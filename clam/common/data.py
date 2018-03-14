@@ -24,6 +24,7 @@ import os.path
 import io
 import json
 import time
+import yaml
 from copy import copy
 from lxml import etree as ElementTree
 if sys.version < '3':
@@ -168,6 +169,10 @@ class HTTPError(Exception):
     pass
 
 class AuthenticationRequired(Exception):
+    """This Exception is raised when authentication is required but has not been provided"""
+    pass
+
+class ConfigurationError(Exception):
     """This Exception is raised when authentication is required but has not been provided"""
     pass
 
@@ -2432,6 +2437,51 @@ def unescapeshelloperators(s):
         s = s.replace('%EXCL%','!')
         s = s.replace('%IN%','<')
     return s
+
+def loadconfig(callername, required=True):
+    try:
+        settingsmodule = sys.modules[callername]
+    except:
+        raise ConfigurationError("Unable to determine caller module, got unknown name: " + callername)
+    hostname = os.uname()[1]
+    searchpath = []
+    searchfile = []
+    searchpath.append(os.getcwd())
+    d = os.path.dirname(settingsmodule.__file__)
+    if d:
+        searchpath.append(d)
+    searchfile.append(hostname+'.yml')
+    searchfile.append(hostname+'.yaml')
+    searchfile.append('config.yml')
+    searchfile.append('config.yaml')
+    configfile = None
+
+    #search host-specific configuration
+    if 'CONFIGFILE' in os.environ:
+        if os.environ['CONFIGFILE'][0] == '/' or os.path.exists(os.environ['CONFIGFILE']):
+            configfile = os.environ['CONFIGFILE']
+        else:
+            searchfile.insert(0, os.path.basename(os.environ['CONFIGFILE']))
+
+    if not configfile:
+        for filename in searchfile:
+            for path in searchpath:
+                if os.path.exists(os.path.join(path, filename)):
+                    configfile = os.path.join(path, filename)
+                    break
+            if configfile: break
+    if configfile:
+        with io.open(configfile,'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f.read())
+        for key, value in data.items():
+            setattr(settingsmodule,key.upper(), value)
+        return True
+
+    if required:
+        raise ConfigurationError("Unable to load required external configuration file. Do you need to set the CONFIGFILE environment variable? Detected hostname is " + hostname + "; search path is " + ", ".join(searchpath) + "; searched for " + ", ".join(searchfile))
+    else:
+        return False
+
 
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position

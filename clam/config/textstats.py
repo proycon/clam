@@ -58,6 +58,17 @@ ADMINS = ['anonymous'] #Define which of the above users are admins (never set th
 #USERS = { 'username': pwhash('username', SYSTEM_ID, 'secret') } #Using pwhash and plaintext password in code is not secure!!
 
 
+#Instead of specifying variables like we did above, we can include them from an external configuration file automatically
+#This invokes the automatic loader, it will try to find a file named $hostname.yaml (or yml), where $hostname
+#is the auto-detected hostname of this system. Alternatively, it tries a static config.yml .
+#You can also set an environment variable CONFIGFILE to specify the exact file to load at run-time.
+#It will look in several paths including the current working directory and the path this settings script is loaded from.
+#Such an external configuration file simply defines variables that will be imported here. If it fails to find
+#a configuration file, an exception will be raised.
+loadconfig(__name__)
+
+assert TEST_DUMMY == "test"   #a test, you never need/want this in your own configuration
+
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
 #REQUIREMEMORY = 10
 

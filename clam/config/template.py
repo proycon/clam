@@ -50,11 +50,12 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 # ======== LOCATION ===========
 
-#Add a section for your host:
+#Either add a section for your host here, or
+#specify these variables in an external yaml file
+#called $hostname.yaml or config.yaml and use the loadconfig() mechanism:
 
 host = os.uname()[1]
 if host == "yourhostname":
-
     #The root directory for CLAM, all project files, (input & output) and
     #pre-installed corpora will be stored here. Set to an absolute path:
     ROOT = "/tmp/clam.projects/"
@@ -73,7 +74,14 @@ if host == "yourhostname":
     #Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
     #FORCEURL = "http://yourhostname.com"
 else:
-    raise Exception("I don't know where I'm running from! Add a section in the configuration corresponding to this host (" + os.uname()[1]+")")
+    #This invokes the automatic loader, do not change it;
+    #it will try to find a file named $hostname.yaml (or yml), where $hostname
+    #is the auto-detected hostname of this system. Alternatively, it tries a static config.yml .
+    #You can also set an environment variable CONFIGFILE to specify the exact file to load at run-time.
+    #It will look in several paths including the current working directory and the path this settings script is loaded from.
+    #Such an external configuration file simply defines variables that will be imported here. If it fails to find
+    #a configuration file, an exception will be raised.
+    loadconfig(__name__)
 
 
 
