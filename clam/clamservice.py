@@ -2778,6 +2778,7 @@ def main():
     parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
     parser.add_argument('-b','--basicauth', help="Default to HTTP Basic Authentication on the development server (do not expose to the world without SSL)", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
+    parser.add_argument('-c','--config', type=str,help="Path to external YAML configuration file to import", action='store',required=False)
     parser.add_argument('settingsmodule', type=str, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
     args = parser.parse_args()
 
@@ -2796,6 +2797,8 @@ def main():
         PYTHONPATH = args.pythonpath
     if 'basicauth' in args:
         ASSUMESSL = True
+    if 'config' in args and args.config:
+        os.environ['CONFIGFILE'] = args.config #passed through the environment
 
     settingsmodule = args.settingsmodule
 
