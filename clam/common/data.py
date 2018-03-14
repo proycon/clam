@@ -24,6 +24,7 @@ import os.path
 import io
 import json
 import time
+import re
 import yaml
 from copy import copy
 from lxml import etree as ElementTree
@@ -2475,6 +2476,12 @@ def loadconfig(callername, required=True):
         with io.open(configfile,'r', encoding='utf-8') as f:
             data = yaml.safe_load(f.read())
         for key, value in data.items():
+            #replace variables
+            if '{' in value:
+                variables = re.findall("\{\{\w+\}\}")
+                for v in variables:
+                    if v.strip('{}') in os.environ:
+                        value = value.replace(v,os.environ[v.strip('{}')])
             setattr(settingsmodule,key.upper(), value)
         return True
 
