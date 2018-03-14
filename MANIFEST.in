@@ -12,3 +12,4 @@ include clam/wrappers/*.py
 include clam/wrappers/*.sh
 include clam/config/*.wsgi
 include clam/config/*.yml
+include clam/tests/*.yml
