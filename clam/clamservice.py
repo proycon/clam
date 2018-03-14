@@ -281,8 +281,10 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
         if createresponse is not None:
             return createresponse
 
+        prefixes = []
         for profile in settings.PROFILES:
             for inputtemplate in profile.input:
+                prefixes.append(inputtemplate.id+'_')
                 data = {'filename':'', 'inputtemplate': inputtemplate.id}
                 if inputtemplate.id + '_filename' in rq:
                     data['filename'] = rq[inputtemplate.id + '_filename']
@@ -318,8 +320,9 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
         #forward any unhandled parameters (issue #66)
         forward_rq = []
         for key, value in rq.items():
-            if rq not in ('project','start'):
-                forward_rq.append((key,value))
+            if key not in ('project','start'):
+                if not any( key.startswith(prefix) for prefix in prefixes):
+                    forward_rq.append((key,value))
 
         if oauth_access_token:
             return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token + ('&' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
