@@ -49,6 +49,11 @@ from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlo
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.STANDALONEURLPREFIX = ''
 
+if sys.version < '3':
+    from urllib import urlencode
+else:
+    from urllib.parse import urlencode
+
 try:
     from requests_oauthlib import OAuth2Session
 except ImportError:
@@ -310,10 +315,16 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
             else:
                 return True #signals start to do a redirect itself after starting (otherwise GET parameters stick on subsequent reloads)
 
+        #forward any unhandled parameters (issue #66)
+        forward_rq = []
+        for key, value in rq.items():
+            if rq not in ('project','start'):
+                forward_rq.append((key,value))
+
         if oauth_access_token:
-            return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token + ('&' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.redirect(getrooturl() + '/' + project + ('/?' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     return None
 
@@ -990,6 +1001,12 @@ class Project:
                 data = clam.common.data.CLAMData(xmldata, None,False, Project.path(project,credentials), loadmetadata=False)
                 return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token,','.join([str(x) for x in data.program.matchedprofiles]) if data.program else "", data.program) #200
             else:
+                #HTTP request parameters may be used to pre-set global parameters when starting a project (issue #66)
+                for parametergroup, parameterlist in settings.PARAMETERS: #pylint: disable=unused-variable
+                    for parameter in parameterlist:
+                        value = parameter.valuefrompostdata(flask.request.values)
+                        if value is not None:
+                            parameter.set(value)
                 return Project.response(user, project, settings.PARAMETERS,"",False,oauth_access_token) #200
 
 
