@@ -2471,6 +2471,7 @@ def loadconfig(callername, required=True):
                     break
             if configfile: break
     if configfile:
+        os.environ['CONFIGFILE'] = configfile #we need to set this so when clamdispatcher loads it can be found again!
         with io.open(configfile,'r', encoding='utf-8') as f:
             data = yaml.safe_load(f.read())
         for key, value in data.items():
