@@ -2483,10 +2483,13 @@ def loadconfig(callername, required=True):
         for key, value in data.items():
             #replace variables
             if '{' in value:
-                variables = re.findall("\{\{\w+\}\}")
+                variables = re.findall(r"\{\{\w+\}\}")
                 for v in variables:
                     if v.strip('{}') in os.environ:
                         value = value.replace(v,os.environ[v.strip('{}')])
+                    else:
+                        print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
+                        value = value.replace(v,"")
             setattr(settingsmodule,key.upper(), value)
         return True
 
