@@ -2450,6 +2450,11 @@ def loadconfig(callername, required=True):
     d = os.path.dirname(settingsmodule.__file__)
     if d:
         searchpath.append(d)
+    if hasattr(settingsmodule, 'SYSTEM_ID'):
+        searchfile.append(settingsmodule.SYSTEM_ID + '.' + hostname+'.yml')
+        searchfile.append(settingsmodule.SYSTEM_ID + '.' + hostname+'.yaml')
+        searchfile.append(settingsmodule.SYSTEM_ID + '.config.yml')
+        searchfile.append(settingsmodule.SYSTEM_ID + '.config.yaml')
     searchfile.append(hostname+'.yml')
     searchfile.append(hostname+'.yaml')
     searchfile.append('config.yml')

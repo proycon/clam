@@ -75,8 +75,8 @@ if host == "yourhostname":
     #FORCEURL = "http://yourhostname.com"
 else:
     #This invokes the automatic loader, do not change it;
-    #it will try to find a file named $hostname.yaml (or yml), where $hostname
-    #is the auto-detected hostname of this system. Alternatively, it tries a static config.yml .
+    #it will try to find a file named $system_id.$hostname.yml or just $hostname.yml, where $hostname
+    #is the auto-detected hostname of this system. Alternatively, it tries a static $system_id.config.yml or just config.yml .
     #You can also set an environment variable CONFIGFILE to specify the exact file to load at run-time.
     #It will look in several paths including the current working directory and the path this settings script is loaded from.
     #Such an external configuration file simply defines variables that will be imported here. If it fails to find
