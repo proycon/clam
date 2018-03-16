@@ -38,12 +38,12 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 2.2$+$ - revision 1.8} \\[0.5cm]
+{\bf \small version 2.3$+$ - revision 1.9} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - October 25th, 2017 (last revision)} \\[0.5cm]
+\emph{November 11th, 2014 (date published) - March 16th, 2018 (last revision)} \\[0.5cm]
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -264,6 +264,7 @@ automatically, except for Python itself:
 \item lxml
 \item requests
 \item requests-oauthlib
+\item PyYAML
 \item mysqlclient (optional, needed only for MySQL support)
 \item FoLiA-Tools (optional, needed only for FoLiA support)
 \end{itemize}
@@ -839,6 +840,54 @@ delete projects. This interface can be accessed on the \texttt{/admin/} URL,
 but requires that the logged-in user is in the list of \texttt{ADMINS} in the
 service configuration file. The administrative interface itself does not, and
 will never, offer any means to adjust service configuration options.
+
+\subsection{External Configuration Files}
+\label{sec:externalconf}
+
+Since CLAM 2.3, you can define part of your webservice configuration in external YAML configuration files.
+In your normal service configuration file you then place a call to \texttt{loadconfig(\_\_name\_\_)}. This will
+automatically search for external configuration files and includes any variables defined therein just as if they were
+defined directly. The power of this mechanism lies in the fact that it allows you to load a different external
+configuration file for hosts, allowing you to deploy your CLAM service on multiple hosts without changing the core
+of the service configuration.
+
+The procedure is as follows, CLAM's \texttt{loadconfig()} function will attempt to search for a file named as follows,
+in the following order:
+
+\begin{itemize}
+    \item \texttt{\$CONFIGFILE} - If this environment variable is set, the exact file specified therein will be the file
+        to load. This should be an absolute path reference rather than just a filename.
+    \item \texttt{\$SYSTEM\_ID.\$HOSTNAME.yml} - Here SYSTEM\_ID must have been defined in the regular service
+        configuration file, prior to calling \texttt{loadconfig()}, \texttt{\$HOSTNAME} is the autodetected hostname of
+        the system CLAM is running on.
+    \item \texttt{\$SYSTEM\_ID.config.yml}
+    \item \texttt{\$HOSTNAME.yml}
+    \item \texttt{config.yml}  - Note that this filename does not contain any variable components, so it's a final
+        catch-all solution.
+\end{itemize}
+
+CLAM will look in the following directories:
+
+\begin{itemize}
+    \item The current working directory (so depends on how CLAM was started)
+    \item The directory where the regular service configuration file exists
+\end{itemize}
+
+An example of a simple external configuration file in YAML syntax is:
+
+\begin{verbatim}
+root: /var/wwwdata/myservice
+hostname: myhost
+urlprefix: myservice
+\end{verbatim}
+
+Note that all field names will be automatically uppercased for CLAM (so root here becomes ROOT).
+
+A simple form of templating is supported to refer to environment variables. Enclose the environment variable in double
+curly braces (no spaces).
+
+You can define any variable, but the external configuration file is meant for host-specific configuration only; it can
+not be used to specify a full CLAM profile so is never a full substitute for the main service configuration file.
 
 \subsection{User Authentication}
 
