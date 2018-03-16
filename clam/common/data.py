@@ -2482,8 +2482,8 @@ def loadconfig(callername, required=True):
             data = yaml.safe_load(f.read())
         for key, value in data.items():
             #replace variables
-            if '{' in value:
-                variables = re.findall(r"\{\{\w+\}\}")
+            if isinstance(value,str) and '{' in value:
+                variables = re.findall(r"\{\{\w+\}\}", value)
                 for v in variables:
                     if v.strip('{}') in os.environ:
                         value = value.replace(v,os.environ[v.strip('{}')])
