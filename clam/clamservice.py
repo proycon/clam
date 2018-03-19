@@ -916,7 +916,9 @@ class Project:
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
                 printlog("Child process failed, exited with non zero-exit code.")
-            customhtml = settings.CUSTOMHTML_PROJECTDONE
+                customhtml = settings.CUSTOMHTML_PROJECTFAILED
+            else:
+                customhtml = settings.CUSTOMHTML_PROJECTDONE
         else:
             outputpaths = [] #pylint: disable=redefined-variable-type
 
@@ -2668,11 +2670,17 @@ def set_defaults():
         else:
             settings.CUSTOMHTML_PROJECTSTART = ""
     if not 'CUSTOMHTML_PROJECTDONE' in settingkeys:
-        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
-            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r',encoding='utf-8') as f:
+        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectdone.html'):
+            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectdone.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTDONE = f.read()
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
+    if not 'CUSTOMHTML_PROJECTFAILED' in settingkeys:
+        if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectfailed.html'):
+            with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectfailed.html','r',encoding='utf-8') as f:
+                settings.CUSTOMHTML_PROJECTFAILED = f.read()
+        else:
+            settings.CUSTOMHTML_PROJECTFAILED = ""
 
     if not 'CUSTOM_FORMATS' in settingkeys:
         settings.CUSTOM_FORMATS = []
