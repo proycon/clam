@@ -588,12 +588,7 @@ def getrooturl(): #not a view
     if settings.FORCEURL:
         return settings.FORCEURL
     else:
-        if settings.PORT == 443:
-            url = 'https://' + settings.HOST
-        else:
-            url = 'http://' + settings.HOST
-        if settings.PORT != 80 and settings.PORT != 443:
-            url += ':' + str(settings.PORT)
+        url = flask.request.host_url
         if settings.URLPREFIX and settings.URLPREFIX != '/':
             if settings.URLPREFIX[0] != '/':
                 url += '/'
@@ -2505,7 +2500,7 @@ class CLAMService(object):
         self.mode = mode
         if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings.BASICAUTH):
             warning("*** YOU ARE RUNNING THE DEVELOPMENT SERVER, THIS IS INSECURE WITH THE CONFIGURED AUTHENTICATION METHOD ***")
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/' + settings.URLPREFIX + ' (Make sure to use access CLAM using this exact URL and no alternative hostnames/IPs)')
+        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/' + settings.URLPREFIX)
         if settings.FORCEURL:
             printlog("Access using forced URL: " + settings.FORCEURL)
 
@@ -2513,7 +2508,7 @@ class CLAMService(object):
             self.service.debug = DEBUG
         elif self.mode in ('standalone','debug'):
             self.service.debug = (mode == 'debug')
-            self.service.run(host=settings.HOST,port=settings.PORT)
+            self.service.run(host='0.0.0.0',port=settings.PORT)
         else:
             raise Exception("Unknown mode: " + mode + ", specify 'wsgi', 'standalone' or 'debug'")
 
