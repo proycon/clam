@@ -2878,7 +2878,7 @@ def run_wsgi(settings_module):
     test_dirs()
 
     if settings.URLPREFIX:
-        settings.STANDALONEURLPREFIX = settings.URLPREFIX
+        settings.STANDALONEURLPREFIX = '/' + settings.URLPREFIX
 
     if DEBUG:
         from werkzeug.debug import DebuggedApplication
