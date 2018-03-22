@@ -44,16 +44,20 @@
     		</li>
     		<li><strong>Upload one or more files</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/input/<em>{filename}</em></tt>. The POST request takes the following parameters:
     			<ul>
-    				<li><tt>inputtemplate</tt> - The input template for this upload, determines the type of file that is expected. The <em><xsl:value-of select="@name"/></em> webservice defines the following Input Templates:
-						<ul>
-							<xsl:for-each select="//InputTemplate">
-								<li><tt>inputtemplate=<xsl:value-of select="@id" /></tt> - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). If you use this input template you can specify the following extra parameters:
-								<ul>
-								<xsl:apply-templates />
-								</ul>
-								</li>
-							</xsl:for-each>
-						</ul>
+    				<li><tt>inputtemplate</tt> - The input template for this upload, determines the type of file that is expected. The <em><xsl:value-of select="@name"/></em> webservice defines the following Input Templates (grouped per profile):
+                    <ol>
+                        <xsl:for-each select="//profile">
+                          <li>Profile #<xsl:value-of select="position()" /><ul>
+                          <xsl:for-each select=".//InputTemplate">
+                                  <li><tt>inputtemplate=<span style="color: blue"><xsl:value-of select="@id" /></span></tt> - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). If you use this input template you can specify the following extra parameters:
+                                    <ul>
+                                     <xsl:apply-templates />
+                                    </ul>
+                                    </li>
+                          </xsl:for-each>
+                          </ul></li>
+                        </xsl:for-each>
+                    </ol>
     				</li>
     				<li><tt>file</tt> - HTTP file data.</li>
     				<li><tt>contents</tt> - full string contents of the file (can be used as an alternative to of file)</li>
@@ -101,11 +105,15 @@
             Curl example (getting project state only, no intepretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
 			</li>
 			<li><strong>Retrieve the desired output file(s)</strong> - Issue a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/output/<em>{outputfilename}</em></tt>.  A list of available output files can be obtained by querying the project's state (HTTP GET on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>) and iterating over <tt>/CLAM/output/file/name</tt> (XPath). A <tt>template</tt> attribute will be available on these nodes indicating what output template was responsible for generating this file. The following output templates are defined for this webservice:
-				<ul>
-					<xsl:for-each select="//OutputTemplate">
-						<li><tt><xsl:value-of select="@id" /></tt> - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). </li>
-					</xsl:for-each>
-				</ul>
+				<ol>
+					<xsl:for-each select="//profile">
+                      <li>Profile #<xsl:value-of select="position()" /><ul>
+					  <xsl:for-each select=".//OutputTemplate">
+                        <li><tt><xsl:value-of select="@id" /></tt>  - <xsl:value-of select="@label" /> (<xsl:value-of select="@format" />). <xsl:if test="@parent">[from input template <tt><xsl:value-of select="@parent" /></tt>]</xsl:if></li>
+					  </xsl:for-each>
+                      </ul></li>
+                    </xsl:for-each>
+				</ol>
 				<br /><em>Responses:</em>
 				<ul>
 					<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns the content of the file (along with the correct mime-type for it)</li>

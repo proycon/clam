@@ -1793,6 +1793,8 @@ class OutputTemplate(object):
             xml +=" filename=\""+clam.common.util.xmlescape(self.filename)+"\""
         if self.extension:
             xml +=" extension=\""+clam.common.util.xmlescape(self.extension)+"\""
+        if self.parent:
+            xml +=" parent=\""+clam.common.util.xmlescape(self.parent)+"\""
         if self.unique:
             xml +=" unique=\"yes\""
         else:
@@ -1821,6 +1823,8 @@ class OutputTemplate(object):
             kwargs['extension'] = node.attrib['extension']
         if 'unique' in node.attrib:
             kwargs['unique'] = node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1'
+        if 'parent' in node.attrib:
+            kwargs['parent'] = node.attrib['parent']
 
         #find formatclass
         formatcls = None
