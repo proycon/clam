@@ -73,7 +73,9 @@
 
     		<li><strong>Start project execution with specified parameters</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>. The POST request takes the following parameters:
     			<ul>
-					<xsl:apply-templates />
+                    <xsl:for-each select="//parametergroup">
+                        <xsl:apply-templates />
+                    </xsl:for-each>
 				</ul>
 				<br /><em>Responses:</em>
 				<ul>
