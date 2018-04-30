@@ -2440,13 +2440,17 @@ class CLAMService(object):
             warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
             self.auth = clam.common.auth.NoAuth() #pylint: disable=redefined-variable-type
 
+        printdebug("Full settings dump: " + repr(vars(settings)))
 
 
+        printdebug("Initialising flask service")
         self.service = flask.Flask("clam")
         self.service.jinja_env.trim_blocks = True
         self.service.jinja_env.lstrip_blocks = True
         self.service.secret_key = settings.SECRET_KEY
+        printdebug("Registering main entrypoint: " + settings.STANDALONEURLPREFIX + "/")
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
+        printdebug("Registering info entrypoint: " + settings.STANDALONEURLPREFIX + "/info/")
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
@@ -2502,14 +2506,23 @@ class CLAMService(object):
         self.mode = mode
         if self.mode != 'wsgi' and (settings.OAUTH or settings.PREAUTHHEADER or settings.BASICAUTH):
             warning("*** YOU ARE RUNNING THE DEVELOPMENT SERVER, THIS IS INSECURE WITH THE CONFIGURED AUTHENTICATION METHOD ***")
-        printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/' + settings.URLPREFIX)
+        if settings.PORT == 443:
+            printlog("Server available on https://" + settings.HOST + '/' + settings.URLPREFIX)
+        elif settings.PORT == 80:
+            printlog("Server available on http://" + settings.HOST + '/' + settings.URLPREFIX)
+        else:
+            printlog("Server available on http://" + settings.HOST + ":" + str(settings.PORT) +'/' + settings.URLPREFIX)
         if settings.FORCEURL:
             printlog("Access using forced URL: " + settings.FORCEURL)
 
         if self.mode == 'wsgi':
+            printdebug("DEBUG="+str(DEBUG))
+            printdebug("CLAM started in wsgi mode")
             self.service.debug = DEBUG
         elif self.mode in ('standalone','debug'):
             self.service.debug = (mode == 'debug')
+            printdebug("DEBUG="+str(mode=='debug'))
+            printdebug("CLAM started in " + self.mode + " mode")
             self.service.run(host='0.0.0.0',port=settings.PORT)
         else:
             raise Exception("Unknown mode: " + mode + ", specify 'wsgi', 'standalone' or 'debug'")
