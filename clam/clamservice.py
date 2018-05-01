@@ -2890,9 +2890,6 @@ def run_wsgi(settings_module):
     set_defaults() #host, port
     test_dirs()
 
-    if settings.URLPREFIX:
-        settings.STANDALONEURLPREFIX = '/' + settings.URLPREFIX
-
     if DEBUG:
         from werkzeug.debug import DebuggedApplication
         return DebuggedApplication(CLAMService('wsgi').service.wsgi_app, True)
