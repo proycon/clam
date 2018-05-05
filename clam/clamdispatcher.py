@@ -92,10 +92,6 @@ def main():
         return 1
     elif projectdir and not os.path.isdir(projectdir):
         print("[CLAM Dispatcher] FATAL ERROR: Project directory "+ projectdir + " does not exist", file=sys.stderr)
-        f = open(projectdir + '.done','w')
-        f.write(str(1))
-        f.close()
-        if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
         return 1
 
     try:
