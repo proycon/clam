@@ -591,8 +591,9 @@ def getrooturl(): #not a view
         url = flask.request.host_url
         if settings.URLPREFIX and settings.URLPREFIX != '/':
             if settings.URLPREFIX[0] != '/':
-                url += '/'
-            url += settings.URLPREFIX
+                url = os.path.join(url, settings.URLPREFIX)
+            else:
+                url = os.path.join(url, settings.URLPREFIX[1:])
         if url[-1] == '/': url = url[:-1]
         return url
 
