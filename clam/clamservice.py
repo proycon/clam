@@ -2559,60 +2559,60 @@ def set_defaults():
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
-    if not 'SYSTEM_VERSION' in settingkeys:
+    if 'SYSTEM_VERSION' not in settingkeys:
         settings.SYSTEM_VERSION = "0"
-    if not 'SYSTEM_EMAIL' in settingkeys:
+    if 'SYSTEM_EMAIL' not in settingkeys:
         settings.SYSTEM_EMAIL = None
-    if not 'USERS' in settingkeys:
+    if 'USERS' not in settingkeys:
         settings.USERS = None
-    if not 'ADMINS' in settingkeys:
+    if 'ADMINS' not in settingkeys:
         settings.ADMINS = []
-    if not 'LISTPROJECTS' in settingkeys:
+    if 'LISTPROJECTS' not in settingkeys:
         settings.LISTPROJECTS = True
-    if not 'ALLOWSHARE' in settingkeys: #TODO: all these are not implemented yet
+    if 'ALLOWSHARE' not in settingkeys: #TODO: all these are not implemented yet
         settings.ALLOWSHARE = True
-    if not 'ALLOWANONSHARE' in settingkeys:
+    if 'ALLOWANONSHARE' not in settingkeys:
         settings.ALLOWANONSHARE = True
-    if not 'ALLOWSHAREUPLOAD' in settingkeys:
+    if 'ALLOWSHAREUPLOAD' not in settingkeys:
         settings.ALLOWSHAREUPLOAD = False
-    if not 'ALLOWSHARERUN' in settingkeys:
+    if 'ALLOWSHARERUN' not in settingkeys:
         settings.ALLOWSHARERUN = True
-    if not 'ALLOWSHAREDELETE' in settingkeys:
+    if 'ALLOWSHAREDELETE' not in settingkeys:
         settings.ALLOWSHAREDELETE = False
-    if not 'ALLOWANONSHAREUPLOAD' in settingkeys:
+    if 'ALLOWANONSHAREUPLOAD' not in settingkeys:
         settings.ALLOWSHAREUPLOAD = False
-    if not 'ALLOWANONSHARERUN' in settingkeys:
+    if 'ALLOWANONSHARERUN' not in settingkeys:
         settings.ALLOWSHARERUN = False
-    if not 'ALLOWANONSHAREDELETE' in settingkeys:
+    if 'ALLOWANONSHAREDELETE' not in settingkeys:
         settings.ALLOWSHAREDELETE = False
-    if not 'USERQUOTA' in settingkeys:
+    if 'USERQUOTA' not in settingkeys:
         settings.USERQUOTA = 0
-    if not 'PROFILES' in settingkeys:
+    if 'PROFILES' not in settingkeys:
         settings.PROFILES = []
-    if not 'INPUTSOURCES' in settingkeys:
+    if 'INPUTSOURCES' not in settingkeys:
         settings.INPUTSOURCES = []
-    if not 'PORT' in settingkeys and not PORT:
+    if 'PORT' not in settingkeys and not PORT:
         settings.PORT = 80
-    if not 'HOST' in settingkeys and not HOST:
+    if 'HOST' not in settingkeys and not HOST:
         settings.HOST = os.uname()[1]
-    if not 'URLPREFIX' in settingkeys:
+    if 'URLPREFIX' not in settingkeys:
         settings.URLPREFIX = ''
-    if not 'REQUIREMEMORY' in settingkeys:
+    if 'REQUIREMEMORY' not in settingkeys:
         settings.REQUIREMEMORY = 0 #unlimited
-    if not 'MAXLOADAVG' in settingkeys:
+    if 'MAXLOADAVG' not in settingkeys:
         settings.MAXLOADAVG = 0 #unlimited
-    if not 'MINDISKSPACE' in settingkeys:
-        if 'MINDISKFREE' in settingkeys:
+    if 'MINDISKSPACE' not in settingkeys:
+        if 'MINDISKFREE' not in settingkeys:
             settings.MINDISKSPACE = settingkeys['MINDISKFREE']
         else:
             settings.MINDISKSPACE = 0
-    if not 'DISK' in settingkeys:
+    if 'DISK' not in settingkeys:
         settings.DISK = None
-    if not 'STYLE' in settingkeys:
+    if 'STYLE' not in settingkeys:
         settings.STYLE = 'classic'
-    if not 'CLAMDIR' in settingkeys:
+    if 'CLAMDIR' not in settingkeys:
         settings.CLAMDIR = os.path.dirname(os.path.abspath(__file__))
-    if not 'DISPATCHER' in settingkeys:
+    if 'DISPATCHER' not in settingkeys:
         r = os.system('which clamdispatcher >/dev/null 2>/dev/null')
         if r == 0:
             settings.DISPATCHER = 'clamdispatcher'
@@ -2623,99 +2623,98 @@ def set_defaults():
             settings.DISPATCHER = 'clamdispatcher'
     if 'PROJECTS_PUBLIC' in settingkeys:
         print("NOTICE: PROJECTS_PUBLIC directive is obsolete and has no effect. You may be looking for LISTPROJECTS or ALLOWSHARE instead",file=sys.stderr)
-    if not 'REALM' in settingkeys:
+    if 'REALM' not in settingkeys:
         settings.REALM = settings.SYSTEM_ID
-    if not 'DIGESTOPAQUE' in settingkeys:
+    if 'DIGESTOPAQUE' not in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128) #TODO: not used now
-    if not 'OAUTH_ENCRYPTIONSECRET' in settingkeys:
+    if 'OAUTH_ENCRYPTIONSECRET' not in settingkeys:
         settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(32)
-    if not 'ENABLEWEBAPP' in settingkeys:
+    if 'ENABLEWEBAPP' not in settingkeys:
         settings.ENABLEWEBAPP = True
-    if not 'REMOTEHOST' in settingkeys:
+    if 'REMOTEHOST' not in settingkeys:
         settings.REMOTEHOST = None
-    elif not 'REMOTEUSER' in settingkeys:
+    elif 'REMOTEUSER' not in settingkeys:
         settings.REMOTEUSER = None
-    if not 'PREAUTHHEADER' in settingkeys:
+    if 'PREAUTHHEADER' not in settingkeys:
         settings.PREAUTHHEADER = None     #The name of the header field containing the pre-authenticated username
     elif isinstance(settings.PREAUTHHEADER,str):
         settings.PREAUTHHEADER = settings.PREAUTHHEADER.split(' ')
     else:
         settings.PREAUTHHEADER = None
-    if not 'USERS_MYSQL' in settingkeys:
+    if 'USERS_MYSQL' not in settingkeys:
         settings.USERS_MYSQL = None
-    if not 'FORCEURL' in settingkeys:
+    if 'FORCEURL' not in settingkeys:
         settings.FORCEURL = None
     if 'CLAMFORCEURL' in os.environ:
         settings.FORCEURL = os.environ['CLAMFORCEURL']
-    if not 'PRIVATEACCESSTOKEN' in settingkeys:
+    if 'PRIVATEACCESSTOKEN' not in settingkeys:
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
-    if not 'OAUTH' in settingkeys:
+    if 'OAUTH' not in settingkeys:
         settings.OAUTH = False
-    if not 'OAUTH_CLIENT_ID' in settingkeys:
+    if 'OAUTH_CLIENT_ID' not in settingkeys:
         settings.OAUTH_CLIENT_ID = settings.SYSTEM_ID
-    if not 'OAUTH_CLIENT_SECRET' in settingkeys:
+    if 'OAUTH_CLIENT_SECRET' not in settingkeys:
         settings.OAUTH_CLIENT_SECRET = ""
-    if not 'OAUTH_AUTH_URL' in settingkeys:
+    if 'OAUTH_AUTH_URL' not in settingkeys:
         settings.OAUTH_AUTH_URL = ""
-    if not 'OAUTH_TOKEN_URL' in settingkeys:
+    if 'OAUTH_TOKEN_URL' not in settingkeys:
         settings.OAUTH_TOKEN_URL = ""
-    if not 'OAUTH_REVOKE_URL' in settingkeys:
+    if 'OAUTH_REVOKE_URL' not in settingkeys:
         settings.OAUTH_REVOKE_URL = ""
-    if not 'OAUTH_SCOPE' in settingkeys:
+    if 'OAUTH_SCOPE' not in settingkeys:
         settings.OAUTH_SCOPE = []
-    if not 'OAUTH_USERNAME_FUNCTION' in settingkeys:
+    if 'OAUTH_USERNAME_FUNCTION' not in settingkeys:
         settings.OAUTH_USERNAME_FUNCTION = None
-    if not 'OAUTH_AUTH_FUNCTION' in settingkeys:
+    if 'OAUTH_AUTH_FUNCTION' not in settingkeys:
         settings.OAUTH_AUTH_FUNCTION = clam.common.oauth.DEFAULT_AUTH_FUNCTION
-    if not 'SECRET_KEY' in settingkeys:
+    if 'SECRET_KEY' not in settingkeys:
         print("WARNING: No explicit SECRET_KEY set in service configuration, generating one at random! This may cause problems with session persistence in production environments!" ,file=sys.stderr)
         settings.SECRET_KEY = "%032x" % random.getrandbits(128)
-    if not 'INTERFACEOPTIONS' in settingkeys:
+    if 'INTERFACEOPTIONS' not in settingkeys:
         settings.INTERFACEOPTIONS = ""
-    if not 'CUSTOMHTML_INDEX' in settingkeys:
+    if 'CUSTOMHTML_INDEX' not in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html'):
             with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_INDEX = f.read()
         else:
             settings.CUSTOMHTML_INDEX = ""
-    if not 'CUSTOMHTML_PROJECTSTART' in settingkeys:
+    if 'CUSTOMHTML_PROJECTSTART' not in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html'):
             with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectstart.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTSTART = f.read()
         else:
             settings.CUSTOMHTML_PROJECTSTART = ""
-    if not 'CUSTOMHTML_PROJECTDONE' in settingkeys:
+    if 'CUSTOMHTML_PROJECTDONE' not in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectdone.html'):
             with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectdone.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTDONE = f.read()
         else:
             settings.CUSTOMHTML_PROJECTDONE = ""
-    if not 'CUSTOMHTML_PROJECTFAILED' in settingkeys:
+    if 'CUSTOMHTML_PROJECTFAILED' not in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectfailed.html'):
             with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_projectfailed.html','r',encoding='utf-8') as f:
                 settings.CUSTOMHTML_PROJECTFAILED = f.read()
         else:
             settings.CUSTOMHTML_PROJECTFAILED = ""
 
-    if not 'CUSTOM_FORMATS' in settingkeys:
+    if 'CUSTOM_FORMATS' not in settingkeys:
         settings.CUSTOM_FORMATS = []
     clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS #dependency injection
 
-    if not 'ACTIONS' in settingkeys:
+    if 'ACTIONS' not in settingkeys:
         settings.ACTIONS = []
 
-    if not 'SESSIONDIR' in settingkeys:
+    if 'SESSIONDIR' not in settingkeys:
         settings.SESSIONDIR = os.path.join(settings.ROOT,'sessions')
 
-    if not 'ALLOW_ORIGIN' in settingkeys:
+    if 'ALLOW_ORIGIN' not in settingkeys:
         settings.ALLOW_ORIGIN = '*'
-
-    if not 'ASSUMESSL' in settingkeys:
+    if 'ASSUMESSL' not in settingkeys:
         settings.ASSUMESSL = settings.PORT == 443
 
-    if not 'BASICAUTH' in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+    if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
         settings.BASICAUTH = True #Allowing HTTP Basic ALONGSIDE HTTP Digest
-    elif not 'BASICAUTH' in settingkeys:
+    elif 'BASICAUTH' not in settingkeys:
         settings.BASICAUTH = False #default is HTTP Digest
 
 def test_dirs():
