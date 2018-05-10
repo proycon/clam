@@ -47,7 +47,7 @@ import clam.common.oauth
 import clam.common.data
 from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
 import clam.config.defaults as settings #will be overridden by real settings later
-settings.STANDALONEURLPREFIX = ''
+settings.INTERNALURLPREFIX = ''
 
 if sys.version < '3':
     from urllib import urlencode
@@ -2449,59 +2449,59 @@ class CLAMService(object):
         self.service.jinja_env.trim_blocks = True
         self.service.jinja_env.lstrip_blocks = True
         self.service.secret_key = settings.SECRET_KEY
-        printdebug("Registering main entrypoint: " + settings.STANDALONEURLPREFIX + "/")
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
-        printdebug("Registering info entrypoint: " + settings.STANDALONEURLPREFIX + "/info/")
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info/', 'info', info, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
+        printdebug("Registering main entrypoint: " + settings.INTERNALURLPREFIX + "/")
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
+        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
 
         #versions without trailing slash so no automatic 301 redirect is needed
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/info', 'info2', info, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status', 'project_status_json2', Project.status_json, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload', 'project_uploader2', uploader, methods=['POST'] ) #has it's own login mechanism
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_get2', self.auth.require_login(Project.get), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_start2', self.auth.require_login(Project.start), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_new2', self.auth.require_login(Project.new), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>', 'project_delete2', self.auth.require_login(Project.delete), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip', 'project_download_zip2', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input', 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/status', 'project_status_json2', Project.status_json, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/upload', 'project_uploader2', uploader, methods=['POST'] ) #has it's own login mechanism
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>', 'project_get2', self.auth.require_login(Project.get), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>', 'project_start2', self.auth.require_login(Project.start), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>', 'project_new2', self.auth.require_login(Project.new), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>', 'project_delete2', self.auth.require_login(Project.delete), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/zip', 'project_download_zip2', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/gz', 'project_download_targz2', self.auth.require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2', 'project_download_tarbz22', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output', 'project_download_zip3', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input', 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
 
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/admin/<command>/<targetuser>/<project>/', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/actions/<actionid>/', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/zip/', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/gz/', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_download_zip4', self.auth.require_login(Project.download_zip), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/input/', 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/status/', 'project_status_json', Project.status_json, methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/upload/', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_start', self.auth.require_login(Project.start), methods=['POST'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
-        self.service.add_url_rule(settings.STANDALONEURLPREFIX + '/<project>/', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/<command>/<targetuser>/<project>/', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/zip/', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/gz/', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_download_zip4', self.auth.require_login(Project.download_zip), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/<path:filename>', 'project_deleteinputfile', self.auth.require_login(Project.deleteinputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/<path:filename>', 'project_addinputfile', self.auth.require_login(Project.addinputfile), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/', 'project_addinputfile2', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/status/', 'project_status_json', Project.status_json, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/upload/', 'project_uploader', uploader, methods=['POST'] ) #has it's own login mechanism
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/', 'project_get', self.auth.require_login(Project.get), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/', 'project_start', self.auth.require_login(Project.start), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/', 'project_new', self.auth.require_login(Project.new), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/', 'project_delete', self.auth.require_login(Project.delete), methods=['DELETE'] )
 
 
         self.mode = mode
@@ -2543,7 +2543,8 @@ def set_defaults():
     #Default settings
     settingkeys = dir(settings)
 
-    settings.STANDALONEURLPREFIX = ''
+    if 'INTERNALURLPREFIX' not in settingkeys:
+        settings.INTERNALURLPREFIX = ''
 
     for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:
         if not s in settingkeys:
@@ -2853,7 +2854,7 @@ def main():
         settings.BASICAUTH = True
 
     if settings.URLPREFIX:
-        settings.STANDALONEURLPREFIX = settings.URLPREFIX
+        settings.INTERNALURLPREFIX = settings.URLPREFIX
         warning("Using URLPREFIX in standalone mode! Are you sure this is what you want?")
         #raise Exception("Can't use URLPREFIX when running in standalone mode!")
     settings.URLPREFIX = '' #standalone server always runs at the root
