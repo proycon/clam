@@ -2602,7 +2602,7 @@ def set_defaults():
     if 'MAXLOADAVG' not in settingkeys:
         settings.MAXLOADAVG = 0 #unlimited
     if 'MINDISKSPACE' not in settingkeys:
-        if 'MINDISKFREE' not in settingkeys:
+        if 'MINDISKFREE' in settingkeys:
             settings.MINDISKSPACE = settingkeys['MINDISKFREE']
         else:
             settings.MINDISKSPACE = 0
