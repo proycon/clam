@@ -38,7 +38,7 @@
 
 \HRule \\[0.5cm]
 { \Large \bfseries CLAM: Computational Linguistics Application Mediator}\\[0.5cm] % Title of your document
-{\bf \small version 2.3$+$ - revision 1.9} \\[0.5cm]
+{\bf \small version 2.3$+$ - revision 1.10} \\[0.5cm]
 { \Large \bfseries Documentation}\\[0.5cm]
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
@@ -617,10 +617,10 @@ tested. Other webservers (such as for example lighttpd), should work too.
 
 \subsection{Overriding host, port and urlprefix at runtime}
 
-CLAM must know precisely with at which host, port and URLPREFIX it will be
-served, otherwise browsers will refuse to render the web interface and you will
-get an error ``error loading stylesheet'', or a blank page entirely.  The same
-CLAM service can never be accessed through different aliases.
+%CLAM must know precisely with at which host, port and URLPREFIX it will be
+%served, otherwise browsers will refuse to render the web interface and you will
+%get an error ``error loading stylesheet'', or a blank page entirely.  The same
+%CLAM service can never be accessed through different aliases.
 
 The HOST, PORT and URLPREFIX are configured in the service configuration file,
 CLAM will attempt to automatically guess them when they are not explicitly set.
@@ -653,6 +653,9 @@ You may possibly encounter one of the following issues when attempting to access
   not work and I am always logged in as anonymous} -- Check that
   \texttt{WSGIPassAuthorization On} is set in your Apache configuration, and
   \texttt{USERS}, \texttt{USERS\_MYSQL} or \texttt{OAUTH} is configured in your service configuration file.
+\item \textbf{I am using \texttt{URLPREFIX} but CLAM tries to interpret the prefix as a project name} - This might
+    happen in some WSGI setups. If this happens, set \texttt{INTERNALURLPREFIX} to the same value as \texttt{URLPREFIX}.
+    Always leave it empty in any other scenario.
 
 \end{enumerate}
 
@@ -799,7 +802,9 @@ its own virtual host, it is often configured at a different URL rather than the
 webserver root. In this case, the value of \texttt{URLPREFIX} should be
 configured accordingly. If you want your webservice to run at
 \url{http://yourhost.com/yourwebservice/} for instance, then the
-\texttt{URLPREFIX} should be set to \texttt{yourwebservice}.
+\texttt{URLPREFIX} should be set to \texttt{yourwebservice}. Only in cases where the URL wrongly propagates to CLAM
+(i.e. CLAM tries to interpret your urlprefix as a project), you need to set \texttt{INTERNALURLPREFIX} to the same
+value. This might happen in certain WSGI set-ups, leave it unset in all other scenarios.
 
 In order to keep server load manageable, three methods are configurable in the
 service configuration file. First, you can set the variable
