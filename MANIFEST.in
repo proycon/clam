@@ -1,5 +1,6 @@
 include README.rst
 include COPYING
+include codemeta.json
 include requirements.txt
 include clam/static/*.*
 include clam/custom/*
