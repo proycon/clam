@@ -110,7 +110,7 @@
 					<xsl:for-each select="//profile">
                       <li>Profile #<xsl:value-of select="position()" /><ul>
 					  <xsl:for-each select=".//OutputTemplate">
-                          <li><tt><xsl:value-of select="@id" /></tt>  - <strong><xsl:value-of select="@label" /> (<em><xsl:value-of select="@format" /></em>)</strong>. <xsl:if test="@parent">[from input template <tt><xsl:value-of select="@parent" /></tt>]</xsl:if></li>
+                          <li><tt><xsl:value-of select="@id" /></tt>  - <strong><xsl:value-of select="@label" /> (<em><xsl:value-of select="@format" /></em>, <xsl:if test="@extension"><tt>*.<xsl:value-of select="@extension" /></tt></xsl:if> <xsl:if test="@filename"><tt><xsl:value-of select="@filename" /></tt></xsl:if> <xsl:if test="@mimetype"><tt><xsl:value-of select="@mimetype" /></tt></xsl:if>)</strong>. <xsl:if test="@parent">[from input template <tt><xsl:value-of select="@parent" /></tt>]</xsl:if></li>
 					  </xsl:for-each>
                       </ul></li>
                     </xsl:for-each>
