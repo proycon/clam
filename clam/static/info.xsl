@@ -103,7 +103,7 @@
 			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
 			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
             </ul><br/>
-            Curl example (getting project state only, no intepretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
+            Curl example (getting project state only, no interpretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
 			</li>
 			<li><strong>Retrieve the desired output file(s)</strong> - Issue a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/output/<em>{outputfilename}</em></tt>.  A list of available output files can be obtained by querying the project's state (HTTP GET on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>) and iterating over <tt>/CLAM/output/file/name</tt> (XPath). A <tt>template</tt> attribute will be available on these nodes indicating what output template was responsible for generating this file. The following output templates are defined for this webservice (grouped per profile):
 				<ol>
