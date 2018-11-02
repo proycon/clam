@@ -24,7 +24,7 @@ if [ $? -ne 0 ]; then
 fi
 
 cd /tmp
-clamnewproject -f clamnewprojecttest
+clamnewproject -f clamnewprojecttest --noninteractive
 if [ $? -ne 0 ]; then
    echo "ERROR: clamnewproject didn't run well" >&2
    GOOD=0

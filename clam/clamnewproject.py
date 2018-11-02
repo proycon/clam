@@ -42,6 +42,7 @@ def main():
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in production environments", action='store',default=8888,required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
+    parser.add_argument('--noninteractive',help="Non-interactive mode, don't ask questions", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('sysid',type=str, help='System ID')
     args = parser.parse_args()
@@ -49,7 +50,7 @@ def main():
     createvenv = False
     if 'CONDA_PREFIX' in os.environ:
         print("NOTICE: Anaconda detected")
-    elif 'VIRTUAL_ENV' not in os.environ:
+    elif 'VIRTUAL_ENV' not in os.environ and not args.noninteractive:
         print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended")
         yn = None
         while yn.strip().lower() not in ('y','yes','n','no'):
