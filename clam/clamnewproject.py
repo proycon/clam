@@ -216,7 +216,7 @@ uwsgi {sysid}.ini || cat {sysid}.uwsgi.log
     with io.open(os.path.join(rootdir, 'startserver_development.sh'),'w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
 python setup.py install
-clamservice -d {sysid}
+clamservice -d {sysid}.{sysid}
 """.format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
     os.chmod(os.path.join(rootdir, 'startserver_development.sh'), 0o755)
 
