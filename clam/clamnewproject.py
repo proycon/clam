@@ -133,7 +133,7 @@ def main():
         fout = io.open(os.path.join(rootdir, 'setup.py'),'w',encoding='utf-8')
         for line in fin:
             line = line.replace("SYSTEM_ID", args.sysid)
-            print(line,file=fout)
+            print(line,end="",file=fout)
         fout.close()
         fin.close()
 
