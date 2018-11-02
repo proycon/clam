@@ -29,7 +29,7 @@ import clam
 import sys
 import os
 
-REQUIRE_VERSION = 0.99
+REQUIRE_VERSION = 2.3
 
 CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
 WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
@@ -52,7 +52,8 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 #Either add a section for your host here, or
 #specify these variables in an external yaml file
-#called $hostname.yaml or config.yaml and use the loadconfig() mechanism:
+#called $hostname.yaml or config.yaml and use the loadconfig() mechanism.
+#Such an external file will be looked for my default and is the recommended way.
 
 host = os.uname()[1]
 if host == "yourhostname":
@@ -73,6 +74,23 @@ if host == "yourhostname":
 
     #Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
     #FORCEURL = "http://yourhostname.com"
+
+    # ======== AUTHENTICATION & SECURITY ===========
+
+    #Users and passwords
+
+    #set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
+    #REALM = SYSTEM_ID
+
+    USERS = None #no user authentication/security (this is not recommended for production environments!)
+    #If you want to enable user-based security, you can define a dictionary
+    #of users and (hashed) passwords here. The actual authentication will proceed
+    #as HTTP Digest Authentication. Although being a convenient shortcut,
+    #using pwhash and plaintext password in this code is not secure!!
+
+    #USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
+
+    ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
 else:
     #This invokes the automatic loader, do not change it;
     #it will try to find a file named $system_id.$hostname.yml or just $hostname.yml, where $hostname
@@ -85,23 +103,7 @@ else:
 
 
 
-# ======== AUTHENTICATION & SECURITY ===========
 
-#Users and passwords
-
-#set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
-#REALM = SYSTEM_ID
-
-USERS = None #no user authentication/security (this is not recommended for production environments!)
-
-ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
-
-#If you want to enable user-based security, you can define a dictionary
-#of users and (hashed) passwords here. The actual authentication will proceed
-#as HTTP Digest Authentication. Although being a convenient shortcut,
-#using pwhash and plaintext password in this code is not secure!!
-
-#USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
 REQUIREMEMORY = 10
