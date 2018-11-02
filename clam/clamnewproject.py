@@ -132,6 +132,7 @@ def main():
         fout = io.open(os.path.join(rootdir, 'setup.py'),'w',encoding='utf-8')
         for line in fin:
             line = line.replace("SYSTEM_ID", args.sysid)
+            print(line,file=fout)
         fout.close()
         fin.close()
 
@@ -208,7 +209,7 @@ Alias /static {clamdir}/static
     with io.open(os.path.join(rootdir, 'startserver_production.sh'),'w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
 python setup.py install
-uwsgi --config {sysid}.ini
+uwsgi {sysid}.ini || cat {sysid}.uwsgi.log
 """.format(sourcedir=sourcedir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
     os.chmod(os.path.join(rootdir , 'startserver_production.sh'), 0o755)
 
@@ -226,11 +227,21 @@ clamservice -d {sysid}
     else:
         virtualenv = None
 
+    with io.open(os.path.join(sourcedir,'config.yml'),'w',encoding='utf-8') as f:
+        f.write("""
+host: {hostname}
+root: {rootdir}/userdata
+port: {port}
+""".format(hostname=args.hostname,sourcedir=sourcedir,port=args.port))
+    if args.forceurl:
+        with io.open(os.path.join(sourcedir,'config.yml'),'a',encoding='utf-8') as f:
+            f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
+
     with io.open(os.path.join(rootdir,args.sysid + '.ini'),'w',encoding='utf-8') as f:
-        f.write("""[uwsgi]\n
+        f.write("""[uwsgi]
 socket = 127.0.0.1:{uwsgiport}
 master = true
-plugins = {uwsgiplugin},logfile
+#plugins = {uwsgiplugin},logfile
 logger = file:{rootdir}/{sysid}.uwsgi.log
 mount = /={sourcedir}/{sysid}.wsgi
 #if you configured a URL prefix then you may want to use this instead:
