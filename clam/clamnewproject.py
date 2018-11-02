@@ -261,7 +261,7 @@ threads = 2
 __pycache__/
 *.py[cod]
 build/
-dist
+dist/
 *.egg
 *.egg-info
 env/
