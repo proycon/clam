@@ -262,6 +262,8 @@ __pycache__/
 *.py[cod]
 build/
 dist/
+userdata/
+*.log
 *.egg
 *.egg-info
 env/
