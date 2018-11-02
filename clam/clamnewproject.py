@@ -232,7 +232,7 @@ clamservice -d {sysid}
 host: {hostname}
 root: {rootdir}/userdata
 port: {port}
-""".format(hostname=args.hostname,sourcedir=sourcedir,port=args.port))
+""".format(hostname=args.hostname,rootdir=rootdir,port=args.port))
     if args.forceurl:
         with io.open(os.path.join(sourcedir,'config.yml'),'a',encoding='utf-8') as f:
             f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
