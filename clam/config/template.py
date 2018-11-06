@@ -109,11 +109,11 @@ else:
 REQUIREMEMORY = 10
 
 #Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
-MAXLOADAVG = 4.0
+#MAXLOADAVG = 4.0
 
 #Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
-DISK = '/dev/sda1' #set this to the disk where ROOT is on
-MINDISKSPACE = 10
+#DISK = '/dev/sda1' #set this to the disk where ROOT is on
+#MINDISKSPACE = 10
 
 #The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
 #USERQUOTA = 100

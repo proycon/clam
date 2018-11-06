@@ -43,7 +43,7 @@
 {\large \emph{Maarten van Gompel}}\\[0.5cm]
 \HRule \\[1.0cm]
 
-\emph{November 11th, 2014 (date published) - March 16th, 2018 (last revision)} \\[0.5cm]
+\emph{November 11th, 2014 (date published) - November 6th, 2018 (last revision)} \\[0.5cm]
 \includegraphics[width=20.0mm]{ru-beeldmerk-zwart.eps}
 \end{center}
 
@@ -726,26 +726,34 @@ $ clamnewproject myfirstproject
 \end{verbatim}
 }
 
-The tool will create a directory named after the identifier, in which three
-template files are created which are similarly named after the chosen
-identifier. You are expected to edit the service configuration file, a Python
-script, and one of the two system wrapper scripts (choose Python or Bash, or write
-one from scratch in your favourite language). The scripts are heavily commented
-to help you along, along with the documentation you are reading, this should
-provide you with all knowledge necessary to make a webservice.
+The tool will create a directory named after the identifier, in which three template files are created which are
+similarly named after the chosen identifier. You are expected to edit the service configuration file, a Python script,
+as well as a host-specific configuration file and one of the two system wrapper scripts (choose Python or Bash, or write
+one from scratch in your favourite language). The scripts are heavily commented to help you along, along with the
+documentation you are reading, this should provide you with all knowledge necessary to make a webservice.
 
 \begin{itemize}
-\item \texttt{myfirstproject.py} - Service Configuration File
-\item \texttt{myfirstproject\_wrapper.py} - System Wrapper Script in Python (this is recommended over the bash version for more complex webservices)
-\item \texttt{myfirstproject\_wrapper.sh} - System Wrapper Script in Bash (only suggested for simple webservices)
+\item \texttt{myfirstproject/myfirstproject.py} - Service Configuration File
+\item \texttt{myfirstproject/myfirstproject.\$HOSTNAME.yml} - Host-specific external configution file which is
+    automatically included from the service configuration file if ran on the specified host. This will be addressed in
+    Section~\ref{sec:externalconf}.
+\item \texttt{myfirstproject/myfirstproject\_wrapper.py} - System Wrapper Script in Python (this is recommended over the
+    bash version, suited for more complex webservices)
+\item \texttt{myfirstproject/myfirstproject\_wrapper.sh} - System Wrapper Script in Bash (only suggested for simple webservices)
+\item \texttt{myfirstproject/myfirstproject.wsgi} - WSGI script, you probably don't need to edit this
+\item \texttt{setup.py} - Installation script (edit the metadata in here), run \texttt{python setup.py install} for
+    installation in production environments or \texttt{python setup.py develop} for installation during development.
+    (the start scripts mentioned below do this automatically for you)
+\item \texttt{INSTRUCTIONS.rst} - Automatically generated instructions
 \end{itemize}
 
 Moreover, some scripts and sample configurations are generated:
 
 \begin{itemize}
-\item \texttt{startserver\_development.sh} - Start your webservice using the development server
+\item \texttt{startserver\_development.sh} - Start your webservice using the built-in development server
 \item \texttt{startserver\_production.sh} - Start your webservice using the production server using uwsgi. To use this you will need to configure your webservice (e.g. Apache or nginx).
-\item \texttt{*.conf} - Sample configuration files for production environments using a Apache 2 or Nginx. Consult sections~\ref{sec:uwsgi} and~\ref{sec:uwsginginx} for details.
+\item \texttt{myfirstproject.\$HOSTNAME.ini} - Uwsgi configuration (for a specific host), used for production environments
+\item \texttt{*.conf} - Sample configuration files for production environments using a Apache 2 or Nginx webserver. Consult sections~\ref{sec:uwsgi} and~\ref{sec:uwsginginx} for details.
 \end{itemize}
 
 These template files need to be edited for your particular application.  They
@@ -855,6 +863,9 @@ automatically search for external configuration files and includes any variables
 defined directly. The power of this mechanism lies in the fact that it allows you to load a different external
 configuration file for hosts, allowing you to deploy your CLAM service on multiple hosts without changing the core
 of the service configuration.
+
+The use of external configuration files is recommend and is also the default if you create new projects with
+\texttt{clamnewproject}.
 
 The procedure is as follows, CLAM's \texttt{loadconfig()} function will attempt to search for a file named as follows,
 in the following order:

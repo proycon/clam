@@ -188,6 +188,7 @@ location @{sysid} {{
 
 ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
 
+#You will likely need to adapt the reference to path {clamdir} if you move this to another system
 Alias /{sysid}/static {clamdir}/static
 <Directory {clamdir}/static/>
     Order deny,allow
@@ -200,6 +201,7 @@ Alias /{sysid}/static {clamdir}/static
 
 ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
 
+#You will likely need to adapt the reference to path {clamdir} if you move this to another system
 Alias /static {clamdir}/static
 <Directory {clamdir}/static/>
     Order deny,allow
@@ -207,16 +209,14 @@ Alias /static {clamdir}/static
 </Directory>
 """.format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
 
-    with io.open(os.path.join(rootdir, 'startserver_production.sh'),'w',encoding='utf-8') as f:
-        f.write("""#!/bin/bash
-python setup.py install
-uwsgi {sysid}.ini || cat {sysid}.uwsgi.log
-""".format(sourcedir=sourcedir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
-    os.chmod(os.path.join(rootdir , 'startserver_production.sh'), 0o755)
 
     with io.open(os.path.join(rootdir, 'startserver_development.sh'),'w',encoding='utf-8') as f:
         f.write("""#!/bin/bash
-python setup.py install
+if [ ! -z "$VIRTUAL_ENV" ]; then
+    python setup.py develop
+else
+    echo "No virtual environment detected, you have to take care of  running setup.py install or setup.py develop yourself!">&2
+fi
 clamservice -d {sysid}.{sysid}
 """.format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
     os.chmod(os.path.join(rootdir, 'startserver_development.sh'), 0o755)
@@ -228,17 +228,22 @@ clamservice -d {sysid}.{sysid}
     else:
         virtualenv = None
 
-    with io.open(os.path.join(sourcedir,'config.yml'),'w',encoding='utf-8') as f:
+    if args.hostname:
+        hostname = args.hostname
+    else:
+        hostname = os.uname()[1]
+    with io.open(os.path.join(sourcedir,args.sysid + '.' + hostname + '.yml'),'w',encoding='utf-8') as f:
         f.write("""
 host: {hostname}
 root: {rootdir}/userdata
 port: {port}
-""".format(hostname=args.hostname,rootdir=rootdir,port=args.port))
+""".format(hostname=hostname,rootdir=rootdir,port=args.port))
     if args.forceurl:
-        with io.open(os.path.join(sourcedir,'config.yml'),'a',encoding='utf-8') as f:
+        with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
             f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
 
-    with io.open(os.path.join(rootdir,args.sysid + '.ini'),'w',encoding='utf-8') as f:
+
+    with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'w',encoding='utf-8') as f:
         f.write("""[uwsgi]
 socket = 127.0.0.1:{uwsgiport}
 master = true
@@ -253,9 +258,26 @@ threads = 2
 #manage-script-name = yes
 """.format(sourcedir=sourcedir, rootdir=rootdir,sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport, virtual_env=os.environ['VIRTUAL_ENV']))
     if virtualenv:
-        with io.open(os.path.join(rootdir,args.sysid + '.ini'),'a',encoding='utf-8') as f:
+        with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'a',encoding='utf-8') as f:
             f.write("virtualenv = " + virtualenv + "\n")
             f.write("chdir = " + virtualenv + "\n")
+
+    with io.open(os.path.join(rootdir, 'startserver_production.sh'),'w',encoding='utf-8') as f:
+        f.write("""#!/bin/bash
+if [ ! -z "$VIRTUAL_ENV" ]; then
+    python setup.py install
+else
+    echo "No virtual environment detected, you have to take care of running setup.py install or setup.py develop yourself!">&2
+fi
+HOSTNAME=$(hostname)
+echo "Detected hostname: $HOSTNAME">&2
+if [ ! -f "{sysid}.$HOSTNAME.ini" ]; then
+        echo "Expected uwsgi configuration {sysid}.$HOSTNAME.ini not found. Did you make one for the host you are running on?">&2
+        exit 2
+fi
+uwsgi {sysid}.$HOSTNAME.ini || cat {sysid}.uwsgi.log
+""".format(sourcedir=sourcedir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
+    os.chmod(os.path.join(rootdir , 'startserver_production.sh'), 0o755)
 
     with io.open(os.path.join(rootdir, '.gitignore'),'w',encoding='utf-8') as f:
         f.write("""
@@ -281,13 +303,19 @@ env/
 DEVELOP YOUR WEBSERVICE
 ----------------------------
 
-To develop your webservice, edit your service configuration file
-``{sourcedir}/{sysid}.py`` , and your system wrapper script ``{sourcedir}/{sysid}_wrapper.py`` , or
-``{sourcedir}/{sysid}_wrapper.sh`` if you prefer to use a simple shell script rather than
-Python. Consult the CLAM Documentation and/or instruction videos on
+To develop your webservice, edit your service configuration file ``{sourcedir}/{sysid}.py`` , the host specific
+configuration file ``{sourcedir}/{sysid}.$HOSTNAME.yml``, and your system wrapper script
+``{sourcedir}/{sysid}_wrapper.py`` (or ``{sourcedir}/{sysid}_wrapper.sh`` if you prefer to use a simple shell script
+rather than Python).
+
+Keep host-specific settings out of the service configuration file and instead put it in the respective
+config.$HOSTNAME.yml file that is automatically included by the service configuration. Create a new one for each host
+you plan to deploy this webservice on.
+
+Consult the CLAM Documentation and/or instruction videos on
 https://proycon.github.io/clam for further details on how to do this.
 
-Also don't forget to edit the metadata in the setup script ``{rootdir}/setup.py`` .
+Also don't forget to edit the metadata in the setup script ``{rootdir}/setup.py`` and run ``python setup.py install`` to install the webservice after you made any changes (the start scripts provided will do so automatically for you).
 """.format(sourcedir=sourcedir,rootdir=rootdir,sysid=args.sysid)
 
 
@@ -319,8 +347,10 @@ DEPLOYING YOUR WEBSERVICE (for system administrators)
 -------------------------------------------------------
 
 For production use, we recommend using uwsgi in combination with a webserver
-such as Apache (with mod_uwsgi_proxy), or nginx. A wsgi script and sample
-configuration has been generated  as a starting point. Use the
+such as Apache (with mod_uwsgi_proxy), or nginx. A uwsgi configuration has been generated ({sysid}.$HOSTNAME.ini); it is specific
+to the host you deploy the webservice on. This in turn loads the wsgi script ({sysid}.wsgi), which loads your webservice.
+
+Sample configurations for nginx and Apache have been generated as a starting point, add these to your server and then use the
 ``./startserver_production.sh`` script to launch CLAM using uwsgi.
 
 VERSION CONTROL
@@ -333,6 +363,11 @@ To create a new git repository::
     git init
     git add *
     git commit -m "generated by clamnewproject"
+
+VIRTUAL ENVIRONMENT
+--------------------
+
+We strongly recommend the use of a Python virtual environment for your CLAM webservice, both in development and in production.
 """.format(rootdir=rootdir,sysid=args.sysid)
 
     print( s2,file=sys.stderr)
