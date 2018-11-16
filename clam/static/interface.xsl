@@ -199,7 +199,7 @@
             <xsl:if test="/clam/author != ''">
                 <xsl:choose>
                     <xsl:when test="/clam/email != ''">
-                        by <a href="mailto:{/clam/email}"><strong><em><xsl:value-of select="/clam/email" /></em></strong></a>
+                        by <a href="mailto:{/clam/email}"><strong><em><xsl:value-of select="/clam/author" /></em></strong></a>
                     </xsl:when>
                     <xsl:otherwise>
                         by <strong><em><xsl:value-of select="/clam/author" /></em></strong>
