@@ -49,6 +49,7 @@ class AbstractParameter(object):
         self.require = []
         self.forbid = []
         self.validator = None
+        self.default = None #None is a viable default for ALL parameter types because None means that the parameter is unset, so do not set this to False, 0, "" or 0.0 or something, only the user may do that with a default= parameter.
 
         #: You can restrict this parameter to only be available to certain users, set the usernames you want to allow here, all others are denied
         self.allowusers = []
@@ -61,8 +62,10 @@ class AbstractParameter(object):
                 self.allowusers = value  #Users to allow access to this parameter (If not set, all users have access)
             elif key == 'denyusers':
                 self.denyusers = value   #Users to deny access to this parameter (If not set, nobody is denied)
-            elif key == 'value' or key == 'default':
-                #set an error message
+            elif key == 'default' and 'value' not in kwargs:
+                if self.set(value):
+                    self.default = self.value
+            elif key == 'value':
                 self.set(value)
             elif key == 'required':
                 self.required = value  #Mandatory parameter?
@@ -191,7 +194,7 @@ class AbstractParameter(object):
         if self.id in postdata:
             return postdata[self.id]
         else:
-            return None
+            return self.default
 
 
     def access(self, user):
@@ -292,13 +295,14 @@ class BooleanParameter(AbstractParameter):
             return ""
 
     def valuefrompostdata(self, postdata):
-        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set()"""
-        if not self.id in postdata:
-            return False #False instead of None
-        elif self.id in postdata and ( (isinstance(postdata[self.id], bool) and postdata[self.id]) or postdata[self.id] == 1 or postdata[self.id] == '1'  or postdata[self.id].lower() == 'true' or postdata[self.id].lower() == 'yes' or postdata[self.id].lower() == 'enabled'):
-            return True #postdata[self.id]
+        """This parameter method searches the POST data and retrieves the values it needs. It does not set the value yet though, but simply returns it. Needs to be explicitly passed to parameter.set(). It typically returns the default None when something is left unset (but that default can be overridden)"""
+        if self.id in postdata:
+            if ( (isinstance(postdata[self.id], bool) and postdata[self.id]) or postdata[self.id] == 1 or postdata[self.id].lower() in ('true','yes','enabled','1')):
+                return True #postdata[self.id]
+            else:
+                return False
         else:
-            return False
+            return self.default
 
 
 class StaticParameter(AbstractParameter):
@@ -318,7 +322,7 @@ class StringParameter(AbstractParameter):
         """Keyword arguments::
 
             ``maxlength`` - The maximum length of the value, in number of characters
-            ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple. 
+            ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple.
         """
 
         self.maxlength = 0 #unlimited
@@ -373,7 +377,7 @@ class ChoiceParameter(AbstractParameter):
         multi   - (boolean) User may select multiple values? (parameter value will be a list)
         delimiter - The delimiter between multiple options (if multi=True), and
                     when used on the command line.
-        ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple. 
+        ``validator`` - A custom validator function expecting one parameter (the value) and returning either a boolean or a (boolean, errormsg) tuple.
         """
 
 
@@ -391,7 +395,7 @@ class ChoiceParameter(AbstractParameter):
         self.delimiter = ","
         self.showall = False
         self.multi = False
-        if 'value' not in kwargs and 'default' not in kwargs and ('multi' not in kwargs or not kwargs['multi']):
+        if  'value' not in kwargs and 'default' not in kwargs and ('multi' not in kwargs or not kwargs['multi']):
             self.value = self.choices[0][0] #no default specified, first choice is default
 
         if 'multi' in kwargs and kwargs['multi']:
@@ -536,8 +540,8 @@ class IntegerParameter(AbstractParameter):
         self.maxvalue = 0 #unlimited
 
         #defaults
-        if 'default' not in kwargs and 'value' not in kwargs:
-            self.value = 0
+        if 'value' not in kwargs:
+            self.value = self.default
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
@@ -572,7 +576,7 @@ class IntegerParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id] != '':
             return int(postdata[self.id])
         else:
-            return None
+            return self.default
 
     def set(self, value):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
@@ -597,8 +601,8 @@ class FloatParameter(AbstractParameter):
 
 
         #defaults
-        if 'default' not in kwargs and 'value' not in kwargs:
-            self.value = 0.0
+        if 'value' not in kwargs:
+            self.value = self.default
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = float(value)
@@ -645,5 +649,5 @@ class FloatParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id] != '':
             return float(postdata[self.id])
         else:
-            return None
+            return self.default
 
