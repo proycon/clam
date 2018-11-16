@@ -541,7 +541,7 @@ class IntegerParameter(AbstractParameter):
 
         #defaults
         if 'value' not in kwargs:
-            self.value = self.default
+            self.value = 0
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = int(value)
@@ -602,7 +602,7 @@ class FloatParameter(AbstractParameter):
 
         #defaults
         if 'value' not in kwargs:
-            self.value = self.default
+            self.value = 0.0
         for key, value in list(kwargs.items()):
             if key == 'minvalue' or key == 'min':
                 self.minvalue = float(value)
