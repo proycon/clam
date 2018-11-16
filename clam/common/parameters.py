@@ -62,9 +62,10 @@ class AbstractParameter(object):
                 self.allowusers = value  #Users to allow access to this parameter (If not set, all users have access)
             elif key == 'denyusers':
                 self.denyusers = value   #Users to deny access to this parameter (If not set, nobody is denied)
-            elif key == 'default' and 'value' not in kwargs:
-                if self.set(value):
-                    self.default = self.value
+            elif key == 'default':
+                if 'value' not in kwargs:
+                    if self.set(value):
+                        self.default = self.value
             elif key == 'value':
                 self.set(value)
             elif key == 'required':
