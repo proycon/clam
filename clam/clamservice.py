@@ -938,6 +938,7 @@ class Project:
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
                 system_version=settings.SYSTEM_VERSION,
+                system_author=settings.SYSTEM_AUTHOR,
                 system_email=settings.SYSTEM_EMAIL,
                 user=user,
                 project=project,
@@ -2560,9 +2561,11 @@ def set_defaults():
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
     if 'SYSTEM_VERSION' not in settingkeys:
-        settings.SYSTEM_VERSION = "0"
+        settings.SYSTEM_VERSION = ""
     if 'SYSTEM_EMAIL' not in settingkeys:
-        settings.SYSTEM_EMAIL = None
+        settings.SYSTEM_EMAIL = ""
+    if 'SYSTEM_AUTHOR' not in settingkeys:
+        settings.SYSTEM_AUTHOR = ""
     if 'USERS' not in settingkeys:
         settings.USERS = None
     if 'ADMINS' not in settingkeys:

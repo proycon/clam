@@ -48,6 +48,17 @@ SYSTEM_NAME = ""
 #An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
 SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
+#A version label of the underlying tool and/or this CLAM wrapper
+#(If you can derive this dynamically then that is strongly recommended!)
+#SYSTEM_VERSION = 0.1
+
+#The author(s) of the underlying tool and/or this CLAM wrapper
+#(If you can derive this dynamically then that is strongly recommended!)
+#SYSTEM_AUTHOR = ""
+
+#How to reach the authors?
+#SYSTEM_EMAIL = ""
+
 # ======== LOCATION ===========
 
 #Either add a section for your host here, or

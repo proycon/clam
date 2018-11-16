@@ -16,6 +16,7 @@
 {############################################################################################}
     <description>{{ system_description }}</description>
     <version>{{ system_version }}</version>
+    <author>{{ system_author }}</author>
     <email>{{ system_email }}</email>
 {############################################################################################}
 {% if customhtml %}
