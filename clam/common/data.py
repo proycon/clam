@@ -679,6 +679,12 @@ class CLAMData(object):
         except KeyError:
             raise
 
+    def get(self, parameter_id, default=None):
+        try:
+            return self[parameter_id]
+        except KeyError:
+            return default
+
     def __setitem__(self, parameter_id, value):
         """Set the value of the specified global parameter"""
         for parametergroup, parameters in self.parameters: #pylint: disable=unused-variable
