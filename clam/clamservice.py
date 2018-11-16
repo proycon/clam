@@ -209,7 +209,7 @@ class Login(object):
         if not 'access_token' in d:
             return withheaders(flask.make_response('No access token received from authorization provider',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, system_version=settings.SYSTEM_VERSION, system_email=settings.SYSTEM_EMAIL, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))), headers={'allow-origin': settings.ALLOW_ORIGIN} )
+        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, system_author=settings.SYSTEM_AUTHOR, system_version=settings.SYSTEM_VERSION, system_email=settings.SYSTEM_EMAIL, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))), headers={'allow-origin': settings.ALLOW_ORIGIN} )
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
@@ -386,6 +386,7 @@ def index(credentials = None):
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
+            system_author=settings.SYSTEM_AUTHOR,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             user=user,
@@ -437,6 +438,7 @@ def info(credentials=None):
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
+            system_author=settings.SYSTEM_AUTHOR,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             user=user,
@@ -487,6 +489,7 @@ class Admin:
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
+                system_author=settings.SYSTEM_AUTHOR,
                 system_version=settings.SYSTEM_VERSION,
                 system_email=settings.SYSTEM_EMAIL,
                 user=user,
@@ -519,6 +522,7 @@ class Admin:
                     system_id=settings.SYSTEM_ID,
                     system_name=settings.SYSTEM_NAME,
                     system_description=settings.SYSTEM_DESCRIPTION,
+                    system_author=settings.SYSTEM_AUTHOR,
                     system_version=settings.SYSTEM_VERSION,
                     system_email=settings.SYSTEM_EMAIL,
                     user=targetuser,
