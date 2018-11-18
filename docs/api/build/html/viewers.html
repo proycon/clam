@@ -1,32 +1,24 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>CLAM Viewers &mdash; CLAM 2.1 documentation</title>
-    
+    <title>CLAM Viewers &#8212; CLAM 2.3.7 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="CLAM 2.1 documentation" href="index.html" />
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="CLAM Parameters" href="parameters.html" /> 
-  </head>
-  <body role="document">
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -39,7 +31,7 @@
         <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.3.7 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,15 +61,30 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="clam.common.viewers.AbstractViewer.url">
-<code class="descname">url</code><span class="sig-paren">(</span><em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.AbstractViewer.url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the URL to view this resource, the link is usually an external service/website. If necessary, the file can be &#8216;pushed&#8217; to the service from here. file is a CLAMOutputFile instance</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="clam.common.viewers.AbstractViewer.view">
 <code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.AbstractViewer.view" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the view itself, in xhtml (it&#8217;s recommended to use flask&#8217;s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="clam.common.viewers.FLATViewer">
+<em class="property">class </em><code class="descclassname">clam.common.viewers.</code><code class="descname">FLATViewer</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.FLATViewer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="clam.common.viewers.FLATViewer.id">
+<code class="descname">id</code><em class="property"> = 'flatviewer'</em><a class="headerlink" href="#clam.common.viewers.FLATViewer.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="clam.common.viewers.FLATViewer.name">
+<code class="descname">name</code><em class="property"> = 'Open in FLAT'</em><a class="headerlink" href="#clam.common.viewers.FLATViewer.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="clam.common.viewers.FLATViewer.view">
+<code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.FLATViewer.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
 </dd></dl>
 
 </dd></dl>
@@ -98,7 +105,8 @@
 <dl class="method">
 <dt id="clam.common.viewers.FoLiAViewer.view">
 <code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.FoLiAViewer.view" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -123,7 +131,8 @@
 <dl class="method">
 <dt id="clam.common.viewers.SimpleTableViewer.view">
 <code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SimpleTableViewer.view" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -143,7 +152,8 @@
 <dl class="method">
 <dt id="clam.common.viewers.SoNaRViewer.view">
 <code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.SoNaRViewer.view" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -163,7 +173,8 @@
 <dl class="method">
 <dt id="clam.common.viewers.XSLTViewer.view">
 <code class="descname">view</code><span class="sig-paren">(</span><em>file</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#clam.common.viewers.XSLTViewer.view" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns the view itself, in xhtml (it’s recommended to use flask’s template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -181,18 +192,20 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/viewers.txt"
+      <li><a href="_sources/viewers.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -211,12 +224,12 @@
         <li class="right" >
           <a href="parameters.html" title="CLAM Parameters"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">CLAM 2.3.7 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2013, Maarten van Gompel.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+        &#169; Copyright 2016, Maarten van Gompel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
     </div>
   </body>
 </html>

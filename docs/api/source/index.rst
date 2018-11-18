@@ -1,97 +1,137 @@
-.. CLAM documentation master file, created by
-   sphinx-quickstart on Mon Nov 29 17:12:57 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to CLAM's documentation!
+Introduction
 ================================
 
-CLAM allows you to quickly and transparently transform your Natural Language Processing application into a RESTful webservice, with which both human end-users as well as automated clients can interact. CLAM takes a description of your system and wraps itself around the system, allowing end-users or automated clients to upload input files to your application, start your application with specific parameters of their choice, and download and view the output of the application once it is completed.
+CLAM, the Computational Linguistics Application Mediator, allows you to quickly and transparently transform your Natural
+Language Processing application into a *RESTful* webservice, with which automated clients can communicate, but which at
+the same time also acts as a modern webapplication with which human end-users can interact. CLAM takes a description of
+your system and wraps itself around the system, allowing clients or users to upload input files to your application,
+start your application with specific parameters of their choice, and download and view the output of the application.
+While the application runs, users can monitor its status.
 
-CLAM is set up in a universal fashion, requiring minimal effort on the part of the service developer. Your actual NLP application is treated as a black box, of which only the parameters, input formats and output formats need to be described. Your application itself needs not be network aware in any way, nor aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
+CLAM is set up in a universal fashion, making it flexible enough to be wrapped around a wide range of applications that
+have a command line interface. These applications are treated as a black box, of which only the parameters, input
+formats, and output formats need to be described.  The applications themselves need not be network-aware in any way, nor
+aware of CLAM, and the handling and validation of input can be taken care of by CLAM.
 
-CLAM is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users. 
+CLAM is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public
+License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates
+in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users.
 
-**This documentation only concerns the API**. F
-For *full documentation* consult the `CLAM manual
-<https://github.com/proycon/clam/raw/master/docs/clam_manual.pdf>`__, also accessible through the CLAM website
-at http://proycon.github.io/clam . It is recommended to read this prior to
-starting with this API documentation.
+The kind of applications that CLAM is originally intended for are Natural Language Processing applications, usually of a
+kind that do some processing on a text corpus. This corpus (any text file) can be uploaded by the user, or may be
+pre-installed for the webservice. The NLP application is usually expected to produce a certain output, which is
+subsequently made available through the webservice for viewing and downloading. CLAM can, however, just as well be used
+in fields other than NLP.
 
-Contents:
+The CLAM webservice is a RESTful webservice:raw-latex:`\citep{REST}`, meaning it uses the HTTP verbs GET, POST, PUT and
+DELETE to manipulate resources and returns responses using the HTTP response codes and XML.  The principal resource in
+CLAM is called a *project*. Various users can maintain various projects, each representing one specific run of the
+system, with particular input data, output data, and a set of configured parameters. The projects and all data is stored
+on the server.
+
+The webservice responds in the CLAM XML format. An associated XSL stylesheet :raw-latex:`\citep{XSLT}` can directly
+transform this to xhtml in the user’s browser, thus providing a standalone web application for human end-users.
+
+The most notable features of CLAM are:
+
+-  **RESTful webservice** – *CLAM is a fully RESTful webservice*
+
+-  **Webapplication** – *CLAM is also provides a generic web user interface for human end-users.*
+
+-  **Extensible** – *Due to a modular setup, CLAM is quite extensible*
+
+-  **Client and Data API** – *A rich Python API for writing CLAM Clients
+   and system wrappers*
+
+-  **Authentication** – *A user-based authentication mechanism through
+   HTTP Digest and/or HTTP Basic is provided. Morever, OAuth2 is also
+   supported for delegating authentication*
+
+-  **Metadata and provenance data** – *Extensive support for metadata
+   and provenance data is offered*
+
+-  **Automatic converters** – *Automatic converters enable conversion
+   from an auxiliary format into the desired input format, and
+   conversion from the produced output format into an auxiliary output
+   format*
+
+-  **Viewers** – *Viewers enable web-based visualisation for a
+   particular format. CLAM supports both built-in python-based viewers
+   as well as external viewers in the form of external (non-CLAM)
+   webservices.*
+
+-  **Predefined datasets** – *Service providers may optionally predefine
+   datasets, such as large corpora*
+
+-  **Batch Processing** – *CLAM’s default project paradigm is ideally
+   suited for batch-processing and the processing of large files. The
+   background process may run for an undefined period*
+
+-  **Actions** – *CLAM’s action paradigm is a remote-procedure
+   call-mechanism in which you make available actions (any
+   script/program or Python function) on specific URLs*.
+
+In publication pertaining to research that makes use of this software, a citation should be given of: “Maarten van
+Gompel (2014). CLAM: Computational Linguistics Application Mediator. Documentation. LST Technical Report Series 14-03.”.
+
+CLAM is open-source software licensed under the GNU Public License v3, a copy of which can be found along with the
+software.
+
+Technical details
+-----------------
+
+CLAM is written in Python :raw-latex:`\citep{PYTHON}`, and is built on
+the Flask framework. [1]_ It can run stand-alone thanks to the built-in
+webserver; no additional webserver is needed to test your service. In
+production environments, it is however strongly recommended that CLAM is
+integrated into a real webserver. Supported are: Apache, nginx or
+lighthttpd, though others may work too.
+
+The software is designed for Unix-based systems (e.g. Linux or BSD)
+only. It also has been verified to run on Mac OS X as well. Windows is
+not supported.
+
+Intended Audience
+-----------------
+
+CLAM and this documentation are intended for *1)* service providers;
+people who want to build a CLAM Webservice around their tool and/or
+people wanting to set up existing CLAM services on their server, and
+*2)* webservice users; people who want to write automated clients to
+communicate with CLAM webservices.
+
+On the part of these users, a certain level of technical expertise is
+required and assumed, such as familiarity with UNIX/Linux systems,
+software development (programming) and system administration.
+
+This documentation is split into two parts: a chapter for service
+providers, people who want to build a CLAM Webservice around their tool,
+and a chapter for service clients, users wanting to write automated
+clients to communicate with the aforemented webservice.
+
+This documentation is not intended for end users using only the web
+application interface.
+
+Table of Contents
+-----------------------
 
 .. toctree::
    :maxdepth: 3
    :glob:
-   
+
+   installation
+   gettingstarted
+   serviceconfiguration
+   wrapperscript
+   deployment
+   client
+   restapi
    *
-   
-Installation
-----------------
-
-It's discouraged to download the zip packages or tarballs
-from github, install CLAM from the `Python
-Package Index <http://pypi.python.org/pypi/CLAM>`_ or use git properly.
-
-Installation On Linux 
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Installation from the Python Package Index using the  package manager *pip* it the recommended way to
-intall CLAM. This is the easiest method
-of installing CLAM, as it will automatically fetch and install any
-dependencies. We recommend to use a virtual environment (``virtualenv``) if you
-want to install CLAM locally as a user, if you want to install globally,
-prepend the following commands with ``sudo``:
-
-CLAM can be installed from the Python Package Index using pip. Pip is usually
-part of the ``python3-pip`` package or similar. It downloads CLAM and all dependencies
-automatically:::
-
-  $ pip3 install clam
-
-If you already downloaded CLAM manually (from github), you can do::
-
-  $ python3 setup.py install
-
-If pip3 is not yet installed on your system, install it using: 
- on debian-based linux systems (including Ubuntu)::
-
-  $ apt-get install python3-pip 
-  
-on RPM-based linux systems::
-
-  $ yum install python3-pip
-
-Note that sudo/root access is needed to install globally. Ask your system administrator
-to install it if you do not own the system. Alternatively, you can install it locally in a Python virtual
-environment::
-
-  $ virtualenv --python=python3 clamenv
-
-  $ . clamenv/bin/activate
-
-  (clamenv)$ pip3 install clam
-
-It is also possible to use Python 2.7 instead of Python 3, adapt the commands
-as necessary.
-
-CLAM also has some optional dependencies. For MySQL support, install
-``mysqlclient`` using pip. For `FoLiA <https://proycon.github.io/folia>`_
-support, install ``FoLiA-Tools`` using pip.
-
-Installation on Mac OS X
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Install a Python distribution such as `Anaconda <http://continuum.io/>`_ and follow the Linux instructions above.
 
 
-Installation on Windows
-~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-CLAM does not support Windows, i.e. you can't run CLAM webservices on Windows.
-However, the CLAM Data API and client API will work, so clients connecting to
-CLAM webservices can run on Windows. Follow the same instructions as for Mac
-OS X.
+
+
 
 Running a test webservice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,7 +140,7 @@ If you installed CLAM using the above method, then you can launch a clam test
 webservice using the development server as follows::
 
   $ clamservice -H localhost -p 8080 clam.config.textstats
- 
+
 Navigate your browser to http://localhost:8080 and verify everything works
 
 Note: It is important to regularly keep CLAM up to date as fixes and
@@ -131,7 +171,7 @@ mywebservice.py, then the development server can be started as follows::
 For production, however, it is strongly recommended to embed CLAM in Apache or
 nginx. This is the typically task of a system administrator, as certain skills are
 necessary and assumed. All this is explained in detail in the CLAM
-Manual, obtainable from https://proycon.github.io/clam/ . 
+Manual, obtainable from https://proycon.github.io/clam/ .
 
 Indices and tables
 ==================
