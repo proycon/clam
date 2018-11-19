@@ -3,6 +3,8 @@
 Getting Started
 =================
 
+Make sure you have first read the :ref:`introduction` so you understand what CLAM is and what it's architecture is like.
+
 You start a new CLAM webservice project using the ``clamnewproject`` tool. The tool
 generates all the necessary files, which you have to edit. The tool
 takes one argument: an identifier for your system. This identifier is

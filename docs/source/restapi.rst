@@ -18,6 +18,7 @@ CLAM.
 :Request Parameters:  (none)
 :Response: ``200 - OK`` & CLAM XML, ``401 - Unauthorised``
 
+
 :Endpoint: ``/[project]/``
 :Method: ``GET``
 :Request Parameters: (none)
@@ -61,6 +62,7 @@ CLAM.
 :Description: Deletes a project. Any running processes will be
   aborted.
 
+
 :Endpoint: ``/[project]/input/[filename]``
 :Method: ``GET``
 :Request Parameters: (none)
@@ -101,6 +103,7 @@ CLAM.
   setting ``metadata`` to the full XML string of the metadata
   specification.
 
+
 :Endpoint: ``/[project]/output/[filename]``
 :Method: ``GET``
 :Request Parameters: (none)
@@ -113,6 +116,7 @@ CLAM.
   ``404 - Not Found``
 :Description: Deletes the specified output file.
 
+
 :Endpoint: ``/[project]/output/[filename]/metadata``
 :Method: ``GET``
 :Request Parameters: (none)
@@ -121,12 +125,14 @@ CLAM.
 :Description: Retrieves the metadata for the specified output
   file.
 
+
 :Endpoint: ``/[project]/input/[filename]/metadata``
 :Method: ``GET``
 :Request Parameters: (none)
 :Response: ``200 - OK`` & CLAM Metadata XML,
   ``401 - Unauthorised``, ``404 - Not Found``
 :Description: Retrieves the metadata for the specified input file.
+
 
 :Endpoint: ``/[project]/output/``
 :Method: ``GET``
@@ -141,6 +147,7 @@ CLAM.
 :Description: Deletes all output files and resets the project for
   another run.
 
+
 :Endpoint: ``/actions/[action_id]/``
 :Method: ``GET`` and/or ``POST``, may be constrained by the action
 :Request Parameters: Determined by the action
@@ -150,11 +157,15 @@ CLAM.
   action and obtain the results. The parameters are specific to the
   action.
 
-| \|l|p10cm\| & **Project entry shortcut**
-| & This is a shortcut method (available since CLAM v0.99.17) that
+Project entry shortcut
+---------------------------
+
+This is a shortcut method (available since CLAM v0.99.17) that
   combines the steps of project creation, file adding and upload, in one
   single GET or POST request. Although more limited than the invididual
-  calls, and less RESTful, it facilitates the job for simpler callers.
+  calls, and less RESTful, it facilitates the job for simpler callers:
+
+
 :Endpoint: ``/``
 :Method: ``GET`` or ``POST``
 :Request Parameters: ``project=[name|new]`` (mandatory), selects
