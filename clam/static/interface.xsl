@@ -453,7 +453,7 @@
           </xsl:choose>
         </p>
 
-        <xsl:if match="/clam/forwarders">
+        <xsl:if test="/clam/forwarders">
             <p>
             Forward all output to:
             <ul>
