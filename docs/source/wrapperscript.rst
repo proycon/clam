@@ -10,8 +10,7 @@ Application itself to be totally independent of CLAM.
 
 When CLAM starts the wrapper script, it creates a ``clam.xml`` file containing the selection of parameters and input
 files provided by the user.  It call the wrapper script with the arguments as specified in ``COMMAND`` in
-the service configuration file (see `here <#command>`_).
-There are some important things to take into account:
+the :ref:`serviceconf`. There are some important things to take into account:
 
 -  All user-provided input has to be read from the specified input
    directory. A full listing of this input will be provided in the

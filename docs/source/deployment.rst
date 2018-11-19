@@ -9,7 +9,7 @@ The next step is to move it into production mode, i.e. the final deployment on a
     Running with the built-in development server is not recommended for production as it offers sub-optimal performance,
     scalability, and security.
 
-It is assumed you used the ``clamnewproject`` tool, as explained in `getting started <#gettingstarted>`_, to get
+It is assumed you used the ``clamnewproject`` tool, as explained in :ref:`gettingstarted`, to get
 started with your project. It generated various example configurations for production environments you can use.
 
 Amongst the generated scripts is a WSGI script (recognisable by the ``wsgi`` extension). WSGI is a calling convention
@@ -139,4 +139,4 @@ lighttpd), should work too.
 
 .. seealso::
 
-    For configuration authentication, see `the authentication section <#auth>`_ of the documentation.
+    For configuration of authentication, see :ref:`auth`.

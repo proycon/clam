@@ -12,11 +12,9 @@ is not essential for you to be able to make your own service
 configurations.
 
 It is recommended, but not mandatory, to separate the parts of the configuration that are host-specific configuration
-settings from the parts that are generic. The host-specific configuration is stored in an `external configuration file
-<#externalconf>`_ that is dynamically included from the service configuration script. Doing so facilitates
-distribution and deployment on different systems late.
+settings from the parts that are generic. Host-specific configurations is stored in :ref:`externalconf` that are dynamically included from the service configuration script. Doing so facilitates distribution and deployment on different systems late.
 
-It is assumed you are using the ``clamnewproject`` tool as explain in `getting started <#gettingstarted>`_, which
+It is assumed you are using the ``clamnewproject`` tool as explain in :ref:`gettingstarted`, which
 generates a template service configuration you can edit, including a host-specific external configuration name
 recognisable by the ``yml`` extension. When reading this section, it may help your understanding to inspect these files
 alongside.
@@ -36,7 +34,7 @@ Server Administration
 The host-specific part of the configuration contains first of all the hostname and the port where the webservice will be
 hosted. If not configured, automatic detection is attempted.
 
-When CLAM runs in a production environment (see `deployment <#deployment>`) using an existing webserver without its
+When CLAM runs in a production environment (see :ref:`deployment`) using an existing webserver without its
 own virtual host, it is often configured at a different URL rather than at the webserver root. In this case, the value
 of ``URLPREFIX`` should be configured accordingly. If you want your webservice to run at
 http://yourhost.com/yourwebservice/ for instance, then the ``URLPREFIX`` should be set to ``yourwebservice``.
@@ -166,7 +164,7 @@ You can mark certain users as being administrators using the ``ADMINS``
 list. Administrators can see and modify all projects.
 
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options
-``allowusers=`` or ``denyusers=`` to set this. See the documentation on `parameter configuration <#parameters>`_. A
+``allowusers=`` or ``denyusers=`` to set this. See the documentation on :ref:`parameters`. A
 common use would be to define one user to be the guest user, for instance the user named “guest”, and set
 ``denyusers=[’guest’]`` on the parameters you do not want the guest user to use.
 
@@ -514,8 +512,7 @@ if that is the case. These definitions are made in so-called *profiles*.
 A profile defines *input templates* and *output templates*. The input
 templates and output template can be seen as “slots” for certain
 filetypes and metadata. An analogy from childhood memory may facilitate
-understanding this, as shown and explained in
-Figure \ `2.2 <#fig:blokkendoos>`__.
+understanding this, as shown and explained in the figure below:
 
 .. figure:: blokkendoos.jpg
    :alt: Box and blocks analogy from childhood memory: the holes on one
@@ -723,7 +720,7 @@ The definition for :class:`InputTemplate` takes three mandatory arguments:
    its selection menus.
 
 After the three mandatory arguments, you may specify any of the Parameter types to indicate the accepted/required
-metadata for the particular input templates. Use any of the `parameter types <#parameters>`_ .  We will come to an
+metadata for the particular input templates. Use any of the parameter types (see :ref:`parameters`) .  We will come to an
 example of this soon.
 
 After specifying any such parameters, there are some possible keyword
@@ -742,7 +739,7 @@ arguments:
    ``unique=False``, insert the variable ``$SEQNR`` into the filename,
    which will be replaced by a number in sequence. After all, we cannot
    have multiple files with the same name. As explained in
-   `later on <#filenamevariables>`__, you can also use any of
+   :ref:`filenamevariables`, you can also use any of
    the metadata parameters as variable in the filename.
 
 #. ``extension`` – Files uploaded through this input template are
@@ -1268,6 +1265,9 @@ web-interface:
 
 -  ``preselectinputtemplate`` – Pre-select the first defined input
    template as default inputtemplate.
+
+
+.. _actions:
 
 Actions
 ---------

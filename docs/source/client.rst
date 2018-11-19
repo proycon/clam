@@ -20,7 +20,7 @@ why one might wish to write a client from scratch, not least as this
 allows you to use any programming language of your choice, or better
 integrate a CLAM webservice as a part of an existing application.
 
-The `RESTful API Specification <#restspec>`_ provides the full technical details necessary for an implementation of a
+The :ref:`restspec` provides the full technical details necessary for an implementation of a
 client. Moreover, each CLAM service offers an automatically tailored RESTful specification specific to the service, and
 example client code in Python, by pointing your browser to your service on the path ``/info/``.
 
