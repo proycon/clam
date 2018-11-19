@@ -99,8 +99,8 @@ User Authentication
 
 Being a RESTful webservice, user authentication proceeds over HTTP
 itself. CLAM implements HTTP Basic Authentication, HTTP Digest
-Authentication :raw-latex:`\cite{HTTPAUTH}` and OAuth2
-:raw-latex:`\cite{OAUTH2}`. HTTP Digest Authentication, contrary to HTTP
+Authentication [Franks1999]_ and OAuth2
+[Hardt2012]_. HTTP Digest Authentication, contrary to HTTP
 Basic Authentication, computes a hash of the username and password
 client-side and transmits that hash, rather than a plaintext password.
 User passwords are therefore only available to CLAM in hashed form and
@@ -172,7 +172,11 @@ common use would be to define one user to be the guest user, for instance the us
 
 In production environments, you will also want to set ``SECRET_KEY`` to
 a string value that is kept strictly private. It is used for
-cryptographically signing session data and preventing CSRF attacks. [3]_
+cryptographically signing session data and preventing CSRF attacks (`details <http://flask.pocoo.org/docs/0.10/quickstart/#sessions>`_).
+
+.. [Franks1999] J. Franks, P. Hallam-Baker, J. Hostelter, S. Lawrence, P.Leach, A. Luotonen and L. Stewart (1999). HTTP Authentication: Basic and Digest Access Authentication (RFC2617). The Internet Engineering Task Force (IETF). `(HTML) <http://tools.ietf.org/html/rfc2617>`_
+
+.. [Hardt2012] D. Hardt (2012) The OAuth 2.0 Authorization Framework (RFC6749). `(Text) <http://www.rfc-editor.org/rfc/rfc6749.txt`_
 
 MySQL backend
 ~~~~~~~~~~~~~~~~~~~~~
@@ -260,7 +264,7 @@ this variable name is just an example in a CLARIN-NL context.
 OAuth2
 ~~~~~~~~~
 
-CLAM also implements OAuth2 :raw-latex:`\cite{OAUTH2}`, i.e. it acts as
+CLAM also implements OAuth2 [Hardt2012]_, i.e. it acts as
 a client in the OAuth2 Authorization framework. An external OAuth2
 authorization provider is responsible for authenticating you, using your
 user credentials to which CLAM itself will never have access. Many
@@ -282,8 +286,8 @@ used with the built-in webserver but requires being embedded in a
 webserver such as Apache2, with SSL support.
 
 When the user approaches the CLAM webservice, he/she will need to pass a
-valid access token. If none is passed, the user is instantly delegated
-to the OAuth2 authorization provider [5]_. The authorization provider
+valid access token. If none is passed, the user is instantly delegated (HTTP 303)
+to the OAuth2 authorization provider. The authorization provider
 makes available a URL for authentication and for obtaining the final
 access token. These are configured as follows in the CLAM service
 configuration file:
@@ -334,7 +338,7 @@ for token encryption has to be configured through
 interface will furthermore explicitly ask users to log out. Logging out
 is done by revoking the access token with the authorization provider.
 For this to work, your authentication provider must offer a revoke URL,
-as described in RFC7009 [6]_, which you configure in your service
+as described in `RFC7009 <https://tools.ietf.org/html/rfc7009>`_, which you configure in your service
 configuration file as follows:
 
 .. code-block:: python
@@ -482,7 +486,7 @@ within the file itself, as is also not the case in the example of plain
 text files. CLAM therefore builds external metadata files for each input
 and output file. These files contain all metadata of the files they
 describe. These are stored in the CLAM Metadata XML format, a very
-simple and straightforward format.  [8]_ Metadata simply consists of
+simple and straightforward format.  Metadata simply consists of
 metadata fields and associated values.
 
 Metadata in CLAM is tied to a particular file format (such as plain text
@@ -566,7 +570,7 @@ parameters can be subdivided into parameter groups, but these serve only
 presentational purposes.
 
 There are seven parameter types available, though custom types can be
-easily added.  [9]_ Each parameter type is a Python class taking the
+easily added. Each parameter type is a Python class taking the
 following mandatory arguments:
 
 #. **``id``** – An id for internal use only.
@@ -1068,10 +1072,10 @@ however will be provided out of the box. Note that the actual conversion
 will be performed by 3rd party software in most cases.
 
 -  ``MSWordConverter`` – Convert MS Word files to plain text. This
-   converter uses the external tool ``catdoc`` by default.  [10]_
+   converter uses the external tool `catdoc <http://www.wagner.pp.ru/~vitus/software/catdoc/>`_ by default.
 
 -  ``PDFConverter`` – Convert PDF to plain text. This converter uses the
-   external tool ``pdftohtml`` by default.  [11]_
+   external tool `pdftohtml <http://pdftohtml.sourceforge.net/>`_ by default.
 
 -  ``CharEncodingConverter`` – Convert between plain text files in
    different character encodings.
@@ -1095,7 +1099,7 @@ any metafield actors.
 The below example illustrates the use of the viewer
 ``SimpleTableViewer``, capable of showing CSV files:
 
-::
+.. code-block:: python
 
    OutputTemplate('freqlist',CSVFormat,"Frequency list",
        SimpleTableViewer(),
@@ -1302,15 +1306,15 @@ interface.
 
 Actions will show in the web-application interface on the index page.
 
-In this example, we specify two parameters, they will be passed *in the
-order they are defined* to the script. The command to be called is
-configured analagous to ``COMMAND``, but only a subset of the variables
-are supported. The most prominent is the ``$PARAMETERS`` variable. Note
-that you can set ``paramflag`` on the parameters to pass them with an
-option flag. String parameters with spaces will work without
-problem [12]_. Actions do not have the notion of the CLAM XML datafile
-that wrapper scripts in the project paradigm can use, so passing
-command-line parameters is the only way here.
+In this example, we specify two parameters, they will be passed *in the order
+they are defined* to the script. The command to be called is configured
+analagous to ``COMMAND``, but only a subset of the variables are supported. The
+most prominent is the ``$PARAMETERS`` variable. Note that you can set
+``paramflag`` on the parameters to pass them with an option flag. String
+parameters with spaces will work without problem (be ware that shells do have a
+maximum length for all parameters combined). Actions do not have the notion of
+the CLAM XML datafile that wrapper scripts in the project paradigm can use, so
+passing command-line parameters is the only way here.
 
 It may, however, not even be necessary to invoke an external script.
 Actions support calling Python functions directly. Consider the

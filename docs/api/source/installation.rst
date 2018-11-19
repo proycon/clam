@@ -50,13 +50,11 @@ an interactive Python interpreter and writing: ``import clam``\ ”
 LaMachine: a meta-distribution with CLAM
 ---------------------------------------------
 
-We also offer *LaMachine*, an environment with CLAM and various CLAM
+We also offer `LaMachine <https://proycon.github.io/LaMachine>`_, an environment with CLAM and various CLAM
 webservices pre-installed, along with a lot of other NLP software. It is
 available as a Virtual Machine, Docker container, as well as a virtual
 environment through a native installation script. It is designed to
-facilitate installation of our software. See
-https://github.com/proycon/lamachine for details.
-
+facilitate installation of our software.
 
 Installation Details
 -------------------------
@@ -116,7 +114,7 @@ Apache and nginx.
 Source Code Repository
 ---------------------------
 
-The CLAM source code is hosted on `github <https://github.com/proycon/clam>`_.
+The CLAM source code is hosted on `Github <https://github.com/proycon/clam>`_.
 
 If you want to work with the latest development release of CLAM rather than the latest stable version. You can cloning this git
 repository is done as follows:

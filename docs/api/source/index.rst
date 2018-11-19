@@ -23,13 +23,13 @@ pre-installed for the webservice. The NLP application is usually expected to pro
 subsequently made available through the webservice for viewing and downloading. CLAM can, however, just as well be used
 in fields other than NLP.
 
-The CLAM webservice is a RESTful webservice:raw-latex:`\citep{REST}`, meaning it uses the HTTP verbs GET, POST, PUT and
+The CLAM webservice is a RESTful webservice [Fielding2000]_, meaning it uses the HTTP verbs GET, POST, PUT and
 DELETE to manipulate resources and returns responses using the HTTP response codes and XML.  The principal resource in
 CLAM is called a *project*. Various users can maintain various projects, each representing one specific run of the
 system, with particular input data, output data, and a set of configured parameters. The projects and all data is stored
 on the server.
 
-The webservice responds in the CLAM XML format. An associated XSL stylesheet :raw-latex:`\citep{XSLT}` can directly
+The webservice responds in the CLAM XML format. An associated XSL stylesheet [XSLT]_ can directly
 transform this to xhtml in the user’s browser, thus providing a standalone web application for human end-users.
 
 The most notable features of CLAM are:
@@ -77,11 +77,14 @@ Gompel (2014). CLAM: Computational Linguistics Application Mediator. Documentati
 CLAM is open-source software licensed under the GNU Public License v3, a copy of which can be found along with the
 software.
 
+.. [Fielding2000] R. T. Fielding (2000). Architectural Styles and the DEsign of Network-based Software Architecture. Doctoral Dissertation. University of California, Irvine. `(HTML) <http://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm>`_
+.. [XSLT] J. Clark (1999). XSL Transformations (XSLT) Version 1.0. W3C Recommendation. http://www.w3.org/TR/xslt
+
 Technical details
 -----------------
 
-CLAM is written in Python :raw-latex:`\citep{PYTHON}`, and is built on
-the Flask framework. [1]_ It can run stand-alone thanks to the built-in
+CLAM is written in Python [python]_, and is built on
+the Flask framework [flask]_. It can run stand-alone thanks to the built-in
 webserver; no additional webserver is needed to test your service. In
 production environments, it is however strongly recommended that CLAM is
 integrated into a real webserver. Supported are: Apache, nginx or
@@ -90,6 +93,9 @@ lighthttpd, though others may work too.
 The software is designed for Unix-based systems (e.g. Linux or BSD)
 only. It also has been verified to run on Mac OS X as well. Windows is
 not supported.
+
+.. [python] Python Software Foundation. Python Language Reference. Available at https://www.python.org
+.. [flask] http://flask.pocoo.org
 
 Intended Audience
 -----------------
@@ -112,12 +118,63 @@ clients to communicate with the aforemented webservice.
 This documentation is not intended for end users using only the web
 application interface.
 
+Architecture
+--------------
+
+CLAM has a layered architecture, with at the core the command line
+application(s) you want to turn into a webservice. The application
+itself can remain untouched and unaware of CLAM. The scheme in
+the figure below illustrates the various layers. The
+workflow interface layer is not provided nor necessary, but shows a
+possible use-case.
+
+.. figure:: architecture.png
+   :alt: The CLAM Architecture
+   :name: fig:arch
+   :width: 130mm
+
+   The CLAM Architecture
+
+CLAM presents two different paradigms for wrapping your script or
+application. The second is a new addition since CLAM 0.9.11 . You may
+use either or both at the same time.
+
+#. **Project Paradigm** – Users create projects, upload files with
+   optional parameters to those projects, and subsequently start the
+   project, optionally passing global parameters to the system. The
+   system may run for a long time and may do batch-processing on
+   multiple input files.
+
+#. `Action Paradigm <#sec:actions>`_ – This is a more limited, and simple
+   remote-procedure call mechanism. Users interact in real-time with the
+   service on specific URLs, passing parameters. Unlike the project
+   paradigm, this is not suitable for complex operations on big-data.
+
+A CLAM webservice needs the following three components from the service
+developer:
+
+#. A `service configuration <#sec:serviceconfiguration>`_
+
+#. A `wrapper script <#sec:wrapperscript>`_ for your command line application;
+
+#. A command line application (your NLP tool)
+
+The wrapper script is not strictly mandatory if the command line
+application can be directly invoked by CLAM. However, for more complex
+applications, writing a wrapper script is recommended, as it offers more
+flexibility and better integration, and allows you to keep the actual
+application unmodified. The wrapper scripts can be seen as the “glue”
+between CLAM and your application, taking care of any translation steps.
+
+Note that wrapper scripts in the action paradigm are more constrained,
+and there may be multiple wrapper scripts for different actions.
+
+
 Table of Contents
 -----------------------
 
 .. toctree::
    :maxdepth: 3
-   :glob:
 
    installation
    gettingstarted
@@ -125,12 +182,8 @@ Table of Contents
    wrapperscript
    deployment
    client
+   troubleshooting
    restapi
-   *
-
-
-
-
 
 
 Running a test webservice
