@@ -13,11 +13,17 @@ CLAM.
     endpoint which provides a more tailored overview. This info page also presents auto-generated example code for
     interacting with the webservice.
 
+Project Index
+------------------------
+
 :Endpoint: ``/``
 :Method: ``GET``
 :Request Parameters:  (none)
+:Description: Retrieves the project index and profile specification
 :Response: ``200 - OK`` & CLAM XML, ``401 - Unauthorised``
 
+Project Endpoint
+-------------------
 
 :Endpoint: ``/[project]/``
 :Method: ``GET``
@@ -62,6 +68,9 @@ CLAM.
 :Description: Deletes a project. Any running processes will be
   aborted.
 
+Input files
+--------------
+
 
 :Endpoint: ``/[project]/input/[filename]``
 :Method: ``GET``
@@ -69,11 +78,15 @@ CLAM.
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Retrieves the specified input file.
+
+
 :Method: ``DELETE``
 :Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Deletes the specified input file.
+
+
 :Endpoint: ``/[project]/input/[filename]`` or
   ``/[project]/input/[inputtemplate]/[filename]``
 :Method: ``POST``
@@ -104,6 +117,17 @@ CLAM.
   specification.
 
 
+:Endpoint: ``/[project]/input/[filename]/metadata``
+:Method: ``GET``
+:Request Parameters: (none)
+:Response: ``200 - OK`` & CLAM Metadata XML,
+  ``401 - Unauthorised``, ``404 - Not Found``
+:Description: Retrieves the metadata for the specified input file.
+
+Output Files
+----------------
+
+
 :Endpoint: ``/[project]/output/[filename]``
 :Method: ``GET``
 :Request Parameters: (none)
@@ -126,13 +150,8 @@ CLAM.
   file.
 
 
-:Endpoint: ``/[project]/input/[filename]/metadata``
-:Method: ``GET``
-:Request Parameters: (none)
-:Response: ``200 - OK`` & CLAM Metadata XML,
-  ``401 - Unauthorised``, ``404 - Not Found``
-:Description: Retrieves the metadata for the specified input file.
-
+Archive Download
+~~~~~~~~~~~~~~~~~~
 
 :Endpoint: ``/[project]/output/``
 :Method: ``GET``
@@ -147,6 +166,9 @@ CLAM.
 :Description: Deletes all output files and resets the project for
   another run.
 
+
+Actions
+-----------
 
 :Endpoint: ``/actions/[action_id]/``
 :Method: ``GET`` and/or ``POST``, may be constrained by the action
