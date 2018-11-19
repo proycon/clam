@@ -52,7 +52,7 @@ These generated scripts are heavily commented to guide you in setting
 your wrapper script up. This documentation will add some further
 insights.
 
-CLAM Data API
+Data API
 --------------
 
 The key function of CLAM Data API is to parse the CLAM XML Data file
