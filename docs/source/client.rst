@@ -1,7 +1,7 @@
 .. _client:
 
-Documentation for Service Clients
-=================================
+Clients
+==========
 
 CLAM is designed as a RESTful webservice. This means a client
 communicates with CLAM through the four HTTP verbs (GET/POST/PUT/DELETE)
