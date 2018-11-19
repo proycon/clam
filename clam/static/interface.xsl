@@ -441,6 +441,7 @@
 <xsl:template match="/clam/output">
     <div id="output" class="box">
         <h2>Output files</h2>
+
         <p>(Download all as archive:
           <xsl:choose>
           <xsl:when test="/clam/@oauth_access_token = ''">
@@ -451,6 +452,18 @@
           </xsl:otherwise>
           </xsl:choose>
         </p>
+
+        <xsl:if match="/clam/forwarders">
+            <p>
+            Forward all output to:
+            <ul>
+                <xsl:for-each select="/clam/forwarders">
+                    <li><a href="{./url}"><xsl:value-of select="./name" /></a> - <xsl:value-of select="./description" /></li>
+                </xsl:for-each>
+            </ul>
+            </p>
+        </xsl:if>
+
         <table id="outputfiles" class="files">
             <thead>
                 <tr>

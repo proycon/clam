@@ -968,6 +968,7 @@ class Project:
                 accesstoken=Project.getaccesstoken(user,project),
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
+                forwarders=[ forwarder(project, getrooturl()) for forwarder in  settings.FORWARDERS ],
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
                 auth_type=auth_type()
@@ -2598,6 +2599,8 @@ def set_defaults():
         settings.PROFILES = []
     if 'INPUTSOURCES' not in settingkeys:
         settings.INPUTSOURCES = []
+    if 'FORWARDERS' not in settingkeys:
+        settings.FORWARDERS = []
     if 'PORT' not in settingkeys and not PORT:
         settings.PORT = 80
     if 'HOST' not in settingkeys and not HOST:

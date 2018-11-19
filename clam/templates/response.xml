@@ -132,4 +132,11 @@
     </input>
     {% endif %}
 {% endif %}
+{% if statuscode == 2 and forwarders %}
+    <forwarders>
+      {% for forwarder in forwarders %}
+        <forwarder id="{{ forwarder.id }}" name="{{ forwarder.name }}" description="{{ forwarder.description }}" type="{{ forwarder.type }}" url="{{ forwarder.forwardlink }}" />
+      {% endfor %}
+    </forwarders>
+{% endif %}
 </clam>

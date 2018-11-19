@@ -675,6 +675,13 @@ The following example defines a boolean parameter with a parameter flag:
 Thus, if this parameter is set, the invoked command will have
 ``$PARAMETERS`` set to ``-l 1`` (plus any additional parameters).
 
+Parameters API
+~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: clam.common.parameters
+    :members:
+    :undoc-members:
+
 .. _profile:
 
 Profile specification
@@ -1082,6 +1089,8 @@ will be performed by 3rd party software in most cases.
 Note that specific converters take specific parameters; consult the API
 reference for details.
 
+.. _viewers:
+
 Viewers
 ~~~~~~~
 
@@ -1105,6 +1114,51 @@ The below example illustrates the use of the viewer
        SetMetaField('encoding','utf-8'),
        extension='.patterns.csv',
    )
+
+Another useful viewer is the :class:`ForwardViewer`. It forwards the viewing request to a remote service and passes a
+backlink where the remote service can *download* the output file (assuming it has proper authorization!). The remote
+service is expected to return a HTTP 302 Redirect response which CLAM will subsequently invoke.
+
+.. code-block:: python
+
+   OutputTemplate('freqlist',CSVFormat,"Frequency list",
+       ForwardViewer(Forwarder(id="some_remote_service",name="Some Remote Frequency List Viewer")),
+       url="https://remote.service.com/?download=$BACKLINK")),
+       SetMetaField('encoding','utf-8'),
+       extension='.patterns.csv',
+   )
+
+You can also use forwarders globally to redirect all output as an archive (zip/tar.gz/tar.bz2), see :ref:`forwarders`.
+
+
+Viewer API
++++++++++++++++
+
+.. automodule:: clam.common.viewers
+    :members:
+    :undoc-members:
+
+.. _forwarders:
+
+Forwarders
+~~~~~~~~~~~~~~
+
+To allow users to forward all output from one webservice to another, you can use Forwarders. The forwarder calls a remote service and passes a backlink where the remote service can *download* the output file (assuming it has proper authorization!). The remote
+service is expected to return a HTTP 302 Redirect response which CLAM will subsequently invoke.
+
+.. code-block:: python
+
+FORWARDERS = [
+       Forwarder(id="some_remote_service",name="Some Remote service",type="zip", description="",
+        url="https://remote.service.com/?downloadarchive=$BACKLINK"
+       )
+]
+
+.. note::
+
+    * Forwarders can also be used as viewers for individual files. See :ref:`viewers`
+    * A forwarder does *NOT* perform any upload, it just passes a download link to a service, the remote
+      service must also have the necessary authorization to use it.
 
 Working with pre-installed data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

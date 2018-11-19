@@ -2314,6 +2314,24 @@ class Action(object):
             raise Exception("No condition found in ParameterCondition!")
         return Action(*args, **kwargs)
 
+class Forwarder(object):
+    def __init__(self, id, name, url, description="", type='zip'):
+        self.id = id
+        self.name = name
+        self.url = url
+        self.description = description
+        self.type = type
+
+    def __call__(self, project, baseurl, outputfile=None):
+        """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generator to download the entire output archive."""
+        if outputfile:
+            self.forwardlink = self.url.replace("$BACKLINK", outputfile.filename)
+        else:
+            self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
+        return self
+
+
+
 def resolveinputfilename(filename, parameters, inputtemplate, nextseq = 0, project = None):
     #parameters are local
     if filename.find('$') != -1:

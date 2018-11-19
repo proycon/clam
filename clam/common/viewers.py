@@ -54,6 +54,26 @@ class AbstractViewer(object):
         """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
         raise NotImplementedError
 
+class ForwardViewer(AbstractViewer):
+    """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file. The remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
+
+    def __init__(self, id, name, forwarder, **kwargs):
+        self.id = id
+        self.name = name
+        self.forwarder = forwarder
+        super(ForwardViewer,self).__init__(**kwargs)
+
+    def view(self, file, **kwargs):
+        self.forwarder(None, file)
+        r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
+        if r.status_code == 302 and 'Location' in r.headers:
+            url = r.headers['Location']
+            return flask.redirect(url)
+        else:
+            return "Unexpected response from Forward service (HTTP " + str(r.status_code) + ", target was " + url + "): " + r.text
+
+
+
 
 class SimpleTableViewer(AbstractViewer):
     id = 'tableviewer'

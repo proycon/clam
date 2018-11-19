@@ -249,6 +249,13 @@ ACTIONS = [
     #Action(id='multiply',name='Multiply',parameters=[IntegerParameter(id='x',name='Value'),IntegerParameter(id='y',name='Multiplier'), function=lambda x,y: x*y ])
 ]
 
+# ======= FORWARDERS =============
+
+#Global forwarders call a remote service, passing a backlink for the remote service to download an archive of all the output data. The remote service is expected to return a redirect (HTTP 302) . CLAM will insert the backlink where you put $BACKLINK in the url:
+
+#FORWARDERS = [
+    #Forwarder(id='otherservice', name="Other service", description="", url="https://my.service.com/grabfrom=$BACKLINK")
+#]
 
 # ======== DISPATCHING (ADVANCED! YOU CAN SAFELY SKIP THIS!) ========
 
