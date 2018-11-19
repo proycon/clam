@@ -4,16 +4,23 @@ RESTful API specification
 =============================
 
 This appendix provides a full specification of the RESTful interface to
-CLAM:
+CLAM.
+
+
+.. note::
+
+    Note that for each webservice, an auto-generated and human readable RESTful API specification is available at the ``/info/``
+    endpoint which provides a more tailored overview. This info page also presents auto-generated example code for
+    interacting with the webservice.
 
 :Endpoint: ``/``
 :Method: ``GET``
-:Request Parameters:  -
+:Request Parameters:  (none)
 :Response: ``200 - OK`` & CLAM XML, ``401 - Unauthorised``
 
 :Endpoint: ``/[project]/``
 :Method: ``GET``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & CLAM XML, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: This returns the current state of the project in
@@ -22,7 +29,7 @@ CLAM:
   Note that errors in parameter validation are encoded in the CLAM XML
   response; the system will still return a 200 response.
 :Method: ``PUT``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``201 - Created``, ``401 - Unauthorised``,
   ``403 - Forbidden`` *(Invalid project ID)*, ``403 - Forbidden`` *(No project name)*
 :Description: This is necessary before attempting to upload any
@@ -56,12 +63,12 @@ CLAM:
 
 :Endpoint: ``/[project]/input/[filename]``
 :Method: ``GET``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Retrieves the specified input file.
 :Method: ``DELETE``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Deletes the specified input file.
@@ -96,19 +103,19 @@ CLAM:
 
 :Endpoint: ``/[project]/output/[filename]``
 :Method: ``GET``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Retrieves the specified output file.
 :Method: ``DELETE``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Deletes the specified output file.
 
 :Endpoint: ``/[project]/output/[filename]/metadata``
 :Method: ``GET``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & CLAM Metadata XML,
   ``401 - Unauthorised``, ``404 - Not Found``
 :Description: Retrieves the metadata for the specified output
@@ -116,7 +123,7 @@ CLAM:
 
 :Endpoint: ``/[project]/input/[filename]/metadata``
 :Method: ``GET``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & CLAM Metadata XML,
   ``401 - Unauthorised``, ``404 - Not Found``
 :Description: Retrieves the metadata for the specified input file.
@@ -129,7 +136,7 @@ CLAM:
 :Description: Offers a single archive, of the desired format,
   including all output files
 :Method: ``DELETE``
-:Request Parameters: -
+:Request Parameters: (none)
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``
 :Description: Deletes all output files and resets the project for
   another run.

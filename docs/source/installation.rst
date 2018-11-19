@@ -16,8 +16,8 @@ CLAM is written for Python 3, which we will use in this documentation. It also s
 Python 2.7.
 
 We recommend you first create a Python Virtual Environment.
-To create a virtual environment, which we name *clamenv* here, but you
-can choose any name you want, issue the following command::
+To create a virtual environment, which we name *clamenv* here (but you
+can choose any name you want), issue the following command::
 
   $ virtualenv --python=python3 clamenv
 
@@ -45,7 +45,7 @@ If pip is not yet installed on your system, install it as follows (example for D
 
 
 You can verify the availability of CLAM by opening
-an interactive Python interpreter and writing: ``import clam``\ ”
+an interactive Python interpreter and writing: ``import clam``
 
 LaMachine: a meta-distribution with CLAM
 ---------------------------------------------

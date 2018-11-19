@@ -139,13 +139,13 @@ CLAM presents two different paradigms for wrapping your script or
 application. The second is a new addition since CLAM 0.9.11 . You may
 use either or both at the same time.
 
-#. **Project Paradigm** – Users create projects, upload files with
+#. `Project Paradigm <#project>`_ – Users create projects, upload files with
    optional parameters to those projects, and subsequently start the
    project, optionally passing global parameters to the system. The
    system may run for a long time and may do batch-processing on
    multiple input files.
 
-#. `Action Paradigm <#sec:actions>`_ – This is a more limited, and simple
+#. `Action Paradigm <#actions>`_ – This is a more limited, and simple
    remote-procedure call mechanism. Users interact in real-time with the
    service on specific URLs, passing parameters. Unlike the project
    paradigm, this is not suitable for complex operations on big-data.
@@ -153,9 +153,9 @@ use either or both at the same time.
 A CLAM webservice needs the following three components from the service
 developer:
 
-#. A `service configuration <#sec:serviceconfiguration>`_
+#. A `service configuration <#serviceconfiguration>`_
 
-#. A `wrapper script <#sec:wrapperscript>`_ for your command line application;
+#. A `wrapper script <#wrapperscript>`_ for your command line application;
 
 #. A command line application (your NLP tool)
 

@@ -1,4 +1,4 @@
-.. _sec:serviceconfig:
+.. _serviceconfig:
 
 Service configuration
 ============================
@@ -13,10 +13,10 @@ configurations.
 
 It is recommended, but not mandatory, to separate the parts of the configuration that are host-specific configuration
 settings from the parts that are generic. The host-specific configuration is stored in an `external configuration file
-<#sec:externalconf>`_ that is dynamically included from the service configuration script. Doing so facilitates
+<#externalconf>`_ that is dynamically included from the service configuration script. Doing so facilitates
 distribution and deployment on different systems late.
 
-It is assumed you are using the ``clamnewproject`` tool as explain in `getting started <#sec:gettingstarted>`_, which
+It is assumed you are using the ``clamnewproject`` tool as explain in `getting started <#gettingstarted>`_, which
 generates a template service configuration you can edit, including a host-specific external configuration name
 recognisable by the ``yml`` extension. When reading this section, it may help your understanding to inspect these files
 alongside.
@@ -28,7 +28,7 @@ directory.
 
 The ``ROOT`` directory will be automatically created upon the first run.
 
-.. _sec:sadmin:
+.. _sadmin:
 
 Server Administration
 -------------------------
@@ -36,7 +36,7 @@ Server Administration
 The host-specific part of the configuration contains first of all the hostname and the port where the webservice will be
 hosted. If not configured, automatic detection is attempted.
 
-When CLAM runs in a production environment (see `deployment <#sec:deployment>`) using an existing webserver without its
+When CLAM runs in a production environment (see `deployment <#deployment>`) using an existing webserver without its
 own virtual host, it is often configured at a different URL rather than at the webserver root. In this case, the value
 of ``URLPREFIX`` should be configured accordingly. If you want your webservice to run at
 http://yourhost.com/yourwebservice/ for instance, then the ``URLPREFIX`` should be set to ``yourwebservice``.
@@ -92,7 +92,7 @@ interface itself does not, and will never, offer any means to adjust
 service configuration options.
 
 
-.. _sec:auth:
+.. _auth:
 
 User Authentication
 ----------------------------
@@ -166,7 +166,7 @@ You can mark certain users as being administrators using the ``ADMINS``
 list. Administrators can see and modify all projects.
 
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options
-``allowusers=`` or ``denyusers=`` to set this. See the documentation on `parameter configuration <#sec:parameters>`_. A
+``allowusers=`` or ``denyusers=`` to set this. See the documentation on `parameter configuration <#parameters>`_. A
 common use would be to define one user to be the guest user, for instance the user named “guest”, and set
 ``denyusers=[’guest’]`` on the parameters you do not want the guest user to use.
 
@@ -402,7 +402,7 @@ needed (has to be explicitly configured), allowing the wrapper script or
 underlying system to communicate with a resource provider on behalf of
 the user, through CLAM’s client_id.
 
-.. _sec:command:
+.. _command:
 
 Command Definition
 ------------------------
@@ -471,6 +471,8 @@ will be in this input directory, and all output that users should be
 able to view or download, should be in this output directory. Your
 wrapper script and NLP tool are of course free to use any other
 locations on the filesystem for whatever other purposes.
+
+.. _project:
 
 Project Paradigm: Metadata, Profiles & Parameters
 -----------------------------------------------------
@@ -559,7 +561,7 @@ is another source of data input: global parameters. A webservice may
 define a set of parameters that it takes. We will start by explaining
 this part in the next section.
 
-.. _sec:parameters:
+.. _parameters:
 
 Parameter Specification
 ---------------------------
@@ -573,12 +575,12 @@ There are seven parameter types available, though custom types can be
 easily added. Each parameter type is a Python class taking the
 following mandatory arguments:
 
-#. **``id``** – An id for internal use only.
+#. **id** – An id for internal use only.
 
-#. **``name``** – The name of this parameter; this will be shown to the
+#. **name** – The name of this parameter; this will be shown to the
    user in the interface.
 
-#. **``description``** – A description of this parameter, meant for the
+#. **description** – A description of this parameter, meant for the
    end-user.
 
 The seven parameter types are:
@@ -621,7 +623,7 @@ The seven parameter types are:
 
 All parameters can take the following extra keyword arguments:
 
--  **``paramflag``** – The parameter flag. This flag will be added to
+-  **paramflag** – The parameter flag. This flag will be added to
    ``$PARAMETERS`` when the parameter is set. Consequently, it is
    mandatory if you use the ``$PARAMETERS`` variable in your ``COMMAND``
    definition. It is customary for parameter flags to consist of a
@@ -634,30 +636,30 @@ All parameters can take the following extra keyword arguments:
    to specify an empty parameter flag, in which case only the value will
    be outputted as if it were an argument.
 
--  **``default``** – Set a default value.
+-  **default** – Set a default value.
 
--  **``required``** – Set to ``True`` to make this parameter required
+-  **required** – Set to ``True`` to make this parameter required
    rather than optional.
 
--  **``require``** – Set this to a list of parameter IDs. If this
+-  **require** – Set this to a list of parameter IDs. If this
    parameter is set, so must all others in this list. If not, an error
    will be returned.
 
--  **``forbid``** – Set this to a list of parameter IDs. If this
+-  **forbid** – Set this to a list of parameter IDs. If this
    parameter is set, none of the others in the list may be set. If not,
    an error will be returned.
 
--  **``allowusers``** – Allow only the specified lists of usernames to
+-  **allowusers** – Allow only the specified lists of usernames to
    see and set this parameter. If unset, all users will have access. You
    can decide whether to use this option or ``denyusers``, or to allow
    access for all.
 
--  **``denyusers``** – Disallow the specified lists of usernames to see
+-  **denyusers** – Disallow the specified lists of usernames to see
    and set this parameter. If unset, no users are blocked from having
    access. You can decide whether to use this option or ``allowusers``,
    or to allow access for all.
 
--  **``validator``** – This should be a Python function (or other
+-  **validator** – This should be a Python function (or other
    callable) taking one argument (the parameter’s value), and returning
    either boolean indication whether the value is valid, or a (boolean,
    errormsg) tuple.
@@ -676,7 +678,7 @@ The following example defines a boolean parameter with a parameter flag:
 Thus, if this parameter is set, the invoked command will have
 ``$PARAMETERS`` set to ``-l 1`` (plus any additional parameters).
 
-.. _sec:profile:
+.. _profile:
 
 Profile specification
 ---------------------------
@@ -721,7 +723,7 @@ The definition for :class:`InputTemplate` takes three mandatory arguments:
    its selection menus.
 
 After the three mandatory arguments, you may specify any of the Parameter types to indicate the accepted/required
-metadata for the particular input templates. Use any of the `parameter types <#sec:parameters>`_ .  We will come to an
+metadata for the particular input templates. Use any of the `parameter types <#parameters>`_ .  We will come to an
 example of this soon.
 
 After specifying any such parameters, there are some possible keyword
@@ -740,7 +742,7 @@ arguments:
    ``unique=False``, insert the variable ``$SEQNR`` into the filename,
    which will be replaced by a number in sequence. After all, we cannot
    have multiple files with the same name. As explained in
-   `later on <#sec:filenamevariables>`__, you can also use any of
+   `later on <#filenamevariables>`__, you can also use any of
    the metadata parameters as variable in the filename.
 
 #. ``extension`` – Files uploaded through this input template are
@@ -883,7 +885,7 @@ encoded plain-text files.
      )
    ]
 
-.. _sec:filenamevariables:
+.. _filenamevariables:
 
 Control over filenames
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -969,7 +971,7 @@ are some additional variables set by CLAM which you can use:
 
 -  ``$INPUTFILE`` - Is set to the project ID.
 
-.. _sec:paramcond:
+.. _paramcond:
 
 Parameter Conditions
 ~~~~~~~~~~~~~~~~~~~~
@@ -1392,7 +1394,7 @@ entirely, set the following in your service configuration file:
    PROFILES = []
    PARAMETERS = []
 
-.. _sec:externalconf:
+.. _externalconf:
 
 External Configuration Files
 ------------------------------

@@ -1,4 +1,4 @@
-.. _sec:gettingstarted:
+.. _gettingstarted:
 
 Getting Started
 =================
@@ -30,7 +30,7 @@ webservice.
 -  ``myfirstproject/myfirstproject.$HOSTNAME.yml`` - Host-specific
    external configution file which is automatically included from the
    service configuration file if ran on the specified host. This will be
-   addressed `later <#sec:externalconf>`_.
+   addressed `later <#externalconf>`_.
 
 -  ``myfirstproject/myfirstproject_wrapper.py`` - System Wrapper Script
    in Python (this is recommended over the bash version, suited for more
@@ -63,7 +63,7 @@ Moreover, some scripts and sample configurations are generated:
    specific host), used for production environments
 
 -  ``*.conf`` - Sample configuration files for production environments
-   using a Apache 2 or Nginx webserver. Consult the section on `deployment <#sec:deployment>`_ for details.
+   using a Apache 2 or Nginx webserver. Consult the section on `deployment <#deployment>`_ for details.
 
 These template files need to be edited for your particular application.
 They are heavily commented to guide you. The ``INSTRUCTIONS.rst`` file will
@@ -76,19 +76,19 @@ to direct your browser once the webservice is running.
 You can choose not to make use of one of the generated system wrapper
 scripts and instead either write one from scratch in another language of
 your choice, or directly let CLAM invoke your application. Moreover, a
-wrapper is intended for the project paradigm, the `action paradigm <#sec:actions>`_ does
+wrapper is intended for the project paradigm, the `action paradigm <#actions>`_ does
 not make use of it.
 
 Starting Your webservice
 ---------------------------
 
 You can start your webservice in development mode with the included ``startserver_development.sh`` script, but not
-before you first read how to construct your webservice. Read the the `service configuration <#sec:serviceconfig>`_ documentation, and afterwards the `wrapper script <#sec:wrapperscript>`_ documentation.
+before you first read how to construct your webservice. Read the the `service configuration <#serviceconfig>`_ documentation, and afterwards the `wrapper script <#wrapperscript>`_ documentation.
 
 The start script simply installs your webservice and runs ``clamservice`` to run it, passing the module name of your
 webservice configuration. Make sure you first activated your Python virtual environment (if used) when calling the start script.
 
-For production environments, read the documentation on `deployment <#sec:deployment>`_.
+For production environments, read the documentation on `deployment <#deployment>`_.
 
 Overriding host, port and urlprefix (advanced)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
