@@ -1148,11 +1148,11 @@ service is expected to return a HTTP 302 Redirect response which CLAM will subse
 
 .. code-block:: python
 
-FORWARDERS = [
-       Forwarder(id="some_remote_service",name="Some Remote service",type="zip", description="",
-        url="https://remote.service.com/?downloadarchive=$BACKLINK"
-       )
-]
+    FORWARDERS = [
+           Forwarder(id="some_remote_service",name="Some Remote service",type="zip", description="",
+            url="https://remote.service.com/?downloadarchive=$BACKLINK"
+           )
+    ]
 
 .. note::
 
