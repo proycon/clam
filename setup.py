@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "2.4.0", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
+    version = "2.4.1", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),

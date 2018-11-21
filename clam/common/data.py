@@ -37,7 +37,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '2.4.0'
+VERSION = '2.4.1'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -331,7 +331,16 @@ class CLAMFile:
 
     def read(self):
         """Loads all lines in memory"""
-        return "\n".join(iter(self))
+        lines = self.readlines()
+        if self.metadata and 'encoding' in self.metadata:
+            encoding = self.metadata['encoding']
+        else:
+            encoding = 'utf-8'
+        if sys.version < '3':
+            return "\n".join( unicode(line, 'utf-8') if isinstance(line, str) else line for line in lines)
+        else:
+            return "\n".join( str(line, 'utf-8') if isinstance(line, bytes) else line for line in lines)
+
 
     def copy(self, target, timeout=500):
         """Copy or download this file to a new local file"""
