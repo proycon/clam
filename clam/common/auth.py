@@ -126,7 +126,7 @@ class HTTPBasicAuth(HTTPAuth):
         return 'Basic realm="{0}"'.format(self.realm)
 
     def authenticate(self, auth, stored_password):
-        remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
+        remote_addr = flask.request.remote_addr
         if pwhash(auth.username, self.realm, auth.password) == stored_password:
             self.printdebug("Basic Authentication challenge passed by " + remote_addr + " for " + auth.username)
             return True
@@ -203,7 +203,7 @@ class HTTPDigestAuth(HTTPAuth):
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, nonce, opaque)
 
     def authenticate(self, auth, password): #pylint: disable=too-many-return-statements
-        remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
+        remote_addr = flask.request.remote_addr
         if not auth.username:
             self.printdebug("Username missing in authorization header from " + remote_addr)
             return False
@@ -301,7 +301,7 @@ class MultiAuth(object):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
+            remote_addr = flask.request.remote_addr
             self.printdebug("Handling Multiple Authenticators for " + remote_addr)
             selected_auth = None
             if 'Authorization' in flask.request.headers:
@@ -404,8 +404,8 @@ class OAuth2(HTTPAuth):
                         return self.auth_error_callback()
                         #return flask.make_response("Error decrypting access token",403)
 
-                    if ip != flask.request.headers.get('REMOTE_ADDR', ''):
-                        self.printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.headers.get('REMOTE_ADDR',''))
+                    if ip != flask.request.remote_addr:
+                        self.printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.remote_addr)
                         #return flask.make_response("Access token not valid for this IP",403)
                         return self.auth_error_callback()
 
