@@ -64,11 +64,14 @@ def setdebug(debug):
     DEBUG = debug
 
 def printlog(msg):
-    now = datetime.datetime.now()
-    if LOG: LOG.write("------------------- [" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
+    if LOG:
+        now = datetime.datetime.now()
+        LOG.write("[" + now.strftime("%d/%b/%Y %H:%M:%S") + "] " + msg + "\n")
 
 def printdebug(msg):
-    if DEBUG: DEBUGLOG.write("CLAM DEBUG: " + msg + "\n")
+    if DEBUG:
+        now = datetime.datetime.now()
+        DEBUGLOG.write("[" + now.strftime("%d/%b/%Y %H:%M:%S") + " DEBUG] " + msg + "\n")
 
 def setlogfile(filename):
     global LOG, DEBUGLOG

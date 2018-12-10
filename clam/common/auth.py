@@ -126,7 +126,13 @@ class HTTPBasicAuth(HTTPAuth):
         return 'Basic realm="{0}"'.format(self.realm)
 
     def authenticate(self, auth, stored_password):
-        return pwhash(auth.username, self.realm, auth.password) == stored_password
+        remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
+        if pwhash(auth.username, self.realm, auth.password) == stored_password:
+            self.printdebug("Basic Authentication challenge passed by " + remote_addr + " for " + auth.username)
+            return True
+        else:
+            self.printdebug("Basic Authentication challenge *FAILED* by " + remote_addr + " for " + auth.username)
+            return False
 
 
 class HTTPDigestAuth(HTTPAuth):
@@ -197,29 +203,30 @@ class HTTPDigestAuth(HTTPAuth):
         return 'Digest realm="{0}",nonce="{1}",opaque="{2}"'.format(self.realm, nonce, opaque)
 
     def authenticate(self, auth, password): #pylint: disable=too-many-return-statements
+        remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
         if not auth.username:
-            self.printdebug("Username missing in authorization header")
+            self.printdebug("Username missing in authorization header from " + remote_addr)
             return False
         elif not auth.realm:
-            self.printdebug("Realm missing in authorization header")
+            self.printdebug("Realm missing in authorization header from " + remote_addr + " for " + auth.username)
             return False
         elif not auth.uri:
-            self.printdebug("URI missing in authorization header")
+            self.printdebug("URI missing in authorization header from " + remote_addr + " for " + auth.username)
             return False
         elif not auth.nonce:
-            self.printdebug("Nonce missing in authorization header")
+            self.printdebug("Nonce missing in authorization header from " + remote_addr + " for " + auth.username)
             return False
         elif not  auth.response:
-            self.printdebug("Response missing in authorization header")
+            self.printdebug("Response missing in authorization header from " + remote_addr + " for " + auth.username)
             return False
         elif not password:
-            self.printdebug("Password missing")
+            self.printdebug("Password missing from " + remote_addr + " for " + auth.username)
             return False
         elif not self.verify_nonce_callback(auth.nonce):
-            self.printdebug("Nonce mismatch")
+            self.printdebug("Nonce mismatch from " + remote_addr + " for " + auth.username)
             return False
         elif not self.verify_opaque_callback(auth.nonce, auth.opaque):
-            self.printdebug("Opaque mismatch")
+            self.printdebug("Opaque mismatch from " + remote_addr + " for " + auth.username)
             return False
         #password is stored has HA1 already
         #a1 = auth.username + ":" + auth.realm + ":" + password
@@ -230,10 +237,10 @@ class HTTPDigestAuth(HTTPAuth):
         a3 = ha1 + ":" + auth.nonce + ":" + ha2
         response = md5(a3.encode('utf-8')).hexdigest()
         if response == auth.response:
-            self.printdebug("Authentication challenge passed")
+            self.printdebug("Digest Authentication challenge passed by " + remote_addr + " for " + auth.username)
             return True
         else:
-            self.printdebug("Authentication challenge failed")
+            self.printdebug("Digest Authentication challenge *FAILED* by " + remote_addr + " for " + auth.username)
             return False
 
 
@@ -285,8 +292,8 @@ class MultiAuth(object):
     def __init__(self, main_auth, *args,**kwargs):
         self.main_auth = main_auth
         self.additional_auth = args
-        if 'printdebug' in kwargs:
-            self.printdebug = kwargs['printdebug']
+        if 'debug' in kwargs:
+            self.printdebug = kwargs['debug']
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.printdebug("Initialized multiple authenticators: " + repr(self.main_auth) + "," + repr(self.additional_auth))
@@ -294,15 +301,16 @@ class MultiAuth(object):
     def require_login(self, f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            self.printdebug("Handling Multiple Authenticators")
+            remote_addr = flask.request.headers.get('REMOTE_ADDR', 'unknown')
+            self.printdebug("Handling Multiple Authenticators for " + remote_addr)
             selected_auth = None
             if 'Authorization' in flask.request.headers:
                 try:
                     scheme, creds = flask.request.headers['Authorization'].split( None, 1)
-                    self.printdebug("Requested scheme = " + scheme)
+                    self.printdebug("Requested scheme by " + remote_addr + " = " + scheme)
                 except ValueError:
                     # malformed Authorization header
-                    self.printdebug("Malformed authorization header")
+                    self.printdebug("Malformed authorization header from " + remote_addr)
                     pass
                 else:
                     for auth in self.additional_auth:
@@ -310,7 +318,7 @@ class MultiAuth(object):
                             selected_auth = auth
                             break
             else:
-                self.printdebug("No authorization header passed")
+                self.printdebug("No authorization header passed by " + remote_addr)
                 flask.request.data #clear receive buffer of pending data
                 res = flask.make_response("Authorization required")
                 res.status_code = 401
@@ -325,7 +333,7 @@ class MultiAuth(object):
         return decorated
 
 class OAuth2(HTTPAuth):
-    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, printdebug=None, scope=None): #pylint: disable=super-init-not-called
+    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None): #pylint: disable=super-init-not-called
         def default_auth_error():
             return "Unauthorized Access (OAuth2)"
 
@@ -337,8 +345,8 @@ class OAuth2(HTTPAuth):
         self.username_function = username_function
         self.redirect_url = redirect_url #the /login URL of the webservice
         self.scope = scope
-        if printdebug:
-            self.printdebug = printdebug
+        if debug:
+            self.printdebug = debug
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.error_handler(default_auth_error)
