@@ -65,7 +65,7 @@ class AbstractParameter(object):
             elif key == 'default':
                 if 'value' not in kwargs:
                     if self.set(value):
-                        self.default = self.value
+                        self.default = value
             elif key == 'value':
                 self.set(value)
             elif key == 'required':

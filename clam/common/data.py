@@ -404,7 +404,7 @@ def processparameter(postdata, parameter, user=None):
             return True, parameter, ''
 
         if postvalue is not None:
-            clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue))
+            clam.common.util.printdebug("Setting parameter '" + parameter.id + "' to: " + repr(postvalue) + ' (from postdata)')
             if parameter.set(postvalue): #may generate an error in parameter.error
                 p = parameter.compilearg() #shell-safe
                 if p:
