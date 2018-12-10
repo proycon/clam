@@ -114,7 +114,8 @@ instead. If you are using SSL but CLAM does not detect it, you can set
 default authentication mechanism since CLAM 2.2, but HTTP Digest
 Authentication is accepted too. If you’re not on an SSL connection, CLAM
 will default to HTTP Digest Authentication only and disallow HTTP Basic
-Authentication.
+Authentication. You can tweak the accepted authentication types by setting the booleans ``BASICAUTH`` and
+``DIGESTAUTH``, respectively.
 
 User authentication is not mandatory, but for any world-accessible
 environment it is most strongly recommended, for obvious security

@@ -2429,20 +2429,34 @@ class CLAMService(object):
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.USERS:
-            digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.MultiAuth(clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug), digest_auth) #pylint: disable=redefined-variable-type
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
                 if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            else:
+            if settings.DIGESTAUTH:
+                digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+            if settings.BASICAUTH and settings.DIGESTAUTH:
+                self.auth = clam.common.auth.MultiAuth(basic_auth, digest_auth) #pylint: disable=redefined-variable-type
+            elif settings.BASICAUTH:
+                self.auth = basic_auth #pylint: disable=redefined-variable-type
+            elif settings.DIGESTAUTH:
                 self.auth = digest_auth
+            else:
+                error("USERS is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
         elif settings.USERS_MYSQL:
             validate_users_mysql()
-            digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
             if settings.BASICAUTH:
-                self.auth = clam.common.auth.MultiAuth(clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug), digest_auth) #pylint: disable=redefined-variable-type
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
                 if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            else:
+            if settings.DIGESTAUTH:
+                digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR, get_password=userdb_lookup_mysql,realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+            if settings.BASICAUTH and settings.DIGESTAUTH:
+                self.auth = clam.common.auth.MultiAuth(basic_auth, digest_auth) #pylint: disable=redefined-variable-type
+            elif settings.BASICAUTH:
+                self.auth = basic_auth #pylint: disable=redefined-variable-type
+            elif settings.DIGESTAUTH:
                 self.auth = digest_auth
+            else:
+                error("USERS is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
         else:
             warning("*** NO AUTHENTICATION ENABLED!!! This is strongly discouraged in production environments! ***")
             self.auth = clam.common.auth.NoAuth() #pylint: disable=redefined-variable-type
@@ -2723,9 +2737,14 @@ def set_defaults():
         settings.ASSUMESSL = settings.PORT == 443
 
     if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
-        settings.BASICAUTH = True #Allowing HTTP Basic ALONGSIDE HTTP Digest
+        settings.BASICAUTH = True #Allowing HTTP Basic Authentication
     elif 'BASICAUTH' not in settingkeys:
         settings.BASICAUTH = False #default is HTTP Digest
+
+    if 'DIGESTAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+        settings.DIGESTAUTH = True #Allowing HTTP Digest AuthenticatioDigest Authentication
+    elif 'DIGESTAUTH' not in settingkeys:
+        settings.DIGESTAUTH = True
 
 def test_dirs():
     if not os.path.isdir(settings.ROOT):
