@@ -195,7 +195,7 @@ class AbstractParameter(object):
         if self.id in postdata:
             return postdata[self.id]
         else:
-            return self.default
+            return None
 
 
     def access(self, user):
@@ -303,7 +303,7 @@ class BooleanParameter(AbstractParameter):
             else:
                 return False
         else:
-            return self.default
+            return None
 
 
 class StaticParameter(AbstractParameter):
@@ -577,7 +577,7 @@ class IntegerParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id] != '':
             return int(postdata[self.id])
         else:
-            return self.default
+            return None
 
     def set(self, value):
         """This parameter method attempts to set a specific value for this parameter. The value will be validated first, and if it can not be set. An error message will be set in the error property of this parameter"""
@@ -650,5 +650,5 @@ class FloatParameter(AbstractParameter):
         if self.id in postdata and postdata[self.id] != '':
             return float(postdata[self.id])
         else:
-            return self.default
+            return None
 
