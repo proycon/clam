@@ -69,6 +69,7 @@ class CLAMClient:
         self.url = url
         self.oauth = oauth
         self.oauth_access_token = oauth_access_token
+        self.basicauth = basicauth
         if verify is None:
             self.verify = certifi.where()
         else:
