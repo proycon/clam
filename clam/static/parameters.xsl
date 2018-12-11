@@ -12,13 +12,13 @@
 
 <xsl:template match="StaticParameter|staticparameter">  <!-- lowercase variant is required because of some XSLT issues in Mozilla -->
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
@@ -28,25 +28,37 @@
 
 <xsl:template match="BooleanParameter|booleanparameter">
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
     <xsl:element name="input">
-        <xsl:attribute name="type">checkbox</xsl:attribute>
+        <xsl:attribute name="type">hidden</xsl:attribute>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
-        <xsl:attribute name="value">1</xsl:attribute>
-        <xsl:if test="@value = 1 or @value = 'True'">
-            <xsl:attribute name="checked">checked</xsl:attribute>     
+        <xsl:choose>
+        <xsl:when test="@value = 1 or @value = 'yes' or @value = 'True'">
+            <xsl:attribute name="value">1</xsl:attribute>
+            <xsl:attribute name="checked">checked</xsl:attribute>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:attribute name="value">0</xsl:attribute>
+            <xsl:attribute name="checked">unchecked</xsl:attribute>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:element><xsl:element name="input"><!--no whitespace is important here-->
+        <xsl:attribute name="type">checkbox</xsl:attribute>
+        <xsl:if test="@value = 1 or @value = 'yes' or @value = 'True'">
+            <xsl:attribute name="checked">checked</xsl:attribute>
         </xsl:if>
+        <xsl:attribute name="onclick">this.previousSibling.value=1-this.previousSibling.value</xsl:attribute>
     </xsl:element>
     </td>
     </tr>
@@ -54,13 +66,13 @@
 
 <xsl:template match="StringParameter|stringparameter">
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
@@ -70,20 +82,20 @@
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
-    </xsl:element>  
+    </xsl:element>
     </td>
     </tr>
 </xsl:template>
 
 <xsl:template match="TextParameter|textparameter">
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
@@ -91,7 +103,7 @@
     <textarea>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
-        <xsl:value-of select="@value"/>    
+        <xsl:value-of select="@value"/>
     </textarea>
     </td>
     </tr>
@@ -99,13 +111,13 @@
 
 <xsl:template match="IntegerParameter|integerparameter">
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
@@ -115,7 +127,7 @@
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
-    </xsl:element>  
+    </xsl:element>
     </td>
     </tr>
 </xsl:template>
@@ -123,13 +135,13 @@
 
 <xsl:template match="FloatParameter|floatparameter">
     <tr>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <xsl:attribute name="class">error</xsl:attribute>
     </xsl:if>
     <th class="parameter">
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
-    <xsl:if test="@error"> 
+    <xsl:if test="@error">
          <div class="error"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
@@ -139,7 +151,7 @@
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
-    </xsl:element>  
+    </xsl:element>
     </td>
     </tr>
 </xsl:template>
@@ -148,13 +160,13 @@
     <xsl:choose>
         <xsl:when test="@multi">
             <tr>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <xsl:attribute name="class">error</xsl:attribute>
             </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <div class="error"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
@@ -169,7 +181,7 @@
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/>[<xsl:value-of select="@id"/>]</xsl:attribute>
                     <xsl:attribute name="value">1</xsl:attribute>
                     <xsl:if test="@selected">
-                        <xsl:attribute name="checked">checked</xsl:attribute>     
+                        <xsl:attribute name="checked">checked</xsl:attribute>
                     </xsl:if>
                 </xsl:element>
                 </td>
@@ -178,13 +190,13 @@
         </xsl:when>
         <xsl:when test="@showall">
             <tr>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <xsl:attribute name="class">error</xsl:attribute>
             </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <div class="error"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
@@ -199,7 +211,7 @@
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute>
                     <xsl:if test="@selected">
-                        <xsl:attribute name="checked">checked</xsl:attribute>     
+                        <xsl:attribute name="checked">checked</xsl:attribute>
                     </xsl:if>
                 </xsl:element>
                 </td>
@@ -208,13 +220,13 @@
         </xsl:when>
         <xsl:otherwise>
             <tr>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <xsl:attribute name="class">error</xsl:attribute>
             </xsl:if>
             <th class="parameter">
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
-            <xsl:if test="@error"> 
+            <xsl:if test="@error">
              <div class="error"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
