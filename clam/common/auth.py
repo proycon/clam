@@ -84,7 +84,12 @@ class HTTPAuth(object):
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
                 if not auth:
-                    self.printdebug("No authentication header supplied")
+                    msg = "No authentication header supplied"
+                    self.printdebug(msg)
+                    return self.auth_error_callback()
+                if not flask.request.headers['Authorization'].lower().startswith(self.scheme.lower()):
+                    msg = "Invalid authentication scheme, expected " + self.scheme
+                    self.printdebug(msg)
                     return self.auth_error_callback()
                 username = self.username(**self.settings)
                 self.printdebug("Obtained username: " + username)
@@ -127,7 +132,10 @@ class HTTPBasicAuth(HTTPAuth):
 
     def authenticate(self, auth, stored_password):
         remote_addr = flask.request.remote_addr
-        if pwhash(auth.username, self.realm, auth.password) == stored_password:
+        if auth.username is None or self.realm is None or auth.password is None:
+            self.printdebug("Basic Authentication challenge *FAILED* for " + auth.username + " due to missing credentials")
+            return False
+        elif pwhash(auth.username, self.realm, auth.password) == stored_password:
             self.printdebug("Basic Authentication challenge passed by " + remote_addr + " for " + auth.username)
             return True
         else:
