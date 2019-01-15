@@ -12,8 +12,8 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: https://api.codacy.com/project/badge/grade/860767a6b995425bbb607fc852c418b7
     :target: https://www.codacy.com/app/proycon/clam
 
-.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.49081.svg
-   :target: http://dx.doi.org/10.5281/zenodo.49081
+.. image:: https://zenodo.org/badge/760072.svg
+   :target: https://zenodo.org/badge/latestdoi/760072
 
 .. image:: http://applejack.science.ru.nl/lamabadge.php/clam
    :target: http://applejack.science.ru.nl/languagemachines/
