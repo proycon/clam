@@ -457,8 +457,8 @@
             <p>
             Forward all output to:
             <ul>
-                <xsl:for-each select="/clam/forwarders">
-                    <li><a href="{./url}"><xsl:value-of select="./name" /></a> - <xsl:value-of select="./description" /></li>
+                <xsl:for-each select="/clam/forwarders/forwarder">
+                    <li><a href="{./@url}"><xsl:value-of select="./@name" /></a> - <xsl:value-of select="./@description" /></li>
                 </xsl:for-each>
             </ul>
             </p>
