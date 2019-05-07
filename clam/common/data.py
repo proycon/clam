@@ -819,6 +819,8 @@ class Profile(object):
                 self.output.append(arg)
             elif isinstance(arg, ParameterCondition):
                 self.output.append(arg)
+            elif arg is None:
+                pass
 
         #Check for orphan OutputTemplates. OutputTemplates must have a parent (only outputtemplates with filename, unique=True may be parentless)
         for o in self.output:
@@ -1431,6 +1433,8 @@ class InputTemplate(object):
                 self.viewers.append(arg)
             elif isinstance(arg, InputSource):
                 self.inputsources.append(arg)
+            elif arg is None:
+                pass
             else:
                 raise ValueError("Unexpected parameter for InputTemplate " + id + ", expecting Parameter, Converter, Viewer or InputSource.")
 
@@ -1740,6 +1744,8 @@ class OutputTemplate(object):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
+            elif arg is None:
+                pass
             else:
                 raise ValueError("Unexpected argument for OutputTemplate " + id + ", expecting MetaField, ParameterCondition, Viewer or Converter")
 
@@ -2007,11 +2013,15 @@ class ParameterCondition(object):
             if key == 'then':
                 if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
                     self.then = value
+                elif value is None:
+                    pass
                 else:
                     raise Exception("Value of 'then=' must be InputTemplate, OutputTemplate or ParameterCondition!")
             elif key == 'else' or key == 'otherwise':
                 if isinstance(value, OutputTemplate) or isinstance(value, InputTemplate) or isinstance(value, ParameterCondition) or isinstance(value, AbstractMetaField):
                     self.otherwise = value
+                elif value is None:
+                    pass
                 else:
                     raise Exception("Value of 'else=' must be InputTemplate, OutputTemplate or ParameterCondition!")
 
