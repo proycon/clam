@@ -48,6 +48,7 @@ WRAPPERDIR = os.path.abspath(os.path.dirname(__file__) + '/../wrappers/')
 DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
 CUSTOM_FORMATS = []  #will be injected
+CUSTOM_VIEWERS = []  #will be injected
 
 class BadRequest(Exception):
     def __init__(self):
@@ -377,7 +378,7 @@ class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
 def getclamdata(filename, custom_formats=None):
-    global CUSTOM_FORMATS  #pylint: disable=global-statement
+    global CUSTOM_FORMATS, CUSTOM_VIEWERS  #pylint: disable=global-statement
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance.
 
@@ -388,6 +389,8 @@ def getclamdata(filename, custom_formats=None):
     f.close()
     if custom_formats:
         CUSTOM_FORMATS = custom_formats #dependency injection for CUSTOM_FORMATS
+    if custom_viewers:
+        CUSTOM_VIEWERS = custom_viewers
     return CLAMData(xml, None, True)
 
 

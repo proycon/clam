@@ -116,6 +116,10 @@ class CLAMClient:
         """custom_formats is a list of Python classes holding custom formats the webservice may use. These must be registered with the client before the client can be used."""
         clam.common.data.CUSTOM_FORMATS = custom_formats
 
+    def register_custom_viewers(self, custom_viewers):
+        """custom_formats is a list of Python classes holding custom viewers the webservice may use. These must be registered with the client before the client can be used."""
+        clam.common.data.CUSTOM_VIEWERS = custom_viewers
+
 
     def initrequest(self, data=None):
         params = {'headers': self.initauth() }

@@ -2725,6 +2725,10 @@ def set_defaults():
         settings.CUSTOM_FORMATS = []
     clam.common.data.CUSTOM_FORMATS = settings.CUSTOM_FORMATS #dependency injection
 
+    if 'CUSTOM_VIEWERS' not in settingkeys:
+        settings.CUSTOM_VIEWERS = []
+    clam.common.data.CUSTOM_VIEWERS = settings.CUSTOM_VIEWERS #dependency injection
+
     if 'ACTIONS' not in settingkeys:
         settings.ACTIONS = []
 

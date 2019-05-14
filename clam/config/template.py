@@ -152,6 +152,13 @@ STYLE = 'classic'
 
 # CUSTOM_FORMATS = [ MyXMLFormat ]
 
+# ======== ENABLED VIEWERS ===========
+
+#In CUSTOM_VIEWERS you can specify a list of Python classes corresponding to extra formats.
+#You can define the classes first, and then put them in CUSTOM_VIEWERS, as shown in this example:
+
+# CUSTOM_VIEWERS = [ MyXMLViewer ]
+
 # ======= INTERFACE OPTIONS ===========
 
 #Here you can specify additional interface options (space separated list), see the documentation for all allowed options
