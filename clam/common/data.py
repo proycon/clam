@@ -377,7 +377,7 @@ class CLAMInputFile(CLAMFile):
 class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
-def getclamdata(filename, custom_formats=None):
+def getclamdata(filename, custom_formats=None, custom_viewers=None):
     global CUSTOM_FORMATS, CUSTOM_VIEWERS  #pylint: disable=global-statement
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance.
