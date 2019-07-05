@@ -2321,6 +2321,8 @@ class ActionHandler(object):
 
 
 def sufficientresources():
+    if not settings.ENABLED:
+        return False, "Service is disabled for maintenance"
     if settings.REQUIREMEMORY > 0:
         if not os.path.exists('/proc/meminfo'):
             printlog("WARNING: No /proc/meminfo available on your system! Not Linux? Skipping memory requirement check!")
@@ -2655,6 +2657,8 @@ def set_defaults():
         settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(32)
     if 'ENABLEWEBAPP' not in settingkeys:
         settings.ENABLEWEBAPP = True
+    if 'ENABLED' not in settingkeys:
+        settings.ENABLED = True
     if 'REMOTEHOST' not in settingkeys:
         settings.REMOTEHOST = None
     elif 'REMOTEUSER' not in settingkeys:
