@@ -350,7 +350,7 @@ def getprojects(user):
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])
                 project = os.path.basename(f)
-                projectsize = Project.getdiskusage(user,project )
+                projectsize, filecount = Project.getdiskusage(user,project )
                 totalsize += projectsize
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
             with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
@@ -629,10 +629,10 @@ class Project:
             with open(os.path.join(path,'.du'),'r') as f:
                 return float(f.read().strip())
         else:
-            size = computediskusage(path)
+            size, count = computediskusage(path)
             with open(os.path.join(path,'.du'),'w') as f:
                 f.write(str(size))
-            return size
+            return size, count
 
     @staticmethod
     def create(project, credentials): #pylint: disable=too-many-return-statements

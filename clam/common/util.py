@@ -44,15 +44,17 @@ def globsymlinks(pattern, recursion=True):
 
 def computediskusage(path):
     total_size = 0
+    total_files = 0
     for dirpath, dirnames, filenames in os.walk(path): #pylint: disable=unused-variable
         for f in filenames:
             fp = os.path.join(dirpath, f)
             try:
                 total_size += os.path.getsize(fp)
+                total_files += 1
             except:
                 #may happen in case of dangling symlinks
                 pass
-    return total_size / 1024 / 1024 #MB
+    return total_size / 1024 / 1024, total_files #MB
 
 
 def setlog(log):

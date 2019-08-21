@@ -2294,7 +2294,7 @@ class Action(object):
         else:
             method = ""
         if self.allowanonymous:
-            allowanonymous = "allowanoymous=\"yes\""
+            allowanonymous = "allowanonymous=\"yes\""
         else:
             allowanonymous = ""
         xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" " + allowanonymous + ">\n"
