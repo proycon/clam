@@ -64,7 +64,7 @@ class ForwardViewer(AbstractViewer):
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
-        self.forwarder(None, file)
+        self.forwarder(None, None, outputfile=file) #this sets the forwardlink on the instance
         r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
         if r.status_code == 302 and 'Location' in r.headers:
             url = r.headers['Location']
