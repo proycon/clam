@@ -55,22 +55,26 @@ class AbstractViewer(object):
         raise NotImplementedError
 
 class ForwardViewer(AbstractViewer):
-    """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file. The remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
+    """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword paramter indirect=True on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
 
     def __init__(self, id, name, forwarder, **kwargs):
         self.id = id
         self.name = name
         self.forwarder = forwarder
+        self.indirect = 'indirect' in kwargs and kwargs['indirect']
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
         self.forwarder(None, None, outputfile=file) #this sets the forwardlink on the instance
-        r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
-        if r.status_code == 302 and 'Location' in r.headers:
-            url = r.headers['Location']
-            return flask.redirect(url)
+        if self.indirect:
+            r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
+            if r.status_code == 302 and 'Location' in r.headers:
+                url = r.headers['Location']
+                return flask.redirect(url)
+            else:
+                return "Unexpected response from Forward service (HTTP " + str(r.status_code) + ", target was " + url + "): " + r.text
         else:
-            return "Unexpected response from Forward service (HTTP " + str(r.status_code) + ", target was " + url + "): " + r.text
+            return flask.redirect(self.forwarder.forwardlink)
 
 
 
