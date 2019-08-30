@@ -627,11 +627,19 @@ class Project:
         path = settings.ROOT + "projects/" + user + '/' + project + "/"
         if os.path.exists(os.path.join(path,'.du')):
             with open(os.path.join(path,'.du'),'r') as f:
-                return float(f.read().strip())
+                size = 0.0
+                count = 0
+                for i, line in enumerate(f):
+                    if line == 0:
+                        size = float(line.strip())
+                    elif line == 1:
+                        count = int(line.strip())
+                return size, count
         else:
             size, count = computediskusage(path)
             with open(os.path.join(path,'.du'),'w') as f:
-                f.write(str(size))
+                f.write(str(size) + "\n")
+                f.write(str(count))
             return size, count
 
     @staticmethod

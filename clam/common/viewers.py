@@ -72,10 +72,9 @@ class ForwardViewer(AbstractViewer):
                 url = r.headers['Location']
                 return flask.redirect(url)
             else:
-                return "Unexpected response from Forward service (HTTP " + str(r.status_code) + ", target was " + url + "): " + r.text
+                return "Unexpected response from Forward service (HTTP " + str(r.status_code) + "): " + str(r.text)
         else:
             return flask.redirect(self.forwarder.forwardlink)
-
 
 
 
