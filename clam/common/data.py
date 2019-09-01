@@ -37,7 +37,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '2.4.8'
+VERSION = '2.4.10'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2347,7 +2347,7 @@ class Forwarder(object):
     def __call__(self, project, baseurl, outputfile=None):
         """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generator to download the entire output archive."""
         if outputfile:
-            self.forwardlink = self.url.replace("$BACKLINK", outputfile.filename)
+            self.forwardlink = self.url.replace("$BACKLINK", str(outputfile))
         else:
             self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
         return self
