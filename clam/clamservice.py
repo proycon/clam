@@ -2812,10 +2812,10 @@ def test_version():
     uptodate = True
     for i in range(0,len(req)):
         if i < len(ver):
-            if req[i] > ver[i]:
+            if int(req[i]) > int(ver[i]):
                 uptodate = False
                 break
-            elif ver[i] > req[i]:
+            elif int(ver[i]) > int(req[i]):
                 break
     if not uptodate:
         error("Version mismatch: at least " + str(settings.REQUIRE_VERSION) + " is required")
