@@ -1231,6 +1231,11 @@ class Project:
                 #attach viewer data (also attaches converters!
                 outputfile.attachviewers(settings.PROFILES)
 
+                #set remote properties, used by the ForwardViewer
+                outputfile.baseurl = getrooturl()
+                outputfile.project = project
+                outputfile.user = user
+
                 viewer = None
                 for v in outputfile.viewers:
                     if v.id == requestid:
