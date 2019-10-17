@@ -18,6 +18,10 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: http://applejack.science.ru.nl/lamabadge.php/clam
    :target: http://applejack.science.ru.nl/languagemachines/
 
+.. image:: https://www.repostatus.org/badges/latest/active.svg
+   :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
+   :target: https://www.repostatus.org/#active
+
 
 *by Maarten van Gompel, Centre for Language and Speech Technology, Radboud University Nijmegen*
 
