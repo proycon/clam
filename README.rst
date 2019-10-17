@@ -15,6 +15,10 @@ CLAM: Computational Linguistics Application Mediator
 .. image:: https://zenodo.org/badge/760072.svg
    :target: https://zenodo.org/badge/latestdoi/760072
 
+.. image:: https://img.shields.io/pypi/v/clam
+   :alt: Latest release in the Python Package Index
+   :target: https://pypi.org/project/clam/
+
 .. image:: http://applejack.science.ru.nl/lamabadge.php/clam
    :target: http://applejack.science.ru.nl/languagemachines/
 
