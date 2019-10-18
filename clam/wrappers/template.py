@@ -52,6 +52,7 @@ outputdir = sys.argv[3]
 #Moreover, you can import any other settings from your service configuration file as well:
 
 #from yourserviceconf import CUSTOM_FORMATS
+#clam.common.data.CUSTOM_FORMATS = CUSTOM_FORMATS
 
 #Obtain all data from the CLAM system (passed in $DATAFILE (clam.xml)), always pass CUSTOM_FORMATS as second argument if you make use of it!
 clamdata = clam.common.data.getclamdata(datafile)
@@ -74,12 +75,12 @@ clam.common.status.write(statusfile, "Starting...")
 # most elegant method to set up your wrapper.
 
 #for outputfile, outputtemplate_id in clamdata.program.getoutputfiles():
-#   if outputtemplate.id == 'some_template_id':
+#   if outputtemplate_id == 'some_template_id':
         #(Use outputtemplate_id to match against output templates)
         #(You can access output metadata using outputfile.metadata[parameter_id])
 #       outputfilepath = str(outputfile) #example showing how to obtain the path to the file
         #if you expect just a single input file for this output file, you can use this:
-#       inputfile, inputtemplate = clamdata.program.getinputfile(outputfilename)
+#       inputfile, inputtemplate = clamdata.program.getinputfile(outputfilepath)
         # ...do your thing... e.g., invoke a process that generates outputfilename on the basis of inputfilename (see the invoke your actual system example below)
         #(You can access input metadata using inputfile.metadata[parameter_id])
 
