@@ -64,6 +64,7 @@ class ExampleFormat(CLAMMetaData):
 class PlainTextFormat(CLAMMetaData):
     """Plain Text Format Definition. This format has one required attribute: encoding"""
 
+    name = "Plain Text Format"
     attributes = {'encoding':True,'language':False }
     mimetype = "text/plain"
 
@@ -73,6 +74,7 @@ class PlainTextFormat(CLAMMetaData):
 
 class HTMLFormat(CLAMMetaData):
     """HTML Format Definition. This format has one required attribute: encoding"""
+    name = "HTML Format"
     attributes = {'encoding':True,'language':False }
     mimetype = "text/html"
 

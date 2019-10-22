@@ -70,6 +70,11 @@
         </parametergroup>
         {% endfor %}
     </parameters>
+    <formats>
+        {% for format in formats %}
+            {{ format.formatxml()|indent(8,false)|safe }}
+        {% endfor %}
+    </formats>
 {% endif %}
 {############################################################################################}
 {% if project and matchedprofiles and program %}

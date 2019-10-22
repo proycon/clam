@@ -403,6 +403,7 @@ def index(credentials = None):
             outputpaths=None,
             inputpaths=None,
             profiles=settings.PROFILES,
+            formats=clam.common.data.getformats(settings.PROFILES),
             datafile=None,
             projects=projects,
             totalsize=totalsize,
@@ -455,6 +456,7 @@ def info(credentials=None):
             outputpaths=None,
             inputpaths=None,
             profiles=settings.PROFILES,
+            formats=clam.common.data.getformats(settings.PROFILES),
             datafile=None,
             projects=projects,
             actions=settings.ACTIONS,
@@ -919,7 +921,7 @@ class Project:
 
         inputpaths = []
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
-            inputpaths = Project.inputindex(project, user) #pylint: disable=redefined-variable-type
+            inputpaths = Project.inputindex(project, user)
 
 
 
@@ -933,7 +935,7 @@ class Project:
             else:
                 customhtml = settings.CUSTOMHTML_PROJECTDONE
         else:
-            outputpaths = [] #pylint: disable=redefined-variable-type
+            outputpaths = []
 
 
         for parametergroup, parameterlist in parameters: #pylint: disable=unused-variable
@@ -966,6 +968,7 @@ class Project:
                 outputpaths=outputpaths,
                 inputpaths=inputpaths,
                 profiles=settings.PROFILES,
+                formats=clam.common.data.getformats(settings.PROFILES),
                 matchedprofiles=matchedprofiles, #comma-separated list of indices (str)
                 program=program, #Program instance
                 datafile=datafile,

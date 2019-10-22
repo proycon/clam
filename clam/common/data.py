@@ -26,6 +26,7 @@ import json
 import time
 import re
 import yaml
+import itertools
 from copy import copy
 from lxml import etree as ElementTree
 if sys.version < '3':
@@ -37,7 +38,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '2.4.13'
+VERSION = '2.5.0'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -627,6 +628,19 @@ class CLAMData(object):
                 for subnode in node:
                     if subnode.tag == 'profile':
                         self.profiles.append(Profile.fromxml(subnode))
+            elif node.tag == 'formats':
+                for subnode in node:
+                    if subnode.tag == 'format':
+                        #check if we already have the format registered
+                        new = True
+                        for F in CUSTOM_FORMATS:
+                            if F.__name__ == subnode.attrib['id']:
+                                new = False
+                                break
+                        if new:
+                            #dynamically create a new class and inject it into CUSTOM_FORMATS
+                            FormatClass = type(subnode.attrib['id'], (CLAMMetaData,), { "mimetype": subnode.attrib['mimetype'], "name": subnode.attrib['name'] })
+                            CUSTOM_FORMATS.append(FormatClass)
             elif node.tag == 'input':
                 for filenode in node:
                     if filenode.tag == 'file':
@@ -1183,7 +1197,7 @@ class CLAMProvenanceData(object):
 
 
 class CLAMMetaData(object):
-    """A simple hash structure to hold arbitrary metadata"""
+    """A simple hash structure to hold arbitrary metadata. This is the basis for format classes."""
     attributes = None #if None, all attributes are allowed! Otherwise it should be a dictionary with keys corresponding to the various attributes and a list of values corresponding to the *maximally* possible settings (include False as element if not setting the attribute is valid), if no list of values are defined, set True if the attrbute is required or False if not. If only one value is specified (either in a list or not), then it will be 'fixed' metadata
     allowcustomattributes = True
 
@@ -1308,6 +1322,11 @@ class CLAMMetaData(object):
 
         xml += indent +  "</CLAMMetaData>"
         return xml
+
+    @classmethod
+    def formatxml(Self, indent = ""):
+        """Render an XML representation of the format class""" #(independent of web.py for support in CLAM API)
+        return "<format id=\"" + Self.__name__ + "\" name=\"" + Self.name + "\" mimetype=\"" + Self.mimetype + "\" />"
 
     def save(self, filename):
         """Save metadata to XML file"""
@@ -2408,6 +2427,15 @@ def resolveoutputfilename(filename, globalparameters, localparameters, outputtem
     clam.common.util.printdebug("Determined output filename: " + filename)
 
     return filename
+
+def getformats(profiles):
+    formats = []
+    for profile in profiles:
+        for template in itertools.chain(profile.input, profile.outputtemplates()):
+            duplicate = any( FormatClass.__name__ == template.formatclass.__name__ for FormatClass in formats )
+            if not duplicate:
+                formats.append(template.formatclass)
+    return formats
 
 
 def escape(s, quote):
