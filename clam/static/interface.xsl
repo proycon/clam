@@ -493,13 +493,13 @@
 
 <xsl:template match="/clam/input/file">
     <tr>
-      <td class="file"><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a></td>
+      <td class="file"><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a></td>
         <xsl:variable name="template" select="@template" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format"/></td>
-        <td class="actions"><img src="{/clam/@baseurl}/static/delete.png" title="Delete this file">
+        <td class="actions"><span class="oi oi-circle-x deletefile" title="Delete this file"></span>
             <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
-        </img></td>
+        </td>
     </tr>
 </xsl:template>
 
@@ -510,10 +510,10 @@
         <td class="file">
         <xsl:choose>
         <xsl:when test="./viewers/viewer[1]">
-            <a><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:when>
         <xsl:otherwise>
-            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:otherwise>
         </xsl:choose>
         </td>
@@ -524,12 +524,12 @@
 
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
             </xsl:for-each>
-            <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
             <xsl:if test="@template">
                 <xsl:text> | </xsl:text>
-                <a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>
+                <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>
             </xsl:if>
         </td>
     </tr>
@@ -717,7 +717,7 @@
                    <xsl:for-each select="projects/project">
                        <tr>
                            <xsl:attribute name="id">projectrow_<xsl:value-of select='.' /></xsl:attribute>
-                           <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
+                           <td><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
                                <button class="btn btn-danger btn-sm quickdelete">
                                    <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
                                    Delete</button>

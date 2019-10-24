@@ -125,3 +125,8 @@ table .file {
     width: 100%;
     margin-bottom: 3px;
 }
+
+.deletefile {
+    color: #800;
+    cursor: pointer;
+}

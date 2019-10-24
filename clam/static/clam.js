@@ -269,7 +269,7 @@ function processuploadresponse(response, paramdiv) {
 
             //Add this file to the input table if it doesn't exist yet
             if (!found) {
-                tableinputfiles.fnAddData( [  '<a href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), $(this).attr('format') ,'<img src="' + baseurl + '/static/delete.png" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');" />' ] );
+                tableinputfiles.fnAddData( [  '<a class="text-primary" href="' + baseurl + '/' + project + '/input/' + $(this).attr('filename') + '">' + $(this).attr('filename') + '</a>', $(this).attr('templatelabel'), $(this).attr('format') ,'<span class="oi-circle-x deletefile" title="Delete this file" onclick="deleteinputfile(\'' + $(this).attr('filename') + '\');"></span>' ] );
             }
 
         }
