@@ -1,11 +1,10 @@
 body {
 	background: url(static/back.png);
-    font-family: sans-serif;
     font-size: 12px;
 }
 #gradient {
     display: block;
-    background: rgba(0, 0, 0, 0) linear-gradient(rgba(211, 200, 180, 0.7), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
+    background: rgba(0, 0, 0, 0) linear-gradient(rgba(30, 30, 30, 0.7), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
     height: 100%;
     left: 0;
     margin: 0;
@@ -25,67 +24,8 @@ body {
     color: #434343;
 }
 
-h2 {
-    font-size: 120%;
-    color: #a6956f;
-    text-decoration: small-caps;
-    border-bottom:  1px solid #a6956f;
-}
-h3 {
-    margin-left: 5px;
-    font-size: 100%;
-    color: #a6956f;
-    text-decoration: small-caps;
-    border-bottom:  1px solid #a6956f;
-}
-#header {
-	background: rgba(155,140,107,0.5);
-    margin: 0px;
-}
-#header h1 {
-    color: white;
-}
 
-#header h2 {
-    color: white;
-    font-style: italic;
-    font-size: 100%;
-    margin: 1px;
-    border: none;
-}
-
-#covershadow {
-    display: block;
-    background-color: #837e75;
-    padding: 0px;
-    height: 8px;
-    width: 100%;
-    bottom: 0px;
-    margin-bottom: 15px;
-    left: 50%;
-    z-index: 5;
-}
-
-.box {
-    background: #f6f6f6;
-    border-radius: 5px;
-	box-shadow: 3px 3px 3px #666;
-	padding: 10px;
-	border: #aaa solid 1px;
-	margin-bottom: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 95%;
-}
-table.files, table#projects {
-    border: #ca9c4d;
-}
-
-
-body table.files td:hover, table.files th:hover, table#projects td:hover {
-    background: #eee;
-}
-
+/*
 .parameters table th, #parameters table  td {
   border-bottom:  1px solid #e1e1e1;
 }
@@ -95,11 +35,12 @@ body table.files td:hover, table.files th:hover, table#projects td:hover {
     text-decoration: small-caps;
     border-bottom:  1px solid #ca9c4d;
 }
+*/
 
-input[type="text"], select, textarea, #editorfilename, #urluploadfile, #projectname {
+/*input[type="text"], select, textarea, #editorfilename, #urluploadfile, #projectname {
     background: #ddd;
     border: 1px solid #cfbf9d;
-}
+}*/
 
 input.start {
     font-weight: bold;
@@ -129,50 +70,12 @@ input.start {
     color: white;
 }
 
-#tabs {
-	background: #E6DCCA;
-}
 
-
-#tabs li.active {
-	background: #cfbf9d;
-	color: white;
-	text-decoration: underline;
-	border:#cfbf9d solid 1px;
-	font-size: 100%;
-}
-
-#tabs li.disabled {
-	background: #bfbfbf;
-	color: white;
-	border:#bfbfbf solid 1px;
-    opacity: 0.6;
-}
-
-#tabs li {
-	font-size: 90%;
-	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;
-	border: #cbc3b1 solid 1px;
-	background: #cbc3b1;
-	color: white;
-	padding-left: 5px;
-	padding-right: 5px;
-	font-weight: bold;
-	cursor: pointer;
-}
-#tabs a, #tabs a:visited {
-	color: white;
-	text-decoration: none;
-}
-#tabs a:hover {
-	color: #fffeb9;
-	text-decoration: none;
-}
 #status .error {
 	margin: 2px;
 	width: 70%;
 }
+
 a {
 	color: #574b32;
 }
@@ -204,6 +107,6 @@ span.running {
 }
 
 span.staging {
-    color: #b3943f;
+    color: #292975;
     font-weight: bold;
 }

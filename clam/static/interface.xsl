@@ -11,7 +11,6 @@
   <xsl:call-template name="head" />
   <body>
     <div id="gradient"></div>
-    <div id="covershadow"></div>
     <div id="container">
 
         <xsl:choose>
@@ -119,17 +118,17 @@
     <xsl:if test="status/@code = 1 and (contains(/clam/@interfaceoptions,'secureonly') or contains(/clam/@interfaceoptions,'simplepolling'))" >
       <meta http-equiv="refresh" content="2" />
     </xsl:if>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
-    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
     <link rel="stylesheet" href="https:////cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.0/font/css/open-iconic-bootstrap.min.css" />
+
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
+    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
     <!--
     <script type="text/javascript"datatables src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
@@ -503,6 +502,7 @@
                 <xsl:apply-templates select="file" />
             </tbody>
         </table>
+        </div>
     </div>
 </xsl:template>
 
@@ -622,15 +622,15 @@
             <ul class="navbar-nav mr-auto">
                 <xsl:choose>
                 <xsl:when test="/clam/@oauth_access_token = ''">
-                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/">1. Projects</a></li>
+                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/">1.&#160;Projects</a></li>
                 </xsl:when>
                 <xsl:otherwise>
-                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
+                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1.&#160;Projects</a></li>
                 </xsl:otherwise>
                 </xsl:choose>
-                <li class="nav-item"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">2. Staging Input &amp; Parameters</a></li>
-                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">3. Processing</a></li>
-                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">4. Output &amp; Visualisation</a></li>
+                <li class="nav-item"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">2.&#160;Staging</a></li>
+                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">3.&#160;Runtime</a></li>
+                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">4.&#160;Results</a></li>
             </ul>
             <ul class="navbar-nav pull-right">
                 <li class="nav-item"><a class="nav-link" href="{/clam/@baseurl}/info"><span class="oi oi-icon-book"></span> REST API Specification</a></li>
@@ -710,7 +710,7 @@
                        <tr>
                            <xsl:attribute name="id">projectrow_<xsl:value-of select='.' /></xsl:attribute>
                            <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
-                               <button class="btn btn-danger quickdelete">
+                               <button class="btn btn-danger btn-sm quickdelete">
                                    <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
                                    Delete</button>
                            </td>

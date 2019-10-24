@@ -9,11 +9,6 @@ body {
     display: none;
 }
 
-#header {
-	text-align: center;
-	padding: 10px;
-}
-
 #header h1 {
     margin: 3px;
 }
@@ -76,8 +71,6 @@ div#loader {
     top: 100px;
     min-height: 30px;
     width: 250px;
-    -moz-border-radius: 12px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 12px; /* CSS3 for Safari */
     margin: 5px;
     margin-left: auto;
     margin-right: auto;
@@ -88,8 +81,6 @@ div#loader {
     padding: 10px;
 }
 div#editor {
-    -moz-border-radius: 12px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 12px; /* CSS3 for Safari */
     margin: 5px;
 }
 
@@ -99,6 +90,7 @@ div#editor {
     font-weight: bold;
     font-size: 120%;
 }
+
 #status .error {
     margin: 2px;
     margin-left: auto;
@@ -111,6 +103,7 @@ div#editor {
     color: white;
     font-size: 120%;
 }
+
 #status img.progress {
     margin: 2px;
     margin-left: 10px;
@@ -120,10 +113,12 @@ div#editor {
 #input table {
     text-align: left;
 }
+
 td.buttons {
     text-align: right;
 }
 
+/*
 table.files, table#projects {
     text-align: left;
     width: 95%;
@@ -140,10 +135,6 @@ table.files th {
     font-weight: none;
     width: 60%;
     padding: 4px;
-}
-table.files td {
-    -moz-border-radius: 5px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 5px; /* CSS3 for Safari */
 }
 
 table.files td.file {
@@ -162,30 +153,17 @@ table.files li {
     margin: 0px;
     padding: 0px;
 }
+*/
 
-
-#tabs {
-    background: #c9bea8;
-}
-#tabs ol {
-    margin: 0px;
-    padding: 0px;
-}
-#tabs li {
-	display: inline-block;
-    margin: 0px;
-    padding: 3px;
-    background: #c9bea8;
-}
 
 
 #footer {
-    margin: 5px;
     font-family: monospace;
     font-size: 80%;
     text-align: center;
     padding: 10px;
 }
+
 #footer .extracredits {
     margin-top: 10px;
     display: block;
