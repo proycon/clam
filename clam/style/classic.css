@@ -37,10 +37,9 @@ body {
 }
 */
 
-/*input[type="text"], select, textarea, #editorfilename, #urluploadfile, #projectname {
+input[type="text"], select, textarea, .form-control, #editorfilename, #urluploadfile, #projectname {
     background: #ddd;
-    border: 1px solid #cfbf9d;
-}*/
+}
 
 input.start {
     font-weight: bold;
@@ -71,10 +70,6 @@ input.start {
 }
 
 
-#status .error {
-	margin: 2px;
-	width: 70%;
-}
 
 a {
 	color: #574b32;
@@ -92,6 +87,9 @@ a:visited {
     background: #aa0000;
 }
 
+.card {
+    margin-bottom: 2px;
+}
 
 
 div#actionindex p {
@@ -109,4 +107,21 @@ span.running {
 span.staging {
     color: #292975;
     font-weight: bold;
+}
+
+#startbutton {
+    margin-top: 5px;
+}
+
+tr.even {
+    background: #eee !important;
+}
+
+table .file {
+    font-family: monospace;
+}
+
+#actions input {
+    width: 100%;
+    margin-bottom: 3px;
 }

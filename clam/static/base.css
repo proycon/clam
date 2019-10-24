@@ -232,7 +232,6 @@ button#openeditor {
 }
 
 #statuslog {
-    width: 85%;
     height: 100px;
     overflow: auto;
 }
@@ -241,7 +240,7 @@ button#openeditor {
     text-align: left;
 }
 #statuslog td.time {
-    width: 15%;
+    width: 25%;
 }
 #statuslog td.message {
     width: 85%;
@@ -269,6 +268,12 @@ button#openeditor {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+.typefirst {
+    opacity: 0.75;
+    margin-bottom: 4px;
+    margin-left: 50px;
+    border-radius: 20px;
 }
 
 pre.pythoncode em {

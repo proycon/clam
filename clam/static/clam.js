@@ -101,7 +101,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             $(target).html(result);
 
             if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {
-                var s = "Automatic conversion from other format? <select name=\"converter\">";
+                var s = "Automatic conversion from other format? <select name=\"converter\" class=\"form-control\">";
                 s += "<option value=\"\">No</option>";
                 for (var j = 0; j < inputtemplate.converters.length; j++) {
                     s += "<option value=\"" + inputtemplate.converters[j].id + "\">" + inputtemplate.converters[j].label + "</option>";
@@ -183,7 +183,7 @@ function pollstatus() {
                 } else {
                     if (response.completion > 0) {
                         progress = response.completion;
-                        $('#progressbar').progressbar( "option", "value", progress );
+                        $('#progress .progress-bar').css("style", "width: " + progress + "%" );
                     }
                     var statuslogcontent = "";
                     for (var i = 0; i < response.statuslog.length - 1; i++) {
@@ -452,7 +452,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             }
        });
       if (stage === 1) {
-            $('#progressbar').progressbar({value: progress});
+            $('#progress .progress-bar').css( "style", "width: " + progress + "%" );
             setTimeout(pollstatus,2000);
        }
     }

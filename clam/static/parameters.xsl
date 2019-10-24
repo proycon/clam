@@ -55,6 +55,7 @@
         </xsl:choose>
     </xsl:element><xsl:element name="input"><!--no whitespace is important here-->
         <xsl:attribute name="type">checkbox</xsl:attribute>
+        <xsl:attribute name="class">form-control</xsl:attribute>
         <xsl:if test="@value = 1 or @value = 'yes' or @value = 'True'">
             <xsl:attribute name="checked">checked</xsl:attribute>
         </xsl:if>
@@ -79,6 +80,7 @@
     <td>
     <xsl:element name="input">
         <xsl:attribute name="type">text</xsl:attribute>
+        <xsl:attribute name="class">form-control</xsl:attribute>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
@@ -124,6 +126,7 @@
     <td>
     <xsl:element name="input">
         <xsl:attribute name="type">text</xsl:attribute>
+        <xsl:attribute name="class">form-control</xsl:attribute>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
@@ -148,6 +151,7 @@
     <td>
     <xsl:element name="input">
         <xsl:attribute name="type">text</xsl:attribute>
+        <xsl:attribute name="class">form-control</xsl:attribute>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="value"><xsl:value-of select="@value"/></xsl:attribute>
@@ -177,6 +181,7 @@
                 <td>
                 <xsl:element name="input">
                     <xsl:attribute name="type">checkbox</xsl:attribute>
+                    <xsl:attribute name="class">form-control</xsl:attribute>
                     <xsl:attribute name="id"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/>[<xsl:value-of select="@id"/>]</xsl:attribute>
                     <xsl:attribute name="value">1</xsl:attribute>
@@ -232,6 +237,7 @@
             </th>
             <td>
             <select>
+                <xsl:attribute name="class">form-control</xsl:attribute>
                 <xsl:attribute name="name"><xsl:value-of select="@id" /></xsl:attribute>
                 <xsl:for-each select="choice">
                     <option><xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute><xsl:if test="@selected = 1"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if><xsl:value-of select="."/></option>
