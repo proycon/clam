@@ -11,7 +11,6 @@
   <xsl:call-template name="head" />
   <body>
     <div id="gradient"></div>
-    <div id="header"><h1><xsl:value-of select="@name"/></h1><xsl:if test="@project"><h2><xsl:value-of select="@project"/></h2></xsl:if></div>
     <div id="covershadow"></div>
     <div id="container">
 
@@ -55,15 +54,19 @@
             <xsl:choose>
                 <xsl:when test="status/@code = 0">
                     <xsl:if test="/clam/customhtml">
-                        <div id="customhtml" class="box">
+                        <div id="customhtml" class="card">
+                            <div class="card-body">
                             <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/>
+                            </div>
                         </div>
                     </xsl:if>
                 </xsl:when>
                 <xsl:when test="status/@code = 2">
                     <xsl:if test="/clam/customhtml">
-                        <div id="customhtml" class="box">
+                        <div id="customhtml" class="card">
+                            <div class="card-body">
                             <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes"/>
+                            </div>
                         </div>
                     </xsl:if>
                 </xsl:when>
@@ -72,18 +75,26 @@
             <xsl:apply-templates select="status"/>
             <xsl:choose>
               <xsl:when test="status/@code = 0">
-                <div id="input" class="box">
-                 <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
-                 <xsl:apply-templates select="profiles"/>
+                <div id="input" class="card">
+                 <div class="card-body">
+                  <xsl:apply-templates select="input"/><!-- upload form transformed from input formats -->
+                 </div>
+                </div>
+                <div id="profiles" class="card">
+                 <div class="card-body">
+                  <xsl:apply-templates select="profiles"/>
+                 </div>
                 </div>
                 <xsl:apply-templates select="parameters"/>
               </xsl:when>
               <xsl:when test="status/@code = 2">
-                <div id="input" class="box">
-                    <button id="toggleinputfiles">Show input files</button>
-                    <div style="clear: both"></div>
-                    <div id="inputfilesarea" style="display: none">
-                        <xsl:apply-templates select="input"/>
+                <div id="input" class="card">
+                    <div class="card-body">
+                        <button id="toggleinputfiles" class="btn btn-outline-primary">Show input files</button>
+                        <div style="clear: both"></div>
+                        <div id="inputfilesarea" style="display: none">
+                            <xsl:apply-templates select="input"/>
+                        </div>
                     </div>
                 </div>
                 <xsl:apply-templates select="output"/>
@@ -108,15 +119,29 @@
     <xsl:if test="status/@code = 1 and (contains(/clam/@interfaceoptions,'secureonly') or contains(/clam/@interfaceoptions,'simplepolling'))" >
       <meta http-equiv="refresh" content="2" />
     </xsl:if>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/table.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https:////cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.0/font/css/open-iconic-bootstrap.min.css" />
+
+    <!--
+    <script type="text/javascript"datatables src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js" />
     <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js" />
+    -->
+
+
+    <script src="http://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js" crossorigin="anonymous" />
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="{/clam/@baseurl}/data.js" />
 
@@ -190,7 +215,7 @@
 </xsl:template>
 
 <xsl:template name="footer">
-    <div id="footer" class="box">
+    <div id="footer" class="card">
         <p>
             <strong><xsl:value-of select="/clam/@name" /></strong>
             <xsl:if test="/clam/version != ''">
@@ -221,7 +246,7 @@
 </xsl:template>
 
 <xsl:template name="logout">
-    <div class="box">
+    <div class="card">
       <p>
         You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/?oauth_access_token={/clam/@oauth_access_token}">log out</a></strong> when you are done.
       </p>
@@ -229,15 +254,15 @@
 </xsl:template>
 
 <xsl:template match="/clam/status">
-    <div id="status" class="box">
+    <div id="status" class="card">
      <h2>Status</h2>
      <xsl:choose>
       <xsl:when test="@code = 0">
         <div id="actions">
-        	<input id="deletebutton" type="button" value="Cancel and delete project" />
+        	<input id="deletebutton" class="btn btn-danger" type="button" value="Cancel and delete project" />
        	</div>
   		<xsl:if test="@errors = 'yes'">
-      		<div id="errorbox" class="error">
+      		<div id="errorcard" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:if>
@@ -246,10 +271,10 @@
       </xsl:when>
       <xsl:when test="@code = 1">
         <div id="actions">
-        	<input id="abortbutton" type="button" value="Abort execution" />
+        	<input id="abortbutton" class="btn btn-outline-danger" type="button" value="Abort execution" />
         </div>
   		<xsl:if test="@errors = 'yes'">
-      		<div id="errorbox" class="error">
+      		<div id="errorcard" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:if>
@@ -269,10 +294,10 @@
       </xsl:when>
       <xsl:when test="@code = 2">
         <div id="actions">
-            <input id="indexbutton" type="button" value="Done, return to project index" /><input id="deletebutton" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" value="Discard output and restart" />
+            <input id="indexbutton" type="button" btn="btn btn-outline-primary" value="Done, return to project index" /><input id="deletebutton" class="btn btn-danger" type="button" value="Cancel and delete project" /><input id="restartbutton" type="button" class="btn btn-danger" value="Discard output and restart" />
         </div>
         <xsl:if test="@errors = 'yes'">
-      		<div id="errorbox" class="error">
+      		<div id="errorcard" class="error">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:if>
@@ -320,7 +345,7 @@
                     </xsl:for-each>
                     </xsl:for-each>
                     </select><br />
-                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="uploadbutton" type="submit" value="Add resource" />
+                    <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="btn btn-primary" type="submit" value="Add resource" />
             </div>
             <div id="inputsourceprogress">
                 <strong>Gathering files... Please wait...</strong><br />
@@ -342,7 +367,7 @@
                     <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text>
                     <xsl:choose>
                     <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
-                    	<input id="uploadbutton" class="uploadbutton" type="submit" value="Select and upload a file" />
+                    	<input id="uploadbutton" class="btn btn-primary" type="submit" value="Select and upload a file" />
                     </xsl:when>
                     <xsl:otherwise>
                     	<div id="fineuploadarea"></div>
@@ -367,7 +392,7 @@
                 <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates"></select><br />
                 <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file you are adding:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><em>Select a type first</em></div>
                 <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" value="http://" /><br />
-                <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="uploadbutton" type="submit" value="Retrieve and add file" />
+                <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="btn btn-primary" type="submit" value="Retrieve and add file" />
             </div>
 
             </xsl:if>
@@ -392,7 +417,7 @@
                     <div id="editorparameters" class="parameters"><em>Select a type first</em></div>
                  </td></tr>
                  <tr class="editorfilenamerow"><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" /></td></tr>
-                 <tr><th></th><td><input id="editorsubmit" class="uploadbutton" type="submit" value="Add to input files" /></td></tr>
+                 <tr><th></th><td><input id="editorsubmit" class="btn btn-primary" type="submit" value="Add to input files" /></td></tr>
                 </table>
             </div>
 
@@ -439,10 +464,11 @@
 </xsl:template>
 
 <xsl:template match="/clam/output">
-    <div id="output" class="box">
-        <h2>Output files</h2>
+    <div id="output" class="card">
+        <div class="card-body">
+        <h2 class="card-title">Output files</h2>
 
-        <p>(Download all as archive:
+        <p class="card-text">(Download all as archive:
           <xsl:choose>
           <xsl:when test="/clam/@oauth_access_token = ''">
             <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)
@@ -454,7 +480,7 @@
         </p>
 
         <xsl:if test="/clam/forwarders">
-            <p>
+            <p class="card-text">
             Forward all output to:
             <ul>
                 <xsl:for-each select="/clam/forwarders/forwarder">
@@ -526,21 +552,23 @@
 
 <xsl:template match="/clam/parameters">
     <form method="POST" enctype="multipart/form-data" action="">
-    <div id="parameters" class="box parameters">
-        <h2>Parameter Selection</h2>
+    <div id="parameters" class="card parameters">
+        <div class="card-body">
+            <h2 class="card-title">Parameter Selection</h2>
 
-        <xsl:for-each select="parametergroup">
-         <h3><xsl:value-of select="@name" /></h3>
-         <table>
-          <xsl:apply-templates />
-         </table>
-        </xsl:for-each>
+            <xsl:for-each select="parametergroup">
+             <h3 class="card-subtitle"><xsl:value-of select="@name" /></h3>
+             <table>
+              <xsl:apply-templates />
+             </table>
+            </xsl:for-each>
 
-        <input id="usecorpus" name="usecorpus" type="hidden" value="" />
+            <input id="usecorpus" name="usecorpus" type="hidden" value="" />
 
 
-        <div id="startbutton">
-            <input type="submit" class="start" value="Start" />
+            <div id="startbutton">
+                <input type="submit" class="btn btn-primary btn-lg btn-block" value="Start" />
+            </div>
         </div>
     </div>
     </form>
@@ -553,7 +581,7 @@
   <body>
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
-        <div id="upload" class="box">
+        <div id="upload" class="card">
             <xsl:choose>
             <xsl:when test="/clam/@oauth_access_token = ''">
               <a href="../">Return to the project view</a>
@@ -583,41 +611,60 @@
     </xsl:choose>
 </xsl:template>
 
-<xsl:template name="clamindex">
+<xsl:template name="nav">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"><xsl:value-of select="/clam/@name" /> <xsl:if test="/clam/@project">:: <em><xsl:value-of select="/clam/@project" /></em></xsl:if></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarcontent" aria-controls="navbarcontent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+      </button>
 
-   		<div id="tabs">
-			<ol>
+      <div class="collapse navbar-collapse" id="navbarcontent">
+            <ul class="navbar-nav mr-auto">
                 <xsl:choose>
                 <xsl:when test="/clam/@oauth_access_token = ''">
-                  <li class="active"><a href="{/clam/@baseurl}/">1. Projects</a></li>
+                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/">1. Projects</a></li>
                 </xsl:when>
                 <xsl:otherwise>
-                  <li class="active"><a href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
+                  <li class="nav-item active"><a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1. Projects</a></li>
                 </xsl:otherwise>
                 </xsl:choose>
-				<li class="disabled">2. Input &amp; Parameters</li>
-				<li class="disabled">3. Processing</li>
-				<li class="disabled">4. Output &amp; Visualisation</li>
-			</ol>
-		</div>
+                <li class="nav-item"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">2. Staging Input &amp; Parameters</a></li>
+                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">3. Processing</a></li>
+                <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">4. Output &amp; Visualisation</a></li>
+            </ul>
+            <ul class="navbar-nav pull-right">
+                <li class="nav-item"><a class="nav-link" href="{/clam/@baseurl}/info"><span class="oi oi-icon-book"></span> REST API Specification</a></li>
+            </ul>
+        </div>
+    </nav>
+</xsl:template>
+
+<xsl:template name="clamindex">
+
+        <xsl:call-template name="nav"/>
 
         <xsl:if test="/clam/@oauth_access_token != ''">
           <xsl:call-template name="logout"/>
         </xsl:if>
 
-        <div id="description" class="box">
-         <xsl:value-of select="description" />
+        <div id="description" class="card">
+            <div class="card-body">
+                 <xsl:value-of select="description" />
+            </div>
         </div>
 
         <xsl:if test="/clam/customhtml">
-            <div id="customhtml" class="box">
-                <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" />
+            <div id="customhtml" class="card">
+                <div class="card-body">
+                    <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" />
+                </div>
             </div>
         </xsl:if>
 
         <xsl:if test="count(/clam/actions/action) > 0">
-            <div id="actionindex" class="box parameters">
-                <h2>Actions</h2>
+            <div id="actionindex" class="card parameters">
+                <div class="card-body">
+                <h2 class="card-title">Actions</h2>
                 <xsl:for-each select="/clam/actions/action">
                     <h3><xsl:value-of select="./@name" /></h3>
                     <p><xsl:value-of select="./@description" /></p>
@@ -638,58 +685,63 @@
                         <input type="submit" class="submitaction" value="Submit" />
                     </form>
                 </xsl:for-each>
+                </div>
             </div>
         </xsl:if>
 
         <xsl:if test="count(/clam/profiles/profile) > 0">
-        <div id="startproject" class="box">
-            <h3>Start a new Project</h3>
-            	<p>A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
+        <div id="startproject" class="card">
+            <div class="card-body">
+                <h3 class="card-title">Start a new Project</h3>
+            	<p class="card-text">A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
                 Project ID: <input id="projectname" type="projectname" value="" />
-                <input id="startprojectbutton" type="button" value="Create project" />
+                <input id="startprojectbutton" class="btn btn-primary btn-lg btn-block" type="button" value="Create project" />
+            </div>
         </div>
-        <div id="index" class="box">
-        <h2>Projects</h2>
-        <table id="projects">
-          <thead>
-              <tr><th style="width: 50%;">Project ID</th><th>Status</th><th>Size</th><th>Last changed</th></tr>
-          </thead>
-          <tbody>
-           <xsl:for-each select="projects/project">
-               <tr>
-                   <xsl:attribute name="id">projectrow_<xsl:value-of select='.' /></xsl:attribute>
-                   <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
-                       <button class="quickdelete">
-                           <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
-                           Delete</button>
-                   </td>
-                   <td>
-                       <xsl:choose>
-                           <xsl:when test="@status = 0">
-                               <span class="staging">staging</span>
-                           </xsl:when>
-                       </xsl:choose>
-                       <xsl:choose>
-                           <xsl:when test="@status = 1">
-                               <span class="running">running</span>
-                           </xsl:when>
-                       </xsl:choose>
-                       <xsl:choose>
-                           <xsl:when test="@status = 2">
-                               <span class="done">done</span>
-                           </xsl:when>
-                       </xsl:choose>
-                    </td>
-                   <td><xsl:value-of select="@size" /> MB</td>
-                   <td><xsl:value-of select="@time" /></td>
-               </tr>
-           </xsl:for-each>
-          </tbody>
-        </table>
-        <div class="diskusage">
-            <span>Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB</span><br />
-            <button onclick="showquickdelete()">Show delete buttons</button>
-        </div>
+        <div id="index" class="card">
+            <div class="card-body">
+                <h2 class="card-title">Projects</h2>
+                <table id="projects">
+                  <thead>
+                      <tr><th style="width: 50%;">Project ID</th><th>Status</th><th>Size</th><th>Last changed</th></tr>
+                  </thead>
+                  <tbody>
+                   <xsl:for-each select="projects/project">
+                       <tr>
+                           <xsl:attribute name="id">projectrow_<xsl:value-of select='.' /></xsl:attribute>
+                           <td><a><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
+                               <button class="btn btn-danger quickdelete">
+                                   <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
+                                   Delete</button>
+                           </td>
+                           <td>
+                               <xsl:choose>
+                                   <xsl:when test="@status = 0">
+                                       <span class="staging">staging</span>
+                                   </xsl:when>
+                               </xsl:choose>
+                               <xsl:choose>
+                                   <xsl:when test="@status = 1">
+                                       <span class="running">running</span>
+                                   </xsl:when>
+                               </xsl:choose>
+                               <xsl:choose>
+                                   <xsl:when test="@status = 2">
+                                       <span class="done">done</span>
+                                   </xsl:when>
+                               </xsl:choose>
+                            </td>
+                           <td><xsl:value-of select="@size" /> MB</td>
+                           <td><xsl:value-of select="@time" /></td>
+                       </tr>
+                   </xsl:for-each>
+                  </tbody>
+                </table>
+                <div class="diskusage">
+                    <span>Disk size used: <xsl:value-of select="/clam/projects/@totalsize" /> MB</span><br />
+                    <button class="btn btn-outline-secondary" onclick="showquickdelete()">Show delete buttons</button>
+                </div>
+            </div>
         </div>
         </xsl:if>
 

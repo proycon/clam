@@ -16,11 +16,7 @@ body {
     z-index: -100;
 }
 #container {
-    background: rgba(0, 0, 0, 0) linear-gradient(rgba(207, 191, 157, 0.4), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
-	border-radius: 12px;
-    -moz-border-radius: 12px; /* CSS3 for older Mozilla */
-    -webkit-border-radius: 12px; /* CSS3 for Safari */
-    padding-bottom: 2px;	
+    padding-bottom: 2px;
 }
 
 #status p {
@@ -32,14 +28,14 @@ body {
 h2 {
     font-size: 120%;
     color: #a6956f;
-    text-decoration: small-caps;  
+    text-decoration: small-caps;
     border-bottom:  1px solid #a6956f;
 }
 h3 {
     margin-left: 5px;
     font-size: 100%;
     color: #a6956f;
-    text-decoration: small-caps;  
+    text-decoration: small-caps;
     border-bottom:  1px solid #a6956f;
 }
 #header {
@@ -68,20 +64,15 @@ h3 {
     margin-bottom: 15px;
     left: 50%;
     z-index: 5;
-    -webkit-box-shadow: 0px 2px 4px #000000;
-       -moz-box-shadow: 0px 2px 4px #000000;
-            box-shadow: 0px 2px 4px #000000;
 }
 
 .box {
     background: #f6f6f6;
-    border-radius: 20px;
-	-moz-box-shadow: 5px 5px 5px #666;
-	-webkit-box-shadow: 5px 5px 5px #666;
-	box-shadow: 5px 5px 5px #666;
+    border-radius: 5px;
+	box-shadow: 3px 3px 3px #666;
 	padding: 10px;
 	border: #aaa solid 1px;
-	margin-bottom:10px;
+	margin-bottom: 10px;
     margin-left: auto;
     margin-right: auto;
     width: 95%;
@@ -90,29 +81,9 @@ table.files, table#projects {
     border: #ca9c4d;
 }
 
-table#projects td {
-    -moz-border-radius: 5px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 5px; /* CSS3 for Safari */
-}
 
 body table.files td:hover, table.files th:hover, table#projects td:hover {
     background: #eee;
-}
-
-table.files td {
-    -moz-border-radius: 5px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 5px; /* CSS3 for Safari */
-}
-
-table.files thead th {
-    background: #cbcbcb;
-    -moz-border-radius: 5px; /* CSS3 for Mozilla */
-    -webkit-border-radius: 5px; /* CSS3 for Safari */
-}
-
-table.files td.actions {
-    background: #eee;
-    text-align: center;
 }
 
 .parameters table th, #parameters table  td {
@@ -121,7 +92,7 @@ table.files td.actions {
 
 .parameters h4 {
     color: #ac8644;
-    text-decoration: small-caps;  
+    text-decoration: small-caps;
     border-bottom:  1px solid #ca9c4d;
 }
 
@@ -137,9 +108,6 @@ input.start {
     width: 20%;
 }
 
-input.uploadbutton {
-    font-weight: bold;
-}
 
 #status p {
     text-align: center;
@@ -176,7 +144,7 @@ input.uploadbutton {
 
 #tabs li.disabled {
 	background: #bfbfbf;
-	color: white;	
+	color: white;
 	border:#bfbfbf solid 1px;
     opacity: 0.6;
 }
@@ -184,7 +152,7 @@ input.uploadbutton {
 #tabs li {
 	font-size: 90%;
 	border-top-left-radius: 12px;
-	border-top-right-radius: 12px;	
+	border-top-right-radius: 12px;
 	border: #cbc3b1 solid 1px;
 	background: #cbc3b1;
 	color: white;
@@ -203,7 +171,7 @@ input.uploadbutton {
 }
 #status .error {
 	margin: 2px;
-	width: 70%; 
+	width: 70%;
 }
 a {
 	color: #574b32;
@@ -212,14 +180,6 @@ a:visited {
 	color: #6d6450;
 }
 
-input.uploadbutton, input.submitaction {
-	background: #8a4949;
-	padding: 7px;
-	color: white;
-	font-weight: normal;
-	font-size: 12px;
-    border-radius: 5px;
-}
 
 #container .qq-upload-button {
     background: #8a4949;
@@ -230,40 +190,7 @@ input.uploadbutton, input.submitaction {
 }
 
 
-input#indexbutton, input#abortbutton, input#restartbutton, input#deletebutton, input#startprojectbutton, button.quickdelete {
-	background: #8a4949;
-	padding: 2px;
-	color: white;
-	font-weight: normal;
-	font-size: 11px;
-	width: 180px;
-	border: none;
-	cursor: pointer;
-    border-radius: 5px;
-    margin: 1px;
-}
-input#indexbutton:hover, input#abortbutton:hover, input#restartbutton:hover, input#deletebutton:hover, input#startprojectbutton:hover, button.quickdelete:hover {
-	background: #EE0000;	
-}
 
-input.uploadbutton:hover {
-	background: #AA0000;
-    border-radius: 5px;
-}
-
-
-div#startbutton input {
-	background: #8a4949;
-	padding: 14px;
-	color: white;
-	font-weight: bold;
-	font-size: 26px;
-    border-radius: 5px;
-}
-
-div#startbutton input:hover {
-	background: #AA0000;
-}
 div#actionindex p {
     margin-left: 20px;
 }
