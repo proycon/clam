@@ -9,22 +9,54 @@
   <xsl:call-template name="head" />
   <body>
     <div id="container">
-    	<div id="header"><h1><xsl:value-of select="@name"/></h1></div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#"><xsl:value-of select="/clam/@name" /></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarcontent" aria-controls="navbarcontent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+          </button>
 
-    	<div class="box">
-    	 <h3>Introduction</h3>
-    	 <p>
-           This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="https://proycon.github.io/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="https://proycon.github.io/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
-    	 </p>
+          <div class="collapse navbar-collapse" id="navbarcontent">
+                <ul class="navbar-nav mr-auto">
+                    <xsl:choose>
+                        <xsl:when test="/clam/@oauth_access_token = ''">
+                            <li class="nav-item">
+                                <xsl:attribute name="class">nav-item</xsl:attribute>
+                                <a class="nav-link" href="{/clam/@baseurl}/"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                            </li>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <li class="nav-item">
+                                <xsl:attribute name="class">nav-item</xsl:attribute>
+                                <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                            </li>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </ul>
+                <ul class="navbar-nav pull-right">
+                    <li class="nav-item active"><a class="nav-link active" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span> REST API Specification</a></li>
+                </ul>
+            </div>
+        </nav>
+
+    	<div class="card">
+         <div class="card-body">
+             <h3 class="card-title">Introduction</h3>
+             <p>
+               This is the info page for the <em><xsl:value-of select="@name"/></em> webservice, a <a href="https://proycon.github.io/clam/">CLAM</a>-based webservice. This page contains some technical information useful for users wanting to interface with this webservice. The  <em><xsl:value-of select="@name"/></em> webservice is a <a href="http://en.wikipedia.org/wiki/REST">RESTful</a> webservice, which implies that usage of the four HTTP verbs (<tt>GET, POST, PUT, DELETE</tt>) on pre-defined URLs is how you can communicate with it. In turn, the response will be a standard HTTP response code along with content in CLAM XML, CLAM Upload XML, or CLAM Metadata XML format where applicable. It is recommended to read the <a href="https://proycon.github.io/clam/">CLAM manual</a> to get deeper insight into the operation of CLAM webservices.
+             </p>
+          </div>
 		</div>
 
-		<div id="description" class="box">
-		 <h3>Description of <xsl:value-of select="@name"/></h3>
-         <xsl:value-of select="description" />
+		<div id="description" class="card">
+         <div class="card-body">
+             <h3 class="card-title">Description of <xsl:value-of select="@name"/></h3>
+             <xsl:value-of select="description" />
+         </div>
         </div>
 
-        <div id="restspec" class="box">
-    	 <h3>RESTful Specification</h3>
+        <div id="restspec" class="card">
+         <div class="card-body">
+    	 <h3 class="card-title">RESTful Specification</h3>
 
          <p>A full generic RESTful specification for CLAM can be found in Appendix A of the <a href="https://proycon.github.io/clam">CLAM manual</a>. The procedure specific to <em><xsl:value-of select="@name"/></em> is described below. Clients interfacing with this webservice should follow this procedure:
     	 </p>
@@ -211,11 +243,13 @@
 
         </xsl:if>
 
+        </div>
     	</div>
 
 
-    	<div class="box">
-    	 <h3>CLAM Client API for Python</h3>
+    	<div class="card">
+         <div class="card-body">
+    	 <h3 class="card-title">CLAM Client API for Python</h3>
     	 <p>
     	 Using the CLAM Client API for Python greatly facilitates the writing of clients for this webservice, as the API will allow for more higher-level programming, taking care of all the necessary basics of RESTful communication. The following is a <em>skeleton</em> Python 3 script you can use as a <em>template</em> for your client to communicate with this webservice.
     	 </p>
@@ -349,18 +383,19 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 </xsl:if>
 
 </pre>
+        </div>
     	</div>
 
 
-    <div class="box">
-    	<h3>CLAM XML</h3>
+    <div class="card">
+        <div class="card-body">
+    	<h3 class="card-title">CLAM XML</h3>
     	<p>To inspect the CLAM XML format, simply view the source of this current page, or any CLAM page. A formal schema definition in RelaxNG format will be available <a href="https://github.com/proycon/clam/blob/master/docs/clam.rng">here</a>. This documentation was automatically generated from the service description in CLAM XML format.</p>
 </div>
 
         <xsl:call-template name="footer" />
 
-
-
+        </div>
     </div>
   </body>
   </html>
@@ -402,13 +437,20 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css"></link>
-    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css"></link>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.0/font/css/open-iconic-bootstrap.min.css" />
+
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
+    <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
+
+    <script src="http://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </head>
 </xsl:template>
 
 <xsl:template name="footer">
-<div id="footer" class="box">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel -
+<div id="footer" class="card">Powered by <strong>CLAM</strong> v<xsl:value-of select="/clam/@version" /> - Computational Linguistics Application Mediator<br />by Maarten van Gompel -
     <a href="https://proycon.github.io/clam">https://proycon.github.io/clam</a>
     <br /><a href="http://ru.nl/clst">Centre for Language and Speech Technology</a>, <a href="http://www.ru.nl">Radboud University Nijmegen</a>
 
