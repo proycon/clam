@@ -160,7 +160,10 @@ class CLAMClient:
             content = r.text
             if parse:
                 data = self._parse(content)
-                if data:
+                if data is True:
+                    #response is not XML
+                    raise clam.common.data.PermissionDenied(content)
+                elif data:
                     if data.errors:
                         error = data.parametererror()
                         #print("DEBUG: parametererror=" + str(error),file=sys.stderr)
@@ -194,7 +197,7 @@ class CLAMClient:
 
     def _parse(self, content):
         """Parses CLAM XML data and returns a ``CLAMData`` object. For internal use. Raises `ParameterError` exception on parameter errors."""
-        if content.find('<clam') != -1:
+        if content.lower().find('<clam') != -1:
             data = clam.common.data.CLAMData(content,self, loadmetadata=self.loadmetadata)
             if data.errors:
                 error = data.parametererror()
