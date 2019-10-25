@@ -30,7 +30,7 @@ except ImportError:
 
 
 class NoAuth(object):
-    def require_login(self, f):
+    def require_login(self, f, optional=False):
         return f
 
 class HTTPAuth(object):
@@ -71,7 +71,7 @@ class HTTPAuth(object):
         self.auth_error_callback = decorated
         return decorated
 
-    def require_login(self, f):
+    def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
             self.printdebug("Handling HTTP " + self.scheme + " Authentication")
@@ -86,7 +86,12 @@ class HTTPAuth(object):
                 if not auth:
                     msg = "No authentication header supplied"
                     self.printdebug(msg)
-                    return self.auth_error_callback()
+                    if optional:
+                        self.printdebug("Login was optional, falling back to anonymous login")
+                        kwargs['credentials'] = 'anonymous'
+                        return f(*args,**kwargs)
+                    else:
+                        return self.auth_error_callback()
                 if not flask.request.headers['Authorization'].lower().startswith(self.scheme.lower()):
                     msg = "Invalid authentication scheme, expected " + self.scheme
                     self.printdebug(msg)
@@ -266,7 +271,7 @@ class ForwardedAuth(HTTPAuth):
     def authenticate_header(self):
         return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
 
-    def require_login(self, f):
+    def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
             self.printdebug("Processing forwarded auth")
@@ -306,7 +311,7 @@ class MultiAuth(object):
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.printdebug("Initialized multiple authenticators: " + repr(self.main_auth) + "," + repr(self.additional_auth))
 
-    def require_login(self, f):
+    def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
             remote_addr = flask.request.remote_addr
@@ -327,17 +332,22 @@ class MultiAuth(object):
                             break
             else:
                 self.printdebug("No authorization header passed by " + remote_addr)
-                flask.request.data #clear receive buffer of pending data
-                res = flask.make_response("Authorization required")
-                res.status_code = 401
-                res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
-                for auth in self.additional_auth:
-                    res.headers.add('WWW-Authenticate',  auth.authenticate_header())
-                return res
+                if optional:
+                    self.printdebug("Login was optional, falling back to anonymous login")
+                    kwargs['credentials'] = 'anonymous'
+                    return f(*args,**kwargs)
+                else:
+                    flask.request.data #clear receive buffer of pending data
+                    res = flask.make_response("Authorization required")
+                    res.status_code = 401
+                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                    for auth in self.additional_auth:
+                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                    return res
 
             if selected_auth is None:
                 selected_auth = self.main_auth
-            return selected_auth.require_login(f)(*args, **kwargs)
+            return selected_auth.require_login(f, optional)(*args, **kwargs)
         return decorated
 
 class OAuth2(HTTPAuth):
@@ -359,7 +369,7 @@ class OAuth2(HTTPAuth):
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.error_handler(default_auth_error)
 
-    def require_login(self, f):
+    def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
             try:
@@ -389,20 +399,26 @@ class OAuth2(HTTPAuth):
 
                 if not oauth_access_token:
                     #No access token yet, start login process
-                    self.printdebug("No access token available yet, starting login process")
+                    if optional:
+                        #unless logins are optional...
+                        self.printdebug("Login was optional, falling back to anonymous login")
+                        kwargs['credentials'] = 'anonymous'
+                        return f(*args,**kwargs)
+                    else:
+                        self.printdebug("No access token available yet, starting login process")
 
-                    #redirect_url = getrooturl() + '/login'
+                        #redirect_url = getrooturl() + '/login'
 
-                    kwargs = {'redirect_uri': self.redirect_url}
-                    if self.scope:
-                        kwargs['scope'] = self.scope
-                    oauthsession = OAuth2Session(self.client_id, **kwargs)
-                    auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
+                        kwargs = {'redirect_uri': self.redirect_url}
+                        if self.scope:
+                            kwargs['scope'] = self.scope
+                        oauthsession = OAuth2Session(self.client_id, **kwargs)
+                        auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
 
-                    #Redirect to Authentication Provider
-                    self.printdebug("Redirecting to authentication provider: " + self.auth_url)
+                        #Redirect to Authentication Provider
+                        self.printdebug("Redirecting to authentication provider: " + self.auth_url)
 
-                    return flask.redirect(auth_url)
+                        return flask.redirect(auth_url)
                 else:
                     #Decrypt access token
                     try:

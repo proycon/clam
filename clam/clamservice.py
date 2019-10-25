@@ -121,7 +121,7 @@ def userdb_lookup_mysql(user, **authsettings):
     if sys.version >= '3' and isinstance(passwd,bytes): passwd = str(passwd,'utf-8')
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
-    #simple protection against mysql injection
+    #simple protection against sql injection
     user = user.replace("'","")
     user = user.replace(";","")
     sql = "SELECT `" + userfield + "`, `" + passwordfield + "` FROM `" + table + "` WHERE " + userfield + "='" + user + "' LIMIT 1"
@@ -209,7 +209,24 @@ class Login(object):
         if not 'access_token' in d:
             return withheaders(flask.make_response('No access token received from authorization provider',403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        return withheaders(flask.make_response(flask.render_template('login.xml',version=VERSION, system_id=settings.SYSTEM_ID, system_name=settings.SYSTEM_NAME, system_description=settings.SYSTEM_DESCRIPTION, system_author=settings.SYSTEM_AUTHOR, system_version=settings.SYSTEM_VERSION, system_email=settings.SYSTEM_EMAIL, url=getrooturl(), oauth_access_token=oauth_encrypt(d['access_token']))), headers={'allow-origin': settings.ALLOW_ORIGIN} )
+        #pylint: disable=bad-continuation
+        return withheaders(flask.make_response(flask.render_template('login.xml',
+                        version=VERSION,
+                        system_id=settings.SYSTEM_ID,
+                        system_name=settings.SYSTEM_NAME,
+                        system_description=settings.SYSTEM_DESCRIPTION,
+                        system_author=settings.SYSTEM_AUTHOR,
+                        system_version=settings.SYSTEM_VERSION,
+                        system_email=settings.SYSTEM_EMAIL,
+                        system_url=settings.SYSTEM_URL,
+                        system_parent_url=settings.SYSTEM_PARENT_URL,
+                        system_register_url=settings.SYSTEM_REGISTER_URL,
+                        system_login_url=settings.SYSTEM_LOGIN_URL,
+                        system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                        system_license=settings.SYSTEM_LICENSE,
+                        url=getrooturl(),
+                        oauth_access_token=oauth_encrypt(d['access_token']))),
+                headers={'allow-origin': settings.ALLOW_ORIGIN} )
 
 def oauth_encrypt(oauth_access_token):
     if not oauth_access_token:
@@ -242,7 +259,10 @@ def parsecredentials(credentials):
         oauth_access_token = credentials[1]
         user = credentials[0]
     elif credentials:
-        user = credentials
+        if isinstance(credentials, tuple):
+            user = credentials[0]
+        else:
+            user = credentials
     else:
         user = 'anonymous'
 
@@ -361,13 +381,26 @@ def getprojects(user):
                     json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
     return projects, round(totalsize)
 
-def index(credentials = None):
-    """Get list of projects or shortcut to other functionality"""
+def mainentry(credentials = None):
+    """This is the main (root) entry point, it can direct to various pages based on configuration and authentication"""
+
+    user, oauth_access_token = parsecredentials(credentials)
 
     #handle shortcut
-    shortcutresponse = entryshortcut(credentials)
+    shortcutresponse = entryshortcut((user,oauth_access_token))
     if shortcutresponse is not None:
         return shortcutresponse
+
+    if user == "anonymous" and auth_type() != "none" and not settings.DISABLEPORCH:
+        #present an unauthenticated landing page without project index
+        return porch(credentials)
+    else:
+        #present the project index
+        return index((user,oauth_access_token))
+
+
+def index(credentials = None):
+    """Get list of projects or shortcut to other functionality"""
 
     projects = []
     user, oauth_access_token = parsecredentials(credentials)
@@ -389,6 +422,12 @@ def index(credentials = None):
             system_author=settings.SYSTEM_AUTHOR,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
+            system_url=settings.SYSTEM_URL,
+            system_parent_url=settings.SYSTEM_PARENT_URL,
+            system_register_url=settings.SYSTEM_REGISTER_URL,
+            system_login_url=settings.SYSTEM_LOGIN_URL,
+            system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
             url=getrooturl(),
@@ -410,6 +449,7 @@ def index(credentials = None):
             actions=settings.ACTIONS,
             disableinterface=not settings.ENABLEWEBAPP,
             info=False,
+            porch=False,
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
@@ -419,6 +459,57 @@ def index(credentials = None):
             )), headers={'allow_origin':settings.ALLOW_ORIGIN}) #pylint: disable=bad-continuation
 
 
+def porch(credentials=None):
+    """Public landing page, provides some info about the system without authentication"""
+    projects = []
+    user, oauth_access_token = parsecredentials(credentials)
+
+    errors = "no"
+    errormsg = ""
+
+    #pylint: disable=bad-continuation
+    return withheaders(flask.make_response(flask.render_template('response.xml',
+            version=VERSION,
+            system_id=settings.SYSTEM_ID,
+            system_name=settings.SYSTEM_NAME,
+            system_description=settings.SYSTEM_DESCRIPTION,
+            system_author=settings.SYSTEM_AUTHOR,
+            system_version=settings.SYSTEM_VERSION,
+            system_email=settings.SYSTEM_EMAIL,
+            system_url=settings.SYSTEM_URL,
+            system_parent_url=settings.SYSTEM_PARENT_URL,
+            system_register_url=settings.SYSTEM_REGISTER_URL,
+            system_login_url=settings.SYSTEM_LOGIN_URL,
+            system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_license=settings.SYSTEM_LICENSE,
+            user=user,
+            project=None,
+            url=getrooturl(),
+            statuscode=-1,
+            statusmessage="",
+            statuslog=[],
+            completion=0,
+            errors=errors,
+            errormsg=errormsg,
+            parameterdata=settings.PARAMETERS,
+            inputsources=[],
+            outputpaths=None,
+            inputpaths=None,
+            profiles=settings.PROFILES,
+            formats=clam.common.data.getformats(settings.PROFILES),
+            datafile=None,
+            projects=projects,
+            actions=settings.ACTIONS,
+            info=False,
+            porch=True,
+            disableinterface=not settings.ENABLEWEBAPP,
+            accesstoken=None,
+            interfaceoptions=settings.INTERFACEOPTIONS,
+            customhtml=settings.CUSTOMHTML_INDEX,
+            allow_origin=settings.ALLOW_ORIGIN,
+            oauth_access_token=oauth_encrypt(oauth_access_token),
+            auth_type=auth_type()
+    )), headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 def info(credentials=None):
     """Get info"""
@@ -434,6 +525,7 @@ def info(credentials=None):
 
     corpora = CLAMService.corpusindex()
 
+    #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
@@ -442,6 +534,12 @@ def info(credentials=None):
             system_author=settings.SYSTEM_AUTHOR,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
+            system_url=settings.SYSTEM_URL,
+            system_parent_url=settings.SYSTEM_PARENT_URL,
+            system_register_url=settings.SYSTEM_REGISTER_URL,
+            system_login_url=settings.SYSTEM_LOGIN_URL,
+            system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
             url=getrooturl(),
@@ -461,6 +559,7 @@ def info(credentials=None):
             projects=projects,
             actions=settings.ACTIONS,
             info=True,
+            porch=False,
             disableinterface=not settings.ENABLEWEBAPP,
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
@@ -494,6 +593,12 @@ class Admin:
                 system_author=settings.SYSTEM_AUTHOR,
                 system_version=settings.SYSTEM_VERSION,
                 system_email=settings.SYSTEM_EMAIL,
+                system_url=settings.SYSTEM_URL,
+                system_parent_url=settings.SYSTEM_PARENT_URL,
+                system_register_url=settings.SYSTEM_REGISTER_URL,
+                system_login_url=settings.SYSTEM_LOGIN_URL,
+                system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 url=getrooturl(),
                 usersprojects = sorted(usersprojects.items()),
@@ -527,6 +632,12 @@ class Admin:
                     system_author=settings.SYSTEM_AUTHOR,
                     system_version=settings.SYSTEM_VERSION,
                     system_email=settings.SYSTEM_EMAIL,
+                    system_url=settings.SYSTEM_URL,
+                    system_parent_url=settings.SYSTEM_PARENT_URL,
+                    system_register_url=settings.SYSTEM_REGISTER_URL,
+                    system_login_url=settings.SYSTEM_LOGIN_URL,
+                    system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                    system_license=settings.SYSTEM_LICENSE,
                     user=targetuser,
                     project=project,
                     inputfiles=sorted(inputfiles),
@@ -954,6 +1065,12 @@ class Project:
                 system_version=settings.SYSTEM_VERSION,
                 system_author=settings.SYSTEM_AUTHOR,
                 system_email=settings.SYSTEM_EMAIL,
+                system_url=settings.SYSTEM_URL,
+                system_parent_url=settings.SYSTEM_PARENT_URL,
+                system_register_url=settings.SYSTEM_REGISTER_URL,
+                system_login_url=settings.SYSTEM_LOGIN_URL,
+                system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 project=project,
                 url=getrooturl(),
@@ -976,6 +1093,7 @@ class Project:
                 actions=settings.ACTIONS,
                 disableinterface=not settings.ENABLEWEBAPP,
                 info=False,
+                porch=False,
                 accesstoken=Project.getaccesstoken(user,project),
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
@@ -2488,13 +2606,17 @@ class CLAMService(object):
         self.service.jinja_env.lstrip_blocks = True
         self.service.secret_key = settings.SECRET_KEY
         printdebug("Registering main entrypoint: " + settings.INTERNALURLPREFIX + "/")
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/', 'index', self.auth.require_login(index), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/', '', self.auth.require_login(mainentry, optional=True), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] )
         printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
 
         #versions without trailing slash so no automatic 301 redirect is needed
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index', 'index2', self.auth.require_login(index), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch', 'porch2', porch, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
@@ -2603,6 +2725,18 @@ def set_defaults():
         settings.SYSTEM_EMAIL = ""
     if 'SYSTEM_AUTHOR' not in settingkeys:
         settings.SYSTEM_AUTHOR = ""
+    if 'SYSTEM_URL' not in settingkeys:
+        settings.SYSTEM_URL = ""
+    if 'SYSTEM_PARENT_URL' not in settingkeys:
+        settings.SYSTEM_PARENT_URL = ""
+    if 'SYSTEM_LOGIN_URL' not in settingkeys:
+        settings.SYSTEM_LOGIN_URL = ""
+    if 'SYSTEM_LOGOUT_URL' not in settingkeys:
+        settings.SYSTEM_LOGOUT_URL = ""
+    if 'SYSTEM_REGISTER_URL' not in settingkeys:
+        settings.SYSTEM_REGISTER_URL = ""
+    if 'SYSTEM_LICENSE' not in settingkeys:
+        settings.SYSTEM_LICENSE = ""
     if 'USERS' not in settingkeys:
         settings.USERS = None
     if 'ADMINS' not in settingkeys:
@@ -2625,6 +2759,8 @@ def set_defaults():
         settings.ALLOWSHARERUN = False
     if 'ALLOWANONSHAREDELETE' not in settingkeys:
         settings.ALLOWSHAREDELETE = False
+    if 'DISABLEPORCH' not in settingkeys:
+        settings.DISABLEPORCH = False
     if 'USERQUOTA' not in settingkeys:
         settings.USERQUOTA = 0
     if 'PROFILES' not in settingkeys:

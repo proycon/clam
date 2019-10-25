@@ -39,7 +39,7 @@ WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this
 # General information concerning your system.
 
 
-#The System ID, a short alphanumeric identifier for internal use only
+#The System ID, a short alphanumeric identifier for internal use only (mandatory!)
 SYSTEM_ID = ""
 
 #System name, the way the system is presented to the world
@@ -58,6 +58,12 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 #How to reach the authors?
 #SYSTEM_EMAIL = ""
+
+#Does this system have a homepage (or possibly a source repository otherwise)
+#SYSTEM_URL = ""
+
+#Is this webservice embedded in a larger system? Like part of an institution or particular portal site. If so, mention the URL here.
+#SYSTEM_PARENT_URL = ""
 
 # ======== LOCATION ===========
 

@@ -78,6 +78,42 @@ RelaxNG schema for CLAM XML
                 <text />
             </element>
         </optional>
+        <optional>
+            <element name="license">
+                <a:documentation>Defines license of the software</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="url">
+                <a:documentation>Defines a website associated with this system, like its homepage or a source code repository.</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="parenturl">
+                <a:documentation>Defines a website that this webservice is part of, like an institution website or portal</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="loginurl">
+                <a:documentation>Defines an external URL that handles logins</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="loginout">
+                <a:documentation>Defines an external URL that handles logouts</a:documentation>
+                <text />
+            </element>
+        </optional>
+        <optional>
+            <element name="registerurl">
+                <a:documentation>Defines an external URL that handles account registrations</a:documentation>
+                <text />
+            </element>
+        </optional>
 		<optional>
 		    <element name="projects">
 		        <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>

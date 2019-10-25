@@ -303,108 +303,204 @@
     <tr><td class="time"><xsl:value-of select="@time" /></td><td class="message"><xsl:value-of select="." /></td></tr>
 </xsl:template>
 
+
+<xsl:template name="uploadnav">
+    <xsl:param name="selectedtab" />
+
+    <ul class="nav nav-tabs card-header-tabs">
+          <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
+          <li class="nav-item">
+              <a class="nav-link active" href="#upload">
+                  <xsl:attribute name="class">
+                      nav-link
+                      <xsl:if test="$selectedtab = 'inputsources'">
+                      active
+                      </xsl:if>
+                  </xsl:attribute>
+                  <span class="oi oi-cloud"></span> Add existing resources</a>
+          </li>
+          </xsl:if>
+          <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
+          <li class="nav-item">
+              <a class="nav-link active" href="#upload">
+                  <xsl:attribute name="class">
+                      nav-link
+                      <xsl:if test="$selectedtab = 'upload'">
+                      active
+                      </xsl:if>
+                  </xsl:attribute>
+                  <span class="oi oi-data-transfer-upload"></span> Upload a file from disk</a>
+          </li>
+          </xsl:if>
+          <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
+          <li class="nav-item">
+              <a class="nav-link" href="#upload">
+                  <xsl:attribute name="class">
+                      nav-link
+                      <xsl:if test="$selectedtab = 'inputfromweb'">
+                      active
+                      </xsl:if>
+                  </xsl:attribute>
+                  <span class="oi oi-cloud-download"></span> Grab a file from the web</a>
+          </li>
+          </xsl:if>
+          <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
+          <li class="nav-item">
+              <a class="nav-link" href="#upload">
+                  <xsl:attribute name="class">
+                      nav-link
+                      <xsl:if test="$selectedtab = 'liveinput'">
+                      active
+                      </xsl:if>
+                  </xsl:attribute>
+                  <span class="oi oi-pencil"></span> Add input directly</a>
+          </li>
+          </xsl:if>
+        </ul>
+</xsl:template>
+
 <xsl:template match="/clam/profiles">
+
+        <a name="upload"></a>
         <div id="uploadarea">
 
-            <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
+        <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
 
-            <h3 class="card-title">Add already available resources</h3>
+            <div class="card uploadform">
+                <div class="card-header">
+                    <xsl:call-template name="uploadnav">
+                        <xsl:with-param name="selectedtab" select="'inputsources'" />
+                    </xsl:call-template>
+                </div>
+                <div class="card-body">
 
-            <div id="inputsourceupload">
-                    <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
-                <select id="uploadinputsource" class="form-control">
-                <xsl:for-each select="/clam/inputsources/inputsource">
-                    <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
-                </xsl:for-each>
-                <xsl:for-each select="profile">
-                <xsl:for-each select="input/InputTemplate">
-                    <xsl:for-each select="inputsource">
-                        <option value="{@id}"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
-                    </xsl:for-each>
-                </xsl:for-each>
-                </xsl:for-each>
-                </select><br />
-                <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="btn btn-primary" type="submit" value="Add resource" />
-        </div>
+                    <h3 class="card-title">Add already available resources</h3>
 
-        <div id="inputsourceprogress">
-            <strong>Gathering files... Please wait...</strong><br />
-            <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-        </div>
+                    <div id="inputsourceupload">
+                            <strong>Step 1)</strong><xsl:text> </xsl:text><em>Select the resource you want to add:</em><xsl:text> </xsl:text>
+                        <select id="uploadinputsource" class="form-control">
+                        <xsl:for-each select="/clam/inputsources/inputsource">
+                            <option><xsl:attribute name="value"><xsl:value-of select="./@id" /></xsl:attribute><xsl:value-of select="." /></option>
+                        </xsl:for-each>
+                        <xsl:for-each select="profile">
+                        <xsl:for-each select="input/InputTemplate">
+                            <xsl:for-each select="inputsource">
+                                <option value="{@id}"><xsl:value-of select="../@label" /> - <xsl:value-of select="." /></option>
+                            </xsl:for-each>
+                        </xsl:for-each>
+                        </xsl:for-each>
+                        </select><br />
+                        <strong>Step 2)</strong><xsl:text> </xsl:text><input id="uploadinputsourcebutton" class="btn btn-primary" type="submit" value="Add resource" />
+                    </div>
+
+                    <div id="inputsourceprogress">
+                        <strong>Gathering files... Please wait...</strong><br />
+                        <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+                    </div>
+                </div>
+            </div>
 
         </xsl:if>
 
         <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
 
-        <div class="uploadform">
-            <h3 class="card-title"><span class="oi oi-data-transfer-upload"></span> Upload a file from disk</h3>
+            <div class="card tab-card uploadform">
+                <div class="card-header tab-card-header">
+                    <xsl:call-template name="uploadnav">
+                        <xsl:with-param name="selectedtab" select="'upload'" />
+                    </xsl:call-template>
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title"><span class="oi oi-data-transfer-upload"></span> Upload a file from disk</h3>
 
-            <p class="card-text">Use this to upload files from your computer to the system.</p>
+                    <p class="card-text">Use this to upload files from your computer to the system.</p>
 
 
-            <div id="clientupload">
-                <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates form-control"></select><br />
-                <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file(s) you are about to upload:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
-                <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text>
-                <xsl:choose>
-                <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
-                    <input id="uploadbutton" class="btn btn-primary" type="submit" value="Select and upload a file" />
-                </xsl:when>
-                <xsl:otherwise>
-                    <div id="fineuploadarea"></div>
-                </xsl:otherwise>
-                </xsl:choose>
+                    <div id="clientupload">
+                        <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates form-control"></select><br />
+                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file(s) you are about to upload:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
+                        <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text>
+                        <xsl:choose>
+                        <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
+                            <input id="uploadbutton" class="btn btn-primary" type="submit" value="Select and upload a file" />
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <div id="fineuploadarea"></div>
+                        </xsl:otherwise>
+                        </xsl:choose>
+                    </div>
+
+                    <div id="uploadprogress">
+                            <strong>Upload in progress... Please wait...</strong><br />
+                            <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+                    </div>
+                </div>
+
+
             </div>
-
-            <div id="uploadprogress">
-                    <strong>Upload in progress... Please wait...</strong><br />
-                    <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-            </div>
-
-
-        </div>
 
         </xsl:if>
 
         <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
 
-        <h3 class="card-title"><span class="oi oi-cloud-download"></span> Grab a file from the web</h3>
+            <div class="card uploadform">
+                <div class="card-header">
+                    <xsl:call-template name="uploadnav">
+                        <xsl:with-param name="selectedtab" select="'inputfromweb'" />
+                    </xsl:call-template>
+                </div>
+                <div class="card-body">
 
-        <div id="urlupload">
-            <p>Retrieves an input file from another location on the web.</p>
-            <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates form-control"></select><br />
-            <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file you are adding:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
-            <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" class="form-control" value="http://" /><br />
-            <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="btn btn-primary" type="submit" value="Retrieve and add file" />
-        </div>
+                    <h3 class="card-title"><span class="oi oi-cloud-download"></span> Grab a file from the web</h3>
+
+                    <div id="urlupload">
+                        <p>Retrieves an input file from another location on the web.</p>
+                        <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates form-control"></select><br />
+                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file you are adding:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
+                        <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" class="form-control" value="http://" /><br />
+                        <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="btn btn-primary" type="submit" value="Retrieve and add file" />
+                    </div>
+
+                    <div id="urluploadprogress">
+                            <strong>Download in progress... Please wait...</strong><br />
+                            <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
+                    </div>
+
+                </div>
+            </div>
 
         </xsl:if>
 
-        <div id="urluploadprogress">
-                <strong>Download in progress... Please wait...</strong><br />
-                <img class="progress" src="{/clam/@baseurl}/static/progress.gif" />
-        </div>
 
         <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
+            <div class="card uploadform">
+                <div class="card-header">
+                    <xsl:call-template name="uploadnav">
+                        <xsl:with-param name="selectedtab" select="'liveinput'" />
+                    </xsl:call-template>
+                </div>
+                <div class="card-body">
 
-        <h3 class="cardtitle"><span class="oi oi-pencil"></span> Add input from browser</h3>
 
-        <p class="card-text">You can create and add new files on the spot from within your browser. Type your text, choose the desired input type, fill the necessary parameters and choose a filename. Press <em>"Add to files"</em> when all done.</p>
+                    <h3 class="cardtitle"><span class="oi oi-pencil"></span> Add input directly</h3>
 
-        <div id="editor">
-            <table>
-             <tr><th><label for="editorcontents">Input text:</label></th><td><textarea id="editorcontents" class="form-control"></textarea></td></tr>
-             <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
-              <select id="editorinputtemplate" class="inputtemplates form-control"></select>
-             </td></tr>
-             <tr><th><label for="editorparameters">Parameters:</label></th><td>
-                <div id="editorparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
-             </td></tr>
-             <tr class="editorfilenamerow"><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" class="form-control" /></td></tr>
-             <tr><th></th><td><input id="editorsubmit" class="btn btn-primary" type="submit" value="Add to input files" /></td></tr>
-            </table>
-        </div>
+                    <p class="card-text">You can create and add new files on the spot from within your browser. Type your text, choose the desired input type, fill the necessary parameters and choose a filename. Press <em>"Add to files"</em> when all done.</p>
 
+                    <div id="editor">
+                        <table>
+                         <tr><th><label for="editorcontents">Input text:</label></th><td><textarea id="editorcontents" class="form-control"></textarea></td></tr>
+                         <tr><th><label for="editorinputtemplate">Input type:</label></th><td>
+                          <select id="editorinputtemplate" class="inputtemplates form-control"></select>
+                         </td></tr>
+                         <tr><th><label for="editorparameters">Parameters:</label></th><td>
+                            <div id="editorparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
+                         </td></tr>
+                         <tr class="editorfilenamerow"><th><label for="editorfilename">Desired filename:</label></th><td><input id="editorfilename" class="form-control" /></td></tr>
+                         <tr><th></th><td><input id="editorsubmit" class="btn btn-primary" type="submit" value="Add to input files" /></td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </xsl:if>
 
     </div>
@@ -603,22 +699,38 @@
             <span class="navbar-toggler-icon"></span>
       </button>
 
+      <xsl:variable name="indexlabel">
+          <xsl:choose>
+              <xsl:when test="count(/clam/actions/action) > 0 and count(/clam/profiles/profile) > 0">
+                  Actions&#160;&amp;&#160;Projects
+              </xsl:when>
+              <xsl:when test="count(/clam/profiles/profile) > 0">
+                  Projects
+              </xsl:when>
+              <xsl:when test="count(/clam/actions/action) > 0">
+                  Actions
+              </xsl:when>
+            </xsl:choose>
+      </xsl:variable>
+
+
       <div class="collapse navbar-collapse" id="navbarcontent">
             <ul class="navbar-nav mr-auto">
                 <xsl:choose>
                     <xsl:when test="/clam/@oauth_access_token = ''">
                         <li class="nav-item active">
                             <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                            <a class="nav-link" href="{/clam/@baseurl}/">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
                         </li>
                     </xsl:when>
                     <xsl:otherwise>
                         <li class="nav-item active">
                             <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                            <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
                         </li>
                     </xsl:otherwise>
                 </xsl:choose>
+                <xsl:if test="count(/clam/profiles/profile) > 0">
                 <xsl:choose>
                     <xsl:when test="@project and status/@code = 0">
                         <li class="nav-item active"><a class="nav-link" href="#" tabindex="-1" aria-disabled="false">2.&#160;<span class="oi oi-cloud-upload"></span>&#160;Staging</a></li>
@@ -641,9 +753,11 @@
                         <li class="nav-item disabled"><a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">4.&#160;<span class="oi oi-cloud-download"></span>&#160;Results</a></li>
                     </xsl:otherwise>
                 </xsl:choose>
+                </xsl:if>
             </ul>
             <ul class="navbar-nav pull-right">
-                <li class="nav-item"><a class="nav-link" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span> REST API Specification</a></li>
+                <li class="nav-item"><a class="nav-link" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span>&#160;REST&#160;API&#160;Specification</a></li>
+                <li class="nav-item"><a class="nav-link"><span class="oi oi-person"></span>&#160;<xsl:value-of select="/clam/@user" /></a></li>
             </ul>
         </div>
     </nav>
@@ -701,7 +815,7 @@
         <div id="startproject" class="card">
             <div class="card-body">
                 <h3 class="card-title">Start a new Project</h3>
-            	<p class="card-text">A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em>:</p>
+            	<p class="card-text">A project is your personal workspace for a specific task; in a project you gather input files, set parameters for the system, monitor the system's progress and download and visualise your output files. Users can have and run multiple projects simultaneously. You can always come back to a project, regardless of the state it's in, until you explicitly delete it. To create a new project, enter a short unique identifier below <em>(no spaces or special characters allowed)</em> and press the button:</p>
                 Project ID: <input id="projectname" class="form-control" type="projectname" value="" />
                 <input id="startprojectbutton" class="btn btn-primary btn-lg btn-block" type="button" value="Create project" />
             </div>

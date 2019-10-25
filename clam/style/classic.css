@@ -130,3 +130,7 @@ table .file {
     color: #800;
     cursor: pointer;
 }
+
+.card-text {
+    max-width: 800px;
+}
