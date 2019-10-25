@@ -677,6 +677,9 @@
 
       <div class="collapse navbar-collapse" id="navbarcontent">
             <ul class="navbar-nav mr-auto">
+                <xsl:if test="/clam/parenturl">
+                    <li class="nav-item"><a class="nav-link" href="{/clam/parenturl}"><span class="oi oi-home" /></a></li>
+                </xsl:if>
                 <xsl:choose>
                     <xsl:when test="/clam/@oauth_access_token = ''">
                         <li class="nav-item active">
