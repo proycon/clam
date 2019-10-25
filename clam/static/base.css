@@ -229,7 +229,7 @@ button#openeditor {
 }
 
 #statuslog {
-    height: 100px;
+    height: 125px;
     overflow: auto;
 }
 #statuslog table {
