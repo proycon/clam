@@ -53,6 +53,41 @@ class AuthServiceTest(unittest.TestCase):
         """No Access Test - No project state retrieval with wrong user credentials"""
         self.assertRaises( AuthRequired, self.client.get, 'basicservicetest')
 
+    def test4_index(self):
+        """Access Test - Testing ability to access porch despite wrong user credentials"""
+        data = self.client.porch()
+        self.assertTrue(data.system_id == "authtest")
+        self.assertTrue(data.profiles)
+        self.assertTrue(data.parameters)
+        self.assertFalse(data.projects)
+
+class NoAuthServiceTest(unittest.TestCase):
+    """Test basic operations without authentication"""
+
+    def setUp(self):
+        self.url = 'http://' + os.uname()[1] + ':8080'
+        self.client = CLAMClient(self.url)
+
+    def test1_porch(self):
+        """Access Test - Testing ability to access the porch (explicitly) without providing user credentials"""
+        data = self.client.porch()
+        self.assertTrue(data.system_id == "authtest")
+        self.assertTrue(data.profiles)
+        self.assertTrue(data.parameters)
+        self.assertFalse(data.projects)
+
+    def test2_porch(self):
+        """Access Test - Testing ability to access the porch (implicitly) without providing user credentials"""
+        data = self.client.getroot()
+        self.assertTrue(data.system_id == "authtest")
+        self.assertTrue(data.profiles)
+        self.assertTrue(data.parameters)
+        self.assertFalse(data.projects)
+
+    def test3_index(self):
+        """No Access Test - Testing inability to access the index"""
+        self.assertRaises( AuthRequired, self.client.index)
+
 
 class BasicServiceTest(unittest.TestCase):
     """Test basic operations with authentication"""
@@ -68,6 +103,14 @@ class BasicServiceTest(unittest.TestCase):
         self.assertTrue(isinstance(data.projects,list))
         self.assertTrue(data.profiles)
         self.assertTrue(data.parameters)
+
+    def test1_2_porch(self):
+        """Basic Service Test - Porch and sanity"""
+        data = self.client.porch()
+        self.assertTrue(data.system_id == "authtest")
+        self.assertTrue(data.profiles)
+        self.assertTrue(data.parameters)
+        self.assertFalse(data.projects)
 
     def test2_1_create(self):
         """Basic Service Test - Project creation"""

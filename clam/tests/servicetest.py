@@ -268,12 +268,13 @@ class ExtensiveServiceTest(unittest.TestCase):
             data = self.client.get(self.project) #get status again
         self.assertTrue(data.program)
         self.assertEqual(data.program.matchedprofiles, [0])
-        self.assertEqual(len(data.program), 4)
+        self.assertEqual(len(data.program), 5)
+        print("PROGRAM:", data.program,file=sys.stderr)
         outputfiles = list(data.program.getoutputfiles())
-        print(outputfiles,file=sys.stderr)
-        self.assertEqual(len(outputfiles), 4)
+        print("OUTPUTFILES:", outputfiles,file=sys.stderr)
+        self.assertEqual(len(outputfiles), 5)
         for outputfile, outputtemplate in outputfiles:
-            self.assertIn(outputtemplate, ('overallstats','overallfreqlist','statsbydoc','freqlistbydoc'))
+            self.assertIn(outputtemplate, ('errorlog', 'overallstats','overallfreqlist','statsbydoc','freqlistbydoc'))
             if not outputtemplate.startswith('overall'):
                 inputfiles = list(data.program.getinputfiles(outputfile))
                 self.assertEqual(len(inputfiles), 1)

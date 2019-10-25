@@ -207,9 +207,20 @@ class CLAMClient:
         else:
             return True
 
+    def getroot(self):
+        """This calls the root of the webservice, providing either the index or the porch, depending whether or not authentication is necessary and credentials are passed.
+
+        It it better to explicitly call either ``index()`` or ``porch()``.
+        """
+        return self.request('')
+
     def index(self):
         """Get index of projects. Returns a ``CLAMData`` instance. Use CLAMData.projects for the index of projects."""
-        return self.request('')
+        return self.request('index/')
+
+    def porch(self):
+        """Get the porch page, basically a stripped-down response that works without authentication."""
+        return self.request('porch/')
 
     def get(self, project):
         """Query the project status. Returns a ``CLAMData`` instance or raises an exception according to the returned HTTP Status code"""
