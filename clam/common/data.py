@@ -2571,31 +2571,34 @@ def loadconfig(callername, required=True):
     else:
         return False
 
+def resolveconfigvariables(value):
+    if isinstance(value,str) and '{' in value:
+        variables = re.findall(r"\{\{\w+\}\}", value)
+        for v in variables:
+            if v.strip('{}') in os.environ:
+                value = value.replace(v,os.environ[v.strip('{}')])
+            else:
+                print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
+                value = value.replace(v,"")
+    return value
+
 def loadconfigfile(configfile, settingsmodule):
     #search host-specific configuration
     with io.open(configfile,'r', encoding='utf-8') as f:
         data = yaml.safe_load(f.read())
+    if 'include' in data and data['include']:
+        value = resolveconfigvariables(data['include'])
+        try:
+            if isinstance(value,str):
+                loadconfigfile(value, settingsmodule)
+            elif isinstance(value, (tuple, list)):
+                for item in value:
+                    loadconfigfile(item, settingsmodule)
+        except:
+            raise ConfigurationError("Unable to load included configuration file: " + item)
     for key, value in data.items():
         #replace variables
-        if isinstance(value,str) and '{' in value:
-            variables = re.findall(r"\{\{\w+\}\}", value)
-            for v in variables:
-                if v.strip('{}') in os.environ:
-                    value = value.replace(v,os.environ[v.strip('{}')])
-                else:
-                    print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
-                    value = value.replace(v,"")
-        if key in ('include','includes'):
-            try:
-                if isinstance(value,str):
-                    loadconfigfile(value, settingsmodule)
-                elif isinstance(value, (tuple, list)):
-                    for item in value:
-                        loadconfigfile(item, settingsmodule)
-            except:
-                raise ConfigurationError("Unable to load included configuration file: " + item)
-        else:
-            setattr(settingsmodule,key.upper(), value)
+        setattr(settingsmodule,key.upper(), resolveconfigvariables(value))
     return True
 
 
