@@ -60,6 +60,11 @@
 {% endif %}
 {############################################################################################}
 {% if statuscode == 0 or statuscode == 2 or not project %}
+    <formats>
+        {% for format in formats %}
+            {{ format.formatxml()|indent(8,false)|safe }}
+        {% endfor %}
+    </formats>
     <profiles>
         {% for profile in profiles %}
             {{ profile.xml()|indent(8,false)|safe }}
@@ -76,11 +81,6 @@
         </parametergroup>
         {% endfor %}
     </parameters>
-    <formats>
-        {% for format in formats %}
-            {{ format.formatxml()|indent(8,false)|safe }}
-        {% endfor %}
-    </formats>
 {% endif %}
 {############################################################################################}
 {% if project and matchedprofiles and program %}

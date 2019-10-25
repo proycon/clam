@@ -172,6 +172,24 @@ RelaxNG schema for CLAM XML
 		        </zeroOrMore>
 		    </element>
 		</optional>
+        <optional>
+            <element name="formats">
+                <a:documentation>Globally specifies the formats used by this webservice, either as input or output. Extracted from the profiles.</a:documentation>
+                <oneOrMore>
+                    <element name="format">
+                        <attribute name="id">
+                            <a:documentation>An ID for the format, corresponds to the Python class that represents it.</a:documentation>
+                        </attribute>
+                        <attribute name="name">
+                            <a:documentation>A human readable name for the parameter group.</a:documentation>
+                        </attribute>
+                        <attribute name="mimetype">
+                            <a:documentation>The mimetype of the format</a:documentation>
+                        </attribute>
+                    </element>
+                </oneOrMore>
+            </element>
+        </optional>
 		<optional>
 		    <element name="profiles">
 		        <a:documentation>Specifies the profiles accepted by this webservice. Profiles describe the input that the system can take and the output it will produce given that input and the configured parameters.</a:documentation>
@@ -315,24 +333,6 @@ RelaxNG schema for CLAM XML
 		            </element>
 		        </zeroOrMore>
 		    </element>
-            <optional>
-                <element name="formats">
-                    <a:documentation>Globally specifies the formats used by this webservice, either as input or output. Extracted from the profiles.</a:documentation>
-                    <oneOrMore>
-                        <element name="format">
-                            <attribute name="id">
-                                <a:documentation>An ID for the format, corresponds to the Python class that represents it.</a:documentation>
-                            </attribute>
-                            <attribute name="name">
-                                <a:documentation>A human readable name for the parameter group.</a:documentation>
-                            </attribute>
-                            <attribute name="mimetype">
-                                <a:documentation>The mimetype of the format</a:documentation>
-                            </attribute>
-                        </element>
-                    </oneOrMore>
-                </element>
-            </optional>
             <optional>
                 <element name="program">
                     <a:documentation>A Program is the concretisation of Profile. It describes the exact output files that will be created on the basis of what input files.</a:documentation>

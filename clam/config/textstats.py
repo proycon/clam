@@ -95,8 +95,13 @@ STYLE = 'classic'
 
 # ======== ENABLED FORMATS ===========
 
-#Here you can specify an extra formats module
-CUSTOM_FORMATS_MODULE = None
+#Here you can specify an extra formats
+class FrequencyListFormat(CLAMMetaData):
+    attributes = { 'encoding', 'language' }
+    name = "My Dummy text format"
+    mimetype = 'text/plain'
+
+CUSTOM_FORMATS = [ FrequencyListFormat ]
 
 # ======= INTERFACE OPTIONS ===========
 
@@ -139,7 +144,7 @@ PROFILES = [
             extension='.stats',
             multi=True
         ),
-        OutputTemplate('freqlistbydoc', PlainTextFormat,'Document Frequency list ',
+        OutputTemplate('freqlistbydoc', FrequencyListFormat,'Document Frequency list ',
             CopyMetaField('language','textinput.language'),
             CopyMetaField('encoding','textinput.encoding'),
             SimpleTableViewer(),
@@ -154,7 +159,7 @@ PROFILES = [
             filename='overall.stats',
             unique=True
         ),
-        OutputTemplate('overallfreqlist', PlainTextFormat, 'Overall Frequency List',
+        OutputTemplate('overallfreqlist', FrequencyListFormat, 'Overall Frequency List',
             SetMetaField('encoding','utf-8'),
             ParameterCondition(author_set=True,
                 then=ParameterMetaField('author','author'),
