@@ -273,7 +273,7 @@ clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", 
 
 <xsl:if test="count(/clam/profiles/profile) > 0">
 
-<em>#If your webservice uses custom formats, you want import or redefine them here (each format is a Python class), and register them with the client:</em>
+<em>#The following applies to older CLAM clients only (&lt; v3)! If your webservice uses custom formats, and you use an older client, you need to import or redefine them here (each format is a Python class), and register them with the client:</em>
 <em>#class SomeCustomFormat(clam.common.data.CLAMMetaData):</em>
 <em>#    mimetype = 'text/plain'</em>
 <em>#clamclient.register_custom_formats([ SomeCustomFormat ])</em>

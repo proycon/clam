@@ -1623,6 +1623,9 @@ class Project:
             return response
         postdata = flask.request.values
 
+        if Project.simplestatus(project, user) != clam.common.status.READY:
+            return withheaders(flask.make_response("No input files accepted at this stage",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
         if filename == '': #pylint: disable=too-many-nested-blocks
             #Handle inputsource
             printdebug('Addinputfile: checking for input source' )
