@@ -134,3 +134,12 @@ table .file {
 .card-text {
     max-width: 800px;
 }
+
+#systeminfo {
+    float: right;
+    width: 320px;
+}
+
+#customhtml {
+    margin-top: 10px;
+}

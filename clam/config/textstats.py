@@ -39,6 +39,16 @@ SYSTEM_NAME = "Text Statistics (CLAM Demo)"
 #An informative description for this system:
 SYSTEM_DESCRIPTION = "This webservice computes several statistics for plaintext files. It is a demo for CLAM."
 
+SYSTEM_URL = "https://proycon.github.io/clam"
+
+SYSTEM_LICENSE = "GNU Public License v3"
+
+SYSTEM_AUTHOR = "proycon"
+
+SYSTEM_EMAIL = "proycon@anaproy.nl"
+
+
+
 # ======== LOCATION ===========
 
 #The root directory for CLAM, all project files, (input & output) and

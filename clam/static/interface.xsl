@@ -736,17 +736,54 @@
 
         <div id="description" class="card">
             <div class="card-body">
-                 <xsl:value-of select="description" />
+                <xsl:if test="/clam/version != '' or /clam/author != '' or /clam/url != '' or /clam/license != '' or /clam/email != '' or /clam/contact != ''">
+                 <div id="systeminfo" class="card">
+                     <div class="card-body">
+                         <h5 class="card-title"><span class="oi oi-info" style="float: right"></span> System Information</h5>
+                         <table>
+                         <xsl:if test="/clam/version != ''">
+                             <tr>
+                                 <th>Version:</th>
+                                 <td><xsl:value-of select="/clam/version" /></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/author != ''">
+                             <tr>
+                                 <th>Author(s):</th>
+                                 <td><xsl:value-of select="/clam/author" /></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/url != ''">
+                             <tr>
+                                 <th>Website:</th>
+                                 <td><a href="{/clam/url}"><xsl:value-of select="/clam/url" /></a></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/license != ''">
+                             <tr>
+                                 <th>License:</th>
+                                 <td><xsl:value-of select="/clam/license" /></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/email != ''">
+                             <tr>
+                                 <th>Contact:</th>
+                                 <td><a href="mailto:{/clam/email}"><xsl:value-of select="/clam/email" /></a></td>
+                             </tr>
+                         </xsl:if>
+                         </table>
+                    </div>
+                 </div>
+                 </xsl:if>
+                 <p class="p-text"><xsl:value-of select="description" /></p>
+                 <xsl:if test="/clam/customhtml">
+                    <div id="customhtml">
+                    <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" />
+                    </div>
+                 </xsl:if>
             </div>
         </div>
 
-        <xsl:if test="/clam/customhtml">
-            <div id="customhtml" class="card">
-                <div class="card-body">
-                    <xsl:value-of select="/clam/customhtml" disable-output-escaping="yes" />
-                </div>
-            </div>
-        </xsl:if>
 
         <xsl:if test="count(/clam/actions/action) > 0">
             <div id="actionindex" class="card parameters">
@@ -776,7 +813,22 @@
             </div>
         </xsl:if>
 
-        <xsl:if test="count(/clam/profiles/profile) > 0">
+        <xsl:choose>
+        <xsl:when test="//clam/@user = 'anonymous' and //clam/@authentication != 'none'">
+        <div id="porch" class="card">
+            <div class="card-body">
+                <p class="alert alert-info">
+                You will be asked to authenticate when you continue to use this service.
+                <xsl:if test="/clam/system_register_url">
+                If you do not have an account yet, you can <a href="{/clam/system_register_url}">register one here</a>.
+                </xsl:if>
+                </p>
+
+                <a href="{/clam/@baseurl}/index/" class="btn btn-primary btn-lg btn-block" type="button">Continue</a>
+            </div>
+        </div>
+        </xsl:when>
+        <xsl:when test="count(/clam/profiles/profile) > 0">
         <div id="startproject" class="card">
             <div class="card-body">
                 <h3 class="card-title">Start a new Project</h3>
@@ -785,6 +837,7 @@
                 <input id="startprojectbutton" class="btn btn-primary btn-lg btn-block" type="button" value="Create project" />
             </div>
         </div>
+
         <div id="index" class="card">
             <div class="card-body">
                 <h2 class="card-title">Projects</h2>
@@ -830,7 +883,9 @@
                 </div>
             </div>
         </div>
-        </xsl:if>
+        </xsl:when>
+        </xsl:choose>
+
 
 
 
