@@ -829,15 +829,23 @@ class Profile(object):
         self.input = []
         self.output = []
 
+        haveerrorlog = False
+
         for arg in args:
             if isinstance(arg, InputTemplate):
                 self.input.append(arg)
             elif isinstance(arg, OutputTemplate):
+                if arg.id == "errorlog":
+                    haveerrorlog = True
                 self.output.append(arg)
             elif isinstance(arg, ParameterCondition):
                 self.output.append(arg)
             elif arg is None:
                 pass
+
+        if not haveerrorlog:
+            self.output.append( OutputTemplate("errorlog", clam.common.formats.PlainTextFormat, "Log file with (standard) error output", SetMetaField("encoding","utf-8"), filename="error.log", unique=True))
+
 
         #Check for orphan OutputTemplates. OutputTemplates must have a parent (only outputtemplates with filename, unique=True may be parentless)
         for o in self.output:
@@ -1769,7 +1777,7 @@ class OutputTemplate(object):
             elif arg is None:
                 pass
             else:
-                raise ValueError("Unexpected argument for OutputTemplate " + id + ", expecting MetaField, ParameterCondition, Viewer or Converter")
+                raise ValueError("Unexpected argument for OutputTemplate " + self.id + ", expecting MetaField, ParameterCondition, Viewer or Converter, got " + str(type(arg)))
 
 
         self.unique = True #mark input/output as unique, as opposed to multiple files
