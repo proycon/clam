@@ -1,24 +1,26 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <title>{{ file.filename }}</title>
 <style type="text/css">
     body {
-        background: #e6dcca;
+        background: #ddd;
         font-family: sans-serif;
         font-size: 12px;
     }
-    
+
     h1 {
         margin: 5px;
         width: 97%;
-        background: #ceb383;
-        border: 1px none #ca9c4d;
+        background: #444;
+        border: 1px none #222;
         padding: 10px;
         text-align: center;
         color: white;
         font-size: 150%;
         font-weight: bold;
+        font-family: monospace;
     }
 
     table {
@@ -34,10 +36,11 @@
         font-family: sans-serif;
         font-size: 12px;
         background: white;
-        border: 1px solid #ca9c4d;
-        {% if not wordwrap %} 
+        border: 1px solid #666;
+        padding: 2px;
+        {% if not wordwrap %}
         white-space: nowrap;
-        {% endif %} 
+        {% endif %}
     }
     {{ customcss }}
 </style>
