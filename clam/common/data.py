@@ -1607,6 +1607,7 @@ class InputTemplate(object):
             seqnr = int(linkf.split('.')[-1])
             results.append( (seqnr, realf[len(inputpath):], self) )
         results = sorted(results)
+        #print("MATCHINGFILES: ", results,file=sys.stderr) #REMOVE DEBUG
         if self.unique and len(results) != 1:
             return []
         else:
