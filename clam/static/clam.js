@@ -325,6 +325,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
         window.location.reload(); //alert("System error: data.js not properly loaded?");
    }
 
+   $('[data-toggle="popover"]').popover();
 
    //set custom text, this hack is needed because XSLT 1.0 can't get the job
    //done alone in all browsers

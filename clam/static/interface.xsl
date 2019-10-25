@@ -323,14 +323,14 @@
                   </li>
                   </xsl:if>
                   <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
-                  <li class="nav-item text-primary">
-                      <a class="nav-link" id="inputfromweb-tab" data-toggle="tab" href="#inputfromweb">
+                  <li class="nav-item">
+                      <a class="nav-link text-primary" id="inputfromweb-tab" data-toggle="tab" href="#inputfromweb">
                           <span class="oi oi-cloud-download"></span> Grab a file from the web</a>
                   </li>
                   </xsl:if>
                   <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
-                  <li class="nav-item text-primary">
-                      <a class="nav-link" id="liveinput-tab" data-toggle="tab" href="#liveinput">
+                  <li class="nav-item">
+                      <a class="nav-link text-primary" id="liveinput-tab" data-toggle="tab" href="#liveinput">
                           <span class="oi oi-pencil"></span> Add input directly</a>
                   </li>
                   </xsl:if>
@@ -716,7 +716,11 @@
             </ul>
             <ul class="navbar-nav pull-right">
                 <li class="nav-item"><a class="nav-link" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span>&#160;REST&#160;API&#160;Specification</a></li>
-                <li class="nav-item"><a class="nav-link"><span class="oi oi-person"></span>&#160;<xsl:value-of select="/clam/@user" /></a></li>
+                <li class="nav-item"><a class="nav-link" role="button"
+                    tabindex="0" data-trigger="focus" data-toggle="popover"
+                    data-content="{/clam/@user}" title="Current user"
+                    data-placement="bottom"><span class="oi
+                        oi-person"></span></a></li>
             </ul>
         </div>
     </nav>
