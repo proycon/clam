@@ -19,7 +19,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td><xsl:value-of select="@value"/></td>
@@ -35,7 +35,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
@@ -74,7 +74,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
@@ -98,7 +98,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
@@ -120,7 +120,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
@@ -145,7 +145,7 @@
     <xsl:value-of select="@name"/>
     <div class="description"><xsl:value-of select="@description"/></div>
     <xsl:if test="@error">
-         <div class="error"><xsl:value-of select="@error"/></div>
+         <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
     </xsl:if>
     </th>
     <td>
@@ -171,7 +171,7 @@
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
             <xsl:if test="@error">
-             <div class="error"><xsl:value-of select="@error"/></div>
+             <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
             <td></td></tr>
@@ -202,7 +202,7 @@
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
             <xsl:if test="@error">
-             <div class="error"><xsl:value-of select="@error"/></div>
+             <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
             <td></td></tr>
@@ -232,7 +232,7 @@
             <xsl:value-of select="@name"/>
             <div class="description"><xsl:value-of select="@description"/></div>
             <xsl:if test="@error">
-             <div class="error"><xsl:value-of select="@error"/></div>
+             <div class="error alert alert-danger"><xsl:value-of select="@error"/></div>
             </xsl:if>
             </th>
             <td>
