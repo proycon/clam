@@ -2564,25 +2564,40 @@ def loadconfig(callername, required=True):
             if configfile: break
     if configfile:
         os.environ['CONFIGFILE'] = configfile #we need to set this so when clamdispatcher loads it can be found again!
-        with io.open(configfile,'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f.read())
-        for key, value in data.items():
-            #replace variables
-            if isinstance(value,str) and '{' in value:
-                variables = re.findall(r"\{\{\w+\}\}", value)
-                for v in variables:
-                    if v.strip('{}') in os.environ:
-                        value = value.replace(v,os.environ[v.strip('{}')])
-                    else:
-                        print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
-                        value = value.replace(v,"")
-            setattr(settingsmodule,key.upper(), value)
-        return True
+        return loadconfigfile(configfile, settingsmodule)
 
     if required:
         raise ConfigurationError("Unable to load required external configuration file. Do you need to set the CONFIGFILE environment variable? Detected hostname is " + hostname + "; search path is " + ", ".join(searchpath) + "; searched for " + ", ".join(searchfile))
     else:
         return False
+
+def loadconfigfile(configfile, settingsmodule):
+    #search host-specific configuration
+    with io.open(configfile,'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f.read())
+    for key, value in data.items():
+        #replace variables
+        if isinstance(value,str) and '{' in value:
+            variables = re.findall(r"\{\{\w+\}\}", value)
+            for v in variables:
+                if v.strip('{}') in os.environ:
+                    value = value.replace(v,os.environ[v.strip('{}')])
+                else:
+                    print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
+                    value = value.replace(v,"")
+        if key in ('include','includes'):
+            try:
+                if isinstance(value,str):
+                    loadconfigfile(value, settingsmodule)
+                elif isinstance(value, (tuple, list)):
+                    for item in value:
+                        loadconfigfile(item, settingsmodule)
+            except:
+                raise ConfigurationError("Unable to load included configuration file: " + item)
+        else:
+            setattr(settingsmodule,key.upper(), value)
+    return True
+
 
 
 #yes, this is deliberately placed at the end!
