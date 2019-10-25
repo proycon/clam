@@ -303,75 +303,45 @@
     <tr><td class="time"><xsl:value-of select="@time" /></td><td class="message"><xsl:value-of select="." /></td></tr>
 </xsl:template>
 
-
-<xsl:template name="uploadnav">
-    <xsl:param name="selectedtab" />
-
-    <ul class="nav nav-tabs card-header-tabs">
-          <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
-          <li class="nav-item">
-              <a class="nav-link active" href="#upload">
-                  <xsl:attribute name="class">
-                      nav-link
-                      <xsl:if test="$selectedtab = 'inputsources'">
-                      active
-                      </xsl:if>
-                  </xsl:attribute>
-                  <span class="oi oi-cloud"></span> Add existing resources</a>
-          </li>
-          </xsl:if>
-          <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
-          <li class="nav-item">
-              <a class="nav-link active" href="#upload">
-                  <xsl:attribute name="class">
-                      nav-link
-                      <xsl:if test="$selectedtab = 'upload'">
-                      active
-                      </xsl:if>
-                  </xsl:attribute>
-                  <span class="oi oi-data-transfer-upload"></span> Upload a file from disk</a>
-          </li>
-          </xsl:if>
-          <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
-          <li class="nav-item">
-              <a class="nav-link" href="#upload">
-                  <xsl:attribute name="class">
-                      nav-link
-                      <xsl:if test="$selectedtab = 'inputfromweb'">
-                      active
-                      </xsl:if>
-                  </xsl:attribute>
-                  <span class="oi oi-cloud-download"></span> Grab a file from the web</a>
-          </li>
-          </xsl:if>
-          <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
-          <li class="nav-item">
-              <a class="nav-link" href="#upload">
-                  <xsl:attribute name="class">
-                      nav-link
-                      <xsl:if test="$selectedtab = 'liveinput'">
-                      active
-                      </xsl:if>
-                  </xsl:attribute>
-                  <span class="oi oi-pencil"></span> Add input directly</a>
-          </li>
-          </xsl:if>
-        </ul>
-</xsl:template>
-
 <xsl:template match="/clam/profiles">
-
-        <a name="upload"></a>
         <div id="uploadarea">
+
+        <div class="card tab-card uploadform">
+
+            <div class="card-header tab-card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                  <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
+                  <li class="nav-item">
+                      <a class="nav-link text-primary" id="inputsources-tab" data-toggle="tab" href="#inputsources">
+                          <span class="oi oi-cloud"></span> Add existing resources</a>
+                  </li>
+                  </xsl:if>
+                  <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
+                  <li class="nav-item">
+                      <a class="nav-link text-primary" id="fileupload-tab" data-toggle="tab" href="#fileupload">
+                          <span class="oi oi-data-transfer-upload"></span> Upload a file from disk</a>
+                  </li>
+                  </xsl:if>
+                  <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
+                  <li class="nav-item text-primary">
+                      <a class="nav-link" id="inputfromweb-tab" data-toggle="tab" href="#inputfromweb">
+                          <span class="oi oi-cloud-download"></span> Grab a file from the web</a>
+                  </li>
+                  </xsl:if>
+                  <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
+                  <li class="nav-item text-primary">
+                      <a class="nav-link" id="liveinput-tab" data-toggle="tab" href="#liveinput">
+                          <span class="oi oi-pencil"></span> Add input directly</a>
+                  </li>
+                  </xsl:if>
+                </ul>
+            </div>
+
+        <div class="tab-content" id="uploadtabs">
 
         <xsl:if test="profile/input/InputTemplate/inputsource|/clam/inputsources/inputsource">
 
-            <div class="card uploadform">
-                <div class="card-header">
-                    <xsl:call-template name="uploadnav">
-                        <xsl:with-param name="selectedtab" select="'inputsources'" />
-                    </xsl:call-template>
-                </div>
+            <div id="inputsources" class="tab-pane">
                 <div class="card-body">
 
                     <h3 class="card-title">Add already available resources</h3>
@@ -404,12 +374,7 @@
 
         <xsl:if test="not(contains(/clam/@interfaceoptions,'disablefileupload'))">
 
-            <div class="card tab-card uploadform">
-                <div class="card-header tab-card-header">
-                    <xsl:call-template name="uploadnav">
-                        <xsl:with-param name="selectedtab" select="'upload'" />
-                    </xsl:call-template>
-                </div>
+            <div id="fileupload" class="tab-pane">
                 <div class="card-body">
                     <h3 class="card-title"><span class="oi oi-data-transfer-upload"></span> Upload a file from disk</h3>
 
@@ -443,12 +408,7 @@
 
         <xsl:if test="contains(/clam/@interfaceoptions,'inputfromweb')">
 
-            <div class="card uploadform">
-                <div class="card-header">
-                    <xsl:call-template name="uploadnav">
-                        <xsl:with-param name="selectedtab" select="'inputfromweb'" />
-                    </xsl:call-template>
-                </div>
+            <div id="inputfromweb" class="tab-pane">
                 <div class="card-body">
 
                     <h3 class="card-title"><span class="oi oi-cloud-download"></span> Grab a file from the web</h3>
@@ -473,12 +433,8 @@
 
 
         <xsl:if test="not(contains(/clam/@interfaceoptions,'disableliveinput'))">
-            <div class="card uploadform">
-                <div class="card-header">
-                    <xsl:call-template name="uploadnav">
-                        <xsl:with-param name="selectedtab" select="'liveinput'" />
-                    </xsl:call-template>
-                </div>
+            <div id="liveinput" class="tab-pane">
+
                 <div class="card-body">
 
 
@@ -503,6 +459,9 @@
             </div>
         </xsl:if>
 
+        </div>
+
+    </div>
     </div>
 </xsl:template>
 
