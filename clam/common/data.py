@@ -52,13 +52,14 @@ CUSTOM_FORMATS = []  #will be injected
 CUSTOM_VIEWERS = []  #will be injected
 
 class BadRequest(Exception):
+    """Raised on HTTP 400 - Bad Request erors"""
     def __init__(self):
         super(BadRequest, self).__init__()
     def __str__(self):
         return "Bad Request"
 
 class NotFound(Exception):
-    """Raised on 404 - Not Found Errors"""
+    """Raised on HTTP 404 - Not Found Errors"""
     def __init__(self, msg=""):
         self.msg = msg
         super(NotFound, self).__init__()
@@ -66,7 +67,7 @@ class NotFound(Exception):
         return "Not Found: " +  self.msg
 
 class PermissionDenied(Exception):
-    """Raised on 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
+    """Raised on HTTP 403 - Permission Denied Errors (but only if no CLAM XML response is provided)"""
     def __init__(self, msg = ""):
         self.msg = msg
         super(PermissionDenied, self).__init__()
@@ -77,7 +78,7 @@ class PermissionDenied(Exception):
             return "Permission Denied: " + self.msg
 
 class ServerError(Exception):
-    """Raised on 500 - Internal Server Error. Indicates that something went wrong on the server side."""
+    """Raised on HTTP 500 - Internal Server Error. Indicates that something went wrong on the server side."""
     def __init__(self, msg = ""):
         self.msg = msg
         super(ServerError, self).__init__()
@@ -85,7 +86,7 @@ class ServerError(Exception):
         return "Server Error: " + self.msg
 
 class AuthRequired(Exception):
-    """Raised on 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
+    """Raised on HTTP 401 - Authentication Required error. Service requires authentication, pass user credentials in CLAMClient constructor."""
     def __init__(self, msg = ""):
         self.msg = msg
         super(AuthRequired, self).__init__()
@@ -93,6 +94,7 @@ class AuthRequired(Exception):
         return "Authorization Required: " + self.msg
 
 class NoConnection(Exception):
+    """Raised when a connection can't be established"""
     def __init__(self):
         super(NoConnection, self).__init__()
     def __str__(self):
@@ -100,6 +102,7 @@ class NoConnection(Exception):
 
 
 class UploadError(Exception):
+    """Raised when something fails during upload"""
     def __init__(self, msg = ""):
         self.msg = msg
         super(UploadError, self).__init__()
@@ -115,6 +118,7 @@ class ParameterError(Exception):
         return "Error setting parameter: " + self.msg
 
 class TimeOut(Exception):
+    """Raised when a connection times out"""
     def __init__(self):
         super(TimeOut, self).__init__()
     def __str__(self):
@@ -126,6 +130,7 @@ if sys.version < '3':
         pass
 
 def processhttpcode(code, allowcodes=None):
+    """Return the success code or raises the appropriate exception when the code repesents an HTTP error code"""
     if allowcodes is None: allowcodes = ()
     if not isinstance(code, int): code = int(code)
     if (code >= 200 and code <= 299) or code in allowcodes:
@@ -2526,6 +2531,15 @@ def unescapeshelloperators(s):
     return s
 
 def loadconfig(callername, required=True):
+    """This function loads an external configuration file. It is called directly by the service configuration script and complements the configuration specified there. The function in turn automatically searches for an appropriate configuration file (in several paths). Host and system specific configuration files are prioritised over more generic ones.
+
+     * ``callername`` - A string representing the name of settings module. This is typically set to __name__
+
+    Example::
+
+        loadconfig(__name__)
+    """
+
     try:
         settingsmodule = sys.modules[callername]
     except:
@@ -2572,18 +2586,20 @@ def loadconfig(callername, required=True):
         return False
 
 def resolveconfigvariables(value):
+    """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
         variables = re.findall(r"\{\{\w+\}\}", value)
         for v in variables:
             if v.strip('{}') in os.environ:
                 value = value.replace(v,os.environ[v.strip('{}')])
             else:
-                print("Undefined environment variable in " + configfile + ": " + v.strip('{}'),file=sys.stderr)
+                print("Undefined environment variable: " + v.strip('{}'),file=sys.stderr)
                 value = value.replace(v,"")
     return value
 
 def loadconfigfile(configfile, settingsmodule):
-    #search host-specific configuration
+    """This function loads an external configuration file. It is usually not invoked directly but through ``loadconfig()`` which handles searching for the right configuration file in the right paths, with fallbacks."""
+
     with io.open(configfile,'r', encoding='utf-8') as f:
         data = yaml.safe_load(f.read())
     if 'include' in data and data['include']:
