@@ -230,14 +230,14 @@
      <h2 class="card-title">Status</h2>
      <xsl:choose>
       <xsl:when test="@code = 0">
-        <div id="actions">
-        	<input id="deletebutton" class="btn btn-danger" type="button" value="Cancel and delete project" />
-       	</div>
   		<xsl:if test="@errors = 'yes'">
-      		<div id="errorcard" class="error">
+      		<div class="alert alert-danger">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:if>
+        <div id="actions">
+        	<input id="deletebutton" class="btn btn-danger" type="button" value="Cancel and delete project" />
+       	</div>
         <div id="statusmessage" class="alert alert-success"><xsl:value-of select="@message"/></div>
 
       </xsl:when>
@@ -246,7 +246,7 @@
         	<input id="abortbutton" class="btn btn-outline-danger" type="button" value="Abort execution" />
         </div>
   		<xsl:if test="@errors = 'yes'">
-      		<div id="errorcard" class="error">
+      		<div class="alert alert-danger">
             <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:if>
@@ -273,7 +273,7 @@
         </div>
         <xsl:choose>
         <xsl:when test="@errors = 'yes'">
-      		<div id="errorbox" class="alert alert-danger">
+      		<div class="alert alert-danger">
                 <strong>Error: </strong> <xsl:value-of select="@errormsg"/>
       		</div>
      	</xsl:when>
