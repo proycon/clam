@@ -83,6 +83,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
         if (inputtemplate) {
             var xmldoc;
             var result;
+            var parametercount = 0;
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)
                 if (parametersxmloverride === undefined) { //eslint-disable-line no-undefined
@@ -95,6 +96,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                     if (xmldoc[i].nodeName.toLowerCase() === "parameters") {
                         xmldoc = xmldoc[i];
                         found = true;
+                        parametercount = xmldoc.children.length;
                     }
                 }
                 if (!found) {
@@ -111,11 +113,22 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 xmldoc=new ActiveXObject("Microsoft.XMLDOM"); //eslint-disable-line no-undef
                 xmldoc.async="false";
                 xmldoc.loadXML(inputtemplate.parametersxml);
+                parametercount = 1; //TODO: determine real count
                 result = xmldoc.transformNode(parametersxsl);
             } else {
-                result = "<strong>Error: Unable to render parameter form!</strong>";
+                result = "<div class=\"alert alert-danger\">Error: Unable to render parameter form!</div>";
             }
             $(target).html(result);
+
+            if (parametercount === 0) {
+                $(target + "wrapper").hide();
+                $(target + "step").html("2");
+                $(target + "step2").html("3");
+            } else {
+                $(target + "wrapper").show();
+                $(target + "step").html("3");
+                $(target + "step2").html("4");
+            }
 
             if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {
                 var s = "Automatic conversion from other format? <select name=\"converter\" class=\"form-control\">";
