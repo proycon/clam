@@ -35,8 +35,8 @@ class ExampleFormat(CLAMMetaData):
     mimetype = "text/plain"
 
 
-    #If your format is XML-based, specify a scheme:
-    scheme = None
+    #If your format is XML-based, specify a schema:
+    schema = None
 
     #NOTE: Never override the constructor with different arguments!
 
@@ -115,7 +115,7 @@ class CSVFormat(CLAMMetaData):
 class XMLFormat(CLAMMetaData):
     name = "XML Format (generic, not further specified)"
     mimetype = 'text/xml'
-    scheme = ''
+    schema = ''
 UndefinedXMLFormat = XMLFormat #backward compatibility
 
 class JSONFormat(CLAMMetaData):
@@ -123,45 +123,73 @@ class JSONFormat(CLAMMetaData):
     mimetype = 'application/json'
 
 class FoLiAXMLFormat(CLAMMetaData):
-    attributes = {}
+    attributes = { #TODO: this is not complete yet
+        'version': StringParameter("version", "Version", "The FoLiA version", required=False),
+        'text-annotation': StringParameter("text-annotation","Token Annotation","Comma separated list of text annotation sets present, may also be set to the value 'no-set'.", required=False),
+        'token-annotation': StringParameter("token-annotation","Token Annotation","Comma separated list of token annotation sets present, may also be set to the value 'no-set'.", required=False),
+        'sentence-annotation': StringParameter("sentence-annotation","Sentence Annotation","Comma separated list of sentence annotation sets present, may also be set to the value 'no-set'.", required=False),
+        'paragraph-annotation': StringParameter("paragraph-annotation","Paragraph Annotation","Comma separated list of paragraph annotation sets present, may also be set to the value 'no-set'.", required=False),
+        'pos-annotation': StringParameter("pos-annotation","Part-of-Speech Annotation","Comma separated list of part-of-speech sets present, may also be set to the value 'no-set'.", required=False),
+        'lemma-annotation': StringParameter("lemma-annotation","Lemma Annotation","Comma separated list of lemma sets present, may also be set to the value 'no-set'.", required=False),
+        'sense-annotation': StringParameter("sense-annotation","Sense Annotation","Comma separated list of sense sets present, may also be set to the value 'no-set'.", required=False),
+        'entity-annotation': StringParameter("entity-annotation","Entity Annotation","Comma separated list of entity sets present, may also be set to the value 'no-set'.", required=False),
+        'syntax-annotation': StringParameter("syntax-annotation","Syntax Annotation","Comma separated list of syntax sets present, may also be set to the value 'no-set'.", required=False),
+        'chunk-annotation': StringParameter("chunk-annotation","Chunk Annotation","Comma separated list of chunk sets present, may also be set to the value 'no-set'.", required=False),
+        'relation-annotation': StringParameter("relation-annotation","Relation Annotation","Comma separated list of relation sets present, may also be set to the value 'no-set'.", required=False),
+    }
     name = "FoLiA XML"
     mimetype = 'text/xml'
-    scheme = '' #TODO
+    schema = '' #TODO
+
+    def loadinlinemetadata(self):
+        """Extract metadata from the FoLiA file"""
+        try:
+            import folia.main as folia #soft-dependency, not too big a deal if it is not present, but no metadata extraction then
+            #this loads a whole FoLiA document into memory! which is a bit of a waste of memory and a performance hog!
+            doc = folia.Document(file=str(self.file))
+            self['version'] = doc.version
+            for annotationtype, annotationset in doc.annotations:
+                key = folia.annotationtype2str(annotationtype) + "-annotation"
+                if annotationset is None: annotationset = "no-set"
+                if key in self:
+                    self[key] += "," +  annotationset
+        except ImportError:
+            pass
 
 class AlpinoXMLFormat(CLAMMetaData):
     attributes = {}
     name = "Alpino XML"
     mimetype = 'text/xml'
-    scheme = '' #TODO
+    schema = '' #TODO
 
 class DCOIFormat(CLAMMetaData):
     attributes = {}
     name = "DCOI format"
     mimetype = 'text/xml'
-    scheme = '' #TODO
+    schema = '' #TODO
 
 
 class KBXMLFormat(CLAMMetaData):
     name = "Koninklijke Bibliotheek XML-formaat"
     mimetype = 'text/xml'
-    scheme = '' #TODO
+    schema = '' #TODO
 
 
 class TICCLVariantOutputXML(CLAMMetaData):
     name="Ticcl Variant Output"
     mimetype='text/xml'
-    scheme='' #TODO
+    schema='' #TODO
 
 class TICCLShadowOutputXML(CLAMMetaData):
     name="Ticcl Shadow Output"
     mimetype='text/xml'
-    scheme='' #TODO
+    schema='' #TODO
 
 class MSWordFormat(CLAMMetaData):
     attributes = {}
     name = "Microsoft Word format"
     mimetype = 'application/msword'
-    scheme = '' #TODO
+    schema = '' #TODO
 
 class PDFFormat(CLAMMetaData):
     attributes = {}
