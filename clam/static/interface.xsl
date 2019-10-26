@@ -2,9 +2,10 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<xsl:import href="parameters.xsl" />
 
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" cdata-section-elements="script"/>
+
+<xsl:include href="parameters.xsl" />
 
 <xsl:template match="/clam">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -553,8 +554,8 @@
         <xsl:variable name="format" select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/formats/format[@id = $format]/@name"/></td>
-        <td class="actions"><span class="oi oi-circle-x deletefile" title="Delete this file"></span>
-            <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
+        <td class="actions"><xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
+            <span class="oi oi-circle-x deletefile" title="Delete this file"></span>
         </td>
     </tr>
 </xsl:template>

@@ -80,11 +80,22 @@ a:visited {
 
 
 #container .qq-upload-button {
-    background: #8a4949;
+    background: #007bff;
+    border-color: #007bff;
     border-radius: 5px;
+    color: #fff;
+    cursor: pointer !important;
+    width: 50%;
+    padding: 10px;
+    font-size: 1rem;
 }
 #container .qq-upload-button:hover {
-    background: #aa0000;
+    background: #0062cc;
+    border-color: #0062cc;
+    cursor: pointer !important;
+}
+#container .qq-upload-button input, #container .qq-upload-button div {
+    cursor: pointer !important;
 }
 
 .card {
