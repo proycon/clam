@@ -14,6 +14,7 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 
+from clam.common.parameters import StringParameter
 from clam.common.data import CLAMMetaData  #import CLAMMetaData
 
 
@@ -24,13 +25,8 @@ from clam.common.data import CLAMMetaData  #import CLAMMetaData
 class ExampleFormat(CLAMMetaData):
     """This is an Example format, please inspect its source code if you want to create custom formats!"""
 
-    #A dictionary of attributes that this format can take, the keys correspond
-    #to the attributes, the values can be either:
-    # True   - Accept any value, this attribute is required
-    # False  - Accept any value, but this attribute is not required
-    # a list - Accept any of the specified values (if False is a member then this attribute is not required)
-    # a specific value - Simply always assign this static value
-    #attributes = {'encoding':True, 'language':False, 'colour': ['green','red','blue'], 'pi':3.14 }
+    #Attributes is a dictionary that maps to parameter instances, these parameters express the possible metadata values, along with whether these are required or not
+    attributes = {}
 
     #Do you want to allow any other custom attributes? Defined by the InputTemplate/OutputTemplate
     allowcustomattributes = True
@@ -65,7 +61,10 @@ class PlainTextFormat(CLAMMetaData):
     """Plain Text Format Definition. This format has one required attribute: encoding"""
 
     name = "Plain Text Format"
-    attributes = {'encoding':True,'language':False }
+    attributes = {
+        'encoding': StringParameter('encoding', "Character Encoding",required=True),
+        'language': StringParameter('language', "Language", required=False),
+    }
     mimetype = "text/plain"
 
     def httpheaders(self):
@@ -75,7 +74,10 @@ class PlainTextFormat(CLAMMetaData):
 class HTMLFormat(CLAMMetaData):
     """HTML Format Definition. This format has one required attribute: encoding"""
     name = "HTML Format"
-    attributes = {'encoding':True,'language':False }
+    attributes = {
+        'encoding': StringParameter('encoding', "Character Encoding",required=True),
+        'language': StringParameter('language', "Language", required=False),
+    }
     mimetype = "text/html"
 
     def httpheaders(self):
@@ -93,7 +95,10 @@ class TadpoleFormat(CLAMMetaData):
     mimetype = 'text/plain'
 
 class CSVFormat(CLAMMetaData):
-    attributes = {'encoding':True,'language':False }
+    attributes = {
+        'encoding': StringParameter('encoding', "Character Encoding",required=True),
+        'language': StringParameter('language', "Language", required=False),
+    }
     name = "Comma separated file"
     mimetype = 'text/csv'
 

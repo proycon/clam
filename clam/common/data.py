@@ -1268,19 +1268,14 @@ class CLAMMetaData(object):
                     if key not in self.attributes: #pylint: disable=unsupported-membership-test
                         raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes. (format: " + self.__class__.__name__ + ", file: " + str(file) + ")")
 
-            for key, valuerange in self.attributes.items():
-                if isinstance(valuerange,list):
-                    if not key in self and not False in valuerange :
-                        raise ValueError("Required metadata attribute " + key +  " not specified")
-                    elif self[key] not in valuerange:
-                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value, choose one of: " + " ".join(self.attributes[key])) + " (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" #pylint: disable=unsubscriptable-object
-                elif valuerange is False: #Any value is allowed, and this attribute is not required
-                    pass #nothing to do
-                elif valuerange is True: #Any value is allowed, this attribute is *required*
-                    if not key in self:
-                        raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
-                elif valuerange: #value is a single specific unconfigurable value
-                    self[key] = valuerange
+            for key, attribute in self.attributes.items():
+                if attribute.required and not key in self:
+                    raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
+                elif isinstance(attribute, clam.common.parameters.StaticParameter):
+                    self[key] = attribute.value
+                elif key in self:
+                    if not attribute.validate(self[key]):
+                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value that violates the format's attributes") #pylint: disable=unsubscriptable-object
 
     def __getitem__(self, key):
         """Retrieve a metadata field"""
@@ -2617,8 +2612,6 @@ def loadconfigfile(configfile, settingsmodule):
         #replace variables
         setattr(settingsmodule,key.upper(), resolveconfigvariables(value))
     return True
-
-
 
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position

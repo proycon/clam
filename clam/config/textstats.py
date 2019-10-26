@@ -99,7 +99,7 @@ STYLE = 'classic'
 
 #Here you can specify an extra formats
 class FrequencyListFormat(CLAMMetaData):
-    attributes = { 'encoding': True, 'language': False }
+    attributes = { 'encoding': StringParameter('encoding','Character Encoding', required=True), 'language': StringParameter('language','Language', required=False) }
     name = "My Dummy text format"
     mimetype = 'text/plain'
 
