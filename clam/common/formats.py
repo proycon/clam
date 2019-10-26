@@ -91,7 +91,7 @@ class BinaryDataFormat(CLAMMetaData):
 
 class FrogTSVFormat(CLAMMetaData):
     attributes = {
-        'tokenisation': StaticParameter('tokenisation','Tokenisation',value=yes, required=False)
+        'tokenisation': StaticParameter('tokenisation','Tokenisation',value=yes, required=False),
         'postagging': ChoiceParameter('postagging','Part-of-Speech tagging',choices=['yes','no'],required=False),
         'lemmatisation': ChoiceParameter('lemmatisation','Lemmatisation', choices=['yes','no'],required=False),
         'morphologicalanalysis': ChoiceParameter('morphologicalanalysis','Morphology', choices=['yes','no'],required=False),
@@ -109,7 +109,7 @@ class CSVFormat(CLAMMetaData):
         'encoding': StringParameter('encoding', "Character Encoding",required=True),
         'language': StringParameter('language', "Language", required=False),
     }
-    name = "Comma separated file"
+    name = "Comma Separated Values"
     mimetype = 'text/csv'
 
 class XMLFormat(CLAMMetaData):
