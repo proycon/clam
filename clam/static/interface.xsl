@@ -261,7 +261,7 @@
       </xsl:when>
       <xsl:when test="@code = 1">
         <div id="actions">
-        	<input id="abortbutton" class="btn btn-outline-danger" type="button" value="Abort execution" />
+        	<input id="abortbutton" class="btn btn-danger" type="button" value="Abort execution" />
         </div>
   		<xsl:if test="@errors = 'yes'">
       		<div class="alert alert-danger">

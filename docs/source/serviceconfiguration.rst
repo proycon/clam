@@ -1508,3 +1508,11 @@ meant for host-specific configuration only; it can not be used to
 specify a full CLAM profile so is never a full substitute for the main
 service configuration file.
 
+It is even possible to include other external configuration files from the external configuration itself::
+
+    include: /path/to/other.yml
+
+or multiple::
+
+    include: [ "/path/to/other.yml", "/path/to/other2.yml" ]
+

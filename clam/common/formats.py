@@ -149,10 +149,12 @@ class FoLiAXMLFormat(CLAMMetaData):
             doc = folia.Document(file=str(self.file))
             self['version'] = doc.version
             for annotationtype, annotationset in doc.annotations:
-                key = folia.annotationtype2str(annotationtype) + "-annotation"
+                key = folia.annotationtype2str(annotationtype).lower() + "-annotation"
                 if annotationset is None: annotationset = "no-set"
                 if key in self:
                     self[key] += "," +  annotationset
+                else:
+                    self[key] = annotationset
         except ImportError:
             pass
 

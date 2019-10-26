@@ -13,13 +13,24 @@ CLAM.
     endpoint which provides a more tailored overview. This info page also presents auto-generated example code for
     interacting with the webservice.
 
+General Webservice Information
+--------------------------------
+
+:Endpoint: ``/porch/`` or ``/info/`` (or ``/`` if no authentication credentials are provided)
+:Method: ``GET``
+:Request Parameters:  (none)
+:Description: Retrieves the general webservice specification (profiles, formats, etc). This also works without
+              authentication even on authenticated webservices (unless explicitly disabled). ``/porch/`` and ``/info/``
+              and almost identical from a webservice perspective, but render very differently in the browser.
+:Response: ``200 - OK`` & CLAM XML
+
 Project Index
 ------------------------
 
-:Endpoint: ``/``
+:Endpoint: ``/index/`` (or ``/`` if proper authentication credentials are provided)
 :Method: ``GET``
 :Request Parameters:  (none)
-:Description: Retrieves the project index and profile specification
+:Description: Retrieves the project index and general webservice specification
 :Response: ``200 - OK`` & CLAM XML, ``401 - Unauthorised``
 
 Project Endpoint
