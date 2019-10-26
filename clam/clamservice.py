@@ -2219,6 +2219,125 @@ def interfacedata(): #no auth
 
     return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript', {'allow_origin': settings.ALLOW_ORIGIN})
 
+def openapi():
+    info = {
+            "title": settings.SYSTEM_NAME,
+            "description": settings.SYSTEM_DESCRIPTION,
+            "version": settings.SYSTEM_VERSION if setings.SYSTEM_VERSION else "0.0.0",
+    }
+    if settings.SYSTEM_LICENSE:
+        info["license"] = {"name": settings.SYSTEM_LICENSE}
+    if settings.SYSTEM_EMAIL:
+        info["contact"] = {"name": "System Contact", "email": settings.SYSTEM_EMAIL }
+
+    components = {
+        "schemas": {
+            # "ClamXML": { "type:": "object", } #TODO later: convert RelaxNG to this spec
+        }
+    }
+
+    paths = {
+        "/porch": {
+            "get": {
+                "description": "retrieves the general webservice specification and information without any authentication",
+                "responses":{
+                    "200": {
+                        "description": "clam xml with the general webservice specification",
+                        "content": {
+                            "application/xml" #todo later: : { "$ref": "#/components/schemas/clamxml" }
+                        }
+                    }
+                }
+            }
+        },
+        "/index": {
+            "get": {
+                "description": "Returns the project index for the logged-in user, a long with the general webservice specification",
+                "responses":{
+                    "200": {
+                        "description": "clam xml with project list and general webservice specification",
+                        "content": {
+                            "application/xml" #todo later: : { "$ref": "#/components/schemas/clamxml" }
+                        }
+                    },
+                    "401": {
+                        "description": "An error asking the user to authenticate first",
+                        "content": "text/plain"
+                    }
+                }
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Returns human readable documentation of the RESTful API of this webservice",
+                "responses": {
+                    "200": {
+                        "description": "Documentation of the RESTful API of this webservice",
+                        "content": "text/html"
+                    }
+                }
+            }
+        },
+        "/{project}": {
+            "get": {
+                "description": "This returns the current state of the project in CLAM XML format. Depending on the state the project is in (staging, running, done) this contains a specification of all accepted parameters, all input files, and all output files.",
+                "responses": {
+                    "200": {
+                        "description": "Returns the CLAM XML description of the project (along with the general webservice specification). The content is identical to a GET request on this same endpoint.",
+                        "content": "application/xml"
+                    },
+                    "401": {
+                        "description": "An error asking the user to authenticate first, the project is not accessible otherwise",
+                        "content": "text/plain"
+                    },
+                    "404": {
+                        "description": "The project does not exist",
+                        "content": "text/plain"
+                    }
+                }
+            },
+            "put": {
+                "description": "Initialises a new empty project, necessary before attempting to upload any files",
+                "responses": {
+                    "201": {
+                        "description": "Indicates the project has been created and returns the CLAM XML description of the project (along with the general webservice specification). The content is identical to a GET request on this same endpoint.",
+                        "content": "application/xml"
+                    },
+                    "401": {
+                        "description": "An error asking the user to authenticate first, the project can not be created otherwise",
+                        "content": "text/plain"
+                    },
+                }
+            },
+            "post": {
+                "description": "This starts the running of a project, i.e. starts the actual background program with the specified service-specific parameters and provided input files. All input files should have been provided prior to a call to this endpoint. The global parameters are supplies as parameters with theis request.",
+                "responses": {
+                    "202": {
+                        "description": "Indicates the project has been started. Returns the CLAM XML description of the project (along with the general webservice specification). The content is identical to a GET request on this same endpoint.",
+                        "content": "application/xml"
+                    },
+
+                }
+
+            }
+        }
+    }
+
+    spec = {
+        "openapi": "3.0.2",
+        "info": info,
+        "servers": [{
+            "url": getrooturl(),
+            "description": "Server",
+        }],
+        "paths": paths,
+        "components": components,
+        "security": security,
+    }
+    return withheaders(flask.make_response(json.dumps(spec)), 'application/json', {'allow_origin': settings.ALLOW_ORIGIN})
+
+
+
 def foliaxsl():
     if foliatools is not None:
         return withheaders(flask.make_response(io.open(foliatools.__path__[0] + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl', {'allow_origin': settings.ALLOW_ORIGIN})
@@ -2640,6 +2759,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input', 'project_addinputfile3', self.auth.require_login(Project.addinputfile_nofile), methods=['POST','GET'] )
 
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/data.js', 'interfacedata', interfacedata, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/openapi.json', 'openapi', openapi, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/style.css', 'styledata', styledata, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
