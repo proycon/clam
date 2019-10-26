@@ -109,6 +109,11 @@ span.staging {
     font-weight: bold;
 }
 
+span.done {
+    color: #276427;
+    font-weight: bold;
+}
+
 #startbutton {
     margin-top: 5px;
 }
