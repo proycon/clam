@@ -19,7 +19,10 @@
             <img src="{/clam/coverurl}" alt="Cover Image">
                 <xsl:attribute name="style">
                 <xsl:if test="contains(/clam/@interfaceoptions,'centercover')">display: block; margin-left: auto; margin-right: auto;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight64')">height: 64px;</xsl:if>
                 <xsl:if test="contains(/clam/@interfaceoptions,'coverheight100')">height: 100px;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight128')">height: 128px;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight192')">height: 192px;</xsl:if>
                 </xsl:attribute>
             </img>
         </xsl:if>
