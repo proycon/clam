@@ -89,10 +89,20 @@ class BinaryDataFormat(CLAMMetaData):
     name = "Application-specific Binary Data"
     mimetype = 'application/octet-stream'
 
-class TadpoleFormat(CLAMMetaData):
-    attributes = {'tokenisation':'yes','lemmatisation':['yes','no'],'postagging':['yes','no'],'morphologicalanalysis':['yes','no'],'mwudetection':['yes','no'],'parsing':['yes','no'] }
-    name = "Tadpole Columned Output Format"
+class FrogTSVFormat(CLAMMetaData):
+    attributes = {
+        'tokenisation': StaticParameter('tokenisation','Tokenisation',value=yes, required=False)
+        'postagging': ChoiceParameter('postagging','Part-of-Speech tagging',choices=['yes','no'],required=False),
+        'lemmatisation': ChoiceParameter('lemmatisation','Lemmatisation', choices=['yes','no'],required=False),
+        'morphologicalanalysis': ChoiceParameter('morphologicalanalysis','Morphology', choices=['yes','no'],required=False),
+        'mwudetection': ChoiceParameter('mwudetection','Multi-Word Unit Detection', choices=['yes','no'],required=False),
+        'parsing': ChoiceParameter('parsing','Dependency Parsing', choices=['yes','no'],required=False),
+        'chunking': ChoiceParameter('chunking','Chunking', choices=['yes','no'],required=False),
+        'namedentities': ChoiceParameter('namedentities','Named Entities', choices=['yes','no'],required=False),
+     }
+    name = "Frog Tab Separated Values"
     mimetype = 'text/plain'
+TadpoleFormat = FrogTSVFormat #backwardcompatibility
 
 class CSVFormat(CLAMMetaData):
     attributes = {
