@@ -14,7 +14,7 @@
 from __future__ import print_function, unicode_literals, division, absolute_import
 
 
-from clam.common.parameters import StringParameter
+from clam.common.parameters import StringParameter, StaticParameter, ChoiceParameter
 from clam.common.data import CLAMMetaData  #import CLAMMetaData
 
 
@@ -91,14 +91,14 @@ class BinaryDataFormat(CLAMMetaData):
 
 class FrogTSVFormat(CLAMMetaData):
     attributes = {
-        'tokenisation': StaticParameter('tokenisation','Tokenisation',value=yes, required=False),
-        'postagging': ChoiceParameter('postagging','Part-of-Speech tagging',choices=['yes','no'],required=False),
-        'lemmatisation': ChoiceParameter('lemmatisation','Lemmatisation', choices=['yes','no'],required=False),
-        'morphologicalanalysis': ChoiceParameter('morphologicalanalysis','Morphology', choices=['yes','no'],required=False),
-        'mwudetection': ChoiceParameter('mwudetection','Multi-Word Unit Detection', choices=['yes','no'],required=False),
-        'parsing': ChoiceParameter('parsing','Dependency Parsing', choices=['yes','no'],required=False),
-        'chunking': ChoiceParameter('chunking','Chunking', choices=['yes','no'],required=False),
-        'namedentities': ChoiceParameter('namedentities','Named Entities', choices=['yes','no'],required=False),
+        'tokenisation': StaticParameter('tokenisation','Tokenisation',value="yes", required=False),
+        'postagging': ChoiceParameter('postagging','Part-of-Speech tagging',"Part-of-Speech tagging",choices=['yes','no'],required=False),
+        'lemmatisation': ChoiceParameter('lemmatisation','Lemmatisation', "Lemmatisation", choices=['yes','no'],required=False),
+        'morphologicalanalysis': ChoiceParameter('morphologicalanalysis','Morphology',"Morphology", choices=['yes','no'],required=False),
+        'mwudetection': ChoiceParameter('mwudetection','Multi-Word Unit Detection',"MWU Detection", choices=['yes','no'],required=False),
+        'parsing': ChoiceParameter('parsing','Dependency Parsing',"Dependency Parsing", choices=['yes','no'],required=False),
+        'chunking': ChoiceParameter('chunking','Chunking',"Chunking", choices=['yes','no'],required=False),
+        'namedentities': ChoiceParameter('namedentities','Named Entities',"Named Entities", choices=['yes','no'],required=False),
      }
     name = "Frog Tab Separated Values"
     mimetype = 'text/plain'
