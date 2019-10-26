@@ -54,6 +54,23 @@ function validateuploadfilename(filename, inputtemplate_id) {
     return filename;
 }
 
+function sort_options(selector) {
+    //adapted from https://stackoverflow.com/questions/12073270/sorting-options-elements-alphabetically-using-jquery
+    var options = $(selector + ' option');
+    if (options) {
+        var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value, s: $(o).prop('selected') }; }).get();
+        arr.sort(function(o1, o2) {
+          var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+          return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+        });
+        options.each(function(i, o) {
+          o.value = arr[i].v;
+          $(o).text(arr[i].t);
+          $(o).prop('selected', arr[i].s);
+        });
+    }
+}
+
 
 
 
@@ -102,7 +119,7 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
 
             if ((enableconverters) && ($(inputtemplate.converters)) && (inputtemplate.converters.length > 0) ) {
                 var s = "Automatic conversion from other format? <select name=\"converter\" class=\"form-control\">";
-                s += "<option value=\"\">No</option>";
+                s += "<option value=\"\" selected=\"selected\">No</option>";
                 for (var j = 0; j < inputtemplate.converters.length; j++) {
                     s += "<option value=\"" + inputtemplate.converters[j].id + "\">" + inputtemplate.converters[j].label + "</option>";
                 }
@@ -390,8 +407,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
     */
 
    //Create lists of all possible inputtemplates (aggregated over all profiles)
-   var inputtemplate_options = "<option value=\"\">Select a filetype...</option>";
+   var inputtemplate_options = "";
    var processed = [];
+   if (inputtemplates.length === 1) {
+       preselectinputtemplate = true; //there is only one so we select it
+   } else {
+       inputtemplate_options = "<option value=\"\">---&gt; Select a filetype...</option>";
+   }
    for (var i = 0; i < inputtemplates.length; i++) {
         var duplicate = false;
         for (var j = 0; j < processed.length; j++) {
@@ -412,6 +434,12 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    }
    $(".inputtemplates").html(inputtemplate_options);
 
+
+   //Sort template selections boxes
+   sort_options('#uploadinputsource');
+   sort_options('#uploadinputtemplate');
+   sort_options('#urluploadinputtemplate');
+   sort_options('#editoruploadinputtemplate');
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
    $("#uploadinputtemplate").change(function(){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
