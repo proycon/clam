@@ -407,12 +407,12 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
     */
 
    //Create lists of all possible inputtemplates (aggregated over all profiles)
-   var inputtemplate_options = "";
+   var inputtemplate_options = [];
    var processed = [];
    if (inputtemplates.length === 1) {
        preselectinputtemplate = true; //there is only one so we select it
    } else {
-       inputtemplate_options = "<option value=\"\">---&gt; Select a filetype...</option>";
+       inputtemplate_options.push( ['',"<option value=\"\">---&gt; Select a filetype...</option>"]);
    }
    for (var i = 0; i < inputtemplates.length; i++) {
         var duplicate = false;
@@ -430,16 +430,14 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
         } else {
             selected="";
         }
-        inputtemplate_options += '<option value="' + inputtemplates[i].id + '" ' + selected + '>' + inputtemplates[i].label + '</option>';
+        inputtemplate_options.push([inputtemplates[i].label.toLowerCase(),  '<option value="' + inputtemplates[i].id + '" ' + selected + '>' + inputtemplates[i].label + '</option>']);
    }
-   $(".inputtemplates").html(inputtemplate_options);
-
-
-   //Sort template selections boxes
-   sort_options('#uploadinputsource');
-   sort_options('#uploadinputtemplate');
-   sort_options('#urluploadinputtemplate');
-   sort_options('#editoruploadinputtemplate');
+   inputtemplate_options.sort(function(a,b){ return (a[0]<b[0]?-1:(a[0]>b[0]?1:0)); } );
+   var inputtemplate_options_string = "";
+   for (var i = 0; i < inputtemplates.length; i++) {
+       inputtemplate_options_string += inputtemplate_options[i][1];
+   }
+   $(".inputtemplates").html(inputtemplate_options_string);
 
    //Tying events to trigger rendering of file-parameters when an inputtemplate is selected:
    $("#uploadinputtemplate").change(function(){renderfileparameters($('#uploadinputtemplate').val(),'#uploadparameters',true); });
