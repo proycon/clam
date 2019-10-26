@@ -143,20 +143,21 @@ class FoLiAXMLFormat(CLAMMetaData):
 
     def loadinlinemetadata(self):
         """Extract metadata from the FoLiA file"""
-        try:
-            import folia.main as folia #soft-dependency, not too big a deal if it is not present, but no metadata extraction then
-            #this loads a whole FoLiA document into memory! which is a bit of a waste of memory and a performance hog!
-            doc = folia.Document(file=str(self.file))
-            self['version'] = doc.version
-            for annotationtype, annotationset in doc.annotations:
-                key = folia.annotationtype2str(annotationtype).lower() + "-annotation"
-                if annotationset is None: annotationset = "no-set"
-                if key in self:
-                    self[key] += "," +  annotationset
-                else:
-                    self[key] = annotationset
-        except ImportError:
-            pass
+        if self.file:
+            try:
+                import folia.main as folia #soft-dependency, not too big a deal if it is not present, but no metadata extraction then
+                #this loads a whole FoLiA document into memory! which is a bit of a waste of memory and a performance hog!
+                doc = folia.Document(file=str(self.file))
+                self['version'] = doc.version
+                for annotationtype, annotationset in doc.annotations:
+                    key = folia.annotationtype2str(annotationtype).lower() + "-annotation"
+                    if annotationset is None: annotationset = "no-set"
+                    if key in self:
+                        self[key] += "," +  annotationset
+                    else:
+                        self[key] = annotationset
+            except ImportError:
+                pass
 
 class AlpinoXMLFormat(CLAMMetaData):
     attributes = {}
