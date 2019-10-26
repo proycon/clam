@@ -23,6 +23,7 @@
     <loginurl>{{ system_login_url }}</loginurl>
     <logouturl>{{ system_logout_url }}</logouturl>
     <registerurl>{{ system_register_url }}</registerurl>
+    <coverurl>{{ system_cover_url }}</coverurl>
     <license>{{ system_license }}</license>
 {############################################################################################}
 {% if customhtml %}

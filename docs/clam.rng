@@ -114,6 +114,12 @@ RelaxNG schema for CLAM XML
                 <text />
             </element>
         </optional>
+        <optional>
+            <element name="coverurl">
+                <a:documentation>Defines an external URL to a cover image for the interface</a:documentation>
+                <text />
+            </element>
+        </optional>
 		<optional>
 		    <element name="projects">
 		        <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>

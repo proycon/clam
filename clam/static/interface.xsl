@@ -14,6 +14,12 @@
     <div id="gradient"></div>
     <div id="container">
 
+        <div id="cover">
+        <xsl:if test="/clam/coverurl != ''">
+            <img src="{/clam/coverurl}" alt="Cover Image"  />
+        </xsl:if>
+        </div>
+
         <xsl:call-template name="nav" />
 
         <xsl:choose>

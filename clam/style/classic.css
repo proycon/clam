@@ -17,6 +17,10 @@ body {
 #container {
     padding-bottom: 2px;
 }
+#cover {
+    width: 100%;
+    background-color: #343a40;
+}
 
 #status p {
     text-align: center;

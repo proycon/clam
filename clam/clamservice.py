@@ -223,6 +223,7 @@ class Login(object):
                         system_register_url=settings.SYSTEM_REGISTER_URL,
                         system_login_url=settings.SYSTEM_LOGIN_URL,
                         system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                        system_cover_url=settings.SYSTEM_COVER_URL,
                         system_license=settings.SYSTEM_LICENSE,
                         url=getrooturl(),
                         oauth_access_token=oauth_encrypt(d['access_token']))),
@@ -427,6 +428,7 @@ def index(credentials = None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -482,6 +484,7 @@ def porch(credentials=None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -541,6 +544,7 @@ def info(credentials=None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -601,6 +605,7 @@ class Admin:
                 system_register_url=settings.SYSTEM_REGISTER_URL,
                 system_login_url=settings.SYSTEM_LOGIN_URL,
                 system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
                 system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 url=getrooturl(),
@@ -640,6 +645,7 @@ class Admin:
                     system_register_url=settings.SYSTEM_REGISTER_URL,
                     system_login_url=settings.SYSTEM_LOGIN_URL,
                     system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                    system_cover_url=settings.SYSTEM_COVER_URL,
                     system_license=settings.SYSTEM_LICENSE,
                     user=targetuser,
                     project=project,
@@ -1073,6 +1079,7 @@ class Project:
                 system_register_url=settings.SYSTEM_REGISTER_URL,
                 system_login_url=settings.SYSTEM_LOGIN_URL,
                 system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
                 system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 project=project,
@@ -2742,6 +2749,8 @@ def set_defaults():
         settings.SYSTEM_LOGOUT_URL = ""
     if 'SYSTEM_REGISTER_URL' not in settingkeys:
         settings.SYSTEM_REGISTER_URL = ""
+    if 'SYSTEM_COVER_URL' not in settingkeys:
+        settings.SYSTEM_COVER_URL = ""
     if 'SYSTEM_LICENSE' not in settingkeys:
         settings.SYSTEM_LICENSE = ""
     if 'USERS' not in settingkeys:
