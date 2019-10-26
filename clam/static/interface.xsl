@@ -2,9 +2,10 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xlink="http://www.w3.org/1999/xlink">
 
-<xsl:import href="parameters.xsl" />
 
 <xsl:output method="html" encoding="UTF-8" omit-xml-declaration="yes" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" indent="yes" cdata-section-elements="script"/>
+
+<xsl:include href="parameters.xsl" />
 
 <xsl:template match="/clam">
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -12,6 +13,20 @@
   <body>
     <div id="gradient"></div>
     <div id="container">
+
+        <div id="cover">
+        <xsl:if test="/clam/coverurl != ''">
+            <img src="{/clam/coverurl}" alt="Cover Image">
+                <xsl:attribute name="style">
+                <xsl:if test="contains(/clam/@interfaceoptions,'centercover')">display: block; margin-left: auto; margin-right: auto;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight64')">height: 64px;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight100')">height: 100px;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight128')">height: 128px;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight192')">height: 192px;</xsl:if>
+                </xsl:attribute>
+            </img>
+        </xsl:if>
+        </div>
 
         <xsl:call-template name="nav" />
 
@@ -202,6 +217,9 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:if>
+            <xsl:if test="/clam/affiliation != ''">
+                <br /><xsl:value-of select="/clam/affiliation" />
+            </xsl:if>
         </p>
 
 
@@ -383,7 +401,7 @@
 
                     <div id="clientupload">
                         <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select what type of file you want to add:</em><xsl:text> </xsl:text><select id="uploadinputtemplate" class="inputtemplates form-control"></select><br />
-                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file(s) you are about to upload:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
+                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters (if any) for the file(s) you are about to upload:</em><xsl:text> </xsl:text><div id="uploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
                         <strong>Step 3)</strong><xsl:text> </xsl:text><em>Click the upload button below and then select one or more files (holding control), you can also drag &amp; drop files onto the button from an external file manager</em><xsl:text> </xsl:text>
                         <xsl:choose>
                         <xsl:when test="contains(/clam/@interfaceoptions,'simpleupload') or contains(/clam/@interfaceoptions,'secureonly')">
@@ -416,7 +434,7 @@
                     <div id="urlupload">
                         <p>Retrieves an input file from another location on the web.</p>
                         <strong>Step 1)</strong><xsl:text> </xsl:text><em>First select the desired input type:</em><xsl:text> </xsl:text><select id="urluploadinputtemplate" class="inputtemplates form-control"></select><br />
-                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters for the file you are adding:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
+                        <strong>Step 2)</strong><xsl:text> </xsl:text><em>Set the parameters (if any) for the file you are adding:</em><xsl:text> </xsl:text><div id="urluploadparameters" class="parameters"><span class="alert alert-info typefirst">Select a type first</span></div>
                         <strong>Step 3)</strong><xsl:text> </xsl:text><em>Enter the URL where to retrieve the file</em><xsl:text> </xsl:text><input id="urluploadfile" class="form-control" value="http://" /><br />
                         <strong>Step 4)</strong><xsl:text> </xsl:text><input id="urluploadsubmit" class="btn btn-primary" type="submit" value="Retrieve and add file" />
                     </div>
@@ -553,8 +571,8 @@
         <xsl:variable name="format" select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
         <td><xsl:value-of select="/clam/formats/format[@id = $format]/@name"/></td>
-        <td class="actions"><span class="oi oi-circle-x deletefile" title="Delete this file"></span>
-            <xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
+        <td class="actions"><xsl:attribute name="onclick">deleteinputfile('<xsl:value-of select="./name"/>');</xsl:attribute>
+            <span class="oi oi-circle-x deletefile" title="Delete this file"></span>
         </td>
     </tr>
 </xsl:template>
@@ -754,6 +772,12 @@
                              <tr>
                                  <th>Author(s):</th>
                                  <td><xsl:value-of select="/clam/author" /></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/affiliation != ''">
+                             <tr>
+                                 <th>Affiliation:</th>
+                                 <td><xsl:value-of select="/clam/affiliation" /></td>
                              </tr>
                          </xsl:if>
                          <xsl:if test="/clam/url != ''">

@@ -45,6 +45,8 @@ SYSTEM_LICENSE = "GNU Public License v3"
 
 SYSTEM_AUTHOR = "proycon"
 
+SYSTEM_AFFILIATION = "Centre for Language and Speech Technology, Radboud University"
+
 SYSTEM_EMAIL = "proycon@anaproy.nl"
 
 

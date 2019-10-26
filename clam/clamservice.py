@@ -216,6 +216,7 @@ class Login(object):
                         system_name=settings.SYSTEM_NAME,
                         system_description=settings.SYSTEM_DESCRIPTION,
                         system_author=settings.SYSTEM_AUTHOR,
+                        system_affiliation=settings.SYSTEM_AFFILIATION,
                         system_version=settings.SYSTEM_VERSION,
                         system_email=settings.SYSTEM_EMAIL,
                         system_url=settings.SYSTEM_URL,
@@ -223,6 +224,7 @@ class Login(object):
                         system_register_url=settings.SYSTEM_REGISTER_URL,
                         system_login_url=settings.SYSTEM_LOGIN_URL,
                         system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                        system_cover_url=settings.SYSTEM_COVER_URL,
                         system_license=settings.SYSTEM_LICENSE,
                         url=getrooturl(),
                         oauth_access_token=oauth_encrypt(d['access_token']))),
@@ -420,6 +422,7 @@ def index(credentials = None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -427,6 +430,7 @@ def index(credentials = None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -450,6 +454,7 @@ def index(credentials = None):
             disableinterface=not settings.ENABLEWEBAPP,
             info=False,
             porch=False,
+            #mergexsl=flask.request.user_agent.browser in ("chrome","safari"),
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
@@ -474,6 +479,7 @@ def porch(credentials=None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -481,6 +487,7 @@ def porch(credentials=None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -503,6 +510,7 @@ def porch(credentials=None):
             info=False,
             porch=True,
             disableinterface=not settings.ENABLEWEBAPP,
+            #mergexsl=flask.request.user_agent.browser in ("chrome","safari"),
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
@@ -532,6 +540,7 @@ def info(credentials=None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -539,6 +548,7 @@ def info(credentials=None):
             system_register_url=settings.SYSTEM_REGISTER_URL,
             system_login_url=settings.SYSTEM_LOGIN_URL,
             system_logout_url=settings.SYSTEM_LOGOUT_URL,
+            system_cover_url=settings.SYSTEM_COVER_URL,
             system_license=settings.SYSTEM_LICENSE,
             user=user,
             project=None,
@@ -560,6 +570,7 @@ def info(credentials=None):
             actions=settings.ACTIONS,
             info=True,
             porch=False,
+            #mergexsl=flask.request.user_agent.browser in ("chrome","safari"),
             disableinterface=not settings.ENABLEWEBAPP,
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
@@ -591,6 +602,7 @@ class Admin:
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
                 system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
                 system_version=settings.SYSTEM_VERSION,
                 system_email=settings.SYSTEM_EMAIL,
                 system_url=settings.SYSTEM_URL,
@@ -598,6 +610,7 @@ class Admin:
                 system_register_url=settings.SYSTEM_REGISTER_URL,
                 system_login_url=settings.SYSTEM_LOGIN_URL,
                 system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
                 system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 url=getrooturl(),
@@ -630,6 +643,7 @@ class Admin:
                     system_name=settings.SYSTEM_NAME,
                     system_description=settings.SYSTEM_DESCRIPTION,
                     system_author=settings.SYSTEM_AUTHOR,
+                    system_affiliation=settings.SYSTEM_AFFILIATION,
                     system_version=settings.SYSTEM_VERSION,
                     system_email=settings.SYSTEM_EMAIL,
                     system_url=settings.SYSTEM_URL,
@@ -637,6 +651,7 @@ class Admin:
                     system_register_url=settings.SYSTEM_REGISTER_URL,
                     system_login_url=settings.SYSTEM_LOGIN_URL,
                     system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                    system_cover_url=settings.SYSTEM_COVER_URL,
                     system_license=settings.SYSTEM_LICENSE,
                     user=targetuser,
                     project=project,
@@ -1064,12 +1079,14 @@ class Project:
                 system_description=settings.SYSTEM_DESCRIPTION,
                 system_version=settings.SYSTEM_VERSION,
                 system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
                 system_email=settings.SYSTEM_EMAIL,
                 system_url=settings.SYSTEM_URL,
                 system_parent_url=settings.SYSTEM_PARENT_URL,
                 system_register_url=settings.SYSTEM_REGISTER_URL,
                 system_login_url=settings.SYSTEM_LOGIN_URL,
                 system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
                 system_license=settings.SYSTEM_LICENSE,
                 user=user,
                 project=project,
@@ -1094,6 +1111,7 @@ class Project:
                 disableinterface=not settings.ENABLEWEBAPP,
                 info=False,
                 porch=False,
+                #mergexsl=flask.request.user_agent.browser in ("chrome","safari"),
                 accesstoken=Project.getaccesstoken(user,project),
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
@@ -2728,6 +2746,8 @@ def set_defaults():
         settings.SYSTEM_EMAIL = ""
     if 'SYSTEM_AUTHOR' not in settingkeys:
         settings.SYSTEM_AUTHOR = ""
+    if 'SYSTEM_AFFILIATION' not in settingkeys:
+        settings.SYSTEM_AFFILIATION = ""
     if 'SYSTEM_URL' not in settingkeys:
         settings.SYSTEM_URL = ""
     if 'SYSTEM_PARENT_URL' not in settingkeys:
@@ -2738,6 +2758,8 @@ def set_defaults():
         settings.SYSTEM_LOGOUT_URL = ""
     if 'SYSTEM_REGISTER_URL' not in settingkeys:
         settings.SYSTEM_REGISTER_URL = ""
+    if 'SYSTEM_COVER_URL' not in settingkeys:
+        settings.SYSTEM_COVER_URL = ""
     if 'SYSTEM_LICENSE' not in settingkeys:
         settings.SYSTEM_LICENSE = ""
     if 'USERS' not in settingkeys:

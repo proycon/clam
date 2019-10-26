@@ -17,6 +17,11 @@ body {
 #container {
     padding-bottom: 2px;
 }
+#cover {
+    width: 100%;
+    background-color: #262a2d;
+    overflow: hidden;
+}
 
 #status p {
     text-align: center;
@@ -80,11 +85,22 @@ a:visited {
 
 
 #container .qq-upload-button {
-    background: #8a4949;
+    background: #007bff;
+    border-color: #007bff;
     border-radius: 5px;
+    color: #fff;
+    cursor: pointer !important;
+    width: 50%;
+    padding: 10px;
+    font-size: 1rem;
 }
 #container .qq-upload-button:hover {
-    background: #aa0000;
+    background: #0062cc;
+    border-color: #0062cc;
+    cursor: pointer !important;
+}
+#container .qq-upload-button input, #container .qq-upload-button div {
+    cursor: pointer !important;
 }
 
 .card {
@@ -147,4 +163,7 @@ table .file {
 
 #customhtml {
     margin-top: 10px;
+}
+#parameters table {
+    margin-left: 20px;
 }
