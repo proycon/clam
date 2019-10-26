@@ -17,6 +17,7 @@
     <description>{{ system_description }}</description>
     <version>{{ system_version }}</version>
     <author>{{ system_author }}</author>
+    <affiliation>{{ system_affiliation }}</affiliation>
     <email>{{ system_email }}</email>
     <url>{{ system_url }}</url>
     <parenturl>{{ system_parent_url }}</parenturl>

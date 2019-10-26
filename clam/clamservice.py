@@ -216,6 +216,7 @@ class Login(object):
                         system_name=settings.SYSTEM_NAME,
                         system_description=settings.SYSTEM_DESCRIPTION,
                         system_author=settings.SYSTEM_AUTHOR,
+                        system_affiliation=settings.SYSTEM_AFFILIATION,
                         system_version=settings.SYSTEM_VERSION,
                         system_email=settings.SYSTEM_EMAIL,
                         system_url=settings.SYSTEM_URL,
@@ -421,6 +422,7 @@ def index(credentials = None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -477,6 +479,7 @@ def porch(credentials=None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -537,6 +540,7 @@ def info(credentials=None):
             system_name=settings.SYSTEM_NAME,
             system_description=settings.SYSTEM_DESCRIPTION,
             system_author=settings.SYSTEM_AUTHOR,
+            system_affiliation=settings.SYSTEM_AFFILIATION,
             system_version=settings.SYSTEM_VERSION,
             system_email=settings.SYSTEM_EMAIL,
             system_url=settings.SYSTEM_URL,
@@ -598,6 +602,7 @@ class Admin:
                 system_name=settings.SYSTEM_NAME,
                 system_description=settings.SYSTEM_DESCRIPTION,
                 system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
                 system_version=settings.SYSTEM_VERSION,
                 system_email=settings.SYSTEM_EMAIL,
                 system_url=settings.SYSTEM_URL,
@@ -638,6 +643,7 @@ class Admin:
                     system_name=settings.SYSTEM_NAME,
                     system_description=settings.SYSTEM_DESCRIPTION,
                     system_author=settings.SYSTEM_AUTHOR,
+                    system_affiliation=settings.SYSTEM_AFFILIATION,
                     system_version=settings.SYSTEM_VERSION,
                     system_email=settings.SYSTEM_EMAIL,
                     system_url=settings.SYSTEM_URL,
@@ -1073,6 +1079,7 @@ class Project:
                 system_description=settings.SYSTEM_DESCRIPTION,
                 system_version=settings.SYSTEM_VERSION,
                 system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
                 system_email=settings.SYSTEM_EMAIL,
                 system_url=settings.SYSTEM_URL,
                 system_parent_url=settings.SYSTEM_PARENT_URL,
@@ -2739,6 +2746,8 @@ def set_defaults():
         settings.SYSTEM_EMAIL = ""
     if 'SYSTEM_AUTHOR' not in settingkeys:
         settings.SYSTEM_AUTHOR = ""
+    if 'SYSTEM_AFFILIATION' not in settingkeys:
+        settings.SYSTEM_AFFILIATION = ""
     if 'SYSTEM_URL' not in settingkeys:
         settings.SYSTEM_URL = ""
     if 'SYSTEM_PARENT_URL' not in settingkeys:

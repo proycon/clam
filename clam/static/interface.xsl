@@ -16,7 +16,12 @@
 
         <div id="cover">
         <xsl:if test="/clam/coverurl != ''">
-            <img src="{/clam/coverurl}" alt="Cover Image"  />
+            <img src="{/clam/coverurl}" alt="Cover Image">
+                <xsl:attribute name="style">
+                <xsl:if test="contains(/clam/@interfaceoptions,'centercover')">display: block; margin-left: auto; margin-right: auto;</xsl:if>
+                <xsl:if test="contains(/clam/@interfaceoptions,'coverheight100')">height: 100px;</xsl:if>
+                </xsl:attribute>
+            </img>
         </xsl:if>
         </div>
 
@@ -208,6 +213,9 @@
                         by <strong><em><xsl:value-of select="/clam/author" /></em></strong>
                     </xsl:otherwise>
                 </xsl:choose>
+            </xsl:if>
+            <xsl:if test="/clam/affiliation != ''">
+                <br /><xsl:value-of select="/clam/affiliation" />
             </xsl:if>
         </p>
 
@@ -761,6 +769,12 @@
                              <tr>
                                  <th>Author(s):</th>
                                  <td><xsl:value-of select="/clam/author" /></td>
+                             </tr>
+                         </xsl:if>
+                         <xsl:if test="/clam/affiliation != ''">
+                             <tr>
+                                 <th>Affiliation:</th>
+                                 <td><xsl:value-of select="/clam/affiliation" /></td>
                              </tr>
                          </xsl:if>
                          <xsl:if test="/clam/url != ''">
