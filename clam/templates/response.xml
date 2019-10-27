@@ -17,15 +17,15 @@
     <description>{{ system_description }}</description>
     <version>{{ system_version }}</version>
     <author>{{ system_author }}</author>
-    <xsl:if test="system_affiliation != ''"><affiliation>{{ system_affiliation }}</affiliation></xsl:if>
-    <xsl:if test="system_email != ''"><email>{{ system_email }}</email></xsl:if>
-    <xsl:if test="system_url != ''"><url>{{ system_url }}</url></xsl:if>
-    <xsl:if test="system_parent_url != ''"><parenturl>{{ system_parent_url }}</parenturl></xsl:if>
-    <xsl:if test="system_login_url != ''"><loginurl>{{ system_login_url }}</loginurl></xsl:if>
-    <xsl:if test="system_logout_url != ''"><logouturl>{{ system_logout_url }}</logouturl></xsl:if>
-    <xsl:if test="system_register_url != ''"><registerurl>{{ system_register_url }}</registerurl></xsl:if>
-    <xsl:if test="system_cover_url != ''"><coverurl>{{ system_cover_url }}</coverurl></xsl:if>
-    <xsl:if test="system_license != ''"><license>{{ system_license }}</license></xsl:if>
+    {% if system_affiliation != '' %}<affiliation>{{ system_affiliation }}</affiliation>{% endif %}
+    {% if system_email != '' %}<email>{{ system_email }}</email>{% endif %}
+    {% if system_url != '' %}<url>{{ system_url }}</url>{% endif %}
+    {% if system_parent_url != '' %}<parenturl>{{ system_parent_url }}</parenturl>{% endif %}
+    {% if system_login_url != '' %}<loginurl>{{ system_login_url }}</loginurl>{% endif %}
+    {% if system_logout_url != '' %}<logouturl>{{ system_logout_url }}</logouturl>{% endif %}
+    {% if system_register_url != '' %}<registerurl>{{ system_register_url }}</registerurl>{% endif %}
+    {% if system_cover_url != '' %}<coverurl>{{ system_cover_url }}</coverurl>{% endif %}
+    {% if system_license != '' %}<license>{{ system_license }}</license>{% endif %}
 {############################################################################################}
 {% if customhtml %}
     <customhtml>
