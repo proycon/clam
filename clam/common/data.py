@@ -477,7 +477,7 @@ def processparameters(postdata, parameters, user=None):
 
     return errors, newparameters, commandlineparams
 
-class CLAMData(object):
+class CLAMData:
     """Instances of this class hold all the CLAM Data that is automatically extracted from CLAM
     XML responses. Its member variables are:
 
@@ -827,7 +827,7 @@ def profiler(profiles, projectpath,parameters,serviceid,servicename,serviceurl,p
 
 
 
-class Profile(object):
+class Profile:
     def __init__(self, *args):
         """Create a Profile. Arguments can be of class InputTemplate, OutputTemplate or ParameterCondition"""
 
@@ -1110,7 +1110,7 @@ class Program(dict):
         """Grabs one output file (raises a StopIteration exception if there is none). Shortcut for getoutputfiles()"""
         return next(self.getoutputfiles(loadmetadata,client,requiremetadata))
 
-class RawXMLProvenanceData(object):
+class RawXMLProvenanceData:
     def __init__(self, data):
         self.data = data
 
@@ -1120,7 +1120,7 @@ class RawXMLProvenanceData(object):
         else:
             return self.data
 
-class CLAMProvenanceData(object):
+class CLAMProvenanceData:
     """Holds provenance data"""
 
     def __init__(self, serviceid, servicename, serviceurl, outputtemplate_id, outputtemplate_label, inputfiles, parameters = None, timestamp = None):
@@ -1209,7 +1209,7 @@ class CLAMProvenanceData(object):
 
 
 
-class CLAMMetaData(object):
+class CLAMMetaData:
     """A simple hash structure to hold arbitrary metadata. This is the basis for format classes."""
     attributes = None #if None, all attributes are allowed! Otherwise it should be a dictionary with keys corresponding to the various attributes and a list of values corresponding to the *maximally* possible settings (include False as element if not setting the attribute is valid), if no list of values are defined, set True if the attrbute is required or False if not. If only one value is specified (either in a list or not), then it will be 'fixed' metadata
     allowcustomattributes = True
@@ -1432,7 +1432,7 @@ class CLAMMetaData(object):
         yield ("Content-Type", self.mimetype)
 
 
-class InputTemplate(object):
+class InputTemplate:
     """This class represents an input template. A slot with a certain format and function to which input files can be uploaded"""
 
     def __init__(self, template_id, formatclass, label, *args, **kwargs):
@@ -1491,7 +1491,7 @@ class InputTemplate(object):
         for arg in args:
             if isinstance(arg, clam.common.parameters.AbstractParameter):
                 self.parameters.append(arg)
-            elif isinstance(arg, clam.common.converters.AbstractConverter):
+            elif isinstance(arg, AbstractConverter):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
@@ -1695,7 +1695,7 @@ class InputTemplate(object):
         return success, metadata, parameters
 
 
-class AbstractMetaField(object): #for OutputTemplate only
+class AbstractMetaField: #for OutputTemplate only
     """This abstract class is the basis for derived classes representing metadata fields of particular types. A metadata field is in essence a (key, value) pair. These classes are used in output templates (described by the XML tag ``meta``). They are not used by ``CLAMMetaData``"""
 
     def __init__(self,key,value=None):
@@ -1793,7 +1793,7 @@ class Constraint:
                 test = lambda metadata: metadata[key] == value
             elif operator == "notequals":
                 test = lambda metadata: metadata[key] != value
-            elif operator == "exist":
+            elif operator == "exists":
                 test = lambda metadata: key in metadata if value else key not in metadata
             elif operator == "greaterthan":
                 test = lambda metadata: metadata[key] > value
@@ -1809,6 +1809,8 @@ class Constraint:
                 test = lambda metadata: value in [ x.strip() for x in metadata[key].split(',') ]
             elif operator == "inspacelist":
                 test = lambda metadata: value in [ x.strip() for x in metadata[key].split(' ') ]
+            else:
+                raise Exception("Unknown operator: " + operator)
             try:
                 if test(metadata):
                     if self.constrainttype == 'require':
@@ -1841,14 +1843,15 @@ class Constraint:
         kwargs = {}
         constrainttype = node.attrib['type']
         for subnode in node:
-            value = node.attrib['value']
-            if value == 'True':
-                value = True
-            elif value == 'False':
-                value = False
-            elif value.isnumeric():
-                value = int(value)
-            kwargs[node.attrib['key'] + '_' +  node.attrib['operator']] = value
+            if subnode.tag.lower() == "test":
+                value = subnode.attrib['value']
+                if value == 'True':
+                    value = True
+                elif value == 'False':
+                    value = False
+                elif value.isnumeric():
+                    value = int(value)
+                kwargs[subnode.attrib['key'] + '_' +  subnode.attrib['operator']] = value
 
         return Constraint(constrainttype, **kwargs)
 
@@ -1899,7 +1902,7 @@ class ParameterMetaField(AbstractMetaField):
         else:
             return False
 
-class OutputTemplate(object):
+class OutputTemplate:
     def __init__(self, template_id, formatclass, label, *args, **kwargs):
         assert issubclass(formatclass, CLAMMetaData)
         assert '/' not in template_id and '.' not in template_id
@@ -1915,7 +1918,7 @@ class OutputTemplate(object):
         for arg in args:
             if isinstance(arg, AbstractMetaField) or isinstance(arg,ParameterCondition):
                 self.metafields.append(arg)
-            elif isinstance(arg, clam.common.converters.AbstractConverter):
+            elif isinstance(arg, AbstractConverter):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
@@ -2185,7 +2188,7 @@ class OutputTemplate(object):
 
 
 
-class ParameterCondition(object):
+class ParameterCondition:
     def __init__(self, **kwargs):
         if 'then' not in kwargs:
             raise Exception("No 'then=' specified!")
@@ -2336,7 +2339,7 @@ class ParameterCondition(object):
             raise Exception("No condition found in ParameterCondition!")
         return ParameterCondition(**kwargs)
 
-class InputSource(object):
+class InputSource:
     def __init__(self, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
@@ -2397,7 +2400,7 @@ class InputSource(object):
             raise Exception("Input source has no input template")
 
 
-class Action(object):
+class Action:
     def __init__(self, *args, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
@@ -2520,7 +2523,7 @@ class Action(object):
             raise Exception("No condition found in ParameterCondition!")
         return Action(*args, **kwargs)
 
-class Forwarder(object):
+class Forwarder:
     def __init__(self, id, name, url, description="", type='zip'):
         self.id = id
         self.name = name
@@ -2768,6 +2771,31 @@ def loadconfigfile(configfile, settingsmodule):
         #replace variables
         setattr(settingsmodule,key.upper(), resolveconfigvariables(value))
     return True
+
+class AbstractConverter:
+    acceptforinput = [] #List of formats; accept the following formats as target for conversion of input
+    acceptforoutput = [] #List of formats; accept the following formats as source for conversion for output
+
+    label = "(ERROR: label not overriden from AbstractConverter!)" #Override this with a sensible name
+
+    def __init__(self, id, **kwargs):
+        if 'label' in kwargs:
+            self.id = id
+            self.label = kwargs['label']
+
+    def convertforinput(self,filepath, metadata):
+        """Convert from target format into one of the source formats. Relevant if converters are used in InputTemplates. Metadata already is metadata for the to-be-generated file. 'filepath' is both the source and the target file, the source file will be erased and overwritten with the conversion result!"""
+        assert isinstance(metadata, CLAMMetaData) #metadata of the destination file (file to be generated here)
+        if not metadata.__class__ in self.acceptforinput:
+            raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + metadata.__class__.__name__ + "!")
+        return False #Return True on success, False on failure
+
+    def convertforoutput(self,outputfile):
+        """Convert from one of the source formats into target format. Relevant if converters are used in OutputTemplates. Sourcefile is a CLAMOutputFile instance."""
+        assert isinstance(outputfile, CLAMOutputFile) #metadata of the destination file (file to be generated here)
+        if not outputfile.metadata.__class__ in self.acceptforoutput:
+            raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + outputfile.metadata.__class__.__name__ + "!")
+        return [] #Return converted contents (must be an iterable) or raise an exception on error
 
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position
