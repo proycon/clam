@@ -1350,7 +1350,7 @@ class CLAMMetaData(object):
 
     @classmethod
     def formatxml(Self, indent = ""):
-        """Render an XML representation of the format class""" #(independent of web.py for support in CLAM API)
+        """Render an XML representation of the format class"""
         return "<format id=\"" + Self.__name__ + "\" name=\"" + Self.name + "\" mimetype=\"" + Self.mimetype + "\" />"
 
     def save(self, filename):
