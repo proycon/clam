@@ -2104,6 +2104,8 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         file.metadata = metadata
                         #Add inputtemplate ID to metadata
                         metadata.inputtemplate = inputtemplate.id
+                    elif 'validation_error' in metadata:
+                        metadataerror = metadata['validation_error']
                     else:
                         metadataerror = "Undefined error"
                 except ValueError as msg:
@@ -2118,6 +2120,11 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 file.metadata = metadata
                 metadata.inputtemplate = inputtemplate.id
 
+            if 'validation_error' in metadata:
+                printdebug('(Metadata could not be generated, ' + str(metadataerror) + ')')
+                #output += "<metadataerror />" #This usually indicates an error in service configuration!
+                fatalerror = "<error type=\"metadataerror\">Validation error for " + filename + ": " + str(metadataerror)  + "</error>"
+                jsonoutput['error'] = "Metadata could not be generated! " + str(metadataerror)
             if metadataerror:
                 printdebug('(Metadata could not be generated, ' + str(metadataerror) + ',  this usually indicated an error in service configuration)')
                 #output += "<metadataerror />" #This usually indicates an error in service configuration!

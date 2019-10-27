@@ -136,6 +136,16 @@ if [ $? -ne 0 ]; then
    echo "</-------------------- actiontest.server.log --------------------------------->" >&2
 fi
 
+echo "Running constraint tests:" >&2
+python constrainttest.py
+if [ $? -ne 0 ]; then
+   echo "ERROR: constraint test failed!!" >&2
+   GOOD=0
+   echo "<--------------------- constrainttest.server.log --------------------------------->" >&2
+   cat constrainttest.server.log >&2
+   echo "</-------------------- constrainttest.server.log --------------------------------->" >&2
+fi
+
 echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 sleep 2
