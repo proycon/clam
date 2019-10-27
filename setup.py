@@ -39,10 +39,12 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Topic :: Text Processing :: Linguistic",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3", #3.0, 3.1 and 3.2 are not supported by flask
-        "Programming Language :: Python :: 3.4", #3.0, 3.1 and 3.2 are not supported by flask
-        "Programming Language :: Python :: 3.5", #3.0, 3.1 and 3.2 are not supported by flask
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Operating System :: POSIX",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
