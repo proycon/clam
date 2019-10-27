@@ -1250,7 +1250,6 @@ class CLAMMetaData(object):
         self.inputtemplate = None
 
         self.data = {}
-        self.loadinlinemetadata()
         for key, value in kwargs.items():
             if key == 'provenance':
                 assert isinstance(value, CLAMProvenanceData)
@@ -1276,6 +1275,8 @@ class CLAMMetaData(object):
                 elif key in self:
                     if not attribute.validate(self[key]):
                         raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value that violates the format's attributes") #pylint: disable=unsubscriptable-object
+
+        self.validate()
 
     def __getitem__(self, key):
         """Retrieve a metadata field"""
@@ -1342,18 +1343,11 @@ class CLAMMetaData(object):
             f.write(self.xml())
 
     def validate(self):
-        """Validate the metadata"""
-        #Should be overridden by subclasses
+        """Validate the metadata. If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file.  NOTE: This method is not implemented in the base class, but should be overridden by subclasses"""
         return True
 
-    def loadinlinemetadata(self):
-        """Not implemented"""
-        #Read inline metadata, can be overridden by subclasses
-        pass
-
-    def saveinlinemetadata(self):
-        """Not implemented"""
-        #Save inline metadata, can be overridden by subclasses
+    def save_injectmetadata(self):
+        """If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file. NOTE: Not implementedi in base clas: can be overriden by subclasses"""
         pass
 
     @staticmethod
