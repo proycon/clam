@@ -15,8 +15,6 @@
 #
 ###############################################################
 
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 import sys
 import os
 import datetime
@@ -72,8 +70,6 @@ def main():
 
     cmd = sys.argv[3+offset]
     cmd = clam.common.data.unescapeshelloperators(cmd) #shell operators like pipes and redirects were passed in an escaped form
-    if sys.version[0] == '2' and isinstance(cmd,str):
-        cmd = unicode(cmd,'utf-8') #pylint: disable=undefined-variable
     for arg in sys.argv[4+offset:]:
         arg_u = clam.common.data.unescapeshelloperators(arg)
         if arg_u != arg:
@@ -126,8 +122,6 @@ def main():
     except (UnicodeDecodeError, UnicodeError, UnicodeEncodeError):
         print("[CLAM Dispatcher] Running " + repr(cmd), file=sys.stderr) #unicode-issues on Python 2
 
-    if sys.version[0] == '2' and isinstance(cmd,unicode): #pylint: disable=undefined-variable
-        cmd = cmd.encode('utf-8')
     if projectdir:
         process = subprocess.Popen(cmd,cwd=projectdir, shell=True, stderr=sys.stderr)
     else:

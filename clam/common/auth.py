@@ -9,7 +9,6 @@ This module provides Basic and Digest HTTP authentication for Flask routes. Adap
 :license:   BSD, see LICENSE for more details.
 """
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import os
@@ -62,7 +61,7 @@ class HTTPAuth(object):
         def decorated(*args, **kwargs):
             flask.request.data #clear receive buffer of pending data
             res = f(*args, **kwargs)
-            if (sys.version >= '3' and isinstance(res, str)) or (sys.version < '3' and isinstance(res,unicode)): #pylint: disable=undefined-variable
+            if isinstance(res, str): #pylint: disable=undefined-variable
                 res = flask.make_response(res)
                 res.status_code = 401
             if 'WWW-Authenticate' not in res.headers.keys() and hasattr(self,'authenticate_header'):

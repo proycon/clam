@@ -15,8 +15,6 @@
 ###############################################################
 
 
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 import sys
 import os
 import io
@@ -54,10 +52,7 @@ def main():
         print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended")
         yn = None
         while yn.strip().lower() not in ('y','yes','n','no'):
-            if sys.version <= '3':
-                yn = raw_input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
-            else:
-                yn = input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
+            yn = input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
             createvenv = yn.strip().lower() in ("y","yes")
 
 

@@ -13,7 +13,6 @@
 
 #pylint: disable=redefined-builtin
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import shutil
 import io

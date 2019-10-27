@@ -5,7 +5,6 @@
 #   OAUTH_AUTH_URL = clam.common.oauth.GOOGLE_AUTH_URL
 #   etc...
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import json
@@ -37,10 +36,7 @@ GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
 def GITHUB_USERNAME_FUNCTION(oauthsession):
     r = oauthsession.get('https://api.github.com/user')
-    if sys.version >= '3':
-        rj = json.loads(str(r.content,'utf-8'))
-    else:
-        rj = json.loads(r.content)
+    rj = json.loads(str(r.content,'utf-8'))
     if not 'login' in rj:
         raise OAuthError("Login not found in json reply from github: " + repr(rj))
     return rj['login']
@@ -66,17 +62,13 @@ def encrypt(encryptionsecret, oauth_access_token, ip):
         encryptionsecret = "SECRET"
         oauth_access_token = "SECRET"
         raise OAuthError("Error in access token encryption")
-    if sys.version < '3':
-        return encoded
-    else:
-        return str(encoded,'ascii')
+    return str(encoded,'ascii')
 
 def decrypt(encryptionsecret, oauth_access_token):
     c = AES.new(encryptionsecret, AES.MODE_ECB)
     clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
     try:
-        if sys.version >= '3':
-            clear = str(clear,'ascii')
+        clear = str(clear,'ascii')
         oauth_access_token, ip = clear.strip().split(':')
     except:
         #prevent leaks in debug mode

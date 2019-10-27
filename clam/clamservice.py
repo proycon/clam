@@ -16,8 +16,6 @@
 
 #pylint: disable=redefined-builtin,trailing-whitespace,superfluous-parens,bad-classmethod-argument,wrong-import-order,wrong-import-position,ungrouped-imports
 
-from __future__ import print_function, unicode_literals, division, absolute_import #for python 2
-
 import shutil
 import os
 import io
@@ -49,10 +47,7 @@ from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlo
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
 
-if sys.version < '3':
-    from urllib import urlencode
-else:
-    from urllib.parse import urlencode
+from urllib.parse import urlencode
 
 try:
     from requests_oauthlib import OAuth2Session
@@ -89,9 +84,6 @@ setlog(sys.stderr)
 HOST = PORT = None
 
 
-if sys.version < '3':
-    class FileNotFoundError(IOError):
-        pass
 
 def error(msg):
     if __name__ == '__main__':
@@ -118,7 +110,7 @@ def userdb_lookup_mysql(user, **authsettings):
     if accesslist and not (user in accesslist):
         printdebug("User not in accesslist")
         raise KeyError
-    if sys.version >= '3' and isinstance(passwd,bytes): passwd = str(passwd,'utf-8')
+    if isinstance(passwd,bytes): passwd = str(passwd,'utf-8')
     db = MySQLdb.connect(host=host,user=mysqluser,passwd=passwd,db=database, charset='utf8', use_unicode=True)
     cursor = db.cursor()
     #simple protection against sql injection
@@ -376,11 +368,7 @@ def getprojects(user):
                 totalsize += projectsize
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
             with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
-                if sys.version < '3':
-                    data = json.dumps({'totalsize': totalsize, 'projects': projects}, ensure_ascii=False)
-                    f.write(data)
-                else:
-                    json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
+                json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
     return projects, round(totalsize)
 
 def mainentry(credentials = None):
@@ -1127,9 +1115,7 @@ class Project:
         #for fineuploader, not oauth
         h = hashlib.md5()
         clear = user+ ':' + settings.PRIVATEACCESSTOKEN + ':' + project
-        if sys.version < '3' and isinstance(clear,unicode): #pylint: disable=undefined-variable
-            h.update(clear.encode('utf-8'))
-        if sys.version >= '3' and isinstance(clear,str):
+        if isinstance(clear,str):
             h.update(clear.encode('utf-8'))
         else:
             h.update(clear)
@@ -1991,12 +1977,8 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 return withheaders(flask.make_response("Unable to extract archive",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             out, _ = process.communicate() #waits for process to end
 
-            if sys.version < '3':
-                if isinstance(out, str):
-                    out = unicode(out,'utf-8') #pylint: disable=undefined-variable
-            else:
-                if isinstance(out, bytes):
-                    out = str(out,'utf-8')
+            if isinstance(out, bytes):
+                out = str(out,'utf-8')
 
             #Read filename results
 
@@ -2328,10 +2310,7 @@ class ActionHandler(object):
                 return withheaders(flask.make_response(str(e),403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             for flag, value, paramid in collectedparams:
-                if sys.version[0] == '2':
-                    if isinstance(value, str):
-                        value = unicode(value,'utf-8') #pylint: disable=undefined-variable
-                elif not isinstance(value, str):
+                if not isinstance(value, str):
                     value = str(value)
                 if value:
                     try:
@@ -2389,25 +2368,15 @@ class ActionHandler(object):
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
             printlog("Starting dispatcher " +  settings.DISPATCHER + " for action " + actionid + " with " + action.command + ": " + repr(cmd) + " ..." )
-            if sys.version[0] == '2' and isinstance(cmd,unicode): #pylint: disable=undefined-variable
-                cmd = cmd.encode('utf-8')
             process = subprocess.Popen(cmd,cwd=passcwd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if process:
                 printlog("Waiting for dispatcher (pid " + str(process.pid) + ") to finish" )
                 stdoutdata, stderrdata = process.communicate()
-                if sys.version >= '3':
-                    stdoutdata = str(stdoutdata,'utf-8')
-                    stderrdata = str(stderrdata,'utf-8')
-                else:
-                    stdoutdata = unicode(stdoutdata,'utf-8') #pylint: disable=undefined-variable
-                    stderrdata = unicode(stderrdata,'utf-8') #pylint: disable=undefined-variable
+                stdoutdata = str(stdoutdata,'utf-8')
+                stderrdata = str(stderrdata,'utf-8')
                 if DEBUG:
-                    if sys.version >= '3':
-                        printdebug("    action stdout:\n" + stdoutdata)
-                        printdebug("    action stderr:\n" + stderrdata)
-                    else:
-                        printdebug("    action stdout:\n" + stdoutdata)
-                        printdebug("    action stderr:\n" + stderrdata)
+                    printdebug("    action stdout:\n" + stdoutdata)
+                    printdebug("    action stderr:\n" + stderrdata)
                 printlog("Dispatcher finished with code " + str(process.returncode) )
                 if tmpdir:
                     shutil.rmtree(tmpdir)
@@ -2431,11 +2400,7 @@ class ActionHandler(object):
                 else:
                     return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             if not isinstance(r, (flask.Response, werkzeug.wrappers.Response)):
-                if sys.version >= '3':
-                    return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
-                else:
-                    if isinstance(r, int) or isinstance(r,float): r = str(r)
-                    return withheaders(flask.make_response(unicode(r,'utf-8')), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN}) #pylint: disable=undefined-variable
+                return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
             else:
                 return r
         else:
@@ -2548,19 +2513,16 @@ class CLAMService(object):
                 if UWSGI:
                     if 'virtualenv' in uwsgi.opt and uwsgi.opt['virtualenv']:
                         base = uwsgi.opt['virtualenv']
-                        if sys.version >= '3' and isinstance(base, bytes):
+                        if isinstance(base, bytes):
                             base = str(base, 'utf-8')
                         interpreter = base + '/bin/python'
                     elif 'home' in uwsgi.opt and uwsgi.opt['home']:
                         base = uwsgi.opt['home']
-                        if sys.version >= '3' and isinstance(base, bytes):
+                        if isinstance(base, bytes):
                             base = str(base, 'utf-8')
                         interpreter = uwsgi.opt['home'] + '/bin/python'
                     else:
-                        if sys.version > '3':
-                            interpreter = 'python3'
-                        else:
-                            interpreter = 'python'
+                        interpreter = 'python3'
                 else:
                     interpreter = sys.executable
                 settings.COMMAND = interpreter + " " + settings.COMMAND
@@ -2730,13 +2692,6 @@ def set_defaults():
     for s in ['SYSTEM_ID','SYSTEM_DESCRIPTION','SYSTEM_NAME','ROOT','COMMAND','PROFILES']:
         if not s in settingkeys:
             error("ERROR: Service configuration incomplete, missing setting: " + s)
-
-    if sys.version < '3':
-        if isinstance(settings.SYSTEM_DESCRIPTION,str):
-            settings.SYSTEM_DESCRIPTION = unicode(settings.SYSTEM_DESCRIPTION,'utf-8') #pylint: disable=undefined-variable
-        if isinstance(settings.SYSTEM_NAME,str):
-            settings.SYSTEM_NAME = unicode(settings.SYSTEM_NAME,'utf-8') #pylint: disable=undefined-variable
-
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash

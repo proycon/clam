@@ -16,9 +16,6 @@
 
 #Consult the CLAM manual for extensive documentation
 
-#If we run on Python 2.7, behave as much as Python 3 as possible
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 from clam.common.parameters import *
 from clam.common.formats import *
 from clam.common.converters import *

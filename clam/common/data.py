@@ -16,7 +16,6 @@
 
 #pylint: disable=wrong-import-order
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import requests
@@ -29,10 +28,7 @@ import yaml
 import itertools
 from copy import copy
 from lxml import etree as ElementTree
-if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error
-else:
-    from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
+from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
 import clam.common.parameters
 import clam.common.status
 import clam.common.util
@@ -124,10 +120,6 @@ class TimeOut(Exception):
     def __str__(self):
         return "Connection with server timed-out"
 
-if sys.version < '3':
-    #Python 2 used IOError instead, create a subclass
-    class FileNotFoundError(IOError): #pylint: disable=redefined-builtin
-        pass
 
 def processhttpcode(code, allowcodes=None):
     """Return the success code or raises the appropriate exception when the code repesents an HTTP error code"""
@@ -150,13 +142,9 @@ def processhttpcode(code, allowcodes=None):
 
 
 def parsexmlstring(node):
-    if sys.version < '3' and isinstance(node,unicode): #pylint: disable=undefined-variable
-        return ElementTree.parse(StringIO(node.encode('utf-8'))).getroot()
-    elif sys.version >= '3' and isinstance(node,str):
+    if isinstance(node,str):
         return ElementTree.parse(BytesIO(node.encode('utf-8'))).getroot()
-    elif sys.version < '2' and isinstance(node,str):
-        return ElementTree.parse(StringIO(node)).getroot()
-    elif sys.version >= '3' and isinstance(node,bytes):
+    elif isinstance(node,bytes):
         return ElementTree.parse(BytesIO(node)).getroot()
     else:
         raise Exception("Expected XML string, don't know how to parse type " + str(type(node)))
@@ -293,9 +281,7 @@ class CLAMFile:
             if self.metadata and 'encoding' in self.metadata:
                 for line in response.iter_lines():
                     #\n is stripped, re-add (should also work fine on binary files)
-                    if sys.version[0] < '3' and not isinstance(line,unicode): #pylint: disable=undefined-variable
-                        yield unicode(line, self.metadata['encoding']) + "\n" #pylint: disable=undefined-variable
-                    elif sys.version[0] >= '3' and not isinstance(line,str):
+                    if not isinstance(line,str):
                         yield str(line, self.metadata['encoding']) + "\n"
                     else:
                         yield line + b'\n'
@@ -343,10 +329,7 @@ class CLAMFile:
             encoding = self.metadata['encoding']
         else:
             encoding = 'utf-8'
-        if sys.version < '3':
-            return "\n".join( unicode(line, 'utf-8') if isinstance(line, str) else line for line in lines)
-        else:
-            return "\n".join( str(line, 'utf-8') if isinstance(line, bytes) else line for line in lines)
+        return "\n".join( str(line, 'utf-8') if isinstance(line, bytes) else line for line in lines)
 
 
     def copy(self, target, timeout=500):
@@ -359,9 +342,7 @@ class CLAMFile:
         else:
             with io.open(target,'wb') as f:
                 for line in self:
-                    if sys.version < '3' and isinstance(line,unicode): #pylint: disable=undefined-variable
-                        f.write(line.encode('utf-8'))
-                    elif sys.version >= '3' and isinstance(line,str):
+                    if isinstance(line,str):
                         f.write(line.encode('utf-8'))
                     else:
                         f.write(line)
@@ -1620,7 +1601,7 @@ class InputTemplate:
         return json.dumps(d)
 
     def __eq__(self, other):
-        if isinstance(other, str) or (sys.version < '3' and isinstance(other,unicode)): #pylint: disable=undefined-variable
+        if isinstance(other, str): #pylint: disable=undefined-variable
             return self.id == other
         else: #object
             return other.id == self.id
@@ -2625,8 +2606,6 @@ def escape(s, quote):
 
 def shellsafe(s, quote='', doescape=True):
     """Returns the value string, wrapped in the specified quotes (if not empty), but checks and raises an Exception if the string is at risk of causing code injection"""
-    if sys.version[0] == '2' and not isinstance(s,unicode): #pylint: disable=undefined-variable
-        s = unicode(s,'utf-8') #pylint: disable=undefined-variable
     if len(s) > 1024:
         raise ValueError("Variable value rejected for security reasons: too long")
     if quote:
@@ -2671,18 +2650,11 @@ def escapeshelloperators(s):
     return o
 
 def unescapeshelloperators(s):
-    if sys.version < '3':
-        s = s.replace(b'%PIPE%',b'|')
-        s = s.replace(b'%OUT%',b'>')
-        s = s.replace(b'%AMP%',b'&')
-        s = s.replace(b'%EXCL%',b'!')
-        s = s.replace(b'%IN%',b'<')
-    else:
-        s = s.replace('%PIPE%','|')
-        s = s.replace('%OUT%','>')
-        s = s.replace('%AMP%','&')
-        s = s.replace('%EXCL%','!')
-        s = s.replace('%IN%','<')
+    s = s.replace('%PIPE%','|')
+    s = s.replace('%OUT%','>')
+    s = s.replace('%AMP%','&')
+    s = s.replace('%EXCL%','!')
+    s = s.replace('%IN%','<')
     return s
 
 def loadconfig(callername, required=True):

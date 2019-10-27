@@ -11,8 +11,6 @@
 #
 ###############################################################
 
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 
 from clam.common.parameters import StringParameter, StaticParameter, ChoiceParameter
 from clam.common.data import CLAMMetaData  #import CLAMMetaData

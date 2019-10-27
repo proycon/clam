@@ -26,9 +26,6 @@
 #passing all parameters on the command line.
 
 
-#If we run on Python 2.7, behave as much as Python 3 as possible
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 #import some general python modules:
 import sys
 

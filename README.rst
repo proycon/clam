@@ -109,9 +109,6 @@ environment:
 
   (clamenv)$ pip3 install clam
 
-It is also possible to use Python 2.7 instead of Python 3, adapt the commands
-as necessary.
-
 CLAM also has some optional dependencies. For MySQL support, install
 ``mysqlclient`` using pip. For `FoLiA <https://proycon.github.io/folia>`_
 support, install ``FoLiA-Tools`` using pip.

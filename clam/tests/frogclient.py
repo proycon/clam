@@ -5,12 +5,11 @@
 #       http://ilk.uvt.nl/~mvgompel
 #       Induction for Linguistic Knowledge Research Group
 #       Universiteit van Tilburg
-#       
+#
 #       Licensed under GPLv3
 #
 ###############################################################
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 import os
@@ -61,21 +60,21 @@ for arg in sys.argv[1:]:
 
 if not url or not files:
     print >>sys.stderr, "Syntax: frogclient.py [OPTIONS] URL TEXTFILES"
-    sys.exit(1)    
+    sys.exit(1)
 
 
 print("Connecting to server...")
 
-        
+
 #create client, connect to server, url is the full URL to the base of your webservice.
 clamclient = CLAMClient(url)
 
 print("Creating project...")
-   
+
 #this is the name of our project, it consists in part of randomly generated bits (so multiple clients don't use the same project and can run similtaneously)
 
 #CLAM works with 'projects', for automated clients it usually suffices to create a temporary project,
-#which we explicitly delete when we're all done. Each client obviously needs its own project, so we 
+#which we explicitly delete when we're all done. Each client obviously needs its own project, so we
 #create a project with a random name:
 project = "frogclient" + str(random.getrandbits(64))
 

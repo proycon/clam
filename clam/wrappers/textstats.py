@@ -20,7 +20,6 @@
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 #import some general python modules:
 import sys

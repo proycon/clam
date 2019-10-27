@@ -13,14 +13,10 @@
 
 #pylint: disable=redefined-builtin
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 import sys
 from lxml import etree as ElementTree
-if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error
-else:
-    from io import StringIO #pylint: disable=wrong-import-order
+from io import StringIO #pylint: disable=wrong-import-order
 from clam.common.util import xmlescape
 
 class AbstractParameter(object):
@@ -140,15 +136,12 @@ class AbstractParameter(object):
                     xml += ' ' + key + '="' + str(int(v))+ '"'
                 elif isinstance(v, list):
                     xml += ' ' + key + '="'+xmlescape(",".join(v))+ '"'
-                elif isinstance(v, str)  or ( sys.version < '3' and isinstance(v, unicode)): #pylint: disable=undefined-variable
+                elif isinstance(v, str): #pylint: disable=undefined-variable
                     xml += ' ' + key + '="'+xmlescape(v)+ '"'
                 else:
                     xml += ' ' + key + '="'+xmlescape(str(v))+ '"'
         if self.hasvalue:
-            if sys.version < '3':
-                xml += ' value="'+xmlescape(unicode(self.value)) + '"' #pylint: disable=undefined-variable
-            else:
-                xml += ' value="'+xmlescape(str(self.value)) + '"'
+            xml += ' value="'+xmlescape(str(self.value)) + '"'
         if self.error:
             xml += ' error="'+xmlescape(self.error) + '"'
         xml += " />"
@@ -156,18 +149,9 @@ class AbstractParameter(object):
 
     def __str__(self):
         if self.value:
-            if sys.version < '3' and isinstance(self.value, unicode): #pylint: disable=undefined-variable
-                return self.value.encode('utf-8')
-            else:
-                return str(self.value)
+            return str(self.value)
         else:
             return ""
-
-    def __unicode__(self): #for python 2 only
-        if self.value:
-            return self.value
-        else:
-            return u""
 
     def __repr__(self):
         if self.error:
@@ -279,7 +263,7 @@ class BooleanParameter(AbstractParameter):
 
     def set(self, value = True):
         """Set the boolean parameter"""
-        value = value in (True,1) or ( (isinstance(value, str) or (sys.version < '3' and isinstance(value, unicode))) and (value.lower() in ("1","yes","true","enabled"))) #pylint: disable=undefined-variable
+        value = value in (True,1) or (isinstance(value, str) and (value.lower() in ("1","yes","true","enabled"))) #pylint: disable=undefined-variable
         return super(BooleanParameter,self).set(value)
 
     def unset(self):

@@ -12,8 +12,8 @@ dependencies. We recommend to use a virtual environment (``virtualenv``) if you
 want to install CLAM locally as a user, if you insist to install globally,
 prepend the following commands with ``sudo``:
 
-CLAM is written for Python 3, which we will use in this documentation. It also still offers backward compatibility with
-Python 2.7.
+CLAM is written for Python 3, which we will use in this documentation. Since version 3.0, backward compatibility with
+Python 2.7 has been dropped.
 
 We recommend you first create a Python Virtual Environment.
 To create a virtual environment, which we name *clamenv* here (but you

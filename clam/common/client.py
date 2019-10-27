@@ -16,19 +16,13 @@
 
 #pylint: disable=wrong-import-order
 
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 import os.path
 import sys
 import requests
 import certifi
 from requests_toolbelt import MultipartEncoder #pylint: disable=import-error
 from lxml import etree as ElementTree
-if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error,unused-import
-    from io import IOBase
-else:
-    from io import StringIO, IOBase, BytesIO  #pylint: disable=import-error,unused-import
+from io import StringIO, IOBase, BytesIO  #pylint: disable=import-error,unused-import
 
 import clam.common.status
 import clam.common.parameters
@@ -323,7 +317,7 @@ class CLAMClient:
             client.downloadarchive("myproject","allresults.zip","zip")
 
         """
-        if isinstance(targetfile,str) or (sys.version < '3' and isinstance(targetfile,unicode)): #pylint: disable=undefined-variable
+        if isinstance(targetfile,str): #pylint: disable=undefined-variable
             targetfile = open(targetfile,'wb')
         r = requests.get(self.url + project + '/output/' + archiveformat,**self.initrequest())
         CHUNK = 16 * 1024
@@ -401,7 +395,7 @@ class CLAMClient:
             client.addinputfile("myproject", "someinputtemplate", "/path/to/local/file", parameter1="blah", parameterX=3.5)
 
         """
-        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
+        if isinstance( inputtemplate, str): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
         elif not isinstance(inputtemplate, clam.common.data.InputTemplate):
@@ -492,7 +486,7 @@ class CLAMClient:
             client.addinput("myproject", "someinputtemplate", "This is a test.", filename="test.txt", parameter1="blah", parameterX=3.5))
 
         """
-        if isinstance( inputtemplate, str) or (sys.version < '3' and isinstance( inputtemplate, unicode)): #pylint: disable=undefined-variable
+        if isinstance( inputtemplate, str): #pylint: disable=undefined-variable
             data = self.get(project) #causes an extra query to server
             inputtemplate = data.inputtemplate(inputtemplate)
         elif not isinstance(inputtemplate, clam.common.data.InputTemplate):

@@ -10,7 +10,6 @@
 #
 ###############################################################
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 #pylint: disable=wrong-import-order
 
@@ -20,10 +19,7 @@ import os.path
 import random
 import requests
 from lxml import etree
-if sys.version < '3':
-    from StringIO import StringIO #pylint: disable=import-error
-else:
-    from io import StringIO,  BytesIO
+from io import StringIO,  BytesIO
 
 try:
     import foliatools
@@ -36,7 +32,7 @@ except ImportError:
 
 from clam.common.util import withheaders
 
-class AbstractViewer(object):
+class AbstractViewer:
 
     id = 'abstractviewer' #you may insert another meaningful ID here, no spaces or special chars!
     name = "Unspecified Viewer"
@@ -136,15 +132,10 @@ class XSLTViewer(AbstractViewer):
 
         lines = file.readlines()
         if lines:
-            if sys.version < '3' and isinstance(lines[0], unicode): #pylint: disable=undefined-variable
-                xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
+            if isinstance(lines[0],str):
+                xml_doc = etree.parse(BytesIO("".join( ( x.encode('utf-8') for x in lines) ) ))
             else:
-                if sys.version > '3' and isinstance(lines[0],str):
-                    xml_doc = etree.parse(BytesIO("".join( ( x.encode('utf-8') for x in lines) ) ))
-                elif sys.version < '3' and isinstance(lines[0], str):
-                    xml_doc = etree.parse(StringIO(b"".join(lines) ))
-                else:
-                    xml_doc = etree.parse(BytesIO(b"".join(lines) ))
+                xml_doc = etree.parse(BytesIO(b"".join(lines) ))
         else:
             return "(no data)"
 
@@ -163,15 +154,10 @@ class FoLiAViewer(AbstractViewer):
 
         lines = file.readlines()
         if lines:
-            if sys.version < '3' and isinstance(lines[0], unicode): #pylint: disable=undefined-variable
-                xml_doc = etree.parse(StringIO("".join( ( x.encode('utf-8') for x in lines) ) ))
+            if isinstance(lines[0],str):
+                xml_doc = etree.parse(BytesIO(b"".join( ( x.encode('utf-8') for x in lines) ) ))
             else:
-                if sys.version > '3' and isinstance(lines[0],str):
-                    xml_doc = etree.parse(BytesIO(b"".join( ( x.encode('utf-8') for x in lines) ) ))
-                elif sys.version < '3' and isinstance(lines[0], str):
-                    xml_doc = etree.parse(StringIO(b"".join(lines) ))
-                else:
-                    xml_doc = etree.parse(BytesIO(b"".join(lines) ))
+                xml_doc = etree.parse(BytesIO(b"".join(lines) ))
         else:
             return "(no data)"
 
@@ -187,10 +173,7 @@ class SoNaRViewer(AbstractViewer):
         xslt_doc = etree.parse(xslfile)
         transform = etree.XSLT(xslt_doc)
 
-        if sys.version < '3':
-            xml_doc = etree.parse(StringIO("".join(file.readlines()).encode('utf-8')))
-        else:
-            xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
+        xml_doc = etree.parse(BytesIO("".join(file.readlines()).encode('utf-8')))
 
         return str(transform(xml_doc))
 

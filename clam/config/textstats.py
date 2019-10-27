@@ -14,7 +14,6 @@
 #
 ###############################################################
 
-from __future__ import print_function, unicode_literals, division, absolute_import
 
 from clam.common.parameters import *
 from clam.common.formats import *

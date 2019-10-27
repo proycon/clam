@@ -14,21 +14,14 @@
 
 #pylint: disable=global-statement
 
-from __future__ import print_function, unicode_literals, division, absolute_import
-
 import glob
 import os
 import sys
 import datetime
 import io
 
-if sys.version < '3':
-    from codecs import getwriter
-    DEBUGLOG = getwriter('utf-8')(sys.stderr)
-    LOG = getwriter('utf-8')(sys.stdout)
-else:
-    DEBUGLOG = sys.stderr
-    LOG = sys.stdout
+DEBUGLOG = sys.stderr
+LOG = sys.stdout
 
 DEBUG = False
 
