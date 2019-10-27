@@ -265,6 +265,9 @@ RelaxNG schema for CLAM XML
 		                                    <text />
 		                                </element>
 		                            </zeroOrMore>
+		                            <zeroOrMore>
+                                        <ref name="constraint" />
+                                    </zeroOrMore>
 		                        </element>
 		                    </zeroOrMore>
 		                </element>
@@ -316,6 +319,7 @@ RelaxNG schema for CLAM XML
 										<choice>
 											<ref name="parametercondition" />
 											<ref name="meta" />
+                                            <ref name="constraint" />
 										</choice>
 									</zeroOrMore>
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
@@ -588,6 +592,30 @@ RelaxNG schema for CLAM XML
 			</element>
 		</optional>
 	</element>
+</define>
+
+
+<define name="constraint">
+    <element name="constraint">
+        <a:documentation>Defines a constraint on the input or output template in the form of one or more tests, the constraint passes if any of the tests pass.</a:documentation>
+        <attribute name="type">
+            <a:documentation>type type of the constraint, can be "require" or "forbid".</a:documentation>
+        </attribute>
+        <oneOrMore>
+            <element name="test">
+                <a:documentation>One of the tests that make up this constraint, is checked against the metadata.</a:documentation>
+                <attribute name="key">
+                    <a:documentation>The metadata field to test</a:documentation>
+                </attribute>
+                <attribute name="operator">
+                    <a:documentation>The operator for testing, can be "equals","notequals","greaterthan","greaterequalthan","lessthan","lessequalthan","contains","incommalist","inspacelist"</a:documentation>
+                </attribute>
+                <attribute name="value">
+                    <a:documentation>The value the field needs to be checked against (using the supplied operator)</a:documentation>
+                </attribute>
+            </element>
+        </oneOrMore>
+    </element>
 </define>
 
 </grammar>

@@ -1227,6 +1227,8 @@ class CLAMMetaData(object):
 
         * ``provenance`` - An instance ``CLAMProvenanceData``
         * ``inputtemplate`` - A string containing the ID of the input template
+        * ``skipvalidation`` - Set to True to skip validation
+        * ``constraints`` - Set constraints (inherited from a template)
 
         CLAMMetaData acts like a dictionary in many regards.
 
@@ -1249,6 +1251,10 @@ class CLAMMetaData(object):
 
         self.inputtemplate = None
 
+        self.skipvalidation = False
+
+        self.constraints = []
+
         self.data = {}
         for key, value in kwargs.items():
             if key == 'provenance':
@@ -1257,8 +1263,15 @@ class CLAMMetaData(object):
             elif key == 'inputtemplate':
                 if isinstance(value, InputTemplate):
                     self.inputtemplate = value.id
+                    self.constraints = value.constraints
+                    self.skipvalidation = value.skipvalidation
                 else:
                     self.inputtemplate = value
+                    #we assume constraints get passed explicitly in this case!
+            elif key == 'constraints':
+                self.constraints = value
+            elif key == 'skipvalidation':
+                self.skipvalidation = bool(value)
             else:
                 self[key] = value
         if self.attributes:
@@ -1326,6 +1339,9 @@ class CLAMMetaData(object):
         for key, value in self.data.items():
             xml += indent + "  <meta id=\""+clam.common.util.xmlescape(key)+"\">"+clam.common.util.xmlescape(str(value))+"</meta>\n"
 
+        for constraint in self.constraints:
+            xml += constraint.xml(indent + "  ")
+
         if self.provenance:
             xml += self.provenance.xml(indent + "  ")
 
@@ -1343,12 +1359,34 @@ class CLAMMetaData(object):
             f.write(self.xml())
 
     def validate(self):
-        """Validate the metadata. If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file.  NOTE: This method is not implemented in the base class, but should be overridden by subclasses"""
+        """Validate the metadata. Possibly extracts additional metadata from the actual file into the metadata file. This method calls a format's custom validator() function which you can override per format, additionally it also validates any constraints that are set. The validatation method implements some caching so your validator() function is never called more than once."""
+        if self.skipvalidation:
+            return True
+
+        if self.file:
+            if hasattr(self,'valid'): # caching mechanism to prevent revalidating
+                return self.valid
+
+            #call the custom validator
+            self.valid = self.validator() and self.validateconstraints()
+            return self.valid
+
+        #if there is no associated file at this stage we simply pass validation (and hopefully come back for real validation at a later stage)
         return True
 
-    def save_injectmetadata(self):
-        """If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file. NOTE: Not implementedi in base clas: can be overriden by subclasses"""
-        pass
+    def validator(self):
+        """This method can be overriden on derived classes and has no implementation here, should return True or False. Additionaly, if there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file, which is guaranteerd to exist when this method is called."""
+        return True
+
+    def validateconstraints(self):
+        """Validates the constraints (if any). Called by validate(), no need to invoke directly"""
+        if self.constraints:
+            for constraint in self.constraints:
+                if not constraint.test(self):
+                    self["validation_error"] = "A constraint on the data did not hold: " + str(constraint)
+                    return False
+        return True
+
 
     @staticmethod
     def fromxml(node, file=None):
@@ -1368,7 +1406,7 @@ class CLAMMetaData(object):
             if formatclass is None:
                 raise Exception("Format class " + dataformat + " not found!")
 
-            data = {}
+            data = {'constraints': []}
             if 'inputtemplate' in node.attrib:
                 data['inputtemplate'] = node.attrib['inputtemplate']
             if 'inputtemplatelabel' in node.attrib:
@@ -1381,6 +1419,8 @@ class CLAMMetaData(object):
                     key = subnode.attrib['id']
                     value = subnode.text
                     data[key] = value
+                elif subnode.tag == 'constraint':
+                    data['constraints'].append( Constraint.fromxml(subnode) )
                 elif subnode.tag == 'provenance':
                     data['provenance'] = CLAMProvenanceData.fromxml(subnode)
             return formatclass(file, **data)
@@ -1390,11 +1430,6 @@ class CLAMMetaData(object):
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples. Should be overridden in sub-classes!"""
         yield ("Content-Type", self.mimetype)
-
-class CMDIMetaData(CLAMMetaData):
-    """Direct CMDI Metadata support, not implemented yet, reserved for future use"""
-    #MAYBE TODO LATER: implement
-    pass
 
 
 class InputTemplate(object):
@@ -1411,6 +1446,7 @@ class InputTemplate(object):
         self.converters = []
         self.viewers = [] #MAYBE TODO Later: Support viewers in InputTemplates?
         self.inputsources = []
+        self.constraints = []
 
         self.unique = True #may mark input/output as unique
 
@@ -1420,6 +1456,8 @@ class InputTemplate(object):
         self.extension = None
         self.onlyinputsource = False #Use only the input sources
         self.acceptarchive = False #Accept and auto-extract archives
+
+        self.skipvalidation = False #Skip validation
 
         for key, value in kwargs.items():
             if key == 'unique':
@@ -1439,6 +1477,8 @@ class InputTemplate(object):
                 self.acceptarchive = bool(value)
             elif key == 'onlyinputsource':
                 self.onlyinputsource = bool(value)
+            elif key == 'skipvalidation':
+                self.skipvalidation = bool(value)
             else:
                 raise ValueError("Unexpected keyword argument for InputTemplate: " + key)
 
@@ -1457,6 +1497,8 @@ class InputTemplate(object):
                 self.viewers.append(arg)
             elif isinstance(arg, InputSource):
                 self.inputsources.append(arg)
+            elif isinstance(arg, Constraint):
+                self.constraints.append(arg)
             elif arg is None:
                 pass
             else:
@@ -1497,6 +1539,9 @@ class InputTemplate(object):
         if self.inputsources:
             for inputsource in self.inputsources:
                 xml += inputsource.xml(indent+"    ")
+        if self.constraints:
+            for constraint in self.constraints:
+                xml += constraint.xml(indent+"    ")
         xml += indent + "</InputTemplate>"
         return xml
 
@@ -1542,6 +1587,8 @@ class InputTemplate(object):
                 pass #MAYBE TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'inputsource':
                 pass #MAYBE TODO: Reading input sources from XML is not implemented (and not necessary at this stage)
+            elif subnode.tag == 'constraint':
+                args.append( Constraint.fromxml(subnode) )
             else:
                 raise Exception("Expected parameter class '" + subnode.tag + "', but not defined!")
 
@@ -1636,8 +1683,12 @@ class InputTemplate(object):
         if not success:
             metadata = None
         else:
+            metadata['constraints'] = self.constraints
+            metadata['skipvalidation'] = self.skipvalidation
             try:
                 metadata = self.formatclass(file, **metadata)
+                if 'validation_error' in metadata:
+                    success = False
             except:
                 raise
 
@@ -1712,6 +1763,104 @@ class UnsetMetaField(AbstractMetaField):
             return True
         return False
 
+class Constraint:
+    def __init__(self, constrainttype, **kwargs):
+        self.constrainttype = constrainttype
+        assert constrainttype in ('require','forbid')
+        self.tests = []
+
+        for check, value in kwargs.items():
+            if check.find('_') != -1:
+                key, operator = check.rsplit('_',2)
+            else:
+                key = check
+                operator = "equals"
+            self.tests.append( (key, operator, value) )
+
+    def __str__(self):
+        if self.constrainttype == "require":
+            s = "required (any of): "
+        elif self.constrainttype == "forbid":
+            s = "forbidden (any of): "
+        return s +  "; ".join([ key + " " + "["+operator + "] " + str(value) for key,operator, value in self.tests ])
+
+
+
+    def test(self, metadata):
+        assert isinstance(metadata, CLAMMetaData)
+        for key, operator, value in self.tests: #Disjunction!
+            if operator == "equals":
+                test = lambda metadata: metadata[key] == value
+            elif operator == "notequals":
+                test = lambda metadata: metadata[key] != value
+            elif operator == "exist":
+                test = lambda metadata: key in metadata if value else key not in metadata
+            elif operator == "greaterthan":
+                test = lambda metadata: metadata[key] > value
+            elif operator == "lessthan":
+                test = lambda metadata: metadata[key] < value
+            elif operator == "greaterequalthan":
+                test = lambda metadata: metadata[key] >= value
+            elif operator == "lessequalthan":
+                test = lambda metadata: metadata[key] <= value
+            elif operator == "contains":
+                test = lambda metadata: value in metadata[key]
+            elif operator == "incommalist":
+                test = lambda metadata: value in [ x.strip() for x in metadata[key].split(',') ]
+            elif operator == "inspacelist":
+                test = lambda metadata: value in [ x.strip() for x in metadata[key].split(' ') ]
+            try:
+                if test(metadata):
+                    if self.constrainttype == 'require':
+                        return True
+                    elif self.constrainttype == 'forbid':
+                        return False
+            except KeyError:
+                pass #as we are doing a disjunction, we can silently allow tests that don't work, if they are essential
+
+        if self.constrainttype == 'require':
+            return False
+        elif self.constrainttype == 'forbid':
+            return True
+
+    def xml(self, indent = ""):
+        """Produce Constraint XML"""
+        xml = indent + "<constraint type=\"" + self.constrainttype + "\">"
+        for key, operator, value in self.tests:
+            xml += indent + "    <test key=\"" + key + "\" operator=\"" +operator + "\" value=\"" + str(value) +"\" />"
+        xml += indent + "</constraint>"
+        return xml
+
+    @staticmethod
+    def fromxml(node):
+        """Static method returns a Constraint instance from the given XML description. Node can be a string or an etree._Element."""
+        if not isinstance(node,ElementTree._Element): #pylint: disable=protected-access
+            node = parsexmlstring(node)
+        assert node.tag.lower() == 'constraint'
+
+        kwargs = {}
+        constrainttype = node.attrib['type']
+        for subnode in node:
+            value = node.attrib['value']
+            if value == 'True':
+                value = True
+            elif value == 'False':
+                value = False
+            elif value.isnumeric():
+                value = int(value)
+            kwargs[node.attrib['key'] + '_' +  node.attrib['operator']] = value
+
+        return Constraint(constrainttype, **kwargs)
+
+
+class RequireMeta(Constraint):
+    def __init__(self, **kwargs):
+        super(RequireMeta,self).__init__('require', **kwargs)
+
+class ForbidMeta(Constraint):
+    def __init__(self, **kwargs):
+        super(ForbidMeta,self).__init__('forbid', **kwargs)
+
 class CopyMetaField(AbstractMetaField):
     """In CopyMetaField, the value is in the form of templateid.keyid, denoting where to copy from. If not keyid but only a templateid is
     specified, the keyid of the metafield itself will be assumed."""
@@ -1762,6 +1911,7 @@ class OutputTemplate(object):
         self.converters = []
 
         self.metafields = []
+        self.constraints = []
         for arg in args:
             if isinstance(arg, AbstractMetaField) or isinstance(arg,ParameterCondition):
                 self.metafields.append(arg)
@@ -1769,6 +1919,8 @@ class OutputTemplate(object):
                 self.converters.append(arg)
             elif isinstance(arg, clam.common.viewers.AbstractViewer):
                 self.viewers.append(arg)
+            elif isinstance(arg, Constraint):
+                self.constraints.append(arg)
             elif arg is None:
                 pass
             else:
@@ -1784,6 +1936,8 @@ class OutputTemplate(object):
 
         self.parent = None
         self.copymetadata = False #copy metadata from parent (if set)
+
+        self.skipvalidation = False
 
         for key, value in kwargs.items():
             if key == 'unique':
@@ -1820,6 +1974,8 @@ class OutputTemplate(object):
                     self.viewers = value
                 else:
                     raise Exception("Invalid viewer specified!")
+            elif key == 'skipvalidation':
+                self.skipvalidation = bool(value)
             else:
                 raise ValueError("Unexpected keyword argument for OutputTemplate: " + key)
 
@@ -1848,6 +2004,8 @@ class OutputTemplate(object):
         xml += ">\n"
         for metafield in self.metafields:
             xml += metafield.xml(indent + "    ") + "\n"
+        for constraint in self.constraints:
+            xml += constraint.xml(indent + "    ") + "\n"
 
         xml += indent + "</OutputTemplate>"
         return xml
@@ -1892,6 +2050,8 @@ class OutputTemplate(object):
                 pass #MAYBE TODO: Reading converters from XML is not implemented (and not necessary at this stage)
             elif subnode.tag == 'viewer':
                 pass #MAYBE TODO: Reading viewers from XML is not implemented (and not necessary at this stage)
+            elif subnode.tag == 'constraint':
+                args.append( Constraint.fromxml(subnode) )
             else:
                 args.append(AbstractMetaField.fromxml(subnode))
 
@@ -2015,6 +2175,8 @@ class OutputTemplate(object):
 
         if provenancedata:
             data['provenance'] = provenancedata
+            data['constraints'] = self.constraints
+            data['skipvalidation'] = self.skipvalidation
 
         return self.formatclass(None, **data)
 

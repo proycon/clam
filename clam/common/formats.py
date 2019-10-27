@@ -31,12 +31,6 @@ class ExampleFormat(CLAMMetaData):
     #Do you want to allow any other custom attributes? Defined by the InputTemplate/OutputTemplate
     allowcustomattributes = True
 
-    #Extract metadata from the produced file (using a call to self.load_extractmetadata() ) (not implmemented yet)
-    postprocess_extractmetadata = False
-
-    #Inject metadata into the produced file (using a call to self.save_injectmetadata() ) (not implmemented yet)
-    postprocess_injectmetadata = False
-
     #Specify a mimetype for your format
     mimetype = "text/plain"
 
@@ -46,23 +40,9 @@ class ExampleFormat(CLAMMetaData):
 
     #NOTE: Never override the constructor with different arguments!
 
-    def validate(self):
-        """Add your validation method here, should return True or Falsei. Additionaly, if there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file"""
-
-        if hasattr(self,'valid'): # caching mechanism to prevent revalidating
-            return self.valid
-
-        self.valid = True
+    def validator(self):
+        """Implement your validator here, should return True or False. Additionaly, if there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file, which is guaranteerd to exist when this method is called."""
         return True
-
-    #TODO: can't I merge this with validate()?
-    def load_extractmetadata(self):
-        """If there is metadata IN the actual file, this method should extract it and assign it to this object. Will be automatically called from constructor. Note that the file (CLAMFile) is accessible through self.file"""
-        pass
-
-    def save_injectmetadata(self):
-        """If there is metadata that should be IN the actual file, this method can store it. Note that the file (CLAMFile) is accessible through self.file"""
-        pass
 
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples."""
@@ -153,34 +133,29 @@ class FoLiAXMLFormat(CLAMMetaData):
     mimetype = 'text/xml'
     schema = '' #TODO
 
-    postprocess_extractmetadata = True #not used yet
+    def validator(self):
+        try:
+            import folia.main as folia #soft-dependency, not too big a deal if it is not present, but no metadata extraction then
 
-    def validate(self):
-        if self.file:
-            if hasattr(self,'valid'): #a caching mechanism to prevent revalidation
-                return self.valid
+            #this loads a whole FoLiA document into memory! which is a bit of a waste of memory and a performance hog!
             try:
-                import folia.main as folia #soft-dependency, not too big a deal if it is not present, but no metadata extraction then
-                #this loads a whole FoLiA document into memory! which is a bit of a waste of memory and a performance hog!
-                try:
-                    doc = folia.Document(file=str(self.file))
-                except Exception as e:
-                    self['validation_error'] = str(e)
-                    self.valid = False
-                    return False
-                self['version'] = doc.version
-                for annotationtype, annotationset in doc.annotations:
-                    key = folia.annotationtype2str(annotationtype).lower() + "-annotation"
-                    if annotationset is None: annotationset = "no-set"
-                    if key in self and annotationset not in [ x.strip() for x in self[key].split(',') ]:
-                        self[key] += "," +  annotationset
-                    else:
-                        self[key] = annotationset
-            except ImportError as e:
+                doc = folia.Document(file=str(self.file))
+            except Exception as e:
                 self['validation_error'] = str(e)
-                pass #note that we simply return True if no validation can be done due to a missing library
+                self.valid = False
+                return False
+            self['version'] = doc.version
+            for annotationtype, annotationset in doc.annotations:
+                key = folia.annotationtype2str(annotationtype).lower() + "-annotation"
+                if annotationset is None: annotationset = "no-set"
+                if key in self and annotationset not in [ x.strip() for x in self[key].split(',') ]:
+                    self[key] += "," +  annotationset
+                else:
+                    self[key] = annotationset
+        except ImportError as e:
+            self['validation_error'] = str(e)
+            return False
 
-            self.valid = True
         return True
 
 class AlpinoXMLFormat(CLAMMetaData):
