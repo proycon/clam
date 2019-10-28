@@ -382,7 +382,7 @@ def mainentry(credentials = None):
     if shortcutresponse is not None:
         return shortcutresponse
 
-    if user == "anonymous" and auth_type() != "none" and not settings.DISABLEPORCH:
+    if user == "anonymous" and auth_type() != "none" and not settings.DISABLE_PORCH:
         #present an unauthenticated landing page without project index
         return porch(credentials)
     else:
@@ -2284,7 +2284,7 @@ def uploader(project, credentials=None):
 
 
 
-class ActionHandler(object):
+class ActionHandler:
 
     @staticmethod
     def find_action( actionid, method):
@@ -2407,7 +2407,15 @@ class ActionHandler(object):
                 if tmpdir:
                     shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
-                    return withheaders(flask.make_response(stdoutdata,200),action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN}) #200
+                    if action.viewer:
+                        output = action.viewer.view(io.StringIO(stdoutdata))
+                        if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
+                            return output
+                        else:
+                            return withheaders(flask.Response(  (line for line in output ) , 200), action.viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
+                    else:
+                        #normal response without a viewer
+                        return withheaders(flask.make_response(stdoutdata,200),action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN}) #200
                 elif process.returncode in action.returncodes403:
                     return withheaders(flask.make_response(stdoutdata,403), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
                 elif process.returncode in action.returncodes404:
@@ -2419,16 +2427,20 @@ class ActionHandler(object):
         elif action.function:
             actionargs = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
             try:
-                r = action.function(*actionargs) #200
+                result = action.function(*actionargs) #200
             except Exception as e: #pylint: disable=broad-except
                 if isinstance(e, werkzeug.exceptions.HTTPException):
                     raise
                 else:
                     return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
-            if not isinstance(r, (flask.Response, werkzeug.wrappers.Response)):
-                return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
+            if not isinstance(result, (flask.Response, werkzeug.wrappers.Response)):
+                if action.viewer:
+                    output = action.viewer.view(io.StringIO(str(result)))
+                    return withheaders(flask.Response(  (line for line in output ) , 200), action.viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
+                else:
+                    return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
             else:
-                return r
+                return result
         else:
             raise Exception("No command or function defined for action " + actionid)
 
@@ -2650,10 +2662,11 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/', 'adminindex', self.auth.require_login(Admin.index), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/<command>/<targetuser>/<project>/', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_get', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_delete', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        #Authentication for handler is handled deeper in the ActionHandler, depending on whether allowanonymous is set
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_get', ActionHandler.GET, methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_post', ActionHandler.POST, methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_put', ActionHandler.PUT, methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_delete', ActionHandler.DELETE, methods=['DELETE'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/zip/', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/gz/', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
@@ -2765,8 +2778,10 @@ def set_defaults():
         settings.ALLOWSHARERUN = False
     if 'ALLOWANONSHAREDELETE' not in settingkeys:
         settings.ALLOWSHAREDELETE = False
-    if 'DISABLEPORCH' not in settingkeys:
-        settings.DISABLEPORCH = False
+    if 'DISABLE_PORCH' not in settingkeys:
+        settings.DISABLE_PORCH = False
+    if 'PUBLIC_ACTIONS' not in settingkeys:
+        settings.PUBLIC_ACTIONS = False
     if 'USERQUOTA' not in settingkeys:
         settings.USERQUOTA = 0
     if 'PROFILES' not in settingkeys:

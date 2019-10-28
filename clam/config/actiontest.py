@@ -133,7 +133,16 @@ ACTIONS = [
     Action(id="multiply",name="Multiplier",description="Multiply two numbers", function=multiply, parameters=[
             IntegerParameter(id="x", name="First value", required=True),
             IntegerParameter(id="y", name="Second value", required=True)
-    ])
+    ]),
+    Action(id="tabler",
+           name="Tabler",
+           description="Puts a comma separated list in a table (viewer test)",
+           function=lambda x: x,
+           parameters=[
+            StringParameter(id="text", name="Text", required=True),
+           ],
+           viewer=SimpleTableViewer(delimiter=",")
+     )
 ]
 
 

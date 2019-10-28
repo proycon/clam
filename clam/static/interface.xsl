@@ -837,7 +837,7 @@
                         <table>
                             <xsl:apply-templates />
                         </table>
-                        <input type="submit" class="submitaction" value="Submit" />
+                        <input class="btn btn-primary" type="submit" value="Submit" />
                     </form>
                 </xsl:for-each>
                 </div>

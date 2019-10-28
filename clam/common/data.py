@@ -2413,15 +2413,28 @@ class Action:
         else:
             self.method = None #all methods
 
+        if 'viewer' in kwargs:
+            assert(kwargs['viewer'], clam.common.viewers.AbstractViewer)
+            self.viewer = kwargs['viewer']
+        else:
+            self.viewer = None
+
+
+        self.parameters = []
         if 'parameters' in kwargs:
             assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in kwargs['parameters']  ])
             self.parameters = kwargs['parameters']
-        elif args:
-            assert all( [ isinstance(x, clam.common.parameters.AbstractParameter) for x in args  ])
-            self.parameters = args
-        else:
-            self.parameters = [] #pylint: disable=redefined-type
 
+        if args:
+            for arg in args:
+                if isinstance(arg, clam.common.parameters.AbstractParameter):
+                    self.parameters.append(arg)
+                elif isinstance(arg, clam.common.viewers.AbstractViewer):
+                    if self.viewer is not None:
+                        raise Exception("Can only set one viewer per Action!")
+                    self.viewer = arg
+                else:
+                    raise Exception("Expected Parameter or Viewer, got " + str(type(arg)))
 
         if 'mimetype' in kwargs:
             self.mimetype = kwargs['mimetype']
