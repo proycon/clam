@@ -1279,13 +1279,13 @@ As the HTML text will be embedded on the fly, take care *not* to include
 any headers. Only tags that go within the HTML ``body`` are permitted!
 Always use the utf-8 encoding and well-formed xhtml syntax.
 
-A second kind of customisation is customisation of the style, which can
-be achieved by creating new CSS themes. CLAM gets shipped with the
-default “classic” style (which did receive a significant overhaul in
-CLAM 0.9). Copy, rename and adapt ``style/classic.css`` to create your
-own style. And set ``STYLE`` accordingly in your service configuration
-file. The ``STYLE`` may also refer to an absolute path of a CSS file to
-include.
+The web interface also support a cover image, which is an image at the head of the website. You can specify such an
+image in ``SYSTEM_COVER_URL``.
+
+A second kind of customisation is customisation of the style, which can be achieved by creating new CSS themes. CLAM
+gets shipped with the default “classic” style (which did receive a significant overhaul in CLAM 0.9 and again with CLAM
+3.0). Copy, rename and adapt ``style/classic.css`` to create your own style. And set ``STYLE`` accordingly in your
+service configuration file. The ``STYLE`` may also refer to an absolute path of a CSS file to include.
 
 In your service configuration file you can set a variable
 ``INTERFACEOPTIONS``; this string is a space-separated list in which you
@@ -1319,7 +1319,11 @@ web-interface:
    in-browser editor.
 
 -  ``preselectinputtemplate`` – Pre-select the first defined input
-   template as default inputtemplate.
+   template as default inputtemplate, even if there are multiple input templates.
+
+- ``centercover`` - Center the cover image horizontally.
+
+- ``coverheigh64``, ``coverheight100``, ``coverheight128``, ``coverheight192`` - Sets the height of the cover image.
 
 
 .. _actions:
