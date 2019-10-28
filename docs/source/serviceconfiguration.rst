@@ -1096,10 +1096,11 @@ however will be provided out of the box. Note that the actual conversion
 will be performed by 3rd party software in most cases.
 
 -  ``MSWordConverter`` – Convert MS Word files to plain text. This
-   converter uses the external tool `catdoc <http://www.wagner.pp.ru/~vitus/software/catdoc/>`_ by default.
+   converter uses the external tool `catdoc <http://www.wagner.pp.ru/~vitus/software/catdoc/>`_ by default and will only
+   work if installed.
 
 -  ``PDFConverter`` – Convert PDF to plain text. This converter uses the
-   external tool `pdftohtml <http://pdftohtml.sourceforge.net/>`_ by default.
+   external tool `pdftohtml <http://pdftohtml.sourceforge.net/>`_ by default and will only work if installed.
 
 -  ``CharEncodingConverter`` – Convert between plain text files in
    different character encodings.

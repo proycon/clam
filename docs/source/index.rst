@@ -174,6 +174,22 @@ between CLAM and your application, taking care of any translation steps.
 Note that wrapper scripts in the action paradigm are more constrained,
 and there may be multiple wrapper scripts for different actions.
 
+Interface
+----------------
+
+Though CLAM is a RESTful webserivce, it has a fully client-side interface for human-end users. Some screenshots can be
+found below:
+
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot.png
+    :alt: the clam project list
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot2.png
+    :alt: the clam project page during staging
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot3.png
+    :alt: the clam project page when done
+
 
 Table of Contents
 -----------------------

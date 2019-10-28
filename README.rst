@@ -63,6 +63,18 @@ Documentation
 
 Documentation is available on https://clam.readthedocs.io
 
+Some screenshots of the web user interface can be found below:
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot.png
+    :alt: the clam project list
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot2.png
+    :alt: the clam project page during staging
+
+.. image:: https://raw.githubusercontent.com/proycon/clam/master/docs/screenshot3.png
+    :alt: the clam project page when done
+
+
 Installation
 ----------------
 
