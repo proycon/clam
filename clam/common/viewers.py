@@ -205,7 +205,10 @@ class FLATViewer(AbstractViewer):
 
     def view(self, file, **kwargs):
         #filename will contain a random component to prevent clashes
-        filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
+        if hasattr(file, filename):
+            filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
+        else:
+            filename = "input-" + str("%x" % random.getrandbits(128)) + '.folia.xml'
         r = requests.post(self.url + '/pub/upload/', allow_redirects=False, files=[('file',(filename,file,'application/xml'))], data={'configuration':self.configuration,'mode':self.mode})
         #FLAT redirects after upload, we catch the redirect rather than following it automatically, and return it ourselves as our redirect
         if r.status_code == 302 and 'Location' in r.headers:
