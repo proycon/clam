@@ -141,7 +141,7 @@ kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 sleep 2
 
 echo "Starting clam service 'constrainttest'" >&2
-clamservice -d clam.config.constrainttest 2> actiontest.server.log &
+clamservice -d clam.config.constrainttest 2> constrainttest.server.log &
 sleep 5
 
 echo "Running constraint tests:" >&2

@@ -17,5 +17,6 @@ addons:
      - zip
 install:
     - pip install -r requirements.txt
+    - pip install folia
     - python setup.py install
 script:  bash clam/tests/test.sh
