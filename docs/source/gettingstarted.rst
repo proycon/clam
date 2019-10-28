@@ -3,7 +3,7 @@
 Getting Started
 =================
 
-Make sure you have first read the :ref:`introduction` so you understand what CLAM is and what it's architecture is like.
+Make sure you have first read the :ref:`introduction` so you understand what CLAM is and what its architecture is like.
 
 You start a new CLAM webservice project using the ``clamnewproject`` tool. The tool
 generates all the necessary files, which you have to edit. The tool
@@ -34,8 +34,12 @@ webservice.
    service configuration file if ran on the specified host. This will be
    addressed in :ref:`externalconf`.
 
+-  ``myfirstproject/myfirstproject.config.yml`` - A more generic external configution file which is automatically
+  included from the service configuration file if a shost specific variant like above is not found. This will be
+  addressed in :ref:`externalconf`.
+
 -  ``myfirstproject/myfirstproject_wrapper.py`` - System Wrapper Script
-   in Python (this is recommended over the bash version, suited for more
+   in Python (this is recommended over the bash version as it is suited for more
    complex webservices)
 
 -  ``myfirstproject/myfirstproject_wrapper.sh`` - System Wrapper Script
@@ -49,6 +53,8 @@ webservice.
    environments or ``python setup.py develop`` for installation during
    development. (the start scripts mentioned below do this automatically
    for you)
+
+-  ``MANIFEST.in`` - Lists files to include in installation by ``setup.py``.
 
 -  ``INSTRUCTIONS.rst`` - Automatically generated instructions
 
@@ -64,7 +70,7 @@ Moreover, some scripts and sample configurations are generated:
 -  ``myfirstproject.$HOSTNAME.ini`` - Uwsgi configuration (for a
    specific host), used for production environments
 
--  ``*.conf`` - Sample configuration files for production environments
+-  ``deployment-examples/`` - Sample configuration files for production environments
    using a Apache 2 or Nginx webserver. Consult the section on :ref:`deployment` for details.
 
 These template files need to be edited for your particular application.

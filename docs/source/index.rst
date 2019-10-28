@@ -17,7 +17,7 @@ aware of CLAM, and the handling and validation of input can be taken care of by 
 
 CLAM is entirely written in Python, runs on UNIX-derived systems, and is available as open source under the GNU Public
 License (v3). It is set up in a modular fashion, and offers an API, and as such is easily extendable. CLAM communicates
-in a transparent XML format, and using XSL transformation offers a full web 2.0 web-interface for human end users.
+in a transparent XML format, and uses client-side XSL transformation to offer a full modern web-interface for human end users.
 
 The kind of applications that CLAM is originally intended for are Natural Language Processing applications, usually of a
 kind that do some processing on a text corpus. This corpus (any text file) can be uploaded by the user, or may be
@@ -72,6 +72,9 @@ The most notable features of CLAM are:
 -  **Actions** – *CLAM’s action paradigm is a remote-procedure
    call-mechanism in which you make available actions (any
    script/program or Python function) on specific URLs*.
+
+-  **Constraints and Input Validation** – *CLAM has a mechanism to actively validate the files the user inputs, and apply constraints
+  to them*.
 
 In publication pertaining to research that makes use of this software, a citation should be given of: “Maarten van
 Gompel (2014). CLAM: Computational Linguistics Application Mediator. Documentation. LST Technical Report Series 14-03.”.
@@ -204,30 +207,18 @@ improvements are implemented on a regular basis. Update CLAM using::
 
   $ pip install -U clam
 
-or if you used easy_install::
-
-  $ easy_install -U clam
-
 
 Installing a particular clam webservice for production use
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When installating a particular CLAM webservice on a new server, it is first
-necessary to edit the service configuration file of the webservice and make
-sure all the paths in there are set correctly for the new server. Of interest
-is in particular the ROOT path, which is where user data will be stored, this
-directory must exist and be writable by the webserver.
+When installating a particular CLAM webservice on a new server, you typically start with creating a host-specific
+external configuration file that specifies all the paths and urls specific to thw new server.  Of interest is in
+particular the ROOT path, which is where user data will be stored, this directory must exist and be writable by the
+webserver.
 
-For testing, the built-in development server can be used. Suppose the
-webservice configuration is in /path/to/mywebservice/ and is called
-mywebservice.py, then the development server can be started as follows::
-
-  $ clamservice -P /path/to/mywebservice mywebservice
-
-For production, however, it is strongly recommended to embed CLAM in Apache or
-nginx. This is the typically task of a system administrator, as certain skills are
-necessary and assumed. All this is explained in detail in the CLAM
-Manual, obtainable from https://proycon.github.io/clam/ .
+For production, it is strongly recommended to embed CLAM in Apache or nginx. This is the typically task of a system
+administrator, as certain skills are necessary and assumed. All this is explained in detail in the section
+:ref:`deployment`.
 
 Indices and tables
 ==================

@@ -11,7 +11,7 @@ service configuration is itself a Python script, but knowledge of Python
 is not essential for you to be able to make your own service
 configurations.
 
-It is recommended, but not mandatory, to separate the parts of the configuration that are host-specific configuration
+It is strongly recommended, but not mandatory, to separate the parts of the configuration that are host-specific configuration
 settings from the parts that are generic. Host-specific configurations is stored in :ref:`externalconf` that are dynamically included from the service configuration script. Doing so facilitates distribution and deployment on different systems late.
 
 It is assumed you are using the ``clamnewproject`` tool as explain in :ref:`gettingstarted`, which

@@ -21,7 +21,6 @@ can choose any name you want), issue the following command::
 
   $ virtualenv --python=python3 clamenv
 
-
 To enter the virtual environment, type the following (note the period)::
 
    $ source clamenv/bin/activate.sh
@@ -43,7 +42,6 @@ If pip is not yet installed on your system, install it as follows (example for D
 
   $ apt-get install python3-pip
 
-
 You can verify the availability of CLAM by opening
 an interactive Python interpreter and writing: ``import clam``
 
@@ -63,7 +61,7 @@ The following software is required to run CLAM, the installation process
 explained above should obtain and install all the mandatory dependencies
 automatically, except for Python itself:
 
--  python 3.3 or higher (2.7 is also still supported)
+-  python 3.3 or higher (2.7 is not supported since CLAM v3!)
 -  flask
 -  lxml
 -  requests
@@ -116,8 +114,8 @@ Source Code Repository
 
 The CLAM source code is hosted on `Github <https://github.com/proycon/clam>`_.
 
-If you want to work with the latest development release of CLAM rather than the latest stable version. You can cloning this git
-repository is done as follows:
+If you want to work with the latest development release of CLAM rather than the latest stable version. You can clone this git
+repository as follows:
 
 ::
 
