@@ -167,3 +167,9 @@ table .file {
 #parameters table {
     margin-left: 20px;
 }
+.qq-upload-file {
+    font-family: monospace;
+}
+.qq-upload-status-text {
+    font-size: 90%;
+}

@@ -760,6 +760,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             autoUpload: true,
             failedUploadTextDisplay: {
                 mode: 'custom',
+                maxChars: 1024,
                 responseProperty: 'error',
             },
             debug: true
@@ -783,7 +784,8 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                     }
                     return true;
                 }
-                processuploadresponse(responseJSON.xml, '#uploadparameters');
+                var xml = window.atob(responseJSON.xml); //was base64 encoded
+                processuploadresponse(xml, '#uploadparameters');
 
         }).on('click',function(){
                 var inputtemplate_id = $('#uploadinputtemplate').val();

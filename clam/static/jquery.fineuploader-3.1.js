@@ -1510,14 +1510,14 @@ qq.FineUploader = function(o){
             disableDefaultDropzone: false
         },
         text: {
-            uploadButton: 'Subir un archivo',
-            cancelButton: 'Cancelar',
-            retryButton: 'Volver a intentar',
-            failUpload: 'Falló la carga',
-            dragZone: 'Arrastrar archivos aquí para subir',
-            dropProcessing: 'Procesando...',
-            formatProgress: "{percent}% de {total_size}",
-            waitingForResponse: "Procesando..."
+            uploadButton: 'Upload a file',
+            cancelButton: 'Cancel
+            retryButton: 'Retry',
+            failUpload: 'Upload failed',
+            dragZone: 'Drag and drop files here to upload',
+            dropProcessing: 'Processing...',
+            formatProgress: "{percent}% of {total_size}",
+            waitingForResponse: "Processing..."
         },
         template: '<div class="qq-uploader">' +
             ((!this._options.dragAndDrop || !this._options.dragAndDrop.disableDefaultDropzone) ? '<div class="qq-upload-drop-area"><span>{dragZoneText}</span></div>' : '') +
@@ -1911,7 +1911,7 @@ qq.extend(qq.FineUploader.prototype, {
                 this.log("'" + responseProperty + "' is not a valid property on the server response.", 'warn');
             }
 
-            qq(this._find(item, 'statusText')).setText(shortFailureReason || failureReason);
+            qq(this._find(item, 'statusText')).setText(failureReason);
 
             if (this._options.failedUploadTextDisplay.enableTooltip) {
                 this._showTooltip(item, failureReason);

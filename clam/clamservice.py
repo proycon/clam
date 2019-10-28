@@ -36,6 +36,7 @@ import mimetypes
 import flask
 import werkzeug
 import requests
+import base64
 
 import clam.common.status
 import clam.common.parameters
@@ -1689,11 +1690,19 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     """Add a new input file, this invokes the actual uploader"""
 
 
-    def errorresponse(msg, code=403):
+    def errorresponse(msg, code=403, xml=""):
         if returntype == 'json':
-            return withheaders(flask.make_response("{success: false, error: '" + msg + "'}"),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.make_response(json.dumps({
+                "success": False,
+                "error": msg,
+                "xml": str(base64.b64encode(xml.encode('utf-8')),'ascii'),
+            })),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
         else:
-            return withheaders(flask.make_response(msg,403),headers={'allow_origin': settings.ALLOW_ORIGIN}) #(it will have to be explicitly deleted by the client first)
+            if not xml:
+                return withheaders(flask.make_response(msg,403),'text/plain',headers={'allow_origin': settings.ALLOW_ORIGIN})
+            else:
+                #ignore msg, send only xml
+                return withheaders(flask.make_response(xml,403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     inputtemplate_id = flask.request.headers.get('Inputtemplate','')
     inputtemplate = None
@@ -1876,12 +1885,12 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     elif 'inputsource' in postdata and postdata['inputsource']:
         printlog("Getting metadata from inputsource, uploading...")
         if inputsource.metadata:
-            printlog("DEBUG: Validating metadata from inputsource")
+            printlog("Validating metadata from inputsource")
             metadata = inputsource.metadata
             errors, parameters = inputtemplate.validate(metadata, user)
             validmeta = True
         else:
-            printlog("DEBUG: No metadata provided with inputsource, looking for metadata files..")
+            printlog("No metadata provided with inputsource, looking for metadata files..")
             metafilename = os.path.dirname(inputsource.path)
             if metafilename: metafilename += '/'
             metafilename += '.' + os.path.basename(inputsource.path) + '.METADATA'
@@ -2121,15 +2130,19 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 metadata.inputtemplate = inputtemplate.id
 
             if 'validation_error' in metadata:
-                printdebug('(Metadata could not be generated, ' + str(metadataerror) + ')')
-                #output += "<metadataerror />" #This usually indicates an error in service configuration!
-                fatalerror = "<error type=\"metadataerror\">Validation error for " + filename + ": " + str(metadataerror)  + "</error>"
-                jsonoutput['error'] = "Metadata could not be generated! " + str(metadataerror)
-            if metadataerror:
+                printdebug('(Metadata could not be generated, ' + str(metadataerror) + ') due to validation error')
+                jsonoutput['error'] = fatalerror = "Input not accepted (validation failed): " + str(metadataerror)
+                output += "<error>" + xmlescape(fatalerror) + "</error>"
+                jsonoutput['success'] = False
+                #remove upload
+                os.unlink(Project.path(project, user) + 'input/' + filename)
+            elif metadataerror:
                 printdebug('(Metadata could not be generated, ' + str(metadataerror) + ',  this usually indicated an error in service configuration)')
-                #output += "<metadataerror />" #This usually indicates an error in service configuration!
-                fatalerror = "<error type=\"metadataerror\">Metadata could not be generated for " + filename + ": " + str(metadataerror) + " (this usually indicates an error in service configuration!)</error>"
-                jsonoutput['error'] = "Metadata could not be generated! " + str(metadataerror) + "  (this usually indicates an error in service configuration!)"
+                jsonoutput['error'] = fatalerror = "Metadata could not be generated! " + str(metadataerror) + "  (this usually indicates an error in service configuration!)"
+                output += "<error>" + xmlescape(fatalerror) + "</error>"
+                jsonoutput['success'] = False
+                #remove upload
+                os.unlink(Project.path(project, user) + 'input/' + filename)
             elif validmeta:
                 #=========== Convert the uploaded file (if requested) ==============
 
@@ -2147,8 +2160,8 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                             success = False
                         if not success:
                             conversionerror = True
-                            fatalerror = "<error type=\"conversion\">The file " + xmlescape(filename) + " could not be converted</error>"
-                            jsonoutput['error'] = "The file could not be converted"
+                            jsonoutput['error'] = fatalerror = "Unable to convert"
+                            output += "<error>" + xmlescape(fatalerror) + "</error>"
                             jsonoutput['success'] = False
 
                 #====================== Validate the file itself ====================
@@ -2171,9 +2184,9 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         printdebug('(Validation error)')
                         #Too bad, everything worked out but the file itself doesn't validate.
                         #output += "<valid>no</valid>"
-                        fatalerror = "<error type=\"validation\">The file " + xmlescape(filename) + " did not validate, it is not in the proper expected format.</error>"
-                        jsonoutput['error'] = "The file " + filename.replace("'","") + " did not validate, it is not in the proper expected format."
+                        jsonoutput['error'] = fatalerror = "The file did not validate, it is not in the proper expected format."
                         jsonoutput['success'] = False
+                        output += "<error>" + xmlescape(fatalerror) + "</error>"
                         #remove upload
                         os.unlink(Project.path(project, user) + 'input/' + filename)
 
@@ -2189,12 +2202,12 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
     elif fatalerror:
         #fatal error return error message with 403 code
         printlog('Fatal Error during upload: ' + fatalerror)
-        return errorresponse(head + fatalerror,403)
+        return errorresponse(fatalerror,403, output)
     elif errors:
         #parameter errors, return XML output with 403 code
         printdebug('There were parameter errors during upload!')
         if returntype == 'json':
-            jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
+            jsonoutput['xml'] = str(base64.b64encode(output.encode('utf-8')),'utf-8') #embed XML in JSON for complete client-side processing
             return withheaders(flask.make_response(json.dumps(jsonoutput)), 'application/json', {'allow_origin': settings.ALLOW_ORIGIN})
         else:
             return withheaders(flask.make_response(output,403),headers={'allow_origin': settings.ALLOW_ORIGIN})
