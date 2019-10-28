@@ -15,7 +15,7 @@ def getreadme():
 
 setup(
     name = "SYSTEM_ID",
-    version = "0.1",
+    version = "0.1", #make sure SYSTEM_VERSION in your service configuration is set to the same value!
     author = "Unspecified", #adapt this
     description = ("Enter a description for your webservice here"),
     license = "GPL",

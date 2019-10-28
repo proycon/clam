@@ -62,6 +62,13 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 #Is this webservice embedded in a larger system? Like part of an institution or particular portal site. If so, mention the URL here.
 #SYSTEM_PARENT_URL = ""
 
+#The URL of a cover image to prominently display in the header of the interface. You may also want to set INTERFACEOPTIONS="centercover" to center it horizontally.
+#SYSTEM_COVER_URL = ""
+
+#URL to a website where users can register an account for use with this webservice. This link is only for human end
+#users, not an API endpoint.
+#SYSTEM_REGISTER_URL = ""
+
 # ======== LOCATION ===========
 
 #Either add a section for your host here, or

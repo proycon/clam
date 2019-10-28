@@ -26,6 +26,23 @@ directory.
 
 The ``ROOT`` directory will be automatically created upon the first run.
 
+General Webservice Metadata
+-------------------------------
+
+The following general metadata fields are available, setting them is strongly recommended:
+
+* ``SYSTEM_ID`` - The System ID, a short alphanumeric identifier for internal use only **(mandatory!)**
+* ``SYSTEM_NAME`` - System name, the way the system is presented to the world
+* ``SYSTEM_DESCRIPTION`` - An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML). If you want a more extensive description in the interface, possibly with HTML then see :ref:`custominterface`.
+* ``SYSTEM_VERSION`` - A version label of the underlying tool and/or this CLAM wrapper.
+* ``SYSTEM_AUTHOR`` - The author(s) of the underlying tool and/or this CLAM wrapper
+* ``SYSTEM_EMAIL`` - A single contact e-mail address
+* ``SYSTEM_URL`` - An assocated website, either for this webservice or the underlying software.
+* ``SYSTEM_PARENT_URL`` - You can set this to a website URL if this webservice embedded in a larger system? Like part of an institution or particular portal site. A small link back to this site will be generated in the navigation bar of the interface.
+* ``SYSTEM_COVER_URL`` - The URL of a cover image to prominently display in the header of the interface. You may also want to set ``INTERFACEOPTIONS="centercover"`` to center it horizontally.
+* ``SYSTEM_REGISTER_URL`` - URL to a website where users can register an account for use with this webservice. This
+  link is only for human end-users, no API endpoint.
+
 .. _sadmin:
 
 Server Administration
@@ -1161,8 +1178,8 @@ service is expected to return a HTTP 302 Redirect response which CLAM will subse
     * A forwarder does *NOT* perform any upload, it just passes a download link to a service, the remote
       service must also have the necessary authorization to use it.
 
-Working with pre-installed data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Input Sources: Working with pre-installed data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Rather than letting users upload files, CLAM also offers the possibility
 of pre-installing input data on the server. This feature is ideally
@@ -1233,6 +1250,50 @@ All files in the directory must be formatted according to this input
 template. Adding input sources for multiple input templates is done by
 simply defining multiple input sources.
 
+Constraints and Validation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to define additional constraints on input templates, because often it is not enough to know the format
+but you need more specific information about it that can be extracted from the file itself. Examples of such information
+are dimensions and colour depth for images, bitrate and duration for sound clips.
+
+These constaints are evaluated during validation of the input file, and can only be done if there is a validator
+implemented in the format class you are using. Aside from validating the validity of the file, the validator therefore
+also has the job to extract metadata from the file itself and make it available to CLAM (including it in the metadata
+assembled). Only then, constraints begin to play a role, as you can now constrain on inferred metadata rather than
+explicitly supplied input parameters.
+
+To actual keys you can use depends on the attributes defined by the format. Consider the following example which accepts
+FoLiA documents but requires that they are at least in version 2.0 or above:
+
+.. code-block:: python
+
+   InputTemplate('inputdoc', FoLiAXMLFormat,"Input Document",
+        RequireMeta(version_greaterthan="2.0"),
+        extension=".folia.xml"
+    )
+
+If you want to add multiple constraints, add multiple ``RequireMeta`` or ``ForbidMeta`` statements. If you specify
+multiple keyword arguments, they are treated as a *disjunction*, and the constraint will trigger if any of them test
+positively.
+
+The keyword arguments for constraints consist may contain one of the following operators, as indicated by their suffix.
+They are analogous to the ones used in Parameter Conditions.
+
+* ``_equals`` (the default one if there is no operator suffix)
+* ``_notequals``
+* ``_greaterthan``
+* ``_greaterequalthan``
+* ``_lessthan``
+* ``_lessequalthan``
+* ``_in`` - Checks if the value is in a list (a list in the pythonic sense)
+* ``_incommalist`` - Checkes if the value is in a comma separated string
+* ``_inspacelist`` - Checkes if the value is in a space separated string
+
+If you want to implement a validator for your custom format (a subclass of ``CLAMMetaData``), you need to overload and
+implement its ``validator()`` method.
+
+
 Multiple profiles, identical input templates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1251,6 +1312,11 @@ simply respecify the full input template, with the same ID as in the
 other profile. The most elegant solution however, is to instantiate the
 input template in a variable, prior to the profile definition, and then
 use this variable in both profiles.
+
+Although you can specify multiple profiles, only one profile can match per project run, and there should be no
+ambiguity.
+
+.. _custominterface:
 
 Customising the web interface
 -----------------------------------
@@ -1323,7 +1389,7 @@ web-interface:
 
 - ``centercover`` - Center the cover image horizontally.
 
-- ``coverheigh64``, ``coverheight100``, ``coverheight128``, ``coverheight192`` - Sets the height of the cover image.
+- ``coverheight64``, ``coverheight100``, ``coverheight128``, ``coverheight192`` - Sets the height of the cover image.
 
 
 .. _actions:
