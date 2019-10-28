@@ -36,7 +36,7 @@ def main():
     parser.add_argument('-d','--dirprefix',type=str, help="Directory prefix, rather than in current working directory", action='store', default=os.getcwd(), required=False)
     parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
     parser.add_argument('-p','--port', type=int,help="The port number for the HTTP webservice", action='store',default=8080,required=False)
-    parser.add_argument('-P','--pythonversion', type=str,help="Python version (2 or 3)", action='store',default='3',required=False)
+    parser.add_argument('-P','--pythonversion', type=str,help="Explicit python version, in case you have multiple installed. Note that python 2 is not supported!", action='store',default='3',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in production environments", action='store',default=8888,required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
@@ -123,7 +123,7 @@ def main():
         print("WARNING: Service configuration file " + sourcedir + '/' + args.sysid + ".py already seems to exists, courageously refusing to overwrite",file=sys.stderr)
         sys.exit(2)
 
-    if not os.path.exists(os.path.join(rootdir, 'setup_template.py')):
+    if not os.path.exists(os.path.join(rootdir, 'setup.py')):
         fin = io.open(os.path.join(CLAMDIR, 'config/setup_template.py'),'r',encoding='utf-8')
         fout = io.open(os.path.join(rootdir, 'setup.py'),'w',encoding='utf-8')
         for line in fin:
@@ -131,6 +131,16 @@ def main():
             print(line,end="",file=fout)
         fout.close()
         fin.close()
+        os.chmod(os.path.join(rootdir, 'setup.py'), 0o755)
+
+    if not os.path.exists(os.path.join(rootdir, 'MANIFEST.in')):
+        with open(os.path.join(rootdir, 'MANIFEST.in'),'w',encoding='utf-8') as fout:
+            fout.write("""include README*
+include {sysid}/*.py
+include {sysid}/*.sh
+include {sysid}/*.wsgi
+include {sysid}/*.yml
+""".format(sysid=args.sysid))
 
     if not os.path.exists(os.path.join(sourcedir, args.sysid + '_wrapper.py')):
         shutil.copyfile(os.path.join(CLAMDIR, 'wrappers','template.py'), os.path.join(sourcedir, args.sysid + '_wrapper.py'))
@@ -150,7 +160,10 @@ def main():
         f.write("from " + args.sysid + " import " + args.sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +args.sysid+ ")")
     os.chmod(os.path.join(sourcedir, args.sysid + '.wsgi'), 0o755)
 
-    with io.open(os.path.join(rootdir,'nginx-withurlprefix.conf'),'w',encoding='utf-8') as f:
+    deploydir = os.path.join(rootdir,"deployment-examples")
+    os.mkdir(deploydir)
+
+    with io.open(os.path.join(deploydir,'nginx-withurlprefix.conf'),'w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", include this in your server block in your nginx.conf
 location /{sysid}/static {{ alias {clamdir}/static; }}
 location = /{sysid} {{ rewrite ^ /{sysid}/; }}
@@ -161,7 +174,7 @@ location @{sysid} {{
 }}""".format(sysid=args.sysid,clamdir=CLAMDIR, uwsgiport=args.uwsgiport))
 
 
-    with io.open(os.path.join(rootdir,'nginx.conf'),'w',encoding='utf-8') as f:
+    with io.open(os.path.join(deploydir,'nginx.conf'),'w',encoding='utf-8') as f:
         f.write("""#Nginx example configuration using uwsgi (assuming your service runs at the root of the server!) include this from your server block in your nginx.conf
 location /static {{ alias {clamdir}/static; }}
 location / {{ try_files $uri @{sysid}; }}
@@ -178,7 +191,7 @@ location @{sysid} {{
     else:
         uwsgiplugin = 'python'
 
-    with io.open(os.path.join(rootdir,'apache-withurlprefix.conf'),'w',encoding='utf-8') as f:
+    with io.open(os.path.join(deploydir,'apache-withurlprefix.conf'),'w',encoding='utf-8') as f:
         f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", include this from your VirtualHost in your Apache configuration
 
 ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
@@ -191,7 +204,7 @@ Alias /{sysid}/static {clamdir}/static
 </Directory>
 """.format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
 
-    with io.open(os.path.join(rootdir,'apache.conf'),'w',encoding='utf-8') as f:
+    with io.open(os.path.join(deploydir,'apache.conf'),'w',encoding='utf-8') as f:
         f.write("""#Apache example configuration using mod-uwsgi-proxy (assuming your service runs at the virtualhost root!) insert this in your VirtualHost in your Apache configuration
 
 ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
@@ -210,7 +223,7 @@ Alias /static {clamdir}/static
 if [ ! -z "$VIRTUAL_ENV" ]; then
     python setup.py develop
 else
-    echo "No virtual environment detected, you have to take care of  running setup.py install or setup.py develop yourself!">&2
+    echo "No virtual environment detected, you have to take care of running python setup.py install or setup.py develop yourself!">&2
 fi
 clamservice -d {sysid}.{sysid}
 """.format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
@@ -229,6 +242,9 @@ clamservice -d {sysid}.{sysid}
         hostname = os.uname()[1]
     with io.open(os.path.join(sourcedir,args.sysid + '.' + hostname + '.yml'),'w',encoding='utf-8') as f:
         f.write("""
+#This is a host-specific configuration file for the webservice on {hostname}
+#Here you can add host-specific options. This file
+#always takes presence over configurations that are not host specific
 host: {hostname}
 root: {rootdir}/userdata
 port: {port}
@@ -237,6 +253,15 @@ port: {port}
         with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
             f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
 
+
+    with io.open(os.path.join(sourcedir,args.sysid + '.config.yml'),'w',encoding='utf-8') as f:
+        f.write("""
+#This is a generic configuration file for the webservice.
+#It will only be used when there is no host-specific configuration file
+#({sysid}.\$HOSTNAME.yml)
+root: /tmp/{sysid}-userdata
+port: {port}
+""".format(sysid=args.sysid,rootdir=rootdir,port=args.port))
 
     with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'w',encoding='utf-8') as f:
         f.write("""[uwsgi]
@@ -298,19 +323,21 @@ env/
 DEVELOP YOUR WEBSERVICE
 ----------------------------
 
-To develop your webservice, edit your service configuration file ``{sourcedir}/{sysid}.py`` , the host specific
-configuration file ``{sourcedir}/{sysid}.$HOSTNAME.yml``, and your system wrapper script
-``{sourcedir}/{sysid}_wrapper.py`` (or ``{sourcedir}/{sysid}_wrapper.sh`` if you prefer to use a simple shell script
-rather than Python).
+To develop your webservice, you need to edit the following file:
 
-Keep host-specific settings out of the service configuration file and instead put it in the respective
-config.$HOSTNAME.yml file that is automatically included by the service configuration. Create a new one for each host
-you plan to deploy this webservice on.
+* ``{sourcedir}/{sysid}.py`` - This is your service configuration file, here you fedinfed what goes in and out of the webservice.
+* ``{sourcedir}/{sysid}.$HOSTNAME.yml`` - This is an external host-specific configuration file, automatically loaded from the service configuration to set host-specific settings.
+* ``{sourcedir}/{sysid}.config.yml`` - This external configuration is less host-specific and used only if no host-specific file can be found.
+* ``{sourcedir}/{sysid}_wrapper.py`` - This is your system wrapper script where you implement the logic to call the tool that underlies your webservice (you can use ``{sourcedir}/{sysid}_wrapper.sh`` if you prefer to use a simple shell script instead of Python, other languages are possible too but we have no templates for those)
+
+It is strongly recommended to keep host-specific settings out of the service configuration file and instead put it in
+the respective config.$HOSTNAME.yml file that is automatically included by the service configuration. Create a new one
+for each host you plan to deploy this webservice on.
 
 Consult the CLAM Documentation and/or instruction videos on
-https://proycon.github.io/clam for further details on how to do this.
+https://proycon.github.io/clam for further details.
 
-Also don't forget to edit the metadata in the setup script ``{rootdir}/setup.py`` and run ``python setup.py install`` to install the webservice after you made any changes (the start scripts provided will do so automatically for you).
+Also don't forget to edit the metadata in the setup script ``{rootdir}/setup.py`` and run ``python setup.py install`` to install the webservice after you made any changes (the start scripts provided will do so automatically for you). This ``setup.py`` also enables you to publish your webservice to the Python Package Index.
 """.format(sourcedir=sourcedir,rootdir=rootdir,sysid=args.sysid)
 
 
@@ -345,7 +372,7 @@ For production use, we recommend using uwsgi in combination with a webserver
 such as Apache (with mod_uwsgi_proxy), or nginx. A uwsgi configuration has been generated ({sysid}.$HOSTNAME.ini); it is specific
 to the host you deploy the webservice on. This in turn loads the wsgi script ({sysid}.wsgi), which loads your webservice.
 
-Sample configurations for nginx and Apache have been generated as a starting point, add these to your server and then use the
+Sample configurations for nginx and Apache have been generated as a starting point in ``deployment-examples/`', add these to your server and then use the
 ``./startserver_production.sh`` script to launch CLAM using uwsgi.
 
 VERSION CONTROL
@@ -384,11 +411,9 @@ We strongly recommend the use of a Python virtual environment for your CLAM webs
 
 Install the webservice:
 
- $ python setup.py install
+ $ python3 setup.py install
 
-You may need to use sudo for global installation. We recommend the use of a Python virtual environment.
-
-The webservice runs from this directory directly. No further installation is necessary.""".format(pip=pip))
+You may need to use sudo for global installation. We recommend the use of a Python virtual environment. Only Python 3 and above are supported.""".format(pip=pip))
 
 
 if __name__ == "__main__":

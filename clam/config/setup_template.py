@@ -24,18 +24,19 @@ setup(
     packages=['SYSTEM_ID'],
     long_description=getreadme(),
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 5 - Production/Stable", #you may want to downgrade this
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        "Topic :: Text Processing :: Linguistic",
-        "Programming Language :: Python :: 2.7",  #remove this if needed!
+        "Topic :: Text Processing :: Linguistic", #check and remove or change if not relevant
         "Programming Language :: Python :: 3.4", #3.0, 3.1 and 3.2 are not supported by flask/CLAM
-        "Programming Language :: Python :: 3.5", #3.0, 3.1 and 3.2 are not supported by flask/CLAM
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Operating System :: POSIX",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],
-    package_data = {'SYSTEM_ID':['*.wsgi','*.yml'] },
+    package_data = {'SYSTEM_ID':['*.wsgi','*.yml','*.sh'] },
     include_package_data=True,
-    install_requires=['CLAM >= 2.3']
+    install_requires=['CLAM >= 3.0']
 )
