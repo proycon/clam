@@ -55,7 +55,7 @@ CLAM is entirely written in Python, runs on UNIX-derived systems, and is
 available as open source under the GNU Public License (v3). It is set up in a
 modular fashion, and offers an API, and as such is easily extendable. CLAM
 communicates in a transparent XML format, and using XSL transformation offers a
-full web 2.0 web-interface for human end users.
+modern client-side generated web-interface for human end users.
 
 
 Documentation
