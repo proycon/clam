@@ -1792,12 +1792,12 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 #good, extension matches (case independent). Let's just make sure the case is as defined exactly by the inputtemplate
                 if not filename[:-len(inputtemplate.extension) - 1]:
                     #file name is only an extension! add random component
-                    filename = "input" + str("%x" % random.getrandbits(64)) + filename
+                    filename = "input-" + str("%x" % random.getrandbits(64)) + filename
                 filename = filename[:-len(inputtemplate.extension) - 1] +  '.' + inputtemplate.extension
             else:
                 if not filename:
                     #no file name specified, add a random component
-                    filename = "input" + str("%x" % random.getrandbits(64))
+                    filename = "input-" + str("%x" % random.getrandbits(64))
                 filename = filename +  '.' + inputtemplate.extension
                 #return flask.make_response("Specified filename does not have the extension dictated by the inputtemplate ("+inputtemplate.extension+")") #403
 
