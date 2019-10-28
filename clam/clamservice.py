@@ -2438,7 +2438,7 @@ class ActionHandler:
                     output = action.viewer.view(io.StringIO(str(result)))
                     return withheaders(flask.Response(  (line for line in output ) , 200), action.viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                 else:
-                    return withheaders(flask.make_response(str(r)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
+                    return withheaders(flask.make_response(str(result)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
             else:
                 return result
         else:

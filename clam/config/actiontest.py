@@ -136,10 +136,11 @@ ACTIONS = [
     ]),
     Action(id="tabler",
            name="Tabler",
+           allowanonymous=True,
            description="Puts a comma separated list in a table (viewer test)",
            function=lambda x: x,
            parameters=[
-            StringParameter(id="text", name="Text", required=True),
+              TextParameter(id="text", name="Text", required=True),
            ],
            viewer=SimpleTableViewer(delimiter=",")
      )

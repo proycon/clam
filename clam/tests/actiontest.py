@@ -52,5 +52,10 @@ class ActionServiceTest(unittest.TestCase):
         result = self.client.action('multiply',x=2,y=3)
         self.assertEqual(result.strip(), "6")
 
+    def test4_action(self):
+        """Action Test (Function with viewer)"""
+        result = self.client.action('tabler',text="a,b,c")
+        self.assertTrue(result.startswith("<!DOCTYPE"))
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

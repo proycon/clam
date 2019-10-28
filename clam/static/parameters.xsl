@@ -105,6 +105,7 @@
     <textarea>
         <xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
         <xsl:attribute name="name"><xsl:value-of select="@id"/></xsl:attribute>
+        <xsl:attribute name="class">form-control</xsl:attribute>
         <xsl:value-of select="@value"/>
     </textarea>
     </td>
@@ -212,6 +213,7 @@
                 <td>
                 <xsl:element name="input">
                     <xsl:attribute name="type">radio</xsl:attribute>
+                    <xsl:attribute name="class">form-control</xsl:attribute>
                     <xsl:attribute name="id"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="name"><xsl:value-of select="../@id"/></xsl:attribute>
                     <xsl:attribute name="value"><xsl:value-of select="@id"/></xsl:attribute>

@@ -137,6 +137,9 @@ span.done {
 tr.even {
     background: #eee !important;
 }
+tr, td {
+    vertical-align: top;
+}
 
 table .file {
     font-family: monospace;
