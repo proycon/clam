@@ -121,6 +121,14 @@ RelaxNG schema for CLAM XML
             </element>
         </optional>
 		<optional>
+		    <element name="actions">
+                <a:documentation>Defines the actions that this webservice provides.</a:documentation>
+		        <zeroOrMore>
+                    <ref name="action"/>
+		        </zeroOrMore>
+            </element>
+        </optional>
+		<optional>
 		    <element name="projects">
 		        <a:documentation>Contains a list of all available projects. The list may differ based on the logged in user.</a:documentation>
 		        <zeroOrMore>
@@ -634,6 +642,41 @@ RelaxNG schema for CLAM XML
                 </attribute>
             </element>
         </oneOrMore>
+    </element>
+</define>
+
+<define name="action">
+    <element name="action">
+        <a:documentation>Defines an action, an action allows you to tie a URL to a script or Python function, and may take a number of parameters you explicitly specify. Each action is strictly independent of other actions, and completely separate of the projects, and by extension also of any files within projects and any profiles.  Unlike projects, which may run over a long time period and are suited for batch processing, actions are intended for real-time communication.  Typically they should return an answer in at most a couple of seconds.</a:documentation>
+        <attribute name="id">
+            <a:documentation>An ID for the action</a:documentation>
+        </attribute>
+        <optional>
+        <attribute name="name">
+            <a:documentation>A human readable name for the action.</a:documentation>
+        </attribute>
+        </optional>
+        <optional>
+        <attribute name="description">
+            <a:documentation>A human readable name for the parameter group.</a:documentation>
+        </attribute>
+        </optional>
+        <optional>
+        <attribute name="mimetype">
+            <a:documentation>The mimetype of the output format</a:documentation>
+        </attribute>
+        </optional>
+        <optional>
+        <attribute name="allowanonymous">
+            <a:documentation>Is anonymous usage of this action allowed? Value should be yes or no.</a:documentation>
+        </attribute>
+        </optional>
+        <zeroOrMore>
+            <choice>
+                <ref name="parameters" />
+                <ref name="viewer" />
+            </choice>
+        </zeroOrMore>
     </element>
 </define>
 

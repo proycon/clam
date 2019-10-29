@@ -1469,7 +1469,8 @@ import it from elsewhere. We can now use this as an action directly:
    ]
 
 Again, the parameters are passed in the order they are specified,
-irregardless of their names. A mismatch in parameters will result in an
+irregardless of their names. If you want to pass them as keyword arguments instead you can do so by setting
+``parameterstyle="keywords"``. A mismatch in parameters will result in an
 error as soon as you try to use the action. All parameters will always
 be validated prior to calling the script or function.
 

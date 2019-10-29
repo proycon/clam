@@ -2384,6 +2384,36 @@ class InputSource:
 
 
 class Action:
+    """This action paradigm allows you to specify *actions*, each action allows
+    you to tie a URL to a script or Python function, and may take a number
+    of parameters you explicitly specify. Each action is strictly
+    independent of other actions, and completely separate of the projects,
+    and by extension also of any files within projects and any profiles.
+    Unlike projects, which may run over a long time period and are suited
+    for batch processing, actions are intended for real-time communication.
+    Typically they should return an answer in at most a couple of seconds.i
+
+    Positional Arguments:
+
+    * a Parameter instance or a Viewer instance.
+
+    Keyword arguments:
+
+    * ``id`` - The ID of the action (mandatory)
+    * ``name`` - A human readable name, used in the interface
+    * ``description`` - A human readable description of the action, used in the interface
+    * ``command`` - The command to run, this is analogous to the COMMAND in the service configuration file and may contain parameters (most notably $PARAMETERS)
+    * ``function`` - The python function to call (use either this or ``command``)
+    * ``parameters`` -  List of parameter instances. By defailt, they will be passed in the order defined to the command or function.
+    * ``parameterstyle`` - Set to ``positional`` (default) or ``keywords``. Changes the way arguments are passed to the function.
+    * ``viewers`` -  List of viewer instances.
+    * ``mimetype`` -  The mimetype of the output (when no viewers are used).
+    * ``returncodes404`` - A list of command exit codes that will be mapped to HTTP 404 Not Found (defaults to: [4])
+    * ``returncodes403`` - A list of command exit codes that will be mapped to HTTP 403 Permission Denied (defaults to: [3])
+    * ``returncodes200`` - A list of command exit codes that will be mapped to HTTP 200 Ok (defaults to: [0])
+    * ``allowanonymous`` - Boolean indicating whether this action can be used without any authentication.
+    """
+
     def __init__(self, *args, **kwargs):
         if 'id' in kwargs:
             self.id = kwargs['id']
