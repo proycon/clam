@@ -1398,11 +1398,10 @@ web-interface:
 Actions
 ---------
 
-Since CLAM 0.9.11, a simple remote procedure call mechanism is available
-in addition to the more elaborate project paradigm.
+A simple remote procedure call mechanism is available in addition to the more elaborate project paradigm.
 
 This action paradigm allows you to specify *actions*, each action allows
-you to tie a URL to a script or Python function, and may take a number
+you to tie a URL to a script (command) or Python function, and may take a number
 of parameters you explicitly specify. Each action is strictly
 independent of other actions, and completely separate of the projects,
 and by extension also of any files within projects and any profiles.
@@ -1480,6 +1479,9 @@ HTTP 200) and as-is. It is therefore important to specify what MIME type
 the user can expect, the default is ``text/plain``, but for many
 applications ``text/html``, ``text/xml`` or ``application/json`` may be
 more appropriate.
+
+Alternatively, you can also associate viewers with an action, just like with output templates. In the interface, a user
+may then select one (or none) of those viewers to use for presenting the output.
 
 By default, actions listen to both GET and POST requests. You may
 constrain it explicitly by specifying ``method="GET"`` or
