@@ -43,7 +43,7 @@ body {
 */
 
 input[type="text"], select, textarea, .form-control, #editorfilename, #urluploadfile, #projectname {
-    background: #ddd;
+    background: #bbb;
 }
 
 input.start {
