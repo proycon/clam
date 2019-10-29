@@ -142,7 +142,7 @@ ACTIONS = [
            parameters=[
               TextParameter(id="text", name="Text", required=True),
            ],
-           viewer=SimpleTableViewer(delimiter=",")
+           viewer=SimpleTableViewer(id="simpletableviewer",delimiter=",")
      )
 ]
 
