@@ -447,6 +447,7 @@ def index(credentials = None):
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
+            customcss=settings.CUSTOMCSS,
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
@@ -503,6 +504,7 @@ def porch(credentials=None):
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
+            customcss=settings.CUSTOMCSS,
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
@@ -564,6 +566,7 @@ def info(credentials=None):
             accesstoken=None,
             interfaceoptions=settings.INTERFACEOPTIONS,
             customhtml=settings.CUSTOMHTML_INDEX,
+            customcss=settings.CUSTOMCSS,
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
@@ -1104,6 +1107,7 @@ class Project:
                 accesstoken=Project.getaccesstoken(user,project),
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
+                customcss=settings.CUSTOMCSS,
                 forwarders=[ forwarder(project, getrooturl()) for forwarder in  settings.FORWARDERS ],
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
@@ -2894,6 +2898,8 @@ def set_defaults():
         settings.SECRET_KEY = "%032x" % random.getrandbits(128)
     if 'INTERFACEOPTIONS' not in settingkeys:
         settings.INTERFACEOPTIONS = ""
+    if 'CUSTOMCSS' not in settingkeys:
+        settings.CUSTOMCSS = ""
     if 'CUSTOMHTML_INDEX' not in settingkeys:
         if os.path.exists(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html'):
             with io.open(settings.CLAMDIR + '/static/custom/' + settings.SYSTEM_ID  + '_index.html','r',encoding='utf-8') as f:

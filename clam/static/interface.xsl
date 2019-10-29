@@ -117,12 +117,6 @@
     <link rel="stylesheet" href="{/clam/@baseurl}/static/fineuploader.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
-    <!--
-    <script type="text/javascript"datatables src="{/clam/@baseurl}/static/jquery-1.8.3.min.js" />
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery-ui-1.9.2.custom.min.js" />
-    <script type="text/javascript" src="{/clam/@baseurl}/static/jquery.dataTables.min.js" />
-    -->
-
 
     <script src="http://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
@@ -196,6 +190,11 @@
 
     </script>
 
+    <xsl:if test="/clam/customcss">
+    <style>
+    <xsl:value-of select="/clam/customcss" />
+    </style>
+    </xsl:if>
 
   </head>
 </xsl:template>

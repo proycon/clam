@@ -1342,6 +1342,8 @@ following variables in the service configuration file:
 -  ``CUSTOMHTML_PROJECTFAILED`` - This text will be included in the
    project view when an error occurred while running the project
 
+-  ``CUSTOMCSS`` - This may hold custom CSS styling hat will be applied to the interface.
+
 As the HTML text will be embedded on the fly, take care *not* to include
 any headers. Only tags that go within the HTML ``body`` are permitted!
 Always use the utf-8 encoding and well-formed xhtml syntax.

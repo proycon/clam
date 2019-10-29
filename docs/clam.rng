@@ -120,6 +120,18 @@ RelaxNG schema for CLAM XML
                 <text />
             </element>
         </optional>
+        <optional>
+		<element name="customhtml">
+		    <a:documentation>Custom HTML for the interface</a:documentation>
+		    <text />
+		</element>
+        </optional>
+        <optional>
+		<element name="customcss">
+		    <a:documentation>Custom CSS for the interface</a:documentation>
+		    <text />
+		</element>
+        </optional>
 		<optional>
 		    <element name="actions">
                 <a:documentation>Defines the actions that this webservice provides.</a:documentation>
