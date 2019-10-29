@@ -272,6 +272,9 @@ ACTIONS = [
     #    IntegerParameter(id='y',name='Multiplier'),
     #   ],
     #   command=sys.path[0] + "/actions/multiply.sh $PARAMETERS"
+    #   tmpdir=False,     #if your command writes intermediate files, you need to set this to True i
+                          #(or to a specific directory), so temporary files can be written.
+                          #You can pass the actual directory in the command above by adding the parameter $TMPDIRECTORY .
     #   allowanonymous=False,
     #),
     #Action(id='multiply',name='Multiply',parameters=[

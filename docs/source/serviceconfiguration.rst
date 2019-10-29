@@ -1392,7 +1392,8 @@ web-interface:
 
 - ``centercover`` - Center the cover image horizontally.
 
-- ``coverheight64``, ``coverheight100``, ``coverheight128``, ``coverheight192`` - Sets the height of the cover image.
+- ``coverheight64``, ``coverheight100``, ``coverheight128``, ``coverheight192`` - Sets the height of the cover imag
+  (alternatively you can use the ``CUSTOMCSS`` setting and do it yourself)
 
 
 .. _actions:
