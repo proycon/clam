@@ -2408,16 +2408,25 @@ class Action:
             self.command = self.function = None #action won't be able to do anything!
 
 
+        #for functions only
+        if 'parameterstyle' in kwargs:
+            self.parameterstyle = kwargs['parameterstyle']
+        else:
+            self.parameterstyle = "positional"
+        assert self.parameterstyle in ('positional', 'keywords')
+
         if 'method' in kwargs:
             self.method = kwargs['method']
         else:
             self.method = None #all methods
 
+        self.viewers = []
         if 'viewer' in kwargs:
             assert(kwargs['viewer'], clam.common.viewers.AbstractViewer)
-            self.viewer = kwargs['viewer']
-        else:
-            self.viewer = None
+            self.viewers = [kwargs['viewer']]
+        elif 'viewers' in kwargs:
+            assert all( [ isinstance(x, clam.common.viewers.AbstractViewer) for x in kwargs['viewers']  ])
+            self.viewers = kwargs['viewers']
 
 
         self.parameters = []
@@ -2430,11 +2439,17 @@ class Action:
                 if isinstance(arg, clam.common.parameters.AbstractParameter):
                     self.parameters.append(arg)
                 elif isinstance(arg, clam.common.viewers.AbstractViewer):
-                    if self.viewer is not None:
-                        raise Exception("Can only set one viewer per Action!")
-                    self.viewer = arg
+                    self.viewers.append(arg)
                 else:
                     raise Exception("Expected Parameter or Viewer, got " + str(type(arg)))
+
+        if self.viewers and not 'viewer' in [ p.id for p in self.parameters ]:
+            #add a viewer parameter, it will be ignored when invoking the actual command or function
+            choices = [ (v.id, v.name) for v in self.viewers  ]
+            choices.append(("","Direct download"))
+            self.parameters.append( clam.common.parameters.ChoiceParameter(id="viewer", name="Result presentation", description="How do you want to present the results?", choices=choices, default=choices[0][0]) )
+
+
 
         if 'mimetype' in kwargs:
             self.mimetype = kwargs['mimetype']

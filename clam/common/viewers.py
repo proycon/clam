@@ -39,12 +39,8 @@ class AbstractViewer:
     mimetype = 'text/html'
 
     def __init__(self, **kwargs):
-        self.embed = False #Embed external sites as opposed to redirecting?
-        for key, value in kwargs.items():
-            if key == 'embed':
-                value = bool(value)
-                self.embed = value
-
+        if 'id' in kwargs:
+            self.id = kwargs['id']
 
     def view(self, file, **kwargs):
         """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""

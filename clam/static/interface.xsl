@@ -706,13 +706,13 @@
                     <xsl:when test="/clam/@oauth_access_token = ''">
                         <li class="nav-item active">
                             <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
+                            <a class="nav-link" href="{/clam/@baseurl}/"><xsl:if test="count(/clam/profiles/profile) > 0">1.&#160;</xsl:if><span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
                         </li>
                     </xsl:when>
                     <xsl:otherwise>
                         <li class="nav-item active">
                             <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}">1.&#160;<span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
+                            <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}"><xsl:if test="count(/clam/profiles/profile) > 0">1.&#160;</xsl:if><span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
                         </li>
                     </xsl:otherwise>
                 </xsl:choose>

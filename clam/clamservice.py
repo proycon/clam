@@ -2323,6 +2323,7 @@ class ActionHandler:
 
         printdebug("Performing action " + action.id)
 
+        viewer = None
 
         userdir =  settings.ROOT + "projects/" + user + '/'
 
@@ -2348,6 +2349,11 @@ class ActionHandler:
                             parameters += clam.common.data.shellsafe(value,'"')
                     except ValueError as e:
                         return withheaders(flask.make_response("Parameter " + paramid + " has an invalid value...",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+                if paramid == "viewer" and value:
+                    try:
+                        viewer = [ v for v in action.viewers if v.id == value ][0]
+                    except IndexError:
+                        return withheaders(flask.make_response("Requested viewer not found!", 404), "text/plain", {'allow_origin': settings.ALLOW_ORIGIN})
 
             if action.tmpdir is True or cmd.find('$TMPDIRECTORY') != -1:
                 tmpdir = os.path.join(settings.SESSIONDIR, 'atmp.' + str("%034x" % random.getrandbits(128)))
@@ -2407,12 +2413,12 @@ class ActionHandler:
                 if tmpdir:
                     shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
-                    if action.viewer:
-                        output = action.viewer.view(io.StringIO(stdoutdata))
+                    if viewer:
+                        output = viewer.view(io.StringIO(stdoutdata))
                         if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                             return output
                         else:
-                            return withheaders(flask.Response(  (line for line in output ) , 200), action.viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
+                            return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                     else:
                         #normal response without a viewer
                         return withheaders(flask.make_response(stdoutdata,200),action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN}) #200
@@ -2425,18 +2431,33 @@ class ActionHandler:
             else:
                 return withheaders(flask.make_response("Unable to launch process",500),headers={'allow_origin': settings.ALLOW_ORIGIN})
         elif action.function:
-            actionargs = [ x[1] for x in  ActionHandler.collect_parameters(action) ]
+            args = []
+            kwargs = {}
+            for _, value, paramid in ActionHandler.collect_parameters(action):
+                if paramid != 'viewer':
+                    args.append(value)
+                    kwargs[paramid] = value
+                else:
+                    if value:
+                        try:
+                            viewer = [ v for v in action.viewers if v.id == str(value) ][0]
+                        except IndexError:
+                            return withheaders(flask.make_response("Requested viewer not found!", 404), "text/plain", {'allow_origin': settings.ALLOW_ORIGIN})
+
             try:
-                result = action.function(*actionargs) #200
+                if action.parameterstyle == 'keywords':
+                    result = action.function(**kwargs)
+                else:
+                    result = action.function(*args)
             except Exception as e: #pylint: disable=broad-except
                 if isinstance(e, werkzeug.exceptions.HTTPException):
                     raise
                 else:
                     return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             if not isinstance(result, (flask.Response, werkzeug.wrappers.Response)):
-                if action.viewer:
-                    output = action.viewer.view(io.StringIO(str(result)))
-                    return withheaders(flask.Response(  (line for line in output ) , 200), action.viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
+                if viewer:
+                    output = viewer.view(io.StringIO(str(result)))
+                    return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                 else:
                     return withheaders(flask.make_response(str(result)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
             else:
