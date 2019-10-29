@@ -919,7 +919,7 @@
                         <table>
                             <xsl:apply-templates />
                         </table>
-                        <input class="btn btn-primary" type="submit" value="Submit" />
+                        <input class="btn btn-primary btn-block" type="submit" style="margin-top: 10px;" value="Run" />
                     </form>
                 </xsl:if>
             </xsl:for-each>
