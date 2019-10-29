@@ -26,7 +26,7 @@ import clam
 import sys
 import os
 
-REQUIRE_VERSION = 2.3
+REQUIRE_VERSION = 3.0
 
 CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
 WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
@@ -164,7 +164,7 @@ STYLE = 'classic'
 
 # ======== ENABLED VIEWERS ===========
 
-#In CUSTOM_VIEWERS you can specify a list of Python classes corresponding to extra formats.
+#In CUSTOM_VIEWERS you can specify a list of Python classes corresponding to extra viewers.
 #You can define the classes first, and then put them in CUSTOM_VIEWERS, as shown in this example:
 
 # CUSTOM_VIEWERS = [ MyXMLViewer ]
@@ -174,13 +174,13 @@ STYLE = 'classic'
 #Here you can specify additional interface options (space separated list), see the documentation for all allowed options
 #INTERFACEOPTIONS = "inputfromweb" #allow CLAM to download its input from a user-specified url
 
-# ======== PREINSTALLED DATA ===========
+# ======== PROJECTS: PREINSTALLED DATA ===========
 
 #INPUTSOURCES = [
 #    InputSource(id='sampledocs',label='Sample texts',path=ROOT+'/inputsources/sampledata',defaultmetadata=PlainTextFormat(None, encoding='utf-8') ),
 #]
 
-# ======== PROFILE DEFINITIONS ===========
+# ======== PROJECTS: PROFILE DEFINITIONS ===========
 
 #Define your profiles here. This is required for the project paradigm, but can be set to an empty list if you only use the action paradigm.
 
@@ -204,14 +204,16 @@ PROFILES = [
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this output template',
             SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            extension='.stats', #set an extension or set a filename:
+            removeextensions=[".txt"] #remove these extensions from the associated input prior to appending the output extension
+            extension='.stats', #set an output extension or set a filename:
             #filename='filename.stats',
-            unique=True
+            unique=True,
+            #If you want to associate any viewers with your output, then this is the place to do so!
         ),
     )
 ]
 
-# ======== COMMAND ===========
+# ======== PROJECTS: COMMAND ===========
 
 #The system command for the project paradigm.
 #It is recommended you set this to small wrapper
@@ -248,7 +250,7 @@ COMMAND = WEBSERVICEDIR + "/your-wrapper-script.py $DATAFILE $STATUSFILE $OUTPUT
 #are a list of instances from common/parameters.py
 
 PARAMETERS =  [
-    ('Group title', [
+    ('Group title', [   #change or comment this
         #BooleanParameter(id='createlexicon',name='Create Lexicon',description='Generate a separate overall lexicon?'),
         #ChoiceParameter(id='casesensitive',name='Case Sensitivity',description='Enable case sensitive behaviour?', choices=['yes','no'],default='no'),
         #StringParameter(id='author',name='Author',description='Sign output metadata with the specified author name',maxlength=255),
@@ -265,13 +267,35 @@ PARAMETERS =  [
 #variables are not available though, so there is no $DATAFILE, $STATUSFILE, $INPUTDIRECTORY, $OUTPUTDIRECTORY or $PROJECT.
 
 ACTIONS = [
-    #Action(id='multiply',name='Multiply',parameters=[IntegerParameter(id='x',name='Value'),IntegerParameter(id='y',name='Multiplier'), command=sys.path[0] + "/actions/multiply.sh $PARAMETERS" ])
-    #Action(id='multiply',name='Multiply',parameters=[IntegerParameter(id='x',name='Value'),IntegerParameter(id='y',name='Multiplier'), function=lambda x,y: x*y ])
+    #Action(id='multiply',name='Multiply',parameters=[
+    #    IntegerParameter(id='x',name='Value'),
+    #    IntegerParameter(id='y',name='Multiplier'),
+    #   ],
+    #   command=sys.path[0] + "/actions/multiply.sh $PARAMETERS"
+    #   allowanonymous=False,
+    #),
+    #Action(id='multiply',name='Multiply',parameters=[
+    #    IntegerParameter(id='x',name='Value'),
+    #    IntegerParameter(id='y',name='Multiplier')
+    #   ],
+    #   function=lambda x,y: x*y
+    #   allowanonymous=False,
+    #),
+    #Action(id="tabler",
+    #       name="Tabler",
+    #       allowanonymous=True,     #allow unauthenticated access to this action
+    #       description="Puts a comma separated list in a table (viewer example)",
+    #       function=lambda x: x,       #as you see, this function doesn't really do anything, we just demonstrate the viewer
+    #       parameters=[
+    #          TextParameter(id="text", name="Text", required=True),
+    #       ],
+    #       viewer=SimpleTableViewer(id="simpletableviewer",delimiter=",")
+    # )
 ]
 
 # ======= FORWARDERS =============
 
-#Global forwarders call a remote service, passing a backlink for the remote service to download an archive of all the output data. The remote service is expected to return a redirect (HTTP 302) . CLAM will insert the backlink where you put $BACKLINK in the url:
+#Global forwarders call a remote service, passing a backlink for the remote service to download an archive of ALL the output data. The remote service is expected to return a redirect (HTTP 302) . CLAM will insert the backlink where you put $BACKLINK in the url:
 
 #FORWARDERS = [
     #Forwarder(id='otherservice', name="Other service", description="", url="https://my.service.com/grabfrom=$BACKLINK")

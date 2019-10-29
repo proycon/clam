@@ -141,8 +141,7 @@ possible use-case.
    The CLAM Architecture
 
 CLAM presents two different paradigms for wrapping your script or
-application. The second is a new addition since CLAM 0.9.11 . You may
-use either or both at the same time.
+application. You may use either or both at the same time.
 
 #. *Project Paradigm* – Users create projects, upload files with
    optional parameters to those projects, and subsequently start the
@@ -150,10 +149,9 @@ use either or both at the same time.
    system may run for a long time and may do batch-processing on
    multiple input files.
 
-#. *Action Paradigm* – This is a more limited, and simple
-   remote-procedure call mechanism. Users interact in real-time with the
-   service on specific URLs, passing parameters. Unlike the project
-   paradigm, this is not suitable for complex operations on big-data.
+#. *Action Paradigm* – This is a more limited and simple remote-procedure call mechanism. Users interact in real-time
+   with the service on specific URLs, passing parameters, and obtaining a single result. Unlike the project paradigm,
+   this is not suitable for complex operations on big-data.
 
 A CLAM webservice needs the following three components from the service
 developer:

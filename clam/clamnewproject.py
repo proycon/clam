@@ -42,7 +42,7 @@ def main():
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
     parser.add_argument('--noninteractive',help="Non-interactive mode, don't ask questions", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
-    parser.add_argument('sysid',type=str, help='System ID')
+    parser.add_argument('sysid',type=str, help='System ID, an internal identifier for your project')
     args = parser.parse_args()
 
     createvenv = False
