@@ -54,7 +54,7 @@ class ActionServiceTest(unittest.TestCase):
 
     def test4_action(self):
         """Action Test (Function with viewer)"""
-        result = self.client.action('tabler',text="a,b,c")
+        result = self.client.action('tabler',text="a,b,c", viewer="simpletableviewer")
         self.assertTrue(result.startswith("<!DOCTYPE"))
 
 if __name__ == '__main__':

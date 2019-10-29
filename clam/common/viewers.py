@@ -43,8 +43,11 @@ class AbstractViewer:
             self.id = kwargs['id']
 
     def view(self, file, **kwargs):
-        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance. By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
+        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
         raise NotImplementedError
+
+    def xml(self, indent = ""):
+        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" />\n"
 
 class ForwardViewer(AbstractViewer):
     """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword paramter indirect=True on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""

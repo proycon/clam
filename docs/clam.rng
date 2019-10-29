@@ -103,7 +103,7 @@ RelaxNG schema for CLAM XML
             </element>
         </optional>
         <optional>
-            <element name="loginout">
+            <element name="logouturl">
                 <a:documentation>Defines an external URL that handles logouts</a:documentation>
                 <text />
             </element>
@@ -320,6 +320,7 @@ RelaxNG schema for CLAM XML
 											<ref name="parametercondition" />
 											<ref name="meta" />
                                             <ref name="constraint" />
+                                            <ref name="viewer" />
 										</choice>
 									</zeroOrMore>
 		                            <!-- Note: Converters and viewers are expressed with each individual output file in the output block rather than here -->
@@ -592,6 +593,24 @@ RelaxNG schema for CLAM XML
 			</element>
 		</optional>
 	</element>
+</define>
+
+<define name="viewer">
+    <element name="viewer">
+        <a:documentation>Registers a viewer for this output format</a:documentation>
+        <attribute name="id">
+            <a:documentation>An ID for the format</a:documentation>
+        </attribute>
+        <attribute name="name">
+            <a:documentation>A human readable name for the parameter group.</a:documentation>
+        </attribute>
+        <attribute name="type">
+            <a:documentation>The type of the format, refers to the python class that implements is.</a:documentation>
+        </attribute>
+        <attribute name="mimetype">
+            <a:documentation>The mimetype of the format</a:documentation>
+        </attribute>
+    </element>
 </define>
 
 

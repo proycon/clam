@@ -1990,6 +1990,8 @@ class OutputTemplate:
             xml += metafield.xml(indent + "    ") + "\n"
         for constraint in self.constraints:
             xml += constraint.xml(indent + "    ") + "\n"
+        for viewer in self.viewers:
+            xml += viewer.xml(indent + "    ") + "\n"
 
         xml += indent + "</OutputTemplate>"
         return xml
@@ -2447,7 +2449,7 @@ class Action:
             #add a viewer parameter, it will be ignored when invoking the actual command or function
             choices = [ (v.id, v.name) for v in self.viewers  ]
             choices.append(("","Direct download"))
-            self.parameters.append( clam.common.parameters.ChoiceParameter(id="viewer", name="Result presentation", description="How do you want to present the results?", choices=choices, default=choices[0][0]) )
+            self.parameters.append( clam.common.parameters.ChoiceParameter(id="viewer", name="Result presentation", description="How do you want to present the results?", choices=choices, default=choices[0][0], required=False) )
 
 
 
@@ -2496,6 +2498,8 @@ class Action:
         xml = indent + "<action id=\"" + self.id + "\" " + method + " name=\"" + self.name + "\" description=\"" +self.description + "\" mimetype=\"" + self.mimetype + "\" " + allowanonymous + ">\n"
         for parameter in self.parameters:
             xml += parameter.xml(indent+ "    ") + "\n"
+        for viewer in self.viewers:
+            xml += viewer.xml(indent + "    ") + "\n"
         xml += indent + "</action>\n"
         return xml
 
