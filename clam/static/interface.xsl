@@ -816,40 +816,14 @@
         </div>
 
 
-        <xsl:if test="count(/clam/actions/action) > 0">
-            <div id="actionindex" class="card parameters">
-                <div class="card-body">
-                <h2 class="card-title">Actions</h2>
-                <xsl:for-each select="/clam/actions/action">
-                    <h3><xsl:value-of select="./@name" /></h3>
-                    <p><xsl:value-of select="./@description" /></p>
-                    <form action="{/clam/@baseurl}/actions/{./@id}/">
-                        <xsl:choose>
-                            <xsl:when test="./@method = 'POST'">
-                                <xsl:attribute name="method">POST</xsl:attribute>
-                                <xsl:attribute name="enctype">multipart/form-data</xsl:attribute>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:attribute name="method">GET</xsl:attribute>
-                                <xsl:attribute name="enctype">application/x-www-form-urlencoded</xsl:attribute>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                        <table>
-                            <xsl:apply-templates />
-                        </table>
-                        <input class="btn btn-primary" type="submit" value="Submit" />
-                    </form>
-                </xsl:for-each>
-                </div>
-            </div>
-        </xsl:if>
+        <xsl:call-template name="actions" />
 
         <xsl:choose>
-        <xsl:when test="//clam/@user = 'anonymous' and //clam/@authentication != 'none'">
+        <xsl:when test="/clam/@user = 'anonymous' and /clam/@authentication != 'none' and (/clam/profiles or /clam/actions[not(@allowanonymous='yes')])">
         <div id="porch" class="card">
             <div class="card-body">
                 <p class="alert alert-info">
-                You will be asked to authenticate when you continue to use this service.
+                You will be asked to authenticate when you continue to use the rest of this service, by clicking the button below.
                 <xsl:if test="/clam/system_register_url">
                 If you do not have an account yet, you can <a href="{/clam/system_register_url}">register one here</a>.
                 </xsl:if>
@@ -921,5 +895,38 @@
 
 
 </xsl:template>
+
+<xsl:template name="actions">
+    <xsl:variable name="anonymousonly" select="//clam/@user = 'anonymous' and //clam/@authentication != 'none'" />
+    <xsl:if test="count(/clam/actions/action) > 0">
+        <div id="actionindex" class="card parameters">
+            <div class="card-body">
+            <xsl:for-each select="/clam/actions/action">
+                <xsl:if test="not($anonymousonly) or ($anonymousonly and ./@allowanonymous = 'yes')">
+                    <h3><xsl:value-of select="./@name" /></h3>
+                    <p><xsl:value-of select="./@description" /></p>
+                    <form action="{/clam/@baseurl}/actions/{./@id}/">
+                        <xsl:choose>
+                            <xsl:when test="./@method = 'POST'">
+                                <xsl:attribute name="method">POST</xsl:attribute>
+                                <xsl:attribute name="enctype">multipart/form-data</xsl:attribute>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:attribute name="method">GET</xsl:attribute>
+                                <xsl:attribute name="enctype">application/x-www-form-urlencoded</xsl:attribute>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                        <table>
+                            <xsl:apply-templates />
+                        </table>
+                        <input class="btn btn-primary" type="submit" value="Submit" />
+                    </form>
+                </xsl:if>
+            </xsl:for-each>
+            </div>
+        </div>
+    </xsl:if>
+</xsl:template>
+
 
 </xsl:stylesheet>

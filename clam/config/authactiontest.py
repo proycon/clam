@@ -28,7 +28,7 @@ from clam.common.data import *
 from clam.common.digestauth import pwhash
 import sys
 
-REQUIRE_VERSION = "0.99"
+REQUIRE_VERSION = "3.0"
 
 # ======== GENERAL INFORMATION ===========
 
@@ -36,13 +36,13 @@ REQUIRE_VERSION = "0.99"
 
 
 #The System ID, a short alphanumeric identifier for internal use only
-SYSTEM_ID = "actiontest"
+SYSTEM_ID = "authactiontest"
 
 #System name, the way the system is presented to the world
-SYSTEM_NAME = "actiontest"
+SYSTEM_NAME = "Action test"
 
 #An informative description for this system (this should be fairly short, about one paragraph, and may not contain HTML)
-SYSTEM_DESCRIPTION = "Example of CLAM Actions"
+SYSTEM_DESCRIPTION = "Example of CLAM Actions with authentication"
 
 # ======== LOCATION ===========
 
@@ -76,7 +76,8 @@ PORT= 8080
 #set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
 #REALM = SYSTEM_ID
 
-USERS = None #no user authentication/security (this is not recommended for production environments!)
+#Users and passwords
+USERS = {'proycon': pwhash('proycon',SYSTEM_ID,'secret'), 'antal': pwhash('antal',SYSTEM_ID,'secret')}
 
 ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
 

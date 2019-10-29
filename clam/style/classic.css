@@ -76,12 +76,6 @@ input.start {
 
 
 
-a {
-	color: #574b32;
-}
-a:visited {
-	color: #6d6450;
-}
 
 
 #container .qq-upload-button {
@@ -175,4 +169,7 @@ table .file {
 }
 .qq-upload-status-text {
     font-size: 90%;
+}
+textarea.form-control {
+    height: 240px;
 }
