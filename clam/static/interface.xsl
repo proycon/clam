@@ -106,7 +106,7 @@
       <meta http-equiv="refresh" content="2" />
     </xsl:if>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title><xsl:value-of select="@name"/> :: <xsl:value-of select="@project"/></title>
+    <title><xsl:value-of select="@name"/><xsl:if test="@project"> :: <xsl:value-of select="@project"/></xsl:if></title>
 
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
