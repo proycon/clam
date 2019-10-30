@@ -159,7 +159,7 @@ table .file {
     z-index: 50;
     word-wrap: break-word;
 }
-#customhtml alert {
+#customhtml .alert {
     clear: right;
 }
 #customhtml {
