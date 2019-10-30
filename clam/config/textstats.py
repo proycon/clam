@@ -24,7 +24,7 @@ from clam.common.digestauth import pwhash
 import clam
 import sys
 
-REQUIRE_VERSION = 0.99
+REQUIRE_VERSION = "3.0"
 CLAMDIR = clam.__path__[0]
 
 # ======== GENERAL INFORMATION ===========
