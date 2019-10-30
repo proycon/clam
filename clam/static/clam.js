@@ -447,7 +447,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    }
    inputtemplate_options.sort(function(a,b){ return (a[0]<b[0]?-1:(a[0]>b[0]?1:0)); } );
    var inputtemplate_options_string = "";
-   for (var i = 0; i < inputtemplates.length; i++) {
+   for (var i = 0; i < inputtemplates_options.length; i++) {
        inputtemplate_options_string += inputtemplate_options[i][1];
    }
    $(".inputtemplates").html(inputtemplate_options_string);
