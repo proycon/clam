@@ -34,7 +34,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.0.1'
+VERSION = '3.0.2'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2774,13 +2774,15 @@ def loadconfig(callername, required=True):
     else:
         return False
 
-def resolveconfigvariables(value):
+def resolveconfigvariables(value, settingsmodule):
     """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
         variables = re.findall(r"\{\{\w+\}\}", value)
         for v in variables:
             if v.strip('{}') in os.environ:
                 value = value.replace(v,os.environ[v.strip('{}')])
+            elif hasattr(settingsmodule, v.strip('{}').upper()):
+                value = value.replace(v,getattr(settingsmodule, v.strip('{}').upper()))
             else:
                 print("Undefined environment variable: " + v.strip('{}'),file=sys.stderr)
                 value = value.replace(v,"")
@@ -2792,7 +2794,7 @@ def loadconfigfile(configfile, settingsmodule):
     with io.open(configfile,'r', encoding='utf-8') as f:
         data = yaml.safe_load(f.read())
     if 'include' in data and data['include']:
-        value = resolveconfigvariables(data['include'])
+        value = resolveconfigvariables(data['include'], settingsmodule)
         try:
             if isinstance(value,str):
                 loadconfigfile(value, settingsmodule)
@@ -2803,7 +2805,7 @@ def loadconfigfile(configfile, settingsmodule):
             raise ConfigurationError("Unable to load included configuration file: " + item)
     for key, value in data.items():
         #replace variables
-        setattr(settingsmodule,key.upper(), resolveconfigvariables(value))
+        setattr(settingsmodule,key.upper(), resolveconfigvariables(value, settingsmodule))
     return True
 
 class AbstractConverter:
