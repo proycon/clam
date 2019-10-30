@@ -204,7 +204,7 @@ class FLATViewer(AbstractViewer):
 
     def view(self, file, **kwargs):
         #filename will contain a random component to prevent clashes
-        if hasattr(file, filename):
+        if hasattr(file, "filename"):
             filename = os.path.basename(file.filename).replace('.folia.xml','').replace('.xml','') +  str("%034x" % random.getrandbits(128)) + '.folia.xml'
         else:
             filename = "input-" + str("%x" % random.getrandbits(128)) + '.folia.xml'
