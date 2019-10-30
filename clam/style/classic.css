@@ -155,9 +155,13 @@ table .file {
 
 #systeminfo {
     float: right;
-    width: 320px;
+    width: 350px;
+    z-index: 50;
+    word-wrap: break-word;
 }
-
+#customhtml alert {
+    clear: right;
+}
 #customhtml {
     margin-top: 10px;
 }
@@ -173,3 +177,4 @@ table .file {
 textarea.form-control {
     height: 240px;
 }
+
