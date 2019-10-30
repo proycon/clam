@@ -1262,13 +1262,14 @@ class CLAMMetaData:
                         raise KeyError("Invalid attribute '" + key + " specified. But this format does not allow custom attributes. (format: " + self.__class__.__name__ + ", file: " + str(file) + ")")
 
             for key, attribute in self.attributes.items():
-                if attribute.required and not key in self:
-                    raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
-                elif isinstance(attribute, clam.common.parameters.StaticParameter):
-                    self[key] = attribute.value
-                elif key in self:
-                    if not attribute.validate(self[key]):
-                        raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value that violates the format's attributes") #pylint: disable=unsubscriptable-object
+                if isinstance(attribute, clam.common.parameters.AbstractParameter): #don't break old-style attributes (just ignore them)
+                    if attribute.required and not key in self:
+                        raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
+                    elif isinstance(attribute, clam.common.parameters.StaticParameter):
+                        self[key] = attribute.value
+                    elif key in self:
+                        if not attribute.validate(self[key]):
+                            raise ValueError("Attribute assignment " + key +  "=" + self[key] + " has an invalid value that violates the format's attributes") #pylint: disable=unsubscriptable-object
 
         self.validate()
 
