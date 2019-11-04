@@ -823,8 +823,8 @@
             <div class="card-body">
                 <p class="alert alert-info">
                 You will be asked to authenticate when you continue to use the rest of this service, by clicking the button below.
-                <xsl:if test="/clam/system_register_url">
-                If you do not have an account yet, you can <a href="{/clam/system_register_url}">register one here</a>.
+                <xsl:if test="/clam/registerurl">
+                If you do not have an account yet, you can <a href="{/clam/registerurl}">register here</a>.
                 </xsl:if>
                 </p>
 
