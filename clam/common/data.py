@@ -34,7 +34,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.0.5'
+VERSION = '3.0.6'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2803,7 +2803,7 @@ def loadconfigfile(configfile, settingsmodule):
                 for item in value:
                     loadconfigfile(item, settingsmodule)
         except:
-            raise ConfigurationError("Unable to load included configuration file: " + item)
+            raise ConfigurationError("Unable to load included configuration file: " + repr(value))
     for key, value in data.items():
         #replace variables
         setattr(settingsmodule,key.upper(), resolveconfigvariables(value, settingsmodule))
