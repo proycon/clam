@@ -23,7 +23,7 @@ import time
 import signal
 import shutil
 
-VERSION = '3.0.6'
+VERSION = '3.0.7'
 
 sys.path.append(sys.path[0] + '/..')
 

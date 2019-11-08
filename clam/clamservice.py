@@ -2291,9 +2291,9 @@ def uploader(project, credentials=None):
 class ActionHandler:
 
     @staticmethod
-    def find_action( actionid, method):
+    def find_action( actionid, method=None):
         for action in settings.ACTIONS:
-            if action.id == actionid and (not action.method or method == action.method):
+            if action.id == actionid and (not action.method or not method or method == action.method):
                 return action
         raise Exception("No such action: " + actionid)
 
@@ -2321,7 +2321,7 @@ class ActionHandler:
     def do( actionid, method, user="anonymous", oauth_access_token=""): #pylint: disable=too-many-return-statements
         try:
             printdebug("Looking for action " + actionid)
-            action = ActionHandler.find_action(actionid, 'GET')
+            action = ActionHandler.find_action(actionid, method)
         except:
             return withheaders(flask.make_response("Action does not exist",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 

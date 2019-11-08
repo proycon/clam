@@ -34,7 +34,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.0.6'
+VERSION = '3.0.7'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2409,6 +2409,7 @@ class Action:
     * ``parameterstyle`` - Set to ``positional`` (default) or ``keywords``. Changes the way arguments are passed to the function.
     * ``viewers`` -  List of viewer instances.
     * ``mimetype`` -  The mimetype of the output (when no viewers are used).
+    * ``method`` -  The HTTP Method to allow, set to string GET, POST or the None value to allow all methods.
     * ``returncodes404`` - A list of command exit codes that will be mapped to HTTP 404 Not Found (defaults to: [4])
     * ``returncodes403`` - A list of command exit codes that will be mapped to HTTP 403 Permission Denied (defaults to: [3])
     * ``returncodes200`` - A list of command exit codes that will be mapped to HTTP 200 Ok (defaults to: [0])
