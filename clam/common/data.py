@@ -687,13 +687,23 @@ class CLAMData:
     def __getitem__(self, parameter_id):
         """Return the value of the specified global parameter"""
         try:
-            return self.parameter(parameter_id).value
+            param = self.parameter(parameter_id)
+            if param.hasvalue:
+                return param.value
+            else:
+                if isinstance(param, clam.common.parameters.BooleanParameter):
+                    return False #booleans that have no explicit value simply default to false
+                raise KeyError("No such parameter passed: " + parameter_id)
         except KeyError:
             raise
 
     def get(self, parameter_id, default=None):
         try:
-            return self[parameter_id]
+            param = self.parameter(parameter_id)
+            if param.hasvalue:
+                return param.value
+            else:
+                return default
         except KeyError:
             return default
 

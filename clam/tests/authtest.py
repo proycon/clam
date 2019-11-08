@@ -263,7 +263,7 @@ class ExtensiveServiceTest(unittest.TestCase):
         while data.status != clam.common.status.DONE:
             time.sleep(1) #wait 1 second before polling status
             data = self.client.get(self.project) #get status again
-        self.assertFalse(data.errors)
+        self.assertFalse(data.errors, "Checking for absence of errors (" + data.errormsg + ")")
         self.assertTrue(isinstance(data.output, list))
         self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
         self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])
