@@ -102,6 +102,10 @@ class FrequencyListFormat(CLAMMetaData):
     name = "My Dummy text format"
     mimetype = 'text/plain'
 
+    def httpheaders(self):
+        """HTTP headers to output for this format. Yields (key,value) tuples."""
+        yield ("Content-Type", self.mimetype + "; charset=" + self['encoding'])
+
 CUSTOM_FORMATS = [ FrequencyListFormat ]
 
 # ======= INTERFACE OPTIONS ===========
