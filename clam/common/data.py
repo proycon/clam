@@ -493,6 +493,7 @@ class CLAMData:
 
         self.system_id = ""
         self.system_name = ""
+        self.system_author = ""
         self.system_version = ""
         self.system_email = ""
         self.system_license = ""
