@@ -503,6 +503,7 @@ class CLAMData:
         self.system_register_url = ""
         self.system_cover_url  = ""
         self.description = ""
+        self.authentication = "none"
 
         #: String containing the base URL of the webserivice
         self.baseurl = ''
@@ -566,6 +567,8 @@ class CLAMData:
             self.project = root.attrib['project']
         else:
             self.project = None
+        if 'authentication' in root.attrib:
+            self.authentication = root.attrib['authentication']
         if 'baseurl' in root.attrib:
             self.baseurl = root.attrib['baseurl']
             if self.project:
