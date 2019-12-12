@@ -594,6 +594,8 @@ class CLAMData:
                 self.system_url = node.text
             elif node.tag == "parenturl":
                 self.system_parent_url = node.text
+            elif node.tag == "loginurl":
+                self.system_login_url = node.text
             elif node.tag == "registerurl":
                 self.system_register_url = node.text
             elif node.tag == "version":
