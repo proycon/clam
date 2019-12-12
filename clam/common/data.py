@@ -586,8 +586,24 @@ class CLAMData:
                 self.description = node.text
             elif node.tag == "version":
                 self.system_version = node.text
+            elif node.tag == "author":
+                self.system_author = node.text
             elif node.tag == "email":
                 self.system_email = node.text
+            elif node.tag == "url":
+                self.system_url = node.text
+            elif node.tag == "parenturl":
+                self.system_parent_url = node.text
+            elif node.tag == "registerurl":
+                self.system_register_url = node.text
+            elif node.tag == "version":
+                self.system_version = node.text
+            elif node.tag == "affiliation":
+                self.system_affiliation = node.text
+            elif node.tag == "license":
+                self.system_license = node.text
+            elif node.tag == "coverurl":
+                self.system_coverurl = node.text
             elif node.tag == 'status':
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
