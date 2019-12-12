@@ -495,6 +495,12 @@ class CLAMData:
         self.system_name = ""
         self.system_version = ""
         self.system_email = ""
+        self.system_license = ""
+        self.system_url = ""
+        self.system_parent_url = ""
+        self.system_login_url = ""
+        self.system_register_url = ""
+        self.system_cover_url  = ""
         self.description = ""
 
         #: String containing the base URL of the webserivice
@@ -605,7 +611,7 @@ class CLAMData:
             elif node.tag == "license":
                 self.system_license = node.text
             elif node.tag == "coverurl":
-                self.system_coverurl = node.text
+                self.system_cover_url = node.text
             elif node.tag == 'status':
                 self.status = int(node.attrib['code'])
                 self.statusmessage  = node.attrib['message']
