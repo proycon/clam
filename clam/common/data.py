@@ -502,6 +502,7 @@ class CLAMData:
         self.system_login_url = ""
         self.system_register_url = ""
         self.system_cover_url  = ""
+        self.system_affiliation = ""
         self.description = ""
         self.authentication = "none"
 
