@@ -37,6 +37,7 @@ import flask
 import werkzeug
 import requests
 import base64
+import copy
 
 import clam.common.status
 import clam.common.parameters
@@ -2311,6 +2312,7 @@ class ActionHandler:
                     flag = parameter.paramflag
                 else:
                     flag = None
+                parameter = copy.deepcopy(parameter) #always operate on a COPY of the parameter
                 if not parameter.set(data[parameter.id]):
                     raise clam.common.data.ParameterError("Invalid value for parameter " + parameter.id + ": " + parameter.error)
                 else:
