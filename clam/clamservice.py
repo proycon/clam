@@ -1525,7 +1525,10 @@ class Project:
                     os.waitpid(pid, 0) #wait for process to finish
                     os.unlink(Project.path(project, user) + '.download')
 
-            extraheaders = {'allow_origin': settings.ALLOW_ORIGIN }
+            extraheaders = {
+                'allow_origin': settings.ALLOW_ORIGIN,
+                'Content-Disposition': 'attachment; filename="' + project +  '.' + format + '"'
+            }
             if contentencoding:
                 extraheaders['Content-Encoding'] = contentencoding
             return withheaders(flask.Response( getbinarydata(path) ), contenttype, extraheaders )
