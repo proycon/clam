@@ -144,7 +144,8 @@ ACTIONS = [
               TextParameter(id="text", name="Text", required=True),
            ],
            viewer=SimpleTableViewer(id="simpletableviewer",delimiter=",")
-     )
+     ),
+    Action(id="returnuser",name="returnuser",description="Return user", command="echo $USERNAME")
 ]
 
 

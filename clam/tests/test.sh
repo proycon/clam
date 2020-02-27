@@ -140,6 +140,24 @@ echo "Stopping clam service" >&2
 kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
 sleep 2
 
+echo "Starting clam service 'authactiontest'" >&2
+clamservice -d clam.config.authactiontest 2> authactiontest.server.log &
+sleep 5
+
+echo "Running actions tests:" >&2
+python authactiontest.py
+if [ $? -ne 0 ]; then
+   echo "ERROR: AuthAction test failed!!" >&2
+   GOOD=0
+   echo "<--------------------- authactiontest.server.log --------------------------------->" >&2
+   cat authactiontest.server.log >&2
+   echo "</-------------------- authactiontest.server.log --------------------------------->" >&2
+fi
+
+echo "Stopping clam service" >&2
+kill $(ps aux | grep 'clamservice' | awk '{print $2}') 2>/dev/null
+sleep 2
+
 echo "Starting clam service 'constrainttest'" >&2
 clamservice -d clam.config.constrainttest 2> constrainttest.server.log &
 sleep 5
