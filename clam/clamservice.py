@@ -2376,7 +2376,14 @@ class ActionHandler:
             else:
                 tmpdir = None
                 passdir = 'NONE'
-                passcwd = userdir
+                if os.path.exists(userdir):
+                    passcwd = userdir
+                elif 'TMPDIR' in os.environ and os.path.exists(os.environ['TMPDIR']):
+                    #fallback, not user-specific!
+                    passcwd = os.environ['TMPDIR']
+                else:
+                    #fallback, not user-specific!
+                    passcwd = "/tmp"
 
             if tmpdir:
                 try:
