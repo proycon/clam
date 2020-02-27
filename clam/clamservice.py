@@ -249,11 +249,20 @@ class Logout(object):
 
 
 
-def parsecredentials(credentials):
+def parsecredentials(credentials, verbose=False):
     oauth_access_token = ""
+    _401response = None
+
     if settings.OAUTH and isinstance(credentials, tuple):
         oauth_access_token = credentials[1]
         user = credentials[0]
+    elif isinstance(credentials, dict):
+        if 'user' in credentials:
+            user = credentials['user']
+        if 'oauth_access_token' in credentials:
+            oauth_access_token = credentials['oauth_access_token']
+        if '401response' in credentials:
+            _401response = credentials['401response']
     elif credentials:
         if isinstance(credentials, tuple):
             user = credentials[0]
@@ -264,7 +273,20 @@ def parsecredentials(credentials):
 
     if '/' in user or user == '.' or user == '..' or len(user) > 200:
         return withheaders(flask.make_response("Username invalid",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
-    return user, oauth_access_token
+    if verbose:
+        authtype = "none"
+        if settings.OAUTH:
+            authtype = "oauth"
+        elif settings.USERS or settings.USERS_MYSQL:
+            if settings.BASICAUTH and settings.DIGESTAUTH:
+                authtype = "multi"
+            elif settings.BASICAUTH:
+                authtype = "basic"
+            elif settings.DIGESTAUTH:
+                authtype = "digest"
+        return {'user': user, 'oauth_access_token': oauth_access_token, '401response': _401response, 'type': authtype}
+    else:
+        return user, oauth_access_token
 
 
 def auth_type():
@@ -2483,21 +2505,21 @@ class ActionHandler:
             raise Exception("No command or function defined for action " + actionid)
 
     @staticmethod
-    def do_auth(actionid, method, credentials=None):
-        user, oauth_access_token = parsecredentials(credentials)
-        return ActionHandler.do(actionid, method, user, oauth_access_token)
-
-    @staticmethod
     def run(actionid, method, credentials=None):
-        #check whether the action requires authentication or allows anonymous users:
+        credentials = parsecredentials(credentials, verbose=True) #verbose returns a more verbose dictionary of credentials
         action = ActionHandler.find_action(actionid, method)
-        if action.allowanonymous:
-            user = "anonymous"
-            oauth_access_token = ""
-            return ActionHandler.do(actionid, method,user,oauth_access_token)
+        if action.allowanonymous or credentials['user'] != 'anonymous' or credentials['type'] == "none":
+            return ActionHandler.do(actionid, method,credentials['user'],credentials['oauth_access_token'] if 'oauth_access_token' in credentials else "")
+        elif '401response' in credentials and credentials['401response'] is not None:
+            #we are anonymous but this action does not allow that:
+            printdebug("(anonymous access not allowed, returning deffered 401 response)")
+            return credentials['401response']
         else:
-            return ActionHandler.do_auth(actionid, method, credentials)
-
+            #we are anonymous but this action does not allow that:
+            printdebug("(anonymous access not allowed, crafting dummy 401 response)")
+            res = flask.make_response("Authorization required")
+            res.status_code = 401
+            return res
 
     @staticmethod
     def GET(actionid, credentials=None):
@@ -2679,10 +2701,12 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST), methods=['POST'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT), methods=['PUT'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE), methods=['DELETE'] )
+        #Authentication for handler is handled deeper in the ActionHandler, depending on whether allowanonymous is set
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET, optional=True), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST, optional=True), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_put2', self.auth.require_login(ActionHandler.PUT, optional=True), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_delete2', self.auth.require_login(ActionHandler.DELETE, optional=True), methods=['DELETE'] )
+
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/status', 'project_status_json2', Project.status_json, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/upload', 'project_uploader2', uploader, methods=['POST'] ) #has it's own login mechanism
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>', 'project_get2', self.auth.require_login(Project.get), methods=['GET'] )
@@ -2701,10 +2725,11 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/download/<targetuser>/<project>/<type>/<filename>/', 'admindownloader', self.auth.require_login(Admin.downloader), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/admin/<command>/<targetuser>/<project>/', 'adminhandler', self.auth.require_login(Admin.handler), methods=['GET'] )
         #Authentication for handler is handled deeper in the ActionHandler, depending on whether allowanonymous is set
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_get', ActionHandler.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_post', ActionHandler.POST, methods=['POST'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_put', ActionHandler.PUT, methods=['PUT'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_delete', ActionHandler.DELETE, methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_get', self.auth.require_login(ActionHandler.GET, optional=True), methods=['GET'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_post', self.auth.require_login(ActionHandler.POST, optional=True), methods=['POST'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_put', self.auth.require_login(ActionHandler.PUT, optional=True), methods=['PUT'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>/', 'action_delete', self.auth.require_login(ActionHandler.DELETE, optional=True), methods=['DELETE'] )
+
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/zip/', 'project_download_zip', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/gz/', 'project_download_targz', self.auth.require_login(Project.download_targz), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )

@@ -87,7 +87,7 @@ class HTTPAuth(object):
                     self.printdebug(msg)
                     if optional:
                         self.printdebug("Login was optional, falling back to anonymous login")
-                        kwargs['credentials'] = 'anonymous'
+                        kwargs['credentials'] = {'user':'anonymous', '401response': self.auth_error_callback() }
                         return f(*args,**kwargs)
                     else:
                         return self.auth_error_callback()
@@ -333,7 +333,12 @@ class MultiAuth(object):
                 self.printdebug("No authorization header passed by " + remote_addr)
                 if optional:
                     self.printdebug("Login was optional, falling back to anonymous login")
-                    kwargs['credentials'] = 'anonymous'
+                    res = flask.make_response("Authorization required")
+                    res.status_code = 401
+                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                    for auth in self.additional_auth:
+                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                    kwargs['credentials'] = {'user': 'anonymous','401response': res}
                     return f(*args,**kwargs)
                 else:
                     flask.request.data #clear receive buffer of pending data
@@ -401,7 +406,15 @@ class OAuth2(HTTPAuth):
                     if optional:
                         #unless logins are optional...
                         self.printdebug("Login was optional, falling back to anonymous login")
-                        kwargs['credentials'] = 'anonymous'
+
+                        #forward to login (the caller can decide whether to use this)
+                        kwargslogin = {'redirect_uri': self.redirect_url}
+                        if self.scope:
+                            kwargslogin['scope'] = self.scope
+                        oauthsession = OAuth2Session(self.client_id, **kwargslogin)
+                        auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
+                        kwargs['credentials'] = {'user': 'anonymous','401response': flask.redirect(auth_url)}
+
                         return f(*args,**kwargs)
                     else:
                         self.printdebug("No access token available yet, starting login process")
