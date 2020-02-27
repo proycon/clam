@@ -2331,7 +2331,7 @@ class ActionHandler:
         except:
             return withheaders(flask.make_response("Action does not exist",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        printdebug("Performing action " + action.id)
+        printdebug("Performing action " + action.id + " (user=" + user +")")
 
         viewer = None
 
@@ -2481,7 +2481,7 @@ class ActionHandler:
         return ActionHandler.do(actionid, method, user, oauth_access_token)
 
     @staticmethod
-    def run(actionid, method):
+    def run(actionid, method, credentials=None):
         #check whether the action requires authentication or allows anonymous users:
         action = ActionHandler.find_action(actionid, method)
         if action.allowanonymous:
@@ -2489,24 +2489,24 @@ class ActionHandler:
             oauth_access_token = ""
             return ActionHandler.do(actionid, method,user,oauth_access_token)
         else:
-            return ActionHandler.do_auth(actionid, method)
+            return ActionHandler.do_auth(actionid, method, credentials)
 
 
     @staticmethod
     def GET(actionid, credentials=None):
-        return ActionHandler.run(actionid, 'GET')
+        return ActionHandler.run(actionid, 'GET', credentials)
 
     @staticmethod
     def POST(actionid, credentials=None):
-        return ActionHandler.run(actionid, 'POST')
+        return ActionHandler.run(actionid, 'POST', credentials)
 
     @staticmethod
     def PUT(actionid, credentials=None):
-        return ActionHandler.run(actionid, 'PUT')
+        return ActionHandler.run(actionid, 'PUT', credentials)
 
     @staticmethod
     def DELETE(actionid, credentials=None):
-        return ActionHandler.run(actionid, 'DELETE')
+        return ActionHandler.run(actionid, 'DELETE', credentials)
 
 
 def sufficientresources():
