@@ -395,6 +395,46 @@ def getprojects(user):
                 json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
     return projects, round(totalsize)
 
+def updateindex(user, project):
+    totalsize = 0.0
+    path = settings.ROOT + "projects/" + user
+    with io.open(os.path.join(path,'.index'),'r',encoding='utf-8') as f:
+        try:
+            data = json.load(f)
+        except ValueError:
+            printlog("Invalid json in .index")
+            #delete the entire index
+            os.unlink(os.path.join(path,'.index'))
+            return False
+    f = os.path.join(path, project)
+    if not os.path.isdir(f):
+        return False
+    d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+    project = os.path.basename(f)
+    projectsize, filecount = Project.getdiskusage(user,project )
+    totalsize += projectsize
+    index = None
+    for i, projectdata in enumerate(projects):
+        totalsize += projectdata[2]
+        if projectdata[0] == project:
+            index = i
+    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user) )
+    changed = True
+    if index is None:
+        data['projects'].append(  projectdata   )
+    elif data["projects"][index] != projectdata:
+        data["projects"][index] = projectdata
+    else:
+        changed = False
+        if totalsize != data['totalsize']:
+            data["totalsize"] = totalsize
+        changed = True
+    if changed:
+        with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
+            json.dump(data,f, ensure_ascii=False)
+    return True
+
+
 def mainentry(credentials = None):
     """This is the main (root) entry point, it can direct to various pages based on configuration and authentication"""
 
