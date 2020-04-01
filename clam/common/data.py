@@ -26,7 +26,7 @@ import time
 import re
 import yaml
 import itertools
-from copy import copy
+from copy import copy, deepcopy
 from lxml import etree as ElementTree
 from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
 import clam.common.parameters
@@ -972,6 +972,7 @@ class Profile:
 
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
+            print(inputfiles,file=sys.stderr)
 
             #inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
             #for seqnr, filename, inputtemplate in inputfiles: #pylint: disable=unused-variable
@@ -985,7 +986,7 @@ class Profile:
                 if outputtemplate:
                     if isinstance(outputtemplate, OutputTemplate):
                         #generate provenance data
-                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  [ CLAMInputFile(projectpath, filename) for seqnr, filename, inputtemplate in inputfiles ], parameters)
+                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  [], parameters)
 
                         create = True
                         if outputtemplate.parent:
@@ -993,7 +994,9 @@ class Profile:
                                 create = False
 
                         if create:
-                            for inputtemplate, inputfilename, outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
+                            for inputtemplate, inputfilename, inputmetadata, outputfilename, metadata in outputtemplate.generate(self, parameters, projectpath, inputfiles, provenancedata):
+                                if inputfilename and inputmetadata:
+                                    metadata.provenance.inputfiles.append( (inputfilename, inputmetadata) )
                                 clam.common.util.printdebug("Writing metadata for outputfile " + outputfilename)
                                 metafilename = os.path.dirname(outputfilename)
                                 if metafilename: metafilename += '/'
@@ -1172,12 +1175,15 @@ class CLAMProvenanceData:
             self.inputfiles = inputfiles
 
 
+    def __copy__(self):
+        return CLAMProvenanceData(self.serviceid, self.servicename, self.serviceurl, self.outputtemplate_id, self.outputtemplate_label, copy(self.inputfiles), self.parameters)
+
     def xml(self, indent = ""):
         """Serialise provenance data to XML. This is included in CLAM Metadata files"""
-        xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">"
+        xml = indent + "<provenance type=\"clam\" id=\""+self.serviceid+"\" name=\"" +self.servicename+"\" url=\"" + self.serviceurl+"\" outputtemplate=\""+self.outputtemplate_id+"\" outputtemplatelabel=\""+self.outputtemplate_label+"\" timestamp=\""+str(self.timestamp)+"\">\n"
         for filename, metadata in self.inputfiles:
-            xml += indent + " <inputfile name=\"" + clam.common.util.xmlescape(filename) + "\">"
-            xml += metadata.xml(indent + " ") + "\n"
+            xml += indent + " <inputfile name=\"" + clam.common.util.xmlescape(filename) + "\">\n"
+            xml += metadata.xml(indent + "  ") + "\n"
             xml += indent +  " </inputfile>\n"
         if self.parameters:
             xml += indent + " <parameters>\n"
@@ -1208,7 +1214,7 @@ class CLAMProvenanceData:
                 parameters = []
                 for subnode in node:
                     if subnode.tag == 'inputfile':
-                        filename = node.attrib['name']
+                        filename = subnode.attrib['name']
                         metadata = None
                         for subsubnode in subnode:
                             if subsubnode.tag == 'CLAMMetaData':
@@ -2104,7 +2110,7 @@ class OutputTemplate:
         raise Exception("Parent InputTemplate '"+self.parent+"' not found!")
 
     def generate(self, profile, parameters, projectpath, inputfiles, provenancedata=None):
-        """Yields (inputtemplate, inputfilename, outputfilename, metadata) tuples"""
+        """Yields (inputtemplate, inputfilename, inputmetadata, outputfilename, metadata) tuples"""
 
         project = os.path.basename(projectpath)
 
@@ -2166,7 +2172,7 @@ class OutputTemplate:
                 #Resolve filename
                 filename = resolveoutputfilename(filename, parameters, metadata, self, seqnr, project, inputfilename)
 
-                yield inputtemplate, inputfilename, filename, metadata
+                yield inputtemplate, inputfilename, parentfile.metadata, filename, metadata
 
         elif self.unique and self.filename:
             #outputtemplate has no parent, but specified a filename and is unique, this implies it is not dependent on input files:
@@ -2175,7 +2181,7 @@ class OutputTemplate:
 
             filename = resolveoutputfilename(self.filename, parameters, metadata, self, 0, project, None)
 
-            yield None, None, filename, metadata
+            yield None, None, None, filename, metadata
         else:
             raise Exception("Unable to generate from OutputTemplate, no parent or filename specified")
 
@@ -2200,7 +2206,7 @@ class OutputTemplate:
             metafield.resolve(data, parameters, parentfile, relevantinputfiles)
 
         if provenancedata:
-            data['provenance'] = provenancedata
+            data['provenance'] = copy(provenancedata) #operate on a semi-copy (mix between shallow and deep), inputfiles are copied deep
             data['constraints'] = self.constraints
             data['skipvalidation'] = self.skipvalidation
 
