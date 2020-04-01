@@ -393,8 +393,9 @@ def getprojects(user):
                 totalsize += projectsize
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
         printdebug("Writing index for " + user + "...")
-        with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
-            json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
+        if os.path.exists(path):
+            with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f_index:
+                json.dump({'totalsize': totalsize, 'projects': projects},f_index, ensure_ascii=False)
     return projects, round(totalsize)
 
 def updateindex(user, project):
