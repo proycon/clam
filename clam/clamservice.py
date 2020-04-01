@@ -1046,15 +1046,15 @@ class Project:
 
 
     @staticmethod
-    def outputindex(project, user, d = ''):
+    def outputindex(project, user, d = '', quick=False):
         prefix = Project.path(project, user) + 'output/'
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
-                    for result in Project.outputindex(project, user, f[len(prefix):]):
+                    for result in Project.outputindex(project, user, f[len(prefix):], quick):
                         yield result
                 else:
-                    file = clam.common.data.CLAMOutputFile(Project.path(project,user), f[len(prefix):])
+                    file = clam.common.data.CLAMOutputFile(Project.path(project,user), f[len(prefix):], loadmetadata=not quick)
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
 
@@ -1106,10 +1106,11 @@ class Project:
         if statuscode == clam.common.status.READY or statuscode == clam.common.status.DONE:
             inputpaths = Project.inputindex(project, user)
 
-
+        #quick mode skips metadata loading and may be useful on very large projects
+        quick = 'quick' in flask.request.values and str(flask.request.values['quick']) == "1"
 
         if statuscode == clam.common.status.DONE:
-            outputpaths = list(Project.outputindex(project, user))
+            outputpaths = list(Project.outputindex(project, user,'',quick=quick))
             if Project.exitstatus(project, user) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"
