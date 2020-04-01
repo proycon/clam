@@ -204,7 +204,7 @@ PROFILES = [
         #------------------------------------------------------------------------------------------------------------------------
         OutputTemplate('replace-with-a-unique-identifier',PlainTextFormat,'Replace with human label for this output template',
             SetMetaField('encoding','ascii'), #note that encoding is required if you work with PlainTextFormat
-            removeextensions=[".txt"] #remove these extensions from the associated input prior to appending the output extension
+            removeextensions=[".txt"], #remove these extensions from the associated input prior to appending the output extension
             extension='.stats', #set an output extension or set a filename:
             #filename='filename.stats',
             unique=True,
