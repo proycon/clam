@@ -384,6 +384,7 @@ def getprojects(user):
             totalsize = float(data['totalsize'])
             projects = data['projects']
     else:
+        printdebug("Computing index for " + user + "...")
         for f in glob.glob(path + '/*'):
             if os.path.isdir(f):
                 d = datetime.datetime.fromtimestamp(os.stat(f)[8])
@@ -391,8 +392,9 @@ def getprojects(user):
                 projectsize, filecount = Project.getdiskusage(user,project )
                 totalsize += projectsize
                 projects.append( ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), Project.simplestatus(project,user)  ) )
-            with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
-                json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
+        printdebug("Writing index for " + user + "...")
+        with io.open(os.path.join(path,'.index'),'w',encoding='utf-8') as f:
+            json.dump({'totalsize': totalsize, 'projects': projects},f, ensure_ascii=False)
     return projects, round(totalsize)
 
 def updateindex(user, project):
@@ -1107,7 +1109,7 @@ class Project:
 
 
         if statuscode == clam.common.status.DONE:
-            outputpaths = Project.outputindex(project, user)
+            outputpaths = list(Project.outputindex(project, user))
             if Project.exitstatus(project, user) != 0: #non-zero codes indicate errors!
                 errors = "yes"
                 errormsg = "An error occurred within the system. Please inspect the error log for details"

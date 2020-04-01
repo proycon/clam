@@ -973,9 +973,9 @@ class Profile:
             #gather all input files that match
             inputfiles = self.matchingfiles(projectpath) #list of (seqnr, filename,inputtemplate) tuples
 
-            inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
-            for seqnr, filename, inputtemplate in inputfiles: #pylint: disable=unused-variable
-                inputfiles_full.append(CLAMInputFile(projectpath, filename))
+            #inputfiles_full = [] #We need the full CLAMInputFiles for generating provenance data
+            #for seqnr, filename, inputtemplate in inputfiles: #pylint: disable=unused-variable
+            #    inputfiles_full.append(CLAMInputFile(projectpath, filename))
 
             for outputtemplate in self.output:
                 if isinstance(outputtemplate, ParameterCondition):
@@ -985,7 +985,7 @@ class Profile:
                 if outputtemplate:
                     if isinstance(outputtemplate, OutputTemplate):
                         #generate provenance data
-                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  inputfiles_full, parameters)
+                        provenancedata = CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate.id, outputtemplate.label,  [ CLAMInputFile(projectpath, filename) for seqnr, filename, inputtemplate in inputfiles ], parameters)
 
                         create = True
                         if outputtemplate.parent:
