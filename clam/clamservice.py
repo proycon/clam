@@ -773,22 +773,11 @@ class Project:
     @staticmethod
     def getdiskusage(user, project):
         path = settings.ROOT + "projects/" + user + '/' + project + "/"
-        if os.path.exists(os.path.join(path,'.du')):
-            with open(os.path.join(path,'.du'),'r') as f:
-                size = 0.0
-                count = 0
-                for i, line in enumerate(f):
-                    if line == 0:
-                        size = float(line.strip())
-                    elif line == 1:
-                        count = int(line.strip())
-                return size, count
-        else:
-            size, count = computediskusage(path)
-            with open(os.path.join(path,'.du'),'w') as f:
-                f.write(str(size) + "\n")
-                f.write(str(count))
-            return size, count
+        size, count = computediskusage(path)
+        with open(os.path.join(path,'.du'),'w') as f:
+            f.write(str(size) + "\n")
+            f.write(str(count))
+        return size, count
 
     @staticmethod
     def create(project, credentials): #pylint: disable=too-many-return-statements
@@ -833,6 +822,21 @@ class Project:
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/tmp")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp'):
                 return withheaders(flask.make_response("tmp directory " + settings.ROOT + "projects/" + user + '/' + project + "/tmp/  could not be created succesfully",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        #Add project to index cache file
+        indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
+        if os.path.exists(indexfile):
+            with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
+                try:
+                    data = json.load(f)
+                    d = datetime.datetime.fromtimestamp(os.stat(settings.ROOT + "projects/" + user + '/' + project)[8])
+                    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), 0.00, clam.common.status.READY )
+                    data['projects'].append(projectdata)
+                    with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
+                        json.dump(newdata,f, ensure_ascii=False)
+                except ValueError:
+                    #something went wrong, delete the entire index (will be recomputed)
+                    os.unlink(os.path.join(indexfile))
 
         return None #checks rely on this
 

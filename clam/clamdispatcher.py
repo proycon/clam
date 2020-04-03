@@ -56,12 +56,11 @@ def updateindex(projectpath):
     if not os.path.isdir(projectpath):
         return False
     d = datetime.datetime.fromtimestamp(os.stat(projectpath)[8])
-    project = os.path.basename(projectpath)
+    project = os.path.dirname(projectpath)
     projectsize, filecount = computediskusage(projectpath)
     with open(os.path.join(projectpath,'.du'),'w') as f:
         f.write(str(projectsize) + "\n")
         f.write(str(filecount))
-    totalsize += projectsize
     index = None
     for i, projectdata in enumerate(data['projects']):
         if projectdata[0] == project:
