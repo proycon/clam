@@ -56,7 +56,7 @@ def updateindex(projectpath):
     if not os.path.isdir(projectpath):
         return False
     d = datetime.datetime.fromtimestamp(os.stat(projectpath)[8])
-    project = os.path.dirname(projectpath)
+    project = os.path.basename(projectpath.rstrip('/'))
     projectsize, filecount = computediskusage(projectpath)
     with open(os.path.join(projectpath,'.du'),'w') as f:
         f.write(str(projectsize) + "\n")
@@ -73,7 +73,7 @@ def updateindex(projectpath):
         data['projects'].append(  projectdata   )
         data["totalsize"] = totalsize + projectsize
     elif data["projects"][index] != projectdata:
-        totalsize -= data["projects"][index][2]
+        data["projects"][index] = projectdata
         data["totalsize"] = totalsize + projectsize
     else:
         changed = False

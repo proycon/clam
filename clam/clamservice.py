@@ -829,6 +829,10 @@ class Project:
             with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
                 try:
                     data = json.load(f)
+                    if 'projects' in data:
+                        for projectdata in data['projects']:
+                            if projectdata[0] == project:
+                                return None #all is well, project already in index, nothing to do
                     d = datetime.datetime.fromtimestamp(os.stat(settings.ROOT + "projects/" + user + '/' + project)[8])
                     projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), 0.00, clam.common.status.READY )
                     data['projects'].append(projectdata)
@@ -1356,6 +1360,7 @@ class Project:
                 if projectdata[0] != project:
                     newdata['projects'].append(projectdata)
                     totalsize += projectdata[2]
+            newdata['totalsize'] = totalsize
             with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
                 json.dump(newdata,f, ensure_ascii=False)
 
