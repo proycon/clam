@@ -1332,8 +1332,29 @@ class Project:
             shutil.rmtree(Project.path(project, user))
             msg += " Deleted"
         msg = msg.strip()
-        if os.path.exists(os.path.join(settings.ROOT + "projects/" + user,'.index')):
-            os.unlink(os.path.join(settings.ROOT + "projects/" + user,'.index'))
+        indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
+        if os.path.exists(indexfile):
+            #delete project from the index cache
+            data = {}
+            with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
+                try:
+                    data = json.load(f)
+                except ValueError:
+                    #delete the entire index
+                    data = {'projects': []}
+                    os.unlink(os.path.join(indexfile))
+            totalsize = 0.0
+            newdata = {
+                'projects': [],
+                'totalsize': 0.0,
+            }
+            for i, projectdata in enumerate(data['projects']):
+                if projectdata[0] != project:
+                    newdata['projects'].append(projectdata)
+                    totalsize += projectdata[2]
+            with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
+                json.dump(newdata,f, ensure_ascii=False)
+
         return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg), 'allow_origin': settings.ALLOW_ORIGIN})  #200
 
 
