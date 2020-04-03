@@ -1015,6 +1015,7 @@ class Project:
     @staticmethod
     def outputindex(project, user, d = '', quick=False):
         prefix = Project.path(project, user) + 'output/'
+        begintime = time.time()
         for f in glob.glob(prefix + d + "/*"):
             if os.path.basename(f)[0] != '.': #always skip all hidden files
                 if os.path.isdir(f):
@@ -1024,6 +1025,8 @@ class Project:
                     file = clam.common.data.CLAMOutputFile(Project.path(project,user), f[len(prefix):], loadmetadata=not quick)
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
+                if not quick and time.time() - begintime >= settings.QUICKTIMEOUT:
+                    quick = True
 
     @staticmethod
     def inputindexbytemplate(project, user, inputtemplate):
@@ -2927,6 +2930,8 @@ def set_defaults():
         settings.ENABLEWEBAPP = True
     if 'ENABLED' not in settingkeys:
         settings.ENABLED = True
+    if 'QUICKTIMEOUT' not in settingkeys:
+        settings.QUICKTIMEOUT = 90 #after loading output files for this many seconds, quick mode will be enabled and files will be loaded without metadata
     if 'REMOTEHOST' not in settingkeys:
         settings.REMOTEHOST = None
     elif 'REMOTEUSER' not in settingkeys:
