@@ -1026,6 +1026,7 @@ class Project:
                     file.attachviewers(settings.PROFILES) #attaches converters as well
                     yield file
                 if not quick and time.time() - begintime >= settings.QUICKTIMEOUT:
+                    printlog("Loading output index is taking too long, enabling quick mode")
                     quick = True
 
     @staticmethod
