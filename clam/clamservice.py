@@ -833,7 +833,7 @@ class Project:
                     projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), 0.00, clam.common.status.READY )
                     data['projects'].append(projectdata)
                     with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
-                        json.dump(newdata,f, ensure_ascii=False)
+                        json.dump(data,f, ensure_ascii=False)
                 except ValueError:
                     #something went wrong, delete the entire index (will be recomputed)
                     os.unlink(os.path.join(indexfile))
