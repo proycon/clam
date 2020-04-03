@@ -52,8 +52,7 @@ def updateindex(projectpath):
                 os.unlink(os.path.join(projectpath,'..','.index'))
                 return False
     else:
-        data["projects"] = []
-        data['totalsize'] = 0.0
+        data = {"projects": [], 'totalsize': 0.0}
     if not os.path.isdir(projectpath):
         return False
     d = datetime.datetime.fromtimestamp(os.stat(f)[8])
