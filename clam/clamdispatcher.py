@@ -22,12 +22,15 @@ import subprocess
 import time
 import signal
 import shutil
+import json
 
 VERSION = '3.0.12'
 
 sys.path.append(sys.path[0] + '/..')
 
 import clam.common.data #pylint: disable=wrong-import-position
+import clam.common.status
+from clam.common.util import computediskusage
 
 
 def mem(pid, size="rss"):
@@ -36,6 +39,53 @@ def mem(pid, size="rss"):
 
 def total_seconds(delta):
     return delta.days * 86400 + delta.seconds + (delta.microseconds / 1000000.0)
+
+def updateindex(projectpath):
+    """Update the index"""
+    totalsize = 0.0
+    if os.path.exists(os.path.join(projectpath,'..','.index')):
+        with open(os.path.join(projectpath,'..','.index'),'r',encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except ValueError:
+                #delete the entire index
+                os.unlink(os.path.join(projectpath,'..','.index'))
+                return False
+    else:
+        data["projects"] = []
+        data['totalsize'] = 0.0
+    if not os.path.isdir(projectpath):
+        return False
+    d = datetime.datetime.fromtimestamp(os.stat(f)[8])
+    project = os.path.basename(f)
+    projectsize, filecount = computediskusage(projectpath)
+    with open(os.path.join(projectpath,'.du'),'w') as f:
+        f.write(str(projectsize) + "\n")
+        f.write(str(filecount))
+    totalsize += projectsize
+    index = None
+    for i, projectdata in enumerate(data['projects']):
+        if projectdata[0] == project:
+            index = i
+        else:
+            totalsize += projectdata[2]
+    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), round(projectsize,2), clam.common.status.DONE )
+    changed = True
+    if index is None:
+        data['projects'].append(  projectdata   )
+        data["totalsize"] = totalsize + projectsize
+    elif data["projects"][index] != projectdata:
+        totalsize -= data["projects"][index][2]
+        data["totalsize"] = totalsize + projectsize
+    else:
+        changed = False
+        if totalsize != data['totalsize']:
+            data["totalsize"] = totalsize
+            changed = True
+    if changed:
+        with open(os.path.join(projectpath,'..','.index'),'w',encoding='utf-8') as f:
+            json.dump(data,f, ensure_ascii=False)
+    return True
 
 def main():
     if len(sys.argv) < 4:
@@ -211,9 +261,8 @@ def main():
             f.write(str(statuscode))
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
-        #remove project index cache (has to be recomputed next time because this project now has a different size)
-        if os.path.exists(os.path.join(projectdir,'..','.index')):
-            os.unlink(os.path.join(projectdir,'..','.index'))
+        #update project index cache
+        updateindex(projectdir)
 
 
     if tmpdir and os.path.exists(tmpdir):
