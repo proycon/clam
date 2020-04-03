@@ -261,6 +261,7 @@ def main():
         if os.path.exists(projectdir + '.pid'): os.unlink(projectdir + '.pid')
 
         #update project index cache
+        print("[CLAM Dispatcher] Updating project index", file=sys.stderr)
         updateindex(projectdir)
 
 
