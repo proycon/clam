@@ -821,10 +821,6 @@ class Project:
             printlog("Creating project '" + project + "'")
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project)
 
-        #project index will need to be regenerated, remove cache
-        if os.path.exists(os.path.join(settings.ROOT + "projects/" + user,'.index')):
-            os.unlink(os.path.join(settings.ROOT + "projects/" + user,'.index'))
-
         if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input/'):
             os.makedirs(settings.ROOT + "projects/" + user + '/' + project + "/input")
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/input'):
