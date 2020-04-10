@@ -276,7 +276,7 @@ processes = 2
 threads = 2
 #enable this for nginx:
 #manage-script-name = yes
-""".format(sourcedir=sourcedir, rootdir=rootdir,sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport, virtual_env=os.environ['VIRTUAL_ENV']))
+""".format(sourcedir=sourcedir, rootdir=rootdir,sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
     if virtualenv:
         with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'a',encoding='utf-8') as f:
             f.write("virtualenv = " + virtualenv + "\n")
