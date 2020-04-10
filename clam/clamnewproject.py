@@ -51,7 +51,7 @@ def main():
     elif 'VIRTUAL_ENV' not in os.environ and not args.noninteractive:
         print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended")
         yn = None
-        while yn.strip().lower() not in ('y','yes','n','no'):
+        while yn is None or yn.strip().lower() not in ('y','yes','n','no'):
             yn = input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
             createvenv = yn.strip().lower() in ("y","yes")
 
