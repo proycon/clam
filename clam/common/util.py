@@ -108,6 +108,8 @@ def xmlescape(s):
 def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
     if headers is None: headers = {}
     response.headers['Content-Type'] = contenttype
+    if contenttype.startswith("text/plain") and "Content-Length" not in headers:
+        headers['Content-Length'] = len(response)
     try:
         for key, value in headers.items():
             if key == 'allow_origin':
