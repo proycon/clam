@@ -2922,7 +2922,7 @@ def set_defaults():
             settings.MINDISKSPACE = settingkeys['MINDISKFREE']
         else:
             settings.MINDISKSPACE = 0
-    if 'MAXCONCURRENTPROJECTSPERUSER' not in settingskeys:
+    if 'MAXCONCURRENTPROJECTSPERUSER' not in settingkeys:
         settings.MAXCONCURRENTPROJECTSPERUSER = 0 #unlimited
     if 'DISK' not in settingkeys:
         settings.DISK = None
