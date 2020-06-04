@@ -1235,7 +1235,7 @@ class Project:
 
         errors, parameters, commandlineparams = clam.common.data.processparameters(postdata, settings.PARAMETERS)
 
-        sufresources, resmsg = sufficientresources()
+        sufresources, resmsg = sufficientresources(user, project)
         if not sufresources:
             printlog("*** NOT ENOUGH SYSTEM RESOURCES AVAILABLE: " + resmsg + " ***")
             return withheaders(flask.make_response("There are not enough system resources available to accommodate your request. " + resmsg + " .Please try again later.",503),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
@@ -2574,7 +2574,7 @@ class ActionHandler:
         return ActionHandler.run(actionid, 'DELETE', credentials)
 
 
-def sufficientresources():
+def sufficientresources(user, project):
     if not settings.ENABLED:
         return False, "Service is disabled for maintenance"
     if settings.REQUIREMEMORY > 0:
@@ -2615,6 +2615,22 @@ def sufficientresources():
 
         else:
             printlog("WARNING: df " + settings.DISK + " failed. Skipping disk space check!")
+    if user:
+        projects, totalsize = getprojects(user)
+        if totalsize > settings.USERQUOTA:
+            return False , "You exceeded your disk quota, refusing to start the project"
+        if settings.MAXCONCURRENTPROJECTSPERUSER > 0:
+            running = 0
+            for p in projects:
+                if p[3] == clam.common.status.RUNNING:
+                    running += 1
+            if running >= settings.MAXCONCURRENTPROJECTSPERUSER:
+                return False , "You may only run " + str(settings.MAXCONCURRENTPROJECTSPERUSER) + " project(s) simultaneously and you are already at this maximum. Refusing to start the project."
+        if settings.PROJECTQUOTA > 0 and project:
+            for p in projects:
+                if p[0] == project:
+                    if p[2] > settings.PROJECTQUOTA:
+                        return False, "Your project is too large, to run. The input files exceed the maximum of "  + str(settings.PROJECTQUOTA) + " MB. Refusing to start the project."
     return True, ""
 
 
@@ -2883,6 +2899,8 @@ def set_defaults():
         settings.PUBLIC_ACTIONS = False
     if 'USERQUOTA' not in settingkeys:
         settings.USERQUOTA = 0
+    if 'PROJECTQUOTA' not in settingkeys:
+        settings.PROJECTQUOTA = 0 #unlimited
     if 'PROFILES' not in settingkeys:
         settings.PROFILES = []
     if 'INPUTSOURCES' not in settingkeys:
@@ -2904,6 +2922,8 @@ def set_defaults():
             settings.MINDISKSPACE = settingkeys['MINDISKFREE']
         else:
             settings.MINDISKSPACE = 0
+    if 'MAXCONCURRENTPROJECTSPERUSER' not in settingskeys:
+        settings.MAXCONCURRENTPROJECTSPERUSER = 0 #unlimited
     if 'DISK' not in settingkeys:
         settings.DISK = None
     if 'STYLE' not in settingkeys:

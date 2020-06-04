@@ -80,6 +80,12 @@ that this makes your system vulnerable to denial-of-service attacks by
 possibly malicious users, especially if no user authentication is
 configured!
 
+Further constraints on disk space can be placed by setting the following:
+* ``USERQUOTA`` - Maximum size in MB of all projects for a user. If this is exceeded no new projects can be created or
+  started.
+* ``PROJECTQUOTA`` - Maximum size in MB of any single project. Larger projects can not be started.
+* ``MAXCONCURRENTPROJECTSPERUSER`` - Maximum number of projects that a single user can run concurrently.
+
 Extra resource control is handled by the CLAM Dispatcher; a small
 program that launches and monitors your wrapper script. In your service
 configuration file you can configure the variable
