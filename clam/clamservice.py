@@ -2617,7 +2617,7 @@ def sufficientresources(user, project):
             printlog("WARNING: df " + settings.DISK + " failed. Skipping disk space check!")
     if user:
         projects, totalsize = getprojects(user)
-        if totalsize > settings.USERQUOTA:
+        if settings.USERQUOTA > 0 and totalsize > settings.USERQUOTA:
             return False , "You exceeded your disk quota, refusing to start the project"
         if settings.MAXCONCURRENTPROJECTSPERUSER > 0:
             running = 0
