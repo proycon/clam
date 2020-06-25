@@ -738,7 +738,10 @@ class Admin:
 
 def getrooturl(): #not a view
     if settings.FORCEURL:
-        return settings.FORCEURL
+        if settings.FORCEHTTPS:
+            return settings.FORCEURL.replace("http://","https://")
+        else:
+            return settings.FORCEURL
     else:
         url = flask.request.host_url
         if settings.URLPREFIX and settings.URLPREFIX != '/':
@@ -747,7 +750,10 @@ def getrooturl(): #not a view
             else:
                 url = os.path.join(url, settings.URLPREFIX[1:])
         if url[-1] == '/': url = url[:-1]
-        return url
+        if settings.FORCEHTTPS:
+            return url.replace("http://","https://")
+        else:
+            return url
 
 def getbinarydata(path, buffersize=16*1024):
     with io.open(path,'rb') as f:
@@ -2967,6 +2973,8 @@ def set_defaults():
         settings.USERS_MYSQL = None
     if 'FORCEURL' not in settingkeys:
         settings.FORCEURL = None
+    if 'FORCEHTTPS' not in settingkeys:
+        settings.FORCEHTTPS = False
     if 'CLAMFORCEURL' in os.environ:
         settings.FORCEURL = os.environ['CLAMFORCEURL']
     if 'PRIVATEACCESSTOKEN' not in settingkeys:
