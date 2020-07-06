@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
 import os
@@ -26,7 +26,7 @@ def read(fname):
 
 setup(
     name = "CLAM",
-    version = "3.0.16", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
+    version = "3.0.17", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),

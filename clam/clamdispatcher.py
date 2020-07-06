@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 
@@ -24,7 +24,7 @@ import signal
 import shutil
 import json
 
-VERSION = '3.0.15'
+VERSION = '3.0.17'
 
 sys.path.append(sys.path[0] + '/..')
 
