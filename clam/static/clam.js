@@ -701,7 +701,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 processuploadresponse(response, '#editorparameters');
                 $('#editorcontents').val('');
                 $('#editorfilename').val('');
-                $(document).scrollTop( $("#header").offset().top );
+                $(document).scrollTop( $("#input").offset().top );
                 //$("#editor").slideUp(400, function(){ $("#editormask").hide(); } );
             },
             error: function(response, errortype){ //eslint-disable-line no-unused-vars
