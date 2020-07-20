@@ -110,7 +110,7 @@
 
 
     <link rel="stylesheet" href="{/clam/@baseurl}/static/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="{/clam/@baseurl}/static/query.dataTables.min.css" type="text/css" />
+    <link rel="stylesheet" href="{/clam/@baseurl}/static/jquery.dataTables.min.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/static/open-iconic-bootstrap.min.css" type="text/css" />
 
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
