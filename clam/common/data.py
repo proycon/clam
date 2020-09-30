@@ -34,7 +34,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.0.17'
+VERSION = '3.0.18'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -1591,6 +1591,8 @@ class InputTemplate:
             kwargs['unique'] =  node.attrib['unique'].lower() == 'yes' or node.attrib['unique'].lower() == 'true' or node.attrib['unique'].lower() == '1'
         if 'acceptarchive' in node.attrib:
             kwargs['acceptarchive'] = node.attrib['acceptarchive'].lower() == 'yes' or node.attrib['acceptarchive'].lower() == 'true' or node.attrib['acceptarchive'].lower() == '1'
+        if 'optional' in node.attrib:
+            kwargs['optional'] =  node.attrib['optional'].lower() == 'yes' or node.attrib['optional'].lower() == 'true' or node.attrib['optional'].lower() == '1'
 
         #find formatclass
         formatcls = None
