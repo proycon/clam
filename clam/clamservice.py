@@ -1768,7 +1768,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
             return withheaders(flask.make_response(json.dumps({
                 "success": False,
                 "error": msg,
-                "xml": str(base64.b64encode(xml.encode('utf-8')),'ascii'),
+                "xml": xml,
             })),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
         else:
             if not xml:
@@ -2286,7 +2286,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         #parameter errors, return XML output with 403 code
         printdebug('There were parameter errors during upload!')
         if returntype == 'json':
-            jsonoutput['xml'] = str(base64.b64encode(output.encode('utf-8')),'utf-8') #embed XML in JSON for complete client-side processing
+            jsonoutput['xml'] = output #embed XML in JSON for complete client-side processing
             return withheaders(flask.make_response(json.dumps(jsonoutput)), 'application/json', {'allow_origin': settings.ALLOW_ORIGIN})
         else:
             return withheaders(flask.make_response(output,403),headers={'allow_origin': settings.ALLOW_ORIGIN})

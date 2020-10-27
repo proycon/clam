@@ -784,7 +784,12 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                     }
                     return true;
                 }
-                var xml = window.atob(responseJSON.xml); //was base64 encoded
+                var xml;
+                try {
+                    xml = window.atob(responseJSON.xml); //was base64 encoded
+                } catch {
+                    xml = responseJSON.xml;
+                }
                 processuploadresponse(xml, '#uploadparameters');
 
         }).on('click',function(){
