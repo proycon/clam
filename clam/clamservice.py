@@ -49,7 +49,7 @@ from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlo
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, unquote
 
 try:
     from requests_oauthlib import OAuth2Session
@@ -317,6 +317,7 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
 
         createresponse = Project.create(project,user)
         if createresponse is not None:
+            #something went wrong during project creation
             return createresponse
 
         prefixes = []
@@ -2125,14 +2126,15 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     #Upload file from client to server
                     flask.request.files['file'].save(Project.path(project, user) + 'input/' + filename)
                 elif 'url' in postdata and postdata['url']:
-                    printdebug('(Receiving data via url)')
+                    postdata['url'] = unquote(postdata['url'])
+                    printdebug('(Receiving data from url: ' + postdata['url'] + " )" )
                     #Download file from 3rd party server to CLAM server
                     try:
                         r = requests.get(postdata['url'])
                     except:
-                        raise flask.abort(404)
+                        return withheaders(flask.make_response("No remote data could be obtained from " + postdata['url'],404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
                     if not (r.status_code >= 200 and r.status_code < 300):
-                        raise flask.abort(404)
+                        return withheaders(flask.make_response("No remote data could be obtained from " + postdata['url'] + ". Server returned HTTP " + str(r.status_code),404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
                     CHUNK = 16 * 1024
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
