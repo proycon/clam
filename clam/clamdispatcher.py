@@ -24,7 +24,7 @@ import signal
 import shutil
 import json
 
-VERSION = '3.0.20'
+VERSION = '3.0.21'
 
 sys.path.append(sys.path[0] + '/..')
 

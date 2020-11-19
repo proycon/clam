@@ -335,7 +335,7 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
                 if inputtemplate.id in rq:
                     data['contents'] = rq[inputtemplate.id]
                 elif inputtemplate.id + '_url' in rq:
-                    data['url'] = rq[inputtemplate.id + '_url']
+                    data['url'] = unquote(rq[inputtemplate.id + '_url'])
 
                 if ('url' in data or 'contents' in data):
                     #copy local parameters
