@@ -1907,6 +1907,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         sourcefile = flask.request.files['file'].filename
     elif 'url' in postdata and postdata['url']:
         #Download from URL
+        postdata['url'] = unquote(postdata['url'])
         printlog("Adding web-based URL " + postdata['url'] + " to input files")
         sourcefile = os.path.basename(postdata['url'])
     elif 'contents' in postdata and postdata['contents']:
