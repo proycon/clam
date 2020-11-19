@@ -85,7 +85,7 @@ class HTTPAuth(object):
                 if not auth:
                     msg = "No authentication header supplied"
                     self.printdebug(msg)
-                    if optional and not 'project' in flask.request.values: #optional login only valid if the project entry shortcut is not used
+                    if optional and 'project' not in flask.request.values: #optional login only valid if the project entry shortcut is not used
                         self.printdebug("Login was optional, falling back to anonymous login")
                         kwargs['credentials'] = {'user':'anonymous', '401response': self.auth_error_callback() }
                         return f(*args,**kwargs)
