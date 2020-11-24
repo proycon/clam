@@ -39,15 +39,24 @@ class AbstractViewer:
     mimetype = 'text/html'
 
     def __init__(self, **kwargs):
+        """
+        Parameters:
+            id: (str) The internal ID for the viewer
+            more: (bool) Should this viewer appear in the More menu rather than in the main list?
+        """
         if 'id' in kwargs:
             self.id = kwargs['id']
+        if 'more' in kwargs:
+            self.more = bool(kwargs['more'])
+        else:
+            self.more = False
 
     def view(self, file, **kwargs):
         """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
         raise NotImplementedError
 
     def xml(self, indent = ""):
-        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" />\n"
+        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + str(int(self.more)) + "\" />\n"
 
 class ForwardViewer(AbstractViewer):
     """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword paramter indirect=True on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""

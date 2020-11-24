@@ -602,12 +602,22 @@
 
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                <xsl:if test="./@more != '1'">
+                    <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                </xsl:if>
             </xsl:for-each>
             <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
             <xsl:if test="@template">
-                <xsl:text> | </xsl:text>
-                <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a>
+                <span class="moremenu"> | More...
+                <ul class="bg-dark">
+                <xsl:for-each select="./viewers/viewer">
+                    <xsl:if test="./@more = '1'">
+                        <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></li>
+                    </xsl:if>
+                </xsl:for-each>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a></li>
+                </ul>
+                </span>
             </xsl:if>
         </td>
     </tr>
