@@ -1394,6 +1394,22 @@ class Project:
         return Project.getarchive(project, user,'tar.bz2')
 
     @staticmethod
+    def shareoutputfile(project, filename, credentials=None):
+        """Put a file into temporary public storage"""
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
+        try:
+            outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
+            fileid = put_storage(outputfile)
+        except FileNotFoundError:
+            return withheaders(flask.make_response('File not found',404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        return withheaders(flask.make_response(json.dumps({
+            "id": fileid,
+            "filename": filename,
+            "url": getrooturl() + "/storage/" + fileid
+        })),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
+
+    @staticmethod
     def getoutputfile(project, filename, credentials=None): #pylint: disable=too-many-return-statements
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         raw = filename.split('/')
@@ -2359,6 +2375,61 @@ def uploader(project, credentials=None):
         return addfile(project,filename,user, postdata,None, 'json' )
 
 
+def get_storage(fileid):
+    """Get a file from temporary public storage"""
+
+    if not fileid or not all( c.isdigit() or c in ('a','b','c','d','e','f') for c in fileid ):
+        return withheaders(flask.make_response("Malformed file id",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+    storagedir = settings.ROOT + "storage/" + fileid
+    if os.path.exists(storagedir):
+        try:
+            filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
+        except IndexError:
+            return withheaders(flask.make_response("No file found for given id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        try:
+            outputfile = clam.common.data.CLAMOutputFile(storagedir, filename)
+        except:
+            return withheaders(flask.make_response("Unable to load file",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        if outputfile.metadata:
+            headers = dict(list(outputfile.metadata.httpheaders()))
+            mimetype = outputfile.metadata.mimetype
+        else:
+            headers = {}
+            mimetype = 'application/octet-stream'
+        headers['allow_origin'] = settings.ALLOW_ORIGIN
+        try:
+            response = withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
+        except UnicodeError:
+            return withheaders(flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+        except (FileNotFoundError, IOError):
+            return withheaders(flask.make_response("File not found",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        if 'keep' not in flask.request.values or flask.request.values['keep'] in ('0','no','false'):
+            shutil.rmtree(storagedir)
+
+        return response
+
+    else:
+        return withheaders(flask.make_response("No such file id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+def put_storage(file):
+    """Put a file in temporary public storage, returns the ID"""
+    assert isinstance(file, clam.common.data.CLAMFile)
+    if not os.path.exists(str(file)):
+        raise FileNotFoundError
+    fileid = None
+    while fileid is None or os.path.exists(settings.ROOT + "storage/" + fileid):
+        fileid = str("%x" % random.getrandbits(128))
+    storagedir = settings.ROOT + "storage/" + fileid
+    os.makedirs(storagedir)
+    os.symlink(str(file), os.path.join(storagedir, file.filename))
+    metafile = file.projectpath + file.basedir + '/' + file.metafilename()
+    if os.path.exists(metafile):
+        os.symlink(metafile, os.path.join(storagedir, file.metafilename()))
+    return fileid
+
 
 class ActionHandler:
 
@@ -2762,6 +2833,9 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/storage/<fileid>', 'get_storage', get_storage, methods=['GET'] )
+
         #Authentication for handler is handled deeper in the ActionHandler, depending on whether allowanonymous is set
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET, optional=True), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST, optional=True), methods=['POST'] )
@@ -2796,6 +2870,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_shareoutputfile', self.auth.require_login(Project.shareoutputfile), methods=['PUT'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_download_zip4', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
@@ -3081,6 +3156,10 @@ def test_dirs():
     if not os.path.isdir(settings.SESSIONDIR):
         warning("Session directory does not exist yet, creating...")
         os.makedirs(settings.SESSIONDIR)
+
+    if not os.path.isdir(settings.ROOT + 'storage'):
+        warning("Temporary storage directory does not exist yet, creating...")
+        os.makedirs(settings.ROOT + 'storage')
 
     if not settings.PARAMETERS:
         warning("No parameters specified in settings module!")
