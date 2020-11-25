@@ -27,6 +27,7 @@ import re
 import yaml
 import itertools
 import random
+import shutil
 from copy import copy, deepcopy
 from lxml import etree as ElementTree
 from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
@@ -2647,7 +2648,7 @@ class Forwarder:
         self.type = type
         self.tmpstore = tmpstore
 
-    def __call__(self, project, baseurl, outputfile=None):
+    def __call__(self, project, baseurl, path=None, outputfile=None):
         """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generated to download the entire output archive."""
         if outputfile:
             if self.tmpstore:
@@ -2657,7 +2658,14 @@ class Forwarder:
             else:
                 self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)
         else:
-            self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
+            if self.tmpstore:
+                assert path is not None
+                archivefile, contentencoding = buildarchive(project, path, self.type)
+                archivefile = CLAMOutputFile(path, project + "." + self.type, False)
+                fileid = archivefile.store()
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid)
+            else:
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
         return self
 
 
@@ -2910,6 +2918,65 @@ class AbstractConverter:
         if not outputfile.metadata.__class__ in self.acceptforoutput:
             raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + outputfile.metadata.__class__.__name__ + "!")
         return [] #Return converted contents (must be an iterable) or raise an exception on error
+
+def buildarchive(project, path, format):
+    """Build a download archive, returns the full file path"""
+
+    contentencoding = None
+    if format == 'zip':
+        contenttype = 'application/zip'
+        command = shutil.which("zip")
+        if not command:
+            raise RuntimeError("zip not found")
+        command += + " -r"
+        if os.path.isfile(path + "output/" + project + ".tar.gz"):
+            os.unlink(path + "output/" + project + ".tar.gz")
+        if os.path.isfile(path + "output/" + project + ".tar.bz2"):
+            os.unlink(path + "output/" + project + ".tar.bz2")
+    elif format == 'tar.gz':
+        contenttype = 'application/x-tar'
+        contentencoding = 'gzip'
+        command = shutil.which("tar")
+        if not command:
+            raise RuntimeError("tar not found")
+        command += + " -czf"
+        if os.path.isfile(path + "output/" + project + ".zip"):
+            os.unlink(path + "output/" + project + ".zip")
+        if os.path.isfile(path + "output/" + project + ".tar.bz2"):
+            os.unlink(path + "output/" + project + ".tar.bz2")
+    elif format == 'tar.bz2':
+        contenttype = 'application/x-bzip2'
+        command = shutil.which("tar")
+        if not command:
+            raise RuntimeError("tar not found")
+        command += + " -cjf"
+        if os.path.isfile(path + "output/" + project + ".tar.gz"):
+            os.unlink(path + "output/" + project + ".tar.gz")
+        if os.path.isfile(path + "output/" + project + ".zip"):
+            os.unlink(path + "output/" + project + ".zip")
+    else:
+        raise ValueError("Invalid archive format")
+
+    archive = path + "output/" + project + "." + format
+
+    if not os.path.isfile(archive):
+        printlog("Building download archive in " + format + " format")
+        cmd = command + ' ' + project + '.' + format + ' *'
+        printdebug(cmd)
+        printdebug(path+'output/')
+        process = subprocess.Popen(cmd, cwd=path+'output/', shell=True)
+        if not process:
+            raise RuntimeError("Subprocess failed")
+        else:
+            pid = process.pid
+            f = open(Project.path(project, user) + '.download','w')
+            f.write(str(pid))
+            f.close()
+            os.waitpid(pid, 0) #wait for process to finish
+            os.unlink(Project.path(project, user) + '.download')
+
+    return archive, contentencoding
+
 
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position

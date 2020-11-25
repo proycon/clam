@@ -69,16 +69,14 @@ class ForwardViewer(AbstractViewer):
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
-        self.forwarder(None, None, outputfile=file) #this sets the forwardlink on the instance
+        self.forwarder(None, None, path=kwargs['path'] if kwargs in 'path' else None, outputfile=file) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
         if self.indirect:
             r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
             if r.status_code == 302 and 'Location' in r.headers:
                 url = r.headers['Location']
                 return flask.redirect(url)
-            else:
-                return "Unexpected response from Forward service (HTTP " + str(r.status_code) + "): " + str(r.text)
-        else:
-            return flask.redirect(self.forwarder.forwardlink)
+            return "Unexpected response from Forward service (HTTP " + str(r.status_code) + "): " + str(r.text)
+        return flask.redirect(self.forwarder.forwardlink)
 
 
 

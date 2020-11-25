@@ -1152,7 +1152,7 @@ class Project:
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
                 customcss=settings.CUSTOMCSS,
-                forwarders=[ forwarder(project, getrooturl()) for forwarder in  settings.FORWARDERS ],
+                forwarders=[ forwarder(project, getrooturl(), Project.path(project,user)) for forwarder in  settings.FORWARDERS ],
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
                 auth_type=auth_type()
@@ -1453,7 +1453,10 @@ class Project:
                     if v.id == requestid:
                         viewer = v
                 if viewer:
-                    output = viewer.view(outputfile, **flask.request.values)
+                    kwargs = {}
+                    kwargs.update(flask.request.values)
+                    kwargs['path'] = Project.path(project, user)
+                    output = viewer.view(outputfile, **kwargs)
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
                     else:
@@ -1549,11 +1552,12 @@ class Project:
 
     @staticmethod
     def getarchive(project, user, format=None):
-        """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
+        """Generates and returns a download package (or 403 if one is already in the process of being prepared, though this does function blocks until the package is ready)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
             return withheaders(flask.make_response('Another compression is already running',403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
+            contentencoding = None
             if not format:
                 data = flask.request.values
                 if 'format' in data:
@@ -1561,50 +1565,12 @@ class Project:
                 else:
                     format = 'zip' #default
 
-            #validation, security
-            contentencoding = None
-            if format == 'zip':
-                contenttype = 'application/zip'
-                command = "/usr/bin/zip -r" #TODO: do not hard-code path!
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.gz':
-                contenttype = 'application/x-tar'
-                contentencoding = 'gzip'
-                command = "/bin/tar -czf"
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.bz2':
-                contenttype = 'application/x-bzip2'
-                command = "/bin/tar -cjf"
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
-            else:
-                return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})#TODO: message won't show
-
-            path = Project.path(project, user) + "output/" + project + "." + format
-
-            if not os.path.isfile(path):
-                printlog("Building download archive in " + format + " format")
-                cmd = command + ' ' + project + '.' + format + ' *'
-                printdebug(cmd)
-                printdebug(Project.path(project, user)+'output/')
-                process = subprocess.Popen(cmd, cwd=Project.path(project, user)+'output/', shell=True)
-                if not process:
-                    return withheaders(flask.make_response("Unable to make download package",500),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
-                else:
-                    pid = process.pid
-                    f = open(Project.path(project, user) + '.download','w')
-                    f.write(str(pid))
-                    f.close()
-                    os.waitpid(pid, 0) #wait for process to finish
-                    os.unlink(Project.path(project, user) + '.download')
+            try:
+                _, contentencoding = clam.common.data.buildarchive(project, Project.path(project,user), format)
+            except ValueError:
+                return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+            except RuntimeError as e:
+                return withheaders(flask.make_response("Unable to make download package: " + str(e),500),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             extraheaders = {
                 'allow_origin': settings.ALLOW_ORIGIN,
