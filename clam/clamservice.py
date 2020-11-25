@@ -2933,6 +2933,8 @@ def set_defaults():
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
+    clam.common.data.ROOT = settings.ROOT #dependency injection
+
     if 'SYSTEM_VERSION' not in settingkeys:
         settings.SYSTEM_VERSION = ""
     if 'SYSTEM_EMAIL' not in settingkeys:

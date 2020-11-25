@@ -123,4 +123,3 @@ def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
                 key = 'Access-Control-Allow-Origin'
             response.headers[key] = value
     return response
-

@@ -26,6 +26,7 @@ import time
 import re
 import yaml
 import itertools
+import random
 from copy import copy, deepcopy
 from lxml import etree as ElementTree
 from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
@@ -46,6 +47,7 @@ DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
 CUSTOM_FORMATS = []  #will be injected
 CUSTOM_VIEWERS = []  #will be injected
+ROOT = "./" #will be injected
 
 class BadRequest(Exception):
     """Raised on HTTP 400 - Bad Request erors"""
@@ -345,7 +347,22 @@ class CLAMFile:
                     if isinstance(line,str):
                         f.write(line.encode('utf-8'))
                     else:
+
                         f.write(line)
+    def store(self):
+        """Put a file in temporary public storage, returns the ID"""
+        if not os.path.exists(str(self)):
+            raise FileNotFoundError
+        fileid = None
+        while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
+            fileid = str("%x" % random.getrandbits(128))
+        storagedir = ROOT + "storage/" + fileid
+        os.makedirs(storagedir)
+        os.symlink(str(self), os.path.join(storagedir, self.filename))
+        metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+        if os.path.exists(metafile):
+            os.symlink(metafile, os.path.join(storagedir, self.metafilename()))
+        return fileid
 
     def validate(self):
         """Validate this file. Returns a boolean."""
@@ -2616,17 +2633,29 @@ class Action:
         return Action(*args, **kwargs)
 
 class Forwarder:
-    def __init__(self, id, name, url, description="", type='zip'):
+    def __init__(self, id, name, url, description="", type='zip', tmpstore=True):
+        """
+        Instantiate a forwarder
+
+        Parameters:
+            tmpstore (boolean): Use the temporary unauthenticated storage for file transfer. The file will be made available for one-time download by the remote service.
+        """
         self.id = id
         self.name = name
         self.url = url
         self.description = description
         self.type = type
+        self.tmpstore = tmpstore
 
     def __call__(self, project, baseurl, outputfile=None):
-        """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generator to download the entire output archive."""
+        """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generated to download the entire output archive."""
         if outputfile:
-            self.forwardlink =  self.url.replace("$BACKLINK", outputfile.baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)
+            if self.tmpstore:
+                #use the temporary storage
+                fileid = outputfile.store()
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid)
+            else:
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)
         else:
             self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
         return self
