@@ -1368,7 +1368,8 @@ class CLAMMetaData:
         xml += ">\n"
 
         for key, value in self.data.items():
-            xml += indent + "  <meta id=\""+clam.common.util.xmlescape(key)+"\">"+clam.common.util.xmlescape(str(value))+"</meta>\n"
+            if value is not None and value is not False:
+                xml += indent + "  <meta id=\""+clam.common.util.xmlescape(key)+"\">"+clam.common.util.xmlescape(str(value))+"</meta>\n"
 
         for constraint in self.constraints:
             xml += constraint.xml(indent + "  ")
