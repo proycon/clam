@@ -1567,7 +1567,7 @@ class Project:
 
             try:
                 printlog("Requested download archive in " + format + " format")
-                _, contentencoding = clam.common.data.buildarchive(project, Project.path(project,user), format)
+                archivefile, contenttype, contentencoding = clam.common.data.buildarchive(project, Project.path(project,user), format)
             except ValueError:
                 return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
             except RuntimeError as e:
@@ -1579,7 +1579,7 @@ class Project:
             }
             if contentencoding:
                 extraheaders['Content-Encoding'] = contentencoding
-            return withheaders(flask.Response( getbinarydata(path) ), contenttype, extraheaders )
+            return withheaders(flask.Response( getbinarydata(archivefile) ), contenttype, extraheaders )
 
 
     @staticmethod

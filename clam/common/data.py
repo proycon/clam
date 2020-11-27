@@ -2638,18 +2638,19 @@ class Forwarder:
             if self.tmpstore:
                 #use the temporary storage
                 fileid = outputfile.store()
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid)
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
             else:
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename) #pylint: disable=attribute-defined-outside-init
+
         else:
             if self.tmpstore:
                 assert path is not None
-                archivefile, contentencoding = buildarchive(project, path, self.type)
+                archivefile, _, _ = buildarchive(project, path, self.type)
                 archivefile = CLAMOutputFile(path, project + "." + self.type, False)
                 fileid = archivefile.store()
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid)
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
             else:
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type) #pylint: disable=attribute-defined-outside-init
         return self
 
 
@@ -2956,7 +2957,7 @@ def buildarchive(project, path, fmt):
         os.waitpid(pid, 0) #wait for process to finish
         os.unlink(os.path.join(path,'.download'))
 
-    return archive, contentencoding
+    return archive, contenttype, contentencoding
 
 
 #yes, this is deliberately placed at the end!
