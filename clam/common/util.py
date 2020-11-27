@@ -124,3 +124,27 @@ def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
             response.headers[key] = value
     return response
 
+def isncname(name):
+    """Checks if a name is a valid XML NCName"""
+    #not entirely according to specs http://www.w3.org/TR/REC-xml/#NT-Name , but simplified:
+    for i, c in enumerate(name):
+        if i == 0:
+            if not c.isalpha() and c != '_':
+                raise ValueError('Invalid XML NCName identifier: ' + name + ' (at position ' + str(i+1)+')')
+        else:
+            if not c.isalnum() and not (c in ['-','_','.']):
+                raise ValueError('Invalid XML NCName identifier: ' + name + ' (at position ' + str(i+1)+')')
+    return True
+
+def makencname(name, prefix="I"):
+    """Convert the name to a valid XML NCName, simply dropping characters that are invalid"""
+    ncname = ""
+    for i, c in enumerate(name):
+        if i == 0:
+            if not c.isalpha() and c != '_':
+                ncname += prefix
+        if c.isalnum() or c in ('-','_','.'):
+            ncname += c
+    if not ncname:
+        raise ValueError("Unable to convert '" + str(name) + "' to a valid XML NCName")
+    return ncname
