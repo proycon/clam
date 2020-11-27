@@ -1566,6 +1566,7 @@ class Project:
                     format = 'zip' #default
 
             try:
+                printlog("Requested download archive in " + format + " format")
                 _, contentencoding = clam.common.data.buildarchive(project, Project.path(project,user), format)
             except ValueError:
                 return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
