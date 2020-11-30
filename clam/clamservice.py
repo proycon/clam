@@ -2355,7 +2355,7 @@ def get_storage(fileid):
     """Get a file from temporary public storage"""
 
     if not fileid or not all( c.isdigit() or c in ('a','b','c','d','e','f') for c in fileid ):
-        return withheaders(flask.make_response("Malformed file id",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+        return withheaders(flask.make_response("Malformed file id",403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
     storagedir = settings.ROOT + "storage/" + fileid
     if os.path.exists(storagedir):
         buildarchivetrigger = os.path.join(storagedir,".buildarchive")
@@ -2372,12 +2372,12 @@ def get_storage(fileid):
             try:
                 filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
             except IndexError:
-                return withheaders(flask.make_response("No file found for given id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
+                return withheaders(flask.make_response("No file found for given id",404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             try:
                 outputfile = clam.common.data.CLAMFile(os.path.dirname(filename), os.path.basename(filename))
             except:
-                return withheaders(flask.make_response("Unable to load file",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+                return withheaders(flask.make_response("Unable to load file",403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if outputfile.metadata:
             headers = dict(list(outputfile.metadata.httpheaders()))
@@ -2402,7 +2402,7 @@ def get_storage(fileid):
         return response
 
     else:
-        return withheaders(flask.make_response("No such file id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
+        return withheaders(flask.make_response("No such file id",404),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 def put_storage(file):
     """Put a file in temporary public storage, returns the ID"""
