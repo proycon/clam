@@ -257,6 +257,12 @@ class CLAMFile:
         except ElementTree.XMLSyntaxError:
             raise ValueError("Metadata is not XML! Contents: " + xml)
 
+    def exists(self):
+        if not self.remote:
+            fullpath = self.projectpath + self.basedir + '/' + self.filename
+            return os.path.exists(fullpath)
+        raise ValueError("Can't determine existence for remote files yet")
+
     def __iter__(self):
         """Read the lines of the file, one by one without loading the file into memory."""
         if not self.remote:
@@ -347,7 +353,7 @@ class CLAMFile:
 
                         f.write(line)
 
-    def store(self,fileid=None):
+    def store(self,fileid=None,keep=False):
         """Put a file in temporary public storage, returns the ID"""
         if not os.path.exists(str(self)):
             raise FileNotFoundError
@@ -359,6 +365,10 @@ class CLAMFile:
         metafile = self.projectpath + self.basedir + '/' + self.metafilename()
         if os.path.exists(metafile):
             os.symlink(metafile, os.path.join(storagedir, self.metafilename()))
+        if keep:
+            #register this file as persistent
+            f = open(os.path.join(storagedir, ".keep"),'w',encoding='utf-8')
+            f.close()
         return fileid
 
     def validate(self):

@@ -615,6 +615,8 @@
                         <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></li>
                     </xsl:if>
                 </xsl:for-each>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/share<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Share</a></li>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/shareonce<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Share once</a></li>
                 <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a></li>
                 </ul>
                 </span>

@@ -52,7 +52,10 @@ class AbstractViewer:
             self.more = False
 
     def view(self, file, **kwargs):
-        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
+        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service.
+
+        In this context kwargs['baseurl'] should be available, pointing to the base URL of the webservice (including URL prefix).
+        """
         raise NotImplementedError
 
     def xml(self, indent = ""):
@@ -227,4 +230,20 @@ class FLATViewer(AbstractViewer):
             return flask.redirect(url)
         else:
             return "Unexpected response from FLAT (HTTP " + str(r.status_code) + ", target was " + self.url + "): " + r.text
+
+
+class ShareViewer(AbstractViewer):
+    id = 'shareviewer'
+    name = "Share this file"
+
+    def __init__(self, **kwargs):
+        if 'persistent' in kwargs:
+            self.persistent = bool(kwargs['persistent'])
+        else:
+            self.persistent = True
+        super(ShareViewer,self).__init__(**kwargs)
+
+    def view(self, file, **kwargs):
+        fileid = file.store(keep=self.persistent)
+        return flask.render_template('share.html',fileid=fileid, filename=file.filename, persistent=self.persistent, baseurl=kwargs['baseurl'])
 

@@ -45,6 +45,7 @@ import clam.common.formats
 import clam.common.auth
 import clam.common.oauth
 import clam.common.data
+import clam.common.viewers
 from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
@@ -1439,8 +1440,15 @@ class Project:
                     return withheaders(flask.make_response(outputfile.metadata.xml()) ,  headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     return withheaders(flask.make_response("No metadata found!",404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+            elif requestid in ('share','shareonce') and settings.ALLOWSHARE:
+                viewer = clam.common.viewers.ShareViewer(id="share",more=True,persistent=(requestid=='share'))
+                output = viewer.view(outputfile, baseurl=getrooturl())
+                if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
+                    return output
+                else:
+                    return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
             else:
-                #attach viewer data (also attaches converters!
+                #attach viewer data (also attaches converters!)
                 outputfile.attachviewers(settings.PROFILES)
 
                 #set remote properties, used by the ForwardViewer
@@ -1456,6 +1464,7 @@ class Project:
                     kwargs = {}
                     kwargs.update(flask.request.values)
                     kwargs['path'] = Project.path(project, user)
+                    viewer['baseurl'] = getrooturl()
                     output = viewer.view(outputfile, **kwargs)
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
@@ -2366,7 +2375,7 @@ def get_storage(fileid):
                 return withheaders(flask.make_response("No file found for given id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             try:
-                outputfile = clam.common.data.CLAMOutputFile(storagedir, filename)
+                outputfile = clam.common.data.CLAMFile(os.path.dirname(filename), os.path.basename(filename))
             except:
                 return withheaders(flask.make_response("Unable to load file",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
@@ -2377,14 +2386,17 @@ def get_storage(fileid):
             headers = {}
             mimetype = 'application/octet-stream'
         headers['allow_origin'] = settings.ALLOW_ORIGIN
+        headers['Content-Disposition'] = "attachment; filename=\"" + outputfile.filename + "\""
+
+        if not outputfile.exists():
+            return withheaders(flask.make_response("File not found: " + str(outputfile),404),'text/plain', {'allow_origin': settings.ALLOW_ORIGIN})
+
         try:
             response = withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
         except UnicodeError:
             return withheaders(flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
-        except (FileNotFoundError, IOError):
-            return withheaders(flask.make_response("File not found",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        if 'keep' not in flask.request.values or flask.request.values['keep'] in ('0','no','false'):
+        if not os.path.exists(os.path.join(storagedir, ".keep")) and ('keep' not in flask.request.values or flask.request.values['keep'] in ('0','no','false')):
             shutil.rmtree(storagedir)
 
         return response
@@ -2547,7 +2559,7 @@ class ActionHandler:
                     shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
                     if viewer:
-                        output = viewer.view(io.StringIO(stdoutdata))
+                        output = viewer.view(io.StringIO(stdoutdata), baseurl=getrooturl())
                         if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                             return output
                         else:
@@ -2589,7 +2601,7 @@ class ActionHandler:
                     return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             if not isinstance(result, (flask.Response, werkzeug.wrappers.Response)):
                 if viewer:
-                    output = viewer.view(io.StringIO(str(result)))
+                    output = viewer.view(io.StringIO(str(result)), baseurl=getrooturl())
                     return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                 else:
                     return withheaders(flask.make_response(str(result)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
@@ -2941,22 +2953,8 @@ def set_defaults():
         settings.ADMINS = []
     if 'LISTPROJECTS' not in settingkeys:
         settings.LISTPROJECTS = True
-    if 'ALLOWSHARE' not in settingkeys: #TODO: all these are not implemented yet
+    if 'ALLOWSHARE' not in settingkeys: #Allow sharing from the interface for all files
         settings.ALLOWSHARE = True
-    if 'ALLOWANONSHARE' not in settingkeys:
-        settings.ALLOWANONSHARE = True
-    if 'ALLOWSHAREUPLOAD' not in settingkeys:
-        settings.ALLOWSHAREUPLOAD = False
-    if 'ALLOWSHARERUN' not in settingkeys:
-        settings.ALLOWSHARERUN = True
-    if 'ALLOWSHAREDELETE' not in settingkeys:
-        settings.ALLOWSHAREDELETE = False
-    if 'ALLOWANONSHAREUPLOAD' not in settingkeys:
-        settings.ALLOWSHAREUPLOAD = False
-    if 'ALLOWANONSHARERUN' not in settingkeys:
-        settings.ALLOWSHARERUN = False
-    if 'ALLOWANONSHAREDELETE' not in settingkeys:
-        settings.ALLOWSHAREDELETE = False
     if 'DISABLE_PORCH' not in settingkeys:
         settings.DISABLE_PORCH = False
     if 'PUBLIC_ACTIONS' not in settingkeys:
