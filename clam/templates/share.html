@@ -42,9 +42,13 @@
 
     <p>Share this link for a one-time share, it can only be used once: <tt>{{ baseurl }}/storage/{{ fileid }}</tt></p>
 
+    <p>The link is only valid if the original project and file remain intact.</p>
+
     <h2>Multiple-use share</h2>
 
     <p>Share this link for a reusable share: <a href="{{ baseurl }}/storage/{{ fileid }}?keep=1">{{ baseurl }}/storage/{{ fileid }}?keep=1</a></p>
+
+    <p>The link is only valid if the original project and file remain intact.</p>
 
     {% endif %}
 
