@@ -2358,16 +2358,17 @@ def get_storage(fileid):
             archivefile, _, _ = clam.common.data.buildarchive(project, path, archivetype)
             archivefile = clam.common.data.CLAMOutputFile(path, project + "." + archivetype, False)
             archivefile.store(fileid)
+            outputfile = archivefile
+        else:
+            try:
+                filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
+            except IndexError:
+                return withheaders(flask.make_response("No file found for given id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        try:
-            filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
-        except IndexError:
-            return withheaders(flask.make_response("No file found for given id",404),headers={'allow_origin': settings.ALLOW_ORIGIN})
-
-        try:
-            outputfile = clam.common.data.CLAMOutputFile(storagedir, filename)
-        except:
-            return withheaders(flask.make_response("Unable to load file",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
+            try:
+                outputfile = clam.common.data.CLAMOutputFile(storagedir, filename)
+            except:
+                return withheaders(flask.make_response("Unable to load file",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if outputfile.metadata:
             headers = dict(list(outputfile.metadata.httpheaders()))
