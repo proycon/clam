@@ -346,15 +346,15 @@ class CLAMFile:
                     else:
 
                         f.write(line)
-    def store(self):
+
+    def store(self,fileid=None):
         """Put a file in temporary public storage, returns the ID"""
         if not os.path.exists(str(self)):
             raise FileNotFoundError
-        fileid = None
         while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
             fileid = str("%x" % random.getrandbits(128))
         storagedir = ROOT + "storage/" + fileid
-        os.makedirs(storagedir)
+        os.makedirs(storagedir, exist_ok=True)
         os.symlink(str(self), os.path.join(storagedir, self.filename))
         metafile = self.projectpath + self.basedir + '/' + self.metafilename()
         if os.path.exists(metafile):
@@ -2646,9 +2646,16 @@ class Forwarder:
         else:
             if self.tmpstore:
                 assert path is not None
-                archivefile, _, _ = buildarchive(project, path, self.type)
-                archivefile = CLAMOutputFile(path, project + "." + self.type, False)
-                fileid = archivefile.store()
+                fileid = None
+                while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
+                    fileid = str("%x" % random.getrandbits(128))
+                storagedir = ROOT + "storage/" + fileid
+                os.makedirs(storagedir)
+                #this is a trigger file that triggers a build of the archive when the
+                #temporary storage is accessed, as we may not have all output files
+                #yet at the time this forwarder gets called.
+                with open(os.path.join(storagedir,".buildarchive"),'w',encoding='utf-8') as f:
+                    f.write(project + "\t" + path + "\t" + self.type + "\n")
                 self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
             else:
                 self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type) #pylint: disable=attribute-defined-outside-init

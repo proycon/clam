@@ -2349,6 +2349,16 @@ def get_storage(fileid):
         return withheaders(flask.make_response("Malformed file id",403),headers={'allow_origin': settings.ALLOW_ORIGIN})
     storagedir = settings.ROOT + "storage/" + fileid
     if os.path.exists(storagedir):
+        buildarchivetrigger = os.path.join(storagedir,".buildarchive")
+        if os.path.exists(buildarchivetrigger):
+            #the archive has not actually been built yet, we trigger a build now
+            with open(buildarchivetrigger,'r',encoding='utf-8') as f:
+                project, path, archivetype = f.readline().split("\t")
+            os.unlink(buildarchivetrigger)
+            archivefile, _, _ = clam.common.data.buildarchive(project, path, archivetype)
+            archivefile = clam.common.data.CLAMOutputFile(path, project + "." + archivetype, False)
+            archivefile.store(fileid)
+
         try:
             filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
         except IndexError:
