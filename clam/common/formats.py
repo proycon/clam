@@ -214,7 +214,7 @@ class XMLStyleSheet(CLAMMetaData):
 class WaveAudioFormat(CLAMMetaData):
     attributes = {}
     name ="Wave Audio File"
-    mimetype = 'audio/wav'
+    mimetype = 'audio/vnd.wave'
 
 class OggAudioFormat(CLAMMetaData):
     attributes = {}
