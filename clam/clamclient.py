@@ -5,9 +5,9 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- Generic CLAM Client --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
+#
+#       Centre for Language and Speech Technology, Radboud University Nijmegen
+#       & KNAW Humanities Cluster
 #
 #       Licensed under GPLv3
 #

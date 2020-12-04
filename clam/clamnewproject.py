@@ -7,8 +7,8 @@
 #       by Maarten van Gompel (proycon)
 #       https://proycon.github.io/clam
 #
-#       Centre for Language Studies
-#       Radboud University Nijmegen
+#       Centre for Language and Speech Technology, Radboud University Nijmegen
+#       & KNAW Humanities Cluster
 #
 #       Licensed under GPLv3
 #

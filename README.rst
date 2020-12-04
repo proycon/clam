@@ -27,7 +27,9 @@ CLAM: Computational Linguistics Application Mediator
    :target: https://www.repostatus.org/#active
 
 
-*by Maarten van Gompel, Centre for Language and Speech Technology, Radboud University Nijmegen*
+*by Maarten van Gompel*
+*Centre for Language and Speech Technology, Radboud University Nijmegen*
+*& KNAW Humanities Cluster*
 
 *Licensed under GPLv3*
 
