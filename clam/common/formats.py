@@ -218,8 +218,8 @@ class WaveAudioFormat(CLAMMetaData):
 
 class OggAudioFormat(CLAMMetaData):
     attributes = {}
-    name ="Ogg Audio File"
-    mimetype = 'audio/ogg'
+    name ="Ogg Vorbis Audio File"
+    mimetype = 'audio/vorbis'
 
 class MP3AudioFormat(CLAMMetaData):
     attributes = {}
