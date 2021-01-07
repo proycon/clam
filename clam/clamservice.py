@@ -2356,6 +2356,7 @@ def get_storage(fileid):
 
     if not fileid or not all( c.isdigit() or c in ('a','b','c','d','e','f') for c in fileid ):
         return withheaders(flask.make_response("Malformed file id",403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+    printdebug("Getting file from public storage " + fileid)
     storagedir = settings.ROOT + "storage/" + fileid
     if os.path.exists(storagedir):
         buildarchivetrigger = os.path.join(storagedir,".buildarchive")
@@ -2392,11 +2393,12 @@ def get_storage(fileid):
             return withheaders(flask.make_response("File not found: " + str(outputfile),404),'text/plain', {'allow_origin': settings.ALLOW_ORIGIN})
 
         try:
-            response = withheaders(flask.Response( (line for line in outputfile) ), mimetype, headers )
+            response = withheaders(flask.Response( outputfile.readlines() ), mimetype, headers ) #warning: loads output into memory! needed because we will delete the file afterward
         except UnicodeError:
             return withheaders(flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         if not os.path.exists(os.path.join(storagedir, ".keep")) and ('keep' not in flask.request.values or flask.request.values['keep'] in ('0','no','false')):
+            printdebug("Removing storage " + fileid)
             shutil.rmtree(storagedir)
 
         return response
@@ -2412,6 +2414,7 @@ def put_storage(file):
     fileid = None
     while fileid is None or os.path.exists(settings.ROOT + "storage/" + fileid):
         fileid = str("%x" % random.getrandbits(128))
+    printdebug("Putting file into public storage " + fileid)
     storagedir = settings.ROOT + "storage/" + fileid
     os.makedirs(storagedir)
     os.symlink(str(file), os.path.join(storagedir, file.filename))
