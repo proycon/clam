@@ -354,22 +354,30 @@ class CLAMFile:
                         f.write(line)
 
     def store(self,fileid=None,keep=False):
-        """Put a file in temporary public storage, returns the ID"""
-        if not os.path.exists(str(self)):
-            raise FileNotFoundError
-        while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
-            fileid = str("%x" % random.getrandbits(128))
-        storagedir = ROOT + "storage/" + fileid
-        os.makedirs(storagedir, exist_ok=True)
-        os.symlink(str(self), os.path.join(storagedir, self.filename))
-        metafile = self.projectpath + self.basedir + '/' + self.metafilename()
-        if os.path.exists(metafile):
-            os.symlink(metafile, os.path.join(storagedir, self.metafilename()))
-        if keep:
-            #register this file as persistent
-            f = open(os.path.join(storagedir, ".keep"),'w',encoding='utf-8')
-            f.close()
-        return fileid
+        """Put a file in temporary public storage, returns the ID if the file is local, returns a dictionary with keys 'id', 'filename' and 'url' if the file is remote."""
+        if self.remote:
+            requestparams = {}
+            if self.client:
+                requestparams = self.client.initrequest()
+            response = requests.put( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
+            response.raise_for_status()
+            return response.json()
+        else:
+            if not os.path.exists(str(self)):
+                raise FileNotFoundError
+            while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
+                fileid = str("%x" % random.getrandbits(128))
+            storagedir = ROOT + "storage/" + fileid
+            os.makedirs(storagedir, exist_ok=True)
+            os.symlink(str(self), os.path.join(storagedir, self.filename))
+            metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+            if os.path.exists(metafile):
+                os.symlink(metafile, os.path.join(storagedir, self.metafilename()))
+            if keep:
+                #register this file as persistent
+                f = open(os.path.join(storagedir, ".keep"),'w',encoding='utf-8')
+                f.close()
+            return fileid
 
     def validate(self):
         """Validate this file. Returns a boolean."""
