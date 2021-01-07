@@ -154,7 +154,7 @@ Output Files
 :Request Parameters: (none)
 :Response: ``200 - OK`` & JSON reply with field ``url`` indicating where the file can be downloaded (one time only) publicly, ``401 - Unauthorised``,
   ``404 - Not Found``
-:Description:  Shares the file using unauthenticated temporary storage; returns a JSON response with a URL where the file can be downloaded (one time only). The URL contains a random 128-bit ID and is safe as long as it is kept secret (only share over encrypted connections).
+:Description:  Shares the file using unauthenticated temporary storage; returns a JSON response with a URL (key: ``url``). where the file can be downloaded (one time only). The URL contains a random 128-bit ID and is safe as long as it is kept secret (only share over encrypted connections).
 
 :Endpoint: ``/[project]/output/[filename]/metadata``
 :Method: ``GET``
