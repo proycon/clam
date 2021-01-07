@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>Sharing {{ filename }}</title>
+<style type="text/css">
+    body {
+        background: #ddd;
+        font-family: sans-serif;
+        font-size: 12px;
+    }
+
+    h1 {
+        margin: 5px;
+        width: 97%;
+        background: #444;
+        border: 1px none #222;
+        padding: 10px;
+        text-align: center;
+        color: white;
+        font-size: 150%;
+        font-weight: bold;
+        font-family: monospace;
+    }
+    {{ customcss }}
+</style>
+</head>
+
+<body>
+<div id="viewer">
+    <h1>Sharing {{ filename }}</h1>
+
+    {% if persistent %}
+
+    <p>Share this link: <a href="{{ baseurl }}/storage/{{ fileid }}">{{ baseurl }}/storage/{{ fileid }}</a></p>
+
+    <p>The link will remain valid as long as the original project and file remain intact.</p>
+
+    {% else %}
+
+    <h2>One-time share</h2>
+
+    <p>Share this link for a one-time share, it can only be used once: <tt>{{ baseurl }}/storage/{{ fileid }}</tt></p>
+
+    <p>The link is only valid if the original project and file remain intact.</p>
+
+    <h2>Multiple-use share</h2>
+
+    <p>Share this link for a reusable share: <a href="{{ baseurl }}/storage/{{ fileid }}?keep=1">{{ baseurl }}/storage/{{ fileid }}?keep=1</a></p>
+
+    <p>The link is only valid if the original project and file remain intact.</p>
+
+    {% endif %}
+
+    <p>
+    <strong>Important note:</strong> Anybody who has any of the mentioned share links can read this file without further authentication, so be careful with whom you share it and over what communication channel you share it. Make sure to always use an encrypted communication channel if the data is sensitive.
+    </p>
+
+
+</div>
+</body>
+</html>

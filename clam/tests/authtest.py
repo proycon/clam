@@ -316,6 +316,33 @@ class ExtensiveServiceTest(unittest.TestCase):
                 outputfile.loadmetadata()
                 self.assertTrue(outputfile.metadata.provenance.outputtemplate_id == 'lexicon')
 
+    def test4_storetest(self):
+        """Extensive Service Test - Storage test"""
+        data = self.client.get(self.project)
+        success = self.client.addinputfile(self.project, data.inputtemplate('textinput'),'/tmp/servicetest.txt', language='fr')
+        self.assertTrue(success)
+        data = self.client.start(self.project)
+        self.assertTrue(data)
+        self.assertFalse(data.errors)
+        while data.status != clam.common.status.DONE:
+            time.sleep(1) #wait 1 second before polling status
+            data = self.client.get(self.project) #get status again
+        self.assertFalse(data.errors, "Checking for absence of errors (" + data.errormsg + ")")
+        self.assertTrue(isinstance(data.output, list))
+        self.assertTrue('servicetest.txt.freqlist' in [ x.filename for x in data.output ])
+        self.assertTrue('servicetest.txt.stats' in [ x.filename for x in data.output ])
+        for outputfile in data.output:
+            if outputfile.filename == 'servicetest.txt.freqlist':
+                outputfile.loadmetadata()
+                #print outputfile.metadata.provenance.outputtemplate_id
+                response = outputfile.store()
+                self.assertTrue('id' in response)
+                print("Stored file ID " + response['id'],file=sys.stderr)
+                self.assertTrue('url' in response)
+                filename = self.client.downloadstorage(response['id'],targetdir="/tmp") #unauthenticated by default
+                self.assertTrue(os.path.exists(filename))
+
+
     def tearDown(self):
         self.client.delete(self.project)
 

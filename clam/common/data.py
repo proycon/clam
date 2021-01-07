@@ -26,6 +26,9 @@ import time
 import re
 import yaml
 import itertools
+import random
+import shutil
+import subprocess
 from copy import copy, deepcopy
 from lxml import etree as ElementTree
 from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
@@ -34,7 +37,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.0.24'
+VERSION = '3.1.0'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -46,11 +49,10 @@ DISALLOWINSHELLSAFE = ('|','&',';','!','<','>','{','}','`','\n','\r','\t')
 
 CUSTOM_FORMATS = []  #will be injected
 CUSTOM_VIEWERS = []  #will be injected
+ROOT = "./" #will be injected
 
 class BadRequest(Exception):
     """Raised on HTTP 400 - Bad Request erors"""
-    def __init__(self):
-        super(BadRequest, self).__init__()
     def __str__(self):
         return "Bad Request"
 
@@ -162,15 +164,12 @@ class FormatError(Exception):
 
 class HTTPError(Exception):
     """This Exception is raised when certain data (such a metadata), can't be retrieved over HTTP"""
-    pass
 
 class AuthenticationRequired(Exception):
     """This Exception is raised when authentication is required but has not been provided"""
-    pass
 
 class ConfigurationError(Exception):
     """This Exception is raised when authentication is required but has not been provided"""
-    pass
 
 class CLAMFile:
     basedir = ''
@@ -257,6 +256,12 @@ class CLAMFile:
             self.metadata = CLAMMetaData.fromxml(xml, self) #returns CLAMMetaData object (or child thereof)
         except ElementTree.XMLSyntaxError:
             raise ValueError("Metadata is not XML! Contents: " + xml)
+
+    def exists(self):
+        if not self.remote:
+            fullpath = self.projectpath + self.basedir + '/' + self.filename
+            return os.path.exists(fullpath)
+        raise ValueError("Can't determine existence for remote files yet")
 
     def __iter__(self):
         """Read the lines of the file, one by one without loading the file into memory."""
@@ -345,14 +350,40 @@ class CLAMFile:
                     if isinstance(line,str):
                         f.write(line.encode('utf-8'))
                     else:
+
                         f.write(line)
+
+    def store(self,fileid=None,keep=False):
+        """Put a file in temporary public storage, returns the ID if the file is local, returns a dictionary with keys 'id', 'filename' and 'url' if the file is remote."""
+        if self.remote:
+            requestparams = {}
+            if self.client:
+                requestparams = self.client.initrequest()
+            response = requests.put( self.projectpath + self.basedir + '/' + self.filename, **requestparams)
+            response.raise_for_status()
+            return response.json()
+        else:
+            if not os.path.exists(str(self)):
+                raise FileNotFoundError
+            while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
+                fileid = str("%x" % random.getrandbits(128))
+            storagedir = ROOT + "storage/" + fileid
+            os.makedirs(storagedir, exist_ok=True)
+            os.symlink(str(self), os.path.join(storagedir, self.filename))
+            metafile = self.projectpath + self.basedir + '/' + self.metafilename()
+            if os.path.exists(metafile):
+                os.symlink(metafile, os.path.join(storagedir, self.metafilename()))
+            if keep:
+                #register this file as persistent
+                f = open(os.path.join(storagedir, ".keep"),'w',encoding='utf-8')
+                f.close()
+            return fileid
 
     def validate(self):
         """Validate this file. Returns a boolean."""
         if self.metadata:
             return self.metadata.validate()
-        else:
-            return False
+        return False
 
 
     def __str__(self):
@@ -365,12 +396,12 @@ class CLAMOutputFile(CLAMFile):
     basedir = "output"
 
 def getclamdata(filename, custom_formats=None, custom_viewers=None):
-    global CUSTOM_FORMATS, CUSTOM_VIEWERS  #pylint: disable=global-statement
     """This function reads the CLAM Data from an XML file. Use this to read
     the clam.xml file from your system wrapper. It returns a CLAMData instance.
 
     If you make use of CUSTOM_FORMATS, you need to pass the CUSTOM_FORMATS list as 2nd argument.
     """
+    global CUSTOM_FORMATS, CUSTOM_VIEWERS  #pylint: disable=global-statement
     f = io.open(filename,'r',encoding='utf-8')
     xml = f.read(os.path.getsize(filename))
     f.close()
@@ -715,24 +746,19 @@ class CLAMData:
 
     def __getitem__(self, parameter_id):
         """Return the value of the specified global parameter"""
-        try:
-            param = self.parameter(parameter_id)
-            if param.hasvalue:
-                return param.value
-            else:
-                if isinstance(param, clam.common.parameters.BooleanParameter):
-                    return False #booleans that have no explicit value simply default to false
-                raise KeyError("No such parameter passed: " + parameter_id)
-        except KeyError:
-            raise
+        param = self.parameter(parameter_id)
+        if param.hasvalue:
+            return param.value
+        if isinstance(param, clam.common.parameters.BooleanParameter):
+            return False #booleans that have no explicit value simply default to false
+        raise KeyError("No such parameter passed: " + parameter_id)
 
     def get(self, parameter_id, default=None):
         try:
             param = self.parameter(parameter_id)
             if param.hasvalue:
                 return param.value
-            else:
-                return default
+            return default
         except KeyError:
             return default
 
@@ -823,8 +849,7 @@ def sanitizeparameters(parameters):
             elif isinstance(x, clam.common.parameters.AbstractParameter):
                 d[x.id] = x
         return d
-    else:
-        return parameters
+    return parameters
 
 
 
@@ -1112,7 +1137,7 @@ class Program(dict):
             outputfilename = str(outputfile).replace(os.path.join(self.projectpath,'output/'),'')
         else:
             outputfilename = outputfile
-        outputtemplate, inputfiles = self[outputfilename]
+        _, inputfiles = self[outputfilename]
         for inputfilename, inputtemplate in inputfiles.items():
             yield CLAMInputFile(self.projectpath, inputfilename, loadmetadata,client,requiremetadata), inputtemplate
 
@@ -1140,8 +1165,7 @@ class RawXMLProvenanceData:
     def xml(self):
         if isinstance(self.data, ElementTree._Element): #pylint: disable=protected-access
             return ElementTree.tostring(self.data, pretty_print = True)
-        else:
-            return self.data
+        return self.data
 
 class CLAMProvenanceData:
     """Holds provenance data"""
@@ -1228,10 +1252,8 @@ class CLAMProvenanceData:
                             else:
                                 raise Exception("Expected parameter class '" + subsubnode.tag + "', but not defined!")
                 return CLAMProvenanceData(serviceid,servicename,serviceurl,outputtemplate, outputtemplatelabel, inputfiles, parameters, timestamp)
-            else:
-                raise NotImplementedError
-
-
+            raise NotImplementedError
+        raise ValueError("Expected a provenance node")
 
 
 
@@ -1308,7 +1330,7 @@ class CLAMMetaData:
 
             for key, attribute in self.attributes.items():
                 if isinstance(attribute, clam.common.parameters.AbstractParameter): #don't break old-style attributes (just ignore them)
-                    if attribute.required and not key in self:
+                    if attribute.required and key not in self:
                         raise ValueError("Required metadata attribute " + key +  " not specified (format: " + self.__class__.__name__ + ", file: " + str(file) + ")" )
                     elif isinstance(attribute, clam.common.parameters.StaticParameter):
                         self[key] = attribute.value
@@ -1377,9 +1399,9 @@ class CLAMMetaData:
         return xml
 
     @classmethod
-    def formatxml(Self, indent = ""):
+    def formatxml(cls, indent = ""):
         """Render an XML representation of the format class"""
-        return "<format id=\"" + Self.__name__ + "\" name=\"" + Self.name + "\" mimetype=\"" + Self.mimetype + "\" />"
+        return "<format id=\"" + cls.__name__ + "\" name=\"" + cls.name + "\" mimetype=\"" + cls.mimetype + "\" />"
 
     def save(self, filename):
         """Save metadata to XML file"""
@@ -1452,8 +1474,8 @@ class CLAMMetaData:
                 elif subnode.tag == 'provenance':
                     data['provenance'] = CLAMProvenanceData.fromxml(subnode)
             return formatclass(file, **data)
-        else:
-            raise Exception("Invalid CLAM Metadata!")
+
+        raise Exception("Invalid CLAM Metadata!")
 
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples. Should be overridden in sub-classes!"""
@@ -1652,8 +1674,7 @@ class InputTemplate:
     def __eq__(self, other):
         if isinstance(other, str): #pylint: disable=undefined-variable
             return self.id == other
-        else: #object
-            return other.id == self.id
+        return other.id == self.id
 
     def match(self, metadata, user = None):
         """Does the specified metadata match this template? returns (success,metadata,parameters)"""
@@ -1676,8 +1697,7 @@ class InputTemplate:
         #print("MATCHINGFILES: ", results,file=sys.stderr) #REMOVE DEBUG
         if self.unique and len(results) != 1:
             return []
-        else:
-            return results
+        return results
 
 
 
@@ -2617,19 +2637,46 @@ class Action:
         return Action(*args, **kwargs)
 
 class Forwarder:
-    def __init__(self, id, name, url, description="", type='zip'):
+    def __init__(self, id, name, url, description="", type='zip', tmpstore=True):
+        """
+        Instantiate a forwarder
+
+        Parameters:
+            tmpstore (boolean): Use the temporary unauthenticated storage for file transfer. The file will be made available for one-time download by the remote service.
+        """
         self.id = id
         self.name = name
         self.url = url
         self.description = description
         self.type = type
+        self.tmpstore = tmpstore
 
-    def __call__(self, project, baseurl, outputfile=None):
-        """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generator to download the entire output archive."""
+    def __call__(self, project, baseurl, path=None, outputfile=None):
+        """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generated to download the entire output archive."""
         if outputfile:
-            self.forwardlink =  self.url.replace("$BACKLINK", outputfile.baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)
+            if self.tmpstore:
+                #use the temporary storage
+                fileid = outputfile.store()
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
+            else:
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename) #pylint: disable=attribute-defined-outside-init
+
         else:
-            self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type)
+            if self.tmpstore:
+                assert path is not None
+                fileid = None
+                while fileid is None or os.path.exists(ROOT + "storage/" + fileid):
+                    fileid = str("%x" % random.getrandbits(128))
+                storagedir = ROOT + "storage/" + fileid
+                os.makedirs(storagedir)
+                #this is a trigger file that triggers a build of the archive when the
+                #temporary storage is accessed, as we may not have all output files
+                #yet at the time this forwarder gets called.
+                with open(os.path.join(storagedir,".buildarchive"),'w',encoding='utf-8') as f:
+                    f.write(project + "\t" + path + "\t" + self.type + "\n")
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
+            else:
+                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type) #pylint: disable=attribute-defined-outside-init
         return self
 
 
@@ -2882,6 +2929,62 @@ class AbstractConverter:
         if not outputfile.metadata.__class__ in self.acceptforoutput:
             raise Exception("Convertor " + self.__class__.__name__ + " can not convert input files to " + outputfile.metadata.__class__.__name__ + "!")
         return [] #Return converted contents (must be an iterable) or raise an exception on error
+
+def buildarchive(project, path, fmt):
+    """Build a download archive, returns the full file path"""
+
+    contentencoding = None
+    if fmt == 'zip':
+        contenttype = 'application/zip'
+        command = shutil.which("zip")
+        if not command:
+            raise RuntimeError("zip not found")
+        command += " -r"
+        if os.path.isfile(path + "output/" + project + ".tar.gz"):
+            os.unlink(path + "output/" + project + ".tar.gz")
+        if os.path.isfile(path + "output/" + project + ".tar.bz2"):
+            os.unlink(path + "output/" + project + ".tar.bz2")
+    elif fmt == 'tar.gz':
+        contenttype = 'application/x-tar'
+        contentencoding = 'gzip'
+        command = shutil.which("tar")
+        if not command:
+            raise RuntimeError("tar not found")
+        command += " -czf"
+        if os.path.isfile(path + "output/" + project + ".zip"):
+            os.unlink(path + "output/" + project + ".zip")
+        if os.path.isfile(path + "output/" + project + ".tar.bz2"):
+            os.unlink(path + "output/" + project + ".tar.bz2")
+    elif fmt == 'tar.bz2':
+        contenttype = 'application/x-bzip2'
+        command = shutil.which("tar")
+        if not command:
+            raise RuntimeError("tar not found")
+        command += " -cjf"
+        if os.path.isfile(path + "output/" + project + ".tar.gz"):
+            os.unlink(path + "output/" + project + ".tar.gz")
+        if os.path.isfile(path + "output/" + project + ".zip"):
+            os.unlink(path + "output/" + project + ".zip")
+    else:
+        raise ValueError("Invalid archive format")
+
+    archive = path + "output/" + project + "." + fmt
+
+    if not os.path.isfile(archive):
+        cmd = command + ' ' + project + '.' + fmt + ' *'
+        process = subprocess.Popen(cmd, cwd=path+'output/', shell=True)
+        if not process:
+            raise RuntimeError("Subprocess failed")
+
+        pid = process.pid
+        f = open(os.path.join(path,'.download'),'w')
+        f.write(str(pid))
+        f.close()
+        os.waitpid(pid, 0) #wait for process to finish
+        os.unlink(os.path.join(path,'.download'))
+
+    return archive, contenttype, contentencoding
+
 
 #yes, this is deliberately placed at the end!
 import clam.common.formats #pylint: disable=wrong-import-position

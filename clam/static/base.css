@@ -310,3 +310,25 @@ pre.pythoncode strong {
     display: none;
     float: right;
 }
+
+span.moremenu {
+    cursor: pointer;
+    font-weight: bold;
+    font-style: italic;
+}
+span.moremenu:hover ul {
+    display: block;
+    position: absolute;
+    min-width: 160px;
+    background: white;
+    padding: 5px;
+    font-weight: normal;
+    font-style: normal;
+    margin-top: -5px;
+}
+span.moremenu ul {
+    display: none;
+}
+span.moremenu ul li, span.moremenu ul li a, span.moremenu ul li a.text-primary {
+    color: white !important;
+}

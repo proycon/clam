@@ -150,7 +150,11 @@ Output Files
 :Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
   ``404 - Not Found``
 :Description: Deletes the specified output file.
-
+:Method: ``PUT``
+:Request Parameters: (none)
+:Response: ``200 - OK`` & JSON reply with field ``url`` indicating where the file can be downloaded (one time only) publicly, ``401 - Unauthorised``,
+  ``404 - Not Found``
+:Description:  Shares the file using unauthenticated temporary storage; returns a JSON response with a URL (key: ``url``). where the file can be downloaded (one time only). The URL contains a random 128-bit ID and is safe as long as it is kept secret (only share over encrypted connections).
 
 :Endpoint: ``/[project]/output/[filename]/metadata``
 :Method: ``GET``
@@ -177,6 +181,15 @@ Archive Download
 :Description: Deletes all output files and resets the project for
   another run.
 
+Temporary Storage
+-------------------------
+
+:Endpoint: ``/storage/[id]``
+:Method: ``GET``
+:Request Parameters: ``keep`` (optional) - Set to ``1`` to preserve the link for another use after download.
+:Response: ``200 - OK`` & File contents, ``401 - Unauthorised``,
+  ``404 - Not Found``
+:Description: Retrieves the specified output file from unauthenticated temporary storage. Files will need to be explicitly made available for this storage (using a ``PUT`` request on ``/[project]/output/[filename]``. The download will only work once unless the parameter ``keep`` is set to ``1``.
 
 Actions
 -----------

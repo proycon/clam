@@ -39,18 +39,30 @@ class AbstractViewer:
     mimetype = 'text/html'
 
     def __init__(self, **kwargs):
+        """
+        Parameters:
+            id: (str) The internal ID for the viewer
+            more: (bool) Should this viewer appear in the More menu rather than in the main list?
+        """
         if 'id' in kwargs:
             self.id = kwargs['id']
+        if 'more' in kwargs:
+            self.more = bool(kwargs['more'])
+        else:
+            self.more = False
 
     def view(self, file, **kwargs):
-        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service."""
+        """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service.
+
+        In this context kwargs['baseurl'] should be available, pointing to the base URL of the webservice (including URL prefix).
+        """
         raise NotImplementedError
 
     def xml(self, indent = ""):
-        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" />\n"
+        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + str(int(self.more)) + "\" />\n"
 
 class ForwardViewer(AbstractViewer):
-    """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword paramter indirect=True on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
+    """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword parameter indirect=True is set on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
 
     def __init__(self, id, name, forwarder, **kwargs):
         self.id = id
@@ -60,16 +72,14 @@ class ForwardViewer(AbstractViewer):
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
-        self.forwarder(None, None, outputfile=file) #this sets the forwardlink on the instance
+        self.forwarder(None, None, path=kwargs['path'] if 'path' in kwargs else None, outputfile=file) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
         if self.indirect:
             r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
             if r.status_code == 302 and 'Location' in r.headers:
                 url = r.headers['Location']
                 return flask.redirect(url)
-            else:
-                return "Unexpected response from Forward service (HTTP " + str(r.status_code) + "): " + str(r.text)
-        else:
-            return flask.redirect(self.forwarder.forwardlink)
+            return "Unexpected response from Forward service (HTTP " + str(r.status_code) + "): " + str(r.text)
+        return flask.redirect(self.forwarder.forwardlink)
 
 
 
@@ -220,4 +230,20 @@ class FLATViewer(AbstractViewer):
             return flask.redirect(url)
         else:
             return "Unexpected response from FLAT (HTTP " + str(r.status_code) + ", target was " + self.url + "): " + r.text
+
+
+class ShareViewer(AbstractViewer):
+    id = 'shareviewer'
+    name = "Share this file"
+
+    def __init__(self, **kwargs):
+        if 'persistent' in kwargs:
+            self.persistent = bool(kwargs['persistent'])
+        else:
+            self.persistent = True
+        super(ShareViewer,self).__init__(**kwargs)
+
+    def view(self, file, **kwargs):
+        fileid = file.store(keep=self.persistent)
+        return flask.render_template('share.html',fileid=fileid, filename=file.filename, persistent=self.persistent, baseurl=kwargs['baseurl'])
 

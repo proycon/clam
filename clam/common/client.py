@@ -305,6 +305,23 @@ class CLAMClient:
         """
         return self.abort(project)
 
+    def downloadstorage(self, file_id, targetfile=None,targetdir="./"):
+        """Download a file from public storage. If targetfile is set to None, the name will be automatically determined. Returns the target file name"""
+        r = requests.get(self.url + "storage/" + file_id) #unauthenticated by default
+        r.raise_for_status()
+        if targetfile is None: #pylint: disable=undefined-variable
+            try:
+                targetfile = os.path.join(targetdir, r.headers['Content-Disposition'].split('=')[1].strip("\"' \n\r\t"))
+            except KeyError as e:
+                raise clam.common.data.NotFound("Server does not return a valid content disposition") from e
+        with open(targetfile,'wb') as f:
+            CHUNK = 16 * 1024
+            for chunk in r.iter_content(chunk_size=CHUNK):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+        return targetfile
+
 
     def downloadarchive(self, project, targetfile, archiveformat = 'zip'):
         """Download all output files as a single archive:

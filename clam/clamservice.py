@@ -45,6 +45,7 @@ import clam.common.formats
 import clam.common.auth
 import clam.common.oauth
 import clam.common.data
+import clam.common.viewers
 from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
@@ -1152,7 +1153,7 @@ class Project:
                 interfaceoptions=settings.INTERFACEOPTIONS,
                 customhtml=customhtml,
                 customcss=settings.CUSTOMCSS,
-                forwarders=[ forwarder(project, getrooturl()) for forwarder in  settings.FORWARDERS ],
+                forwarders=[ forwarder(project, getrooturl(), Project.path(project,user)) for forwarder in  settings.FORWARDERS ],
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
                 auth_type=auth_type()
@@ -1394,6 +1395,22 @@ class Project:
         return Project.getarchive(project, user,'tar.bz2')
 
     @staticmethod
+    def shareoutputfile(project, filename, credentials=None):
+        """Put a file into temporary public storage"""
+        user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
+        try:
+            outputfile = clam.common.data.CLAMOutputFile(Project.path(project, user), filename)
+            fileid = put_storage(outputfile)
+        except FileNotFoundError:
+            return withheaders(flask.make_response('File not found',404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        return withheaders(flask.make_response(json.dumps({
+            "id": fileid,
+            "filename": filename,
+            "url": getrooturl() + "/storage/" + fileid
+        })),'application/json',{'allow_origin': settings.ALLOW_ORIGIN})
+
+    @staticmethod
     def getoutputfile(project, filename, credentials=None): #pylint: disable=too-many-return-statements
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         raw = filename.split('/')
@@ -1423,8 +1440,15 @@ class Project:
                     return withheaders(flask.make_response(outputfile.metadata.xml()) ,  headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     return withheaders(flask.make_response("No metadata found!",404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+            elif requestid in ('share','shareonce') and settings.ALLOWSHARE:
+                viewer = clam.common.viewers.ShareViewer(id="share",more=True,persistent=(requestid=='share'))
+                output = viewer.view(outputfile, baseurl=getrooturl())
+                if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
+                    return output
+                else:
+                    return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
             else:
-                #attach viewer data (also attaches converters!
+                #attach viewer data (also attaches converters!)
                 outputfile.attachviewers(settings.PROFILES)
 
                 #set remote properties, used by the ForwardViewer
@@ -1437,7 +1461,11 @@ class Project:
                     if v.id == requestid:
                         viewer = v
                 if viewer:
-                    output = viewer.view(outputfile, **flask.request.values)
+                    kwargs = {}
+                    kwargs.update(flask.request.values)
+                    kwargs['path'] = Project.path(project, user)
+                    viewer['baseurl'] = getrooturl()
+                    output = viewer.view(outputfile, **kwargs)
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
                     else:
@@ -1533,11 +1561,12 @@ class Project:
 
     @staticmethod
     def getarchive(project, user, format=None):
-        """Generates and returns a download package (or 403 if one is already in the process of being prepared)"""
+        """Generates and returns a download package (or 403 if one is already in the process of being prepared, though this does function blocks until the package is ready)"""
         if os.path.isfile(Project.path(project, user) + '.download'):
             #make sure we don't start two compression processes at the same time
             return withheaders(flask.make_response('Another compression is already running',403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
         else:
+            contentencoding = None
             if not format:
                 data = flask.request.values
                 if 'format' in data:
@@ -1545,50 +1574,13 @@ class Project:
                 else:
                     format = 'zip' #default
 
-            #validation, security
-            contentencoding = None
-            if format == 'zip':
-                contenttype = 'application/zip'
-                command = "/usr/bin/zip -r" #TODO: do not hard-code path!
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.gz':
-                contenttype = 'application/x-tar'
-                contentencoding = 'gzip'
-                command = "/bin/tar -czf"
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.bz2"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.bz2")
-            elif format == 'tar.bz2':
-                contenttype = 'application/x-bzip2'
-                command = "/bin/tar -cjf"
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".tar.gz"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".tar.gz")
-                if os.path.isfile(Project.path(project, user) + "output/" + project + ".zip"):
-                    os.unlink(Project.path(project, user) + "output/" + project + ".zip")
-            else:
-                return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})#TODO: message won't show
-
-            path = Project.path(project, user) + "output/" + project + "." + format
-
-            if not os.path.isfile(path):
-                printlog("Building download archive in " + format + " format")
-                cmd = command + ' ' + project + '.' + format + ' *'
-                printdebug(cmd)
-                printdebug(Project.path(project, user)+'output/')
-                process = subprocess.Popen(cmd, cwd=Project.path(project, user)+'output/', shell=True)
-                if not process:
-                    return withheaders(flask.make_response("Unable to make download package",500),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
-                else:
-                    pid = process.pid
-                    f = open(Project.path(project, user) + '.download','w')
-                    f.write(str(pid))
-                    f.close()
-                    os.waitpid(pid, 0) #wait for process to finish
-                    os.unlink(Project.path(project, user) + '.download')
+            try:
+                printlog("Requested download archive in " + format + " format")
+                archivefile, contenttype, contentencoding = clam.common.data.buildarchive(project, Project.path(project,user), format)
+            except ValueError:
+                return withheaders(flask.make_response('Invalid archive format',403) ,"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+            except RuntimeError as e:
+                return withheaders(flask.make_response("Unable to make download package: " + str(e),500),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
             extraheaders = {
                 'allow_origin': settings.ALLOW_ORIGIN,
@@ -1596,7 +1588,7 @@ class Project:
             }
             if contentencoding:
                 extraheaders['Content-Encoding'] = contentencoding
-            return withheaders(flask.Response( getbinarydata(path) ), contenttype, extraheaders )
+            return withheaders(flask.Response( getbinarydata(archivefile) ), contenttype, extraheaders )
 
 
     @staticmethod
@@ -2359,6 +2351,78 @@ def uploader(project, credentials=None):
         return addfile(project,filename,user, postdata,None, 'json' )
 
 
+def get_storage(fileid):
+    """Get a file from temporary public storage"""
+
+    if not fileid or not all( c.isdigit() or c in ('a','b','c','d','e','f') for c in fileid ):
+        return withheaders(flask.make_response("Malformed file id",403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+    printdebug("Getting file from public storage " + fileid)
+    storagedir = settings.ROOT + "storage/" + fileid
+    if os.path.exists(storagedir):
+        buildarchivetrigger = os.path.join(storagedir,".buildarchive")
+        if os.path.exists(buildarchivetrigger):
+            #the archive has not actually been built yet, we trigger a build now
+            with open(buildarchivetrigger,'r',encoding='utf-8') as f:
+                project, path, archivetype = f.readline().split("\t")
+            os.unlink(buildarchivetrigger)
+            archivefile, _, _ = clam.common.data.buildarchive(project, path, archivetype)
+            archivefile = clam.common.data.CLAMOutputFile(path, project + "." + archivetype, False)
+            archivefile.store(fileid)
+            outputfile = archivefile
+        else:
+            try:
+                filename = [ f for f in glob.glob(storagedir + "/*") if f[0] != '.' ][0]
+            except IndexError:
+                return withheaders(flask.make_response("No file found for given id",404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+            try:
+                outputfile = clam.common.data.CLAMFile(os.path.dirname(filename), os.path.basename(filename))
+            except:
+                return withheaders(flask.make_response("Unable to load file",403),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        if outputfile.metadata:
+            headers = dict(list(outputfile.metadata.httpheaders()))
+            mimetype = outputfile.metadata.mimetype
+        else:
+            headers = {}
+            mimetype = 'application/octet-stream'
+        headers['allow_origin'] = settings.ALLOW_ORIGIN
+        headers['Content-Disposition'] = "attachment; filename=\"" + outputfile.filename + "\""
+
+        if not outputfile.exists():
+            return withheaders(flask.make_response("File not found: " + str(outputfile),404),'text/plain', {'allow_origin': settings.ALLOW_ORIGIN})
+
+        try:
+            response = withheaders(flask.Response( outputfile.readlines() ), mimetype, headers ) #warning: loads output into memory! needed because we will delete the file afterward
+        except UnicodeError:
+            return withheaders(flask.make_response("Output file " + str(outputfile) + " is not in the expected encoding! Make sure encodings for output templates service configuration file are accurate.",500),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+        if not os.path.exists(os.path.join(storagedir, ".keep")) and ('keep' not in flask.request.values or flask.request.values['keep'] in ('0','no','false')):
+            printdebug("Removing storage " + fileid)
+            shutil.rmtree(storagedir)
+
+        return response
+
+    else:
+        return withheaders(flask.make_response("No such file id",404),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+
+def put_storage(file):
+    """Put a file in temporary public storage, returns the ID"""
+    assert isinstance(file, clam.common.data.CLAMFile)
+    if not os.path.exists(str(file)):
+        raise FileNotFoundError
+    fileid = None
+    while fileid is None or os.path.exists(settings.ROOT + "storage/" + fileid):
+        fileid = str("%x" % random.getrandbits(128))
+    printdebug("Putting file into public storage " + fileid)
+    storagedir = settings.ROOT + "storage/" + fileid
+    os.makedirs(storagedir)
+    os.symlink(str(file), os.path.join(storagedir, file.filename))
+    metafile = file.projectpath + file.basedir + '/' + file.metafilename()
+    if os.path.exists(metafile):
+        os.symlink(metafile, os.path.join(storagedir, file.metafilename()))
+    return fileid
+
 
 class ActionHandler:
 
@@ -2498,7 +2562,7 @@ class ActionHandler:
                     shutil.rmtree(tmpdir)
                 if process.returncode in action.returncodes200:
                     if viewer:
-                        output = viewer.view(io.StringIO(stdoutdata))
+                        output = viewer.view(io.StringIO(stdoutdata), baseurl=getrooturl())
                         if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                             return output
                         else:
@@ -2540,7 +2604,7 @@ class ActionHandler:
                     return withheaders(flask.make_response(e,500),headers={'allow_origin': settings.ALLOW_ORIGIN})
             if not isinstance(result, (flask.Response, werkzeug.wrappers.Response)):
                 if viewer:
-                    output = viewer.view(io.StringIO(str(result)))
+                    output = viewer.view(io.StringIO(str(result)), baseurl=getrooturl())
                     return withheaders(flask.Response(  (line for line in output ) , 200), viewer.mimetype,  headers={'allow_origin': settings.ALLOW_ORIGIN}) #streaming output
                 else:
                     return withheaders(flask.make_response(str(result)), action.mimetype, {'allow_origin': settings.ALLOW_ORIGIN})
@@ -2762,6 +2826,9 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/storage/<fileid>', 'get_storage', get_storage, methods=['GET'] )
+
         #Authentication for handler is handled deeper in the ActionHandler, depending on whether allowanonymous is set
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_get2', self.auth.require_login(ActionHandler.GET, optional=True), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/actions/<actionid>', 'action_post2', self.auth.require_login(ActionHandler.POST, optional=True), methods=['POST'] )
@@ -2796,6 +2863,7 @@ class CLAMService(object):
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/bz2/', 'project_download_tarbz2', self.auth.require_login(Project.download_tarbz2), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_getoutputfile', self.auth.require_login(Project.getoutputfile), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_deleteoutputfile', self.auth.require_login(Project.deleteoutputfile), methods=['DELETE'] )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/<path:filename>', 'project_shareoutputfile', self.auth.require_login(Project.shareoutputfile), methods=['PUT'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_download_zip4', self.auth.require_login(Project.download_zip), methods=['GET'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/output/', 'project_deletealloutput', self.auth.require_login(Project.deletealloutput), methods=['DELETE'] )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/<project>/input/<path:filename>', 'project_getinputfile', self.auth.require_login(Project.getinputfile), methods=['GET'] )
@@ -2858,6 +2926,8 @@ def set_defaults():
 
     if 'ROOT' in settingkeys and settings.ROOT and not settings.ROOT[-1] == "/":
         settings.ROOT += "/" #append slash
+    clam.common.data.ROOT = settings.ROOT #dependency injection
+
     if 'SYSTEM_VERSION' not in settingkeys:
         settings.SYSTEM_VERSION = ""
     if 'SYSTEM_EMAIL' not in settingkeys:
@@ -2886,22 +2956,8 @@ def set_defaults():
         settings.ADMINS = []
     if 'LISTPROJECTS' not in settingkeys:
         settings.LISTPROJECTS = True
-    if 'ALLOWSHARE' not in settingkeys: #TODO: all these are not implemented yet
+    if 'ALLOWSHARE' not in settingkeys: #Allow sharing from the interface for all files
         settings.ALLOWSHARE = True
-    if 'ALLOWANONSHARE' not in settingkeys:
-        settings.ALLOWANONSHARE = True
-    if 'ALLOWSHAREUPLOAD' not in settingkeys:
-        settings.ALLOWSHAREUPLOAD = False
-    if 'ALLOWSHARERUN' not in settingkeys:
-        settings.ALLOWSHARERUN = True
-    if 'ALLOWSHAREDELETE' not in settingkeys:
-        settings.ALLOWSHAREDELETE = False
-    if 'ALLOWANONSHAREUPLOAD' not in settingkeys:
-        settings.ALLOWSHAREUPLOAD = False
-    if 'ALLOWANONSHARERUN' not in settingkeys:
-        settings.ALLOWSHARERUN = False
-    if 'ALLOWANONSHAREDELETE' not in settingkeys:
-        settings.ALLOWSHAREDELETE = False
     if 'DISABLE_PORCH' not in settingkeys:
         settings.DISABLE_PORCH = False
     if 'PUBLIC_ACTIONS' not in settingkeys:
@@ -3081,6 +3137,10 @@ def test_dirs():
     if not os.path.isdir(settings.SESSIONDIR):
         warning("Session directory does not exist yet, creating...")
         os.makedirs(settings.SESSIONDIR)
+
+    if not os.path.isdir(settings.ROOT + 'storage'):
+        warning("Temporary storage directory does not exist yet, creating...")
+        os.makedirs(settings.ROOT + 'storage')
 
     if not settings.PARAMETERS:
         warning("No parameters specified in settings module!")
