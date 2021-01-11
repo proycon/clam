@@ -32,6 +32,7 @@ import subprocess
 from copy import copy, deepcopy
 from lxml import etree as ElementTree
 from io import StringIO, BytesIO #pylint: disable=ungrouped-imports
+from urllib.parse import quote
 import clam.common.parameters
 import clam.common.status
 import clam.common.util
@@ -2637,12 +2638,13 @@ class Action:
         return Action(*args, **kwargs)
 
 class Forwarder:
-    def __init__(self, id, name, url, description="", type='zip', tmpstore=True):
+    def __init__(self, id, name, url, description="", type='zip', tmpstore=True, encodeurl=True):
         """
         Instantiate a forwarder
 
         Parameters:
-            tmpstore (boolean): Use the temporary unauthenticated storage for file transfer. The file will be made available for one-time download by the remote service.
+            * tmpstore (boolean): Use the temporary unauthenticated storage for file transfer. The file will be made available for one-time download by the remote service.
+            * encodeurl (boolean): Properly urlencode the backlink (True by default)
         """
         self.id = id
         self.name = name
@@ -2650,16 +2652,22 @@ class Forwarder:
         self.description = description
         self.type = type
         self.tmpstore = tmpstore
+        self.encodeurl = encodeurl
 
     def __call__(self, project, baseurl, path=None, outputfile=None):
         """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generated to download the entire output archive."""
+        if self.encodeurl:
+            f_enc = lambda x: quote(x, safe='')
+        else:
+            f_enc = lambda x: x
+        assert isinstance(baseurl, str)
         if outputfile:
             if self.tmpstore:
                 #use the temporary storage
                 fileid = outputfile.store()
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
+                self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/storage/' + fileid)) #pylint: disable=attribute-defined-outside-init
             else:
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + outputfile.project + '/output/' + outputfile.filename) #pylint: disable=attribute-defined-outside-init
+                self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/' + outputfile.project + '/output/' + outputfile.filename)) #pylint: disable=attribute-defined-outside-init
 
         else:
             if self.tmpstore:
@@ -2674,9 +2682,9 @@ class Forwarder:
                 #yet at the time this forwarder gets called.
                 with open(os.path.join(storagedir,".buildarchive"),'w',encoding='utf-8') as f:
                     f.write(project + "\t" + path + "\t" + self.type + "\n")
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/storage/' + fileid) #pylint: disable=attribute-defined-outside-init
+                self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/storage/' + fileid)) #pylint: disable=attribute-defined-outside-init
             else:
-                self.forwardlink =  self.url.replace("$BACKLINK", baseurl + '/' + project + '/output/' + self.type) #pylint: disable=attribute-defined-outside-init
+                self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/' + project + '/output/' + self.type)) #pylint: disable=attribute-defined-outside-init
         return self
 
 

@@ -69,10 +69,11 @@ class ForwardViewer(AbstractViewer):
         self.name = name
         self.forwarder = forwarder
         self.indirect = 'indirect' in kwargs and kwargs['indirect']
+        #self.baseurl is injected later
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
-        self.forwarder(None, None, path=kwargs['path'] if 'path' in kwargs else None, outputfile=file) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
+        self.forwarder(None, self.baseurl, path=kwargs['path'] if 'path' in kwargs else None, outputfile=file) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
         if self.indirect:
             r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
             if r.status_code == 302 and 'Location' in r.headers:

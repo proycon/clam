@@ -1464,7 +1464,7 @@ class Project:
                     kwargs = {}
                     kwargs.update(flask.request.values)
                     kwargs['path'] = Project.path(project, user)
-                    viewer['baseurl'] = getrooturl()
+                    viewer.baseurl = getrooturl()
                     output = viewer.view(outputfile, **kwargs)
                     if isinstance(output, (flask.Response, werkzeug.wrappers.Response)):
                         return output
