@@ -73,7 +73,14 @@ class ForwardViewer(AbstractViewer):
         super(ForwardViewer,self).__init__(**kwargs)
 
     def view(self, file, **kwargs):
-        self.forwarder(None, self.baseurl, path=kwargs['path'] if 'path' in kwargs else None, outputfile=file) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
+        #these are additional variables that will be replaced if present in the url, in addition to $BACKLINK
+        replacevars = {
+            'MIMETYPE': self.mimetype,
+        }
+        if file.metadata:
+            for key, value in file.metadata.items():
+                replacevars[key] = value
+        self.forwarder(None, self.baseurl, path=kwargs['path'] if 'path' in kwargs else None, outputfile=file, **replacevars) #this sets the forwardlink on the instance and takes care of using unauthenticated temporary storage if needed
         if self.indirect:
             r = requests.get(self.forwarder.forwardlink, allow_redirects=True)
             if r.status_code == 302 and 'Location' in r.headers:

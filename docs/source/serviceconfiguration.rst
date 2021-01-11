@@ -1141,17 +1141,28 @@ The below example illustrates the use of the viewer
    )
 
 Another useful viewer is the :class:`ForwardViewer`. It forwards the viewing request to a remote service and passes a
-backlink where the remote service can *download* the output file (assuming it has proper authorization!). The remote
-service is expected to return a HTTP 302 Redirect response which CLAM will subsequently invoke.
+backlink where the remote service can *download* the output file without further authentication.  Users are taken
+directly to the remote service, that is, their browsers/clients are directly redirected to the specified URL. To have
+CLAM itself invoke the URL, you have to set ``indirect=True`` on the Forwarder, in that case CLAM will invoke the remote
+URL itself and the remote service is expected to return a HTTP 302 Redirect response which CLAM will subsequently
+invoke.
 
 .. code-block:: python
 
    OutputTemplate('freqlist',CSVFormat,"Frequency list",
-       ForwardViewer(Forwarder(id="some_remote_service",name="Some Remote Frequency List Viewer")),
-       url="https://remote.service.com/?download=$BACKLINK")),
+       ForwardViewer(
+            Forwarder(id="some_remote_service",name="Some Remote Frequency List Viewer"),
+                      url="https://remote.service.com/?download=$BACKLINK")),
        SetMetaField('encoding','utf-8'),
        extension='.patterns.csv',
    )
+
+The ``$BACKLINK`` variable will be replaced by CLAM by the actual URL where the resource can be obtained. By default,
+this is a one time download link that uses a temporary storage that does not require authentication, circumventing user
+delegation problems. This is safe as long as all communication is encrypted, i.e. over HTTPS. If you don't want this
+behaviour, pass ``tmpstore=False`` on the Forwarder.
+
+Other variables are also available, such as ``$MIMETYPE``. You can reference any associated parameters using their ID in uppercase, so in this example you would have the variable ``$ENCODING`` available as well. All variables will be url encoded by default, if you don't want this, pass ``encodeurl=False`` to the Forwarder.
 
 You can also use forwarders globally to redirect all output as an archive (zip/tar.gz/tar.bz2), see :ref:`forwarders`.
 
@@ -1168,8 +1179,12 @@ Viewer API
 Forwarders
 ~~~~~~~~~~~~~~
 
-To allow users to forward all output from one webservice to another, you can use Forwarders. The forwarder calls a remote service and passes a backlink where the remote service can *download* the output file (assuming it has proper authorization!). The remote
-service is expected to return a HTTP 302 Redirect response which CLAM will subsequently invoke.
+To allow users to forward all output from one webservice to another, you can use Forwarders. The forwarder calls a
+remote service and passes a backlink where the remote service can *download* the output file once, without further
+authentication (by default). Users are taken directly to the remote service, that is, their browsers/clients are
+directly redirected to the specified URL. To have CLAM itself invoke the URL, you have to set ``indirect=True`` on the
+Forwarder, in that case CLAM will invoke the remote URL itself and the remote service is expected to return a HTTP 302
+Redirect response which CLAM will subsequently invoke.
 
 .. code-block:: python
 
@@ -1179,11 +1194,19 @@ service is expected to return a HTTP 302 Redirect response which CLAM will subse
            )
     ]
 
+The ``$BACKLINK`` variable will be replaced by CLAM by the actual URL where the resource can be obtained. By default,
+this is a one time download link that uses a temporary storage that does not require authentication, circumventing user
+delegation problems. This is safe as long as all communication is encrypted, i.e. over HTTPS. If you don't want this
+behaviour, pass ``tmpstore=False`` on the Forwarder. Other variables are also available, such as ``$MIMETYPE``. All
+variables will be url encoded by default, if you don't want this, pass ``encodeurl=False`` to the Forwarder.
+
+
+
 .. note::
 
     * Forwarders can also be used as viewers for individual files. See :ref:`viewers`
-    * A forwarder does *NOT* perform any upload, it just passes a download link to a service, the remote
-      service must also have the necessary authorization to use it.
+    * A forwarder does *NOT* perform any upload, it just passes a download link to a service, the remote.
+
 
 Input Sources: Working with pre-installed data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

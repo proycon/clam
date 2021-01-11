@@ -2654,7 +2654,7 @@ class Forwarder:
         self.tmpstore = tmpstore
         self.encodeurl = encodeurl
 
-    def __call__(self, project, baseurl, path=None, outputfile=None):
+    def __call__(self, project, baseurl, path=None, outputfile=None, **kwargs):
         """Return the forward link given a project and (optionally) an outputfile. If no outputfile was selected, a link is generated to download the entire output archive."""
         if self.encodeurl:
             f_enc = lambda x: quote(x, safe='')
@@ -2685,6 +2685,9 @@ class Forwarder:
                 self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/storage/' + fileid)) #pylint: disable=attribute-defined-outside-init
             else:
                 self.forwardlink =  self.url.replace("$BACKLINK", f_enc(baseurl + '/' + project + '/output/' + self.type)) #pylint: disable=attribute-defined-outside-init
+        if kwargs:
+            for key, value in sorted(kwargs.items(), key=lambda x: -1 * len(x[0])): #longest keys first to prevent conflicts
+                self.forwardlink = self.forwardlink.replace('$' + key.upper(), f_enc(value)) #pylint: disable=attribute-defined-outside-init
         return self
 
 
