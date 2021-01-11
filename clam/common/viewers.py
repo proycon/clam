@@ -59,7 +59,7 @@ class AbstractViewer:
         raise NotImplementedError
 
     def xml(self, indent = ""):
-        return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + str(int(self.more)) + "\" />\n"
+       return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + ("true" if self.more else "false") + "\" />\n"
 
 class ForwardViewer(AbstractViewer):
     """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword parameter indirect=True is set on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""

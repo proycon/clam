@@ -604,7 +604,7 @@
 
         <td>
             <xsl:for-each select="./viewers/viewer">
-                <xsl:if test="./@more != '1'">
+                <xsl:if test="not(@more = '1' or @more = 'true' or @more = 'yes')">
                     <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
                 </xsl:if>
             </xsl:for-each>
@@ -613,7 +613,7 @@
                 <span class="moremenu"> | More...
                 <ul class="bg-dark">
                 <xsl:for-each select="./viewers/viewer">
-                    <xsl:if test="./@more = '1'">
+                    <xsl:if test="@more = '1' or @more = 'true' or @more = 'yes'">
                         <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></li>
                     </xsl:if>
                 </xsl:for-each>
