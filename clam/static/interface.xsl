@@ -588,7 +588,7 @@
 
         <td class="file">
         <xsl:choose>
-        <xsl:when test="./viewers/viewer[1]">
+            <xsl:when test="./viewers/viewer[1] and not(./viewers/viewer[1]/@allowdefault = 'false')">
             <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:when>
         <xsl:otherwise>

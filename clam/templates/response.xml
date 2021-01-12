@@ -116,7 +116,7 @@
             {% if outputfile.viewers %}
                 <viewers>
                     {% for viewer in outputfile.viewers %}
-                    <viewer xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ viewer.id }}" id="{{viewer.id}}" type="{{viewer.__class__.__name__}}" mimetype="{{viewer.mimetype}}" more="{{viewer.more|lower}}">{{ viewer.name }}</viewer>
+                    <viewer xlink:type="simple" xlink:href="{{ url }}/{{ project }}/output/{{ outputfile.filename }}/{{ viewer.id }}" id="{{viewer.id}}" type="{{viewer.__class__.__name__}}" mimetype="{{viewer.mimetype}}" more="{{viewer.more|lower}}" allowdefault="{{viewer.allowdefault|lower}}">{{ viewer.name }}</viewer>
                     {% endfor %}
                 </viewers>
             {% endif %}

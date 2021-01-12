@@ -1126,8 +1126,8 @@ the CLAM framework, using Python, but they can also be external
 (non-CLAM) webservices, hosted elsewhere. Several simple viewers for
 some formats are provided already; these are defined in ``viewers.py`` and derived off :class:`AbstractViewer`.
 
-Viewers can be included in output templates. Include them directly after
-any metafield actors.
+Viewers can be included in output templates. Include them directly after any metafield actors. The first viewer you
+define will be the default viewer for that particular output template, unless you set ``allowdefault=False`` on the viewer.
 
 The below example illustrates the use of the viewer
 ``SimpleTableViewer``, capable of showing CSV files:

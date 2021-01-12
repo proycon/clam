@@ -631,8 +631,11 @@ RelaxNG schema for CLAM XML
             <a:documentation>The mimetype of the format</a:documentation>
         </attribute>
         <attribute name="more">
-            <a:documentation>Boolean integer (1 or 0), should this viewer be visualised in an extra menu or as part of the main group?</a:documentation>
+            <a:documentation>Set to either true or false: should this viewer be visualised in an extra menu or as part of the main group?</a:documentation>
         </attribute>
+        <attribute name="allowdefault">
+            <a:documentation>Set to either true or false: may this viewer act as the default viewer if it is the first
+            defined viewer?</a:documentation>
     </element>
 </define>
 

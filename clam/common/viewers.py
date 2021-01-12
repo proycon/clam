@@ -42,7 +42,10 @@ class AbstractViewer:
         """
         Parameters:
             id: (str) The internal ID for the viewer
+
+        Keyword arguments:
             more: (bool) Should this viewer appear in the More menu rather than in the main list?
+            allowdefault: (bool) Allow this viewer to be used as the default viewer if it is the first to be defined? (default: True)
         """
         if 'id' in kwargs:
             self.id = kwargs['id']
@@ -50,6 +53,10 @@ class AbstractViewer:
             self.more = bool(kwargs['more'])
         else:
             self.more = False
+        if 'allowdefault' in kwargs:
+            self.allowdefault = bool(kwargs['allowdefault'])
+        else:
+            self.allowdefault = False
 
     def view(self, file, **kwargs):
         """Returns the view itself, in xhtml (it's recommended to use flask's template system!). file is a CLAMOutputFile instance (or a StringIO object if invoked through an action). By default, if not overriden and a remote service is specified, this issues a GET to the remote service.
@@ -59,7 +66,7 @@ class AbstractViewer:
         raise NotImplementedError
 
     def xml(self, indent = ""):
-       return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + ("true" if self.more else "false") + "\" />\n"
+       return indent + "<viewer id=\"" + self.id + "\" name=\"" + self.name + "\" type=\"" + self.__class__.__name__ + "\" mimetype=\"" + self.mimetype + "\" more=\"" + ("true" if self.more else "false") + "\" allowdefault=\"" + ("true" if self.allowdefault else "false") + "\" />\n"
 
 class ForwardViewer(AbstractViewer):
     """The ForwardViewer calls a remote service and passes a backlink where the remote service can download an output file and immediately visualise it. An extra level of indirection is also supported if keyword parameter indirect=True is set on the constructor, in that case only CLAM will call the remote service and the remote service is in turn expected to return a HTTP Redirect (302) response. It is implemented as a :class:`Forwarder`. See :ref:`forwarders`"""
