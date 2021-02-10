@@ -303,6 +303,9 @@ we then enable OAuth as follows:
    OAUTH_CLIENT_ID = "some_client_id"
    OAUTH_CLIENT_SECRET = "donotsharewithanyone"
 
+Your identity provider will also ask your for a redirect URL, use the ``/login`` endpoint
+of your CLAM webservice there.
+
 Note that OAuth2 by definition requires HTTPS, therefore, it can not be
 used with the built-in webserver but requires being embedded in a
 webserver such as Apache2, with SSL support.
