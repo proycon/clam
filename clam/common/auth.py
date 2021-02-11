@@ -355,7 +355,7 @@ class MultiAuth(object):
         return decorated
 
 class OAuth2(HTTPAuth):
-    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None): #pylint: disable=super-init-not-called
+    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None, userinfo_url=None): #pylint: disable=super-init-not-called
         def default_auth_error():
             return "Unauthorized Access (OAuth2)"
 
@@ -366,6 +366,7 @@ class OAuth2(HTTPAuth):
         self.auth_function = auth_function
         self.username_function = username_function
         self.redirect_url = redirect_url #the /login URL of the webservice
+        self.userinfo_url = userinfo_url
         self.scope = scope
         if debug:
             self.printdebug = debug
@@ -412,6 +413,7 @@ class OAuth2(HTTPAuth):
                         if self.scope:
                             kwargslogin['scope'] = self.scope
                         oauthsession = OAuth2Session(self.client_id, **kwargslogin)
+                        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
                         auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
                         kwargs['credentials'] = {'user': 'anonymous','401response': flask.redirect(auth_url)}
 
@@ -425,6 +427,7 @@ class OAuth2(HTTPAuth):
                         if self.scope:
                             kwargs['scope'] = self.scope
                         oauthsession = OAuth2Session(self.client_id, **kwargs)
+                        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
                         auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
 
                         #Redirect to Authentication Provider
@@ -446,6 +449,7 @@ class OAuth2(HTTPAuth):
                         return self.auth_error_callback()
 
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
+                    if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
                     username = self.username_function(oauthsession)
                     if username:
                         #add (username, oauth_access_token) tuple as parameter to the wrapped function

@@ -374,7 +374,15 @@ If none is set, CLAM’s logout procedure will simply instruct users to
 clear their browser history and cache, which is clearly sub-optimal.
 
 The only information CLAM needs from the authorization provider is a
-username. The setting ``OAUTH_USERNAME_FUNCTION`` refers to a (Python)
+username, or often the email address that acts as a username.
+To be able to get the username, a so-called ``userinfo`` end-point is required.
+
+.. code-block:: python
+
+   OAUTH_USERINFO_URL = "https://yourprovider/oauth/userinfo"
+
+CLAM will make some educated guesses to extract the necessary information and will have a preference for using the
+e-mail address as a username. If you want something more customised, you can set ``OAUTH_USERNAME_FUNCTION`` and refer it to a (Python)
 function that obtains this from your resource provider after you have
 been authenticated. It gets a single argument, the ``oauthsession``
 instance, and returns the username as a string. The following example
@@ -385,7 +393,7 @@ provider-specific so you always have to write your own function!
 .. code-block:: python
 
    def myprovider_username_function(oauthsession):
-     r = oauthsession.get("https://yourprovider/user")
+     r = oauthsession.get(oauthsession.USERINFO_URL)
      d = json.loads(r.content)
      return d['username']
 
@@ -402,6 +410,16 @@ provider-specific. The following example refers to the Google API:
    OAUTH_SCOPE = [
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile"
+   ]
+
+
+If you want to use OpenID Connect, a recommended extension on top of OAuth2, you need specify the following scopes:
+
+.. code-block:: python
+
+   OAUTH_SCOPE = [
+        "openid",
+        "email"
    ]
 
 One of the problems with OAuth2 for automated clients is the
@@ -426,6 +444,7 @@ The unencrypted access token may be passed to the wrapper script if
 needed (has to be explicitly configured), allowing the wrapper script or
 underlying system to communicate with a resource provider on behalf of
 the user, through CLAM’s client_id.
+
 
 .. _command:
 
