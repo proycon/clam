@@ -3053,6 +3053,8 @@ def set_defaults():
     if 'OAUTH_CLIENT_URL' not in settingkeys:
         if settings.FORCEURL:
             settings.OAUTH_CLIENT_URL = settings.FORCEURL
+        else:
+            settings.OAUTH_CLIENT_URL = None
     if 'OAUTH_REVOKE_URL' not in settingkeys:
         settings.OAUTH_REVOKE_URL = ""
     if 'OAUTH_SCOPE' not in settingkeys:
