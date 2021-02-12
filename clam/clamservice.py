@@ -209,7 +209,7 @@ class Login(object):
         except KeyError:
             return withheaders(flask.make_response('No state passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
-        d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=os.path.join(settings.OAUTH_CLIENT_URL, 'login?code='+ code + '&state=' + state ))
+        d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,redirect_uri=os.path.join(settings.OAUTH_CLIENT_URL, 'login?code='+ code + '&state=' + state ))
         if not 'access_token' in d:
             return withheaders(flask.make_response('No access token received from authorization provider',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
