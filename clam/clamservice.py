@@ -2766,7 +2766,7 @@ class CLAMService(object):
 
         if settings.OAUTH:
             if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, getrooturl() + '/login/', settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login/'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
@@ -3032,10 +3032,10 @@ def set_defaults():
         settings.USERS_MYSQL = None
     if 'FORCEURL' not in settingkeys:
         settings.FORCEURL = None
-    if 'FORCEHTTPS' not in settingkeys:
-        settings.FORCEHTTPS = False
     if 'CLAMFORCEURL' in os.environ:
         settings.FORCEURL = os.environ['CLAMFORCEURL']
+    if 'FORCEHTTPS' not in settingkeys:
+        settings.FORCEHTTPS = not settings.FORCEURL or settings.FORCEURL.startswith("https://")
     if 'PRIVATEACCESSTOKEN' not in settingkeys:
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
     if 'OAUTH' not in settingkeys:
@@ -3050,6 +3050,9 @@ def set_defaults():
         settings.OAUTH_TOKEN_URL = ""
     if 'OAUTH_USERINFO_URL' not in settingkeys:
         settings.OAUTH_USERINFO_URL = ""
+    if 'OAUTH_CLIENT_URL' not in settingkeys:
+        if settings.FORCEURL:
+            settings.OAUTH_CLIENT_URL = settings.FORCEURL
     if 'OAUTH_REVOKE_URL' not in settingkeys:
         settings.OAUTH_REVOKE_URL = ""
     if 'OAUTH_SCOPE' not in settingkeys:
@@ -3161,6 +3164,8 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_USERNAME_FUNCTION not specified!")
         if not settings.OAUTH_ENCRYPTIONSECRET:
             error("ERROR: OAUTH enabled but OAUTH_ENCRYPTIONSECRET not specified!")
+        if not settings.OAUTH_CLIENT_URL:
+            error("You need to set OAUTH_CLIENT_URL to the base URL of your webservice, as it is known to the identity provider")
 
         warning("*** OAUTH is enabled, make sure you are running CLAM through HTTPS or security is void! ***")
 
