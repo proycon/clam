@@ -192,6 +192,15 @@ class Login(object):
     def GET():
         oauthsession = OAuth2Session(settings.OAUTH_CLIENT_ID)
         try:
+            error = flask.request.values['error']
+            try:
+                error_msg = flask.request.values['error_message']
+            except KeyError:
+                error_msg = ""
+        except KeyError:
+            if error:
+                return withheaders(flask.make_response("Error from remote identify provider: " + error + ": " + error_msg,403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+        try:
             code = flask.request.values['code']
         except KeyError:
             return withheaders(flask.make_response('No code passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})

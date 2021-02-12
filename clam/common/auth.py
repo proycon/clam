@@ -426,6 +426,7 @@ class OAuth2(HTTPAuth):
                         kwargs = {'redirect_uri': self.redirect_url}
                         if self.scope:
                             kwargs['scope'] = self.scope
+                        self.printdebug("OAuth2 details, client=" + self.client_id + ": " + repr(kwargs))
                         oauthsession = OAuth2Session(self.client_id, **kwargs)
                         if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
                         auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
