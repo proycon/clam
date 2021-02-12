@@ -247,16 +247,16 @@ class Logout(object):
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.OAUTH_REVOKE_URL:
-            return withheaders(flask.make_response("No revoke mechanism defined: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.make_response("Logging you out locally, however, no revoke mechanism was defined at the remote end. Moreover, not all browser support this (notably Safari and IE), you may want to clear your cache and history manually if you are on a public computer.",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
             if response.status_code >= 200 and response.status_code < 300:
-                return withheaders(flask.make_response("Logout successful, have a nice day",200),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+                return withheaders(flask.make_response("Logout successful, have a nice day",200),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
             else:
-                return withheaders(flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+                return withheaders(flask.make_response("Logout failed at remote end: we recommend to clear your browsing history and cache instead, especially if you are on a public computer",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
 
-        return withheaders(flask.make_response("Logout successful, have a nice day",200),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+        return withheaders(flask.make_response("Logout successful, have a nice day",200),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
 
 
 
@@ -1222,7 +1222,7 @@ class Project:
             extraloc = '?oauth_access_token=' + oauth_access_token
         else:
             extraloc = ''
-        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization'}) #HTTP CREATED
+            return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
 
     @staticmethod
     def start(project, credentials=None): #pylint: disable=too-many-return-statements

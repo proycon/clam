@@ -106,7 +106,8 @@ def xmlescape(s):
 
 
 def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
-    if headers is None: headers = {}
+    if headers is None: headers = { }
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     response.headers['Content-Type'] = contenttype
     try:
         for key, value in headers.items():
