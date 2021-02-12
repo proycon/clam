@@ -55,30 +55,3 @@ def DEFAULT_USERNAME_FUNCTION(oauthsession):
             return rj[key]
     raise OAuthError("No username (checked email and various fallbacks) was found in json reply from userinfo endpoint: " + repr(rj))
 
-def encrypt(encryptionsecret, oauth_access_token, ip):
-    BLOCK_SIZE = 16
-    c = AES.new(encryptionsecret, AES.MODE_ECB)
-    clear = oauth_access_token + ':' + ip
-    try:
-        clear = str(clear + ((BLOCK_SIZE - len(clear) % BLOCK_SIZE) * " "))
-        encoded = base64.urlsafe_b64encode(c.encrypt(clear))
-    except:
-        #prevent leaks in debug mode
-        encryptionsecret = "SECRET"
-        oauth_access_token = "SECRET"
-        raise OAuthError("Error in access token encryption")
-    return str(encoded,'ascii')
-
-def decrypt(encryptionsecret, oauth_access_token):
-    c = AES.new(encryptionsecret, AES.MODE_ECB)
-    clear = c.decrypt(base64.urlsafe_b64decode(str(oauth_access_token)))
-    try:
-        clear = str(clear,'ascii')
-        oauth_access_token, ip = clear.strip().split(':')
-    except:
-        #prevent leaks in debug mode
-        encryptionsecret = "SECRET"
-        oauth_access_token = "SECRET"
-        raise OAuthError("Error in access token decryption")
-    return oauth_access_token, ip
-

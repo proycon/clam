@@ -198,7 +198,7 @@ class Login(object):
             except KeyError:
                 error_msg = ""
             if error:
-                return withheaders(flask.make_response("Error from remote identify provider: " + error + ": " + error_msg,403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
+                return withheaders(flask.make_response("Error from remote authorization provider: " + error + ": " + error_msg,403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         try:
             code = flask.request.values['code']
@@ -235,10 +235,11 @@ class Login(object):
                 headers={'allow-origin': settings.ALLOW_ORIGIN} )
 
 def oauth_encrypt(oauth_access_token):
+    #encrypt is a misnomer because we don't actually encrypt anything anymore!
     if not oauth_access_token:
         return "" #no oauth
     else:
-        return clam.common.oauth.encrypt(settings.OAUTH_ENCRYPTIONSECRET, oauth_access_token, flask.request.headers.get('REMOTE_ADDR',''))
+        return oauth_access_token
 
 class Logout(object):
 
@@ -2775,7 +2776,7 @@ class CLAMService(object):
 
         if settings.OAUTH:
             if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_ENCRYPTIONSECRET, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
@@ -3019,8 +3020,6 @@ def set_defaults():
         settings.REALM = settings.SYSTEM_ID
     if 'DIGESTOPAQUE' not in settingkeys:
         settings.DIGESTOPAQUE = "%032x" % random.getrandbits(128) #TODO: not used now
-    if 'OAUTH_ENCRYPTIONSECRET' not in settingkeys:
-        settings.OAUTH_ENCRYPTIONSECRET = "%032x" % random.getrandbits(32)
     if 'ENABLEWEBAPP' not in settingkeys:
         settings.ENABLEWEBAPP = True
     if 'ENABLED' not in settingkeys:
@@ -3173,8 +3172,6 @@ def test_dirs():
             error("ERROR: OAUTH enabled but OAUTH_TOKEN_URL not specified!")
         if not settings.OAUTH_USERNAME_FUNCTION:
             error("ERROR: OAUTH enabled but OAUTH_USERNAME_FUNCTION not specified!")
-        if not settings.OAUTH_ENCRYPTIONSECRET:
-            error("ERROR: OAUTH enabled but OAUTH_ENCRYPTIONSECRET not specified!")
         if not settings.OAUTH_CLIENT_URL:
             error("You need to set OAUTH_CLIENT_URL to the base URL of your webservice, as it is known to the identity provider")
 

@@ -355,13 +355,12 @@ class MultiAuth(object):
         return decorated
 
 class OAuth2(HTTPAuth):
-    def __init__(self, client_id, encryptionsecret, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None, userinfo_url=None): #pylint: disable=super-init-not-called
+    def __init__(self, client_id, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None, userinfo_url=None): #pylint: disable=super-init-not-called
         def default_auth_error():
             return "Unauthorized Access (OAuth2)"
 
 
         self.client_id = client_id
-        self.encryptionsecret = encryptionsecret
         self.auth_url = auth_url #Remote URL
         self.auth_function = auth_function
         self.username_function = username_function
@@ -436,19 +435,6 @@ class OAuth2(HTTPAuth):
 
                         return flask.redirect(auth_url)
                 else:
-                    #Decrypt access token
-                    try:
-                        oauth_access_token, ip = clam.common.oauth.decrypt(self.encryptionsecret, oauth_access_token)
-                    except clam.common.oauth.OAuthError:
-                        self.printdebug("Error decrypting access token")
-                        return self.auth_error_callback()
-                        #return flask.make_response("Error decrypting access token",403)
-
-                    if ip != flask.request.remote_addr:
-                        self.printdebug("Access token not valid for IP, got " + ip + ", expected " + flask.request.remote_addr)
-                        #return flask.make_response("Access token not valid for this IP",403)
-                        return self.auth_error_callback()
-
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
                     username = self.username_function(oauthsession)
