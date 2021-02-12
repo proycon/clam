@@ -2323,7 +2323,7 @@ def interfacedata(): #no auth
 
     return withheaders(flask.make_response("systemid = '"+ settings.SYSTEM_ID + "'; baseurl = '" + getrooturl() + "';\n inputtemplates = [ " + ",".join(inputtemplates) + " ];"), 'text/javascript', {'allow_origin': settings.ALLOW_ORIGIN})
 
-def foliaxsl(_project=None):
+def foliaxsl(**kwargs):
     if foliatools is not None:
         return withheaders(flask.make_response(io.open(foliatools.__path__[0] + '/folia2html.xsl','r',encoding='utf-8').read()),'text/xsl', {'allow_origin': settings.ALLOW_ORIGIN})
     else:
