@@ -76,9 +76,11 @@ ADMINS = ['anonymous'] #Define which of the above users are admins (never set th
 #It will look in several paths including the current working directory and the path this settings script is loaded from.
 #Such an external configuration file simply defines variables that will be imported here. If it fails to find
 #a configuration file, an exception will be raised.
-loadconfig(__name__)
-
-assert TEST_DUMMY == "test"   #a test, you never need/want this in your own configuration
+try:
+    loadconfig(__name__)
+    assert TEST_DUMMY == "test"   #a test, you never need/want this in your own configuration
+except ConfigurationError:
+    print("No external configuration found, using built-in configuration",file=sys.stderr)
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!)
 #REQUIREMEMORY = 10
