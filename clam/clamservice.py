@@ -3045,7 +3045,7 @@ def set_defaults():
     if 'CLAMFORCEURL' in os.environ:
         settings.FORCEURL = os.environ['CLAMFORCEURL']
     if 'FORCEHTTPS' not in settingkeys:
-        settings.FORCEHTTPS = not settings.FORCEURL or settings.FORCEURL.startswith("https://")
+        settings.FORCEHTTPS = settings.FORCEURL and settings.FORCEURL.startswith("https://")
     if 'PRIVATEACCESSTOKEN' not in settingkeys:
         settings.PRIVATEACCESSTOKEN = "%032x" % random.getrandbits(128)
     if 'OAUTH' not in settingkeys:
@@ -3163,6 +3163,8 @@ def test_dirs():
         warning("No parameters specified in settings module!")
     if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
         warning("No user authentication enabled, this is not recommended for production environments!")
+    if settings.FORCEHTTPS:
+        print("Forcing HTTPS", file=sys.stderr)
     if settings.OAUTH:
         if not settings.OAUTH_CLIENT_ID:
             error("ERROR: OAUTH enabled but OAUTH_CLIENT_ID not specified!")
