@@ -2460,19 +2460,22 @@ class ActionHandler:
 
     @staticmethod
     def collect_parameters(action):
-        data = flask.request.values
         params = []
         for parameter in action.parameters:
-            if not parameter.id in data:
+            if not parameter.id in flask.request.args and not parameter.id in flask.request.form:
                 if parameter.required:
                     raise clam.common.data.ParameterError("Missing parameter: " + parameter.id)
             else:
+                if parameter.id in flask.request.args:
+                    paramvalue = flask.request.args[parameter.id]
+                elif parameter.id in flask.request.form:
+                    paramvalue = flask.request.form[parameter.id]
                 if parameter.paramflag:
                     flag = parameter.paramflag
                 else:
                     flag = None
                 parameter = copy.deepcopy(parameter) #always operate on a COPY of the parameter
-                if not parameter.set(data[parameter.id]):
+                if not parameter.set(paramvalue):
                     raise clam.common.data.ParameterError("Invalid value for parameter " + parameter.id + ": " + parameter.error)
                 else:
                     params.append( ( flag, parameter.value, parameter.id) )

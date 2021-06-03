@@ -21,7 +21,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GitHub
+          nickname: GH-clam
           message: |-
             ${{ github.actor }} started a build of CLAM
 
@@ -58,7 +58,7 @@ jobs:
           channel: '#gitlama'
           nickname: GH-clam-py${{ matrix.python-version }}
           message: |-
-            Building and testing clam by ${{ github.actor }} on Python ${{ matrix.python-version }}: FAILED
+            Building and testing clam on Python ${{ matrix.python-version }}: FAILED
 
       - name: Notify IRC of success
         if: ${{ steps.test.outcome == 'success' }}
@@ -68,7 +68,7 @@ jobs:
           channel: '#gitlama'
           nickname: GH-clam-py${{ matrix.python-version }}
           message: |-
-            Building and testing clam by ${{ github.actor }} on Python ${{ matrix.python-version }}: SUCCESS
+            Building and testing clam on Python ${{ matrix.python-version }}: SUCCESS
 
       - name: Propagate test exit code
         if: ${{ steps.test.outcome != 'success' }}

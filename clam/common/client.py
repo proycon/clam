@@ -132,7 +132,6 @@ class CLAMClient:
 
         requestparams = self.initrequest(data)
 
-
         if method == 'POST':
             request = requests.post
         elif method == 'DELETE':
