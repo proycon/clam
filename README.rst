@@ -2,8 +2,8 @@
 CLAM: Computational Linguistics Application Mediator
 =======================================================
 
-.. image:: https://travis-ci.org/proycon/clam.svg?branch=master
-    :target: https://travis-ci.org/proycon/clam
+.. image:: https://github.com/proycon/clam/actions/workflows/clam.yml/badge.svg?branch=master
+    :target: https://github.com/proycon/clam/actions/
 
 .. image:: https://readthedocs.org/projects/clam/badge/?version=latest
     :target: http://clam.readthedocs.io/en/latest/?badge=latest
