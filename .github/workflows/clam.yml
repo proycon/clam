@@ -69,3 +69,8 @@ jobs:
           nickname: GitHub
           message: |-
             Building and testing clam by ${{ github.actor }} on Python ${{ matrix.python-version }}: SUCCESS
+
+      - name: Propagate test exit code
+        if: ${{ steps.test.outcome != 'success' }}
+        run: |
+            exit 1
