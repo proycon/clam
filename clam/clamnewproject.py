@@ -252,13 +252,13 @@ host: {hostname}
 root: {rootdir}/userdata
 port: {port}
 """.format(hostname=hostname,rootdir=rootdir,port=args.port))
-    if args.forceurl:
-        with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
+    with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
+        if args.forceurl:
             f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
-    elif args.reverseproxy:
-        f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
-    else:
-        f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+        elif args.reverseproxy:
+            f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+        else:
+            f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
 
 
     with io.open(os.path.join(sourcedir,args.sysid + '.config.yml'),'w',encoding='utf-8') as f:
