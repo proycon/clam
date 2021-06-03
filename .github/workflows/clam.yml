@@ -51,6 +51,10 @@ jobs:
             find: '.'
             replace: ''
 
+      - name: Install self
+        run: |
+          python -m pip install .
+
       - name: Build and test
         id: test
         run: |
