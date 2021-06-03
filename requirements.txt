@@ -4,3 +4,5 @@ requests
 requests_oauthlib
 requests_toolbelt
 pycrypto
+certifi
+pyyaml
