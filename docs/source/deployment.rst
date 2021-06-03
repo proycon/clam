@@ -142,3 +142,17 @@ lighttpd), should work too.
 .. seealso::
 
     For configuration of authentication, see :ref:`auth`.
+
+Deploying CLAM behind a reverse proxy
+--------------------------------------
+
+In production environment, you will often deploy your webservice behind a reverse proxy. If this is the case, then you
+will want to set ``USE_FORWARDED_HOST = True`` in your service configuration so CLAM can detect the original host and
+protocol it was called with. This expects your reverse proxy to set the proper ``X-Forwarded-Host`` and
+``X-Forwarded-Proto`` headers, and is a security risk if these headers are not set but are forwarded from actual
+end-users.
+
+The other alternative is to set ``FORCEURL`` to the exact URL where your webservice will run. But this implies that it
+won't work properly when invoked with another URL.
+
+

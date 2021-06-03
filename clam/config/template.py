@@ -93,7 +93,12 @@ if host == "yourhostname":
     #doesn't run at the root of the server, you can specify a URL prefix here:
     #URLPREFIX = "/myservice/"
 
-    #Optionally, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
+    #If you run behind a reverse proxy, you can autodetect your host if you run
+    #if your reverse proxy properly sets the X-Forwarded-Host and X-Forwarded-Proto headers.
+    #Setting this when you are NOT behind a reverse proxy that output these headers, is a security risk:
+    #USE_FORWARDED_HOST = False
+
+    #Alternatively to the above, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
     #FORCEURL = "http://yourhostname.com"
 
     # ======== AUTHENTICATION & SECURITY ===========

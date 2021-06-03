@@ -102,7 +102,9 @@ Overriding host, port and urlprefix (advanced)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``HOST``, ``PORT`` and ``URLPREFIX`` are configured in the service configuration file or the  host-specific external
-configuration file it includes, CLAM will attempt to automatically guess them when they are not explicitly set.
+configuration file it includes, CLAM will attempt to automatically guess them when they are not explicitly set. If you
+run behind a reverse proxy (common in production environments), you will need to set ``USE_FORWARDED_HOST = True`` so
+CLAM can automatically detect where the original request was coming from.
 
 It is possible, however, to override these when
 launching or deploying the webserver, without changing the service
@@ -110,8 +112,6 @@ configuration itself. If you use the development server, using
 ``clamservice``, then you can pass the ``-u`` flag with the full URL
 CLAM should use. You can also set an environment variable
 ``CLAMFORCEURL``, which has the same effect. This latter option also
-works when deploying CLAM through WSGI.
+works when deploying CLAM through WSGI. The use of ``USE_FORWARDED_HOST`` is preferred though.
 
-The most common use for this is when serving CLAM behind another reverse
-proxy, where automatic hostname detection could never work.
 

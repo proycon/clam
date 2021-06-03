@@ -749,7 +749,22 @@ class Admin:
 
 
 def getrooturl(): #not a view
-    if settings.FORCEURL:
+    if settings.USE_FORWARDED_HOST and 'X-Forwarded-Host' in flask.request.headers:
+        url = flask.request.headers['X-Forwarded-Host']
+        if settings.URLPREFIX and settings.URLPREFIX != '/':
+            if settings.URLPREFIX[0] != '/':
+                url = os.path.join(url, settings.URLPREFIX)
+            else:
+                url = os.path.join(url, settings.URLPREFIX[1:])
+        if url[-1] == '/': url = url[:-1]
+        if settings.FORCEHTTPS:
+            url = "https://" + url
+        elif 'X-Forwarded-Proto' in flask.request.headers:
+            url =  flask.request.headers['X-Forwarded-Proto'] + "://" +  url
+        else:
+            url = "http://" + url
+        return url
+    elif settings.FORCEURL:
         if settings.FORCEHTTPS:
             return settings.FORCEURL.replace("http://","https://")
         else:
@@ -3044,6 +3059,8 @@ def set_defaults():
         settings.FORCEURL = None
     if 'CLAMFORCEURL' in os.environ:
         settings.FORCEURL = os.environ['CLAMFORCEURL']
+    if 'USE_FORWARDED_HOST' not in settingkeys:
+        settings.USE_FORWARDED_HOST = False
     if 'FORCEHTTPS' not in settingkeys:
         settings.FORCEHTTPS = settings.FORCEURL and settings.FORCEURL.startswith("https://")
     if 'PRIVATEACCESSTOKEN' not in settingkeys:

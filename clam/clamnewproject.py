@@ -39,6 +39,7 @@ def main():
     parser.add_argument('-P','--pythonversion', type=str,help="Explicit python version, in case you have multiple installed. Note that python 2 is not supported!", action='store',default='3',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in production environments", action='store',default=8888,required=False)
+    parser.add_argument('-r','--reverseproxy',help="Set up for use behind a reverse proxy, sets USE_FORWARDED_HOST to True", action='store_true',required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
     parser.add_argument('--noninteractive',help="Non-interactive mode, don't ask questions", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
@@ -112,6 +113,8 @@ def main():
                 line = "ROOT = \"" + os.path.join(rootdir, "userdata") + "\"\n"
             elif 'forceurl' in args and args.forceurl and line[:9] == '#FORCEURL':
                 line = "FORCEURL = \"" + args.forceurl + "\"\n"
+            elif 'reverseproxy' in args and args.reverseproxy and line[:19] == '#USE_FORWARDED_HOST':
+                line = "USE_FORWARDED_HOST = True\n"
             elif line[:9] == "COMMAND =":
                 line = "COMMAND = WEBSERVICEDIR + \"/" + args.sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             elif line[:10] == "#COMMAND =":
@@ -252,6 +255,10 @@ port: {port}
     if args.forceurl:
         with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
             f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
+    elif args.reverseproxy:
+        f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+    else:
+        f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
 
 
     with io.open(os.path.join(sourcedir,args.sysid + '.config.yml'),'w',encoding='utf-8') as f:
@@ -262,6 +269,10 @@ port: {port}
 root: /tmp/{sysid}-userdata
 port: {port}
 """.format(sysid=args.sysid,rootdir=rootdir,port=args.port))
+        if args.reverseproxy:
+            f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+        else:
+            f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
 
     with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'w',encoding='utf-8') as f:
         f.write("""[uwsgi]
