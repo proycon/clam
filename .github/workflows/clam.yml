@@ -65,7 +65,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH_clam_py${{ steps.pyversion.outputs.result }}
+          nickname: GH_clam_py${{ steps.pyversion.outputs.value }}
           message: |-
             Building and testing clam on Python ${{ matrix.python-version }}: FAILED
 
@@ -75,7 +75,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH_clam_py${{ steps.pyversion.outputs.result }}
+          nickname: GH_clam_py${{ steps.pyversion.outputs.value }}
           message: |-
             Building and testing clam on Python ${{ matrix.python-version }}: SUCCESS
 
