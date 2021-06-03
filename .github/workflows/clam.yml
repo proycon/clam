@@ -1,0 +1,72 @@
+name: Python CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'clam/**'
+      - 'setup.py'
+      - '.github/**'
+
+  pull_request:
+    branches: [master]
+
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    name: Notify start to ##gitlama
+    steps:
+      - name: IRC notification
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            ${{ github.actor }} started a build of CLAM
+
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+        matrix:
+            python-version: [3.5, 3.6, 3.7, 3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          apt install curl
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Build and test
+        id: test
+        run: |
+            cd clam/tests
+            ./test.sh
+        continue-on-error: true
+
+      - name: Notify IRC of failure
+        if: ${{ steps.test.outcome != 'success' }}
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            Building and testing clam by ${{ github.actor }} on Python ${{ matrix.python-version }}: FAILED
+
+      - name: Notify IRC of success
+        if: ${{ steps.test.outcome == 'success' }}
+        uses: Gottox/irc-message-action@v1
+        with:
+          server: irc.uvt.nl
+          channel: '#gitlama'
+          nickname: GitHub
+          message: |-
+            Building and testing clam by ${{ github.actor }} on Python ${{ matrix.python-version }}: SUCCESS
