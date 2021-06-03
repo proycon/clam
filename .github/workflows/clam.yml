@@ -43,6 +43,14 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      - name: Get Short Python Version
+        id: pyversion
+        uses: mad9000/actions-find-and-replace-string@2
+        with:
+            source: ${{ matrix.python-version }}
+            find: '.'
+            replace: ''
+
       - name: Build and test
         id: test
         run: |
@@ -50,13 +58,14 @@ jobs:
             ./test.sh
         continue-on-error: true
 
+
       - name: Notify IRC of failure
         if: ${{ steps.test.outcome != 'success' }}
         uses: Gottox/irc-message-action@v1
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH-clam-py${{ matrix.python-version }}
+          nickname: GH_clam_py${{ steps.pyversion.outputs.result }}
           message: |-
             Building and testing clam on Python ${{ matrix.python-version }}: FAILED
 
@@ -66,7 +75,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GH-clam-py${{ matrix.python-version }}
+          nickname: GH_clam_py${{ steps.pyversion.outputs.result }}
           message: |-
             Building and testing clam on Python ${{ matrix.python-version }}: SUCCESS
 
