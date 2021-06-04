@@ -39,8 +39,6 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Topic :: Text Processing :: Linguistic",
-        "Programming Language :: Python :: 3.3", #3.0, 3.1 and 3.2 are not supported by flask
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
@@ -61,5 +59,5 @@ setup(
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi'] },
     include_package_data=True,
-    install_requires=['flask >= 2.0.1','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto','certifi', 'pyyaml']
+    install_requires=['flask >= 2.0.1','lxml >= 4.6.0','requests','requests_oauthlib','requests_toolbelt','pycrypto','certifi', 'pyyaml']
 )

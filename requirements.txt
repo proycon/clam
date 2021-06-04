@@ -1,5 +1,5 @@
-flask>=0.10
-lxml>=2.2
+flask>=2.0.1
+lxml>=4.6.0
 requests
 requests_oauthlib
 requests_toolbelt
