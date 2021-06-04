@@ -61,5 +61,5 @@ setup(
     },
     package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi'] },
     include_package_data=True,
-    install_requires=['flask >= 0.10','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto','certifi', 'pyyaml']
+    install_requires=['flask >= 2.0.1','lxml >= 2.2','requests','requests_oauthlib','requests_toolbelt','pycrypto','certifi', 'pyyaml']
 )
