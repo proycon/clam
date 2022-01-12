@@ -29,9 +29,9 @@ setup(
     version = "3.1.0", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
-    description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
+    description = ("Turns command-line tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
     license = "GPL",
-    keywords = "clam webservice rest nlp computational_linguistics rest",
+    keywords = ["SaaS", "webservice", "rest"],
     url = "https://proycon.github.io/clam",
     packages=['clam','clam.common','clam.config','clam.wrappers'],
     long_description=read('README.rst'),
