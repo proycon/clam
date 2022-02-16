@@ -1646,3 +1646,17 @@ or multiple::
 
     include: [ "/path/to/other.yml", "/path/to/other2.yml" ]
 
+External configuration files may refer to standard environment variables by refering to them in curly braces::
+
+   root: "{{ROOT}}"
+
+If the variable does not exist or is empty, it will not be set alltogether. If you want to force a hard error message
+instead, add an exclamation mark::
+
+   root: "{{ROOT!}}"
+
+Alternatively, you can specify a default value as follows::
+
+   root: "{{ROOT=/tmp/data}}"
+
+

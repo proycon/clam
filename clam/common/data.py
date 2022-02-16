@@ -38,7 +38,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.1.0'
+VERSION = '3.1.1'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2885,15 +2885,29 @@ def loadconfig(callername, required=True):
 def resolveconfigvariables(value, settingsmodule):
     """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
-        variables = re.findall(r"\{\{\w+\}\}", value)
+        variables = re.findall(r"\{\{\w+\!?(=[^\}]+)?\}\}", value)
         for v in variables:
-            if v.strip('{}') in os.environ:
-                value = value.replace(v,os.environ[v.strip('{}')])
-            elif hasattr(settingsmodule, v.strip('{}').upper()):
-                value = value.replace(v,getattr(settingsmodule, v.strip('{}').upper()))
+            varname = v.strip('{}')
+            if '=' in varname:
+                varname, defaultvalue = varname.split("=")
             else:
-                print("Undefined environment variable: " + v.strip('{}'),file=sys.stderr)
-                value = value.replace(v,"")
+                defaultvalue = ""
+            if varname and varname[-1] == '!':
+                varname = varname[:-1]
+                required = True
+            else:
+                required = False
+            if varname in os.environ:
+                value = value.replace(v,os.environ[varname])
+            elif hasattr(settingsmodule, varname.upper()):
+                value = value.replace(v,getattr(settingsmodule, varname.upper()))
+            else:
+                msg = "Undefined environment variable: " + varname
+                if required:
+                    raise ConfigurationError(msg)
+                else:
+                    print(msg,file=sys.stderr)
+                value = value.replace(v,defaultvalue)
     return value
 
 def loadconfigfile(configfile, settingsmodule):
@@ -2913,7 +2927,8 @@ def loadconfigfile(configfile, settingsmodule):
             raise ConfigurationError("Unable to load included configuration file: " + repr(value))
     for key, value in data.items():
         #replace variables
-        setattr(settingsmodule,key.upper(), resolveconfigvariables(value, settingsmodule))
+        value = resolveconfigvariables(value, settingsmodule)
+        if value != "": setattr(settingsmodule,key.upper(), value)
     return True
 
 class AbstractConverter:

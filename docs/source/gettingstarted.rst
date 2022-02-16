@@ -30,7 +30,7 @@ webservice.
 -  ``myfirstproject/myfirstproject.py`` - Service Configuration File
 
 -  ``myfirstproject/myfirstproject.$HOSTNAME.yml`` - Host-specific
-   external configution file which is automatically included from the
+   external configuration file which is automatically included from the
    service configuration file if ran on the specified host. This will be
    addressed in :ref:`externalconf`.
 
