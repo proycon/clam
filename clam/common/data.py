@@ -2885,7 +2885,7 @@ def loadconfig(callername, required=True):
 def resolveconfigvariables(value, settingsmodule):
     """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
-        variables = re.findall(r"\{\{\w+\!?(=[^\}]+)?\}\}", value)
+        variables = re.findall(r"\{\{[\w\d_]+!?(?:=[^\}]+)?\}\}", value)
         for v in variables:
             varname = v.strip('{}')
             if '=' in varname:
