@@ -3,6 +3,5 @@ lxml>=4.6.0
 requests
 requests_oauthlib
 requests_toolbelt
-pycrypto
 certifi
 pyyaml
