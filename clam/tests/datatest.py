@@ -226,39 +226,46 @@ class ExternalConfigTest(unittest.TestCase):
     def test1_substenvvars(self):
         """External YAML Config - Substitute variable from environment"""
         os.environ['SIMPLETESTVAR'] = "/test"
-        s_in = 'root: "{{SIMPLETESTVAR}}/frog_webservice-userdata"'
-        s_ref = 'root: "/test/frog_webservice-userdata"'
+        s_in = '{{SIMPLETESTVAR}}/frog_webservice-userdata'
+        s_ref = '/test/frog_webservice-userdata'
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
 
     def test2_substenvvars(self):
         """External YAML Config - Substitute variable from environment (2)"""
         os.environ['CLAM_TEST_ROOT1'] = "/test"
-        s_in = 'root: "{{CLAM_TEST_ROOT1}}/frog_webservice-userdata"'
-        s_ref = 'root: "/test/frog_webservice-userdata"'
+        s_in = '{{CLAM_TEST_ROOT1}}/frog_webservice-userdata'
+        s_ref = '/test/frog_webservice-userdata'
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
 
     def test3_emptyenvvars(self):
         """External YAML Config - Non-existing variable (allow to pass)"""
-        s_in = 'root: "{{CLAM_TEST_ROOT2}}/frog_webservice-userdata"'
-        s_ref = 'root: "/frog_webservice-userdata"'
+        s_in = '{{CLAM_TEST_ROOT2}}/frog_webservice-userdata'
+        s_ref = '/frog_webservice-userdata'
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
 
     def test4_resolveenvvars(self):
         """External YAML Config - Non-existing variable, fall back to specified default"""
-        s_in = 'root: "{{CLAM_TEST_ROOT2=/tmp}}/frog_webservice-userdata"'
-        s_ref = 'root: "/tmp/frog_webservice-userdata"'
+        s_in = '{{CLAM_TEST_ROOT2=/tmp}}/frog_webservice-userdata'
+        s_ref = '/tmp/frog_webservice-userdata'
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
 
     def test5_emptyenvvars_fail(self):
         """External YAML Config - Non-existing variable (hard failure)"""
-        s_in = 'root: "{{CLAM_TEST_ROOT2!}}"'
+        s_in = '{{CLAM_TEST_ROOT2!}}'
         self.assertRaises(clam.common.data.ConfigurationError, clam.common.data.resolveconfigvariables, s_in, {})
 
 
+    def test6_substenvvars_typecast(self):
+        """External YAML Config - Type casting"""
+        os.environ['SIMPLETESTVAR'] = "42"
+        s_in = '{{SIMPLETESTVAR|int}}'
+        s_ref = 42
+        s_out = clam.common.data.resolveconfigvariables(s_in, {})
+        self.assertEqual(s_out,s_ref)
 
 
 if __name__ == '__main__':

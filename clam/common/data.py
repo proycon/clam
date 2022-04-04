@@ -2885,7 +2885,7 @@ def loadconfig(callername, required=True):
 def resolveconfigvariables(value, settingsmodule):
     """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
-        variables = re.findall(r"\{\{[\w\d_]+!?(?:=[^\}]+)?\}\}", value)
+        variables = re.findall(r"\{\{[\w\d_\|]+!?(?:=[^\}]+)?\}\}", value)
         for v in variables:
             varname = v.strip('{}')
             if '=' in varname:
@@ -2897,17 +2897,33 @@ def resolveconfigvariables(value, settingsmodule):
                 required = True
             else:
                 required = False
+            castf = lambda x: x #no-op
+            if varname.find("|") != -1:
+                varname, cast = varname.split("|",1)
+                cast = cast.strip()
+                if cast == "int":
+                    castf = int
+                elif cast == "float":
+                    castf = float
+                elif cast == "bool":
+                    castf = bool
+                elif cast == "json":
+                    castf = json.loads
+                else:
+                    msg = "Undefined function: " + cast
+                    raise ConfigurationError(msg)
+
             if varname in os.environ:
-                value = value.replace(v,os.environ[varname])
+                value = castf(value.replace(v,os.environ[varname]))
             elif hasattr(settingsmodule, varname.upper()):
-                value = value.replace(v,getattr(settingsmodule, varname.upper()))
+                value = castf(value.replace(v,getattr(settingsmodule, varname.upper())))
             else:
                 msg = "Undefined environment variable: " + varname
                 if required:
                     raise ConfigurationError(msg)
                 else:
                     print(msg,file=sys.stderr)
-                value = value.replace(v,defaultvalue)
+                value = castf(value.replace(v,defaultvalue))
     return value
 
 def loadconfigfile(configfile, settingsmodule):

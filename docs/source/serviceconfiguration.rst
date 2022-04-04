@@ -1659,4 +1659,9 @@ Alternatively, you can specify a default value as follows::
 
    root: "{{ROOT=/tmp/data}}"
 
+It is also possible to typecast variables using the functions `int`, `bool`, `float` or `json`, this is done using the
+pipe character immediately after the variable name (before any of the previously mentioned options)::
+
+   number: "{{NUMBER|int}}"
+
 
