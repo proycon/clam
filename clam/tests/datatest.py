@@ -260,10 +260,18 @@ class ExternalConfigTest(unittest.TestCase):
 
 
     def test6_substenvvars_typecast(self):
-        """External YAML Config - Type casting"""
+        """External YAML Config - Type casting (int)"""
         os.environ['SIMPLETESTVAR'] = "42"
         s_in = '{{SIMPLETESTVAR|int}}'
         s_ref = 42
+        s_out = clam.common.data.resolveconfigvariables(s_in, {})
+        self.assertEqual(s_out,s_ref)
+
+    def test7_substenvvars_typecast_bool(self):
+        """External YAML Config - Type casting (bool)"""
+        os.environ['SIMPLETESTVAR'] = "true"
+        s_in = '{{SIMPLETESTVAR|bool=false}}'
+        s_ref = True
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
 
