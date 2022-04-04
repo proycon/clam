@@ -2906,7 +2906,7 @@ def resolveconfigvariables(value, settingsmodule):
                 elif cast == "float":
                     castf = float
                 elif cast == "bool":
-                    castf = bool
+                    castf = lambda x: x.lower() in ('yes','true','1','enabled')
                 elif cast == "json":
                     castf = json.loads
                 else:
