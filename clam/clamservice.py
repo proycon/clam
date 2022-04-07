@@ -319,6 +319,7 @@ def auth_type():
 def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-many-return-statements
     user, oauth_access_token = parsecredentials(credentials)
     rq = flask.request.values
+    printdebug("Using entry shortcut")
     if 'project' in rq: #pylint: disable=too-many-nested-blocks
         if rq['project'].lower() in ('new','create'):
             projectprefix = rq['projectprefix'] if 'projectprefix' in rq else 'P'
