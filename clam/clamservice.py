@@ -1237,7 +1237,7 @@ class Project:
             extraloc = '?oauth_access_token=' + oauth_access_token
         else:
             extraloc = ''
-            return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
+        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
 
     @staticmethod
     def start(project, credentials=None): #pylint: disable=too-many-return-statements
