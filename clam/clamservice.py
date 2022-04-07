@@ -2848,19 +2848,22 @@ class CLAMService(object):
         self.service.secret_key = settings.SECRET_KEY
         printdebug("Registering main entrypoint: " + settings.INTERNALURLPREFIX + "/")
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/', '', self.auth.require_login(mainentry, optional=True), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] )
-        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
 
-        #versions without trailing slash so no automatic 301 redirect is needed
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index', 'index2', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch', 'porch2', porch, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+        #versions without trailing slash so no automatic 308 redirect is needed (which flask does by itself otherwise!)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index', 'index2', self.auth.require_login(index), methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch', 'porch2', porch, methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'], strict_slashes=False )
+
+        #canonical versions
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] , strict_slashes=False)
+        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/", strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] , strict_slashes=False)
+
 
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/storage/<fileid>', 'get_storage', get_storage, methods=['GET'] )
 
