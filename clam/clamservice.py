@@ -198,22 +198,28 @@ class Login(object):
             except KeyError:
                 error_msg = ""
             if error:
+                printdebug("OAuth Login: Error from remote authorization provider: " + error + ": " + error_msg)
                 return withheaders(flask.make_response("Error from remote authorization provider: " + error + ": " + error_msg,403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         try:
             code = flask.request.values['code']
         except KeyError:
+            printdebug("OAuth Login: No code passed")
             return withheaders(flask.make_response('No code passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
         try:
             state = flask.request.values['state']
         except KeyError:
+            printdebug("OAuth Login: No state passed")
             return withheaders(flask.make_response('No state passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
+        printdebug("OAuth Login: Fetching token")
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=os.path.join(settings.OAUTH_CLIENT_URL, 'login?code='+ code + '&state=' + state ))
         if not 'access_token' in d:
+            printdebug("OAuth Login: Error fetching token")
             return withheaders(flask.make_response('No access token received from authorization provider',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         #pylint: disable=bad-continuation
+        printdebug("OAuth Login: Done")
         return withheaders(flask.make_response(flask.render_template('login.xml',
                         version=VERSION,
                         system_id=settings.SYSTEM_ID,
