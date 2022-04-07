@@ -2923,7 +2923,10 @@ def resolveconfigvariables(value, settingsmodule):
                     raise ConfigurationError(msg)
                 else:
                     print(msg,file=sys.stderr)
-                value = castf(value.replace(v,defaultvalue))
+                if castf == json.loads and not defaultvalue:
+                    value = None
+                else:
+                    value = castf(value.replace(v,defaultvalue))
     return value
 
 def loadconfigfile(configfile, settingsmodule):

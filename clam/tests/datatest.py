@@ -15,6 +15,7 @@
 import unittest
 import sys
 import os
+import json
 
 #We may need to do some path magic in order to find the clam.* imports
 sys.path.append(sys.path[0] + '/../../')
@@ -274,6 +275,20 @@ class ExternalConfigTest(unittest.TestCase):
         s_ref = True
         s_out = clam.common.data.resolveconfigvariables(s_in, {})
         self.assertEqual(s_out,s_ref)
+
+    def test8_substenvvars_typecast_json(self):
+        """External YAML Config - Type casting (json)"""
+        s_ref = { "a": 1, "b": 2 }
+        os.environ['COMPLEXVAR'] = json.dumps(s_ref)
+        s_in = '{{COMPLEXVAR|json}}'
+        s_out = clam.common.data.resolveconfigvariables(s_in, {})
+        self.assertEqual(s_out,s_ref)
+
+    def test9_substenvvars_typecast_json(self):
+        """External YAML Config - Type casting (json)"""
+        s_in = '{{DOESNOTEXIST|json}}'
+        s_out = clam.common.data.resolveconfigvariables(s_in, {})
+        self.assertEqual(s_out,None)
 
 
 if __name__ == '__main__':
