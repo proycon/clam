@@ -2915,8 +2915,8 @@ def resolveconfigvariables(value, settingsmodule):
 
             if varname in os.environ:
                 value = castf(value.replace(v,os.environ[varname]))
-            elif hasattr(settingsmodule, varname.upper()):
-                value = castf(value.replace(v,getattr(settingsmodule, varname.upper())))
+            elif hasattr(settingsmodule, varname.upper()) and getattr(settingsmodule, varname.upper()) is not None:
+                value = castf(value.replace(v,str(getattr(settingsmodule, varname.upper()))))
             else:
                 msg = "Undefined environment variable: " + varname
                 if required:
