@@ -2859,7 +2859,7 @@ class CLAMService(object):
         #canonical versions
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'], strict_slashes=False )
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] , strict_slashes=False)
-        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/", strict_slashes=False)
+        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] , strict_slashes=False)
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] , strict_slashes=False)
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] , strict_slashes=False)
