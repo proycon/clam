@@ -30,7 +30,7 @@ setup(
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
     description = ("Turns command-line tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
-    license = "GPL",
+    license = "GPL-3.0-only",
     keywords = ["SaaS", "webservice", "rest"],
     url = "https://proycon.github.io/clam",
     packages=['clam','clam.common','clam.config','clam.wrappers'],
