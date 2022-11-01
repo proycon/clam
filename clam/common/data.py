@@ -2932,6 +2932,7 @@ def resolveconfigvariables(value, settingsmodule):
 def loadconfigfile(configfile, settingsmodule):
     """This function loads an external configuration file. It is usually not invoked directly but through ``loadconfig()`` which handles searching for the right configuration file in the right paths, with fallbacks."""
 
+    clam.common.util.printlog("Loading configuration file " + configfile)
     with io.open(configfile,'r', encoding='utf-8') as f:
         data = yaml.safe_load(f.read())
     if 'include' in data and data['include']:
