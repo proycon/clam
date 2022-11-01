@@ -9,9 +9,6 @@ CLAM: Computational Linguistics Application Mediator
     :target: http://clam.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://api.codacy.com/project/badge/grade/860767a6b995425bbb607fc852c418b7
-    :target: https://www.codacy.com/app/proycon/clam
-
 .. image:: https://zenodo.org/badge/760072.svg
    :target: https://zenodo.org/badge/latestdoi/760072
 
