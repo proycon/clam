@@ -958,7 +958,7 @@ class Project:
         totalcompletion = 0
         if os.path.isfile(statusfile): #pylint: disable=too-many-nested-blocks
             prevmsg = None
-            with open(statusfile) as f:
+            with open(statusfile, 'r', encoding='utf-8') as f:
                 for line in f: #pylint: disable=too-many-nested-blocks
                     line = line.strip()
                     if line:
