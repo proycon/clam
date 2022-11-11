@@ -437,14 +437,10 @@ class OAuth2(HTTPAuth):
                 else:
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
-                    if oauthsession.get('error'):
-                        #happens for instance when the token is expired
-                        self.printdebug("OAuth Session returned an error:" + str(oauthsession.get('error',"")) + " - " + str(oauthsession.get('error_description',"")))
-                        return self.auth_error_callback()
                     try:
                         username = self.username_function(oauthsession)
                     except clam.common.oauth.OAuthError as e:
-                        self.printdebug("Could not obtain username from OAuth session")
+                        self.printdebug("Could not obtain username from OAuth session, got OAuthError error " + str(e))
                         return self.auth_error_callback()
                     if username:
                         #add (username, oauth_access_token) tuple as parameter to the wrapped function
