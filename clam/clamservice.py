@@ -103,6 +103,18 @@ def userdb_lookup_dict(user, **authsettings):
     printdebug("Looking up user " + user)
     return settings.USERS[user] #possible KeyError is captured later
 
+def userdb_lookup_file(user, **authsettings):
+    printdebug("Looking up user " + user)
+    with open(settings.USERS_FILE,'r',encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            line = line.strip()
+            if line and line[0] != '#':
+                fields = line.split("\t")
+                if len(fields) != 2:
+                    warning(f"Error in line {i+1} in password file, expected two columns")
+                elif fields[0] == user:
+                    return fields[1]
+    raise KeyError(f"User {user} not in database") 
 
 def userdb_lookup_mysql(user, **authsettings):
     printdebug("Looking up user " + user + " in MySQL")
@@ -294,7 +306,7 @@ def parsecredentials(credentials, verbose=False):
         authtype = "none"
         if settings.OAUTH:
             authtype = "oauth"
-        elif settings.USERS or settings.USERS_MYSQL:
+        elif settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE:
             if settings.BASICAUTH and settings.DIGESTAUTH:
                 authtype = "multi"
             elif settings.BASICAUTH:
@@ -311,9 +323,9 @@ def auth_type():
         return "oauth"
     elif settings.PREAUTHHEADER:
         return "preauth"
-    elif (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL):
+    elif (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
         return "basic"
-    elif settings.USERS or settings.USERS_MYSQL:
+    elif settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE:
         return "digest"
     else:
         return "none"
@@ -2819,6 +2831,20 @@ class CLAMService(object):
                 self.auth = digest_auth
             else:
                 error("USERS is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
+        elif settings.USERS_FILE:
+            if settings.BASICAUTH:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug)
+                if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            if settings.DIGESTAUTH:
+                digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+            if settings.BASICAUTH and settings.DIGESTAUTH:
+                self.auth = clam.common.auth.MultiAuth(basic_auth, digest_auth) #pylint: disable=redefined-variable-type
+            elif settings.BASICAUTH:
+                self.auth = basic_auth #pylint: disable=redefined-variable-type
+            elif settings.DIGESTAUTH:
+                self.auth = digest_auth
+            else:
+                error("USERS_FILE is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
         elif settings.USERS_MYSQL:
             validate_users_mysql()
             if settings.BASICAUTH:
@@ -2992,6 +3018,8 @@ def set_defaults():
         settings.SYSTEM_LICENSE = ""
     if 'USERS' not in settingkeys:
         settings.USERS = None
+    if 'USERS_FILE' not in settingkeys:
+        settings.USERS_FILE = None
     if 'ADMINS' not in settingkeys:
         settings.ADMINS = []
     if 'LISTPROJECTS' not in settingkeys:
@@ -3154,12 +3182,12 @@ def set_defaults():
     if 'ASSUMESSL' not in settingkeys:
         settings.ASSUMESSL = settings.PORT == 443
 
-    if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+    if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE) and settings.ASSUMESSL:
         settings.BASICAUTH = True #Allowing HTTP Basic Authentication
     elif 'BASICAUTH' not in settingkeys:
         settings.BASICAUTH = False #default is HTTP Digest
 
-    if 'DIGESTAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+    if 'DIGESTAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE) and settings.ASSUMESSL:
         settings.DIGESTAUTH = True #Allowing HTTP Digest AuthenticatioDigest Authentication
     elif 'DIGESTAUTH' not in settingkeys:
         settings.DIGESTAUTH = True
@@ -3191,7 +3219,7 @@ def test_dirs():
 
     if not settings.PARAMETERS:
         warning("No parameters specified in settings module!")
-    if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
+    if not settings.USERS and not settings.USERS_MYSQL and not settings.USERS_FILE and not settings.PREAUTHHEADER and not settings.OAUTH:
         warning("No user authentication enabled, this is not recommended for production environments!")
     if settings.FORCEHTTPS:
         print("Forcing HTTPS", file=sys.stderr)

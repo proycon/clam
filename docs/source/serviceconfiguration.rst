@@ -187,6 +187,13 @@ the example below to your actual service configuration file:
 You can mark certain users as being administrators using the ``ADMINS``
 list. Administrators can see and modify all projects.
 
+Rather than define the ``USERS`` at service initialisation time, you can also
+specify a ``USERS_FILE`` which is a simple tab separated text file, with one
+username and hashed password entry per line (separated by a tab). The whole
+contents of this file will be parsed anew on each authentication request, so it
+does not scale to large numbers of users. If you need something more scalable,
+use the MySQL backend described in the next section.
+
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options
 ``allowusers=`` or ``denyusers=`` to set this. See the documentation on :ref:`parameters`. A
 common use would be to define one user to be the guest user, for instance the user named “guest”, and set
@@ -203,10 +210,10 @@ cryptographically signing session data and preventing CSRF attacks (`details <ht
 MySQL backend
 ~~~~~~~~~~~~~~~~~~~~~
 
-Rather than using ``USERS`` to define a user database in your service
+Rather than using ``USERS`` or ``USERS_FILE`` to define a user database in your service
 configuration file, a more sophisticated method is available using
-MySQL. The configuration variable ``USERS_MYSQL`` can be configured,
-instead of ``USERS``, to point to a table in a MySQL database somewhere;
+MySQL/MariaDB. The configuration variable ``USERS_MYSQL`` can be configured,
+instead of ``USERS``/``USERS_FILE``, to point to a table in a MySQL database somewhere;
 the fields “username” and “password” in this table will subsequently be
 used to authenticate against. Custom field names are also possible. This
 approach allows you to use existing MySQL-based user databases. The
