@@ -158,9 +158,11 @@ converted on the fly to hashes, is found below:
 .. code-block:: python
 
        USERS = {
-           'bob': pwhash('bob', SYSTEM_ID, 'secret'),
-           'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
+           'bob': pwhash('bob', REALM, 'secret'),
+           'alice': pwhash('alice', REALM, 'secret2'),
        }
+
+REALM is by default set to your service's SYSTEM_ID.
 
 However, computing hashes on the fly like in the above example is quite
 insecure and not recommended. You should pre-compute the hashes and add
@@ -181,7 +183,7 @@ the example below to your actual service configuration file:
 
    from clam.common.digestauth import pwhash
    import clam.config.yourconfig as settings
-   pwhash('alice', settings.SYSTEM_ID, 'secret')
+   pwhash('alice', settings.REALM, 'secret')
    'e445370f57e19a8bfa454404ba3892cc'
 
 You can mark certain users as being administrators using the ``ADMINS``
