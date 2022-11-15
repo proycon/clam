@@ -341,13 +341,16 @@ class MultiAuth(object):
                     kwargs['credentials'] = {'user': 'anonymous','401response': res}
                     return f(*args,**kwargs)
 
-                flask.request.data #clear receive buffer of pending data
-                res = flask.make_response("Authorization required")
-                res.status_code = 401
-                res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
-                for auth in self.additional_auth:
-                    res.headers.add('WWW-Authenticate',  auth.authenticate_header())
-                return res
+                if isinstance(self.main_auth, (HTTPBasicAuth, HTTPDigestAuth)) and all(isinstance(x, (HTTPBasicAuth, HTTPDigestAuth)) for x in self.additional_auth):
+                    flask.request.data #clear receive buffer of pending data
+                    res = flask.make_response("Authorization required")
+                    res.status_code = 401
+                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                    for auth in self.additional_auth:
+                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                    return res
+
+                    #if there are other authentication methods in the mix we just fall back to the main authenticator and let it handle the response (might be a redirect to an OAuth2 identity provider)
 
             if selected_auth is None:
                 selected_auth = self.main_auth
@@ -371,6 +374,7 @@ class OAuth2(HTTPAuth):
             self.printdebug = debug
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
+        self.scheme = "Bearer"
         self.error_handler(default_auth_error)
 
     def require_login(self, f, optional=False):

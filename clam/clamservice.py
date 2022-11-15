@@ -2813,10 +2813,23 @@ class CLAMService(object):
 
         if settings.OAUTH:
             if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            main_auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            #Allow combinations with HTTP Basic Auth
+            if settings.USERS:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            elif settings.USERS_FILE:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            elif settings.USERS_MYSQL:
+                validate_users_mysql()
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            else:
+                self.auth = main_auth
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
-            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
+            main_auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.USERS:
             if settings.BASICAUTH:
                 basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
