@@ -205,11 +205,7 @@ function pollstatus() {
         data: {accesstoken: accesstoken, user: user},
         success: function(response){
                 if (response.statuscode !== 1) {
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
-                    } else {
-                      window.location.href = baseurl + '/' + project + '/'; /* refresh */
-                    }
+                    window.location.href = baseurl + '/' + project + '/'; /* refresh */
                 } else {
                     if (response.completion > 0) {
                         progress = response.completion;
@@ -517,11 +513,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
               withCredentials: true
             },
             success: function(){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + "/" + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
-                } else {
-                  window.location.href = baseurl + "/" + $("#projectname").val() + "/";
-                }
+                window.location.href = baseurl + "/" + $("#projectname").val() + "/";
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -550,11 +542,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
               withCredentials: true
             },
             success: function(){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-                } else {
-                  window.location.href = baseurl + '/'; /* back to index */
-                }
+                window.location.href = baseurl + '/'; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -583,11 +571,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
               withCredentials: true
             },
             success: function(response){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-                } else {
-                  window.location.href = baseurl + '/'; /* back to index */
-                }
+                window.location.href = baseurl + '/'; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -633,11 +617,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(){
-            if (oauth_access_token !== "") {
-              window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-            } else {
-              window.location.href = baseurl + '/'; /* back to index */
-            }
+            window.location.href = baseurl + '/'; /* back to index */
        });
    }
 
@@ -777,11 +757,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 return true;
         }).on('complete', function(e, id, fileName, responseJSON) { //eslint-disable-line no-unused-vars
                 if (responseJSON.isarchive) {
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                    window.location.href = baseurl + '/' + project + "/";
                     return true;
                 }
                 var xml;
@@ -841,11 +817,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                   withCredentials: true
                 },
                 success: function(response){
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                    window.location.href = baseurl + '/' + project + "/";
                 },
                 error: function(response, errortype){
                     alert(response.responseText);
@@ -867,21 +839,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             },
             success: function(response){//eslint-disable-line no-unused-vars
                 //processuploadresponse(response, '#nonexistant');
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                } else {
-                  window.location.href = baseurl + '/' + project + "/";
-                }
+               window.location.href = baseurl + '/' + project + "/";
           },
             error: function(response,errortype){//eslint-disable-line no-unused-vars
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                   window.location.href = baseurl + '/' + project + "/";
                 } else {
                     if (response.responseText) {
                         alert(response.responseText);

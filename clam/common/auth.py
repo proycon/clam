@@ -410,12 +410,20 @@ class OAuth2(HTTPAuth):
             oauth_access_token = authheader[6:]
             self.printdebug("Oauth access token obtained from HTTP request Authentication header")
         else:
-            #Is the token submitted in the GET/POST data? (as oauth_access_token)
-            try:
-                oauth_access_token = flask.request.values['oauth_access_token']
-                self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
-            except KeyError:
-                self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+            #Is the token submitted via a cookie?
+            oauth_access_token = flask.request.cookies.get("oauth_access_token")
+            if not oauth_access_token:
+                self.printdebug("Oauth access token not found in cookie")
+                #Is the token submitted in the GET/POST data? (as oauth_access_token)
+                #This is a last resort we don't really want to use
+                try:
+                    oauth_access_token = flask.request.values['oauth_access_token']
+                    self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
+                except KeyError:
+                    self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+            else:
+                self.printdebug("Oauth access token obtained from cookie")
+
         return oauth_access_token
 
     def require_login(self, f, optional=False):

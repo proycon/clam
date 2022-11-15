@@ -105,7 +105,7 @@ def xmlescape(s):
 
 
 
-def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
+def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None, cookies=None, cookies_max_age=None):
     if headers is None: headers = { }
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     response.headers['Content-Type'] = contenttype
@@ -123,6 +123,12 @@ def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
                 response.headers['Access-Control-Allow-Headers'] = 'Authorization'
                 key = 'Access-Control-Allow-Origin'
             response.headers[key] = value
+
+    if cookies:
+        assert isinstance(cookies, dict)
+        for key, value in cookies.items():
+            if value is not None and value != "":
+                response.set_cookie(key, value, cookies_max_age)
     return response
 
 def isncname(name):

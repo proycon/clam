@@ -250,7 +250,7 @@ class Login(object):
                         system_license=settings.SYSTEM_LICENSE,
                         url=getrooturl(),
                         oauth_access_token=oauth_encrypt(d['access_token']))),
-                headers={'allow-origin': settings.ALLOW_ORIGIN} )
+                   headers={'allow-origin': settings.ALLOW_ORIGIN}, cookies={'oauth_access_token': oauth_encrypt(d['access_token'])} )
 
 def oauth_encrypt(oauth_access_token):
     #encrypt is a misnomer because we don't actually encrypt anything anymore!
@@ -265,7 +265,10 @@ class Logout(object):
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.OAUTH_REVOKE_URL:
-            return withheaders(flask.make_response("Logging you out locally, however, no revoke mechanism was defined at the remote end. Moreover, not all browser support this (notably Safari and IE), you may want to clear your cache and history manually if you are on a public computer.",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
+            if 'Safari' in flask.headers.get('User-Agent'):
+                return withheaders(flask.make_response("Safari does not support logging out, and no key revocation mechanism was defined at the remote end. Please clear your browser cookies and cache manually if you are on a public computer.",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
+            else:
+                return withheaders(flask.make_response("Logged you out locally, (however, no key revocation mechanism was defined at the remote end)",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
