@@ -340,14 +340,14 @@ class MultiAuth(object):
                         res.headers.add('WWW-Authenticate',  auth.authenticate_header())
                     kwargs['credentials'] = {'user': 'anonymous','401response': res}
                     return f(*args,**kwargs)
-                else:
-                    flask.request.data #clear receive buffer of pending data
-                    res = flask.make_response("Authorization required")
-                    res.status_code = 401
-                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
-                    for auth in self.additional_auth:
-                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
-                    return res
+
+                flask.request.data #clear receive buffer of pending data
+                res = flask.make_response("Authorization required")
+                res.status_code = 401
+                res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                for auth in self.additional_auth:
+                    res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                return res
 
             if selected_auth is None:
                 selected_auth = self.main_auth
@@ -417,23 +417,21 @@ class OAuth2(HTTPAuth):
                         kwargs['credentials'] = {'user': 'anonymous','401response': flask.redirect(auth_url)}
 
                         return f(*args,**kwargs)
-                    else:
-                        self.printdebug("No access token available yet, starting login process")
 
-                        #redirect_url = getrooturl() + '/login'
+                    self.printdebug("No access token available yet, starting login process")
 
-                        kwargs = {'redirect_uri': self.redirect_url}
-                        if self.scope:
-                            kwargs['scope'] = self.scope
-                        self.printdebug("OAuth2 details, client=" + self.client_id + ": " + repr(kwargs))
-                        oauthsession = OAuth2Session(self.client_id, **kwargs)
-                        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
-                        auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
+                    kwargs = {'redirect_uri': self.redirect_url}
+                    if self.scope:
+                        kwargs['scope'] = self.scope
+                    self.printdebug("OAuth2 details, client=" + self.client_id + ": " + repr(kwargs))
+                    oauthsession = OAuth2Session(self.client_id, **kwargs)
+                    if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
+                    auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
 
-                        #Redirect to Authentication Provider
-                        self.printdebug("Redirecting to authentication provider: " + self.auth_url)
+                    #Redirect to Authentication Provider
+                    self.printdebug("Redirecting to authentication provider: " + self.auth_url)
 
-                        return flask.redirect(auth_url)
+                    return flask.redirect(auth_url)
                 else:
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
