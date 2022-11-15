@@ -10,20 +10,6 @@ def read(fname):
     return io.open(os.path.join(os.path.dirname(__file__), fname),'r',encoding='utf-8').read()
 
 
-#merge the interface XSL into a merges one which will be served to browser which can't handle XSL imports well (not used currently)
-#interfacexsl = os.path.join(os.path.dirname(__file__), "clam/static/interface.xsl")
-#parametersxsl = os.path.join(os.path.dirname(__file__), "clam/static/parameters.xsl")
-#mergedinterfacexsl = os.path.join(os.path.dirname(__file__), "clam/static/interface-merged.xsl")
-#with open(interfacexsl,'r',encoding='utf-8') as f:
-#    interfacexsl_data = f.read()
-#with open(parametersxsl,'r',encoding='utf-8') as f:
-#    parametersxsl_data = ""
-#    for line in f:
-#        if not line.startswith(("<?","<xsl:stylesheet","</xsl:stylesheet","<xsl:output")):
-#            parametersxsl_data += line
-#with open(mergedinterfacexsl,'w',encoding='utf-8') as f:
-#    f.write(interfacexsl_data.replace('<xsl:include href="parameters.xsl" />', parametersxsl_data))
-
 setup(
     name = "CLAM",
     version = "3.1.9", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
