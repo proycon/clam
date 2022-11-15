@@ -2668,7 +2668,7 @@ class ActionHandler:
             return ActionHandler.do(actionid, method,credentials['user'],credentials['oauth_access_token'] if 'oauth_access_token' in credentials else "")
         elif '401response' in credentials and credentials['401response'] is not None:
             #we are anonymous but this action does not allow that:
-            printdebug("(anonymous access not allowed, returning deffered 401 response)")
+            printdebug("(anonymous access not allowed, returning deferred 401 response)")
             return credentials['401response']
         else:
             #we are anonymous but this action does not allow that:

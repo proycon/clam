@@ -268,7 +268,7 @@ class ForwardedAuth(HTTPAuth):
         self.printdebug("Forwarded authentication listens to headers: " + ",".join(self.headers))
 
     def authenticate_header(self):
-        return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
+        return None
 
     def require_login(self, f, optional=False):
         @wraps(f)
@@ -331,26 +331,33 @@ class MultiAuth(object):
                             break
             else:
                 self.printdebug("No authorization header passed by " + remote_addr)
+
                 if optional:
                     self.printdebug("Login was optional, falling back to anonymous login")
+                    #prepare a DEFERRED 401 response, won't be sent immediately
+                    #special case to return multiple WWW-Authenticate headers
+
                     res = flask.make_response("Authorization required")
                     res.status_code = 401
-                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                    value = self.main_auth.authenticate_header()
+                    if value:
+                        res.headers.add('WWW-Authenticate',  value)
                     for auth in self.additional_auth:
-                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                        value = auth.authenticate_header()
+                        if value:
+                            res.headers.add('WWW-Authenticate',  value)
                     kwargs['credentials'] = {'user': 'anonymous','401response': res}
+
+                    #return result WITHOUT authentication
                     return f(*args,**kwargs)
 
-                if isinstance(self.main_auth, (HTTPBasicAuth, HTTPDigestAuth)) and all(isinstance(x, (HTTPBasicAuth, HTTPDigestAuth)) for x in self.additional_auth):
-                    flask.request.data #clear receive buffer of pending data
-                    res = flask.make_response("Authorization required")
-                    res.status_code = 401
-                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
-                    for auth in self.additional_auth:
-                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
-                    return res
-
-                    #if there are other authentication methods in the mix we just fall back to the main authenticator and let it handle the response (might be a redirect to an OAuth2 identity provider)
+                #main authentication method determines whether this will be a 401 or immediately a 302 (oauth)
+                res = self.main_auth.require_login(f, optional)(*args, **kwargs)
+                for auth in self.additional_auth:
+                    value = auth.authenticate_header()
+                    if value:
+                        res.headers.add('WWW-Authenticate',  value)
+                return res
 
             if selected_auth is None:
                 selected_auth = self.main_auth
@@ -376,6 +383,15 @@ class OAuth2(HTTPAuth):
             self.printdebug = lambda x: print(x,file=sys.stderr)
         self.scheme = "Bearer"
         self.error_handler(default_auth_error)
+
+    def authenticate_header(self):
+        #provide forward to login (the caller can decide whether to actually use this)
+        kwargslogin = {'redirect_uri': self.redirect_url}
+        if self.scope:
+            kwargslogin['scope'] = self.scope
+        oauthsession = OAuth2Session(self.client_id, **kwargslogin)
+        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
+        return 'Bearer scope="{0}", auth_server="{1}"'.format(self.scope, self.auth_function(oauthsession, self.auth_url)) #following https://stackoverflow.com/questions/50921816/standard-http-header-to-indicate-location-of-openid-connect-server , realm is OPTIONAL so I skip it here
 
     def require_login(self, f, optional=False):
         @wraps(f)
