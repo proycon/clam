@@ -320,6 +320,8 @@ class MultiAuth(object):
                 try:
                     scheme, creds = flask.request.headers['Authorization'].split( None, 1)
                     self.printdebug("Requested scheme by " + remote_addr + " = " + scheme)
+                    if isinstance(self.main_auth, OAuth2) and self.main_auth.get_oauth_access_token_from_request():
+                        scheme = "Bearer"
                 except ValueError:
                     # malformed Authorization header
                     self.printdebug("Malformed authorization header from " + remote_addr)
@@ -393,33 +395,37 @@ class OAuth2(HTTPAuth):
         if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
         return 'Bearer scope="{0}", auth_server="{1}"'.format(self.scope, self.auth_function(oauthsession, self.auth_url)) #following https://stackoverflow.com/questions/50921816/standard-http-header-to-indicate-location-of-openid-connect-server , realm is OPTIONAL so I skip it here
 
+    def get_oauth_access_token_from_request(self):
+        oauth_access_token = None
+        try:
+            authheader = flask.request.headers['Authorization']
+        except KeyError:
+            authheader = None
+        #Obtain access token
+        if authheader and authheader[:6].lower() == "bearer":
+            oauth_access_token = authheader[7:]
+            self.printdebug("Oauth access token obtained from HTTP request Authentication header")
+        elif authheader and authheader[:5].lower() == "token":
+            oauth_access_token = authheader[6:]
+            self.printdebug("Oauth access token obtained from HTTP request Authentication header")
+        else:
+            #Is the token submitted in the GET/POST data? (as oauth_access_token)
+            try:
+                oauth_access_token = flask.request.values['oauth_access_token']
+                self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
+            except KeyError:
+                self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+        return oauth_access_token
+
     def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
-            try:
-                authheader = flask.request.headers['Authorization']
-            except KeyError:
-                authheader = None
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
-                oauth_access_token = None
-                #Obtain access token
-                if authheader and authheader[:6].lower() == "bearer":
-                    oauth_access_token = authheader[7:]
-                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-                elif authheader and authheader[:5].lower() == "token":
-                    oauth_access_token = authheader[6:]
-                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-                else:
-                    #Is the token submitted in the GET/POST data? (as oauth_access_token)
-                    try:
-                        oauth_access_token = flask.request.values['oauth_access_token']
-                        self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                    except KeyError:
-                        self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+                oauth_access_token = self.get_oauth_access_token_from_request()
 
                 if not oauth_access_token:
                     #No access token yet, start login process
