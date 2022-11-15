@@ -6,10 +6,6 @@
 # CLAM: Computational Linguistics Application Mediator
 # -- CLAM Dispatcher --
 #       by Maarten van Gompel (proycon)
-#       http://ilk.uvt.nl/clam
-#       http://ilk.uvt.nl/~mvgompel
-#       Induction for Linguistic Knowledge Research Group
-#       Universiteit van Tilburg
 #
 #       Licensed under GPLv3
 #
@@ -24,7 +20,7 @@ import signal
 import shutil
 import json
 
-VERSION = '3.1.8'
+VERSION = '3.1.9'
 
 sys.path.append(sys.path[0] + '/..')
 
