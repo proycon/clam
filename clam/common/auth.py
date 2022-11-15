@@ -320,8 +320,6 @@ class MultiAuth(object):
                 try:
                     scheme, creds = flask.request.headers['Authorization'].split( None, 1)
                     self.printdebug("Requested scheme by " + remote_addr + " = " + scheme)
-                    if isinstance(self.main_auth, OAuth2) and self.main_auth.get_oauth_access_token_from_request():
-                        scheme = "Bearer"
                 except ValueError:
                     # malformed Authorization header
                     self.printdebug("Malformed authorization header from " + remote_addr)
@@ -331,6 +329,9 @@ class MultiAuth(object):
                         if auth.scheme == scheme:
                             selected_auth = auth
                             break
+            elif isinstance(self.main_auth, OAuth2) and self.main_auth.get_oauth_access_token_from_request():
+                scheme = "Bearer"
+                selected_auth = self.main_auth
             else:
                 self.printdebug("No authorization header passed by " + remote_addr)
 
