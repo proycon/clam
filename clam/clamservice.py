@@ -2829,7 +2829,7 @@ class CLAMService(object):
                 self.auth = main_auth
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
-            main_auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
+            self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
         elif settings.USERS:
             if settings.BASICAUTH:
                 basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
