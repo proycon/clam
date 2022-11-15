@@ -449,7 +449,7 @@ provider.
 
 At the moment, CLAM does not yet implement support for refresh tokens.
 
-The unencrypted access token may be passed to the wrapper script if
+The access token may be passed to the wrapper script if
 needed (has to be explicitly configured), allowing the wrapper script or
 underlying system to communicate with a resource provider on behalf of
 the user, through CLAM’s client_id.
