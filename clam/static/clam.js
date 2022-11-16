@@ -17,11 +17,13 @@
 
 var uploader;
 
+/*
 function oauthheader(req) {
   if (oauth_access_token !== "") {
     req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
-  }
+ }
 }
+*/
 
 function getinputtemplate(id) {
     for (var i = 0; i < inputtemplates.length; i++) {
@@ -161,7 +163,7 @@ function deleteinputfile(filename) {   //eslint-disable-line no-unused-vars
     if (found >= 0) tableinputfiles.fnDeleteRow(found);
     $.ajax({
         type: "DELETE",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
           withCredentials: true
@@ -196,7 +198,7 @@ function pollstatus() {
     $.ajax({
         type: 'GET',
         url: baseurl + '/' + project + "/status/",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
           withCredentials: true
@@ -324,7 +326,7 @@ function quickdelete(projectname) {//eslint-disable-line no-unused-vars
         type: "DELETE",
         url: baseurl + '/' + projectname + '/',
         dataType: "text",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
             withCredentials: true
@@ -472,7 +474,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "GET",
             url: baseurl + "/static/parameters.xsl",
             dataType: "xml",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -507,7 +509,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "PUT",
             url: baseurl + "/" + $("#projectname").val() + "/",
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -536,7 +538,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + '/?abortonly=true',
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -565,7 +567,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + '/',
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -593,7 +595,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + "/output/" ,
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -672,7 +674,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             url: baseurl + '/' + project + "/input/" + filename,
             dataType: "xml",
             data: data,
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -708,7 +710,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 url: baseurl + '/' + project + "/input/" + filename,
                 dataType: "xml",
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() },
-                beforeSend: oauthheader,
+                //beforeSend: oauthheader,
                 crossDomain: true,
                 xhrFields: {
                   withCredentials: true
@@ -811,7 +813,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 url: baseurl + '/' + project + "/input/",
                 //dataType: "xml",
                 data: {'inputsource': $('#inputsource').val() },
-                beforeSend: oauthheader,
+                //beforeSend: oauthheader,
                 crossDomain: true,
                 xhrFields: {
                   withCredentials: true
@@ -832,7 +834,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "POST",
             url: baseurl + '/' + project + "/input/",
             data: {'inputsource': $('#uploadinputsource').val() },
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true

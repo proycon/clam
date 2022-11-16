@@ -47,11 +47,6 @@ RelaxNG schema for CLAM XML
 		    </attribute>
 		</optional>
 		<optional>
-		    <attribute name="oauth_access_token">
-		        <a:documentation>Access token for OAuth (if used)</a:documentation>
-		    </attribute>
-		</optional>
-		<optional>
 		    <attribute name="authentication">
 		        <a:documentation>The authentication method used (basic, digest, oauth, preauth or none)</a:documentation>
 		    </attribute>

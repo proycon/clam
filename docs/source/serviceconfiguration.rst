@@ -343,12 +343,12 @@ without any children.
    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version"
    id="yourservice"
     name="yourservice" baseurl="https://yourservice.com/"
-    oauth_access_token="1234567890">
+    oauth="1">
    </clam>
 
-Now any subsequent call to CLAM must pass this access token, otherwise
-you’d simply be redirected to authenticate again. The client must thus
-explicitly call CLAM again. Passing the access token can be done in two
+The actual access token will be make available to the client via a cookie named `oauth_access_token`.
+Any subsequent request to CLAM must pass this access token, otherwise
+you’d simply be redirected to authenticate again. Passing the access token can be done in two
 ways, the recommended way is by sending the following HTTP header in
 your request, where the number is replaced with the actual access token:
 
@@ -356,21 +356,8 @@ your request, where the number is replaced with the actual access token:
 
    Authentication: Bearer 1234567890
 
-The alternative way is by passing it along with the HTTP GET/POST
-request. This is considered less secure as your browser may log it in
-its history, and the server in its access logs. It can still not be
-intercepted by anyone in the middle, however, as it is transmitted over
-HTTPS.
-
-::
-
-   https://yourservice.com/?oauth_access_token=1234567890
-
-Automated clients can avoid this method, but it is necessarily used by
-the web-based interface. To mitigage security concerns, the access token
-you receive is encrypted by CLAM and bound to your IP. The passphrase
-for token encryption has to be configured through
-``OAUTH_ENCRYPTIONSECRET`` in your service configuration file. The web
+The other way is by passing the `Cookie` header. Most HTTP clients (e.g. browsers) will do this
+automatically upon every request once having received a cookie. The web
 interface will furthermore explicitly ask users to log out. Logging out
 is done by revoking the access token with the authorization provider.
 For this to work, your authentication provider must offer a revoke URL,
@@ -381,8 +368,7 @@ configuration file as follows:
 
    OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
 
-If none is set, CLAM’s logout procedure will simply instruct users to
-clear their browser history and cache, which is clearly sub-optimal.
+If none is set, CLAM’s logout procedure will simply clear the cookies and browser cache.
 
 The only information CLAM needs from the authorization provider is a
 username, or often the email address that acts as a username.
@@ -514,7 +500,7 @@ set by CLAM.
 
 -  ``$PROJECT`` – The ID of the project
 
--  ``$OAUTH_ACCESS_TOKEN`` – The unencrypted OAuth access token [7]_.
+-  ``$OAUTH_ACCESS_TOKEN`` – The OAuth access token [7]_.
 
 Make sure the actual command is an absolute path, or that the executable
 is in the ``$PATH`` of the user ``clamservice`` will run as. Upon

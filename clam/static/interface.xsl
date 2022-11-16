@@ -33,7 +33,7 @@
         <xsl:choose>
          <xsl:when test="@project">
 
-            <xsl:if test="/clam/@oauth_access_token != ''">
+            <xsl:if test="/clam/@authentication = 'oauth'">
              <xsl:call-template name="logout"/>
             </xsl:if>
 
@@ -151,9 +151,6 @@
         </xsl:if>
         <xsl:if test="/clam/@accesstoken">
         		accesstoken = '<xsl:value-of select="/clam/@accesstoken" />';
-        </xsl:if>
-        <xsl:if test="/clam/@oauth_access_token">
-        		oauth_access_token = '<xsl:value-of select="/clam/@oauth_access_token" />';
         </xsl:if>
         <xsl:choose>
         <xsl:when test="/clam/@user">
@@ -744,7 +741,7 @@
 
 <xsl:template name="clamindex">
 
-        <xsl:if test="/clam/@oauth_access_token != ''">
+        <xsl:if test="/clam/@authentication = 'oauth'">
           <xsl:call-template name="logout"/>
         </xsl:if>
 
