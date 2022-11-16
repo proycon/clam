@@ -265,7 +265,7 @@ class Logout(object):
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
         if not settings.OAUTH_REVOKE_URL:
-            if 'Safari' in flask.headers.get('User-Agent'):
+            if 'Safari' in flask.request.headers.get('User-Agent'):
                 return withheaders(flask.make_response("Safari does not support logging out, and no key revocation mechanism was defined at the remote end. Please clear your browser cookies and cache manually if you are on a public computer.",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
             else:
                 return withheaders(flask.make_response("Logged you out locally, (however, no key revocation mechanism was defined at the remote end)",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
