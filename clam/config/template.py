@@ -2,19 +2,10 @@
 #-*- coding:utf-8 -*-
 
 ###############################################################
-# CLAM: Computational Linguistics Application Mediator
-# -- Service Configuration File (Template) --
-#       by Maarten van Gompel (proycon)
-#       Centre for Language and Speech Technology / Language Machines
-#       Radboud University Nijmegen
-#
-#       https://proycon.github.io/clam
-#
-#       Licensed under GPLv3
-#
+# Service configuration file for CLAM
 ###############################################################
 
-#Consult the CLAM manual for extensive documentation
+#Consult the CLAM documentation at https://clam.readthedocs.io/
 
 from clam.common.parameters import *
 from clam.common.formats import *
@@ -26,15 +17,15 @@ import clam
 import sys
 import os
 
-REQUIRE_VERSION = 3.0
+#The minimum version of CLAM that is required by this service
+REQUIRE_VERSION = 3.2
 
 CLAMDIR = clam.__path__[0] #directory where CLAM is installed, detected automatically
 WEBSERVICEDIR = os.path.dirname(os.path.abspath(__file__)) #directory where this webservice is installed, detected automatically
 
 # ======== GENERAL INFORMATION ===========
 
-# General information concerning your system.
-
+# General metadata concerning your system.
 
 #The System ID, a short alphanumeric identifier for internal use only (mandatory!)
 SYSTEM_ID = ""
@@ -46,8 +37,8 @@ SYSTEM_NAME = ""
 SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 
 #A version label of the underlying tool and/or this CLAM wrapper
-#(If you can derive this dynamically then that is strongly recommended!)
-#SYSTEM_VERSION = 0.1
+#(If you can derive this dynamically then that is strongly recommended! It should be the same as in your setup.py)
+SYSTEM_VERSION = 0.1
 
 #The author(s) of the underlying tool and/or this CLAM wrapper
 #(If you can derive this dynamically then that is strongly recommended!)
@@ -69,83 +60,21 @@ SYSTEM_DESCRIPTION = "Enter a nice description for your system"
 #users, not an API endpoint.
 #SYSTEM_REGISTER_URL = ""
 
-# ======== LOCATION ===========
+# ======== EXTERNAL CONFIGURATION ===========
 
-#Either add a section for your host here, or
 #specify these variables in an external yaml file
 #called $hostname.yaml or config.yaml and use the loadconfig() mechanism.
 #Such an external file will be looked for my default and is the recommended way.
 
-host = os.uname()[1]
-if host == "yourhostname":
-    #The root directory for CLAM, all project files, (input & output) and
-    #pre-installed corpora will be stored here. Set to an absolute path:
-    ROOT = "/tmp/clam.projects/"
+#This invokes the automatic loader, do not change it;
+#it will try to find a file named $system_id.$hostname.yml or just $hostname.yml, where $hostname
+#is the auto-detected hostname of this system. Alternatively, it tries a static $system_id.config.yml or just config.yml .
+#You can also set an environment variable CONFIGFILE to specify the exact file to load at run-time.
+#It will look in several paths including the current working directory and the path this settings script is loaded from.
+#Such an external configuration file simply defines variables that will be imported here. If it fails to find
+#a configuration file, an exception will be raised.
+loadconfig(__name__)
 
-    #The URL of the system (If you start clam with the built-in webserver, you can override this with -P)
-    PORT= 8080
-
-    #The hostname of the system. Will be automatically determined if not set. (If you start clam with the built-in webserver, you can override this with -H)
-    #Users *must* make use of this hostname and no other (even if it points to the same IP) for the web application to work.
-    HOST = 'yourhostname'
-
-    #If the webservice runs in another webserver (e.g. apache, nginx, lighttpd), and it
-    #doesn't run at the root of the server, you can specify a URL prefix here:
-    #URLPREFIX = "/myservice/"
-
-    #If you run behind a reverse proxy, you can autodetect your host if you run
-    #if your reverse proxy properly sets the X-Forwarded-Host and X-Forwarded-Proto headers.
-    #Setting this when you are NOT behind a reverse proxy that output these headers, is a security risk:
-    #USE_FORWARDED_HOST = False
-
-    #Alternatively to the above, you can force the full URL CLAM has to use, rather than rely on any autodetected measures:
-    #FORCEURL = "http://yourhostname.com"
-
-    # ======== AUTHENTICATION & SECURITY ===========
-
-    #Users and passwords
-
-    #set security realm, a required component for hashing passwords (will default to SYSTEM_ID if not set)
-    #REALM = SYSTEM_ID
-
-    USERS = None #no user authentication/security (this is not recommended for production environments!)
-    #If you want to enable user-based security, you can define a dictionary
-    #of users and (hashed) passwords here. The actual authentication will proceed
-    #as HTTP Digest Authentication. Although being a convenient shortcut,
-    #using pwhash and plaintext password in this code is not secure!!
-
-    #USERS = { user1': '4f8dh8337e2a5a83734b','user2': pwhash('username', REALM, 'secret') }
-
-    ADMINS = None #List of usernames that are administrator and can access the administrative web-interface (on URL /admin/)
-else:
-    #This invokes the automatic loader, do not change it;
-    #it will try to find a file named $system_id.$hostname.yml or just $hostname.yml, where $hostname
-    #is the auto-detected hostname of this system. Alternatively, it tries a static $system_id.config.yml or just config.yml .
-    #You can also set an environment variable CONFIGFILE to specify the exact file to load at run-time.
-    #It will look in several paths including the current working directory and the path this settings script is loaded from.
-    #Such an external configuration file simply defines variables that will be imported here. If it fails to find
-    #a configuration file, an exception will be raised.
-    loadconfig(__name__)
-
-
-
-
-
-#Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
-REQUIREMEMORY = 10
-
-#Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
-#MAXLOADAVG = 4.0
-
-#Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
-#DISK = '/dev/sda1' #set this to the disk where ROOT is on
-#MINDISKSPACE = 10
-
-#The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
-#USERQUOTA = 100
-
-#The secret key is used internally for cryptographically signing session data, in production environments, you'll want to set this to a persistent value. If not set it will be randomly generated.
-#SECRET_KEY = 'mysecret'
 
 #Allow Asynchronous HTTP requests from **web browsers** in following domains (sets Access-Control-Allow-Origin HTTP headers), by default this is unrestricted
 #ALLOW_ORIGIN = "*"

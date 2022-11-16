@@ -43,7 +43,7 @@ setup(
             'clamclient = clam.clamclient:main'
         ]
     },
-    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi','config/*.yml','config/*.Dockerfile'] },
     include_package_data=True,
     install_requires=['flask >= 2.0.1','lxml >= 4.6.0','requests','requests_oauthlib','requests_toolbelt','certifi', 'pyyaml']
 )

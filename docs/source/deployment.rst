@@ -11,39 +11,98 @@ The next step is to move it into production mode, i.e. the final deployment on a
     Running with the built-in development server is not recommended for production as it offers sub-optimal performance,
     scalability, and security.
 
-It is assumed you used the ``clamnewproject`` tool, as explained in :ref:`gettingstarted`, to get
-started with your project. It generated various example configurations for production environments you can use.
+It is assumed you used the ``clamnewproject`` tool, as explained in
+:ref:`gettingstarted`, to get started with your project.
 
-Amongst the generated scripts is a WSGI script (recognisable by the ``wsgi`` extension). WSGI is a calling convention
-for web servers to call Python applications and this script provides the initial entry-point, you most likely don't need
-to edit it. Serving the python application is handled by uWSGI, which you can install (within your Python virtual
-environment) as follows::
+Container deployment
+------------------------
 
-    $ pip install uwsgi
+When running ``clamnewproject``, it generated a `Dockerfile` that is suitable
+for production environments (since CLAM v3.2). This is the recommended way for
+production deployments and works nicely in setups with Docker, Docker Compose,
+Podman and/or Kubernetes. 
 
-Your webservice project contains an ``ini`` file that provides the configuration for uwsgi to launch your webservice.
-You can read the `uWSGI Documentation <https://uwsgi-docs.readthedocs.io/en/latest/>`_ for a full understanding, but the
-generated template is commented and should generally be enough to get you going.
+A ``startserver_production.sh`` script was generated that builds and subsequently runs the container. It builds the container as follows::
 
-The uWSGI configuration is specific to the host you are running on so you will need to edit this ``ini`` file according
-to your server. It contains the port the uWSGI process should listen on (note that this is by definition a *different*
-port than the HTTP/HTTPS port you use to access your webserver!).  The shell script ``startserver_production.sh`` in
-turn starts the uWSGI process with your webservice.
+    docker build -t yourservice .
 
-The next step is to forward requests from your webserver to this uWSGI process. Example configurations for nginx and
-Apache have been generated automatically, adapt these and include them in your webserver configuration. There are
-example configurations with a ``URLPREFIX``, i.e. when you are not hosting the webservice at the webserver root, and
-without. Choose the one appropriate for your environment.
+and runs it like::
 
-To use uWSGI with Apache, you need to install and enable the WSGI proxy module for Apache 2. On Debian/Ubuntu systems,
-this is installed as follows::
+    docker run --rm -v "/path/to/data:/data" -p 8080:80 yourservice
 
-   $ sudo apt-get install libapache2-mod-proxy-uwsgi
+If you used the generated ``*.config.yml`` external configuration file, then
+you can configure a lot of the deployment specific variables via environment
+variables. Check the ``*.config.yml`` file to see which are available. Note
+that most environment variables carry the additional prefix `CLAM_`.
 
-Apache configurations typically go into ``/etc/apache2/sites-enabled``, within a ``VirtualHost`` context.
+The container is based on Alpine Linux and serves your CLAM webservice via
+nginx and uwsgi.
 
-For nginx, uWSGI support should already be compiled in. Configurations are commonly stored in ``/etc/nginx/conf.d/``. We assume the reader has sufficient experience with the webserver of his/her choice, and refer to the respective webserver's documentation for further details.
+When deploying in this way, it is strongly recommended that you run it behind a
+reverse proxy that handles SSL, neither CLAM nor the provided container handles
+HTTPS traffic directly. Always Make sure to pass environment variable
+``--env CLAM_USE_FORWARDED_HOST=1`` when starting the container in such cases!
 
+The container should be suitable for publication to container registries such
+as Docker Hub or Quay.io, provided that you didn't hard-code any secrets in the
+code or configuration.
+
+Manual deployment
+------------------------
+
+If you do not want to use containers for your deployment, then you have to install and configure various components yourself.
+
+We assume the reader has sufficient experience with the webserver of his/her
+choice, and refer to the respective webserver's documentation for further
+details.
+
+1. Install and configure a webserver like nginx or apache. Here is an example snippet for nginx::
+
+    #Nginx example configuration using uwsgi (assuming your service runs at the root of the server!) include this from your server block in your nginx.conf
+    location /static { alias /usr/lib/python3.10/site-packages/clam/static; }
+    location / { try_files $uri @yourservice; }
+    location @yourservice {
+        include uwsgi_params;
+        uwsgi_pass 127.0.0.1:8888;
+    }
+
+And here is one for Apache via `mod-uwsgi-proxy` (make sure it is installed). Apache configurations typically go into ``/etc/apache2/sites-enabled``, within a ``VirtualHost`` context::
+
+    #Apache example configuration assuming your service runs at the virtualhost root!) insert this in your VirtualHost in your Apache configuration
+
+    ProxyPass / uwsgi://127.0.0.1:8888/
+
+    #You will likely need to adapt the reference to path /tmp/env/lib/python3.10/site-packages/clam if you move this to another system
+    Alias /static /usr/lib/python3.10/site-packages/clam/static
+    <Directory /usr/lib/python3.10/site-packages/clam/static/>
+        Order deny,allow
+        Allow from all
+    </Directory>
+
+2. Install uwsgi, it acts as the gateway between the webserver and CLAM. On Debian/Ubuntu::
+
+    apt install uwsgi uwsgi-plugin-python3
+
+3. Configure uwsgi. Here is an example ini file for uwsgi::
+
+    [uwsgi]
+    socket = 127.0.0.1:8888
+    master = true
+    plugins = python3,logfile
+    logger = file:/path/to/yourservice/yourservice.uwsgi.log
+    mount = /=/path/to/yourservice/yourservice/yourservice.wsgi
+    processes = 2
+    threads = 2
+    #the following option is needed for nginx, maybe not for Apache?
+    manage-script-name = yes
+    #set this if you installed the service in a virtual environment (recommended)
+    #virtualenv = /path/to/env
+    #chdir = /path/to/env
+    #Optionally, this is also a place where you can inject environment variables for CLAM:
+    env = CLAM_ROOT=/data/yourservice-userdata
+    env = CLAM_USER_FORWARDED_HOST=1
+ 
+4. The service can now be started with ``uwsgi yourservice.ini``. But you'll want to configure the uwsgi server to auto-start. You can use either uwsgi emperor and have the above ini file as a so-called vassal, or you can use your system's init system (e.g. systemd).
 
 .. warning::
 
@@ -59,7 +118,7 @@ For nginx, uWSGI support should already be compiled in. Configurations are commo
 
 .. _modwsgi:
 
-Alternative deployment on Apache 2 with mod_wsgi
+Manual deployment: alternative deployment on Apache 2 with mod_wsgi
 --------------------------------------------------
 
 As an alternative to using Apache with uWSGI, you can use the older ``mod_wsgi`` module. For this you do not need the
@@ -67,32 +126,17 @@ uwsgi configuration (the ``ini`` file), nor the ``startserver_production.sh`` sc
 
 #. Install ``mod_wsgi`` for Apache 2, if not already present on the
    system. In Debian and Ubuntu this is available as a package named
-   ``libapache2-mod-wsgi`` for Python 2 and ``libapache2-mod-wsgi-py3``
-   for Python 3. The latter is recommended for CLAM, but you can only
-   have one installed at the same time.
+   ``libapache2-mod-wsgi-py3``.
 
-#. Configure Apache to let it know about WSGI and your service. I assume
-   the reader is acquainted with basic Apache configuration and will
-   only elaborate on the specifics for CLAM. Adapt and add the following
-   to any of your sites in ``/etc/apache2/sites-enabled`` (or optionally
-   directly in ``httpd.conf``), within any ``VirtualHost`` context. Here
-   it is assumed you configured your service configuration file with
-   ``URLPREFIX`` set to *“yourservice”*.
+#. Configure Apache to let it know about WSGI and your service:
 
    ::
 
-       WSGIScriptAlias /yourwebservice \
-        /path/to/yourwebservice/yourwebservice.wsgi/
+       WSGIScriptAlias / /path/to/yourwebservice/yourwebservice.wsgi/
        WSGIDaemonProcess yourwebservice user=username group=groupname \
            home=/path/to/yourwebservice threads=15 maximum-requests=10000
        WSGIProcessGroup yourservice
        WSGIPassAuthorization On
-       Alias /yourwebservice/static \
-         /usr/lib/python3.4/site-packages/clam-2.1-py3.4.egg/clam/static
-       <Directory /path/to/clam/static/>
-          Order deny,allow
-          Allow from all
-       </Directory>
 
    The ``WSGIScriptAlias`` and ``WSGIDaemonProcess`` directives go on
    one line, but were wrapped here for presentational purposes. Needless
@@ -134,10 +178,9 @@ system resources according to your needs.
 Deploying CLAM with other webservers
 --------------------------------------
 
-The above configurations with Apache and Nginx are just the
-configurations we tested. Other webservers (such as for example
-lighttpd), should work too.
-
+The above configurations with Apache and Nginx are just the configurations we
+tested. Other webservers (such as for example lighttpd), should work too. It is
+also conceivable to use other WSGI middleware instead of uwsgi (such as gunicorn or mod_wsgi).
 
 .. seealso::
 
@@ -146,13 +189,18 @@ lighttpd), should work too.
 Deploying CLAM behind a reverse proxy
 --------------------------------------
 
-In production environment, you will often deploy your webservice behind a reverse proxy. If this is the case, then you
-will want to set ``USE_FORWARDED_HOST = True`` in your service configuration so CLAM can detect the original host and
-protocol it was called with. This expects your reverse proxy to set the proper ``X-Forwarded-Host`` and
-``X-Forwarded-Proto`` headers, and is a security risk if these headers are not set but are forwarded from actual
-end-users.
+In production environment, you will often deploy your webservice behind a
+reverse proxy. This is recommended. If this is the case, then you will want to
+invoke the container with ``--env CLAM_USE_FORWARDED_HOST=1``, or alternatively
+set `use_forwarded_host: true` in the external configuration yaml file directly.
+CLAM can now detect the original host and protocol it was called with. This
+expects your reverse proxy to set the proper ``X-Forwarded-Host`` and
+``X-Forwarded-Proto`` headers, and is a security risk if these headers are not
+set but are forwarded from actual end-users.
 
-The other alternative is to set ``FORCEURL`` to the exact URL where your webservice will run. But this implies that it
-won't work properly when invoked with another URL.
+The other alternative is to set ``forceurl`` in the external configuration
+yaml file to the exact URL where your webservice will run. But this implies
+that it won't work properly when invoked with another URL and is therefore not
+recommended.
 
 
