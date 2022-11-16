@@ -53,7 +53,7 @@ def main():
         print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended")
         yn = None
         while yn is None or yn.strip().lower() not in ('y','yes','n','no'):
-            yn = input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
+            yn = input("Do you want us to create one for you? [yn]").strip()
             createvenv = yn.strip().lower() in ("y","yes")
 
 
@@ -79,9 +79,14 @@ def main():
 
     if createvenv:
         os.chdir(rootdir)
-        r = os.system("virtualenv --python=python" + str(args.pythonversion) + " env")
-        if r != 0:
-            print("ERROR: Unable to create virtual environment",file=sys.stderr)
+        if os.system("which virtualenv") == 0:
+            r = os.system("virtualenv --python=python" + str(args.pythonversion) + " env")
+            if r != 0:
+                print("ERROR: Unable to create virtual environment",file=sys.stderr)
+        else:
+            r = os.system("python" + str(args.pythonversion) + " -m venv env")
+            if r != 0:
+                print("ERROR: Unable to create virtual environment",file=sys.stderr)
 
     sourcedir = os.path.join(rootdir, args.sysid)
     if os.path.exists(sourcedir):
