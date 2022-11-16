@@ -396,10 +396,7 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
                 if not any( key.startswith(prefix) for prefix in prefixes):
                     forward_rq.append((key,value))
 
-        if oauth_access_token:
-            return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token + ('&' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
-        else:
-            return withheaders(flask.redirect(getrooturl() + '/' + project + ('/?' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
+        return withheaders(flask.redirect(getrooturl() + '/' + project + ('/?' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     return None
 
@@ -1255,11 +1252,7 @@ class Project:
         if response is not None:
             return response
         msg = "Project " + project + " has been created for user " + user
-        if oauth_access_token:
-            extraloc = '?oauth_access_token=' + oauth_access_token
-        else:
-            extraloc = ''
-        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
+        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
 
     @staticmethod
     def start(project, credentials=None): #pylint: disable=too-many-return-statements
@@ -1279,10 +1272,7 @@ class Project:
 
         statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
-            if oauth_access_token:
-                return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
-            else:
-                return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
@@ -1369,10 +1359,7 @@ class Project:
                     f.write(str(pid))
                 if shortcutresponse is True:
                     #redirect to project page to lose parameters in URL
-                    if oauth_access_token:
-                        return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
-                    else:
-                        return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
+                    return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     #normal response (202)
                     return Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program,http_code=202) #returns 202 - Accepted
