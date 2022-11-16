@@ -3135,7 +3135,7 @@ def set_defaults():
     if 'OAUTH_AUTH_FUNCTION' not in settingkeys:
         settings.OAUTH_AUTH_FUNCTION = clam.common.oauth.DEFAULT_AUTH_FUNCTION
     if 'SECRET_KEY' not in settingkeys:
-        settings.SECRET_KEY = "%032x" % random.getrandbits(128)
+        settings.SECRET_KEY = "%032x" % random.getrandbits(128) #not really used I think since we don't use flask.session
     if 'INTERFACEOPTIONS' not in settingkeys:
         settings.INTERFACEOPTIONS = ""
     if 'CUSTOMCSS' not in settingkeys:
