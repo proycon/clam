@@ -43,7 +43,7 @@ realm: "{{CLAM_REALM={sys_id}}}"
 # -- Resource limits --
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
-requirememory: {{CLAM_REQUIRE_MEMORY|int=10}}
+requirememory: "{{CLAM_REQUIRE_MEMORY|int=10}}"
 
 #Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
 #maxloadavg: 4.0

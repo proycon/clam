@@ -29,18 +29,9 @@ RUN sed -i 's/txt;/txt log;/' /etc/nginx/mime.types &&\
 COPY . /usr/src/webservice
 
 # Configure webserver and uwsgi server
-RUN echo '#!/bin/sh\nln -sf /dev/stdout /var/log/nginx/access.log\nnginx -g "daemon off; error_log /dev/stdout info;"' > /etc/service/nginx/run &&\
-    echo '#!/bin/sh\nuwsgi --plugin python3 \\\
-      --uid ${UWSGI_UID:100} \\\
-      --gid ${UWSGI_GID:100} \\\
-      --master \\\
-      --socket "127.0.0.1:8888" \\\
-      --wsgi-file /etc/clam_webservice.wsgi \\\
-      --processes ${UWSGI_PROCESSES:-2} \\\
-      --threads ${UWSGI_THREADS:-2} \\\
-      --manage-script-name' > /etc/service/uwsgi/run &&\
-    chmod a+x /etc/service/uwsgi/run &&\
-    chmod a+x /etc/service/nginx/run &&\
+RUN echo -e '#!/bin/sh\nln -sf /dev/stdout /var/log/nginx/access.log\nnginx -g "daemon off; error_log /dev/stdout info;"' > /etc/service/nginx/run &&\
+    echo -e '#!/bin/sh\nuwsgi --plugin python3 --uid ${UWSGI_UID:100} --gid ${UWSGI_GID:100} --master --socket "127.0.0.1:8888" --wsgi-file /etc/clam_webservice.wsgi --processes ${UWSGI_PROCESSES:-2} --threads ${UWSGI_THREADS:-2} --manage-script-name' > /etc/service/uwsgi/run &&\
+    chmod a+x /etc/service/uwsgi/run /etc/service/nginx/run &&\
     cp "/usr/src/webservice/{sys_id}/{sys_id}.wsgi" /etc/clam_webservice.wsgi &&\
     chmod a+x /etc/clam_webservice.wsgi &&\
     echo 'server {\
