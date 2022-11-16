@@ -11,7 +11,7 @@
 # We use lowercase for all CLAM configuration variables here.
 
 #The root directory where CLAM will safe all user projects
-root: "{{CLAM_ROOT=/tmp}}/{sys_id}-userdata"
+root: "{{CLAM_ROOT=/tmp/{sys_id}-userdata}}"
 
 #The port on which the server runs
 port: "{{CLAM_PORT={port}}}"
