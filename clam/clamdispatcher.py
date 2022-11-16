@@ -8,7 +8,6 @@
 #       by Maarten van Gompel (proycon)
 #
 #       Licensed under GPLv3
-#
 ###############################################################
 
 import sys
@@ -20,7 +19,7 @@ import signal
 import shutil
 import json
 
-VERSION = '3.1.9'
+VERSION = '3.2'
 
 sys.path.append(sys.path[0] + '/..')
 
