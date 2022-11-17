@@ -391,12 +391,19 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
         <div class="card-body">
     	<h3 class="card-title">CLAM XML</h3>
     	<p>To inspect the CLAM XML format, simply view the source of this current page, or any CLAM page. A formal schema definition in RelaxNG format will be available <a href="https://github.com/proycon/clam/blob/master/docs/clam.rng">here</a>. This documentation was automatically generated from the service description in CLAM XML format.</p>
-</div>
-
-        <xsl:call-template name="footer" />
-
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-body">
+    	<h3 class="card-title">JSON-LD</h3>
+        <p>You may also request this info page as linked open data (JSON-LD). This will use <a href="https://schema.org">schema.org vocabulary</a> with some extensions. Note that it is not as complete as the XML output and only suitable for generic metadata purposes at this point! Use content negotation to request the JSON-LD version or just <a href="?json=1">click here</a></p>
+        </div>
+    </div>
+
+    <xsl:call-template name="footer" />
+    </div>
+
   </body>
   </html>
 </xsl:template>
