@@ -46,7 +46,7 @@ import clam.common.auth
 import clam.common.oauth
 import clam.common.data
 import clam.common.viewers
-from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
+from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage, parse_accept_header
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
 
@@ -441,6 +441,11 @@ def mainentry(credentials = None):
     if shortcutresponse is not None:
         return shortcutresponse
 
+    #when JSON(-LD) response is requested, just return the info page
+    accept = parse_accept_header(flask.request)
+    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0]:
+        return info(credentials)
+
     if user == "anonymous" and auth_type() != "none" and not settings.DISABLE_PORCH:
         #present an unauthenticated landing page without project index
         return porch(credentials)
@@ -462,6 +467,7 @@ def index(credentials = None):
     errormsg = ""
 
     corpora = CLAMService.corpusindex()
+
 
     #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
@@ -582,6 +588,51 @@ def info(credentials=None):
     errormsg = ""
 
     corpora = CLAMService.corpusindex()
+
+    accept = parse_accept_header(flask.request)
+    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0] or flask.request.args.get("json") == "1":
+        #pylint: disable=bad-continuation
+        return withheaders(flask.make_response(flask.render_template('response.json',
+                version=VERSION,
+                system_id=settings.SYSTEM_ID,
+                system_name=settings.SYSTEM_NAME,
+                system_description=settings.SYSTEM_DESCRIPTION,
+                system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
+                system_version=settings.SYSTEM_VERSION,
+                system_email=settings.SYSTEM_EMAIL,
+                system_url=settings.SYSTEM_URL,
+                system_parent_url=settings.SYSTEM_PARENT_URL,
+                system_register_url=settings.SYSTEM_REGISTER_URL,
+                system_login_url=settings.SYSTEM_LOGIN_URL,
+                system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
+                system_license=settings.SYSTEM_LICENSE,
+                user=user,
+                project=None,
+                url=getrooturl(),
+                statuscode=-1,
+                statusmessage="",
+                statuslog=[],
+                completion=0,
+                errors=errors,
+                errormsg=errormsg,
+                parameterdata=settings.PARAMETERS,
+                inputsources=corpora,
+                outputpaths=None,
+                inputpaths=None,
+                profiles=settings.PROFILES,
+                formats=clam.common.data.getformats(settings.PROFILES),
+                datafile=None,
+                projects=projects,
+                actions=settings.ACTIONS,
+                info=True,
+                porch=False,
+                allow_origin=settings.ALLOW_ORIGIN,
+                oauth_access_token=oauth_encrypt(oauth_access_token),
+                auth_type=auth_type()
+        )), contenttype="application/ld+json", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
 
     #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
