@@ -741,7 +741,7 @@
 
 <xsl:template name="clamindex">
 
-        <xsl:if test="contains(/clam/@authentication,'oauth')">
+        <xsl:if test="contains(/clam/@authentication,'oauth') and /clam/@user != 'anonymous'">
           <xsl:call-template name="logout"/>
         </xsl:if>
 
