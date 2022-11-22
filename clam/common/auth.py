@@ -389,7 +389,11 @@ class MultiAuth(object):
 class OAuth2(HTTPAuth):
     def __init__(self, client_id, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None, userinfo_url=None): #pylint: disable=super-init-not-called
         def default_auth_error():
-            return "Unauthorized Access (OAuth2)"
+            res = flask.make_response("Unauthorized Access (OAuth2). Your access token may be invalid or is expired, if the latter is the case, simply refresh the page to be redirected login again.")
+            res.set_cookie('oauth_access_token', "",expires=0) #remove cookie
+            res.status_code = 403
+            return res
+
 
 
         self.client_id = client_id
