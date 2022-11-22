@@ -40,7 +40,7 @@ def donereadingupload(encoder):
     pass
 
 class CLAMClient:
-    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None, loadmetadata=False, basicauth=False):
+    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None, loadmetadata=False, basicauth=True):
         """Initialise the CLAM client (does not actually connect yet)
 
         * ``url`` - URL of the webservice
@@ -55,7 +55,7 @@ class CLAMClient:
            Can be set to False to skip verification (not recommended)
            Follows the syntax of the requests library (http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification)
         * ``loadmetadata`` - Automatically download and load all relevant metadata
-        * ``basicauth`` - Do HTTP Basic Authentication instead of HTTP Digest Authentication (boolean)
+        * ``basicauth`` - Do HTTP Basic Authentication instead of HTTP Digest Authentication (boolean), True by default, if set to False, to Digest authentication instead
         """
 
         #self.http = httplib2.Http()
