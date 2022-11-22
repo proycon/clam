@@ -818,7 +818,7 @@
                 <a href="{/clam/@baseurl}/index/" class="btn btn-primary btn-lg btn-block" type="button">Continue</a>
 
                 <xsl:if test="contains(/clam/@authentication,',basic')">
-                    Or alternatively <a href="{/clam/@baseurl}/index/?requestauth=basic">continue using fallback authentication</a> <em>(HTTP Basic Authentication)</em>
+                    Or alternatively <a href="{/clam/@baseurl}/index/?requestauth=Basic">continue using fallback authentication</a> <em>(HTTP Basic Authentication)</em>
                 </xsl:if>
             </div>
         </div>
