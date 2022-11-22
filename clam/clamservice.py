@@ -322,16 +322,20 @@ def parsecredentials(credentials, verbose=False):
 
 
 def auth_type():
+    types = []
     if settings.OAUTH:
-        return "oauth"
-    elif settings.PREAUTHHEADER:
-        return "preauth"
-    elif (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
-        return "basic"
+        types.append("oauth")
+    if settings.PREAUTHHEADER:
+        types.append("preauth")
+    if (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
+        types.append("basic")
     elif settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE:
-        return "digest"
+        types.append("digest")
+    if types:
+        return ",".join(types)
     else:
         return "none"
+
 
 ################# Views ##########################
 

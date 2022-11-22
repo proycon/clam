@@ -33,7 +33,7 @@
         <xsl:choose>
          <xsl:when test="@project">
 
-            <xsl:if test="/clam/@authentication = 'oauth'">
+            <xsl:if test="contains(/clam/@authentication,'oauth')">
              <xsl:call-template name="logout"/>
             </xsl:if>
 
@@ -741,7 +741,7 @@
 
 <xsl:template name="clamindex">
 
-        <xsl:if test="/clam/@authentication = 'oauth'">
+        <xsl:if test="contains(/clam/@authentication,'oauth')">
           <xsl:call-template name="logout"/>
         </xsl:if>
 
@@ -816,6 +816,10 @@
                 </p>
 
                 <a href="{/clam/@baseurl}/index/" class="btn btn-primary btn-lg btn-block" type="button">Continue</a>
+
+                <xsl:if test="contains(/clam/@authentication,',basic')">
+                    Or alternatively <a href="{/clam/@baseurl}/index/?requestauth=basic">continue using fallback authentication</a> <em>(HTTP Basic Authentication)</em>
+                </xsl:if>
             </div>
         </div>
         </xsl:when>
