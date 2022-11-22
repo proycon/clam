@@ -413,7 +413,8 @@ class OAuth2(HTTPAuth):
             kwargslogin['scope'] = self.scope
         oauthsession = OAuth2Session(self.client_id, **kwargslogin)
         if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
-        return 'Bearer scope="{0}", auth_server="{1}"'.format(self.scope, self.auth_function(oauthsession, self.auth_url)) #following https://stackoverflow.com/questions/50921816/standard-http-header-to-indicate-location-of-openid-connect-server , realm is OPTIONAL so I skip it here
+        auth_url, _state = self.auth_function(oauthsession, self.auth_url)
+        return 'Bearer auth_server="{0}"'.format(auth_url) #following https://stackoverflow.com/questions/50921816/standard-http-header-to-indicate-location-of-openid-connect-server , realm is OPTIONAL so I skip it here
 
     def get_oauth_access_token_from_request(self):
         oauth_access_token = None
