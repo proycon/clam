@@ -329,13 +329,6 @@ class MultiAuth(object):
                     if auth.scheme == scheme:
                         selected_auth = auth
                         break
-            elif 'requestauth' in flask.request.values:
-                scheme = flask.request.values['requestauth']
-                self.printdebug("Requested scheme (in params) by " + remote_addr + " = " + scheme)
-                for auth in self.additional_auth:
-                    if auth.scheme == scheme:
-                        selected_auth = auth
-                        break
             elif isinstance(self.main_auth, OAuth2) and self.main_auth.get_oauth_access_token_from_request():
                 scheme = "Bearer"
                 selected_auth = self.main_auth
@@ -360,6 +353,16 @@ class MultiAuth(object):
 
                     #return result WITHOUT authentication
                     return f(*args,**kwargs)
+
+
+                if 'requestauth' in flask.request.values:
+                    #authentication of a different type explicitly requested
+                    scheme = flask.request.values['requestauth']
+                    if scheme != self.main_auth.scheme:
+                        self.printdebug("Requested scheme (in params) by " + remote_addr + " = " + scheme)
+                        for auth in self.additional_auth:
+                            if auth.scheme == scheme:
+                                return auth.require_login(f, optional)(*args, **kwargs)
 
                 #main authentication method determines whether this will be a 401 or immediately a 302 (oauth)
                 res = self.main_auth.require_login(f, optional)(*args, **kwargs)
