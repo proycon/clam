@@ -367,7 +367,9 @@ class MultiAuth(object):
                     if scheme != self.main_auth.scheme:
                         for auth in self.additional_auth:
                             if auth.scheme == scheme:
+                                self.printdebug("Using to requested authentication scheme")
                                 res = auth.require_login(f, optional)(*args, **kwargs)
+                                self.printdebug("Setting cookie")
                                 res.set_cookie('requestauth', scheme)
                                 return res
 
