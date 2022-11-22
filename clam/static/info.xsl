@@ -291,6 +291,8 @@ clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>")
 <em>#if you use SSL (https) and SSL verification fails, you can pass a verify= parameter with the path to your certificate of certificate authority bundle</em>
 </xsl:if>
 
+<br/>
+
 <xsl:if test="count(/clam/profiles/profile) > 0">
 
 <em>#The following applies to older CLAM clients only (&lt; v3)! If your webservice uses custom formats, and you use an older client, you need to import or redefine them here (each format is a Python class), and register them with the client:</em>
