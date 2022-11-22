@@ -33,7 +33,7 @@
         <xsl:choose>
          <xsl:when test="@project">
 
-            <xsl:if test="contains(/clam/@authentication,'oauth')">
+            <xsl:if test="/clam/@authentication != 'none' and /clam/@user != 'anonymous'">
              <xsl:call-template name="logout"/>
             </xsl:if>
 
@@ -741,7 +741,7 @@
 
 <xsl:template name="clamindex">
 
-        <xsl:if test="contains(/clam/@authentication,'oauth') and /clam/@user != 'anonymous'">
+        <xsl:if test="/clam/@authentication != 'none' and /clam/@user != 'anonymous'">
           <xsl:call-template name="logout"/>
         </xsl:if>
 

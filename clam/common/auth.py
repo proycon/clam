@@ -355,14 +355,21 @@ class MultiAuth(object):
                     return f(*args,**kwargs)
 
 
-                if 'requestauth' in flask.request.values:
+                if 'requestauth' in flask.request.values or 'requestauth' in flask.request.cookies:
                     #authentication of a different type explicitly requested
-                    scheme = flask.request.values['requestauth']
-                    if scheme != self.main_auth.scheme:
+
+                    if 'requestauth' in flask.request.values:
+                        scheme = flask.request.values['requestauth']
                         self.printdebug("Requested scheme (in params) by " + remote_addr + " = " + scheme)
+                    else:
+                        scheme = flask.request.cookies['requestauth']
+                        self.printdebug("Requested scheme (in cookie) by " + remote_addr + " = " + scheme)
+                    if scheme != self.main_auth.scheme:
                         for auth in self.additional_auth:
                             if auth.scheme == scheme:
-                                return auth.require_login(f, optional)(*args, **kwargs)
+                                res = auth.require_login(f, optional)(*args, **kwargs)
+                                res.set_cookie('requestauth', scheme)
+                                return res
 
                 #main authentication method determines whether this will be a 401 or immediately a 302 (oauth)
                 res = self.main_auth.require_login(f, optional)(*args, **kwargs)
