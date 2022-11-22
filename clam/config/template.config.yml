@@ -40,6 +40,14 @@ oauth_scope: "{{CLAM_OAUTH_SCOPE|json}}"
 users_file: "{{CLAM_USERS_FILE}}"
 realm: "{{CLAM_REALM={sys_id}}}"
 
+#Interface customisation
+customhtml_index: "{{CLAM_CUSTOMHTML_INDEX}}"
+customhtml_projectstart: "{{CLAM_CUSTOMHTML_PROJECTSTART}}"
+customhtml_projectdone: "{{CLAM_CUSTOMHTML_PROJECTDONE}}"
+customhtml_projectfailed: "{{CLAM_CUSTOMHTML_PROJECTFAILED}}"
+customcss: "{{CLAM_CUSTOMCSS}}"
+interfaceoptions: "{{CLAM_INTERFACEOPTIONS}}"
+
 # -- Resource limits --
 
 #Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
