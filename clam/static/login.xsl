@@ -8,7 +8,7 @@
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="3; url={/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}" />            
+    <meta http-equiv="refresh" content="3; url={/clam/@baseurl}" />            
     <title><xsl:value-of select="@name"/><xsl:value-of select="@project"/></title>
   </head>
   <body>

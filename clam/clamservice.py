@@ -248,6 +248,7 @@ class Login(object):
                         system_logout_url=settings.SYSTEM_LOGOUT_URL,
                         system_cover_url=settings.SYSTEM_COVER_URL,
                         system_license=settings.SYSTEM_LICENSE,
+                        auth_type=auth_type(),
                         url=getrooturl(),
                         oauth_access_token=oauth_encrypt(d['access_token']))),
                    headers={'allow-origin': settings.ALLOW_ORIGIN}, cookies={'oauth_access_token': oauth_encrypt(d['access_token'])} )

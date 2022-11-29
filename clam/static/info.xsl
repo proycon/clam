@@ -17,20 +17,10 @@
 
           <div class="collapse navbar-collapse" id="navbarcontent">
                 <ul class="navbar-nav mr-auto">
-                    <xsl:choose>
-                        <xsl:when test="/clam/@oauth_access_token = ''">
-                            <li class="nav-item">
-                                <xsl:attribute name="class">nav-item</xsl:attribute>
-                                <a class="nav-link" href="{/clam/@baseurl}/"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
-                            </li>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <li class="nav-item">
-                                <xsl:attribute name="class">nav-item</xsl:attribute>
-                                <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
-                            </li>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <li class="nav-item">
+                        <xsl:attribute name="class">nav-item</xsl:attribute>
+                        <a class="nav-link" href="{/clam/@baseurl}/"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav pull-right">
                     <li class="nav-item active"><a class="nav-link active" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span> REST API Specification</a></li>
