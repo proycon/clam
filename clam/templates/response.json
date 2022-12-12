@@ -32,6 +32,7 @@
     "url": "{{url}}",
     "consumesData": [
     {% for profile in profiles %}
+    {% set outer_loop = loop %}
     {% for inputtemplate in profile.input %}
     {
         {% if inputtemplate.formatclass.schemaorg_type %}
@@ -54,10 +55,12 @@
     }
     {% if not loop.last %},{% endif %}
     {% endfor %}
+    {% if profile.input and not outer_loop.last %},{% endif %}
     {% endfor %}
     ],
     "producesData": [
     {% for profile in profiles %}
+    {% set outer_loop = loop %}
     {% for outputtemplate in profile.outputtemplates() %}
     {
         {% if outputtemplate.formatclass.schemaorg_type %}
@@ -80,6 +83,7 @@
     }
     {% if not loop.last %},{% endif %}
     {% endfor %}
+    {% if profile.outputtemplates() and not outer_loop.last %},{% endif %}
     {% endfor %}
     ]
 }
