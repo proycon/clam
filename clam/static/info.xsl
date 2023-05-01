@@ -63,7 +63,7 @@
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if you specified if an error arises, most often due to an invalid Project ID; certain characters including spaces, slashes and ampersands, are not allowed.</li>
 				</ul>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X PUT <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
-                <xsl:if test="contains(/clam/@authentication,',')">(The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
     		</li>
     		<li><strong>Upload one or more files</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/input/<em>{filename}</em></tt>. The POST request takes the following parameters:
     			<ul>
@@ -113,7 +113,7 @@
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X POST <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/</tt>  (further parameters are passed similarly with <tt>-d "<em>$parameter</em>=<em>$value</em>"</tt>, can be issued multiple times)
-                <xsl:if test="contains(/clam/@authentication,',')">(The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Poll the project status with a regular interval and check its status until it is flagged as finished</strong> - Issue (with a regular interval) a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt> .
 			<ul>
@@ -128,7 +128,7 @@
 			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
             </ul><br/>
             Curl example (getting project state only, no interpretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
-                <xsl:if test="contains(/clam/@authentication,',')">(The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Retrieve the desired output file(s)</strong> - Issue a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/output/<em>{outputfilename}</em></tt>.  A list of available output files can be obtained by querying the project's state (HTTP GET on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>) and iterating over <tt>/CLAM/output/file/name</tt> (XPath). A <tt>template</tt> attribute will be available on these nodes indicating what output template was responsible for generating this file. The following output templates are defined for this webservice (grouped per profile):
 				<ol>
@@ -147,7 +147,7 @@
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the file or project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/output/<em>$outputfilename</em></tt>
-                <xsl:if test="contains(/clam/@authentication,',')">(The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Delete the project</strong> (otherwise it will remain on the server and take up space) - Issue a <tt>HTTP DELETE</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>.
 <br /><em>Responses:</em>
@@ -158,7 +158,7 @@
     			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X DELETE <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
-                <xsl:if test="contains(/clam/@authentication,',')">(The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
     	 </ol>
 
@@ -421,17 +421,15 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
 </xsl:template>
 
 <xsl:template name="curlauth">
-    <xsl:choose>
-        <xsl:when test="contains(/clam/@authentication,'oauth')">
-            --oauth2-bearer <em>$oauth_access_token</em>
-        </xsl:when>
-        <xsl:when test="contains(/clam/@authentication,'basic')">
-            --basic -u <em>$username</em> -p
-        </xsl:when>
-        <xsl:when test="contains(/clam/@authentication,'digest')">
-            --digest -u <em>$username</em> -p
-        </xsl:when>
-    </xsl:choose>
+    <xsl:if test="contains(/clam/@authentication,'oauth')">
+        --oauth2-bearer <em>$oauth_access_token</em> 
+    </xsl:if>
+    <xsl:if test="contains(/clam/@authentication,'basic')">
+        --basic --user <em>$username:$password</em> 
+    </xsl:if>
+    <xsl:if test="contains(/clam/@authentication,'digest')">
+        --digest --user <em>$username:$password</em> 
+    </xsl:if>
 </xsl:template>
 
 <xsl:template name="authtype">
