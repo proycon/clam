@@ -118,7 +118,7 @@
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
 
-    <script src="{/clam/@baseurl}/static/jquery-3.4.1.min.js"></script>
+    <script src="{/clam/@baseurl}/static/jquery-3.5.0.min.js"></script>
     <script src="{/clam/@baseurl}/static/popper.min.js"></script>
     <script src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script src="{/clam/@baseurl}/static/bootstrap.min.js"></script>
