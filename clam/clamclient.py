@@ -34,7 +34,7 @@ def usage():
     print("Options:",file=sys.stderr)
     print("\t-u [username]",file=sys.stderr)
     print("\t-p [password]",file=sys.stderr)
-    print("\t-b              - Use HTTP Basic Authentication instead of Digest",file=sys.stderr)
+    print("\t-D              - Use HTTP Digest Authentication instead of Basic",file=sys.stderr)
     print("\t-h              - Help",file=sys.stderr)
     print("\t-v              - Version information",file=sys.stderr)
     print("Commands:",file=sys.stderr)
@@ -67,7 +67,7 @@ def usage():
 
 def main():
     username = password = None
-    basicauth = False
+    basicauth = True
     parameters = {}
     begin = 0
     rawargs = sys.argv[1:]
@@ -81,8 +81,8 @@ def main():
         elif o == '-h':
             usage()
             sys.exit(0)
-        elif o == '-h':
-            basicauth = True
+        elif o == '-D':
+            basicauth = False
         elif o == '-v':
             print("CLAM Client version " + str(VERSION),file=sys.stderr)
             sys.exit(0)
