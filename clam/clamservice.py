@@ -856,26 +856,39 @@ class Project:
             if not os.path.isdir(settings.ROOT + "projects/" + user + '/' + project + '/tmp'):
                 return withheaders(flask.make_response("tmp directory " + settings.ROOT + "projects/" + user + '/' + project + "/tmp/  could not be created succesfully",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
+        Project.updateindex(user, project, 0.0, clam.common.status.READY)
+
+        return None #checks rely on this
+
+    @staticmethod
+    def updateindex(user: str, project: str, progress: float, status: int) -> None:
         #Add project to index cache file
         indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
         if os.path.exists(indexfile):
             with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
                 try:
                     data = json.load(f)
+                    index = -1
                     if 'projects' in data:
-                        for projectdata in data['projects']:
-                            if projectdata[0] == project:
-                                return None #all is well, project already in index, nothing to do
+                        for i, projectdata in enumerate(data['projects']):
+                            current_project, current_timestamp, current_progress, current_status = projectdata
+                            if current_project == project:
+                                if current_progress == progress and current_status == status:
+                                    return #all is well, project already in index, nothing to do
+                                # Project found, but something changed, update it!
+                                index = i
+                                break
                     d = datetime.datetime.fromtimestamp(os.stat(settings.ROOT + "projects/" + user + '/' + project)[8])
-                    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), 0.00, clam.common.status.READY )
-                    data['projects'].append(projectdata)
+                    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), progress, status )
+                    if index != -1:
+                        data['projects'][index] = projectdata
+                    else:
+                        data['projects'].append(projectdata)
                     with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
                         json.dump(data,f, ensure_ascii=False)
                 except ValueError:
                     #something went wrong, delete the entire index (will be recomputed)
                     os.unlink(os.path.join(indexfile))
-
-        return None #checks rely on this
 
     @staticmethod
     def pid(project, user):
@@ -919,6 +932,7 @@ class Project:
         while not os.path.exists(Project.path(project, user) + ".done"):
             printdebug("Waiting for process to die")
             time.sleep(1)
+        Project.updateindex(user, project, 0.0, clam.common.status.READY)
         return True
 
     @staticmethod
@@ -1337,6 +1351,8 @@ class Project:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
+
+            Project.updateindex(user, project, 0.0, clam.common.status.RUNNING)
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)
             process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)
@@ -1583,6 +1599,7 @@ class Project:
             os.unlink(Project.path(project, user) + ".done")
         if os.path.exists(Project.path(project, user) + ".status"):
             os.unlink(Project.path(project, user) + ".status")
+        Project.updateindex(user, project, 0.0, clam.common.status.READY)
 
     @staticmethod
     def getarchive(project, user, format=None):
