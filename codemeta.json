@@ -2,17 +2,14 @@
     "@context": [
         "https://doi.org/10.5063/schema/codemeta-2.0",
         "http://schema.org",
-        {
-            "entryPoints": { "@reverse": "schema:actionApplication" },
-            "interfaceType": { "@id": "codemeta:interfaceType" }
-        }
+        "https://w3id.org/software-types"
     ],
     "@type": "SoftwareSourceCode",
     "identifier": "clam",
     "name": "CLAM",
-    "version": "3.0.24",
+    "version": "3.2.6",
     "description": "Quickly turn command-line applications into RESTful webservices with a web-application front-end. You provide a specification of your command line application, its input, output and parameters, and CLAM wraps around your application to form a fully fledged RESTful webservice. ",
-    "license": "https://spdx.org/licenses/GPL-3.0",
+    "license": "https://spdx.org/licenses/GPL-3.0-only",
 	"url": "https://proycon.github.io/clam",
     "producer": [
         {
@@ -71,7 +68,7 @@
 		"identifier": "python",
 		"name": "python"
 	},
-	"operatingSystem": "POSIX",
+	"operatingSystem": "Linux",
 	"codeRepository": "https://github.com/proycon/clam",
     "softwareRequirements": [
         {
@@ -80,23 +77,51 @@
 			"name": "flask"
 		}
 	],
-	"funder": [
+	"funding": [
 		{
-			"@type": "Organization",
-			"name": "CLARIN-NL"
+			"@type": "Grant",
+			"name": "CLARIN-NL (NWO grant 184.021.003)",
+			"url": "https://www.clariah.nl",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
 		},
 		{
-			"@type": "Organization",
-			"name": "CLARIAH",
-			"url": "https://www.clariah.nl"
-		}
+			"@type": "Grant",
+			"name": "CLARIAH-CORE (NWO grant 184.033.101)",
+			"url": "https://www.clariah.nl",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
+        },
+        {
+            "@type": "Grant",
+            "name": "CLARIAH-PLUS (NWO grant 184.034.023)",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
+        }
 	],
 	"readme": "https://github.com/proycon/clam/blob/master/README.rst",
 	"issueTracker": "https://github.com/proycon/clam/issues",
-	"contIntegration": "https://travis-ci.org/proycon/clam",
+	"contIntegration": "https://github.com/proycon/clam/actions/workflows/clam.yml",
 	"releaseNotes": "https://github.com/proycon/clam/releases",
-	"developmentStatus": "active",
+	"developmentStatus": [ "https://www.repostatus.org/#active", "https://w3id.org/research-technology-readiness-levels#Level9Proven" ],
 	"keywords":  [ "nlp", "natural language processing", "webservice", "rest" ],
+    "softwareHelp": [
+        {
+            "@id": "https://clam.readthedocs.io",
+            "@type": "WebSite",
+            "name": "CLAM Documentation",
+            "url": "https://clam.readthedocs.io"
+        }
+    ],
     "referencePublication": [
 		{
 			"@type": "TechArticle",
@@ -120,12 +145,35 @@
 			"pageEnd": 75,
 			"isPartOf": {
 				"@type": "PublicationIssue",
-				"datePublished": "2014",
-				"name": "Proceedings of COLING 2014, the 25th International Conference on Computational Linguistics",
+				"datePublished": "2014", "name": "Proceedings of COLING 2014, the 25th International Conference on Computational Linguistics",
                 "location": "Dublin, Ireland"
 			},
             "url": "http://anthology.aclweb.org/C/C14/C14-2016.pdf"
 		}
 	],
-	"dateCreated": "2010-03-21"
+    "targetProduct": [
+        {
+            "@type": "SoftwareLibrary",
+            "executableName": "clam",
+            "name": "clam",
+            "runtimePlatform": [ "Linux", "BSD", "macOS", "Windows" ],
+            "description": "CLAM Data & Client API - programming library for Python"
+        },
+        {
+            "@type": "ServerApplication",
+            "executableName": "clamservice",
+            "name": "clamservice",
+            "runtimePlatform": [ "Linux", "BSD", "macOS" ],
+            "description": "Webservice daemon, the core component of CLAM. May be invoked directly in development, often invoken indirectly via WSGI in production environments."
+        },
+        {
+            "@type": "CommandLineApplication",
+            "executableName": "clamnewproject",
+            "name": "clamnewproject",
+            "runtimePlatform": [ "Linux", "BSD", "macOS" ],
+            "description": "Developer tool to create a new CLAM project"
+        }
+    ],
+	"dateCreated": "2010-03-21",
+	"dateModified": "2023-05-01"
 }

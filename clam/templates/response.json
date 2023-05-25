@@ -1,0 +1,89 @@
+{
+    "@context": [
+        "https://schema.org",
+        "https://w3id.org/software-iodata",
+        "https://w3id.org/software-types"
+    ],
+    "@id": "{{url}}",
+    "@type": "WebApplication",
+    "name": "{{system_name}}",
+    {% if system_author  and system_email %}
+    "author": {
+        "@type": "Person",
+        "name": "{{system_author}}",
+        "email": "{{system_email}}"
+    },
+    {% elif system_author %}
+    "author": "{{system_author}}",
+    {% endif %}
+    {% if system_version %}
+    "version": "{{system_version}}",
+    {% endif %}
+    "description": "{{system_description}}",
+    {% if system_license %}
+    "license": "{{system_license}}",
+    {% endif %}
+    {% if system_affiliation %}
+    "provider": {
+        "@type": "Organization",
+        "name": "{{system_affiliation}}"
+    },
+    {% endif %}
+    "url": "{{url}}",
+    "consumesData": [
+    {% for profile in profiles %}
+    {% set outer_loop = loop %}
+    {% for inputtemplate in profile.input %}
+    {
+        {% if inputtemplate.formatclass.schemaorg_type %}
+        "@type": "{{ inputtemplate.formatclass.schemaorg_type }}",
+        {% else %}
+        "@type": "DigitalDocument",
+        {% endif %}
+        {% if inputtemplate.label %}
+        "description": "{{ inputtemplate.label }}",
+        {% endif %}
+        {% if inputtemplate.formatclass.mimetype %}
+        "encodingFormat": "{{inputtemplate.formatclass.mimetype}}",
+        {% endif %}
+        {% if inputtemplate.filename %}
+        "name": "{{inputtemplate.filename}}",
+        {% elif inputtemplate.extension %}
+        "name": "*.{{inputtemplate.extension}}",
+        {% endif %}
+        "identifier": "{{ inputtemplate.formatclass.__name__ }}"
+    }
+    {% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if profile.input and not outer_loop.last %},{% endif %}
+    {% endfor %}
+    ],
+    "producesData": [
+    {% for profile in profiles %}
+    {% set outer_loop = loop %}
+    {% for outputtemplate in profile.outputtemplates() %}
+    {
+        {% if outputtemplate.formatclass.schemaorg_type %}
+        "@type": "{{ outputtemplate.formatclass.schemaorg_type }}",
+        {% else %}
+        "@type": "DigitalDocument",
+        {% endif %}
+        {% if outputtemplate.label %}
+        "description": "{{ outputtemplate.label }}",
+        {% endif %}
+        {% if outputtemplate.formatclass.mimetype %}
+        "encodingFormat": "{{outputtemplate.formatclass.mimetype}}",
+        {% endif %}
+        {% if outputtemplate.filename %}
+        "name": "{{outputtemplate.filename}}",
+        {% elif outputtemplate.extension %}
+        "name": "*.{{outputtemplate.extension}}",
+        {% endif %}
+        "identifier": "{{ outputtemplate.formatclass.__name__ }}"
+    }
+    {% if not loop.last %},{% endif %}
+    {% endfor %}
+    {% if profile.outputtemplates() and not outer_loop.last %},{% endif %}
+    {% endfor %}
+    ]
+}

@@ -18,10 +18,10 @@ case. Example:
    $ clamnewproject myfirstproject
 
 The tool will create a directory named after the identifier, in which
-various template files are created which are similarly named after the
+various template files are created which are named after the
 chosen identifier. You are expected to edit the service configuration
 file, a Python script, as well as a host-specific configuration file and
-one of the two system wrapper scripts (choose Python or Bash, or write
+one of the two system wrapper scripts (choose Python or shell script, or write
 one from scratch in your favourite language). The scripts are heavily
 commented to help you along, along with the documentation you are
 reading, this should provide you with all knowledge necessary to make a
@@ -29,49 +29,40 @@ webservice.
 
 -  ``myfirstproject/myfirstproject.py`` - Service Configuration File
 
--  ``myfirstproject/myfirstproject.$HOSTNAME.yml`` - Host-specific
-   external configution file which is automatically included from the
-   service configuration file if ran on the specified host. This will be
-   addressed in :ref:`externalconf`.
-
 -  ``myfirstproject/myfirstproject.config.yml`` - A more generic external configution file which is automatically
-  included from the service configuration file if a shost specific variant like above is not found. This will be
+  included from the service configuration file unless a more host specific variant is found (``myfirstproject.$HOSTNAME.yml``). This will be
   addressed in :ref:`externalconf`.
 
 -  ``myfirstproject/myfirstproject_wrapper.py`` - System Wrapper Script
-   in Python (this is recommended over the bash version as it is suited for more
+   in Python (this is recommended over the shell version as it is suited for more
    complex webservices)
 
 -  ``myfirstproject/myfirstproject_wrapper.sh`` - System Wrapper Script
-   in Bash (only suggested for simple webservices)
+   in shell script (only suggested for simple webservices)
 
 -  ``myfirstproject/myfirstproject.wsgi`` - WSGI script, you probably
    don’t need to edit this
 
 -  ``setup.py`` - Installation script (edit the metadata in here), run
-   ``python setup.py install`` for installation in production
-   environments or ``python setup.py develop`` for installation during
+   ``pip install .`` for installation in production
+   environments or ``pip install -e`` for installation during
    development. (the start scripts mentioned below do this automatically
    for you)
 
+-  ``Dockerfile`` - OCI Container build script. You may need to adapt this to add extra dependencies your system may need.
+
 -  ``MANIFEST.in`` - Lists files to include in installation by ``setup.py``.
 
--  ``INSTRUCTIONS.rst`` - Automatically generated instructions
+-  ``INSTRUCTIONS.rst`` - Automatically generated instructions. They complement/reiterate most of waht is said here.
 
 Moreover, some scripts and sample configurations are generated:
 
 -  ``startserver_development.sh`` - Start your webservice using the
-   built-in development server
+   built-in development server.
 
 -  ``startserver_production.sh`` - Start your webservice using the
    production server using uwsgi. To use this you will need to configure
    your webservice (e.g. Apache or nginx).
-
--  ``myfirstproject.$HOSTNAME.ini`` - Uwsgi configuration (for a
-   specific host), used for production environments
-
--  ``deployment-examples/`` - Sample configuration files for production environments
-   using a Apache 2 or Nginx webserver. Consult the section on :ref:`deployment` for details.
 
 These template files need to be edited for your particular application.
 They are heavily commented to guide you. The ``INSTRUCTIONS.rst`` file will
@@ -81,11 +72,11 @@ project. Starting your webservice is as easy as running
 ``startserver_development.sh``, the script will inform you to what URL
 to direct your browser once the webservice is running.
 
-You can choose not to make use of one of the generated system wrapper
+You can choose not to make use of one of the two generated system wrapper
 scripts and instead either write one from scratch in another language of
 your choice, or directly let CLAM invoke your application. Moreover, a
-wrapper is intended for the project paradigm, the action paradigm (:ref:`actions`) does
-not make use of it.
+wrapper is only intended for CLAM's *project paradigm*, the *action paradigm* (:ref:`actions`) does
+not make use of it at all.
 
 Starting Your webservice
 ---------------------------

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding:utf-8 -*-
 
 ###############################################################
@@ -17,7 +17,6 @@
 
 import sys
 import os
-import io
 import shutil
 import argparse
 
@@ -33,13 +32,9 @@ from clam.common.data import VERSION
 def main():
     parser = argparse.ArgumentParser(description="This tool sets up a new CLAM project for you. It generates a bunch of templates for you to use as basis. Replace 'system_id' with a short ID/name for your project that will be used internally and possibly in URLs; it will be used in various filenames, no spaces or other special characters allowed.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-n','--name',type=str, help="A human-readable name. Shortcut option, can be also set in service configuration file later", action='store', required=False)
-    parser.add_argument('-d','--dirprefix',type=str, help="Directory prefix, rather than in current working directory", action='store', default=os.getcwd(), required=False)
     parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
-    parser.add_argument('-p','--port', type=int,help="The port number for the HTTP webservice", action='store',default=8080,required=False)
+    parser.add_argument('-p','--port', type=int,help="The port number for the HTTP webservice during development", action='store',default=8080,required=False)
     parser.add_argument('-P','--pythonversion', type=str,help="Explicit python version, in case you have multiple installed. Note that python 2 is not supported!", action='store',default='3',required=False)
-    parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
-    parser.add_argument('-U','--uwsgiport', type=int,help="UWSGI port to use for this webservice when deployed in production environments", action='store',default=8888,required=False)
-    parser.add_argument('-r','--reverseproxy',help="Set up for use behind a reverse proxy, sets USE_FORWARDED_HOST to True", action='store_true',required=False)
     parser.add_argument('-f','--force',help="Force use of a directory which already exists", action='store_true',required=False)
     parser.add_argument('--noninteractive',help="Non-interactive mode, don't ask questions", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
@@ -48,12 +43,12 @@ def main():
 
     createvenv = False
     if 'CONDA_PREFIX' in os.environ:
-        print("NOTICE: Anaconda detected")
+        print("NOTICE: Anaconda detected", file=sys.stderr)
     elif 'VIRTUAL_ENV' not in os.environ and not args.noninteractive:
-        print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended")
+        print("WARNING: You are not inside a Python Virtual Environment, using one is strongly recommended", file=sys.stderr)
         yn = None
         while yn is None or yn.strip().lower() not in ('y','yes','n','no'):
-            yn = input("Do you want us to create one for you? (assuming virtualenv is installed) [yn]").strip()
+            yn = input("Do you want us to create one for you? [yn]").strip()
             createvenv = yn.strip().lower() in ("y","yes")
 
 
@@ -67,21 +62,26 @@ def main():
             print("ERROR: Templates not found (Could not find " + os.path.join(CLAMDIR,template) +"). Unable to create new project",file=sys.stderr)
             sys.exit(2)
 
-    rootdir = os.path.join(args.dirprefix, args.sysid)
+    rootdir = os.path.join(os.getcwd(), args.sysid)
 
     if os.path.exists(rootdir):
         if 'force' not in args or not args.force:
             print("ERROR: Directory " +rootdir + " already exists.. Unable to make new CLAM project. Add -f (force) if you want to continue nevertheless ",file=sys.stderr)
             sys.exit(2)
     else:
-        print("Making project directory " + rootdir,file=sys.stderr)
+        print("Making project root directory " + rootdir,file=sys.stderr)
         os.mkdir(rootdir)
 
     if createvenv:
         os.chdir(rootdir)
-        r = os.system("virtualenv --python=python" + str(args.pythonversion) + " env")
-        if r != 0:
-            print("ERROR: Unable to create virtual environment",file=sys.stderr)
+        if os.system("which virtualenv") == 0:
+            r = os.system("virtualenv --python=python" + str(args.pythonversion) + " env")
+            if r != 0:
+                print("ERROR: Unable to create virtual environment",file=sys.stderr)
+        else:
+            r = os.system("python" + str(args.pythonversion) + " -m venv env")
+            if r != 0:
+                print("ERROR: Unable to create virtual environment",file=sys.stderr)
 
     sourcedir = os.path.join(rootdir, args.sysid)
     if os.path.exists(sourcedir):
@@ -89,7 +89,7 @@ def main():
             print("ERROR: Directory " +sourcedir + " already exists.. Unable to make new CLAM project. Add -f (force) if you want to continue nevertheless ",file=sys.stderr)
             sys.exit(2)
     else:
-        print("Making project directory " + sourcedir,file=sys.stderr)
+        print("Making project source directory " + sourcedir,file=sys.stderr)
         os.mkdir(sourcedir)
 
 
@@ -98,23 +98,13 @@ def main():
         f.close()
 
     if not os.path.exists(os.path.join(sourcedir, args.sysid + '.py')):
-        fin = io.open(os.path.join(CLAMDIR, 'config/template.py'),'r',encoding='utf-8')
-        fout = io.open(os.path.join(sourcedir, args.sysid + '.py'),'w',encoding='utf-8')
+        fin = open(os.path.join(CLAMDIR, 'config/template.py'),'r',encoding='utf-8')
+        fout = open(os.path.join(sourcedir, args.sysid + '.py'),'w',encoding='utf-8')
         for line in fin:
             if line == "SYSTEM_ID = \"\"\n":
                 line =  "SYSTEM_ID = \"" + args.sysid + "\""
             elif 'name' in args and args.name and line[:13] == "SYSTEM_NAME =":
                 line = "SYSTEM_NAME = \"" + args.name + "\"\n"
-            elif 'hostname' in args and args.hostname and line[:7] == "#HOST =":
-                line = "HOST = \"" + args.hostname+ "\"\n"
-            elif 'port' in args and args.port and (line[:7] == "#PORT =" or line[:6] == "PORT ="):
-                line = "PORT = \"" + str(args.port) + "\"\n"
-            elif line[:6] == "ROOT =":
-                line = "ROOT = \"" + os.path.join(rootdir, "userdata") + "\"\n"
-            elif 'forceurl' in args and args.forceurl and line[:9] == '#FORCEURL':
-                line = "FORCEURL = \"" + args.forceurl + "\"\n"
-            elif 'reverseproxy' in args and args.reverseproxy and line[:19] == '#USE_FORWARDED_HOST':
-                line = "USE_FORWARDED_HOST = True\n"
             elif line[:9] == "COMMAND =":
                 line = "COMMAND = WEBSERVICEDIR + \"/" + args.sysid + "_wrapper.py $DATAFILE $STATUSFILE $OUTPUTDIRECTORY\"\n"
             elif line[:10] == "#COMMAND =":
@@ -127,8 +117,8 @@ def main():
         sys.exit(2)
 
     if not os.path.exists(os.path.join(rootdir, 'setup.py')):
-        fin = io.open(os.path.join(CLAMDIR, 'config/setup_template.py'),'r',encoding='utf-8')
-        fout = io.open(os.path.join(rootdir, 'setup.py'),'w',encoding='utf-8')
+        fin = open(os.path.join(CLAMDIR, 'config/setup_template.py'),'r',encoding='utf-8')
+        fout = open(os.path.join(rootdir, 'setup.py'),'w',encoding='utf-8')
         for line in fin:
             line = line.replace("SYSTEM_ID", args.sysid)
             print(line,end="",file=fout)
@@ -159,158 +149,84 @@ include {sysid}/*.yml
         print("WARNING: System wrapper file " + sourcedir + '/' + args.sysid + '_wrapper.sh already seems to exists, defiantly refusing to overwrite',file=sys.stderr)
         sys.exit(2)
 
-    with io.open(os.path.join(sourcedir, args.sysid +'.wsgi'),'w',encoding='utf-8') as f:
+    with open(os.path.join(sourcedir, args.sysid +'.wsgi'),'w',encoding='utf-8') as f:
         f.write("from " + args.sysid + " import " + args.sysid + "\nimport clam.clamservice\napplication = clam.clamservice.run_wsgi(" +args.sysid+ ")")
     os.chmod(os.path.join(sourcedir, args.sysid + '.wsgi'), 0o755)
 
-    deploydir = os.path.join(rootdir,"deployment-examples")
-    os.mkdir(deploydir)
 
-    with io.open(os.path.join(deploydir,'nginx-withurlprefix.conf'),'w',encoding='utf-8') as f:
-        f.write("""#Nginx example configuration using uwsgi, assuming your service is using URLPREFIX=\"{sysid}\", include this in your server block in your nginx.conf
-location /{sysid}/static {{ alias {clamdir}/static; }}
-location = /{sysid} {{ rewrite ^ /{sysid}/; }}
-location /{sysid} {{ try_files $uri @{sysid}; }}
-location @{sysid} {{
-    include uwsgi_params;
-    uwsgi_pass 127.0.0.1:{uwsgiport};
-}}""".format(sysid=args.sysid,clamdir=CLAMDIR, uwsgiport=args.uwsgiport))
-
-
-    with io.open(os.path.join(deploydir,'nginx.conf'),'w',encoding='utf-8') as f:
-        f.write("""#Nginx example configuration using uwsgi (assuming your service runs at the root of the server!) include this from your server block in your nginx.conf
-location /static {{ alias {clamdir}/static; }}
-location / {{ try_files $uri @{sysid}; }}
-location @{sysid} {{
-    include uwsgi_params;
-    uwsgi_pass 127.0.0.1:{uwsgiport};
-}}""".format(sysid=args.sysid,clamdir=CLAMDIR, uwsgiport=args.uwsgiport))
-
-
-
-
-    if args.pythonversion >= '3':
-        uwsgiplugin = 'python3'
-    else:
-        uwsgiplugin = 'python'
-
-    with io.open(os.path.join(deploydir,'apache-withurlprefix.conf'),'w',encoding='utf-8') as f:
-        f.write("""#Apache example configuration using mod-uwsgi-proxy, assuming your service is using URLPREFIX=\"{sysid}\", include this from your VirtualHost in your Apache configuration
-
-ProxyPass /{sysid} uwsgi://127.0.0.1:{uwsgiport}/
-
-#You will likely need to adapt the reference to path {clamdir} if you move this to another system
-Alias /{sysid}/static {clamdir}/static
-<Directory {clamdir}/static/>
-    Order deny,allow
-    Allow from all
-</Directory>
-""".format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
-
-    with io.open(os.path.join(deploydir,'apache.conf'),'w',encoding='utf-8') as f:
-        f.write("""#Apache example configuration using mod-uwsgi-proxy (assuming your service runs at the virtualhost root!) insert this in your VirtualHost in your Apache configuration
-
-ProxyPass / uwsgi://127.0.0.1:{uwsgiport}/
-
-#You will likely need to adapt the reference to path {clamdir} if you move this to another system
-Alias /static {clamdir}/static
-<Directory {clamdir}/static/>
-    Order deny,allow
-    Allow from all
-</Directory>
-""".format(clamdir=CLAMDIR,sysid=args.sysid,uwsgiport=args.uwsgiport))
-
-
-    with io.open(os.path.join(rootdir, 'startserver_development.sh'),'w',encoding='utf-8') as f:
-        f.write("""#!/bin/bash
-if [ ! -z "$VIRTUAL_ENV" ]; then
-    python setup.py develop
+    with open(os.path.join(rootdir, 'startserver_development.sh'),'w',encoding='utf-8') as f:
+        f.write("""#!/bin/sh
+set -e
+if [ -n "$VIRTUAL_ENV" ]; then
+    pip install -e .
 else
-    echo "No virtual environment detected, you have to take care of running python setup.py install or setup.py develop yourself!">&2
+    if [ -d env ]; then
+        . env/bin/activate
+        pip install -e .
+    else
+        echo "No virtual environment detected, you have to take care of running python setup.py install or setup.py develop yourself!">&2
+    fi 
 fi
 clamservice -d {sysid}.{sysid}
 """.format(dir=dir,sysid=args.sysid, pythonversion=args.pythonversion))
     os.chmod(os.path.join(rootdir, 'startserver_development.sh'), 0o755)
 
-    if 'VIRTUAL_ENV' in os.environ:
-        virtualenv = os.environ['VIRTUAL_ENV']
-    elif createvenv:
-        virtualenv = os.path.join(rootdir, "env")
+    if not os.path.exists(os.path.join(rootdir, 'Dockerfile')):
+        with open(os.path.join(CLAMDIR, 'config','template.Dockerfile'),'r',encoding='utf-8') as f_in:
+            with open(os.path.join(rootdir, 'Dockerfile'),'w',encoding='utf-8') as f_out:
+                f_out.write(f_in.read().replace("{sys_id}", args.sysid))
     else:
-        virtualenv = None
+        print("WARNING: Dockerfile already seems to exists, defiantly refusing to overwrite",file=sys.stderr)
+        sys.exit(2)
 
-    if args.hostname:
-        hostname = args.hostname
+    if not os.path.exists(os.path.join(sourcedir, args.sysid + '.config.yml')):
+        with open(os.path.join(CLAMDIR, 'config','template.config.yml'),'r',encoding='utf-8') as f_in:
+            with open(os.path.join(sourcedir, args.sysid + '.config.yml'),'w',encoding='utf-8') as f_out:
+                f_out.write(f_in.read().replace("{sys_id}", args.sysid))
     else:
-        hostname = os.uname()[1]
-    with io.open(os.path.join(sourcedir,args.sysid + '.' + hostname + '.yml'),'w',encoding='utf-8') as f:
-        f.write("""
-#This is a host-specific configuration file for the webservice on {hostname}
-#Here you can add host-specific options. This file
-#always takes presence over configurations that are not host specific
-host: {hostname}
-root: {rootdir}/userdata
-port: {port}
-""".format(hostname=hostname,rootdir=rootdir,port=args.port))
-    with io.open(os.path.join(sourcedir, args.sysid + '.' + hostname + '.yml'),'a',encoding='utf-8') as f:
-        if args.forceurl:
-            f.write("forceurl: {forceurl}".format(forceurl=args.forceurl))
-        elif args.reverseproxy:
-            f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
-        else:
-            f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+        print("WARNING: YAML configuration file already seems to exists, defiantly refusing to overwrite",file=sys.stderr)
+        sys.exit(2)
 
 
-    with io.open(os.path.join(sourcedir,args.sysid + '.config.yml'),'w',encoding='utf-8') as f:
-        f.write("""
-#This is a generic configuration file for the webservice.
-#It will only be used when there is no host-specific configuration file
-#({sysid}.\$HOSTNAME.yml)
-root: /tmp/{sysid}-userdata
-port: {port}
-""".format(sysid=args.sysid,rootdir=rootdir,port=args.port))
-        if args.reverseproxy:
-            f.write("use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
-        else:
-            f.write("#use_forwarded_host: true #(enable this if you run behind a properly configured reverse proxy only)\n")
+    with open(os.path.join(rootdir, 'startserver_production.sh'),'w',encoding='utf-8') as f:
+        f.write("""#!/bin/sh
+set -e
+docker build -t "{sysid}" .
 
-    with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'w',encoding='utf-8') as f:
-        f.write("""[uwsgi]
-socket = 127.0.0.1:{uwsgiport}
-master = true
-#plugins = {uwsgiplugin},logfile
-logger = file:{rootdir}/{sysid}.uwsgi.log
-mount = /={sourcedir}/{sysid}.wsgi
-#if you configured a URL prefix then you may want to use this instead:
-#mount = /{sysid}={sourcedir}/{sysid}.wsgi
-processes = 2
-threads = 2
-#enable this for nginx:
-#manage-script-name = yes
-""".format(sourcedir=sourcedir, rootdir=rootdir,sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
-    if virtualenv:
-        with io.open(os.path.join(rootdir,args.sysid + '.' + hostname + '.ini'),'a',encoding='utf-8') as f:
-            f.write("virtualenv = " + virtualenv + "\n")
-            f.write("chdir = " + virtualenv + "\n")
+#Note, this datadir will be non-persistent, you will likely want to change this in production settings
+DATADIR=$(mktemp -d)
+chmod go+wx "$DATADIR" #allow subuids/subgids to make directories, needed to prevent permission denied errors
+HOST_PORT={port}
 
-    with io.open(os.path.join(rootdir, 'startserver_production.sh'),'w',encoding='utf-8') as f:
-        f.write("""#!/bin/bash
-if [ ! -z "$VIRTUAL_ENV" ]; then
-    python setup.py install
-else
-    echo "No virtual environment detected, you have to take care of running setup.py install or setup.py develop yourself!">&2
-fi
-HOSTNAME=$(hostname)
-echo "Detected hostname: $HOSTNAME">&2
-if [ ! -f "{sysid}.$HOSTNAME.ini" ]; then
-        echo "Expected uwsgi configuration {sysid}.$HOSTNAME.ini not found. Did you make one for the host you are running on?">&2
-        exit 2
-fi
-uwsgi {sysid}.$HOSTNAME.ini || cat {sysid}.uwsgi.log
-""".format(sourcedir=sourcedir, sysid=args.sysid, uwsgiplugin=uwsgiplugin,pythonversion=args.pythonversion, uwsgiport=args.uwsgiport))
+#At this point you can pass any environment variables you use in your {sysid}.config.yml, pass them via --env
+docker run --rm --volume "$DATADIR:/data" -p "$HOST_PORT:80" --env CLAM_ROOT=/data/{sysid}-userdata --env CLAM_USE_FORWARDED_HOST=0 "{sysid}"
+
+# In many production scenarios, you will not invoke this script manually but instead use a kubernetes deployment (setting the necessary env variables) or a docker-compose.yml
+# It is strongly recommended to deploy the container behind a reverse proxy that handles SSL, make sure to pass CLAM_USER_FORWARDED_HOST=1 when running the container in that case.
+
+echo "Navigate to http://localhost:{port} to access the deployed webservice"
+""".format(sysid=args.sysid,port=args.port))
+
     os.chmod(os.path.join(rootdir , 'startserver_production.sh'), 0o755)
 
-    with io.open(os.path.join(rootdir, '.gitignore'),'w',encoding='utf-8') as f:
+    with open(os.path.join(rootdir, '.gitignore'),'w',encoding='utf-8') as f:
+        f.write("""
+__pycache__/
+*.py[cod]
+build/
+dist/
+userdata/
+*.log
+*.egg
+*.egg-info
+env/
+*.bak
+*~
+.DS_Store
+._*
+""")
+
+    with open(os.path.join(rootdir, '.dockerignore'),'w',encoding='utf-8') as f:
         f.write("""
 __pycache__/
 *.py[cod]
@@ -334,15 +250,20 @@ env/
 DEVELOP YOUR WEBSERVICE
 ----------------------------
 
-To develop your webservice, you need to edit the following file:
+To develop your webservice, you need to edit the following files:
 
-* ``{sourcedir}/{sysid}.py`` - This is your service configuration file, here you fedinfed what goes in and out of the webservice.
-* ``{sourcedir}/{sysid}.$HOSTNAME.yml`` - This is an external host-specific configuration file, automatically loaded from the service configuration to set host-specific settings.
-* ``{sourcedir}/{sysid}.config.yml`` - This external configuration is less host-specific and used only if no host-specific file can be found.
-* ``{sourcedir}/{sysid}_wrapper.py`` - This is your system wrapper script where you implement the logic to call the tool that underlies your webservice (you can use ``{sourcedir}/{sysid}_wrapper.sh`` if you prefer to use a simple shell script instead of Python, other languages are possible too but we have no templates for those)
+* ``{sourcedir}/{sysid}.py`` - This is your service configuration file, here you define what goes in and out of the webservice.
+* ``{sourcedir}/{sysid}.config.yml`` - This external configuration contains deployment configuration options. It is only used if no host-specific yaml file ({sysid}.$hostname.yml) can be found.
+* ``{sourcedir}/{sysid}_wrapper.py`` - This is your system wrapper script (Python) where you implement the logic to call the tool that underlies your webservice
+* ``{sourcedir}/{sysid}_wrapper.sh`` - If you prefer to use a simple shell script instead of Python, than use this instead of the above one, other languages are possible too but we have no templates for those.
+* ``{sourcedir}/setup.py`` - Set setup.py for your CLAM project, allows you to ship it as a Python package and publish it in the Python Package Index. Adapt the software metadata and when needed the dependencies.
+* ``{sourcedir}/Dockerfile`` - The Dockerfile for your project, allows you to build a self-contained container. Recommended for deployment on production servers. Adapt the software metadata and when needed the dependencies.
 
-It is strongly recommended to keep host-specific settings out of the service configuration file and instead put it in
-the respective config.$HOSTNAME.yml file that is automatically included by the service configuration. Create a new one
+It is strongly recommended to keep host/deployment specific settings out of the main service configuration file and instead put it in
+external configuration files. You can make static external configuration files per hostname (config.$HOSTNAME.yml)
+or you can use the provided `{sysid}.config.yml` and use environment variables to set the values at run-time. This is the preferred set-up in combination with Docker.
+
+Create a new one
 for each host you plan to deploy this webservice on.
 
 Consult the CLAM Documentation and/or instruction videos on
@@ -354,18 +275,6 @@ Also don't forget to edit the metadata in the setup script ``{rootdir}/setup.py`
 
     print(s,file=sys.stderr)
 
-    if args.forceurl:
-        url = args.forceurl
-    else:
-        url = "http://"
-        if 'hostname' in args and args.hostname:
-            url += args.hostname
-        else:
-            url += os.uname()[1]
-        if 'port' in args and args.port != 80:
-            url += ':' + str(args.port)
-        url += '/'
-
     s2 = """
 START YOUR WEBSERVICE
 -------------------------
@@ -375,21 +284,19 @@ and test your webservice using the built-in development webserver, start it
 with ``./startserver_development.sh`` . This takes care of any installation as well.
 Once started, you can point your browser to the URL advertised by this script.
 
+DEPLOYING YOUR WEBSERVICE IN PRODUCTION (for system administrators)
+----------------------------------------------------------------------
 
-DEPLOYING YOUR WEBSERVICE (for system administrators)
--------------------------------------------------------
+For production use, we recommend using Docker/OCI containers. A Dockerfile has been generated for your project. It is based on Alpine Linux and 
+uses nginx and uwsgi to serve the webservice. A ``./startserver_production.sh`` script has been provided to build and launch the container. 
 
-For production use, we recommend using uwsgi in combination with a webserver
-such as Apache (with mod_uwsgi_proxy), or nginx. A uwsgi configuration has been generated ({sysid}.$HOSTNAME.ini); it is specific
-to the host you deploy the webservice on. This in turn loads the wsgi script ({sysid}.wsgi), which loads your webservice.
-
-Sample configurations for nginx and Apache have been generated as a starting point in ``deployment-examples/`', add these to your server and then use the
-``./startserver_production.sh`` script to launch CLAM using uwsgi.
+If you do not want to use the container, the Dockerfile still provides valuable insight into how to set up a CLAM webservice. Alternatively, the CLAM Documentation at 
+https://clam.readthedocs.io/en/latest/deployment.html explains how to deploy in other settings (e.g. using Apache instead of nginx).
 
 VERSION CONTROL
 -----------------
 
-We *strongly* recommend you to put {rootdir} and everything inside under version control (e.g. git).
+We *strongly* recommend you to put your project under version control (e.g. git).
 To create a new git repository::
 
     cd {rootdir}
@@ -400,31 +307,31 @@ To create a new git repository::
 VIRTUAL ENVIRONMENT
 --------------------
 
-We strongly recommend the use of a Python virtual environment for your CLAM webservice, both in development and in production.
+We strongly recommend the use of a Python virtual environment for your CLAM webservice during development.
 """.format(rootdir=rootdir,sysid=args.sysid)
 
     print( s2,file=sys.stderr)
 
     print( "\n(All of this information can be read again in the INSTRUCTIONS.rst file)",file=sys.stderr)
+    print( f"(Your project can be found in {rootdir})",file=sys.stderr)
 
-    with io.open(os.path.join(rootdir, "INSTRUCTIONS.rst"),'w',encoding='utf-8') as f:
+    with open(os.path.join(rootdir, "INSTRUCTIONS.rst"),'w',encoding='utf-8') as f:
         f.write(s + s2)
 
-    if args.pythonversion >= '3':
-        pip = 'pip3'
-    else:
-        pip = 'pip'
+    with open(os.path.join(rootdir,"INSTALL"),'w',encoding='utf-8') as f:
+        f.write("""Install this webservice and all python dependencies (including CLAM itself) as follows:
 
-    with io.open(os.path.join(rootdir,"INSTALL"),'w',encoding='utf-8') as f:
-        f.write("""Install CLAM from the Python package index with:
+ $ pip install .
 
- $ {pip} install clam
+You may need to use sudo for global installation. We recommend the use of a Python virtual environment.
 
-Install the webservice:
+We recommmend using Docker/OCI containers for production deployments, build and run one using:
 
- $ python3 setup.py install
+ $ ./startserver_production.sh 
 
-You may need to use sudo for global installation. We recommend the use of a Python virtual environment. Only Python 3 and above are supported.""".format(pip=pip))
+Check the contents of that script for further explanations.
+
+""".format(sysid=args.sysid))
 
 
 if __name__ == "__main__":

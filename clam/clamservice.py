@@ -46,7 +46,7 @@ import clam.common.auth
 import clam.common.oauth
 import clam.common.data
 import clam.common.viewers
-from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage
+from clam.common.util import globsymlinks, setdebug, setlog, setlogfile, printlog, printdebug, xmlescape, withheaders, computediskusage, parse_accept_header
 import clam.config.defaults as settings #will be overridden by real settings later
 settings.INTERNALURLPREFIX = ''
 
@@ -103,6 +103,18 @@ def userdb_lookup_dict(user, **authsettings):
     printdebug("Looking up user " + user)
     return settings.USERS[user] #possible KeyError is captured later
 
+def userdb_lookup_file(user, **authsettings):
+    printdebug("Looking up user " + user)
+    with open(settings.USERS_FILE,'r',encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            line = line.strip()
+            if line and line[0] != '#':
+                fields = line.split("\t")
+                if len(fields) != 2:
+                    warning(f"Error in line {i+1} in password file, expected two columns")
+                elif fields[0] == user:
+                    return fields[1]
+    raise KeyError(f"User {user} not in database") 
 
 def userdb_lookup_mysql(user, **authsettings):
     printdebug("Looking up user " + user + " in MySQL")
@@ -198,22 +210,28 @@ class Login(object):
             except KeyError:
                 error_msg = ""
             if error:
+                printdebug("OAuth Login: Error from remote authorization provider: " + error + ": " + error_msg)
                 return withheaders(flask.make_response("Error from remote authorization provider: " + error + ": " + error_msg,403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         try:
             code = flask.request.values['code']
         except KeyError:
+            printdebug("OAuth Login: No code passed")
             return withheaders(flask.make_response('No code passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
         try:
             state = flask.request.values['state']
         except KeyError:
+            printdebug("OAuth Login: No state passed")
             return withheaders(flask.make_response('No state passed',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
+        printdebug("OAuth Login: Fetching token")
         d = oauthsession.fetch_token(settings.OAUTH_TOKEN_URL, client_secret=settings.OAUTH_CLIENT_SECRET,authorization_response=os.path.join(settings.OAUTH_CLIENT_URL, 'login?code='+ code + '&state=' + state ))
         if not 'access_token' in d:
+            printdebug("OAuth Login: Error fetching token")
             return withheaders(flask.make_response('No access token received from authorization provider',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         #pylint: disable=bad-continuation
+        printdebug("OAuth Login: Done")
         return withheaders(flask.make_response(flask.render_template('login.xml',
                         version=VERSION,
                         system_id=settings.SYSTEM_ID,
@@ -230,9 +248,10 @@ class Login(object):
                         system_logout_url=settings.SYSTEM_LOGOUT_URL,
                         system_cover_url=settings.SYSTEM_COVER_URL,
                         system_license=settings.SYSTEM_LICENSE,
+                        auth_type=auth_type(),
                         url=getrooturl(),
                         oauth_access_token=oauth_encrypt(d['access_token']))),
-                headers={'allow-origin': settings.ALLOW_ORIGIN} )
+                   headers={'allow-origin': settings.ALLOW_ORIGIN}, cookies={'oauth_access_token': oauth_encrypt(d['access_token'])} )
 
 def oauth_encrypt(oauth_access_token):
     #encrypt is a misnomer because we don't actually encrypt anything anymore!
@@ -246,8 +265,10 @@ class Logout(object):
     @staticmethod
     def GET(credentials = None):
         user, oauth_access_token = parsecredentials(credentials) #pylint: disable=unused-variable
-        if not settings.OAUTH_REVOKE_URL:
-            return withheaders(flask.make_response("Logging you out locally, however, no revoke mechanism was defined at the remote end. Moreover, not all browser support this (notably Safari and IE), you may want to clear your cache and history manually if you are on a public computer.",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
+        if not settings.OAUTH:
+            return withheaders(flask.make_response("You will be properly logged out only after closing your browser session",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
+        elif not settings.OAUTH_REVOKE_URL:
+            return withheaders(flask.make_response("Logged you out locally (however, no key revocation mechanism was defined at the remote end)",403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN, 'Clear-Site-Data': '"cache", "cookies", "storage", "executionContexts"' })
         else:
             response = requests.get(settings.OAUTH_REVOKE_URL + '/', data={'token': oauth_access_token })
 
@@ -288,7 +309,7 @@ def parsecredentials(credentials, verbose=False):
         authtype = "none"
         if settings.OAUTH:
             authtype = "oauth"
-        elif settings.USERS or settings.USERS_MYSQL:
+        elif settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE:
             if settings.BASICAUTH and settings.DIGESTAUTH:
                 authtype = "multi"
             elif settings.BASICAUTH:
@@ -301,16 +322,20 @@ def parsecredentials(credentials, verbose=False):
 
 
 def auth_type():
+    types = []
     if settings.OAUTH:
-        return "oauth"
-    elif settings.PREAUTHHEADER:
-        return "preauth"
-    elif (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL):
-        return "basic"
-    elif settings.USERS or settings.USERS_MYSQL:
-        return "digest"
+        types.append("oauth")
+    if settings.PREAUTHHEADER:
+        types.append("preauth")
+    if (settings.ASSUMESSL or settings.BASICAUTH) and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
+        types.append("basic")
+    elif settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE:
+        types.append("digest")
+    if types:
+        return ",".join(types)
     else:
         return "none"
+
 
 ################# Views ##########################
 
@@ -319,6 +344,7 @@ def auth_type():
 def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-many-return-statements
     user, oauth_access_token = parsecredentials(credentials)
     rq = flask.request.values
+    printdebug("Using entry shortcut")
     if 'project' in rq: #pylint: disable=too-many-nested-blocks
         if rq['project'].lower() in ('new','create'):
             projectprefix = rq['projectprefix'] if 'projectprefix' in rq else 'P'
@@ -374,10 +400,7 @@ def entryshortcut(credentials = None, fromstart=False): #pylint: disable=too-man
                 if not any( key.startswith(prefix) for prefix in prefixes):
                     forward_rq.append((key,value))
 
-        if oauth_access_token:
-            return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token + ('&' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
-        else:
-            return withheaders(flask.redirect(getrooturl() + '/' + project + ('/?' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
+        return withheaders(flask.redirect(getrooturl() + '/' + project + ('/?' if forward_rq else '') + urlencode(forward_rq)),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
     return None
 
@@ -422,6 +445,11 @@ def mainentry(credentials = None):
     if shortcutresponse is not None:
         return shortcutresponse
 
+    #when JSON(-LD) response is requested, just return the info page
+    accept = parse_accept_header(flask.request)
+    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0]:
+        return info(credentials)
+
     if user == "anonymous" and auth_type() != "none" and not settings.DISABLE_PORCH:
         #present an unauthenticated landing page without project index
         return porch(credentials)
@@ -443,6 +471,7 @@ def index(credentials = None):
     errormsg = ""
 
     corpora = CLAMService.corpusindex()
+
 
     #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
@@ -563,6 +592,51 @@ def info(credentials=None):
     errormsg = ""
 
     corpora = CLAMService.corpusindex()
+
+    accept = parse_accept_header(flask.request)
+    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0] or flask.request.args.get("json") == "1":
+        #pylint: disable=bad-continuation
+        return withheaders(flask.make_response(flask.render_template('response.json',
+                version=VERSION,
+                system_id=settings.SYSTEM_ID,
+                system_name=settings.SYSTEM_NAME,
+                system_description=settings.SYSTEM_DESCRIPTION,
+                system_author=settings.SYSTEM_AUTHOR,
+                system_affiliation=settings.SYSTEM_AFFILIATION,
+                system_version=settings.SYSTEM_VERSION,
+                system_email=settings.SYSTEM_EMAIL,
+                system_url=settings.SYSTEM_URL,
+                system_parent_url=settings.SYSTEM_PARENT_URL,
+                system_register_url=settings.SYSTEM_REGISTER_URL,
+                system_login_url=settings.SYSTEM_LOGIN_URL,
+                system_logout_url=settings.SYSTEM_LOGOUT_URL,
+                system_cover_url=settings.SYSTEM_COVER_URL,
+                system_license=settings.SYSTEM_LICENSE,
+                user=user,
+                project=None,
+                url=getrooturl(),
+                statuscode=-1,
+                statusmessage="",
+                statuslog=[],
+                completion=0,
+                errors=errors,
+                errormsg=errormsg,
+                parameterdata=settings.PARAMETERS,
+                inputsources=corpora,
+                outputpaths=None,
+                inputpaths=None,
+                profiles=settings.PROFILES,
+                formats=clam.common.data.getformats(settings.PROFILES),
+                datafile=None,
+                projects=projects,
+                actions=settings.ACTIONS,
+                info=True,
+                porch=False,
+                allow_origin=settings.ALLOW_ORIGIN,
+                oauth_access_token=oauth_encrypt(oauth_access_token),
+                auth_type=auth_type()
+        )), contenttype="application/ld+json", headers={'allow_origin': settings.ALLOW_ORIGIN})
+
 
     #pylint: disable=bad-continuation
     return withheaders(flask.make_response(flask.render_template('response.xml',
@@ -965,7 +1039,7 @@ class Project:
         totalcompletion = 0
         if os.path.isfile(statusfile): #pylint: disable=too-many-nested-blocks
             prevmsg = None
-            with open(statusfile) as f:
+            with open(statusfile, 'r', encoding='utf-8') as f:
                 for line in f: #pylint: disable=too-many-nested-blocks
                     line = line.strip()
                     if line:
@@ -1247,11 +1321,7 @@ class Project:
         if response is not None:
             return response
         msg = "Project " + project + " has been created for user " + user
-        if oauth_access_token:
-            extraloc = '?oauth_access_token=' + oauth_access_token
-        else:
-            extraloc = ''
-            return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/' + extraloc, 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
+        return flask.make_response(msg, 201, {'Location': getrooturl() + '/' + project + '/', 'Content-Type':'text/plain','Content-Length': len(msg),'Access-Control-Allow-Origin': settings.ALLOW_ORIGIN, 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE', 'Access-Control-Allow-Headers': 'Authorization', 'Referrer-Policy': 'strict-origin-when-cross-origin'}) #HTTP CREATED
 
     @staticmethod
     def start(project, credentials=None): #pylint: disable=too-many-return-statements
@@ -1271,10 +1341,7 @@ class Project:
 
         statuscode, _, _, _  = Project.status(project, user)
         if statuscode != clam.common.status.READY:
-            if oauth_access_token:
-                return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
-            else:
-                return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
+            return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
 
         #Generate arguments based on POSTed parameters
         commandlineparams = []
@@ -1363,10 +1430,7 @@ class Project:
                     f.write(str(pid))
                 if shortcutresponse is True:
                     #redirect to project page to lose parameters in URL
-                    if oauth_access_token:
-                        return withheaders(flask.redirect(getrooturl() + '/' + project + '/?oauth_access_token=' + oauth_access_token),headers={'allow_origin': settings.ALLOW_ORIGIN})
-                    else:
-                        return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
+                    return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
                 else:
                     #normal response (202)
                     return Project.response(user, project, parameters,"",False,oauth_access_token,",".join([str(x) for x in matchedprofiles_byindex]), program,http_code=202) #returns 202 - Accepted
@@ -2666,7 +2730,7 @@ class ActionHandler:
             return ActionHandler.do(actionid, method,credentials['user'],credentials['oauth_access_token'] if 'oauth_access_token' in credentials else "")
         elif '401response' in credentials and credentials['401response'] is not None:
             #we are anonymous but this action does not allow that:
-            printdebug("(anonymous access not allowed, returning deffered 401 response)")
+            printdebug("(anonymous access not allowed, returning deferred 401 response)")
             return credentials['401response']
         else:
             #we are anonymous but this action does not allow that:
@@ -2811,7 +2875,20 @@ class CLAMService(object):
 
         if settings.OAUTH:
             if not settings.ASSUMESSL: warning("*** Oauth Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
-            self.auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            main_auth = clam.common.auth.OAuth2(settings.OAUTH_CLIENT_ID, settings.OAUTH_AUTH_URL, os.path.join(settings.OAUTH_CLIENT_URL, 'login'), settings.OAUTH_AUTH_FUNCTION, settings.OAUTH_USERNAME_FUNCTION, debug=printdebug,scope=settings.OAUTH_SCOPE, userinfo_url=settings.OAUTH_USERINFO_URL)
+            #Allow combinations with HTTP Basic Auth
+            if settings.USERS:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_dict, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            elif settings.USERS_FILE:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            elif settings.USERS_MYSQL:
+                validate_users_mysql()
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_mysql, realm=settings.REALM,debug=printdebug)
+                self.auth = clam.common.auth.MultiAuth(main_auth, basic_auth)
+            else:
+                self.auth = main_auth
         elif settings.PREAUTHHEADER:
             warning("*** Forwarded Authentication is enabled. THIS IS NOT SECURE WITHOUT A PROPERLY CONFIGURED AUTHENTICATION PROVIDER! ***")
             self.auth = clam.common.auth.ForwardedAuth(settings.PREAUTHHEADER, debug=printdebug) #pylint: disable=redefined-variable-type
@@ -2829,6 +2906,20 @@ class CLAMService(object):
                 self.auth = digest_auth
             else:
                 error("USERS is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
+        elif settings.USERS_FILE:
+            if settings.BASICAUTH:
+                basic_auth = clam.common.auth.HTTPBasicAuth(get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug)
+                if not settings.ASSUMESSL: warning("*** HTTP Basic Authentication is enabled. THIS IS NOT SECURE WITHOUT SSL! ***")
+            if settings.DIGESTAUTH:
+                digest_auth = clam.common.auth.HTTPDigestAuth(settings.SESSIONDIR,get_password=userdb_lookup_file, realm=settings.REALM,debug=printdebug) #pylint: disable=redefined-variable-type
+            if settings.BASICAUTH and settings.DIGESTAUTH:
+                self.auth = clam.common.auth.MultiAuth(basic_auth, digest_auth) #pylint: disable=redefined-variable-type
+            elif settings.BASICAUTH:
+                self.auth = basic_auth #pylint: disable=redefined-variable-type
+            elif settings.DIGESTAUTH:
+                self.auth = digest_auth
+            else:
+                error("USERS_FILE is set but no authentication mechanism is enabled, set BASICAUTH and/or DIGESTAUTH to True")
         elif settings.USERS_MYSQL:
             validate_users_mysql()
             if settings.BASICAUTH:
@@ -2858,19 +2949,22 @@ class CLAMService(object):
         self.service.secret_key = settings.SECRET_KEY
         printdebug("Registering main entrypoint: " + settings.INTERNALURLPREFIX + "/")
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/', '', self.auth.require_login(mainentry, optional=True), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] )
-        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] )
 
-        #versions without trailing slash so no automatic 301 redirect is needed
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index', 'index2', self.auth.require_login(index), methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch', 'porch2', porch, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] )
-        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'] )
+        #versions without trailing slash so no automatic 308 redirect is needed (which flask does by itself otherwise!)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index', 'index2', self.auth.require_login(index), methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch', 'porch2', porch, methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info', 'info2', info, methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login', 'login2', Login.GET, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout', 'logout2', self.auth.require_login(Logout.GET), methods=['GET'], strict_slashes=False )
+
+        #canonical versions
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/index/', 'index', self.auth.require_login(index), methods=['GET'], strict_slashes=False )
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/porch/', 'porch', porch, methods=['GET'] , strict_slashes=False)
+        printdebug("Registering info entrypoint: " + settings.INTERNALURLPREFIX + "/info/")
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/info/', 'info', info, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/login/', 'login', Login.GET, methods=['GET'] , strict_slashes=False)
+        self.service.add_url_rule(settings.INTERNALURLPREFIX + '/logout/', 'logout', self.auth.require_login(Logout.GET), methods=['GET'] , strict_slashes=False)
+
 
         self.service.add_url_rule(settings.INTERNALURLPREFIX + '/storage/<fileid>', 'get_storage', get_storage, methods=['GET'] )
 
@@ -2999,6 +3093,8 @@ def set_defaults():
         settings.SYSTEM_LICENSE = ""
     if 'USERS' not in settingkeys:
         settings.USERS = None
+    if 'USERS_FILE' not in settingkeys:
+        settings.USERS_FILE = None
     if 'ADMINS' not in settingkeys:
         settings.ADMINS = []
     if 'LISTPROJECTS' not in settingkeys:
@@ -3111,8 +3207,7 @@ def set_defaults():
     if 'OAUTH_AUTH_FUNCTION' not in settingkeys:
         settings.OAUTH_AUTH_FUNCTION = clam.common.oauth.DEFAULT_AUTH_FUNCTION
     if 'SECRET_KEY' not in settingkeys:
-        print("WARNING: No explicit SECRET_KEY set in service configuration, generating one at random! This may cause problems with session persistence in production environments!" ,file=sys.stderr)
-        settings.SECRET_KEY = "%032x" % random.getrandbits(128)
+        settings.SECRET_KEY = "%032x" % random.getrandbits(128) #not really used I think since we don't use flask.session
     if 'INTERFACEOPTIONS' not in settingkeys:
         settings.INTERFACEOPTIONS = ""
     if 'CUSTOMCSS' not in settingkeys:
@@ -3161,15 +3256,15 @@ def set_defaults():
     if 'ASSUMESSL' not in settingkeys:
         settings.ASSUMESSL = settings.PORT == 443
 
-    if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
+    if 'BASICAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
         settings.BASICAUTH = True #Allowing HTTP Basic Authentication
     elif 'BASICAUTH' not in settingkeys:
-        settings.BASICAUTH = False #default is HTTP Digest
+        settings.BASICAUTH = True #default is HTTP Basic
 
-    if 'DIGESTAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL) and settings.ASSUMESSL:
-        settings.DIGESTAUTH = True #Allowing HTTP Digest AuthenticatioDigest Authentication
+    if 'DIGESTAUTH' not in settingkeys and (settings.USERS or settings.USERS_MYSQL or settings.USERS_FILE):
+        settings.DIGESTAUTH = True #Allowing HTTP Digest Authentication
     elif 'DIGESTAUTH' not in settingkeys:
-        settings.DIGESTAUTH = True
+        settings.DIGESTAUTH = True #allow digest by default for backward compatibility
 
 def test_dirs():
     if not os.path.isdir(settings.ROOT):
@@ -3198,7 +3293,7 @@ def test_dirs():
 
     if not settings.PARAMETERS:
         warning("No parameters specified in settings module!")
-    if not settings.USERS and not settings.USERS_MYSQL and not settings.PREAUTHHEADER and not settings.OAUTH:
+    if not settings.USERS and not settings.USERS_MYSQL and not settings.USERS_FILE and not settings.PREAUTHHEADER and not settings.OAUTH:
         warning("No user authentication enabled, this is not recommended for production environments!")
     if settings.FORCEHTTPS:
         print("Forcing HTTPS", file=sys.stderr)
@@ -3253,7 +3348,7 @@ def main():
     parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
     parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
-    parser.add_argument('-b','--basicauth', help="Default to HTTP Basic Authentication on the development server (do not expose to the world without SSL)", action='store_true',required=False)
+    parser.add_argument('-b','--basicauth', help="Default to HTTP Basic Authentication on the development server (do not expose to the world without SSL) (option remains for legacy purposes, enabled by default now)", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('-c','--config', type=str,help="Path to external YAML configuration file to import", action='store',required=False)
     parser.add_argument('settingsmodule', type=str, help='The webservice service configuration to be imported. This is a Python module path rather than a file path (for instance: clam.config.textstats), the configuration must be importable by Python. Add the path where it is located using --pythonpath if it can not be found.')
@@ -3310,7 +3405,6 @@ def main():
         settings.PORT = PORT
     if ASSUMESSL:
         settings.ASSUMESSL = ASSUMESSL
-        settings.BASICAUTH = True
 
     if settings.URLPREFIX:
         settings.INTERNALURLPREFIX = settings.URLPREFIX

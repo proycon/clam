@@ -9,9 +9,6 @@ CLAM: Computational Linguistics Application Mediator
     :target: http://clam.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://api.codacy.com/project/badge/grade/860767a6b995425bbb607fc852c418b7
-    :target: https://www.codacy.com/app/proycon/clam
-
 .. image:: https://zenodo.org/badge/760072.svg
    :target: https://zenodo.org/badge/latestdoi/760072
 
@@ -80,13 +77,6 @@ Some screenshots of the web user interface can be found below:
 Installation
 ----------------
 
-It's discouraged to download the zip packages or tarballs
-from github, install CLAM from the `Python
-Package Index <http://pypi.python.org/pypi/CLAM>`_ or use git properly.
-
-Installation On Linux
-~~~~~~~~~~~~~~~~~~~~~~~~
-
 Installation from the Python Package Index using the  package manager *pip* it the recommended way to
 intall CLAM. This is the easiest method
 of installing CLAM, as it will automatically fetch and install any
@@ -95,16 +85,17 @@ want to install CLAM locally as a user, if you want to install globally,
 prepend the following commands with ``sudo``:
 
 CLAM can be installed from the Python Package Index using pip. Pip is usually
-part of the ``python3-pip`` package (Debian/Ubuntu) or similar. It downloads CLAM and all dependencies
+part of the ``python3-pip`` package (Debian/Ubuntu) or similar, note that
+Python 2.7 is not supported anymore (you might need to call ``pip3`` instead of ``pip`` on older system). It downloads CLAM and all dependencies
 automatically:::
 
-  $ pip3 install clam
+  $ pip install clam
 
 If you already downloaded CLAM manually (from github), you can do::
 
-  $ python3 setup.py install
+  $ pip install .
 
-If pip3 is not yet installed on your system, install it using:
+If pip is not yet installed on your system, install it using:
  on debian-based linux systems (including Ubuntu)::
 
   $ apt-get install python3-pip
@@ -115,19 +106,25 @@ on RPM-based linux systems::
 
 Note that sudo/root access is needed to install globally. Ask your system administrator
 to install it if you do not own the system. Alternatively, you can install it locally in a Python virtual
-environment:
+environment::
 
-  $ virtualenv --python=python3 clamenv
+  $ virtualenv --python=python3 env
 
-  $ . clamenv/bin/activate
+Or::
 
-  (clamenv)$ pip3 install clam
+  $ python3 -m venv env
+
+Then activate it as follows:
+
+  $ . env/bin/activate
+
+  (env)$ pip install clam
 
 CLAM also has some optional dependencies. For MySQL support, install
 ``mysqlclient`` using pip. For `FoLiA <https://proycon.github.io/folia>`_
 support, install ``FoLiA-Tools`` using pip.
 
-
+**Note:** CLAM is designed for Linux-like systems, although the client and data library work everywhere, hosting webservices via ``clamservice`` may not work on Windows.
 
 Running a test webservice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,7 +136,7 @@ webservice using the development server as follows::
 
 Navigate your browser to http://localhost:8080 and verify everything works
 
-Note: It is important to regularly keep CLAM up to date as fixes and
+**Note:** It is important to regularly keep CLAM up to date as fixes and
 improvements are implemented on a regular basis. Update CLAM using::
 
   $ pip install -U clam

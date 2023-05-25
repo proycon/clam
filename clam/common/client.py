@@ -40,7 +40,7 @@ def donereadingupload(encoder):
     pass
 
 class CLAMClient:
-    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None, loadmetadata=False, basicauth=False):
+    def __init__(self, url, user=None, password=None, oauth=False, oauth_access_token=None,verify=None, loadmetadata=False, basicauth=True):
         """Initialise the CLAM client (does not actually connect yet)
 
         * ``url`` - URL of the webservice
@@ -55,7 +55,7 @@ class CLAMClient:
            Can be set to False to skip verification (not recommended)
            Follows the syntax of the requests library (http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification)
         * ``loadmetadata`` - Automatically download and load all relevant metadata
-        * ``basicauth`` - Do HTTP Basic Authentication instead of HTTP Digest Authentication (boolean)
+        * ``basicauth`` - Do HTTP Basic Authentication instead of HTTP Digest Authentication (boolean), True by default, if set to False, to Digest authentication instead
         """
 
         #self.http = httplib2.Http()
@@ -97,10 +97,11 @@ class CLAMClient:
 
 
                 data = self._parse(r.text)
-                if data is True: #indicates failure
-                    raise Exception("No access token provided, but Authorization Provider requires manual user input. Unable to authenticate automatically. Obtain an access token from " + r.geturl())
+                cookies = r.cookies.get_dict()
+                if 'oauth_access_token' in cookies and data is not True: #date True is indicative of a non-XML error response
+                    self.oauth_access_token = cookies.oauth_access_token
                 else:
-                    self.oauth_access_token = data.oauth_access_token
+                    raise Exception("No access token provided, but Authorization Provider requires interactive user input. Unable to authenticate automatically. Obtain an access token manually first, if there is no official means than you can always get one by logging in manually and copying it from the oauth_access_token cookie.")
 
             headers['Authorization'] = 'Bearer ' + self.oauth_access_token
         return headers

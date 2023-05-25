@@ -10,28 +10,14 @@ def read(fname):
     return io.open(os.path.join(os.path.dirname(__file__), fname),'r',encoding='utf-8').read()
 
 
-#merge the interface XSL into a merges one which will be served to browser which can't handle XSL imports well (not used currently)
-#interfacexsl = os.path.join(os.path.dirname(__file__), "clam/static/interface.xsl")
-#parametersxsl = os.path.join(os.path.dirname(__file__), "clam/static/parameters.xsl")
-#mergedinterfacexsl = os.path.join(os.path.dirname(__file__), "clam/static/interface-merged.xsl")
-#with open(interfacexsl,'r',encoding='utf-8') as f:
-#    interfacexsl_data = f.read()
-#with open(parametersxsl,'r',encoding='utf-8') as f:
-#    parametersxsl_data = ""
-#    for line in f:
-#        if not line.startswith(("<?","<xsl:stylesheet","</xsl:stylesheet","<xsl:output")):
-#            parametersxsl_data += line
-#with open(mergedinterfacexsl,'w',encoding='utf-8') as f:
-#    f.write(interfacexsl_data.replace('<xsl:include href="parameters.xsl" />', parametersxsl_data))
-
 setup(
     name = "CLAM",
-    version = "3.1.0", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
+    version = "3.2.6", #also change in clam.common.data.VERSION and dispatcher.py and codemeta.json
     author = "Maarten van Gompel",
     author_email = "proycon@anaproy.nl",
-    description = ("Turns command-line NLP tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
-    license = "GPL",
-    keywords = "clam webservice rest nlp computational_linguistics rest",
+    description = ("Turns command-line tools into fully-fledged RESTful webservices with an auto-generated web-interface for human end-users."),
+    license = "GPL-3.0-only",
+    keywords = ["SaaS", "webservice", "rest"],
     url = "https://proycon.github.io/clam",
     packages=['clam','clam.common','clam.config','clam.wrappers'],
     long_description=read('README.rst'),
@@ -57,7 +43,7 @@ setup(
             'clamclient = clam.clamclient:main'
         ]
     },
-    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi'] },
+    package_data = {'clam':['static/*.*','static/custom/*','static/tableimages/*','templates/*','style/*','clients/*.py','tests/*.py','tests/*.yml','wrappers/*.sh','config/*.wsgi','config/*.yml','config/*.Dockerfile'] },
     include_package_data=True,
-    install_requires=['flask >= 2.0.1','lxml >= 4.6.0','requests','requests_oauthlib','requests_toolbelt','pycrypto','certifi', 'pyyaml']
+    install_requires=['flask >= 2.0.1','lxml >= 4.6.0','requests','requests_oauthlib','requests_toolbelt','certifi', 'pyyaml']
 )

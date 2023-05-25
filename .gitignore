@@ -1,4 +1,6 @@
 __pycache__/
+build/
+env/
 CLAM.egg-info/
 *.py[cod]
 *~

@@ -268,7 +268,7 @@ class ForwardedAuth(HTTPAuth):
         self.printdebug("Forwarded authentication listens to headers: " + ",".join(self.headers))
 
     def authenticate_header(self):
-        return flask.make_response('Pre-authentication mechanism did not pass expected header',403)
+        return None
 
     def require_login(self, f, optional=False):
         @wraps(f)
@@ -316,38 +316,70 @@ class MultiAuth(object):
             remote_addr = flask.request.remote_addr
             self.printdebug("Handling Multiple Authenticators for " + remote_addr)
             selected_auth = None
+            scheme = None
             if 'Authorization' in flask.request.headers:
                 try:
-                    scheme, creds = flask.request.headers['Authorization'].split( None, 1)
+                    scheme, _creds = flask.request.headers['Authorization'].split( None, 1)
                     self.printdebug("Requested scheme by " + remote_addr + " = " + scheme)
                 except ValueError:
                     # malformed Authorization header
                     self.printdebug("Malformed authorization header from " + remote_addr)
                     pass
-                else:
-                    for auth in self.additional_auth:
-                        if auth.scheme == scheme:
-                            selected_auth = auth
-                            break
+                for auth in self.additional_auth:
+                    if auth.scheme == scheme:
+                        selected_auth = auth
+                        break
+            elif isinstance(self.main_auth, OAuth2) and self.main_auth.get_oauth_access_token_from_request():
+                scheme = "Bearer"
+                selected_auth = self.main_auth
             else:
                 self.printdebug("No authorization header passed by " + remote_addr)
+
                 if optional:
                     self.printdebug("Login was optional, falling back to anonymous login")
+                    #prepare a DEFERRED 401 response, won't be sent immediately
+                    #special case to return multiple WWW-Authenticate headers
+
                     res = flask.make_response("Authorization required")
                     res.status_code = 401
-                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
+                    value = self.main_auth.authenticate_header()
+                    if value:
+                        res.headers.add('WWW-Authenticate',  value)
                     for auth in self.additional_auth:
-                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
+                        value = auth.authenticate_header()
+                        if value:
+                            res.headers.add('WWW-Authenticate',  value)
                     kwargs['credentials'] = {'user': 'anonymous','401response': res}
+
+                    #return result WITHOUT authentication
                     return f(*args,**kwargs)
-                else:
-                    flask.request.data #clear receive buffer of pending data
-                    res = flask.make_response("Authorization required")
-                    res.status_code = 401
-                    res.headers.add('WWW-Authenticate',  self.main_auth.authenticate_header())
-                    for auth in self.additional_auth:
-                        res.headers.add('WWW-Authenticate',  auth.authenticate_header())
-                    return res
+
+
+                if 'requestauth' in flask.request.values or 'requestauth' in flask.request.cookies:
+                    #authentication of a different type explicitly requested
+
+                    if 'requestauth' in flask.request.values:
+                        scheme = flask.request.values['requestauth']
+                        self.printdebug("Requested scheme (in params) by " + remote_addr + " = " + scheme)
+                    else:
+                        scheme = flask.request.cookies['requestauth']
+                        self.printdebug("Requested scheme (in cookie) by " + remote_addr + " = " + scheme)
+                    if scheme != self.main_auth.scheme:
+                        for auth in self.additional_auth:
+                            if auth.scheme == scheme:
+                                self.printdebug("Using to requested authentication scheme")
+                                res = auth.require_login(f, optional)(*args, **kwargs)
+                                self.printdebug("Setting cookie")
+                                res.set_cookie('requestauth', scheme)
+                                return res
+
+                #main authentication method determines whether this will be a 401 or immediately a 302 (oauth)
+                res = self.main_auth.require_login(f, optional)(*args, **kwargs)
+                for auth in self.additional_auth:
+                    value = auth.authenticate_header()
+                    if value:
+                        res.headers.add('WWW-Authenticate',  value)
+                return res
 
             if selected_auth is None:
                 selected_auth = self.main_auth
@@ -357,7 +389,11 @@ class MultiAuth(object):
 class OAuth2(HTTPAuth):
     def __init__(self, client_id, auth_url, redirect_url, auth_function, username_function, debug=None, scope=None, userinfo_url=None): #pylint: disable=super-init-not-called
         def default_auth_error():
-            return "Unauthorized Access (OAuth2)"
+            res = flask.make_response("Unauthorized Access (OAuth2). Your access token may be invalid or is expired, if the latter is the case, simply refresh the page to be redirected login again.")
+            res.set_cookie('oauth_access_token', "",expires=0) #remove cookie
+            res.status_code = 403
+            return res
+
 
 
         self.client_id = client_id
@@ -371,35 +407,58 @@ class OAuth2(HTTPAuth):
             self.printdebug = debug
         else:
             self.printdebug = lambda x: print(x,file=sys.stderr)
+        self.scheme = "Bearer"
         self.error_handler(default_auth_error)
+
+    def authenticate_header(self):
+        #provide forward to login (the caller can decide whether to actually use this)
+        kwargslogin = {'redirect_uri': self.redirect_url}
+        if self.scope:
+            kwargslogin['scope'] = self.scope
+        oauthsession = OAuth2Session(self.client_id, **kwargslogin)
+        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
+        auth_url, _state = self.auth_function(oauthsession, self.auth_url)
+        return 'Bearer auth_server="{0}"'.format(auth_url) #following https://stackoverflow.com/questions/50921816/standard-http-header-to-indicate-location-of-openid-connect-server , realm is OPTIONAL so I skip it here
+
+    def get_oauth_access_token_from_request(self):
+        oauth_access_token = None
+        try:
+            authheader = flask.request.headers['Authorization']
+        except KeyError:
+            authheader = None
+        #Obtain access token
+        if authheader and authheader[:6].lower() == "bearer":
+            oauth_access_token = authheader[7:]
+            self.printdebug("Oauth access token obtained from HTTP request Authentication header")
+        elif authheader and authheader[:5].lower() == "token":
+            oauth_access_token = authheader[6:]
+            self.printdebug("Oauth access token obtained from HTTP request Authentication header")
+        else:
+            #Is the token submitted via a cookie?
+            oauth_access_token = flask.request.cookies.get("oauth_access_token")
+            if not oauth_access_token:
+                self.printdebug("Oauth access token not found in cookie")
+                #Is the token submitted in the GET/POST data? (as oauth_access_token)
+                #This is a last resort we don't really want to use
+                try:
+                    oauth_access_token = flask.request.values['oauth_access_token']
+                    self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
+                except KeyError:
+                    self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+            else:
+                self.printdebug("Oauth access token obtained from cookie")
+
+        return oauth_access_token
 
     def require_login(self, f, optional=False):
         @wraps(f)
         def decorated(*args, **kwargs):
-            try:
-                authheader = flask.request.headers['Authorization']
-            except KeyError:
-                authheader = None
             # We need to ignore authentication headers for OPTIONS to avoid
             # unwanted interactions with CORS.
             # Chrome and Firefox issue a preflight OPTIONS request to check
             # Access-Control-* headers, and will fail if it returns 401.
             if flask.request.method != 'OPTIONS':
-                oauth_access_token = None
-                #Obtain access token
-                if authheader and authheader[:6].lower() == "bearer":
-                    oauth_access_token = authheader[7:]
-                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-                elif authheader and authheader[:5].lower() == "token":
-                    oauth_access_token = authheader[6:]
-                    self.printdebug("Oauth access token obtained from HTTP request Authentication header")
-                else:
-                    #Is the token submitted in the GET/POST data? (as oauth_access_token)
-                    try:
-                        oauth_access_token = flask.request.values['oauth_access_token']
-                        self.printdebug("Oauth access token obtained from HTTP request GET/POST data")
-                    except KeyError:
-                        self.printdebug("No oauth access token found. Header debug: " + repr(flask.request.headers) )
+                oauth_access_token = self.get_oauth_access_token_from_request()
 
                 if not oauth_access_token:
                     #No access token yet, start login process
@@ -417,27 +476,29 @@ class OAuth2(HTTPAuth):
                         kwargs['credentials'] = {'user': 'anonymous','401response': flask.redirect(auth_url)}
 
                         return f(*args,**kwargs)
-                    else:
-                        self.printdebug("No access token available yet, starting login process")
 
-                        #redirect_url = getrooturl() + '/login'
+                    self.printdebug("No access token available yet, starting login process")
 
-                        kwargs = {'redirect_uri': self.redirect_url}
-                        if self.scope:
-                            kwargs['scope'] = self.scope
-                        self.printdebug("OAuth2 details, client=" + self.client_id + ": " + repr(kwargs))
-                        oauthsession = OAuth2Session(self.client_id, **kwargs)
-                        if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
-                        auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
+                    kwargs = {'redirect_uri': self.redirect_url}
+                    if self.scope:
+                        kwargs['scope'] = self.scope
+                    self.printdebug("OAuth2 details, client=" + self.client_id + ": " + repr(kwargs))
+                    oauthsession = OAuth2Session(self.client_id, **kwargs)
+                    if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
+                    auth_url, state = self.auth_function(oauthsession, self.auth_url) #pylint: disable=unused-variable
 
-                        #Redirect to Authentication Provider
-                        self.printdebug("Redirecting to authentication provider: " + self.auth_url)
+                    #Redirect to Authentication Provider
+                    self.printdebug("Redirecting to authentication provider: " + self.auth_url)
 
-                        return flask.redirect(auth_url)
+                    return flask.redirect(auth_url)
                 else:
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
-                    username = self.username_function(oauthsession)
+                    try:
+                        username = self.username_function(oauthsession)
+                    except clam.common.oauth.OAuthError as e:
+                        self.printdebug("Could not obtain username from OAuth session, got OAuthError error " + str(e))
+                        return self.auth_error_callback()
                     if username:
                         #add (username, oauth_access_token) tuple as parameter to the wrapped function
                         kwargs['credentials'] =  (username, oauth_access_token)

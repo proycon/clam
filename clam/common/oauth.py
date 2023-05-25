@@ -9,7 +9,6 @@
 import sys
 import json
 import base64
-from Crypto.Cipher import AES
 from requests_oauthlib import OAuth2Session
 
 class OAuthError(Exception):

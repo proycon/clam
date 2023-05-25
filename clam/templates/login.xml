@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <?xml-stylesheet type="text/xsl" href="{{ url }}/static/login.xsl"?>
-<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" baseurl="{{ url }}" oauth_access_token="{{ oauth_access_token }}">
+<clam xmlns:xlink="http://www.w3.org/1999/xlink" version="{{ version }}" id="{{ system_id }}" name="{{ system_name }}" baseurl="{{ url }}" authentication="{{ auth_type }}">
 </clam>

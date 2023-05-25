@@ -46,7 +46,7 @@ class AuthActionServiceTest(unittest.TestCase):
 
     def setUp(self):
         self.url = 'http://' + os.uname()[1] + ':8080'
-        self.client = CLAMClient(self.url,'proycon','secret')
+        self.client = CLAMClient(self.url,'proycon','secret',basicauth=True)
 
     def test1_action(self):
         """Action Test (Command)"""

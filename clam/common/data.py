@@ -38,7 +38,7 @@ import clam.common.status
 import clam.common.util
 import clam.common.viewers
 
-VERSION = '3.1.0'
+VERSION = '3.2.6'
 
 #dirs for services shipped with CLAM itself
 CONFIGDIR = os.path.abspath(os.path.dirname(__file__) + '/../config/')
@@ -2885,20 +2885,54 @@ def loadconfig(callername, required=True):
 def resolveconfigvariables(value, settingsmodule):
     """Resolves standard environment variables, encoded in curly braces"""
     if isinstance(value,str) and '{' in value:
-        variables = re.findall(r"\{\{\w+\}\}", value)
+        variables = re.findall(r"\{\{[\w\d_\|]+!?(?:=[^\}]+)?\}\}", value)
         for v in variables:
-            if v.strip('{}') in os.environ:
-                value = value.replace(v,os.environ[v.strip('{}')])
-            elif hasattr(settingsmodule, v.strip('{}').upper()):
-                value = value.replace(v,getattr(settingsmodule, v.strip('{}').upper()))
+            varname = v.strip('{}')
+            if '=' in varname:
+                varname, defaultvalue = varname.split("=")
             else:
-                print("Undefined environment variable: " + v.strip('{}'),file=sys.stderr)
-                value = value.replace(v,"")
+                defaultvalue = ""
+            if varname and varname[-1] == '!':
+                varname = varname[:-1]
+                required = True
+            else:
+                required = False
+            castf = lambda x: x #no-op
+            if varname.find("|") != -1:
+                varname, cast = varname.split("|",1)
+                cast = cast.strip()
+                if cast == "int":
+                    castf = int
+                elif cast == "float":
+                    castf = float
+                elif cast == "bool":
+                    castf = lambda x: x.lower() in ('yes','true','1','enabled')
+                elif cast == "json":
+                    castf = json.loads
+                else:
+                    msg = "Undefined function: " + cast
+                    raise ConfigurationError(msg)
+
+            if varname in os.environ:
+                value = castf(value.replace(v,os.environ[varname]))
+            elif hasattr(settingsmodule, varname.upper()) and getattr(settingsmodule, varname.upper()) is not None:
+                value = castf(value.replace(v,str(getattr(settingsmodule, varname.upper()))))
+            else:
+                msg = "Undefined environment variable: " + varname
+                if required:
+                    raise ConfigurationError(msg)
+                else:
+                    print(msg,file=sys.stderr)
+                if castf == json.loads and not defaultvalue:
+                    value = None
+                else:
+                    value = castf(value.replace(v,defaultvalue))
     return value
 
 def loadconfigfile(configfile, settingsmodule):
     """This function loads an external configuration file. It is usually not invoked directly but through ``loadconfig()`` which handles searching for the right configuration file in the right paths, with fallbacks."""
 
+    clam.common.util.printlog("Loading configuration file " + configfile)
     with io.open(configfile,'r', encoding='utf-8') as f:
         data = yaml.safe_load(f.read())
     if 'include' in data and data['include']:
@@ -2913,7 +2947,8 @@ def loadconfigfile(configfile, settingsmodule):
             raise ConfigurationError("Unable to load included configuration file: " + repr(value))
     for key, value in data.items():
         #replace variables
-        setattr(settingsmodule,key.upper(), resolveconfigvariables(value, settingsmodule))
+        value = resolveconfigvariables(value, settingsmodule)
+        if value != "": setattr(settingsmodule,key.upper(), value)
     return True
 
 class AbstractConverter:

@@ -17,11 +17,13 @@
 
 var uploader;
 
+/*
 function oauthheader(req) {
   if (oauth_access_token !== "") {
     req.setRequestHeader("Authorization", "Bearer " + oauth_access_token);
-  }
+ }
 }
+*/
 
 function getinputtemplate(id) {
     for (var i = 0; i < inputtemplates.length; i++) {
@@ -161,7 +163,7 @@ function deleteinputfile(filename) {   //eslint-disable-line no-unused-vars
     if (found >= 0) tableinputfiles.fnDeleteRow(found);
     $.ajax({
         type: "DELETE",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
           withCredentials: true
@@ -196,7 +198,7 @@ function pollstatus() {
     $.ajax({
         type: 'GET',
         url: baseurl + '/' + project + "/status/",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
           withCredentials: true
@@ -205,11 +207,7 @@ function pollstatus() {
         data: {accesstoken: accesstoken, user: user},
         success: function(response){
                 if (response.statuscode !== 1) {
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + '/?oauth_access_token=' + oauth_access_token; /* refresh */
-                    } else {
-                      window.location.href = baseurl + '/' + project + '/'; /* refresh */
-                    }
+                    window.location.href = baseurl + '/' + project + '/'; /* refresh */
                 } else {
                     if (response.completion > 0) {
                         progress = response.completion;
@@ -328,7 +326,7 @@ function quickdelete(projectname) {//eslint-disable-line no-unused-vars
         type: "DELETE",
         url: baseurl + '/' + projectname + '/',
         dataType: "text",
-        beforeSend: oauthheader,
+        //beforeSend: oauthheader,
         crossDomain: true,
         xhrFields: {
             withCredentials: true
@@ -476,7 +474,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "GET",
             url: baseurl + "/static/parameters.xsl",
             dataType: "xml",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -511,17 +509,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "PUT",
             url: baseurl + "/" + $("#projectname").val() + "/",
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
             },
             success: function(){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + "/" + $("#projectname").val() + "/?oauth_access_token="+oauth_access_token;
-                } else {
-                  window.location.href = baseurl + "/" + $("#projectname").val() + "/";
-                }
+                window.location.href = baseurl + "/" + $("#projectname").val() + "/";
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -544,17 +538,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + '/?abortonly=true',
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
             },
             success: function(){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-                } else {
-                  window.location.href = baseurl + '/'; /* back to index */
-                }
+                window.location.href = baseurl + '/'; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -577,17 +567,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + '/',
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
             },
             success: function(response){
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-                } else {
-                  window.location.href = baseurl + '/'; /* back to index */
-                }
+                window.location.href = baseurl + '/'; /* back to index */
             },
             error: function(response){
                 if ((response.status < 200) || (response.status > 299)) { //patch
@@ -609,7 +595,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "DELETE",
             url: baseurl + '/' + project + "/output/" ,
             dataType: "text",
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -633,11 +619,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
    //Return to index
    if ($("#indexbutton").length) {
        $("#indexbutton").click(function(){
-            if (oauth_access_token !== "") {
-              window.location.href = baseurl + '/?oauth_access_token=' + oauth_access_token; /* back to index */
-            } else {
-              window.location.href = baseurl + '/'; /* back to index */
-            }
+            window.location.href = baseurl + '/'; /* back to index */
        });
    }
 
@@ -692,7 +674,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             url: baseurl + '/' + project + "/input/" + filename,
             dataType: "xml",
             data: data,
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
@@ -728,7 +710,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 url: baseurl + '/' + project + "/input/" + filename,
                 dataType: "xml",
                 data: {'url': $('#urluploadfile').val(), 'inputtemplate': $('#urluploadinputtemplate').val() },
-                beforeSend: oauthheader,
+                //beforeSend: oauthheader,
                 crossDomain: true,
                 xhrFields: {
                   withCredentials: true
@@ -777,11 +759,7 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 return true;
         }).on('complete', function(e, id, fileName, responseJSON) { //eslint-disable-line no-unused-vars
                 if (responseJSON.isarchive) {
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                    window.location.href = baseurl + '/' + project + "/";
                     return true;
                 }
                 var xml;
@@ -835,17 +813,13 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
                 url: baseurl + '/' + project + "/input/",
                 //dataType: "xml",
                 data: {'inputsource': $('#inputsource').val() },
-                beforeSend: oauthheader,
+                //beforeSend: oauthheader,
                 crossDomain: true,
                 xhrFields: {
                   withCredentials: true
                 },
                 success: function(response){
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                    window.location.href = baseurl + '/' + project + "/";
                 },
                 error: function(response, errortype){
                     alert(response.responseText);
@@ -860,28 +834,20 @@ function initclam() { //eslint-disable-line no-unused-vars, complexity
             type: "POST",
             url: baseurl + '/' + project + "/input/",
             data: {'inputsource': $('#uploadinputsource').val() },
-            beforeSend: oauthheader,
+            //beforeSend: oauthheader,
             crossDomain: true,
             xhrFields: {
               withCredentials: true
             },
             success: function(response){//eslint-disable-line no-unused-vars
                 //processuploadresponse(response, '#nonexistant');
-                if (oauth_access_token !== "") {
-                  window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                } else {
-                  window.location.href = baseurl + '/' + project + "/";
-                }
+               window.location.href = baseurl + '/' + project + "/";
           },
             error: function(response,errortype){//eslint-disable-line no-unused-vars
                 $('#inputsourceprogress').hide();
                 $('#inputsourceupload').show();
                 if ((response.status >= 200) && (response.status <= 299)) { //patch
-                    if (oauth_access_token !== "") {
-                      window.location.href = baseurl + '/' + project + "/?oauth_access_token="+oauth_access_token;
-                    } else {
-                      window.location.href = baseurl + '/' + project + "/";
-                    }
+                   window.location.href = baseurl + '/' + project + "/";
                 } else {
                     if (response.responseText) {
                         alert(response.responseText);

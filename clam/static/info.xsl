@@ -17,20 +17,10 @@
 
           <div class="collapse navbar-collapse" id="navbarcontent">
                 <ul class="navbar-nav mr-auto">
-                    <xsl:choose>
-                        <xsl:when test="/clam/@oauth_access_token = ''">
-                            <li class="nav-item">
-                                <xsl:attribute name="class">nav-item</xsl:attribute>
-                                <a class="nav-link" href="{/clam/@baseurl}/"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
-                            </li>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <li class="nav-item">
-                                <xsl:attribute name="class">nav-item</xsl:attribute>
-                                <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
-                            </li>
-                        </xsl:otherwise>
-                    </xsl:choose>
+                    <li class="nav-item">
+                        <xsl:attribute name="class">nav-item</xsl:attribute>
+                        <a class="nav-link" href="{/clam/@baseurl}/"><span class="oi oi-spreadsheet"></span>&#160;Projects</a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav pull-right">
                     <li class="nav-item active"><a class="nav-link active" href="{/clam/@baseurl}/info"><span class="oi oi-info"></span> REST API Specification</a></li>
@@ -69,10 +59,11 @@
     		<li><strong>Create a <em>project</em></strong> - Issue a <tt>HTTP PUT</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em></tt>
 				<ul>
 					<li>Will respond with <tt>HTTP 201 Created</tt> if successful.</li>
-                    <li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+                    <li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if you specified if an error arises, most often due to an invalid Project ID; certain characters including spaces, slashes and ampersands, are not allowed.</li>
 				</ul>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X PUT <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
     		</li>
     		<li><strong>Upload one or more files</strong> - Issue a <tt>HTTP POST</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/input/<em>{filename}</em></tt>. The POST request takes the following parameters:
     			<ul>
@@ -100,7 +91,7 @@
     			<br /><em>Responses</em>:
     			<ul>
 					<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns CLAM Upload XML with details on the uploaded files (they may have been renamed automatically)</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the upload is not valid, the file may not be of the correct type, have an invalid name, or there may be problems with specified parameters for the file. Returns CLAM Upload XML with the specific details</li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
                 </ul><br/>
@@ -117,11 +108,12 @@
 				<br /><em>Responses:</em>
 				<ul>
 					<li>Will respond with <tt>HTTP 202 Accepted</tt> if successful, and returns the CLAM XML for the project's current state.</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the system does not have sufficient files uploaded to run, or if there are parameter errors. Will return CLAM XML with the project's current state, including parameter errors. In the CLAM XML response, <tt>/CLAM/status/@errors</tt> (XPath) will be <em>yes</em> if errors occurred, <em>no</em> otherwise.</li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X POST <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/</tt>  (further parameters are passed similarly with <tt>-d "<em>$parameter</em>=<em>$value</em>"</tt>, can be issued multiple times)
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Poll the project status with a regular interval and check its status until it is flagged as finished</strong> - Issue (with a regular interval) a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt> .
 			<ul>
@@ -132,10 +124,11 @@
 				<li>2 - The project has finished</li>
 			</ul>
 			</li>
-			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials  or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
 			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
             </ul><br/>
             Curl example (getting project state only, no interpretation): <tt>curl <xsl:call-template name="curlauth" /> -v -X GET <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Retrieve the desired output file(s)</strong> - Issue a <tt>HTTP GET</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/output/<em>{outputfilename}</em></tt>.  A list of available output files can be obtained by querying the project's state (HTTP GET on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>) and iterating over <tt>/CLAM/output/file/name</tt> (XPath). A <tt>template</tt> attribute will be available on these nodes indicating what output template was responsible for generating this file. The following output templates are defined for this webservice (grouped per profile):
 				<ol>
@@ -150,20 +143,22 @@
 				<br /><em>Responses:</em>
 				<ul>
 					<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns the content of the file (along with the correct mime-type for it)</li>
-					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+					<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
 					<li>Will respond with <tt>HTTP 404 Not Found</tt> if the file or project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em>/output/<em>$outputfilename</em></tt>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
 			<li><strong>Delete the project</strong> (otherwise it will remain on the server and take up space) - Issue a <tt>HTTP DELETE</tt> on <tt><xsl:value-of select="@baseurl"/>/<em>{yourprojectname}</em>/</tt>.
 <br /><em>Responses:</em>
 <ul>
     			<li>Will respond with <tt>HTTP 200 OK</tt> if successful, and returns CLAM Upload XML with details on the uploaded files (they may have been renamed automatically)</li>
-    			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials were passed. User credentials have to be passed using <xsl:call-template name="authtype" /></li>
+    			<li>Will respond with <tt>HTTP 401 Unauthorized</tt> if incorrect or no user credentials or authorization token were passed. They have to be passed using <xsl:call-template name="authtype" /></li>
     			<li>Will respond with <tt>HTTP 403 Permission Denied</tt> if the upload is not valid, the file may not be of the correct type, have an invalid name, or there may be problems with specified parameters for the file. Returns CLAM Upload XML with the specific details</li>
     			<li>Will respond with <tt>HTTP 404 Not Found</tt> if the project does not exist</li>
                 </ul><br/>
                 Curl example: <tt>curl <xsl:call-template name="curlauth" /> -v -X DELETE <xsl:value-of select="@baseurl"/>/<em>$yourprojectname</em></tt>
+                <xsl:if test="contains(/clam/@authentication,',')"> (The curl call includes all possible authentication methods, make sure to pick only one)</xsl:if>
 			</li>
     	 </ol>
 
@@ -265,11 +260,28 @@
 <strong>import</strong> time
 
 <em>#create client, connect to server.</em>
-<em>#the latter two arguments are required for authenticated webservices, they can be omitted otherwise</em>
-<em>#if you use SSL (https) and SSL verification fails, you can pass a verify= parameter with the path to your certificate of certificate authority bundle</em>
-<em>#if the server only accepts HTTP Basic Authentication, add a basicauth=True parameter</em>
+<xsl:if test="contains(/clam/@authentication,'basic')">
+<em>#HTTP Basic Authentication</em>
+clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password, basicauth=True)
+</xsl:if>
+<xsl:if test="contains(/clam/@authentication,'digest')">
+<em>#HTTP Digest Authentication</em>
 clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", username, password)
+</xsl:if>
+<xsl:if test="contains(/clam/@authentication,'oauth')">
+<em>#OAuth2 (OpenID Connect) Authentication, requires you to first obtain the access token manually!</em>
+clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>", oauth=True, oauth_access_token=oauth_access_token)
+</xsl:if>
+<xsl:if test="contains(/clam/@authentication,'none')">
+<em>#No authentication (generally not recommended)</em>
+clamclient = clam.common.client.CLAMClient("<xsl:value-of select="@baseurl"/>")
+</xsl:if>
+<xsl:if test="contains(/clam/@authentication,',')">
+<em>#Please pick only one of the above instantiations for clamclient, depending on your authentication method</em>
+<em>#if you use SSL (https) and SSL verification fails, you can pass a verify= parameter with the path to your certificate of certificate authority bundle</em>
+</xsl:if>
 
+<br/>
 
 <xsl:if test="count(/clam/profiles/profile) > 0">
 
@@ -391,29 +403,43 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
         <div class="card-body">
     	<h3 class="card-title">CLAM XML</h3>
     	<p>To inspect the CLAM XML format, simply view the source of this current page, or any CLAM page. A formal schema definition in RelaxNG format will be available <a href="https://github.com/proycon/clam/blob/master/docs/clam.rng">here</a>. This documentation was automatically generated from the service description in CLAM XML format.</p>
-</div>
-
-        <xsl:call-template name="footer" />
-
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-body">
+    	<h3 class="card-title">JSON-LD</h3>
+        <p>You may also request this info page as linked open data (JSON-LD). This will use <a href="https://schema.org">schema.org vocabulary</a> with some extensions. Note that it is not as complete as the XML output and only suitable for generic metadata purposes at this point! Use content negotation to request the JSON-LD version or just <a href="?json=1">click here</a></p>
+        </div>
+    </div>
+
+    <xsl:call-template name="footer" />
+    </div>
+
   </body>
   </html>
 </xsl:template>
 
 <xsl:template name="curlauth">
-    <xsl:choose>
-        <xsl:when test="/clam/@authentication = 'basic'">
-            --basic -u <em>$username</em> -p
-        </xsl:when>
-        <xsl:when test="/clam/@authentication = 'digest'">
-            --digest -u <em>$username</em> -p
-        </xsl:when>
-    </xsl:choose>
+    <xsl:if test="contains(/clam/@authentication,'oauth')">
+        --oauth2-bearer <em>$oauth_access_token</em> 
+    </xsl:if>
+    <xsl:if test="contains(/clam/@authentication,'basic')">
+        --basic --user <em>$username:$password</em> 
+    </xsl:if>
+    <xsl:if test="contains(/clam/@authentication,'digest')">
+        --digest --user <em>$username:$password</em> 
+    </xsl:if>
 </xsl:template>
 
 <xsl:template name="authtype">
     <xsl:choose>
+        <xsl:when test="/clam/@authentication = 'oauth,basic'">
+            OAuth2 or HTTP Basic Authentication
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'basic,oauth'">
+            HTTP Basic Authentication or OAuth2
+        </xsl:when>
         <xsl:when test="/clam/@authentication = 'basic'">
             HTTP Basic Authentication or HTTP Digest Authentication
         </xsl:when>
@@ -422,6 +448,9 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
         </xsl:when>
         <xsl:when test="/clam/@authentication = 'preauth'">
             a custom application-specific scheme based on a pre-authenticated header
+        </xsl:when>
+        <xsl:when test="/clam/@authentication = 'preauth,basic'">
+            a custom application-specific scheme based on a pre-authenticated header, or HTTP Basic Authentication
         </xsl:when>
         <xsl:when test="/clam/@authentication = 'oauth'">
             OAuth2
@@ -443,7 +472,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
-    <script src="{/clam/@baseurl}/static/jquery-3.4.1.min.js"></script>
+    <script src="{/clam/@baseurl}/static/jquery-3.5.0.min.js"></script>
     <script src="{/clam/@baseurl}/static/popper.min.js"></script>
     <script src="{/clam/@baseurl}/static/bootstrap.min.js"></script>
   </head>

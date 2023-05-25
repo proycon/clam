@@ -1,0 +1,67 @@
+# -- CLAM external configuration file --
+
+#This is the external configuration file for your CLAM webservice
+#You edit this file directly and set values, possibly make host-specific copies named ({sys_id}.$HOSTNAME.yml),
+#or you can inject values at run time via environment variables (recommended with Docker/podman/kubernetes etc).
+#This generic template as been set up to allow the latter.
+
+#  * All {{VAR}} templates will be substituted by the respective environment variables, 
+#  * they may optionally be set to default values if no environment variable is set
+
+# We use lowercase for all CLAM configuration variables here.
+
+#The root directory where CLAM will safe all user projects
+root: "{{CLAM_ROOT=/tmp/{sys_id}-userdata}}"
+
+#The port on which the server runs
+port: "{{CLAM_PORT={port}}}"
+
+#Use the Forwarded-Host HTTP header, set to true or false, only enable this if you run behind a properly configured reverse proxy!!
+#Strongly recommended for production environments. It will allow CLAM to detect the proper hostname and schema (http/https) it is running on.
+use_forwarded_host: "{{CLAM_USE_FORWARDED_HOST|bool=false}}" 
+
+# You can enable DEBUG mode, but must never leave this on in production environments!
+debug: "{{CLAM_DEBUG|bool=false}}"
+
+# -- Authentication -- 
+
+# For OAuth2/OpenID Connect authentication, use this, by default it will be off:
+oauth: "{{CLAM_OAUTH|bool=false}}"
+oauth_client_id: "{{CLAM_OAUTH_CLIENT_ID}}"
+oauth_client_secret: "{{CLAM_OAUTH_CLIENT_SECRET}}"
+oauth_client_url: "{{CLAM_OAUTH_CLIENT_URL}}"
+oauth_auth_url: "{{CLAM_OAUTH_AUTH_URL}}"
+oauth_token_url: "{{CLAM_OAUTH_TOKEN_URL}}"
+oauth_userinfo_url: "{{CLAM_OAUTH_USERINFO_URL}}"
+oauth_revoke_url: "{{CLAM_OAUTH_REVOKE_URL}}"
+oauth_scope: "{{CLAM_OAUTH_SCOPE|json}}"
+
+# HTTP Basic Authentication via a simple TSV file (disabled by default)
+users_file: "{{CLAM_USERS_FILE}}"
+realm: "{{CLAM_REALM={sys_id}}}"
+
+#Interface customisation
+customhtml_index: "{{CLAM_CUSTOMHTML_INDEX}}"
+customhtml_projectstart: "{{CLAM_CUSTOMHTML_PROJECTSTART}}"
+customhtml_projectdone: "{{CLAM_CUSTOMHTML_PROJECTDONE}}"
+customhtml_projectfailed: "{{CLAM_CUSTOMHTML_PROJECTFAILED}}"
+customcss: "{{CLAM_CUSTOMCSS}}"
+interfaceoptions: "{{CLAM_INTERFACEOPTIONS}}"
+
+# -- Resource limits --
+
+#Amount of free memory required prior to starting a new process (in MB!), Free Memory + Cached (without swap!). Set to 0 to disable this check (not recommended)
+requirememory: "{{CLAM_REQUIRE_MEMORY|int=10}}"
+
+#Maximum load average at which processes are still started (first number reported by 'uptime'). Set to 0 to disable this check (not recommended)
+#maxloadavg: 4.0
+
+#Minimum amount of free diskspace in MB. Set to 0 to disable this check (not recommended)
+#disk: "/dev/sda1" #set this to the disk where ROOT is on
+#mindiskspace: 10
+
+#The amount of diskspace a user may use (in MB), this is a soft quota which can be exceeded, but creation of new projects is blocked until usage drops below the quota again
+#userquota: 100
+
+#Allow Asynchronous HTTP requests from **web browsers** in following domains (sets Access-Control-Allow-Origin HTTP headers), by default this is unrestricted
+#allow_origin: "*"

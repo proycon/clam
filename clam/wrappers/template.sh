@@ -1,20 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 ###############################################################
-# CLAM: Computational Linguistics Application Mediator
 # -- CLAM Wrapper script Template --
-#       by Maarten van Gompel (proycon)
-#       https://proycon.github.io/clam
-#       Centre for Language and Speech Technology
-#       Radboud University Nijmegen
-#
-#       Licensed under GPLv3
-#
 ###############################################################
 
 #This is a template wrapper which you can use a basis for writing your own
-#system wrapper script. The system wrapper script is called by CLAM, it's job it
+#system wrapper script. The system wrapper script is called by CLAM, its job it
 #to call your actual tool.
+
+#you can use this function as-is to handle errors
+die() {
+    echo "ERROR: $*">&2
+    echo "Failed: $*">> "$STATUSFILE"
+    exit 1
+}
 
 #This script will be called by CLAM and will run with the current working directory set to the specified project directory
 
@@ -25,17 +24,21 @@
 
 #this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY. (as configured at COMMAND= in the service configuration file)
 STATUSFILE=$1
+shift
 INPUTDIRECTORY=$2
+shift
 OUTPUTDIRECTORY=$3
+shift
 
-#If $PARAMETERS was passed COMMAND= in the service configuration file, the remainder of the arguments are custom parameters for which you either need to do your own parsing, or you pass them directly to your application
-PARAMETERS=${@:4}
+# If $PARAMETERS was passed via COMMAND= in the service configuration file;
+# the remainder of the arguments in $@ are now custom parameters for which you either need to do your own parsing, or you pass them directly to your application
 
 #Output a status message to the status file that users will see in the interface
-echo "Starting..." >> $STATUSFILE
+echo "Starting..." >> "$STATUSFILE"
 
 #Example parameter parsing using getopt:
-#while getopts ":h" opt "$PARAMETERS"; do
+
+#while getopts ":h" opt "$@"; do
 #  case $opt in
 #    h)
 #      echo "Help option was triggered" >&2
@@ -47,15 +50,15 @@ echo "Starting..." >> $STATUSFILE
 #done
 
 #Loop over all input files, here we assume they are txt files, adapt to your situation:
-for inputfile in $INPUTDIRECTORY/*.txt; do
+for inputfile in "$INPUTDIRECTORY/"*.txt; do
     #get name of output file on the basis of input file
-    filename=`basename $inputfile`
+    filename=$(basename "$inputfile")
     outputfile="$OUTPUTDIRECTORY/$filename"
-    #Invoke your actual system, whatever it may be, adapt accordingly
-    yoursystem $PARAMETERS < $inputfile > $outputfile
+
+    #Invoke your actual system, whatever it may be, adapt accordingly!
+    # If $PARAMETERS was passed via COMMAND= in the service configuration file;
+    # the remainder of the arguments in $@ are now custom parameters for which you either need to do your own parsing, or you pass them directly to your application
+    yoursystem "$@" < "$inputfile" > "$outputfile" || die "System failed when processing $filename"
 done
 
-echo "Done." >> $STATUSFILE
-
-
-
+echo "Done." >> "$STATUSFILE"

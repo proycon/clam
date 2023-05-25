@@ -158,9 +158,11 @@ converted on the fly to hashes, is found below:
 .. code-block:: python
 
        USERS = {
-           'bob': pwhash('bob', SYSTEM_ID, 'secret'),
-           'alice': pwhash('alice', SYSTEM_ID, 'secret2'),
+           'bob': pwhash('bob', REALM, 'secret'),
+           'alice': pwhash('alice', REALM, 'secret2'),
        }
+
+REALM is by default set to your service's SYSTEM_ID.
 
 However, computing hashes on the fly like in the above example is quite
 insecure and not recommended. You should pre-compute the hashes and add
@@ -181,11 +183,18 @@ the example below to your actual service configuration file:
 
    from clam.common.digestauth import pwhash
    import clam.config.yourconfig as settings
-   pwhash('alice', settings.SYSTEM_ID, 'secret')
+   pwhash('alice', settings.REALM, 'secret')
    'e445370f57e19a8bfa454404ba3892cc'
 
 You can mark certain users as being administrators using the ``ADMINS``
 list. Administrators can see and modify all projects.
+
+Rather than define the ``USERS`` at service initialisation time, you can also
+specify a ``USERS_FILE`` which is a simple tab separated text file, with one
+username and hashed password entry per line (separated by a tab). The whole
+contents of this file will be parsed anew on each authentication request, so it
+does not scale to large numbers of users. If you need something more scalable,
+use the MySQL backend described in the next section.
 
 The ability to view and set parameters can be restricted to certain users. You can use the extra parameter options
 ``allowusers=`` or ``denyusers=`` to set this. See the documentation on :ref:`parameters`. A
@@ -203,10 +212,10 @@ cryptographically signing session data and preventing CSRF attacks (`details <ht
 MySQL backend
 ~~~~~~~~~~~~~~~~~~~~~
 
-Rather than using ``USERS`` to define a user database in your service
+Rather than using ``USERS`` or ``USERS_FILE`` to define a user database in your service
 configuration file, a more sophisticated method is available using
-MySQL. The configuration variable ``USERS_MYSQL`` can be configured,
-instead of ``USERS``, to point to a table in a MySQL database somewhere;
+MySQL/MariaDB. The configuration variable ``USERS_MYSQL`` can be configured,
+instead of ``USERS``/``USERS_FILE``, to point to a table in a MySQL database somewhere;
 the fields “username” and “password” in this table will subsequently be
 used to authenticate against. Custom field names are also possible. This
 approach allows you to use existing MySQL-based user databases. The
@@ -334,12 +343,12 @@ without any children.
    <clam xmlns:xlink="http://www.w3.org/1999/xlink" version="$version"
    id="yourservice"
     name="yourservice" baseurl="https://yourservice.com/"
-    oauth_access_token="1234567890">
+    oauth="1">
    </clam>
 
-Now any subsequent call to CLAM must pass this access token, otherwise
-you’d simply be redirected to authenticate again. The client must thus
-explicitly call CLAM again. Passing the access token can be done in two
+The actual access token will be make available to the client via a cookie named `oauth_access_token`.
+Any subsequent request to CLAM must pass this access token, otherwise
+you’d simply be redirected to authenticate again. Passing the access token can be done in two
 ways, the recommended way is by sending the following HTTP header in
 your request, where the number is replaced with the actual access token:
 
@@ -347,21 +356,8 @@ your request, where the number is replaced with the actual access token:
 
    Authentication: Bearer 1234567890
 
-The alternative way is by passing it along with the HTTP GET/POST
-request. This is considered less secure as your browser may log it in
-its history, and the server in its access logs. It can still not be
-intercepted by anyone in the middle, however, as it is transmitted over
-HTTPS.
-
-::
-
-   https://yourservice.com/?oauth_access_token=1234567890
-
-Automated clients can avoid this method, but it is necessarily used by
-the web-based interface. To mitigage security concerns, the access token
-you receive is encrypted by CLAM and bound to your IP. The passphrase
-for token encryption has to be configured through
-``OAUTH_ENCRYPTIONSECRET`` in your service configuration file. The web
+The other way is by passing the `Cookie` header. Most HTTP clients (e.g. browsers) will do this
+automatically upon every request once having received a cookie. The web
 interface will furthermore explicitly ask users to log out. Logging out
 is done by revoking the access token with the authorization provider.
 For this to work, your authentication provider must offer a revoke URL,
@@ -372,8 +368,7 @@ configuration file as follows:
 
    OAUTH_REVOKE_URL = "https://yourprovider/oauth/revoke"
 
-If none is set, CLAM’s logout procedure will simply instruct users to
-clear their browser history and cache, which is clearly sub-optimal.
+If none is set, CLAM’s logout procedure will simply clear the cookies and browser cache.
 
 The only information CLAM needs from the authorization provider is a
 username, or often the email address that acts as a username.
@@ -442,7 +437,7 @@ provider.
 
 At the moment, CLAM does not yet implement support for refresh tokens.
 
-The unencrypted access token may be passed to the wrapper script if
+The access token may be passed to the wrapper script if
 needed (has to be explicitly configured), allowing the wrapper script or
 underlying system to communicate with a resource provider on behalf of
 the user, through CLAM’s client_id.
@@ -505,7 +500,7 @@ set by CLAM.
 
 -  ``$PROJECT`` – The ID of the project
 
--  ``$OAUTH_ACCESS_TOKEN`` – The unencrypted OAuth access token [7]_.
+-  ``$OAUTH_ACCESS_TOKEN`` – The OAuth access token [7]_.
 
 Make sure the actual command is an absolute path, or that the executable
 is in the ``$PATH`` of the user ``clamservice`` will run as. Upon
@@ -1645,4 +1640,23 @@ It is even possible to include other external configuration files from the exter
 or multiple::
 
     include: [ "/path/to/other.yml", "/path/to/other2.yml" ]
+
+External configuration files may refer to standard environment variables by refering to them in curly braces::
+
+   root: "{{ROOT}}"
+
+If the variable does not exist or is empty, it will not be set alltogether. If you want to force a hard error message
+instead, add an exclamation mark::
+
+   root: "{{ROOT!}}"
+
+Alternatively, you can specify a default value as follows::
+
+   root: "{{ROOT=/tmp/data}}"
+
+It is also possible to typecast variables using the functions `int`, `bool`, `float` or `json`, this is done using the
+pipe character immediately after the variable name (before any of the previously mentioned options)::
+
+   number: "{{NUMBER|int}}"
+
 

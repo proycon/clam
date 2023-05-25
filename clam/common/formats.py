@@ -32,6 +32,8 @@ class ExampleFormat(CLAMMetaData):
     #Specify a mimetype for your format
     mimetype = "text/plain"
 
+    schemaorg_type = "DigitalDocument"
+
 
     #If your format is XML-based, specify a schema:
     schema = None
@@ -69,6 +71,7 @@ class HTMLFormat(CLAMMetaData):
         'language': StringParameter('language', "Language", required=False),
     }
     mimetype = "text/html"
+    schemaorg_type = "TextDigitalDocument"
 
     def httpheaders(self):
         """HTTP headers to output for this format. Yields (key,value) tuples."""
@@ -78,6 +81,7 @@ class BinaryDataFormat(CLAMMetaData):
     attributes = {}
     name = "Application-specific Binary Data"
     mimetype = 'application/octet-stream'
+    schemaorg_type = "DigitalDocument"
 
 class FrogTSVFormat(CLAMMetaData):
     attributes = {
@@ -92,6 +96,8 @@ class FrogTSVFormat(CLAMMetaData):
      }
     name = "Frog Tab Separated Values"
     mimetype = 'text/plain'
+    schemaorg_type = "TextDigitalDocument"
+
 TadpoleFormat = FrogTSVFormat #backwardcompatibility
 
 class CSVFormat(CLAMMetaData):
@@ -101,16 +107,19 @@ class CSVFormat(CLAMMetaData):
     }
     name = "Comma Separated Values"
     mimetype = 'text/csv'
+    schemaorg_type = "SpreadsheetDigitalDocument"
 
 class XMLFormat(CLAMMetaData):
     name = "XML Format (generic, not further specified)"
     mimetype = 'text/xml'
     schema = ''
+    schemaorg_type = "DigitalDocument"
 UndefinedXMLFormat = XMLFormat #backward compatibility
 
 class JSONFormat(CLAMMetaData):
     name = "JSON Format (generic, not further specified)"
     mimetype = 'application/json'
+    schemaorg_type = "DigitalDocument"
 
 class FoLiAXMLFormat(CLAMMetaData):
     attributes = { #TODO: this is not complete yet
@@ -130,6 +139,7 @@ class FoLiAXMLFormat(CLAMMetaData):
     name = "FoLiA XML"
     mimetype = 'text/xml'
     schema = '' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
     def validator(self):
         try:
@@ -161,103 +171,123 @@ class AlpinoXMLFormat(CLAMMetaData):
     name = "Alpino XML"
     mimetype = 'text/xml'
     schema = '' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 class DCOIFormat(CLAMMetaData):
     attributes = {}
     name = "DCOI format"
     mimetype = 'text/xml'
     schema = '' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 
 class KBXMLFormat(CLAMMetaData):
     name = "Koninklijke Bibliotheek XML-formaat"
     mimetype = 'text/xml'
     schema = '' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 
 class TICCLVariantOutputXML(CLAMMetaData):
     name="Ticcl Variant Output"
     mimetype='text/xml'
     schema='' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 class TICCLShadowOutputXML(CLAMMetaData):
     name="Ticcl Shadow Output"
     mimetype='text/xml'
     schema='' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 class MSWordFormat(CLAMMetaData):
     attributes = {}
     name = "Microsoft Word format"
     mimetype = 'application/msword'
     schema = '' #TODO
+    schemaorg_type = "TextDigitalDocument"
 
 class PDFFormat(CLAMMetaData):
     attributes = {}
     name = "PDF"
     mimetype = 'application/pdf'
+    schemaorg_type = "TextDigitalDocument"
 
 class OpenDocumentTextFormat(CLAMMetaData):
     attributes = {}
     name = "Open Document Text Format"
     mimetype = 'application/vnd.oasis.opendocument.text'
+    schemaorg_type = "TextDigitalDocument"
 
 class ZIPFormat(CLAMMetaData):
     attributes = {}
     name = "ZIP Archive"
     mimetype = 'application/zip'
+    schemaorg_type = "Dataset"
 
 class XMLStyleSheet(CLAMMetaData):
     attributes = {}
     name = "XML Stylesheet"
     mimetype ='application/xslt+xml'
+    schemaorg_type = "DigitalDocument"
 
 class WaveAudioFormat(CLAMMetaData):
     attributes = {}
     name ="Wave Audio File"
     mimetype = 'audio/vnd.wave'
+    schemaorg_type = "AudioObject"
 
 class OggAudioFormat(CLAMMetaData):
     attributes = {}
     name ="Ogg Vorbis Audio File"
     mimetype = 'audio/vorbis'
+    schemaorg_type = "AudioObject"
 
 class MP3AudioFormat(CLAMMetaData):
     attributes = {}
     name ="MP3 Audio File"
     mimetype = 'audio/mpeg'
+    schemaorg_type = "AudioObject"
 
 class MpegVideoFormat(CLAMMetaData):
     attributes = {}
     name ="Mpeg Video"
     mimetype = 'video/mpeg'
+    schemaorg_type = "VideoObject"
 
 class OggVideoFormat(CLAMMetaData):
     attributes = {}
     name ="Ogg Video File"
     mimetype = 'audio/ogg'
+    schemaorg_type = "VideoObject"
 
 class PngImageFormat(CLAMMetaData):
     attributes = {}
     name ="PNG Image"
     mimetype = 'image/png'
+    schemaorg_type = "ImageObject"
 
 class JpegImageFormat(CLAMMetaData):
     attributes = {}
     name ="Jpeg Image"
     mimetype = 'image/jpeg'
+    schemaorg_type = "ImageObject"
 
 class GifImageFormat(CLAMMetaData):
     attributes = {}
     name ="Gif Image"
     mimetype = 'image/gif'
+    schemaorg_type = "ImageObject"
 
 class TiffImageFormat(CLAMMetaData):
     attributes = {}
     name ="Tiff Image"
     mimetype = 'image/tiff'
+    schemaorg_type = "ImageObject"
 
 class DjVuFormat(CLAMMetaData):
     attributes = {}
     name = "DjVu format"
     mimetype = 'image/x-djvu'
+    schemaorg_type = "ImageObject"
 

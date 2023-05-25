@@ -33,7 +33,7 @@
         <xsl:choose>
          <xsl:when test="@project">
 
-            <xsl:if test="/clam/@oauth_access_token != ''">
+            <xsl:if test="/clam/@authentication != 'none' and /clam/@user != 'anonymous'">
              <xsl:call-template name="logout"/>
             </xsl:if>
 
@@ -118,7 +118,7 @@
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
 
-    <script src="{/clam/@baseurl}/static/jquery-3.4.1.min.js"></script>
+    <script src="{/clam/@baseurl}/static/jquery-3.5.0.min.js"></script>
     <script src="{/clam/@baseurl}/static/popper.min.js"></script>
     <script src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script src="{/clam/@baseurl}/static/bootstrap.min.js"></script>
@@ -151,9 +151,6 @@
         </xsl:if>
         <xsl:if test="/clam/@accesstoken">
         		accesstoken = '<xsl:value-of select="/clam/@accesstoken" />';
-        </xsl:if>
-        <xsl:if test="/clam/@oauth_access_token">
-        		oauth_access_token = '<xsl:value-of select="/clam/@oauth_access_token" />';
         </xsl:if>
         <xsl:choose>
         <xsl:when test="/clam/@user">
@@ -238,7 +235,7 @@
 <xsl:template name="logout">
     <div class="card">
       <p>
-        You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/?oauth_access_token={/clam/@oauth_access_token}">log out</a></strong> when you are done.
+        You are currently logged in as <em><xsl:value-of select="/clam/@user" /></em>. Make sure to <strong><a href="{/clam/@baseurl}/logout/">log out</a></strong> when you are done.
       </p>
     </div>
 </xsl:template>
@@ -531,14 +528,7 @@
         <h2 class="card-title">Output files</h2>
 
         <p class="card-text">(Download all as archive:
-          <xsl:choose>
-          <xsl:when test="/clam/@oauth_access_token = ''">
-            <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)
-          </xsl:when>
-          <xsl:otherwise>
-            <a href="output/zip/?oauth_access_token={/clam/@oauth_access_token}">zip</a> | <a href="output/gz/?oauth_access_token={/clam/@oauth_access_token}">tar.gz</a> | <a href="output/bz2/?oauth_access_token={/clam/@oauth_access_token}">tar.bz2</a>)
-          </xsl:otherwise>
-          </xsl:choose>
+        <a href="output/zip/">zip</a> | <a href="output/gz/">tar.gz</a> | <a href="output/bz2/">tar.bz2</a>)
         </p>
 
         <xsl:if test="/clam/forwarders">
@@ -571,7 +561,7 @@
 
 <xsl:template match="/clam/input/file">
     <tr>
-      <td class="file"><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a></td>
+      <td class="file"><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href"/></xsl:attribute><xsl:value-of select="./name"/></a></td>
         <xsl:variable name="template" select="@template" />
         <xsl:variable name="format" select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@format" />
         <td><xsl:value-of select="/clam/profiles/profile/input/InputTemplate[@id = $template]/@label"/></td>
@@ -589,10 +579,10 @@
         <td class="file">
         <xsl:choose>
             <xsl:when test="./viewers/viewer[1] and not(./viewers/viewer[1]/@allowdefault = 'false')">
-            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="./viewers/viewer[1]/@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:when>
         <xsl:otherwise>
-            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="./name"/></a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="./name"/></a>
         </xsl:otherwise>
         </xsl:choose>
         </td>
@@ -605,21 +595,21 @@
         <td>
             <xsl:for-each select="./viewers/viewer">
                 <xsl:if test="not(@more = '1' or @more = 'true' or @more = 'yes')">
-                    <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
+                    <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="." /></a><xsl:text> | </xsl:text>
                 </xsl:if>
             </xsl:for-each>
-            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Download</a>
+            <a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute>Download</a>
             <xsl:if test="@template">
                 <span class="moremenu"> | More...
                 <ul class="bg-dark">
                 <xsl:for-each select="./viewers/viewer">
                     <xsl:if test="@more = '1' or @more = 'true' or @more = 'yes'">
-                        <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /><xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a></li>
+                        <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" /></xsl:attribute><xsl:value-of select="." /></a></li>
                     </xsl:if>
                 </xsl:for-each>
-                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/share<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Share</a></li>
-                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/shareonce<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Share once</a></li>
-                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute>Metadata</a></li>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/share</xsl:attribute>Share</a></li>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/shareonce</xsl:attribute>Share once</a></li>
+                <li><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/metadata</xsl:attribute>Metadata</a></li>
                 </ul>
                 </span>
             </xsl:if>
@@ -659,14 +649,7 @@
     <div id="header"><h1><xsl:value-of select="@name"/></h1><h2><xsl:value-of select="@project"/></h2></div>
     <xsl:for-each select="upload">
         <div id="upload" class="card">
-            <xsl:choose>
-            <xsl:when test="/clam/@oauth_access_token = ''">
-              <a href="../">Return to the project view</a>
-            </xsl:when>
-            <xsl:otherwise>
-              <a href="../?oauth_access_token={/clam/@oauth_access_token}">Return to the project view</a>
-            </xsl:otherwise>
-            </xsl:choose>
+            <a href="../">Return to the project view</a>
             <ul>
               <xsl:apply-templates select="file"/>
             </ul>
@@ -715,20 +698,10 @@
                 <xsl:if test="/clam/parenturl != ''">
                     <li class="nav-item"><a class="nav-link" href="{/clam/parenturl}"><span class="oi oi-home" /></a></li>
                 </xsl:if>
-                <xsl:choose>
-                    <xsl:when test="/clam/@oauth_access_token = ''">
-                        <li class="nav-item active">
-                            <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/"><xsl:if test="count(/clam/profiles/profile) > 0">1.&#160;</xsl:if><span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
-                        </li>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <li class="nav-item active">
-                            <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
-                            <a class="nav-link" href="{/clam/@baseurl}/?oauth_access_token={/clam/@oauth_access_token}"><xsl:if test="count(/clam/profiles/profile) > 0">1.&#160;</xsl:if><span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
-                        </li>
-                    </xsl:otherwise>
-                </xsl:choose>
+                    <li class="nav-item active">
+                        <xsl:attribute name="class">nav-item<xsl:if test="not(/clam/@project)"> active</xsl:if></xsl:attribute>
+                        <a class="nav-link" href="{/clam/@baseurl}/"><xsl:if test="count(/clam/profiles/profile) > 0">1.&#160;</xsl:if><span class="oi oi-spreadsheet"></span>&#160;<xsl:value-of select="$indexlabel" /></a>
+                    </li>
                 <xsl:if test="count(/clam/profiles/profile) > 0">
                 <xsl:choose>
                     <xsl:when test="@project and status/@code = 0">
@@ -768,7 +741,7 @@
 
 <xsl:template name="clamindex">
 
-        <xsl:if test="/clam/@oauth_access_token != ''">
+        <xsl:if test="/clam/@authentication != 'none' and /clam/@user != 'anonymous'">
           <xsl:call-template name="logout"/>
         </xsl:if>
 
@@ -843,6 +816,10 @@
                 </p>
 
                 <a href="{/clam/@baseurl}/index/" class="btn btn-primary btn-lg btn-block" type="button">Continue</a>
+
+                <xsl:if test="contains(/clam/@authentication,',basic')">
+                    Or alternatively <a href="{/clam/@baseurl}/index/?requestauth=Basic">continue using fallback authentication</a> <em>(HTTP Basic Authentication)</em>
+                </xsl:if>
             </div>
         </div>
         </xsl:when>
@@ -867,7 +844,7 @@
                    <xsl:for-each select="projects/project">
                        <tr>
                            <xsl:attribute name="id">projectrow_<xsl:value-of select='.' /></xsl:attribute>
-                           <td><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/<xsl:if test="/clam/@oauth_access_token != ''">?oauth_access_token=<xsl:value-of select="/clam/@oauth_access_token"/></xsl:if></xsl:attribute><xsl:value-of select="." /></a>
+                           <td><a class="text-primary"><xsl:attribute name="href"><xsl:value-of select="@xlink:href" />/</xsl:attribute><xsl:value-of select="." /></a>
                                <button class="btn btn-danger btn-sm quickdelete">
                                    <xsl:attribute name="onclick">quickdelete('<xsl:value-of select='.' />');</xsl:attribute>
                                    Delete</button>

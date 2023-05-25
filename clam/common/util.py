@@ -105,7 +105,7 @@ def xmlescape(s):
 
 
 
-def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
+def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None, cookies=None, cookies_max_age=None):
     if headers is None: headers = { }
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     response.headers['Content-Type'] = contenttype
@@ -123,6 +123,12 @@ def withheaders(response, contenttype="text/xml; charset=UTF-8", headers=None):
                 response.headers['Access-Control-Allow-Headers'] = 'Authorization'
                 key = 'Access-Control-Allow-Origin'
             response.headers[key] = value
+
+    if cookies:
+        assert isinstance(cookies, dict)
+        for key, value in cookies.items():
+            if value is not None and value != "":
+                response.set_cookie(key, value, cookies_max_age)
     return response
 
 def isncname(name):
@@ -149,3 +155,27 @@ def makencname(name, prefix="I"):
     if not ncname:
         raise ValueError("Unable to convert '" + str(name) + "' to a valid XML NCName")
     return ncname
+
+def parse_accept_header(request):
+    """Get the outputtype based on content negotiation"""
+    if 'Accept' in request.headers:
+        accept = request.headers['Accept']
+        printdebug("Found accept header: " + str(accept))
+        if accept:
+            accept = accept.split(",")
+            ordered = []
+            for item in accept:
+                item = item.split(";")
+                q = 1.0
+                if len(item) > 1:
+                    if item[1].startswith("q="):
+                        try:
+                            q = float(item[1][2:])
+                        except ValueError:
+                            q = 1.0
+                ordered.append( (item[0],q) )
+
+            #sort by q value
+            ordered.sort(key=lambda x: -1 * x[1])
+            return [ x[0] for x in ordered ]
+    return []
