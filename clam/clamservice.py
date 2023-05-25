@@ -935,7 +935,7 @@ class Project:
         return None #checks rely on this
 
     @staticmethod
-    def updateindex(user: str, project: str, progress: float, status: int) -> None:
+    def updateindex(user: str, project: str, size: float, status: int) -> None:
         #Add project to index cache file
         indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
         if os.path.exists(indexfile):
@@ -945,15 +945,15 @@ class Project:
                     index = -1
                     if 'projects' in data:
                         for i, projectdata in enumerate(data['projects']):
-                            current_project, current_timestamp, current_progress, current_status = projectdata
+                            current_project, current_timestamp, current_size, current_status = projectdata
                             if current_project == project:
-                                if current_progress == progress and current_status == status:
+                                if current_size == size and current_status == status:
                                     return #all is well, project already in index, nothing to do
                                 # Project found, but something changed, update it!
                                 index = i
                                 break
                     d = datetime.datetime.fromtimestamp(os.stat(settings.ROOT + "projects/" + user + '/' + project)[8])
-                    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), progress, status )
+                    projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), size, status )
                     if index != -1:
                         data['projects'][index] = projectdata
                     else:
