@@ -1418,7 +1418,6 @@ class Project:
                 else:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEHOST + " " + cmd
 
-            Project.updateindex(user, project, 0.0, clam.common.status.RUNNING)
             printlog("Starting dispatcher " +  settings.DISPATCHER + " with " + settings.COMMAND + ": " + repr(cmd) + " ..." )
             #process = subprocess.Popen(cmd,cwd=Project.path(project), shell=True)
             process = subprocess.Popen(cmd,cwd=settings.CLAMDIR, shell=True)
@@ -1427,6 +1426,7 @@ class Project:
                 printlog("Started dispatcher with pid " + str(pid) )
                 with open(Project.path(project, user) + '.pid','w') as f: #will be handled by dispatcher!
                     f.write(str(pid))
+                Project.updateindex(user, project, 0.0, clam.common.status.RUNNING)
                 if shortcutresponse is True:
                     #redirect to project page to lose parameters in URL
                     return withheaders(flask.redirect(getrooturl() + '/' + project),headers={'allow_origin': settings.ALLOW_ORIGIN})
