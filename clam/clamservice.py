@@ -937,7 +937,7 @@ class Project:
     @staticmethod
     def updateindex(user: str, project: str, size: float, status: int) -> None:
         #Add project to index cache file
-        indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
+        indexfile = os.path.join(settings.ROOT , "projects" , user,'.index')
         if os.path.exists(indexfile):
             with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
                 try:
@@ -952,17 +952,17 @@ class Project:
                                 # Project found, but something changed, update it!
                                 index = i
                                 break
-                    d = datetime.datetime.fromtimestamp(os.stat(settings.ROOT + "projects/" + user + '/' + project)[8])
+                    d = datetime.datetime.fromtimestamp(os.stat(os.path.join(settings.ROOT ,"projects" , user , project))[8])
                     projectdata = ( project , d.strftime("%Y-%m-%d %H:%M:%S"), size, status )
                     if index != -1:
                         data['projects'][index] = projectdata
                     else:
                         data['projects'].append(projectdata)
-                    with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
+                    with open(indexfile,'w',encoding='utf-8') as f:
                         json.dump(data,f, ensure_ascii=False)
                 except ValueError:
                     #something went wrong, delete the entire index (will be recomputed)
-                    os.unlink(os.path.join(indexfile))
+                    os.unlink(indexfile)
 
     @staticmethod
     def pid(project, user):
@@ -1456,17 +1456,17 @@ class Project:
             shutil.rmtree(Project.path(project, user))
             msg += " Deleted"
         msg = msg.strip()
-        indexfile = os.path.join(settings.ROOT + "projects/" + user,'.index')
+        indexfile = os.path.join(settings.ROOT , "projects" , user,'.index')
         if os.path.exists(indexfile):
             #delete project from the index cache
             data = {}
-            with open(os.path.join(indexfile),'r',encoding='utf-8') as f:
+            with open(indexfile,'r',encoding='utf-8') as f:
                 try:
                     data = json.load(f)
                 except ValueError:
                     #delete the entire index
                     data = {'projects': []}
-                    os.unlink(os.path.join(indexfile))
+                    os.unlink(indexfile)
             totalsize = 0.0
             newdata = {
                 'projects': [],
@@ -1477,7 +1477,7 @@ class Project:
                     newdata['projects'].append(projectdata)
                     totalsize += projectdata[2]
             newdata['totalsize'] = totalsize
-            with open(os.path.join(indexfile),'w',encoding='utf-8') as f:
+            with open(indexfile,'w',encoding='utf-8') as f:
                 json.dump(newdata,f, ensure_ascii=False)
 
         return withheaders(flask.make_response(msg),'text/plain',{'Content-Length':len(msg), 'allow_origin': settings.ALLOW_ORIGIN})  #200
