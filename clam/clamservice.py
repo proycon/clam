@@ -100,11 +100,11 @@ def warning(msg):
 
 
 def userdb_lookup_dict(user, **authsettings):
-    printdebug("Looking up user " + user)
+    printdebug(f"Looking up user {user} in dictionary")
     return settings.USERS[user] #possible KeyError is captured later
 
 def userdb_lookup_file(user, **authsettings):
-    printdebug("Looking up user " + user)
+    printdebug(f"Looking up user {user} in password file")
     with open(settings.USERS_FILE,'r',encoding='utf-8') as f:
         for i, line in enumerate(f):
             line = line.strip()
@@ -117,7 +117,7 @@ def userdb_lookup_file(user, **authsettings):
     raise KeyError(f"User {user} not in database") 
 
 def userdb_lookup_mysql(user, **authsettings):
-    printdebug("Looking up user " + user + " in MySQL")
+    printdebug(f"Looking up user {user} in MySQL")
     host,port, mysqluser,passwd, database, table, userfield, passwordfield, accesslist, denylist = validate_users_mysql()  #pylint: disable=unused-variable
     if denylist and user in denylist:
         printdebug("User in denylist")
