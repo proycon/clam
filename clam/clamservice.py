@@ -1006,7 +1006,6 @@ class Project:
         while not os.path.exists(Project.path(project, user) + ".done"):
             printdebug("Waiting for process to die")
             time.sleep(1)
-        Project.updateindex(user, project, 0.0, clam.common.status.READY)
         return True
 
     @staticmethod
