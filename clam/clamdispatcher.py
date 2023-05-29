@@ -217,8 +217,8 @@ def main():
                 os.waitpid(pid, 0)
                 if projectdir:
                     os.unlink(projectdir + '.abort')
-                    open(projectdir + '.aborted','w')
-                    f.close()
+                    with open(projectdir + '.aborted','w') as f:
+                        f.close()
                 done = True
                 break
             lastabortchecktime = datetime.datetime.now()
