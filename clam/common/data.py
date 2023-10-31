@@ -2991,8 +2991,7 @@ def buildarchive(project, path, fmt):
         if os.path.isfile(path + "output/" + project + ".tar.bz2"):
             os.unlink(path + "output/" + project + ".tar.bz2")
     elif fmt == 'tar.gz':
-        contenttype = 'application/x-tar'
-        contentencoding = 'gzip'
+        contenttype = 'application/gzip'
         command = shutil.which("tar")
         if not command:
             raise RuntimeError("tar not found")
