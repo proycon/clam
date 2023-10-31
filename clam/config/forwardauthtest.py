@@ -46,7 +46,7 @@ PORT= 8080
 
 # ======== AUTHENTICATION & SECURITY ===========
 
-PREAUTHHEADER = 'REMOTE_USER'
+PREAUTHHEADER = 'X-Custom-User'
 PREAUTHONLY = True
 
 #Users and passwords

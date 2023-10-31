@@ -282,7 +282,7 @@ class ForwardedAuth(HTTPAuth):
                 try:
                     username = self.username(**self.settings)
                 except KeyError:
-                    self.printdebug("Header not found")
+                    self.printdebug("Header not found, headers: " + repr(flask.request.headers))
                     return self.auth_error_callback()
                 #add username as parameter to the wrapped function
                 kwargs['credentials'] = username
