@@ -109,12 +109,18 @@ sleep 5
 curl -f -H "REMOTE_USER: test" http://$HOSTNAME:8080/
 if [ $? -ne 0 ]; then
    echo "ERROR: Forwarded authentication failure (false negative)" >&2
+   echo "<--------------------- forwardauthtest.server.log --------------------------------->" >&2
+   cat forwardauthtest.server.log >&2
+   echo "</-------------------- forwardauthtest.server.log --------------------------------->" >&2
    GOOD=0
 fi
 
 curl -f http://$HOSTNAME:8080/
 if [ $? -eq 0 ]; then
    echo "ERROR: Forwarded authentication failure (false positive)" >&2
+   echo "<--------------------- forwardauthtest.server.log --------------------------------->" >&2
+   cat forwardauthtest.server.log >&2
+   echo "</-------------------- forwardauthtest.server.log --------------------------------->" >&2
    GOOD=0
 fi
 
