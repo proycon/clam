@@ -8,7 +8,7 @@ CLAM is available from the Python Package Index; a standardised
 framework and repository for the installation of all kinds of Python
 packages. This is the easiest method
 of installing CLAM, as it will automatically fetch and install any
-dependencies. We recommend to use a virtual environment (``virtualenv``) if you
+dependencies. We recommend to use a virtual environment if you
 want to install CLAM locally as a user, if you insist to install globally,
 prepend the following commands with ``sudo``:
 
