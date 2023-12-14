@@ -25,23 +25,19 @@ If pip is not yet installed on your system, install it as follows (example for D
 
 However, we recommend you first create a Python Virtual Environment to install
 CLAM (and your clam project) in. To create a virtual environment, which we name
-*clamenv* here (but you can choose any name you want), issue the following
+*env* here (but you can choose any name you want), issue the following
 command::
 
-  $ virtualenv --python=python3 clamenv
+  $ python3 -m venv env
 
 To enter the virtual environment, type the following (note the period)::
 
-   $ . clamenv/bin/activate.sh
+   $ . env/bin/activate
 
 This will change your prompt by inserting the name of the virtual
-environment. Now you can proceed with to install CLAM in the virtual environment::
+environment. Now you can proceed to install CLAM in the virtual environment::
 
-  $ . env/bin/activate
-
-If virtualenv is not yet installed on your system, you can install it as follows (example for Debian/Ubuntu systems)::
-
-  $ apt-get install virtualenv
+  $ pip install clam
 
 You can verify the availability of CLAM by opening
 an interactive Python interpreter and writing: ``import clam``
