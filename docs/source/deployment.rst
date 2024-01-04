@@ -22,6 +22,11 @@ for production environments (since CLAM v3.2). This is the recommended way for
 production deployments and works nicely in setups with Docker, Docker Compose,
 Podman and/or Kubernetes. 
 
+Please first ensure you have docker (or a compatible system like podman)
+installed on your system. On Ubuntu/Debian::
+
+    apt-get install docker.io
+
 A ``startserver_production.sh`` script was generated that builds and subsequently runs the container. It builds the container as follows::
 
     docker build -t yourservice .
