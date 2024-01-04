@@ -68,8 +68,8 @@ RUN echo -e '#!/bin/sh\nln -sf /dev/stdout /var/log/nginx/access.log\nnginx -g "
 }' > /etc/nginx/http.d/default.conf
 
 # Install the service itself, will also pull in CLAM and all other dependencies
-RUN if [ $CLAM_DEV -eq 1 ]; then pip install git+https://github.com/proycon/clam.git; fi &&\
-    cd /usr/src/webservice && pip install . && rm -Rf /usr/src/webservice &&\
+RUN if [ $CLAM_DEV -eq 1 ]; then pip install --break-system-packages git+https://github.com/proycon/clam.git; fi &&\
+    cd /usr/src/webservice && pip install --break-system-packages . && rm -Rf /usr/src/webservice &&\
     ln -s /usr/lib/python3.*/site-packages/clam /opt/clam
 
 VOLUME ["/data"]
