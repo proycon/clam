@@ -39,7 +39,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'CLAM'
-copyright = u'2018, Maarten van Gompel'
+copyright = u'2024, Maarten van Gompel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
