@@ -35,10 +35,16 @@ and runs it like::
 
     docker run --rm -v "/path/to/data:/data" -p 8080:80 yourservice
 
+
 If you used the generated ``*.config.yml`` external configuration file, then
 you can configure a lot of the deployment specific variables via environment
 variables. Check the ``*.config.yml`` file to see which are available. Note
 that most environment variables carry the additional prefix `CLAM_`.
+
+The ``startserver_production.sh`` script generates a non-persistent data
+directory on the host for use by the container, you most likely want to change
+this either in the script itself or by setting a `DATADIR` environment variable
+to an existing directory on the host prior to running the script!
 
 The container is based on Alpine Linux and serves your CLAM webservice via
 nginx and uwsgi.

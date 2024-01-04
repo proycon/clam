@@ -194,7 +194,7 @@ set -e
 docker build -t "{sysid}" .
 
 #Note, this datadir will be non-persistent, you will likely want to change this in production settings
-DATADIR=$(mktemp -d)
+[ -z "$DATADIR" ] && DATADIR=$(mktemp -d)
 chmod go+wx "$DATADIR" #allow subuids/subgids to make directories, needed to prevent permission denied errors
 HOST_PORT={port}
 
