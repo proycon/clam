@@ -201,6 +201,8 @@ HOST_PORT={port}
 #At this point you can pass any environment variables you use in your {sysid}.config.yml, pass them via --env
 docker run --rm --volume "$DATADIR:/data" -p "$HOST_PORT:80" --env CLAM_ROOT=/data/{sysid}-userdata --env CLAM_USE_FORWARDED_HOST=0 "{sysid}"
 
+# Note: if your host system uses SELinux and you find the data is not properly writable from the container then you might need to change --volume parameter to "$DATADIR:/data:z"
+
 # In many production scenarios, you will not invoke this script manually but instead use a kubernetes deployment (setting the necessary env variables) or a docker-compose.yml
 # It is strongly recommended to deploy the container behind a reverse proxy that handles SSL, make sure to pass CLAM_USER_FORWARDED_HOST=1 when running the container in that case.
 
