@@ -93,14 +93,11 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
                 } else {
                     xmldoc = $.parseXML(parametersxmloverride);
                 }
-                var found = false;
                 var x = $(xmldoc).find("parameters");
                 if (x.length == 1) {
                     xmldoc = x[0];
-                    found = true;
                     parametercount = xmldoc.children.length;
-                }
-                if (!found) {
+                } else {
                     alert("You browser was unable render the metadata parameters...");
                     return false;
                 }
