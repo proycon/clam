@@ -89,23 +89,21 @@ function renderfileparameters(id, target, enableconverters, parametersxmloverrid
             if (document.implementation && document.implementation.createDocument) {
                 //For decent browsers (Firefox, Opera, Chromium, etc...)
                 if (parametersxmloverride === undefined) { //eslint-disable-line no-undefined
-                    xmldoc = $(inputtemplate.parametersxml);
+                    xmldoc = $.parseXML(inputtemplate.parametersxml);
                 } else {
-                    xmldoc = $(parametersxmloverride);
+                    xmldoc = $.parseXML(parametersxmloverride);
                 }
                 var found = false;
-                for (var i = 0; i < xmldoc.length; i++) {
-                    if (xmldoc[i].nodeName.toLowerCase() === "parameters") {
-                        xmldoc = xmldoc[i];
-                        found = true;
-                        parametercount = xmldoc.children.length;
-                    }
+                var x = $(xmldoc).find("parameters");
+                if (x.length == 1) {
+                    xmldoc = x[0];
+                    found = true;
+                    parametercount = xmldoc.children.length;
                 }
                 if (!found) {
                     alert("You browser was unable render the metadata parameters...");
                     return false;
                 }
-
 
                 var xsltProcessor=new XSLTProcessor();
                 xsltProcessor.importStylesheet(parametersxsl); //parametersxsl global, automatically loaded at start
