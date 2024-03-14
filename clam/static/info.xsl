@@ -472,7 +472,7 @@ result = clamclient.action('someaction', someparameter='blah',otherparameter=42,
     <link rel="stylesheet" href="{/clam/@baseurl}/static/base.css" type="text/css" />
     <link rel="stylesheet" href="{/clam/@baseurl}/style.css" type="text/css" />
 
-    <script src="{/clam/@baseurl}/static/jquery-3.5.0.min.js"></script>
+    <script src="{/clam/@baseurl}/static/jquery-3.7.1.min.js"></script>
     <script src="{/clam/@baseurl}/static/popper.min.js"></script>
     <script src="{/clam/@baseurl}/static/bootstrap.min.js"></script>
   </head>
