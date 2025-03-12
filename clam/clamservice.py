@@ -2292,7 +2292,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                         file.metadata = metadata
                         #Add inputtemplate ID to metadata
                         metadata.inputtemplate = inputtemplate.id
-                    elif 'validation_error' in metadata:
+                    elif metadata is not None and 'validation_error' in metadata:
                         metadataerror = metadata['validation_error']
                     else:
                         metadataerror = "Undefined error"
@@ -2308,7 +2308,7 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                 file.metadata = metadata
                 metadata.inputtemplate = inputtemplate.id
 
-            if 'validation_error' in metadata:
+            if metadata is not None and 'validation_error' in metadata:
                 printdebug('(Metadata could not be generated, ' + str(metadataerror) + ') due to validation error')
                 jsonoutput['error'] = fatalerror = "Input not accepted (validation failed): " + str(metadataerror)
                 output += "<error>" + xmlescape(fatalerror) + "</error>"
