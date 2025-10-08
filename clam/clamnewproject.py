@@ -182,7 +182,7 @@ clamservice -d {sysid}.{sysid}
     if not os.path.exists(os.path.join(sourcedir, args.sysid + '.config.yml')):
         with open(os.path.join(CLAMDIR, 'config','template.config.yml'),'r',encoding='utf-8') as f_in:
             with open(os.path.join(sourcedir, args.sysid + '.config.yml'),'w',encoding='utf-8') as f_out:
-                f_out.write(f_in.read().replace("{sys_id}", args.sysid))
+                f_out.write(f_in.read().replace("{sys_id}", args.sysid).replace("{port}",str(args.port)))
     else:
         print("WARNING: YAML configuration file already seems to exists, defiantly refusing to overwrite",file=sys.stderr)
         sys.exit(2)
