@@ -1412,7 +1412,10 @@ class Project:
             #    cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + '.py'
             #else:
             cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
-            if settings.REMOTEHOST:
+            venv = os.environ.get('VIRTUAL_ENV')
+            if venv:
+                cmd = f". {venv}/bin/activate && " + cmd
+            elif settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
                 else:
