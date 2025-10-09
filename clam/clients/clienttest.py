@@ -3,9 +3,6 @@ import sys
 import os
 import time
 
-sys.path.append(sys.path[0] + '/../../')
-os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
-
 from clam.common.client import *
 from clam.common.formats import *
 import clam.common.status

@@ -24,7 +24,7 @@ try:
     import clam
     CLAMDIR = os.path.abspath(clam.__path__[0])
 except ImportError:
-    print("ERROR: Unable to find CLAM. Did you install it properly? Is your PYTHONPATH or virtual environment correct?",file=sys.stderr)
+    print("ERROR: Unable to find CLAM. Did you install it properly? Is your virtual environment correct?",file=sys.stderr)
     sys.exit(2)
 
 from clam.common.data import VERSION

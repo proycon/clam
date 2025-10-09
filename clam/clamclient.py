@@ -19,15 +19,12 @@
 
 import sys
 import os
-sys.path.append(sys.path[0] + '/..')
-os.environ['PYTHONPATH'] = sys.path[0] + '/..'
-
 
 from clam.common.client import CLAMClient
 from clam.common.data import ParameterCondition, NotFound, PermissionDenied, ServerError, AuthRequired, VERSION
 
 def usage():
-    print("clamclient.py [[options]] [url] [command] [command-arguments]",file=sys.stderr)
+    print("clamclient [[options]] [url] [command] [command-arguments]",file=sys.stderr)
     print("  Low-level command-line interface to any CLAM webservice",file=sys.stderr)
     print("Options:",file=sys.stderr)
     print("\t-u [username]",file=sys.stderr)
@@ -101,7 +98,6 @@ def main():
     else:
         usage()
         sys.exit(2)
-        print("ERROR: URL expected",file=sys.stderr)
     if url[:4] != 'http':
         print("ERROR: URL expected",file=sys.stderr)
         usage()

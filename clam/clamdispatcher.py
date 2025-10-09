@@ -88,16 +88,10 @@ def main():
         if os.path.exists('.pid'): os.unlink('.pid')
         return 1
 
-    offset = 0
-    if '/' in sys.argv[1]:
-        #os.environ['PYTHONPATH'] = sys.argv[1]
-        for path in sys.argv[1].split(':'):
-            print("[CLAM Dispatcher] Adding to PYTHONPATH: " + path, file=sys.stderr)
-            sys.path.append(path)
-        offset = 1
+    print("[CLAM Dispatcher] Running with " + sys.executable, file=sys.stderr)
 
-    settingsmodule = sys.argv[1+offset]
-    projectdir = sys.argv[2+offset]
+    settingsmodule = sys.argv[1]
+    projectdir = sys.argv[2]
     if projectdir == 'NONE': #Actions
         tmpdir = None
         projectdir = None
@@ -111,9 +105,9 @@ def main():
 
     print("[CLAM Dispatcher] Started CLAM Dispatcher v" + str(VERSION) + " with " + settingsmodule + " (" + datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ")", file=sys.stderr)
 
-    cmd = sys.argv[3+offset]
+    cmd = sys.argv[3]
     cmd = clam.common.data.unescapeshelloperators(cmd) #shell operators like pipes and redirects were passed in an escaped form
-    for arg in sys.argv[4+offset:]:
+    for arg in sys.argv[4:]:
         arg_u = clam.common.data.unescapeshelloperators(arg)
         if arg_u != arg:
             cmd += " " + arg_u #shell operator (pipe or something)
@@ -144,7 +138,7 @@ def main():
             pass
     except ImportError as e:
         print("[CLAM Dispatcher] FATAL ERROR: Unable to import settings module, settingsmodule is " + settingsmodule + ", error: " + str(e), file=sys.stderr)
-        print("[CLAM Dispatcher]      hint: If you're using the development server, check you pass the path your service configuration file is in using the -P flag. For Apache integration, verify you add this path to your PYTHONPATH (can be done from the WSGI script)", file=sys.stderr)
+        print("[CLAM Dispatcher]              Your settings module should have been (automatically) installed either in your virtual environment or globally", file=sys.stderr)
         if projectdir:
             f = open(projectdir + '.done','w')
             f.write(str(1))

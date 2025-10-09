@@ -17,9 +17,6 @@ import time
 import glob
 import random
 import codecs
-#We may need to do some path magic in order to find the clam.* imports
-sys.path.append(sys.path[0] + '/../../')
-os.environ['PYTHONPATH'] = sys.path[0] + '/../../'
 
 #Import the CLAM Client API and CLAM Data API and other dependencies
 from clam.common.client import *

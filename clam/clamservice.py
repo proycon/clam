@@ -1397,21 +1397,12 @@ class Project:
             #everything should be shell-safe now
             cmd += " 2> " + Project.path(project, user) + "output/error.log" #add error output
 
-            pythonpath = ''
-            try:
-                pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
-            except AttributeError:
-                pass
-            if pythonpath:
-                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
-            else:
-                pythonpath = os.path.dirname(settings.__file__)
 
             #if settings.DISPATCHER == 'clamdispatcher' and os.path.exists(settings.CLAMDIR + '/' + settings.DISPATCHER + '.py') and stat.S_IXUSR & os.stat(settings.CLAMDIR + '/' + settings.DISPATCHER+'.py')[stat.ST_MODE]:
             #    #backward compatibility for old configurations without setuptools
             #    cmd = settings.CLAMDIR + '/' + settings.DISPATCHER + '.py'
             #else:
-            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
+            cmd = settings.DISPATCHER + ' ' + settingsmodule + ' ' + Project.path(project, user) + ' ' + cmd
             venv = os.environ.get('VIRTUAL_ENV')
             if venv:
                 cmd = f". {venv}/bin/activate && " + cmd
@@ -2641,18 +2632,7 @@ class ActionHandler:
             cmd = clam.common.data.escapeshelloperators(cmd)
             #everything should be shell-safe now
 
-            #run the action
-            pythonpath = ''
-            try:
-                pythonpath = ':'.join(settings.DISPATCHER_PYTHONPATH)
-            except:
-                pass
-            if pythonpath:
-                pythonpath = os.path.dirname(settings.__file__) + ':' + pythonpath
-            else:
-                pythonpath = os.path.dirname(settings.__file__)
-
-            cmd = settings.DISPATCHER + ' ' + pythonpath + ' ' + settingsmodule + ' ' + passdir + ' ' + cmd
+            cmd = settings.DISPATCHER + ' ' + settingsmodule + ' ' + passdir + ' ' + cmd
             if settings.REMOTEHOST:
                 if settings.REMOTEUSER:
                     cmd = "ssh -o NumberOfPasswordPrompts=0 " + settings.REMOTEUSER + "@" + settings.REMOTEHOST + " " + cmd
@@ -3341,7 +3321,6 @@ def main():
 
     settingsmodule = None
     PORT = HOST = FORCEURL = None
-    PYTHONPATH = None
     ASSUMESSL = False
 
     parser = argparse.ArgumentParser(description="Start a CLAM webservice; turns command-line tools into RESTful webservice, including a web-interface for human end-users.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -3349,7 +3328,6 @@ def main():
     parser.add_argument('-H','--hostname', type=str,help="The hostname used to access the webservice", action='store',required=False)
     parser.add_argument('-p','--port', type=int,help="The port number for the webservice", action='store',required=False)
     parser.add_argument('-u','--forceurl', type=str,help="The full URL to access the webservice", action='store',required=False)
-    parser.add_argument('-P','--pythonpath', type=str,help="Sets the $PYTHONPATH", action='store',required=False)
     parser.add_argument('-b','--basicauth', help="Default to HTTP Basic Authentication on the development server (do not expose to the world without SSL) (option remains for legacy purposes, enabled by default now)", action='store_true',required=False)
     parser.add_argument('-v','--version',help="Version", action='version',version="CLAM version " + str(VERSION))
     parser.add_argument('-c','--config', type=str,help="Path to external YAML configuration file to import", action='store',required=False)
@@ -3367,17 +3345,12 @@ def main():
         HOST = args.hostname
     if 'forceurl' in args:
         FORCEURL = args.forceurl
-    if 'pythonpath' in args:
-        PYTHONPATH = args.pythonpath
     if 'basicauth' in args:
         ASSUMESSL = True
     if 'config' in args and args.config:
         os.environ['CONFIGFILE'] = args.config #passed through the environment
 
     settingsmodule = args.settingsmodule
-
-    if PYTHONPATH:
-        sys.path.append(PYTHONPATH)
 
     import_string = "import " + settingsmodule + " as settings"
     settings = importlib.import_module(settingsmodule)
