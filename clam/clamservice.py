@@ -2799,19 +2799,6 @@ def sufficientresources(user, project):
 
 
 
-def usage():
-    print( "Syntax: clamservice.py [options] clam.config.yoursystem",file=sys.stderr)
-    print("Options:",file=sys.stderr)
-    print("\t-d            - Enable debug mode",file=sys.stderr)
-    print("\t-H [hostname] - Hostname",file=sys.stderr)
-    print("\t-p [port]     - Port",file=sys.stderr)
-    print("\t-u [url]      - Force URL",file=sys.stderr)
-    print("\t-h            - This help message",file=sys.stderr)
-    print("\t-P [path]     - Python Path from which the settings module can be imported",file=sys.stderr)
-    print("\t-v            - Version information",file=sys.stderr)
-    print("(Note: Running clamservice directly from the command line uses the built-in",file=sys.stderr)
-    print("web-server. This is great for development purposes but not recommended",file=sys.stderr)
-    print("for production use. Use the WSGI interface with for instance Apache instead.)",file=sys.stderr)
 
 class CLAMService(object):
     """CLAMService is the actual service object. See the documentation for a full specification of the REST interface."""
@@ -3316,7 +3303,6 @@ def main():
     global settingsmodule, DEBUG, settings
 
     if len(sys.argv) < 2:
-        usage()
         sys.exit(1)
 
     settingsmodule = None
