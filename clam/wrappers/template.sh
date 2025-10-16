@@ -25,9 +25,9 @@ die() {
 #this script takes three arguments from CLAM: $STATUSFILE $INPUTDIRECTORY $OUTPUTDIRECTORY. (as configured at COMMAND= in the service configuration file)
 STATUSFILE=$1
 shift
-INPUTDIRECTORY=$2
+INPUTDIRECTORY=$1
 shift
-OUTPUTDIRECTORY=$3
+OUTPUTDIRECTORY=$1
 shift
 
 # If $PARAMETERS was passed via COMMAND= in the service configuration file;
