@@ -447,7 +447,7 @@ def mainentry(credentials = None):
 
     #when JSON(-LD) response is requested, just return the info page
     accept = parse_accept_header(flask.request)
-    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0]:
+    if accept and 'application/ld+json' in accept or 'application/json' in accept:
         return info(credentials)
 
     if user == "anonymous" and auth_type() != "none" and not settings.DISABLE_PORCH:
@@ -594,7 +594,7 @@ def info(credentials=None):
     corpora = CLAMService.corpusindex()
 
     accept = parse_accept_header(flask.request)
-    if accept and 'application/ld+json' in accept[0] or 'application/json' in accept[0] or flask.request.args.get("json") == "1":
+    if accept and 'application/ld+json' in accept or 'application/json' in accept or flask.request.args.get("json") == "1":
         #pylint: disable=bad-continuation
         return withheaders(flask.make_response(flask.render_template('response.json',
                 version=VERSION,

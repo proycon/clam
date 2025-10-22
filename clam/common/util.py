@@ -156,7 +156,7 @@ def makencname(name, prefix="I"):
         raise ValueError("Unable to convert '" + str(name) + "' to a valid XML NCName")
     return ncname
 
-def parse_accept_header(request):
+def parse_accept_header(request) -> list[str]:
     """Get the outputtype based on content negotiation"""
     if 'Accept' in request.headers:
         accept = request.headers['Accept']
