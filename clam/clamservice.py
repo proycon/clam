@@ -1998,9 +1998,9 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
         sourcefile = flask.request.files['file'].filename
     elif 'url' in postdata and postdata['url']:
         #Download from URL
-        postdata['url'] = unquote(postdata['url'])
-        printlog("Adding web-based URL " + postdata['url'] + " to input files")
-        sourcefile = os.path.basename(postdata['url'])
+        sourcefile = unquote(postdata['url'])
+        printlog("Adding web-based URL " + sourcefile + " to input files")
+        sourcefile = os.path.basename(sourcefile)
     elif 'contents' in postdata and postdata['contents']:
         #In message
         printlog("Adding file " + filename + " with explicitly provided contents to input files")
@@ -2218,15 +2218,15 @@ def addfile(project, filename, user, postdata, inputsource=None,returntype='xml'
                     #Upload file from client to server
                     flask.request.files['file'].save(Project.path(project, user) + 'input/' + filename)
                 elif 'url' in postdata and postdata['url']:
-                    postdata['url'] = unquote(postdata['url'])
-                    printdebug('(Receiving data from url: ' + postdata['url'] + " )" )
+                    url = unquote(postdata['url'])
+                    printdebug('(Receiving data from url: ' + url + " )" )
                     #Download file from 3rd party server to CLAM server
                     try:
-                        r = requests.get(postdata['url'])
+                        r = requests.get(url)
                     except:
-                        return withheaders(flask.make_response("No remote data could be obtained from " + postdata['url'],404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+                        return withheaders(flask.make_response("No remote data could be obtained from " + url,404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
                     if not (r.status_code >= 200 and r.status_code < 300):
-                        return withheaders(flask.make_response("No remote data could be obtained from " + postdata['url'] + ". Server returned HTTP " + str(r.status_code),404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
+                        return withheaders(flask.make_response("No remote data could be obtained from " + url,404),"text/plain", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
                     CHUNK = 16 * 1024
                     f = open(Project.path(project, user) + 'input/' + filename,'wb')
