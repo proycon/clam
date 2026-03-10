@@ -216,6 +216,7 @@ class HTTPDigestAuth(HTTPAuth):
 
     def authenticate(self, auth, password): #pylint: disable=too-many-return-statements
         remote_addr = flask.request.remote_addr
+        assert isinstance(remote_addr,str)
         if not auth.username:
             self.printdebug("Username missing in authorization header from " + remote_addr)
             return False
@@ -314,6 +315,7 @@ class MultiAuth(object):
         @wraps(f)
         def decorated(*args, **kwargs):
             remote_addr = flask.request.remote_addr
+            assert isinstance(remote_addr,str)
             self.printdebug("Handling Multiple Authenticators for " + remote_addr)
             selected_auth = None
             scheme = None
