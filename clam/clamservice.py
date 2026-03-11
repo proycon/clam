@@ -230,9 +230,12 @@ class Login(object):
             printdebug("OAuth Login: Error fetching token")
             return withheaders(flask.make_response('No access token received from authorization provider',403),"text/plain",headers={'allow_origin': settings.ALLOW_ORIGIN})
 
+        #pick up earlier parameters from cookies
+        params = urlencode([ (k,v) for k,v in flask.request.cookies.items()])
+
         #pylint: disable=bad-continuation
         printdebug("OAuth Login: Done")
-        return withheaders(flask.make_response(flask.render_template('login.xml',
+        response = withheaders(flask.make_response(flask.render_template('login.xml',
                         version=VERSION,
                         system_id=settings.SYSTEM_ID,
                         system_name=settings.SYSTEM_NAME,
@@ -250,8 +253,13 @@ class Login(object):
                         system_license=settings.SYSTEM_LICENSE,
                         auth_type=auth_type(),
                         url=getrooturl(),
+                        params=params,
                         oauth_access_token=oauth_encrypt(d['access_token']))),
                    headers={'allow-origin': settings.ALLOW_ORIGIN}, cookies={'oauth_access_token': oauth_encrypt(d['access_token'])} )
+        #reset parameter cookies
+        for key in flask.request.cookies.keys():
+            response.delete_cookies(key)
+        return response
 
 def oauth_encrypt(oauth_access_token):
     #encrypt is a misnomer because we don't actually encrypt anything anymore!

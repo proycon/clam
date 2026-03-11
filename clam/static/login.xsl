@@ -8,7 +8,14 @@
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta http-equiv="refresh" content="3; url={/clam/@baseurl}/" />            
+    <xsl:choose>
+        <xsl:when test="/clam/@params">
+            <meta http-equiv="refresh" content="3; url={/clam/@baseurl}/?{/clam/@params}" />
+        </xsl:when>
+        <xsl:otherwise>
+            <meta http-equiv="refresh" content="3; url={/clam/@baseurl}/" />
+        </xsl:otherwise>
+    </xsl:choose>
     <title><xsl:value-of select="@name"/><xsl:value-of select="@project"/></title>
   </head>
   <body>

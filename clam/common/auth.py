@@ -492,7 +492,12 @@ class OAuth2(HTTPAuth):
                     #Redirect to Authentication Provider
                     self.printdebug("Redirecting to authentication provider: " + self.auth_url)
 
-                    return flask.redirect(auth_url)
+                    response = flask.redirect(auth_url)
+
+                    #set cookie so parameters can be picked up again on login redirect
+                    for key, value in flask.request.values:
+                        response.set_cookie(key, value, max_age=600)
+                    return response
                 else:
                     oauthsession = OAuth2Session(self.client_id, token={'access_token': oauth_access_token, 'token_type': 'bearer'})
                     if self.userinfo_url: oauthsession.USERINFO_URL = self.userinfo_url
