@@ -36,8 +36,9 @@ import mimetypes
 import flask
 import werkzeug
 import requests
-import base64
 import copy
+import lxml
+from typing import Union
 
 import clam.common.status
 import clam.common.parameters
@@ -85,6 +86,10 @@ settingsmodule = None #will be overwritten later
 setlog(sys.stderr)
 
 HOST = PORT = None
+
+XSLFILES = ('info.xsl','interface.xsl','login.xsl','parameters.xsl')
+
+SUPPORTED_MIMETYPES = ('application/xml', 'text/xml', 'text/html')
 
 
 
@@ -235,7 +240,7 @@ class Login(object):
 
         #pylint: disable=bad-continuation
         printdebug("OAuth Login: Done")
-        response = withheaders(flask.make_response(flask.render_template('login.xml',
+        response = respond('login.xsl',flask.render_template('login.xml',
                         version=VERSION,
                         system_id=settings.SYSTEM_ID,
                         system_name=settings.SYSTEM_NAME,
@@ -254,7 +259,7 @@ class Login(object):
                         auth_type=auth_type(),
                         url=getrooturl(),
                         params=params,
-                        oauth_access_token=oauth_encrypt(d['access_token']))),
+                        oauth_access_token=oauth_encrypt(d['access_token'])),
                    headers={'allow-origin': settings.ALLOW_ORIGIN}, cookies={'oauth_access_token': oauth_encrypt(d['access_token'])} )
         #reset parameter cookies
         for key in flask.request.cookies.keys():
@@ -267,6 +272,23 @@ def oauth_encrypt(oauth_access_token):
         return "" #no oauth
     else:
         return oauth_access_token
+
+def respond(xslname: str, rendered_template: str, http_code=200, **kwargs) -> Union[bytes,str]:
+    """Formulates a full response with headers, and optionally through XSLT if an interface was requested"""
+    mimetype = flask.request.accept_mimetypes.best_match(SUPPORTED_MIMETYPES)
+    printdebug(f"Responding with mimetype = {mimetype}")
+    assert isinstance(mimetype, str)
+    if not kwargs: kwargs = {}
+    if 'application/xml' in mimetype or 'text/xml' in mimetype:
+        response = flask.make_response(rendered_template, http_code)
+    else:
+        printdebug(f"Rendering XSLT")
+        xmldoc = lxml.etree.XML(rendered_template.encode('utf-8'))
+        xmlstring = lxml.etree.tostring(settings.transformers[xslname](xmldoc), pretty_print=True).replace(b'xmlns=""',b'')
+        response = flask.make_response(xmlstring, http_code)
+        kwargs['contenttype'] = "text/xml; charset=UTF-8"
+    return withheaders(response, **kwargs)
+
 
 class Logout(object):
 
@@ -482,7 +504,7 @@ def index(credentials = None):
 
 
     #pylint: disable=bad-continuation
-    return withheaders(flask.make_response(flask.render_template('response.xml',
+    return respond('interface.xsl',flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
@@ -528,7 +550,7 @@ def index(credentials = None):
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
-            )), headers={'allow_origin':settings.ALLOW_ORIGIN}) #pylint: disable=bad-continuation
+            ), headers={'allow_origin':settings.ALLOW_ORIGIN}) #pylint: disable=bad-continuation
 
 
 def porch(credentials=None):
@@ -540,7 +562,7 @@ def porch(credentials=None):
     errormsg = ""
 
     #pylint: disable=bad-continuation
-    return withheaders(flask.make_response(flask.render_template('response.xml',
+    return respond('interface.xsl', flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
@@ -585,7 +607,7 @@ def porch(credentials=None):
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
-    )), headers={'allow_origin': settings.ALLOW_ORIGIN})
+    ), headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 def info(credentials=None):
     """Get info"""
@@ -604,7 +626,7 @@ def info(credentials=None):
     accept = parse_accept_header(flask.request)
     if accept and 'application/ld+json' in accept or 'application/json' in accept or flask.request.args.get("json") == "1":
         #pylint: disable=bad-continuation
-        return withheaders(flask.make_response(flask.render_template('response.json',
+        return respond('interface.xsl',flask.render_template('response.json',
                 version=VERSION,
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
@@ -643,11 +665,11 @@ def info(credentials=None):
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
                 auth_type=auth_type()
-        )), contenttype="application/ld+json", headers={'allow_origin': settings.ALLOW_ORIGIN})
+        ), contenttype="application/ld+json", headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 
     #pylint: disable=bad-continuation
-    return withheaders(flask.make_response(flask.render_template('response.xml',
+    return respond('interface.xsl', flask.render_template('response.xml',
             version=VERSION,
             system_id=settings.SYSTEM_ID,
             system_name=settings.SYSTEM_NAME,
@@ -692,7 +714,7 @@ def info(credentials=None):
             allow_origin=settings.ALLOW_ORIGIN,
             oauth_access_token=oauth_encrypt(oauth_access_token),
             auth_type=auth_type()
-    )), headers={'allow_origin': settings.ALLOW_ORIGIN})
+    ), headers={'allow_origin': settings.ALLOW_ORIGIN})
 
 class Admin:
     @staticmethod
@@ -1229,7 +1251,7 @@ class Project:
                     printlog("One or more parameters are invalid: " + parameter.id)
                     break
 
-        return withheaders(flask.make_response(flask.render_template('response.xml',
+        return respond('interface.xsl', flask.render_template('response.xml',
                 version=VERSION,
                 system_id=settings.SYSTEM_ID,
                 system_name=settings.SYSTEM_NAME,
@@ -1277,7 +1299,7 @@ class Project:
                 allow_origin=settings.ALLOW_ORIGIN,
                 oauth_access_token=oauth_encrypt(oauth_access_token),
                 auth_type=auth_type()
-        ),http_code), headers={'allow_origin':settings.ALLOW_ORIGIN})
+        ),http_code=http_code, headers={'allow_origin':settings.ALLOW_ORIGIN})
 
 
     @staticmethod
@@ -2917,6 +2939,13 @@ class CLAMService(object):
             self.auth = clam.common.auth.NoAuth() #pylint: disable=redefined-variable-type
 
         printdebug("Full settings dump: " + repr(vars(settings)))
+
+        settings.transformers = {}
+        for xslfile in XSLFILES:
+            filename = settings.CLAMDIR + '/static/' + xslfile
+            printdebug(f"Loading transformer for {filename}")
+            xslt_root = lxml.etree.parse(filename)
+            settings.transformers[xslfile] = lxml.etree.XSLT(xslt_root)
 
 
         printdebug("Initialising flask service")
