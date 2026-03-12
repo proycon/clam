@@ -122,6 +122,7 @@
     <script src="{/clam/@baseurl}/static/popper.min.js"></script>
     <script src="{/clam/@baseurl}/static/jquery.dataTables.min.js"></script>
     <script src="{/clam/@baseurl}/static/bootstrap.min.js"></script>
+    <script src="{/clam/@baseurl}/static/xslt-polyfill.min.js"></script>
 
     <script type="text/javascript" src="{/clam/@baseurl}/data.js" />
 
