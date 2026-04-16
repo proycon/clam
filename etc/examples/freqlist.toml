@@ -1,0 +1,33 @@
+[service]
+name = "freqlist"
+description = "This webservice produces a frequency list for an input file"
+rootdir = "./data"
+command = "./freqlist.sh"
+
+[[service.args]]
+parameter_id = "casesensitive"
+
+[[service.args]]
+parameter_id = "tokinput"
+
+[[service.filetypes]]
+id = "plaintext"
+name = "Plain Text (UTF-8)"
+contenttype = "text/plain; charset=utf-8"
+
+[[service.endpoints]]
+path = "/"
+mode = "Batch"
+status_pattern = ".*" #every line from stderr qualifies as a status message
+
+[[service.endpoints.parameters]]
+id = "tokinput"
+description = "Tokenised text input"
+required = true
+type = { parametertype = "File", filetype = "plaintext", name = { nametype = "Pattern", value = "*.txt" } }
+
+[[service.endpoints.parameters]]
+id = "casesensitive"
+description = "Case sensitivity"
+required = false
+type = { parametertype = "Boolean", default = false, flag = "-c"  }

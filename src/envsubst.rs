@@ -1,5 +1,7 @@
 use std::ffi::OsString;
 
+// TODO: I might decide to toss this all away and just rely on external envsubst instead
+
 use crate::error::ClamError;
 
 pub trait Envsubst {
