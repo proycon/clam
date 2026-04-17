@@ -1,21 +1,13 @@
-use std::path::PathBuf;
+use crate::dispatcher::Message;
+use derive_getters::Getters;
+use std::sync::mpsc::Sender;
 
-#[derive(Copy, Clone, Debug)]
-pub enum JobState {
-    /// The job is waiting in the queue to be picked up by the dispatcher
-    Pending,
+pub type JobId = usize;
 
-    /// The job is running
-    Running,
-
-    /// The job is done
-    Done { exitcode: usize },
-}
-
-#[derive(Debug)]
+#[derive(Debug, Clone, Getters)]
 pub struct Job {
     /// Job identifier
-    id: String,
+    id: JobId,
 
     /// The particular endpoint in the service configuration this job is associated with (by index)
     endpoint: usize,
@@ -23,11 +15,48 @@ pub struct Job {
     /// The particular project this job is associated with (if any)
     project: Option<String>,
 
-    /// The particular user this job is associated with (None = anonymous)
-    user: Option<String>,
+    /// The particular user this job is associated with (may be 'anonymous')
+    user: String,
+
+    // command
+    command: String,
+    args: Vec<String>,
 }
 
-pub struct Share {
-    path: PathBuf,
-    onetime: bool,
+impl Job {
+    /// Spawns the job (consumes it)
+    /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
+    pub fn spawn(self, dispatcherchannel: Sender<Message>) {
+        std::thread::spawn(move || {
+            match std::process::Command::new(self.command)
+                .args(self.args)
+                .output()
+            {
+                Ok(result) => {
+                    let output: String = if let Ok(s) = result.stdout.try_into() {
+                        s
+                    } else {
+                        format!("Process stdout is invalid UTF-8!")
+                    };
+                    let error: String = if let Ok(s) = result.stderr.try_into() {
+                        s
+                    } else {
+                        format!("Process stderr is invalid UTF-8!")
+                    };
+                    dispatcherchannel.send(Message::FinishJob {
+                        id: self.id,
+                        exitstatus: result.status,
+                        output,
+                        error,
+                    });
+                }
+                Err(e) => {
+                    dispatcherchannel.send(Message::FailStartJob {
+                        id: self.id,
+                        error: format!("{}", e),
+                    });
+                }
+            }
+        });
+    }
 }

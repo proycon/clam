@@ -17,7 +17,7 @@ contenttype = "text/plain; charset=utf-8"
 
 [[service.endpoints]]
 path = "/"
-mode = "Batch"
+mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
 
 [[service.endpoints.parameters]]

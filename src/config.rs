@@ -11,7 +11,7 @@ use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
 
-#[derive(Deserialize, Serialize, Default, Getters)]
+#[derive(Deserialize, Serialize, Default, Getters, Clone)]
 pub struct ServiceConfig {
     /// The version of the webservice, increment this on subsequent releases. Semantic versioning is strongly recommended.
     version: String,
@@ -55,6 +55,12 @@ pub struct ServiceConfig {
     /// CORS
     allow_origin: Option<String>,
 
+    #[serde(default)]
+    dispatcher: DispatcherConfig,
+}
+
+#[derive(Deserialize, Serialize, Clone, Default, Getters)]
+pub struct DispatcherConfig {
     /// Maximum number of running jobs at the same time
     max_running_jobs: usize,
 
@@ -67,7 +73,7 @@ pub struct ServiceConfig {
     pre_accept_script: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize, Default, Clone)]
 pub struct AuthConfig {
     /// Path to a tab seperated file of usernames and hashed passwords for HTTP Basic Authentication.
     user_db: Option<String>,
@@ -79,14 +85,22 @@ pub struct AuthConfig {
     oauth_scope: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Default)]
-pub enum ServeMode {
-    ///In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only (of a specific filetype). No file upload/download support.
+#[derive(Deserialize, Serialize, Default, Clone)]
+pub enum EndPointMode {
+    /// In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only (of a specific filetype). No file upload/download support.
     Action { filetype: String },
 
-    ///In project mode, responses do not come immediately after a POST request but clients poll for status at regular intervals using a GET request and must first CREATE a project. This allows the job to run over long periods of time and allows (multiple) file-based output.
+    /// In project mode, responses do not come immediately after a POST request but clients poll for status at regular intervals using a GET request and must first CREATE a project and optionally PUT files.
+    /// Users can DELETE projects when done, or leave them to come back later.
+    /// This allows the job to run over long periods of time and allows (multiple) file-based output.
+    /// All endpoint paths are suffixed with the project ID
     #[default]
     Project,
+
+    /// The Porch is a publicly accessible endpoint (unauthenticated) that gives information over the service and allows users to continue
+    /// to the authenticated sections
+    /// It is typically served at path `/` and used as a landing page.
+    Porch,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -99,7 +113,7 @@ pub enum CommandArg {
     FromParameter { parameter_id: String },
 }
 
-#[derive(Deserialize, Serialize, Default, Getters)]
+#[derive(Deserialize, Serialize, Default, Getters, Clone)]
 pub struct EndPoint {
     /// The path where the endpoint is accessible, this also serves as the primary identifier for the endpoint. All paths must start with /
     path: String,
@@ -107,7 +121,7 @@ pub struct EndPoint {
     name: String,
     description: Option<String>,
 
-    mode: ServeMode,
+    mode: EndPointMode,
 
     /// Public endpoints are available without authentication
     public: bool,
