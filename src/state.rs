@@ -1,3 +1,4 @@
+use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::Message;
 use crate::job::{Job, JobId};
 use core::default::Default;
@@ -27,10 +28,12 @@ pub(crate) struct ServiceState {
     pub(crate) user_db: RwLock<HashMap<String, String>>,
 
     pub(crate) sender: RwLock<Sender<Message>>,
+
+    pub(crate) config: ServiceConfig,
 }
 
 impl ServiceState {
-    pub fn new(sender: Sender<Message>) -> Self {
+    pub fn new(config: ServiceConfig, sender: Sender<Message>) -> Self {
         Self {
             sender: RwLock::new(sender),
             pending_jobs: RwLock::new(Default::default()),
@@ -39,6 +42,18 @@ impl ServiceState {
             user_project_map: RwLock::new(Default::default()),
             shares: RwLock::new(Default::default()),
             user_db: RwLock::new(Default::default()),
+            config,
         }
+    }
+
+    pub fn config(&self) -> &ServiceConfig {
+        &self.config
+    }
+
+    pub fn get_endpoint(&self, endpoint_index: usize) -> &EndPoint {
+        self.config()
+            .endpoints()
+            .get(endpoint_index)
+            .expect("endpoint must exist")
     }
 }

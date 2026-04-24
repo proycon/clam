@@ -87,8 +87,8 @@ pub struct AuthConfig {
 
 #[derive(Deserialize, Serialize, Default, Clone)]
 pub enum EndPointMode {
-    /// In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only (of a specific filetype). No file upload/download support.
-    Action { filetype: String },
+    /// In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only. No file upload/download support.
+    Action,
 
     /// In project mode, responses do not come immediately after a POST request but clients poll for status at regular intervals using a GET request and must first CREATE a project and optionally PUT files.
     /// Users can DELETE projects when done, or leave them to come back later.
@@ -138,6 +138,9 @@ pub struct EndPoint {
 
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
     status_pattern: Option<String>,
+
+    /// Return type for the endpoint, used for actions
+    filetype: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]

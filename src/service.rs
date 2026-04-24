@@ -7,9 +7,10 @@ use crate::state::ServiceState;
 use tokio::signal;
 use tower_http::trace::TraceLayer;
 
+use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
@@ -21,7 +22,6 @@ const CONTENT_TYPE_HTML: &str = "text/html";
 
 pub struct Service {
     config: ServiceConfig,
-    dispatchersender: Option<Sender<Message>>,
 }
 
 pub enum ClamResponse {
@@ -86,10 +86,7 @@ impl IntoResponse for ClamResponse {
 impl Service {
     pub fn new(config: ServiceConfig) -> Self {
         // create the dispatcher and set up communication channels
-        Self {
-            config,
-            dispatchersender: None,
-        }
+        Self { config }
     }
 
     #[tokio::main]
@@ -105,8 +102,8 @@ impl Service {
         dispatcher.spawn(); //consumes the dispatcher
 
         let mut router = Router::new();
-        for endpoint in self.config.endpoints().iter() {
-            router = self.configure_endpoint(router, endpoint);
+        for (i, endpoint) in self.config.endpoints().iter().enumerate() {
+            router = self.configure_endpoint(router, i, endpoint);
         }
         let router = router
             //.merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
@@ -121,22 +118,91 @@ impl Service {
 
     pub fn configure_endpoint(
         &self,
-        router: Router<Arc<ServiceState>>,
+        mut router: Router<Arc<ServiceState>>,
+        endpoint_index: usize,
         endpoint: &EndPoint,
     ) -> Router<Arc<ServiceState>> {
         match endpoint.mode() {
-            EndPointMode::Porch => router.route(endpoint.path(), get(porch)),
+            EndPointMode::Porch => router.route(endpoint.path(), get(get_porch)),
             EndPointMode::Project => {
-                todo!();
+                let path = format!("{}/{{project}}", endpoint.path());
+                router = router
+                    .route(path.as_str(), get(get_project))
+                    .layer(Extension(endpoint_index));
+                router = router
+                    .route(path.as_str(), put(create_project))
+                    .layer(Extension(endpoint_index));
+                router = router
+                    .route(path.as_str(), delete(delete_project))
+                    .layer(Extension(endpoint_index));
+                router = router
+                    .route(path.as_str(), post(submit_project))
+                    .layer(Extension(endpoint_index));
+                let fpath = format!("{}/{{project}}/{{filename}}", endpoint.path());
+                router = router
+                    .route(fpath.as_str(), get(download_file))
+                    .layer(Extension(endpoint_index));
+                router = router
+                    .route(fpath.as_str(), put(upload_file))
+                    .layer(Extension(endpoint_index));
+                router = router
+                    .route(fpath.as_str(), delete(delete_file))
+                    .layer(Extension(endpoint_index));
+                router
             }
-            EndPointMode::Action { filetype } => {
-                todo!();
+            EndPointMode::Action => {
+                router = router.route(endpoint.path(), get(get_action));
+                router = router.route(
+                    endpoint.path(),
+                    post(post_action).layer(Extension(endpoint_index)),
+                );
+                router
             }
         }
     }
 }
 
-async fn porch(
+async fn get_porch(
+    state: State<Arc<ServiceState>>,
+    Extension(endpoint_index): Extension<usize>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        Ok(CONTENT_TYPE_HTML) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+async fn get_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.get_endpoint(endpoint_index);
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        Ok(CONTENT_TYPE_HTML) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+async fn submit_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
@@ -150,11 +216,13 @@ async fn porch(
     }
 }
 
-async fn action(
+async fn create_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
             todo!();
         }
@@ -162,6 +230,94 @@ async fn action(
             "Accept header could not be satisfied (try application/json)",
         )),
     }
+}
+
+async fn delete_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+async fn download_file(
+    Path(project): Path<String>,
+    Path(filename): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    todo!();
+}
+
+async fn upload_file(
+    Path(project): Path<String>,
+    Path(filename): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+async fn delete_file(
+    Path(project): Path<String>,
+    Path(filename): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+/// Landing page for the action
+async fn get_action(
+    state: State<Arc<ServiceState>>,
+    Extension(endpoint_index): Extension<usize>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        Ok(CONTENT_TYPE_HTML) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+/// Runs the action
+async fn post_action(
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    todo!();
 }
 
 async fn shutdown_signal(state: Arc<ServiceState>) {

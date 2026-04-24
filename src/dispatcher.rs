@@ -2,7 +2,6 @@ use crate::config::{DispatcherConfig, ServiceConfig};
 use crate::job::{Job, JobId};
 use crate::project::Project;
 use crate::state::ServiceState;
-use core::any::Any;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, Sender};
@@ -13,7 +12,6 @@ use std::sync::mpsc::{Receiver, Sender};
 pub struct Dispatcher {
     state: Arc<ServiceState>,
     receiver: Receiver<Message>,
-    config: ServiceConfig,
 }
 
 #[derive(Debug)]
@@ -74,9 +72,8 @@ impl Dispatcher {
     pub fn new(config: ServiceConfig) -> Self {
         let (sender, receiver) = std::sync::mpsc::channel();
         Self {
-            state: Arc::new(ServiceState::new(sender)),
+            state: Arc::new(ServiceState::new(config, sender)),
             receiver: receiver,
-            config,
         }
     }
 
@@ -84,16 +81,16 @@ impl Dispatcher {
         self.state.clone()
     }
 
-    /// Non-blocking function that spawns a new thread for the dispatcher, and returns a channel to transmit
+    /// Non-blocking function that spawns a new thread for the dispatcher
     pub fn spawn(self) {
         std::thread::spawn(move || {
             loop {
-                // there should be no long-running blocking tasks in this loop
+                // there should be no long-running blocking tasks in this loop!
                 match self.receiver.recv() {
                     Ok(Message::SubmitJob(job, responsechannel)) => {
                         if let Ok(mut jobs) = self.state.pending_jobs.write() {
                             jobs.push_back(job);
-                            responsechannel.send(ResponseMessage::JobSubmitted);
+                            let _ = responsechannel.send(ResponseMessage::JobSubmitted);
                             self.send(Message::StartJobs);
                         } else {
                             panic!("running job lock poisoned!");
@@ -156,7 +153,7 @@ impl Dispatcher {
                 panic!("running job lock poisoned!");
             };
 
-            if running_job_count < self.config.dispatcher().max_running_jobs() {
+            if running_job_count < self.state().config.dispatcher().max_running_jobs() {
                 let have_pending_jobs = if let Ok(pending_jobs) = self.state.pending_jobs.read() {
                     !pending_jobs.is_empty()
                 } else {
