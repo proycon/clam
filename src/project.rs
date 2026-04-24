@@ -2,7 +2,7 @@ use crate::config::ServiceConfig;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
 
-const FORBIDDEN_CHARS: [char; 5] = [' ', '/', '\\', '\'', '\''];
+const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
 /// A project is a workspace for a user that holds input and output files
 /// It is also tied to a particular endpoint
