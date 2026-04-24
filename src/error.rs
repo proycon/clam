@@ -19,6 +19,7 @@ pub enum ApiError {
     NotAcceptable(&'static str),
     PermissionDenied(&'static str),
     ParameterError(&'static str),
+    InvalidName(&'static str),
 }
 
 impl Serialize for ApiError {
@@ -47,6 +48,10 @@ impl Serialize for ApiError {
             }
             Self::InternalError(s) => {
                 state.serialize_field("name", "InternalError")?;
+                state.serialize_field("message", s)?;
+            }
+            Self::InvalidName(s) => {
+                state.serialize_field("name", "InvalidName")?;
                 state.serialize_field("message", s)?;
             }
         }

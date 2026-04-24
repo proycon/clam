@@ -3,6 +3,7 @@ use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
 use crate::job::Job;
+use crate::project::Project;
 use crate::state::ServiceState;
 use tokio::signal;
 use tower_http::trace::TraceLayer;
@@ -186,7 +187,7 @@ async fn get_project(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.get_endpoint(endpoint_index);
+    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => {
             todo!();
@@ -220,11 +221,21 @@ async fn create_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
-            todo!();
+            if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+                if let Err(e) = project.create(state.config()) {
+                    Err(e.into())
+                } else {
+                    Ok(ClamResponse::Created())
+                }
+            } else {
+                Err(ApiError::InvalidName("project name invalid"))
+            }
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -236,11 +247,21 @@ async fn delete_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
-            todo!();
+            if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+                if let Err(e) = project.delete(state.config()) {
+                    Err(e.into())
+                } else {
+                    Ok(ClamResponse::NoContent())
+                }
+            } else {
+                Err(ApiError::InvalidName("project name invalid"))
+            }
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -380,4 +401,9 @@ fn negotiate_content_type(
     } else {
         Ok(offer_types[0])
     }
+}
+
+fn get_username(headers: &HeaderMap) -> &str {
+    //TODO: implement!
+    "anonymous"
 }

@@ -1,6 +1,5 @@
 use crate::config::{DispatcherConfig, ServiceConfig};
 use crate::job::{Job, JobId};
-use crate::project::Project;
 use crate::state::ServiceState;
 use std::process::ExitStatus;
 use std::sync::Arc;
@@ -35,11 +34,6 @@ pub enum Message {
     /// Fail a job, this is sent by a job monitor thread to the dispatcher
     FailStartJob { id: JobId, error: String },
 
-    /// Create a project
-    CreateProject(Project, Sender<ResponseMessage>),
-    /// Delete a project, by ID
-    DeleteProject(String, Sender<ResponseMessage>),
-
     /// Poll job status
     PollJob(JobId, Sender<ResponseMessage>),
 
@@ -64,8 +58,6 @@ pub enum ResponseMessage {
     JobStartFailed {
         error: String,
     },
-    ProjectCreated,
-    ProjectDeleted,
 }
 
 impl Dispatcher {
@@ -96,14 +88,7 @@ impl Dispatcher {
                             panic!("running job lock poisoned!");
                         }
                     }
-                    Ok(Message::CreateProject(project, responsechannel)) => {
-                        todo!();
-                        responsechannel.send(ResponseMessage::ProjectCreated);
-                    }
                     Ok(Message::CancelJob(job_id, responsechannel)) => {
-                        todo!();
-                    }
-                    Ok(Message::DeleteProject(project_id, responsechannel)) => {
                         todo!();
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),

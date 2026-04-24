@@ -50,7 +50,8 @@ impl ServiceState {
         &self.config
     }
 
-    pub fn get_endpoint(&self, endpoint_index: usize) -> &EndPoint {
+    /// Retrieve an endpoint by index, will panic if it does not exist!
+    pub fn endpoint(&self, endpoint_index: usize) -> &EndPoint {
         self.config()
             .endpoints()
             .get(endpoint_index)

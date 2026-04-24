@@ -1,5 +1,5 @@
 use crate::config::ServiceConfig;
-use std::fs::create_dir_all;
+use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
 
 const FORBIDDEN_CHARS: [char; 5] = [' ', '/', '\\', '\'', '\''];
@@ -40,6 +40,12 @@ impl Project {
         Ok(())
     }
 
+    pub fn delete(&self, config: &ServiceConfig) -> Result<(), std::io::Error> {
+        let path = self.path(config);
+        remove_dir_all(path)?;
+        Ok(())
+    }
+
     pub fn is_valid(&self) -> bool {
         if self.id.is_empty() || self.user.is_empty() || self.endpoint.is_empty() {
             return false;
@@ -59,6 +65,9 @@ impl Project {
             .chars()
             .any(|c| FORBIDDEN_CHARS.contains(&c))
         {
+            return false;
+        }
+        if self.id.as_str().find("..").is_some() {
             return false;
         }
         true
