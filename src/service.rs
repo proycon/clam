@@ -1,3 +1,4 @@
+use crate::auth::auth;
 use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
@@ -13,6 +14,7 @@ use axum::Router;
 use axum::body::Body;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
+use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
 use serde_json::Value;
@@ -109,6 +111,9 @@ impl Service {
         let router = router
             //.merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
             .layer(TraceLayer::new_for_http())
+            .route_layer(from_fn_with_state(state.clone(), |state, req, next| {
+                auth(state, req, next)
+            }))
             .with_state(state.clone());
 
         axum::serve(listener, router.into_make_service())

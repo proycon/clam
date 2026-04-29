@@ -1,3 +1,4 @@
+mod auth;
 mod config;
 mod dispatcher;
 mod envsubst;
@@ -6,6 +7,7 @@ mod job;
 mod project;
 mod service;
 mod state;
+pub use auth::*;
 pub use config::*;
 pub use dispatcher::*;
 pub use error::*;

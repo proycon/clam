@@ -12,6 +12,7 @@ keywords = [ "webservice", "rest"]
 
 [dependencies]
 axum = "0.8.8"
+base64 = "0.22.1"
 clap = { version = "4.5.60", features = ["derive"] }
 const_format = "0.2.36"
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
