@@ -1,4 +1,7 @@
+use crate::config::EndPoint;
 use crate::dispatcher::Message;
+use crate::state::ServiceState;
+use core::usize;
 use derive_getters::Getters;
 use std::sync::mpsc::Sender;
 
@@ -10,7 +13,7 @@ pub struct Job {
     id: JobId,
 
     /// The particular endpoint in the service configuration this job is associated with (by index)
-    endpoint: usize,
+    endpoint_index: usize,
 
     /// The particular project this job is associated with (if any)
     project: Option<String>,
@@ -24,6 +27,26 @@ pub struct Job {
 }
 
 impl Job {
+    pub fn new(
+        state: &ServiceState,
+        endpoint_index: usize,
+        project: Option<String>,
+        user: impl Into<String>,
+    ) -> Self {
+        let endpoint = state.endpoint(endpoint_index);
+        //TODO: process command and arguments (replace build time parameters with run-time parameters)
+        let command: String = endpoint.command().into();
+        let args = Vec::new();
+        Self {
+            id: rand::random_range(1..usize::MAX),
+            endpoint_index,
+            project,
+            user: user.into(),
+            command: endpoint.command().into(),
+            args,
+        }
+    }
+
     /// Spawns the job (consumes it)
     /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
     pub fn spawn(self, dispatcherchannel: Sender<Message>) {

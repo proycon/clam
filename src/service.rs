@@ -1,3 +1,4 @@
+use crate::ResponseMessage;
 use crate::auth::auth;
 use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
@@ -7,6 +8,7 @@ use crate::job::Job;
 use crate::project::Project;
 use crate::state::ServiceState;
 use tokio::signal;
+use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
 
 use axum::Extension;
@@ -218,14 +220,25 @@ async fn submit_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            todo!();
-        }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
+    let job = Job::new(
+        &state,
+        endpoint_index,
+        Some(project),
+        get_username(&headers),
+    );
+    let (tx, rx) = oneshot::channel();
+    state.send(Message::SubmitJob(job, tx));
+    match rx.await {
+        Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
+        Ok(ResponseMessage::JobStartFailed { error }) => Err(ApiError::ServiceUnavailable(error)),
+        Err(_) => Err(ApiError::InternalError(
+            "oneshot sender dropped whilst submitting a job",
+        )),
+        Ok(_) => Err(ApiError::InternalError(
+            "unexpected response message whilst submitting a job",
         )),
     }
 }

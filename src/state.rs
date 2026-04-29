@@ -50,6 +50,13 @@ impl ServiceState {
         &self.config
     }
 
+    /// Send a message to the dispatcher
+    pub fn send(&self, message: Message) {
+        if let Ok(sender) = self.sender.read() {
+            sender.send(message);
+        }
+    }
+
     /// Retrieve an endpoint by index, will panic if it does not exist!
     pub fn endpoint(&self, endpoint_index: usize) -> &EndPoint {
         self.config()
