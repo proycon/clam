@@ -4,6 +4,7 @@ use crate::state::ServiceState;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, Sender};
+use tokio::sync::oneshot;
 
 /// The dispatcher is CLAM's job manager
 /// It spawns jobs, in parallel, and monitors their execution
@@ -16,10 +17,10 @@ pub struct Dispatcher {
 #[derive(Debug)]
 pub enum Message {
     /// Submit a job to the queue
-    SubmitJob(Job, Sender<ResponseMessage>),
+    SubmitJob(Job, oneshot::Sender<ResponseMessage>),
 
     /// Forcibly stop a job, by job ID, discarding its results
-    CancelJob(JobId, Sender<ResponseMessage>),
+    CancelJob(JobId, oneshot::Sender<ResponseMessage>),
 
     /// Finish a job, this is sent by a job monitor thread to the dispatcher
     FinishJob {
@@ -35,7 +36,7 @@ pub enum Message {
     FailStartJob { id: JobId, error: String },
 
     /// Poll job status
-    PollJob(JobId, Sender<ResponseMessage>),
+    PollJob(JobId, oneshot::Sender<ResponseMessage>),
 
     /// Checks the queue for new jobs and spawns them, will be send after SubmitJob
     StartJobs,
@@ -75,7 +76,7 @@ impl Dispatcher {
 
     /// Non-blocking function that spawns a new thread for the dispatcher
     pub fn spawn(self) {
-        std::thread::spawn(move || {
+        tokio::task::spawn_blocking(move || {
             loop {
                 // there should be no long-running blocking tasks in this loop!
                 match self.receiver.recv() {
