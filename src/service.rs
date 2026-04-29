@@ -104,11 +104,19 @@ impl Service {
         let state: Arc<ServiceState> = dispatcher.state(); //the dispatcher initiates the state for us
         dispatcher.spawn(); //consumes the dispatcher
 
-        let mut router = Router::new();
+        let mut private_routes = Router::new();
+        let mut public_routes = Router::new();
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
-            router = self.configure_endpoint(router, i, endpoint);
+            if endpoint.public() {
+                public_routes = self.configure_endpoint(public_routes, i, endpoint);
+            } else {
+                private_routes = self.configure_endpoint(private_routes, i, endpoint);
+            }
         }
-        let router = router
+
+        let router = Router::new()
+            .merge(private_routes)
+            .merge(public_routes)
             //.merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
             .layer(TraceLayer::new_for_http())
             .route_layer(from_fn_with_state(state.clone(), |state, req, next| {
