@@ -20,6 +20,7 @@ pub enum ApiError {
     PermissionDenied(&'static str),
     ParameterError(&'static str),
     InvalidName(&'static str),
+    ServiceUnavailable(String),
 }
 
 impl Serialize for ApiError {
@@ -50,6 +51,10 @@ impl Serialize for ApiError {
                 state.serialize_field("name", "InternalError")?;
                 state.serialize_field("message", s)?;
             }
+            Self::ServiceUnavailable(s) => {
+                state.serialize_field("name", "ServiceUnavailable")?;
+                state.serialize_field("message", s)?;
+            }
             Self::InvalidName(s) => {
                 state.serialize_field("name", "InvalidName")?;
                 state.serialize_field("message", s)?;
@@ -64,6 +69,7 @@ impl IntoResponse for ApiError {
         let statuscode = match self {
             Self::InternalError(..) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::PermissionDenied(..) => StatusCode::FORBIDDEN,
+            Self::ServiceUnavailable(..) => StatusCode::SERVICE_UNAVAILABLE,
             Self::NotAcceptable(..) => StatusCode::NOT_ACCEPTABLE,
             _ => StatusCode::NOT_FOUND,
         };
