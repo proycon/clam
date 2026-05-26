@@ -50,7 +50,8 @@ pub struct ServiceConfig {
 
     endpoints: Vec<EndPoint>,
 
-    auth: Option<AuthConfig>,
+    #[serde(default)]
+    auth: AuthConfig,
 
     /// CORS
     allow_origin: Option<String>,
@@ -73,11 +74,17 @@ pub struct DispatcherConfig {
     pre_accept_script: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, Getters)]
 pub struct AuthConfig {
     /// Path to a tab seperated file of usernames and hashed passwords for HTTP Basic Authentication.
-    user_db: Option<String>,
+    user_file: Option<String>,
 
+    /// Path to a toml file holding the OAuth2 configuration for OAuth2/OpenID Connect authentication
+    oauth_config_file: Option<String>,
+}
+
+#[derive(Deserialize, Serialize, Default, Clone, Getters)]
+pub struct OAuth2Config {
     oauth_client_id: Option<String>,
     oauth_client_url: Option<String>,
     oauth_client_secret: Option<String>,

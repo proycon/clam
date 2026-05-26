@@ -1,6 +1,7 @@
 use crate::config::EndPoint;
 use crate::dispatcher::Message;
 use crate::state::ServiceState;
+use axum::http::HeaderMap;
 use core::usize;
 use derive_getters::Getters;
 use std::sync::mpsc::Sender;
@@ -31,7 +32,7 @@ impl Job {
         state: &ServiceState,
         endpoint_index: usize,
         project: Option<String>,
-        user: impl Into<String>,
+        headers: &HeaderMap,
     ) -> Self {
         let endpoint = state.endpoint(endpoint_index);
         //TODO: process command and arguments (replace build time parameters with run-time parameters)

@@ -223,12 +223,7 @@ async fn submit_project(
     headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let job = Job::new(
-        &state,
-        endpoint_index,
-        Some(project),
-        get_username(&headers),
-    );
+    let job = Job::new(&state, endpoint_index, Some(project), &headers);
     let (tx, rx) = oneshot::channel();
     state.send(Message::SubmitJob(job, tx));
     match rx.await {
