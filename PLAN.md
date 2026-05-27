@@ -43,6 +43,7 @@ The following features are planned:
 * Implement a pending job queue so users will no longer be presented with a HTTP 503 if the system is too busy
 * There will extra attention to security.
 * Extra attention for use-cases in which resource-sharing such as GPU-sharing is a factor.
+    * starting and stopping background servers
 
 ## Planning
 

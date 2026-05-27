@@ -75,21 +75,45 @@ pub struct DispatcherConfig {
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
+/// Authorization Configuration, points to external files that holds credentials so it is
+/// easier to separate the service configuration from secret configurations.
 pub struct AuthConfig {
     /// Path to a tab seperated file of usernames and hashed passwords for HTTP Basic Authentication.
     user_file: Option<String>,
 
-    /// Path to a toml file holding the OAuth2 configuration for OAuth2/OpenID Connect authentication
+    /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication
     oauth_config_file: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
-pub struct OAuth2Config {
-    oauth_client_id: Option<String>,
-    oauth_client_url: Option<String>,
-    oauth_client_secret: Option<String>,
-    oauth_token_url: Option<String>,
-    oauth_scope: Option<String>,
+pub struct OAuthCredentials {
+    /// URL from where to obtain the OpenID configuration at run-time, is usually something like https://example.com/.well-known/openid-configuration
+    /// and obtained once when the service starts
+    pub(crate) openid_configuration_url: String,
+    pub(crate) openid_redirect_url: String,
+
+    pub(crate) oauth_client_id: String,
+    pub(crate) oauth_client_secret: String,
+
+    #[serde(default = "default_cookie_path")]
+    pub(crate) cookie_path: String,
+
+    #[serde(default)]
+    pub(crate) oauth_scope: Vec<String>,
+}
+
+fn default_cookie_path() -> String {
+    "/".into()
+}
+
+impl OAuthCredentials {
+    /// Is OAuth enabled or not?
+    pub fn enabled(&self) -> bool {
+        !self.openid_configuration_url.is_empty()
+            && !self.oauth_client_id.is_empty()
+            && !self.oauth_client_secret.is_empty()
+            && !self.openid_redirect_url.is_empty()
+    }
 }
 
 #[derive(Deserialize, Serialize, Default, Clone)]

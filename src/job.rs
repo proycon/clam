@@ -1,3 +1,4 @@
+use crate::auth::CurrentUser;
 use crate::config::EndPoint;
 use crate::dispatcher::Message;
 use crate::state::ServiceState;
@@ -32,6 +33,7 @@ impl Job {
         state: &ServiceState,
         endpoint_index: usize,
         project: Option<String>,
+        user: &CurrentUser,
         headers: &HeaderMap,
     ) -> Self {
         let endpoint = state.endpoint(endpoint_index);
@@ -42,7 +44,7 @@ impl Job {
             id: rand::random_range(1..usize::MAX),
             endpoint_index,
             project,
-            user: user.into(),
+            user: user.as_str().to_string(),
             command: endpoint.command().into(),
             args,
         }

@@ -12,12 +12,15 @@ keywords = [ "webservice", "rest"]
 
 [dependencies]
 axum = "0.8.8"
+axum-extra = { version = "0.12.6", features = ["cookie"] }
 base64 = "0.22.1"
 clap = { version = "4.5.60", features = ["derive"] }
 const_format = "0.2.36"
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
+jsonwebtoken = { version = "10.4.0", features = ["rust_crypto"] }
 md5 = "0.8.0"
 rand = "0.10.1"
+reqwest = { version = "0.13.4", features = ["blocking", "form", "json"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 tokio = { version = "1.52.0", features = ["signal", "macros", "rt-multi-thread"] }

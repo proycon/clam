@@ -1,5 +1,5 @@
 use crate::ResponseMessage;
-use crate::auth::auth;
+use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
 use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
@@ -107,7 +107,9 @@ impl Service {
         dispatcher.spawn(); //consumes the dispatcher
 
         let mut private_routes = Router::new();
-        let mut public_routes = Router::new();
+        let mut public_routes = Router::new()
+            .route("/login", get(login_handler))
+            .route("/oidc/callback", get(callback_handler));
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
             if endpoint.public() {
                 public_routes = self.configure_endpoint(public_routes, i, endpoint);
@@ -219,11 +221,12 @@ async fn get_project(
 async fn submit_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let job = Job::new(&state, endpoint_index, Some(project), &headers);
+    let job = Job::new(&state, endpoint_index, Some(project), &user, &headers);
     let (tx, rx) = oneshot::channel();
     state.send(Message::SubmitJob(job, tx));
     match rx.await {

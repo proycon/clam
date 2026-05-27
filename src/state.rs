@@ -1,9 +1,12 @@
-use crate::config::{EndPoint, OAuth2Config, ServiceConfig};
+use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
+use crate::config::{EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::Message;
 use crate::job::{Job, JobId};
 use core::default::Default;
+use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
 
@@ -28,13 +31,20 @@ pub(crate) struct ServiceState {
     pub(crate) user_db: RwLock<HashMap<String, String>>,
 
     /// Oauth2 credentials (loaded from external file)
-    pub(crate) oauth2config: RwLock<OAuth2Config>,
+    pub(crate) oauthcredentials: OAuthCredentials,
+
+    /// OpenID configuration as obtained from .well-know/openid-configuration endpoint
+    pub(crate) openidconfig: Option<OpenIdConfiguration>,
 
     pub(crate) sender: RwLock<Sender<Message>>,
 
     pub(crate) config: ServiceConfig,
+
+    /// JSON Web Key Set to efficiently validate tokens (it should never be fetched on each request, but fetched and cached as otherwise it is inefficient)
+    pub(crate) jwkset: Option<JwkSet>,
 }
 
+/// Parse the user database, a simple TSV file with a username, a tab and a hashed password on each line
 fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::io::Error> {
     let mut user_db: HashMap<String, String> = HashMap::new();
     if let Some(user_file) = config.auth().user_file() {
@@ -53,12 +63,13 @@ fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::
     Ok(user_db)
 }
 
-fn read_oauth_config(config: &ServiceConfig) -> Result<OAuth2Config, String> {
+/// Read the OAuth config with the openid credentials and the configuration endpoint
+fn read_oauth_config(config: &ServiceConfig) -> Result<OAuthCredentials, String> {
     if let Some(filename) = config.auth().oauth_config_file() {
         let data = std::fs::read_to_string(filename)
             .map_err(|e| format!("Failed to read OAuth config file: {}", e))?;
-        let oauth2_config: OAuth2Config = serde_json::from_str(&data)
-            .map_err(|e| format!("Failed to parse OAuth config: {}", e))?;
+        let oauth2_config: OAuthCredentials = serde_json::from_str(&data)
+            .map_err(|e| format!("Failed to parse OAuth config file: {}", e))?;
         Ok(oauth2_config)
     } else {
         Ok(Default::default())
@@ -67,6 +78,24 @@ fn read_oauth_config(config: &ServiceConfig) -> Result<OAuth2Config, String> {
 
 impl ServiceState {
     pub fn new(config: ServiceConfig, sender: Sender<Message>) -> Self {
+        //read oauth credentials and metadata endpoint
+        let oauthcredentials = read_oauth_config(&config).expect("Unable to read oauth config");
+        // get configuration from metadata endpoint
+        let openidconfig = if oauthcredentials.enabled() {
+            Some(get_openid_config(
+                &oauthcredentials.openid_configuration_url,
+            ))
+        } else {
+            None
+        };
+
+        // get JSON Web Token Set for OIDC
+        let jwkset = if let Some(openidconfig) = openidconfig.as_ref() {
+            Some(get_jwks(openidconfig.jwks_uri.as_str()))
+        } else {
+            None
+        };
+
         Self {
             sender: RwLock::new(sender),
             pending_jobs: RwLock::new(Default::default()),
@@ -78,10 +107,9 @@ impl ServiceState {
                 "User database could not be read from {}",
                 config.auth().user_file().as_deref().unwrap()
             ))),
-            oauth2config: RwLock::new(read_oauth_config(&config).expect(&format!(
-                "Oauth2 config could not be read from {}",
-                config.auth().oauth_config_file().as_deref().unwrap()
-            ))),
+            oauthcredentials,
+            openidconfig,
+            jwkset,
             config,
         }
     }
