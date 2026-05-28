@@ -1,5 +1,4 @@
 use crate::auth::CurrentUser;
-use crate::config::EndPoint;
 use crate::dispatcher::Message;
 use crate::state::ServiceState;
 use axum::http::HeaderMap;
@@ -69,18 +68,22 @@ impl Job {
                     } else {
                         format!("Process stderr is invalid UTF-8!")
                     };
-                    dispatcherchannel.send(Message::FinishJob {
+                    if let Err(e) = dispatcherchannel.send(Message::FinishJob {
                         id: self.id,
                         exitstatus: result.status,
                         output,
                         error,
-                    });
+                    }) {
+                        eprintln!("ERROR: Dispatcher send failure: {}", e)
+                    }
                 }
                 Err(e) => {
-                    dispatcherchannel.send(Message::FailStartJob {
+                    if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
                         id: self.id,
                         error: format!("{}", e),
-                    });
+                    }) {
+                        eprintln!("ERROR: Dispatcher error send failure: {}", e2)
+                    }
                 }
             }
         });
