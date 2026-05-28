@@ -127,7 +127,9 @@ impl Dispatcher {
 
     pub fn send(&self, message: Message) {
         if let Ok(sender) = self.state.sender.read() {
-            sender.send(message);
+            if let Err(e) = sender.send(message) {
+                eprintln!("ERROR: Dispatcher send failed: {}", e)
+            }
         }
     }
 

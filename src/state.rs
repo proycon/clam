@@ -121,7 +121,9 @@ impl ServiceState {
     /// Send a message to the dispatcher
     pub fn send(&self, message: Message) {
         if let Ok(sender) = self.sender.read() {
-            sender.send(message);
+            if let Err(e) = sender.send(message) {
+                eprintln!("ERROR: State send failed: {}", e)
+            }
         }
     }
 
