@@ -15,7 +15,7 @@ pub struct Share {
     onetime: bool,
 }
 
-pub(crate) struct ServiceState {
+pub struct ServiceState {
     /// Jobs
     pub(crate) pending_jobs: RwLock<VecDeque<Job>>,
     pub(crate) running_jobs: RwLock<HashMap<JobId, Job>>,

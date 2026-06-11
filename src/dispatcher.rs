@@ -54,11 +54,10 @@ pub enum ResponseMessage {
         /// stderr
         error: String,
     },
+    JobStatus(Job),
     JobStarted,
-    // A job failed to start
-    JobStartFailed {
-        error: String,
-    },
+    // For example when a job failed to start
+    JobError(String),
 }
 
 impl Dispatcher {
@@ -94,7 +93,15 @@ impl Dispatcher {
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),
                     Ok(Message::PollJob(job_id, responsechannel)) => {
-                        todo!();
+                        if let Ok(jobs) = self.state.running_jobs.read() {
+                            if let Some(job) = jobs.get(&job_id) {
+                                let _ =
+                                    responsechannel.send(ResponseMessage::JobStatus(job.clone()));
+                            } else {
+                                let _ = responsechannel
+                                    .send(ResponseMessage::JobError("No such job".to_string()));
+                            }
+                        }
                     }
                     Ok(Message::FinishJob {
                         id,
@@ -102,14 +109,29 @@ impl Dispatcher {
                         output,
                         error,
                     }) => {
-                        todo!();
+                        if let (Ok(mut running_jobs), Ok(mut done_jobs)) = (
+                            self.state.running_jobs.write(),
+                            self.state.done_jobs.write(),
+                        ) {
+                            if let Some(mut job) = running_jobs.remove(&id) {
+                                job.set_output(output);
+                                job.set_error(error);
+                                if let Some(code) = exitstatus.code() {
+                                    job.set_exitstatus(code);
+                                }
+                                done_jobs.insert(id, job);
+                            } else {
+                                eprintln!("Warning: Job not found: {}", id);
+                            }
+                        }
                     }
                     Ok(Message::FailStartJob { id, error }) => {
                         if let (Ok(mut running_jobs), Ok(mut done_jobs)) = (
                             self.state.running_jobs.write(),
                             self.state.done_jobs.write(),
                         ) {
-                            if let Some(job) = running_jobs.remove(&id) {
+                            if let Some(mut job) = running_jobs.remove(&id) {
+                                job.set_error(error);
                                 done_jobs.insert(id, job);
                             } else {
                                 eprintln!("Warning: Job not found: {}", id);

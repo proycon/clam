@@ -231,7 +231,7 @@ async fn submit_project(
     state.send(Message::SubmitJob(job, tx));
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
-        Ok(ResponseMessage::JobStartFailed { error }) => Err(ApiError::ServiceUnavailable(error)),
+        Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
         Err(_) => Err(ApiError::InternalError(
             "oneshot sender dropped whilst submitting a job",
         )),

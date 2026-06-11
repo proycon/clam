@@ -22,9 +22,16 @@ pub struct Job {
     /// The particular user this job is associated with (may be 'anonymous')
     user: String,
 
-    // command
+    /// command
     command: String,
     args: Vec<String>,
+
+    /// Holds exit status (only for done jobs)
+    exitstatus: Option<i32>,
+    /// Holds standard output (only for done jobs)
+    output: Option<String>,
+    /// Holds stderr output (only for done jobs)
+    error: Option<String>,
 }
 
 impl Job {
@@ -45,8 +52,23 @@ impl Job {
             project,
             user: user.as_str().to_string(),
             command: endpoint.command().into(),
+            output: None,
+            error: None,
+            exitstatus: None,
             args,
         }
+    }
+
+    pub fn set_output(&mut self, output: String) {
+        self.output = Some(output);
+    }
+
+    pub fn set_error(&mut self, error: String) {
+        self.error = Some(error);
+    }
+
+    pub fn set_exitstatus(&mut self, code: i32) {
+        self.exitstatus = Some(code);
     }
 
     /// Spawns the job (consumes it)
