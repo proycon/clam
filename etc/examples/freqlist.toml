@@ -4,6 +4,11 @@ description = "This webservice produces a frequency list for an input file"
 rootdir = "./data"
 command = "./freqlist.sh"
 
+[service.license]
+name = "GNU Affero General Public License"
+id = "AGPL-3.0-only"
+url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
+
 [[service.args]]
 parameter_id = "casesensitive"
 
@@ -17,6 +22,14 @@ contenttype = "text/plain; charset=utf-8"
 
 [[service.endpoints]]
 path = "/"
+mode = "Porch"
+
+[[service.endpoints]]
+path = "/index"
+mode = "Index"
+
+[[service.endpoints]]
+path = "/"  #project name will be appended automatically
 mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
 

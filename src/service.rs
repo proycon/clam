@@ -5,7 +5,7 @@ use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
 use crate::job::Job;
-use crate::project::Project;
+use crate::project::{Project, project_list};
 use crate::state::ServiceState;
 use tokio::signal;
 use tokio::sync::oneshot;
@@ -109,7 +109,9 @@ impl Service {
         let mut private_routes = Router::new();
         let mut public_routes = Router::new()
             .route("/login", get(login_handler))
-            .route("/oidc/callback", get(callback_handler));
+            .route("/oidc/callback", get(callback_handler))
+            .route("/openapi.json", get(get_api)) //openAPI endpoint
+            .route("/info", get(get_info)); //wrapped around, openAPI endpoint, may serve swagger UI
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
             if endpoint.public() {
                 public_routes = self.configure_endpoint(public_routes, i, endpoint);
@@ -142,6 +144,7 @@ impl Service {
     ) -> Router<Arc<ServiceState>> {
         match endpoint.mode() {
             EndPointMode::Porch => router.route(endpoint.path(), get(get_porch)),
+            EndPointMode::Index => router.route(endpoint.path(), get(get_index)),
             EndPointMode::Project => {
                 let path = format!("{}/{{project}}", endpoint.path());
                 router = router
@@ -180,16 +183,77 @@ impl Service {
     }
 }
 
+async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiError> {
+    match state.openapi.to_json() {
+        Ok(apidoc) => {
+            return Ok(ClamResponse::Body {
+                stream: apidoc.into(),
+                contenttype: "application/json".to_string(),
+            });
+        }
+        Err(e) => {
+            eprintln!("ERROR serialising OpenAPI specification: {}", e);
+            Err(ApiError::InternalError(
+                "Internal error whilst serializing OpenAPI specification to JSON, check server logs for details",
+            ))
+        }
+    }
+}
+
+async fn get_info(
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
+        Ok(CONTENT_TYPE_HTML) => {
+            //present swagger UI
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
 async fn get_porch(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => {
+        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
+        Ok(CONTENT_TYPE_HTML) => {
+            //present human-readable welcome porch
             todo!();
         }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+/// Presents a list of actions and projects to the user, the user is redirected here after login
+async fn get_index(
+    state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    let username = get_username(&headers);
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => {
+            //return project list (for actions the OpenAPI endpoint already suffices)
+            if let Ok(projects) = project_list(username, state.config()) {
+                Ok(ClamResponse::JsonList(
+                    projects.into_iter().map(|project| project.into()).collect(),
+                ))
+            } else {
+                Err(ApiError::InternalError("Unable to obtain project list"))
+            }
+        }
         Ok(CONTENT_TYPE_HTML) => {
+            //present human-readable welcome porch with project and action list
             todo!();
         }
         _ => Err(ApiError::NotAcceptable(
@@ -202,19 +266,26 @@ async fn get_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            todo!();
+    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+        match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+            Ok(CONTENT_TYPE_JSON) => {
+                //present stating state, progress state or output state (including index of input/output files for the first and last)
+                todo!();
+            }
+            Ok(CONTENT_TYPE_HTML) => {
+                //present staging interface, in progress message, or output interface, depending on project state
+                todo!();
+            }
+            _ => Err(ApiError::NotAcceptable(
+                "Accept header could not be satisfied (try application/json)",
+            )),
         }
-        Ok(CONTENT_TYPE_HTML) => {
-            todo!();
-        }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
     }
 }
 

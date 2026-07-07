@@ -42,8 +42,8 @@ pub struct ServiceConfig {
     /// Link to a source code repository
     sourcerepo: Option<String>,
 
-    /// The license of the service, an SPDX compatible identifier is strongly recommended here
-    license: Option<String>,
+    /// The license of the service, has fields name, id (SPDX identifier) and URL.
+    license: Option<utoipa::openapi::License>,
 
     filetypes: Vec<FileType>,
     viewers: Vec<Viewer>,
@@ -119,12 +119,14 @@ impl OAuthCredentials {
 #[derive(Deserialize, Serialize, Default, Clone)]
 pub enum EndPointMode {
     /// In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only. No file upload/download support.
+    /// A GET on this endpoint (requesting HTML) presents the interface for that action.
     Action,
 
     /// In project mode, responses do not come immediately after a POST request but clients poll for status at regular intervals using a GET request and must first CREATE a project and optionally PUT files.
     /// Users can DELETE projects when done, or leave them to come back later.
     /// This allows the job to run over long periods of time and allows (multiple) file-based output.
     /// All endpoint paths are suffixed with the project ID
+    /// The GET endpoint presents the staging area (files), an in progress state, or the output files, depending on the state of the project
     #[default]
     Project,
 
@@ -132,6 +134,9 @@ pub enum EndPointMode {
     /// to the authenticated sections
     /// It is typically served at path `/` and used as a landing page.
     Porch,
+
+    /// Provides a list of projects and actions. This is what people will see after logging in (if such an endpoint is defined)
+    Index,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -172,6 +177,12 @@ pub struct EndPoint {
 
     /// Return type for the endpoint, used for actions
     filetype: Option<String>,
+
+    /// One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
+    next: Vec<String>,
+
+    /// One or more endpoints that come before this endpoint, so the output of that endpoint acts as the input for this one. These are possible dependencies that the user can run before tis one.
+    before: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]
@@ -402,13 +413,6 @@ impl Envsubst for ServiceConfig {
         }
         if let Some(Err(e)) = self
             .sourcerepo
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        if let Some(Err(e)) = self
-            .license
             .as_mut()
             .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
         {

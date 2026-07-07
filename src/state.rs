@@ -38,7 +38,11 @@ pub struct ServiceState {
 
     pub(crate) sender: RwLock<Sender<Message>>,
 
+    /// Service Configuration
     pub(crate) config: ServiceConfig,
+
+    /// API specific in OpenAPI format
+    pub(crate) openapi: utoipa::openapi::OpenApi,
 
     /// JSON Web Key Set to efficiently validate tokens (it should never be fetched on each request, but fetched and cached as otherwise it is inefficient)
     pub(crate) jwkset: Option<JwkSet>,
@@ -109,6 +113,7 @@ impl ServiceState {
             ))),
             oauthcredentials,
             openidconfig,
+            openapi: (&config).into(), //compute and associate openAPI specification
             jwkset,
             config,
         }
