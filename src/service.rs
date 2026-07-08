@@ -5,7 +5,7 @@ use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
 use crate::job::Job;
-use crate::project::{Project, project_index};
+use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use tokio::signal;
 use tokio::sync::oneshot;
@@ -35,6 +35,7 @@ pub enum ClamResponse {
     NoContent(),
     Text(String),
     Body { stream: Body, contenttype: String },
+    ProjectResponse(ProjectStatus),
     JsonList(Vec<Value>),
 }
 
@@ -84,6 +85,9 @@ impl IntoResponse for ClamResponse {
             )
                 .into_response(),
             Self::JsonList(data) => (StatusCode::OK, [cors, server], Json(data)).into_response(),
+            Self::ProjectResponse(status) => {
+                (StatusCode::OK, [cors, server], Json(status)).into_response()
+            }
         }
     }
 }
@@ -163,6 +167,8 @@ impl Service {
                 router = router
                     .route(path.as_str(), post(submit_project))
                     .layer(Extension(endpoint_index));
+
+                //File uploading endpoints within a project
                 let fpath = format!("{}/{{project}}/{{filename}}", endpoint.path());
                 router = router
                     .route(fpath.as_str(), get(download_file))
@@ -176,7 +182,10 @@ impl Service {
                 router
             }
             EndPointMode::Action => {
-                router = router.route(endpoint.path(), get(get_action));
+                // Both GET or POST are fine for actions
+                router = router
+                    .route(endpoint.path(), get(get_action))
+                    .layer(Extension(endpoint_index));
                 router = router.route(
                     endpoint.path(),
                     post(post_action).layer(Extension(endpoint_index)),
@@ -300,6 +309,7 @@ async fn get_project(
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
             Ok(CONTENT_TYPE_JSON) => {
                 //present staging stage, progress stage or output stage (including index of input/output files for the first and last)
+                // build ProjectStatus and return ClamResponse::ProjectResponse(ProjectStatus) as response
                 todo!();
             }
             Ok(CONTENT_TYPE_HTML) => {

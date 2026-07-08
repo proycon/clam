@@ -1,5 +1,6 @@
 use crate::config::EndPoint;
 use crate::config::ServiceConfig;
+use serde::Serialize;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
 
@@ -95,6 +96,27 @@ impl Project {
         p.push(id);
         p
     }
+}
+
+#[derive(Debug, Clone, Serialize)]
+/// Returned to the client in JSON as part of `ProjectResponse`
+#[serde(tag = "stage", content = "data")]
+pub enum ProjectStatus {
+    /// The project is in staging mode, you can upload files and when done start it
+    Staging { input_files: Vec<String> },
+    /// Project is scheduled for execution (but not running yet)
+    Scheduled,
+    /// The project is running
+    Running {
+        progress: Option<u8>,
+        message: String,
+    },
+    /// The project is done (either succesfully or with a runtime error)
+    Done {
+        success: bool,
+        message: Option<String>,
+        output_files: Vec<String>,
+    },
 }
 
 /// Returns an index of projects **for a specific user and endpoint**

@@ -22,7 +22,7 @@ pub struct ServiceConfig {
     /// The host and port to listen on (`host:port`). Can also be overriden from the command-line at runtime.
     listen: Option<String>,
 
-    /// A short human-readable description
+    /// Description of the service, supports CommonMark syntax. (for human end-users)
     description: Option<String>,
 
     /// The authors of the webservice
@@ -44,6 +44,12 @@ pub struct ServiceConfig {
 
     /// The license of the service, has fields name, id (SPDX identifier) and URL.
     license: Option<utoipa::openapi::License>,
+
+    /// The contact person/organisation for this deployment of the webservice (may differ from the actual authors!)
+    contact: Option<utoipa::openapi::Contact>,
+
+    /// URL for the Terms of Service for this API
+    termsofservice: Option<String>,
 
     filetypes: Vec<FileType>,
     viewers: Vec<Viewer>,
@@ -157,7 +163,13 @@ pub struct EndPoint {
     /// The path where the endpoint is accessible, this also serves as the primary identifier for the endpoint. All paths must start with /
     path: String,
 
+    /// Human-readable name or title of the endpoint
     name: String,
+
+    /// Short summary of the endpoint (for human end-users)
+    summary: Option<String>,
+
+    /// Larger description of the endpoint, supports CommonMark syntax. (for human end-users)
     description: Option<String>,
 
     mode: EndPointMode,
@@ -263,7 +275,7 @@ pub enum ParameterType {
     },
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Parameter {
     /// Identifier for the parameter, used as variable name in HTTP requests
     id: String,
@@ -296,7 +308,7 @@ pub enum FileName {
     Pattern(String),
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct FileType {
     /// Internal ID
     id: String,
@@ -377,6 +389,16 @@ impl ServiceConfig {
     pub fn with_listen(mut self, host_and_port: impl Into<String>) -> Self {
         self.listen = Some(host_and_port.into());
         self
+    }
+
+    /// Get a filetype object by name
+    pub fn get_filetype(&self, filetype: &str) -> Option<&FileType> {
+        for f in self.filetypes() {
+            if f.id == filetype {
+                return Some(f);
+            }
+        }
+        None
     }
 }
 

@@ -1,6 +1,7 @@
 [service]
 name = "freqlist"
-description = "This webservice produces a frequency list for an input file"
+summary = "This webservice produces a frequency list for an input file"
+description = "You can unload a plain text file, and the tokens in it will be analysed and their frequency outputted in a TSV file"
 rootdir = "./data"
 command = "./freqlist.sh"
 
@@ -11,6 +12,11 @@ postauth_url = "/index"
 name = "GNU Affero General Public License"
 id = "AGPL-3.0-only"
 url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
+
+[service.contact]
+name = "Maarten van Gompel"
+url = "https://proycon.anaproy.nl"
+email = "proycon@anaproy.nl"
 
 [[service.args]]
 parameter_id = "casesensitive"
