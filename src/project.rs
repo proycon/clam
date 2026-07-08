@@ -1,3 +1,4 @@
+use crate::config::EndPoint;
 use crate::config::ServiceConfig;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::PathBuf;
@@ -5,8 +6,7 @@ use std::path::PathBuf;
 const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
 /// A project is a workspace for a user that holds input and output files
-/// It is also tied to a particular endpoint, but we group on project name first, and then on endpoint, so it acts
-/// as a grouping mechanism.
+/// It is also tied to a particular endpoint (each endpoint holds its own projects)
 #[derive(Debug)]
 pub struct Project {
     /// The identifier of the project
@@ -91,14 +91,18 @@ impl Project {
             .map(|x| x.clone())
             .unwrap_or(".".into());
         p.push(user);
-        p.push(id);
         p.push(endpoint);
+        p.push(id);
         p
     }
 }
 
-/// Returns a list of projects
-pub fn project_list(user: &str, config: &ServiceConfig) -> Result<Vec<String>, std::io::Error> {
+/// Returns an index of projects **for a specific user and endpoint**
+pub fn project_index(
+    user: &str,
+    endpoint: &EndPoint,
+    config: &ServiceConfig,
+) -> Result<Vec<String>, std::io::Error> {
     if user.chars().any(|c| FORBIDDEN_CHARS.contains(&c)) {
         return Err(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
@@ -112,6 +116,8 @@ pub fn project_list(user: &str, config: &ServiceConfig) -> Result<Vec<String>, s
         .map(|x| x.clone())
         .unwrap_or(".".into());
     p.push(user);
+    let endpoint_checksum = format!("{:x}", md5::compute(endpoint.path().as_str().as_bytes()));
+    p.push(endpoint_checksum);
     if p.is_dir() {
         let mut projects = Vec::new();
         for entry in std::fs::read_dir(p)? {

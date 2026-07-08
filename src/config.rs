@@ -83,6 +83,9 @@ pub struct AuthConfig {
 
     /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication
     oauth_config_file: Option<String>,
+
+    /// The URL to redirect to after succesful authentication
+    postauth_url: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
@@ -135,7 +138,7 @@ pub enum EndPointMode {
     /// It is typically served at path `/` and used as a landing page.
     Porch,
 
-    /// Provides a list of projects and actions. This is what people will see after logging in (if such an endpoint is defined)
+    /// Provides a list of project or action endpoints. This is what people will see after logging in (if such an endpoint is defined)
     Index,
 }
 
@@ -177,12 +180,11 @@ pub struct EndPoint {
 
     /// Return type for the endpoint, used for actions
     filetype: Option<String>,
+    // One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
+    //next: Vec<String>, //implement later
 
-    /// One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
-    next: Vec<String>,
-
-    /// One or more endpoints that come before this endpoint, so the output of that endpoint acts as the input for this one. These are possible dependencies that the user can run before tis one.
-    before: Vec<String>,
+    // One or more endpoints that come before this endpoint, so the output of that endpoint acts as the input for this one. These are possible dependencies that the user can run before tis one.
+    //before: Vec<String>, //implement later
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default)]

@@ -5,7 +5,7 @@ use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
 use crate::job::Job;
-use crate::project::{Project, project_list};
+use crate::project::{Project, project_index};
 use crate::state::ServiceState;
 use tokio::signal;
 use tokio::sync::oneshot;
@@ -146,6 +146,10 @@ impl Service {
             EndPointMode::Porch => router.route(endpoint.path(), get(get_porch)),
             EndPointMode::Index => router.route(endpoint.path(), get(get_index)),
             EndPointMode::Project => {
+                let index_path = format!("{}/projects", endpoint.path());
+                router = router
+                    .route(index_path.as_str(), get(get_projects))
+                    .layer(Extension(endpoint_index));
                 let path = format!("{}/{{project}}", endpoint.path());
                 router = router
                     .route(path.as_str(), get(get_project))
@@ -234,17 +238,38 @@ async fn get_porch(
     }
 }
 
-/// Presents a list of actions and projects to the user, the user is redirected here after login
+/// Index of endpoints (actions & project endpoint with project list). The user will be directed here after login.
 async fn get_index(
+    state: State<Arc<ServiceState>>,
+    Extension(endpoint_index): Extension<usize>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
+        Ok(CONTENT_TYPE_HTML) => {
+            //present human-readable list of actions and project endpoints, as well as the actual projects there (calls project_index() for each)
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+/// Presents a list of projects for a given user and endpoint (Web API only, humans only use get_index)
+async fn get_projects(
+    Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
     let username = get_username(&headers);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => {
             //return project list (for actions the OpenAPI endpoint already suffices)
-            if let Ok(projects) = project_list(username, state.config()) {
+            if let Ok(projects) = project_index(username, endpoint, state.config()) {
                 Ok(ClamResponse::JsonList(
                     projects.into_iter().map(|project| project.into()).collect(),
                 ))
@@ -254,6 +279,7 @@ async fn get_index(
         }
         Ok(CONTENT_TYPE_HTML) => {
             //present human-readable welcome porch with project and action list
+            //(I'm not sure if I'll actually use this or enumerate all projects from all endpoints on the index page)
             todo!();
         }
         _ => Err(ApiError::NotAcceptable(
@@ -273,7 +299,7 @@ async fn get_project(
     if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
             Ok(CONTENT_TYPE_JSON) => {
-                //present stating state, progress state or output state (including index of input/output files for the first and last)
+                //present staging stage, progress stage or output stage (including index of input/output files for the first and last)
                 todo!();
             }
             Ok(CONTENT_TYPE_HTML) => {

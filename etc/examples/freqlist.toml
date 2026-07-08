@@ -4,6 +4,9 @@ description = "This webservice produces a frequency list for an input file"
 rootdir = "./data"
 command = "./freqlist.sh"
 
+[service.auth]
+postauth_url = "/index"
+
 [service.license]
 name = "GNU Affero General Public License"
 id = "AGPL-3.0-only"
@@ -24,6 +27,7 @@ contenttype = "text/plain; charset=utf-8"
 path = "/"
 mode = "Porch"
 
+#Index of endpoints and projects
 [[service.endpoints]]
 path = "/index"
 mode = "Index"
