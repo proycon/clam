@@ -198,12 +198,7 @@ impl EndPoint {
                         .to_string()
                 }));
                 put_operation.responses = ResponsesBuilder::new()
-                    .response(
-                        "201",
-                        ResponseBuilder::new()
-                            .content("text/plain", ContentBuilder::new().into())
-                            .description("just the word 'created'"),
-                    )
+                    .response("201", ResponseBuilder::new())
                     .response(
                         "404",
                         apierror_response(
@@ -230,12 +225,7 @@ impl EndPoint {
                         "Deletes this project, including all input and output files".to_string()
                     }));
                 delete_operation.responses = ResponsesBuilder::new()
-                    .response(
-                        "200",
-                        ResponseBuilder::new()
-                            .content("text/plain", ContentBuilder::new().into())
-                            .description("just the word 'ok'"),
-                    )
+                    .response("204", ResponseBuilder::new())
                     .response(
                         "404",
                         apierror_response("Returned when the project does not exist", error_schema),
@@ -262,7 +252,6 @@ impl EndPoint {
                     .response(
                         "200",
                         ResponseBuilder::new()
-                            .content("text/plain", ContentBuilder::new().into())
                             .description(
                                 "Indicates that the job for the project has been succesfully accepted. Query progress using GET requests.",
                             ),

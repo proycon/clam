@@ -24,6 +24,7 @@ use std::sync::{Arc, mpsc::Sender};
 
 const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
+const CONTENT_TYPE_TEXT: &str = "text/plain";
 
 pub struct Service {
     config: ServiceConfig,
@@ -169,15 +170,20 @@ impl Service {
                     .layer(Extension(endpoint_index));
 
                 //File uploading endpoints within a project
-                let fpath = format!("{}/{{project}}/{{filename}}", endpoint.path());
+                let fpath = format!("{}/{{project}}/input/{{filename}}", endpoint.path());
                 router = router
-                    .route(fpath.as_str(), get(download_file))
+                    .route(fpath.as_str(), get(download_input_file))
                     .layer(Extension(endpoint_index));
                 router = router
-                    .route(fpath.as_str(), put(upload_file))
+                    .route(fpath.as_str(), put(upload_input_file))
                     .layer(Extension(endpoint_index));
                 router = router
-                    .route(fpath.as_str(), delete(delete_file))
+                    .route(fpath.as_str(), delete(delete_input_file))
+                    .layer(Extension(endpoint_index));
+
+                let fpath = format!("{}/{{project}}/output/{{filename}}", endpoint.path());
+                router = router
+                    .route(fpath.as_str(), get(download_output_file))
                     .layer(Extension(endpoint_index));
                 router
             }
@@ -356,21 +362,14 @@ async fn create_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
-                if let Err(e) = project.create(state.config()) {
-                    Err(e.into())
-                } else {
-                    Ok(ClamResponse::Created())
-                }
-            } else {
-                Err(ApiError::InvalidName("project name invalid"))
-            }
+    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+        if let Err(e) = project.create(state.config()) {
+            Err(e.into())
+        } else {
+            Ok(ClamResponse::Created())
         }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
     }
 }
 
@@ -382,25 +381,18 @@ async fn delete_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
-                if let Err(e) = project.delete(state.config()) {
-                    Err(e.into())
-                } else {
-                    Ok(ClamResponse::NoContent())
-                }
-            } else {
-                Err(ApiError::InvalidName("project name invalid"))
-            }
+    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+        if let Err(e) = project.delete(state.config()) {
+            Err(e.into())
+        } else {
+            Ok(ClamResponse::NoContent())
         }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
     }
 }
 
-async fn download_file(
+async fn download_output_file(
     Path(project): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
@@ -410,7 +402,17 @@ async fn download_file(
     todo!();
 }
 
-async fn upload_file(
+async fn download_input_file(
+    Path(project): Path<String>,
+    Path(filename): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    todo!();
+}
+
+async fn upload_input_file(
     Path(project): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
@@ -427,7 +429,7 @@ async fn upload_file(
     }
 }
 
-async fn delete_file(
+async fn delete_input_file(
     Path(project): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
