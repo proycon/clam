@@ -51,9 +51,16 @@ pub struct ServiceConfig {
     /// URL for the Terms of Service for this API
     termsofservice: Option<String>,
 
+    /// File type definitions
     filetypes: Vec<FileType>,
+
+    /// Viewer definitions, used by file types
     viewers: Vec<Viewer>,
 
+    /// Output file definitions  (ties matching filenames to filetypes)
+    outputfiles: Vec<OutputFile>,
+
+    /// Endpoint configuration
     endpoints: Vec<EndPoint>,
 
     #[serde(default)]
@@ -256,10 +263,13 @@ pub enum ParameterType {
 
     /// File
     File {
-        name: FileName,
+        filename: FileName,
+
+        /// Should match with an id from the filetypes
         filetype: String,
 
         /// Coerce input file into pattern even when it doesn't match
+        #[serde(default)]
         conflictresolution: FileConflictResolution,
     },
 
@@ -321,6 +331,18 @@ pub struct FileType {
 
     /// URL to forward to
     viewers: Vec<Viewer>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, Getters)]
+pub struct OutputFile {
+    /// name of the type of output
+    name: String,
+
+    /// Filetype, corresponds with an ID in filetypes
+    r#type: String,
+
+    /// Filename, output files are assigned this OutputFile when this matches
+    filename: FileName,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

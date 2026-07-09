@@ -29,6 +29,11 @@ id = "plaintext"
 name = "Plain Text (UTF-8)"
 contenttype = "text/plain; charset=utf-8"
 
+[[service.filetypes]]
+id = "tsv"
+name = "Tab Separated Values (UTF-8)"
+contenttype = "text/tsv"
+
 [[service.endpoints]]
 path = "/"
 mode = "Porch"
@@ -47,10 +52,15 @@ status_pattern = ".*" #every line from stderr qualifies as a status message
 id = "tokinput"
 description = "Tokenised text input"
 required = true
-type = { parametertype = "File", filetype = "plaintext", name = { nametype = "Pattern", value = "*.txt" } }
+type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "*.txt" } }
 
 [[service.endpoints.parameters]]
 id = "casesensitive"
 description = "Case sensitivity"
 required = false
 type = { parametertype = "Boolean", default = false, flag = "-c"  }
+
+[[service.outputfiles]]
+name = "Frequency list"
+type = "tsv"
+filename = { nametype = "Pattern", value = "*.txt" }

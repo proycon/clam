@@ -25,6 +25,7 @@ use std::sync::{Arc, mpsc::Sender};
 const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
 const CONTENT_TYPE_TEXT: &str = "text/plain";
+const CONTENT_TYPE_FORMDATA: &str = "multipart/form-data";
 
 pub struct Service {
     config: ServiceConfig,
@@ -169,8 +170,23 @@ impl Service {
                     .route(path.as_str(), post(submit_project))
                     .layer(Extension(endpoint_index));
 
-                //File uploading endpoints within a project
-                let fpath = format!("{}/{{project}}/input/{{filename}}", endpoint.path());
+                // Generic file upload endpoint
+                let fpath = format!("{}/{{project}}/upload", endpoint.path());
+                router = router
+                    .route(fpath.as_str(), get(upload_input_file_multipart))
+                    .layer(Extension(endpoint_index));
+
+                // File output endpoints
+                let fpath = format!("{}/{{project}}/output/{{filename}}", endpoint.path());
+                router = router
+                    .route(fpath.as_str(), get(download_output_file))
+                    .layer(Extension(endpoint_index));
+
+                //File uploading/download/deletion endpoints within a project
+                let fpath = format!(
+                    "{}/{{project}}/{{parameter_id}}/{{filename}}",
+                    endpoint.path()
+                );
                 router = router
                     .route(fpath.as_str(), get(download_input_file))
                     .layer(Extension(endpoint_index));
@@ -181,10 +197,6 @@ impl Service {
                     .route(fpath.as_str(), delete(delete_input_file))
                     .layer(Extension(endpoint_index));
 
-                let fpath = format!("{}/{{project}}/output/{{filename}}", endpoint.path());
-                router = router
-                    .route(fpath.as_str(), get(download_output_file))
-                    .layer(Extension(endpoint_index));
                 router
             }
             EndPointMode::Action => {
@@ -421,6 +433,23 @@ async fn upload_input_file(
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
+            todo!();
+        }
+        _ => Err(ApiError::NotAcceptable(
+            "Accept header could not be satisfied (try application/json)",
+        )),
+    }
+}
+
+async fn upload_input_file_multipart(
+    Path(project): Path<String>,
+    Path(filename): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    state: State<Arc<ServiceState>>,
+    request: Request<Body>,
+) -> Result<ClamResponse, ApiError> {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_FORMDATA]) {
+        Ok(CONTENT_TYPE_FORMDATA) => {
             todo!();
         }
         _ => Err(ApiError::NotAcceptable(

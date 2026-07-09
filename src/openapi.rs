@@ -1,11 +1,16 @@
+use std::fmt::format;
+use std::fs::FileType;
+
 use crate::config::{EndPoint, EndPointMode, ParameterType, ServiceConfig};
 use crate::error::ApiError;
 use crate::project::ProjectStatus;
+use utoipa::openapi::Object;
+use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{
     Components, Content, ContentBuilder, HttpMethod, Info, ObjectBuilder, OpenApi, OpenApiBuilder,
     PathItem, Paths, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
     Server, path::Operation, path::Parameter, path::ParameterBuilder, path::ParameterIn,
-    schema::Type,
+    request_body::RequestBodyBuilder, schema::Type,
 };
 
 impl From<&ServiceConfig> for OpenApi {
@@ -274,13 +279,189 @@ impl EndPoint {
                     vec![HttpMethod::Post],
                     post_operation,
                 );
+
+                let mut file_parameters = Vec::new();
+
+                // Create endpoints for input file upload/download/deletion
+                for parameter in self.parameters().iter() {
+                    if let ParameterType::File {
+                        filename: _,
+                        filetype,
+                        conflictresolution: _,
+                    } = parameter.r#type()
+                    {
+                        let filetype = config
+                            .get_filetype(filetype)
+                            .expect("A parameter references an undefined filetype");
+                        file_parameters.push((parameter.id(), filetype));
+
+                        //GET inputfile
+                        let mut get_inputfile_operation = Operation::new();
+                        get_inputfile_operation.summary = Some(format!(
+                            "Retrieves the specified inputfile for parameter: {}",
+                            parameter.name(),
+                        ));
+                        get_inputfile_operation.responses = ResponsesBuilder::new()
+                            .response(
+                                "200",
+                                ResponseBuilder::new()
+                                    .content(filetype.contenttype(), ContentBuilder::new().into())
+                                    .description(filetype.name()),
+                            )
+                            .response(
+                                "404",
+                                apierror_response(
+                                    "Returned when the specified input file does not exist",
+                                    error_schema,
+                                ),
+                            )
+                            .into();
+                        get_inputfile_operation.parameters = Some(vec![project_path_parameter()]);
+                        get_inputfile_operation
+                            .parameters
+                            .as_mut()
+                            .map(|parameters| parameters.push(filename_path_parameter()));
+                        paths.add_path_operation(
+                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            vec![HttpMethod::Get],
+                            get_inputfile_operation,
+                        );
+
+                        //DELETE inputfile
+                        let mut delete_inputfile_operation = Operation::new();
+                        delete_inputfile_operation.summary = Some(format!(
+                            "Removes the specified inputfile for parameter: {}",
+                            parameter.name(),
+                        ));
+                        delete_inputfile_operation.responses = ResponsesBuilder::new()
+                            .response(
+                                "204",
+                                ResponseBuilder::new()
+                                    .description("Returned when the file was succesfully deleted"),
+                            )
+                            .response(
+                                "404",
+                                apierror_response(
+                                    "Returned when the specified input file does not exist",
+                                    error_schema,
+                                ),
+                            )
+                            .into();
+                        delete_inputfile_operation.parameters =
+                            Some(vec![project_path_parameter()]);
+                        delete_inputfile_operation
+                            .parameters
+                            .as_mut()
+                            .map(|parameters| parameters.push(filename_path_parameter()));
+                        paths.add_path_operation(
+                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            vec![HttpMethod::Delete],
+                            delete_inputfile_operation,
+                        );
+
+                        //Upload inputfile (PUT), file contents is directly in request body and filename encoded in URL
+                        let mut upload_inputfile_operation = Operation::new();
+                        upload_inputfile_operation.summary = Some(format!(
+                            "Upload the specified inputfile for parameter: {}{}",
+                            parameter.name(),
+                            if parameter.multiple() {
+                                ", this may be called multiple times to upload multiple files"
+                            } else {
+                                ", only one file is accepted, subsequent calls will overwrite/remove earlier uploads!"
+                            }
+                        ));
+                        upload_inputfile_operation.responses = ResponsesBuilder::new()
+                            .response(
+                                "201",
+                                ResponseBuilder::new()
+                                    .description("Returned when the file is succesfully uploaded"),
+                            )
+                            .response(
+                                "404",
+                                apierror_response(
+                                    "Returned when the specified input file does not exist",
+                                    error_schema,
+                                ),
+                            )
+                            .into();
+                        upload_inputfile_operation.request_body = Some(
+                            RequestBodyBuilder::new()
+                                .required(Some(Required::True))
+                                .description(Some("File contents to upload"))
+                                .content(filetype.contenttype(), ContentBuilder::new().build())
+                                .build(),
+                        );
+                        upload_inputfile_operation.parameters =
+                            Some(vec![project_path_parameter()]);
+                        upload_inputfile_operation
+                            .parameters
+                            .as_mut()
+                            .map(|parameters| parameters.push(filename_path_parameter()));
+                        paths.add_path_operation(
+                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            vec![HttpMethod::Put],
+                            upload_inputfile_operation,
+                        );
+                    }
+                }
+                if !file_parameters.is_empty() {
+                    //Upload inputfile (POST), secondary upload point, file name and contents are form-encoded in request body
+                    let mut upload_inputfile_operation = Operation::new();
+                    upload_inputfile_operation.summary = Some(format!("Generic upload endpoint"));
+                    upload_inputfile_operation.description = Some(format!(
+                        "This upload endpoint accepts multipart/form-data, the field names must correspond with the parameter IDs you want to upload for",
+                    ));
+                    upload_inputfile_operation.responses = ResponsesBuilder::new()
+                        .response(
+                            "201",
+                            ResponseBuilder::new()
+                                .description("Returned when the file is succesfully uploaded"),
+                        )
+                        .response(
+                            "404",
+                            apierror_response(
+                                "Returned when the specified input file does not exist",
+                                error_schema,
+                            ),
+                        )
+                        .into();
+                    let mut multipart_schema_builder = ObjectBuilder::new();
+                    for (parameter, filetype) in file_parameters.iter() {
+                        multipart_schema_builder = multipart_schema_builder.property(
+                            parameter.as_str(),
+                            ObjectBuilder::new().schema_type(Type::String).format(Some(
+                                utoipa::openapi::SchemaFormat::Custom(
+                                    filetype.contenttype().clone(),
+                                ),
+                            )),
+                        )
+                    }
+                    upload_inputfile_operation.request_body = Some(
+                        RequestBodyBuilder::new()
+                            .required(Some(Required::True))
+                            .description(Some("File contents to upload"))
+                            .content(
+                                "multipart/form-data",
+                                ContentBuilder::new()
+                                    .schema(Some(Schema::Object(multipart_schema_builder.build())))
+                                    .build(),
+                            )
+                            .build(),
+                    );
+                    upload_inputfile_operation.parameters = Some(vec![project_path_parameter()]);
+                    paths.add_path_operation(
+                        format!("{}{{project}}/upload", self.path()),
+                        vec![HttpMethod::Post],
+                        upload_inputfile_operation,
+                    );
+                }
             }
             &EndPointMode::Index => {
                 let mut operation = Operation::new();
                 operation.summary = Some(
                     self.summary()
                         .clone()
-                        .unwrap_or_else(|| "Index page, provides a list of endpoints and project to human end-users. Authentication may be required.".to_string()),
+                        .unwrap_or_else(|| "Index page, provides a list of endpoints and underlying projects to human end-users. Authentication may be required.".to_string()),
                 );
                 operation.description = self.description().clone();
                 operation.responses = ResponsesBuilder::new()
@@ -288,7 +469,7 @@ impl EndPoint {
                         "200",
                         ResponseBuilder::new()
                             .content("text/html", ContentBuilder::new().into())
-                            .description("List of endpoints (actions & projects). Provides an interface to start new projects or delete existing ones (if applicable)."),
+                            .description("List of endpoints (with underlying projects if applicable). Provides an interface to start new projects or delete existing ones (if applicable)."),
                     )
                     .into();
                 paths.add_path_operation(self.path(), vec![HttpMethod::Get], operation);
@@ -324,6 +505,14 @@ fn project_path_parameter() -> Parameter {
     ParameterBuilder::new()
         .name("project")
         .description(Some("Project identifier"))
+        .parameter_in(ParameterIn::Path)
+        .build()
+}
+
+fn filename_path_parameter() -> Parameter {
+    ParameterBuilder::new()
+        .name("filename")
+        .description(Some("Filename"))
         .parameter_in(ParameterIn::Path)
         .build()
 }
