@@ -238,8 +238,7 @@ async fn get_info(
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
-            //present swagger UI
-            todo!();
+            todo!("present swagger UI");
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -253,11 +252,10 @@ async fn get_porch(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
-            //present human-readable welcome porch
-            todo!();
+            todo!("present human-readable welcome porch");
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -275,8 +273,9 @@ async fn get_index(
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
-            //present human-readable list of actions and project endpoints, as well as the actual projects there (calls project_index() for each)
-            todo!();
+            todo!(
+                "present human-readable list of actions and project endpoints, as well as the actual projects there (calls project_index() for each)"
+            );
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -293,7 +292,7 @@ async fn get_projects(
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let username = get_username(&headers);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
             //return project list (for actions the OpenAPI endpoint already suffices)
             if let Ok(projects) = project_index(username, endpoint, state.config()) {
@@ -303,11 +302,6 @@ async fn get_projects(
             } else {
                 Err(ApiError::InternalError("Unable to obtain project list"))
             }
-        }
-        Ok(CONTENT_TYPE_HTML) => {
-            //present human-readable welcome porch with project and action list
-            //(I'm not sure if I'll actually use this or enumerate all projects from all endpoints on the index page)
-            todo!();
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -328,11 +322,15 @@ async fn get_project(
             Ok(CONTENT_TYPE_JSON) => {
                 //present staging stage, progress stage or output stage (including index of input/output files for the first and last)
                 // build ProjectStatus and return ClamResponse::ProjectResponse(ProjectStatus) as response
-                todo!();
+                todo!(
+                    "build ProjectStatus and return ClamResponse::ProjectResponse(ProjectStatus) as response"
+                );
             }
             Ok(CONTENT_TYPE_HTML) => {
                 //present staging interface, in progress message, or output interface, depending on project state
-                todo!();
+                todo!(
+                    "present staging interface, in progress message, or output interface, depending on project state"
+                );
             }
             _ => Err(ApiError::NotAcceptable(
                 "Accept header could not be satisfied (try application/json)",
@@ -411,7 +409,7 @@ async fn download_output_file(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    todo!();
+    todo!("download output file without keeping it all in memory");
 }
 
 async fn download_input_file(
@@ -421,7 +419,7 @@ async fn download_input_file(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    todo!();
+    todo!("download input file without keeping it all in memory");
 }
 
 async fn upload_input_file(
@@ -433,7 +431,7 @@ async fn upload_input_file(
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
-            todo!();
+            todo!("transfer input file without keeping all in memory");
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -450,7 +448,7 @@ async fn upload_input_file_multipart(
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_FORMDATA]) {
         Ok(CONTENT_TYPE_FORMDATA) => {
-            todo!();
+            todo!("transfer input file without keeping all in memory");
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -465,14 +463,7 @@ async fn delete_input_file(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            todo!();
-        }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
-    }
+    todo!("delete input file and return 204");
 }
 
 /// Landing page for the action (if text/html is requested), if the output content-type is requested (and the necessary parameters are supplied) it will run the action
@@ -518,7 +509,7 @@ async fn post_action(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    todo!();
+    todo!("Run the action");
 }
 
 async fn shutdown_signal(state: Arc<ServiceState>) {
@@ -584,6 +575,5 @@ fn negotiate_content_type<'a>(
 }
 
 fn get_username(headers: &HeaderMap) -> &str {
-    //TODO: implement!
-    "anonymous"
+    todo!("return username")
 }
