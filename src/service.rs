@@ -475,18 +475,36 @@ async fn delete_input_file(
     }
 }
 
-/// Landing page for the action
+/// Landing page for the action (if text/html is requested), if the output content-type is requested (and the necessary parameters are supplied) it will run the action
 async fn get_action(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            todo!();
+    let endpoint = state.endpoint(endpoint_index);
+    let mut accepted_data = vec![CONTENT_TYPE_HTML];
+    let mut output_filetype = None;
+    if let Some(filetype) = endpoint.filetype() {
+        if let Some(filetype) = state.config().get_filetype(filetype) {
+            let contenttype = filetype.contenttype().as_str();
+            if contenttype != "text/html" {
+                output_filetype = Some(contenttype);
+                accepted_data.push(contenttype);
+            }
         }
+    }
+    match negotiate_content_type(request.headers(), &accepted_data) {
         Ok(CONTENT_TYPE_HTML) => {
-            todo!();
+            todo!("Present action submission form");
+        }
+        Ok(filetype) => {
+            if Some(filetype) == output_filetype {
+                todo!("Run the action");
+            } else {
+                Err(ApiError::NotAcceptable(
+                    "Accept header could not be satisfied (try application/json)",
+                ))
+            }
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -529,10 +547,10 @@ async fn shutdown_signal(state: Arc<ServiceState>) {
     }
 }
 
-fn negotiate_content_type(
+fn negotiate_content_type<'a>(
     headers: &HeaderMap<HeaderValue>,
-    offer_types: &[&'static str],
-) -> Result<&'static str, ApiError> {
+    offer_types: &[&'a str],
+) -> Result<&'a str, ApiError> {
     if let Some(accept_types) = headers.get(axum::http::header::ACCEPT) {
         let mut match_accept_index = None;
         let mut matching_offer = None;

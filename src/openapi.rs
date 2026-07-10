@@ -107,18 +107,81 @@ impl EndPoint {
                 paths.add_path_operation(self.path(), vec![HttpMethod::Get], operation);
             }
             &EndPointMode::Action => {
-                let mut operation = Operation::new();
-                operation.summary = Some(
+                let filetype = config.get_filetype(self.filetype().as_deref().unwrap_or("none"));
+
+                let mut get_operation = Operation::new();
+                get_operation.summary = Some(
+                    self.summary()
+                        .clone()
+                        .unwrap_or_else(|| "Submission form for an action".to_string()),
+                );
+                get_operation.description = Some(format!(
+                    "{}{}{}",
+                    self.description().as_deref().unwrap_or(""),
+                    if self.description().is_some() {
+                        ". "
+                    } else {
+                        ""
+                    },
+                    format!(
+                        "This endpoint is for human end-users and presents the submission form for the action unless the output content-type {} is requested in the accepted header.",
+                        if let Some(filetype) = filetype {
+                            filetype.contenttype()
+                        } else {
+                            ""
+                        }
+                    )
+                ));
+                self.register_parameters_in(&mut get_operation);
+
+                get_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "200",
+                        if let Some(filetype) = filetype {
+                            let mut rb = ResponseBuilder::new()
+                                .content("text/html", ContentBuilder::new().into())
+                                .description(
+                                    "The submission form for the action"
+                                );
+                            if filetype.contenttype() != "text/html" {
+                                rb = rb
+                                    .content(filetype.contenttype(), ContentBuilder::new().into())
+                                    .description(
+                                        format!("Output of the action in {} format", filetype.name())
+                                    );
+                            }
+                            rb.build()
+                        } else {
+                            // generic, unknown filetype
+                            ResponseBuilder::new()
+                                .content("text/html", ContentBuilder::new().into())
+                                .description(
+                                    "Submission form for the action"
+                                ).build()
+                        }
+                    )
+                    .response(
+                        "400",
+                        apierror_response("Returned when one or more parameters to the action are invalid (ParameterError)", error_schema),
+                    )
+                    .response(
+                        "503",
+                        apierror_response("Returned when the action is unavailable due to load or other reasons (ServiceUnavailable)", error_schema),
+                    )
+                    .into();
+                paths.add_path_operation(self.path(), vec![HttpMethod::Get], get_operation);
+
+                let mut post_operation = Operation::new();
+                post_operation.summary = Some(
                     self.summary()
                         .clone()
                         .unwrap_or_else(|| "Action endpoint".to_string()),
                 );
-                operation.description =
+                post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "An action endpoint takes zero or more parameters, runs a process in the background, and returns within the same round-trip with the result".to_string()));
-                self.register_parameters_in(&mut operation);
-                let filetype = config.get_filetype(self.filetype().as_deref().unwrap_or("none"));
+                self.register_parameters_in(&mut post_operation);
 
-                operation.responses = ResponsesBuilder::new()
+                post_operation.responses = ResponsesBuilder::new()
                     .response(
                         "200",
                         if let Some(filetype) = filetype {
@@ -145,11 +208,7 @@ impl EndPoint {
                         apierror_response("Returned when the action is unavailable due to load or other reasons (ServiceUnavailable)", error_schema),
                     )
                     .into();
-                paths.add_path_operation(
-                    self.path(),
-                    vec![HttpMethod::Get, HttpMethod::Post],
-                    operation,
-                );
+                paths.add_path_operation(self.path(), vec![HttpMethod::Post], post_operation);
             }
             &EndPointMode::Project => {
                 //GET
