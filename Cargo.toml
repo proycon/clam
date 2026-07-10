@@ -23,7 +23,8 @@ rand = "0.10.1"
 reqwest = { version = "0.13.4", features = ["blocking", "form", "json"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-tokio = { version = "1.52.0", features = ["signal", "macros", "rt-multi-thread"] }
+tokio = { version = "1.52.0", features = ["signal", "macros", "rt-multi-thread", "fs"] }
+tokio-util = { version = "0.7.18", features = [ "io" ]}
 toml = "1.1.2"
 tower-http = { version = "0.6.8", features = ["trace", "normalize-path"] }
 utoipa = { version = "5.5.0", features = ["axum_extras"] }

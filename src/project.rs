@@ -1,34 +1,40 @@
-use crate::config::EndPoint;
-use crate::config::ServiceConfig;
+use crate::config::{EndPoint, FileType, ServiceConfig};
+use crate::error::ApiError;
+use axum::body::Body;
 use serde::Serialize;
 use std::fs::{create_dir_all, remove_dir_all};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use tokio::fs::File;
+use tokio_util::io::ReaderStream;
 
 const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
 /// A project is a workspace for a user that holds input and output files
 /// It is also tied to a particular endpoint (each endpoint holds its own projects)
-#[derive(Debug)]
-pub struct Project {
+pub struct Project<'a> {
     /// The identifier of the project
     id: String,
 
     user: String,
 
     endpoint: String,
+
+    config: &'a ServiceConfig,
 }
 
-impl Project {
+impl<'a> Project<'a> {
     /// Instantiate a project, does not yet create it
     pub fn new(
         id: impl Into<String>,
         user: impl Into<String>,
         endpoint: impl Into<String>,
+        config: &'a ServiceConfig,
     ) -> Result<Self, ()> {
         let project = Self {
             id: id.into(),
             user: user.into(),
             endpoint: endpoint.into(),
+            config,
         };
         if project.is_valid() {
             Ok(project)
@@ -38,15 +44,15 @@ impl Project {
     }
 
     /// Creates a project by writing the project directory to the filesystem
-    pub fn create(&self, config: &ServiceConfig) -> Result<(), std::io::Error> {
-        let path = self.path(config);
+    pub fn create(&self) -> Result<(), std::io::Error> {
+        let path = self.path();
         create_dir_all(path)?;
         Ok(())
     }
 
     /// Deletes a project by deleting the project directory and all it contains from the filesystem
-    pub fn delete(&self, config: &ServiceConfig) -> Result<(), std::io::Error> {
-        let path = self.path(config);
+    pub fn delete(&self) -> Result<(), std::io::Error> {
+        let path = self.path();
         remove_dir_all(path)?;
         Ok(())
     }
@@ -81,12 +87,13 @@ impl Project {
     }
 
     /// Returns the path to the project on the filesystem
-    pub fn path(&self, config: &ServiceConfig) -> PathBuf {
+    pub fn path(&self) -> PathBuf {
         let user: PathBuf = PathBuf::from(self.user.clone());
         let checksum = format!("{:x}", md5::compute(self.endpoint.as_str().as_bytes()));
         let endpoint: PathBuf = PathBuf::from(checksum);
         let id: PathBuf = PathBuf::from(self.id.clone());
-        let mut p: PathBuf = config
+        let mut p: PathBuf = self
+            .config
             .rootdir()
             .as_ref()
             .map(|x| x.clone())
@@ -95,6 +102,33 @@ impl Project {
         p.push(endpoint);
         p.push(id);
         p
+    }
+
+    /// Returns the path of the specified output file if it indeed exists
+    pub fn output_file(&self, filename: &str) -> Option<PathBuf> {
+        let mut path = self.path();
+        path.push(filename);
+        if path.is_file() { Some(path) } else { None }
+    }
+
+    /// Returns the path of the specified input file if it indeed exists
+    pub fn input_file(&self, parameter_id: &str, filename: &str) -> Option<PathBuf> {
+        let mut path = self.path();
+        path.push(parameter_id);
+        path.push(filename);
+        if path.is_file() { Some(path) } else { None }
+    }
+
+    /// Returns the body of a file so it can be streamed to the client, use with `input_file()` or `output_file()'
+    pub async fn file_body(&self, filepath: &Path) -> Result<axum::body::Body, ApiError> {
+        let file = File::open(filepath).await?;
+        let stream = ReaderStream::new(file);
+        let body = Body::from_stream(stream);
+        Ok(body)
+    }
+
+    pub fn output_filetype(&self, filename: &str) -> Option<FileType> {
+        todo!("return matching filetype for output file");
     }
 }
 

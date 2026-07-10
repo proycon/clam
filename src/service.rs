@@ -317,7 +317,12 @@ async fn get_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
             Ok(CONTENT_TYPE_JSON) => {
                 //present staging stage, progress stage or output stage (including index of input/output files for the first and last)
@@ -372,8 +377,13 @@ async fn create_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
-        if let Err(e) = project.create(state.config()) {
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        if let Err(e) = project.create() {
             Err(e.into())
         } else {
             Ok(ClamResponse::Created())
@@ -391,8 +401,13 @@ async fn delete_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    if let Ok(project) = Project::new(project, get_username(&headers), endpoint.path()) {
-        if let Err(e) = project.delete(state.config()) {
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        if let Err(e) = project.delete() {
             Err(e.into())
         } else {
             Ok(ClamResponse::NoContent())
@@ -407,9 +422,39 @@ async fn download_output_file(
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    todo!("download output file without keeping it all in memory");
+    let endpoint = state.endpoint(endpoint_index);
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        if let Err(e) = project.delete() {
+            Err(e.into())
+        } else {
+            //download output file without keeping it all in memory
+            if let Some(filepath) = project.output_file(filename.as_str()) {
+                let stream: axum::body::Body = project.file_body(&filepath).await?;
+                let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str())
+                {
+                    filetype.contenttype().to_string()
+                } else {
+                    "application/octet-stream".to_string()
+                };
+                Ok(ClamResponse::Body {
+                    stream,
+                    contenttype,
+                })
+            } else {
+                Err(ApiError::NotFound("Output file not found"))
+            }
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
 }
 
 async fn download_input_file(
@@ -493,12 +538,12 @@ async fn get_action(
                 todo!("Run the action");
             } else {
                 Err(ApiError::NotAcceptable(
-                    "Accept header could not be satisfied (try application/json)",
+                    "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
                 ))
             }
         }
         _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
+            "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
         )),
     }
 }

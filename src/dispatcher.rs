@@ -89,7 +89,7 @@ impl Dispatcher {
                         }
                     }
                     Ok(Message::CancelJob(job_id, responsechannel)) => {
-                        todo!();
+                        todo!("kill running process job");
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),
                     Ok(Message::PollJob(job_id, responsechannel)) => {
