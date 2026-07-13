@@ -3,13 +3,17 @@
 */
 
 use crate::envsubst::*;
-use crate::error::ClamError;
+use crate::error::{ApiError, ClamError};
+use axum::http::request;
 use derive_getters::Getters;
-use serde::{Deserialize, Serialize};
+use regex::Regex;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Debug;
 use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
+
+const INVALID_FILENAME_CHARS: [char; 4] = ['/', '\n', '\t', ';'];
 
 #[derive(Deserialize, Serialize, Default, Getters, Clone)]
 pub struct ServiceConfig {
@@ -206,13 +210,13 @@ pub struct EndPoint {
     //before: Vec<String>, //implement later
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, Default)]
+#[derive(Clone, Debug, Deserialize, Serialize, Default, PartialEq)]
 pub enum FileConflictResolution {
     // Reject input files which don't match the pattern
     #[default]
     Reject,
 
-    //Coerce an input file into a pattern when it doesn't matches
+    //Coerce an input file into the exact filename (does not work for patterns!)
     Coerce,
 }
 
@@ -285,6 +289,61 @@ pub enum ParameterType {
     },
 }
 
+impl Parameter {
+    /// Validates/matches a requested filename against the filetype configuration and returns the accepted filename (may or may not be different from the requested one) or an ApiError::ParameterError
+    pub fn validate_filename(&self, request_filename: &str) -> Result<String, ApiError> {
+        if let ParameterType::File {
+            filename,
+            filetype: _,
+            conflictresolution,
+        } = self.r#type()
+        {
+            //validate requested filename
+            if request_filename.find("..").is_some()
+                || request_filename
+                    .chars()
+                    .any(|c| INVALID_FILENAME_CHARS.contains(&c))
+            {
+                return Err(ApiError::ParameterError(
+                    "Unacceptable filename".to_string(),
+                ));
+            }
+
+            match filename {
+                FileName::Exact(exact_filename) => {
+                    if request_filename == exact_filename.as_str() {
+                        Ok(request_filename.to_string())
+                    } else if conflictresolution == &FileConflictResolution::Coerce {
+                        Ok(exact_filename.clone())
+                    } else {
+                        Err(ApiError::ParameterError(format!(
+                            "Filename '{}' not accepted for parameter {}",
+                            request_filename,
+                            self.id()
+                        )))
+                    }
+                }
+                FileName::Pattern(pattern) => {
+                    if pattern.is_match(request_filename) && !request_filename.is_empty() {
+                        Ok(request_filename.to_string())
+                    } else {
+                        Err(ApiError::ParameterError(format!(
+                            "Filename '{}' not accepted for parameter {}",
+                            request_filename,
+                            self.id()
+                        )))
+                    }
+                }
+            }
+        } else {
+            Err(ApiError::ParameterError(format!(
+                "Parameter {} if not a file parameter",
+                self.id()
+            )))
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Parameter {
     /// Identifier for the parameter, used as variable name in HTTP requests
@@ -314,8 +373,28 @@ pub struct Parameter {
 pub enum FileName {
     /// Exact filename
     Exact(String),
+
     /// Regular expression to capture file(s)
-    Pattern(String),
+    #[serde(
+        deserialize_with = "deserialize_regex",
+        serialize_with = "serialize_regex"
+    )]
+    Pattern(Regex),
+}
+
+fn deserialize_regex<'de, D>(d: D) -> Result<Regex, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(d)?;
+    Regex::new(&s).map_err(serde::de::Error::custom)
+}
+
+fn serialize_regex<S>(re: &Regex, s: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    s.serialize_str(re.as_str())
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
@@ -483,5 +562,16 @@ impl Envsubst for EndPoint {
             return Err(e);
         }
         Ok(())
+    }
+}
+
+impl EndPoint {
+    pub fn parameter<'a>(&'a self, parameter_id: &str) -> Option<&'a Parameter> {
+        for parameter in self.parameters.iter() {
+            if parameter.id.as_str() == parameter_id {
+                return Some(parameter);
+            }
+        }
+        None
     }
 }

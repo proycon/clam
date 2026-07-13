@@ -7,6 +7,9 @@ use crate::error::{ApiError, ClamError};
 use crate::job::Job;
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
+use futures_util::StreamExt;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
 use tokio::signal;
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
@@ -14,7 +17,7 @@ use tower_http::trace::TraceLayer;
 use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Path, State};
+use axum::extract::{Multipart, Path, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
@@ -222,12 +225,10 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
                 contenttype: "application/json".to_string(),
             });
         }
-        Err(e) => {
-            eprintln!("ERROR serialising OpenAPI specification: {}", e);
-            Err(ApiError::InternalError(
-                "Internal error whilst serializing OpenAPI specification to JSON, check server logs for details",
-            ))
-        }
+        Err(e) => Err(ApiError::InternalError(format!(
+            "Internal error whilst serializing OpenAPI specification to JSON: {}",
+            e
+        ))),
     }
 }
 
@@ -295,12 +296,14 @@ async fn get_projects(
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
             //return project list (for actions the OpenAPI endpoint already suffices)
-            if let Ok(projects) = project_index(username, endpoint, state.config()) {
-                Ok(ClamResponse::JsonList(
+            match project_index(username, endpoint, state.config()) {
+                Ok(projects) => Ok(ClamResponse::JsonList(
                     projects.into_iter().map(|project| project.into()).collect(),
-                ))
-            } else {
-                Err(ApiError::InternalError("Unable to obtain project list"))
+                )),
+                Err(e) => Err(ApiError::InternalError(format!(
+                    "Unable to obtain project list: {}",
+                    e
+                ))),
             }
         }
         _ => Err(ApiError::NotAcceptable(
@@ -360,12 +363,14 @@ async fn submit_project(
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
         Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
-        Err(_) => Err(ApiError::InternalError(
-            "oneshot sender dropped whilst submitting a job",
-        )),
-        Ok(_) => Err(ApiError::InternalError(
-            "unexpected response message whilst submitting a job",
-        )),
+        Err(e) => Err(ApiError::InternalError(format!(
+            "oneshot sender dropped whilst submitting a job: {}",
+            e
+        ))),
+        Ok(m) => Err(ApiError::InternalError(format!(
+            "unexpected response message whilst submitting a job: {:?}",
+            m
+        ))),
     }
 }
 
@@ -432,25 +437,20 @@ async fn download_output_file(
         endpoint.path(),
         state.config(),
     ) {
-        if let Err(e) = project.delete() {
-            Err(e.into())
-        } else {
-            //download output file without keeping it all in memory
-            if let Some(filepath) = project.output_file(filename.as_str()) {
-                let stream: axum::body::Body = project.file_body(&filepath).await?;
-                let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str())
-                {
-                    filetype.contenttype().to_string()
-                } else {
-                    "application/octet-stream".to_string()
-                };
-                Ok(ClamResponse::Body {
-                    stream,
-                    contenttype,
-                })
+        //download output file without keeping it all in memory
+        if let Some(filepath) = project.output_file(filename.as_str()) {
+            let stream: axum::body::Body = project.file_body(&filepath).await?;
+            let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
+                filetype.contenttype().to_string()
             } else {
-                Err(ApiError::NotFound("Output file not found"))
-            }
+                "application/octet-stream".to_string()
+            };
+            Ok(ClamResponse::Body {
+                stream,
+                contenttype,
+            })
+        } else {
+            Err(ApiError::NotFound("Output file not found"))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -459,50 +459,152 @@ async fn download_output_file(
 
 async fn download_input_file(
     Path(project): Path<String>,
+    Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    todo!("download input file without keeping it all in memory");
+    let endpoint = state.endpoint(endpoint_index);
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        //download input file without keeping it all in memory
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+            let stream: axum::body::Body = project.file_body(&filepath).await?;
+            let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
+                filetype.contenttype().to_string()
+            } else {
+                "application/octet-stream".to_string()
+            };
+            Ok(ClamResponse::Body {
+                stream,
+                contenttype,
+            })
+        } else {
+            Err(ApiError::NotFound("Output file not found"))
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
 }
 
 async fn upload_input_file(
     Path(project): Path<String>,
+    Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            todo!("transfer input file without keeping all in memory");
+    let endpoint = state.endpoint(endpoint_index);
+    let parameter = endpoint
+        .parameter(parameter_id.as_str())
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+    let filename = parameter.validate_filename(filename.as_str())?;
+
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        //upload input file without keeping it all in memory
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+            //MAYBE TODO: Check for matching content-type? We just accept anything as-is right now
+            let mut body_stream = request.into_body().into_data_stream();
+            let mut file = File::create(&filepath)
+                .await
+                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {}", e)))?;
+
+            // Stream chunks directly from the network to the disk
+            while let Some(chunk_result) = body_stream.next().await {
+                let chunk = chunk_result.map_err(|e| {
+                    ApiError::UploadError(format!("Network error while streaming: {e}"))
+                })?;
+                file.write_all(&chunk).await.map_err(|e| {
+                    ApiError::InternalError(format!("Failed to write uploaded chunk: {e}"))
+                })?;
+            }
+
+            file.flush().await.map_err(|e| {
+                ApiError::InternalError(format!("Failed to flush after upload: {e}"))
+            })?;
+
+            Ok(ClamResponse::Created())
+        } else {
+            Err(ApiError::NotFound("Output file not found"))
         }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
     }
 }
 
 async fn upload_input_file_multipart(
     Path(project): Path<String>,
+    Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
-    request: Request<Body>,
+    headers: HeaderMap,
+    mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_FORMDATA]) {
-        Ok(CONTENT_TYPE_FORMDATA) => {
-            todo!("transfer input file without keeping all in memory");
+    let endpoint = state.endpoint(endpoint_index);
+
+    let project = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    )
+    .map_err(|_| ApiError::InvalidName("project name invalid"))?;
+
+    let parameter = endpoint
+        .parameter(parameter_id.as_str())
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+
+    // Iterate through all the fields/files in the multipart form submission
+    while let Some(mut field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| ApiError::UploadError(format!("Upload error in Multipart: {e}")))?
+    {
+        let filename = parameter.validate_filename(field.name().unwrap_or_default())?;
+
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+            let mut file = File::create(&filepath)
+                .await
+                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {e}")))?;
+
+            while let Some(chunk_result) = field.next().await {
+                let chunk = chunk_result.map_err(|e| {
+                    ApiError::UploadError(format!("Error reading multipart upload chunk: {e}"))
+                })?;
+
+                file.write_all(&chunk).await.map_err(|e| {
+                    ApiError::InternalError(format!("File upload write error: {e}"))
+                })?;
+            }
+
+            file.flush().await.map_err(|e| {
+                ApiError::InternalError(format!("Flush error after file upload: {e}"))
+            })?;
+        } else {
+            return Err(ApiError::NotFound("Output file path generation failed"));
         }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
     }
+
+    Ok(ClamResponse::Created())
 }
 
 async fn delete_input_file(
     Path(project): Path<String>,
+    Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,

@@ -14,11 +14,13 @@ pub enum ClamError {
 
 #[derive(Debug)]
 pub enum ApiError {
-    InternalError(&'static str),
+    InternalError(String),
+    /// client-side upload error (HTTP 400)
+    UploadError(String),
     NotFound(&'static str),
     NotAcceptable(&'static str),
     PermissionDenied(&'static str),
-    ParameterError(&'static str),
+    ParameterError(String),
     InvalidName(&'static str),
     ServiceUnavailable(String),
 }
@@ -46,6 +48,10 @@ impl Serialize for ApiError {
                 state.serialize_field("type", "ParameterError")?;
                 state.serialize_field("message", s)?;
             }
+            Self::UploadError(s) => {
+                state.serialize_field("type", "UploadError")?;
+                state.serialize_field("message", s)?;
+            }
             Self::InternalError(s) => {
                 state.serialize_field("type", "InternalError")?;
                 state.serialize_field("message", s)?;
@@ -70,7 +76,9 @@ impl IntoResponse for ApiError {
             Self::PermissionDenied(..) => StatusCode::FORBIDDEN,
             Self::ServiceUnavailable(..) => StatusCode::SERVICE_UNAVAILABLE,
             Self::NotAcceptable(..) => StatusCode::NOT_ACCEPTABLE,
-            Self::ParameterError(..) | Self::InvalidName(..) => StatusCode::BAD_REQUEST,
+            Self::ParameterError(..) | Self::InvalidName(..) | Self::UploadError(..) => {
+                StatusCode::BAD_REQUEST
+            }
             _ => StatusCode::NOT_FOUND,
         };
         (statuscode, Json(self)).into_response()
@@ -91,16 +99,22 @@ impl From<std::io::Error> for ApiError {
             std::io::ErrorKind::PermissionDenied => {
                 Self::PermissionDenied("permission denied on filesystem")
             }
-            std::io::ErrorKind::NotSeekable => Self::InternalError("file not seekable"),
-            std::io::ErrorKind::StorageFull => Self::InternalError("storage full"),
-            std::io::ErrorKind::ReadOnlyFilesystem => Self::InternalError("read only filesystem"),
-            _ => Self::InternalError("File I/O error"),
+            std::io::ErrorKind::NotSeekable => {
+                Self::InternalError(format!("file not seekable: {}", value))
+            }
+            std::io::ErrorKind::StorageFull => {
+                Self::InternalError(format!("storage full: {}", value))
+            }
+            std::io::ErrorKind::ReadOnlyFilesystem => {
+                Self::InternalError(format!("read only filesystem: {}", value))
+            }
+            _ => Self::InternalError(format!("File I/O error: {}", value)),
         }
     }
 }
 
 impl From<axum::Error> for ApiError {
-    fn from(_value: axum::Error) -> Self {
-        Self::InternalError("web framework error")
+    fn from(value: axum::Error) -> Self {
+        Self::InternalError(format!("web framework error: {}", value))
     }
 }
