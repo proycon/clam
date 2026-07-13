@@ -1,3 +1,4 @@
+use crate::ParameterType;
 use crate::config::{EndPoint, FileType, ServiceConfig};
 use crate::error::ApiError;
 use axum::body::Body;
@@ -127,8 +128,24 @@ impl<'a> Project<'a> {
         Ok(body)
     }
 
-    pub fn output_filetype(&self, filename: &str) -> Option<FileType> {
-        todo!("return matching filetype for output file");
+    pub fn output_filetype(&self, filename: &str, endpoint: &EndPoint) -> Option<&FileType> {
+        for parameter in endpoint.parameters().iter() {
+            if let ParameterType::File {
+                filename: _,
+                filetype,
+                conflictresolution: _,
+            } = parameter.r#type()
+            {
+                if parameter.validate_filename(filename).is_ok() {
+                    for ft in self.config.filetypes() {
+                        if filetype == ft.id() {
+                            return Some(ft);
+                        }
+                    }
+                }
+            }
+        }
+        None
     }
 }
 

@@ -342,6 +342,22 @@ impl Parameter {
             )))
         }
     }
+
+    pub fn filetype<'a>(&self, config: &'a ServiceConfig) -> Option<&'a FileType> {
+        if let ParameterType::File {
+            filename: _,
+            filetype,
+            conflictresolution: _,
+        } = self.r#type()
+        {
+            for ft in config.filetypes() {
+                if ft.id() == filetype {
+                    return Some(ft);
+                }
+            }
+        }
+        None
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]

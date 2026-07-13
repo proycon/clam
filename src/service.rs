@@ -440,11 +440,12 @@ async fn download_output_file(
         //download output file without keeping it all in memory
         if let Some(filepath) = project.output_file(filename.as_str()) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
-            let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
-                filetype.contenttype().to_string()
-            } else {
-                "application/octet-stream".to_string()
-            };
+            let contenttype =
+                if let Some(filetype) = project.output_filetype(filename.as_str(), endpoint) {
+                    filetype.contenttype().to_string()
+                } else {
+                    "application/octet-stream".to_string()
+                };
             Ok(ClamResponse::Body {
                 stream,
                 contenttype,
@@ -467,6 +468,9 @@ async fn download_input_file(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
+    let parameter = endpoint
+        .parameter(parameter_id.as_str())
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -476,7 +480,7 @@ async fn download_input_file(
         //download input file without keeping it all in memory
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
-            let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
+            let contenttype = if let Some(filetype) = parameter.filetype(state.config()) {
                 filetype.contenttype().to_string()
             } else {
                 "application/octet-stream".to_string()
