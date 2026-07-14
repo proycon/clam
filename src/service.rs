@@ -4,7 +4,7 @@ use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
-use crate::job::{Job, ProjectKey, wait_for_pids};
+use crate::job::{Job, wait_for_pids};
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
@@ -404,14 +404,8 @@ async fn delete_project(
     if let Ok(project) = Project::new(project, username, endpoint_index, state.config()) {
         let mut pids: Vec<u32> = Vec::new();
         if let Ok(mut project_job_map) = state.project_job_map.write() {
-            let projectkey = ProjectKey {
-                endpoint: endpoint_index,
-                user: username.to_string(),
-                project: project.id().clone(),
-            };
-
             //kill all remaining running jobs
-            if let Some(job_ids) = project_job_map.get(&projectkey) {
+            if let Some(job_ids) = project_job_map.get(project.key()) {
                 if let Ok(running_jobs) = state.running_jobs.read() {
                     for job_id in job_ids.iter() {
                         if let Some(job) = running_jobs.get(job_id) {
@@ -423,7 +417,7 @@ async fn delete_project(
                     }
                 }
             }
-            project_job_map.remove(&projectkey);
+            project_job_map.remove(&project.key());
         }
         // wait until all processes are done
         wait_for_pids(pids).await;

@@ -1,5 +1,6 @@
 use crate::auth::CurrentUser;
 use crate::dispatcher::Message;
+use crate::project::ProjectKey;
 use crate::state::ServiceState;
 use axum::http::HeaderMap;
 use core::usize;
@@ -83,11 +84,11 @@ impl Job {
     /// Returns the project key, an aggregate encoding endpoint, user and project and used by the project_job_map
     pub fn projectkey(&self) -> Option<ProjectKey> {
         if let Some(project) = self.project() {
-            Some(ProjectKey {
-                endpoint: self.endpoint_index,
-                user: self.user.clone(),
-                project: project.clone(),
-            })
+            Some(ProjectKey::new(
+                project,
+                self.user.clone(),
+                self.endpoint_index,
+            ))
         } else {
             None
         }
@@ -157,13 +158,6 @@ impl Job {
             kill(Pid::from_raw(pid as i32), None);
         }
     }
-}
-
-#[derive(Clone, Debug, Hash, PartialEq, PartialOrd, Eq)]
-pub(crate) struct ProjectKey {
-    pub(crate) endpoint: usize,
-    pub(crate) user: String,
-    pub(crate) project: String,
 }
 
 pub async fn wait_for_pids(pids: Vec<u32>) {

@@ -1,7 +1,7 @@
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::Message;
-use crate::job::{Job, JobId, ProjectKey};
+use crate::job::{Job, JobId};
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
 use serde::Deserializer;
@@ -11,7 +11,7 @@ use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
 
-use crate::project::{Project, ProjectStatus};
+use crate::project::{Project, ProjectKey, ProjectStatus};
 
 pub struct Share {
     path: PathBuf,

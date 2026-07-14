@@ -1,29 +1,51 @@
 use crate::ParameterType;
 use crate::config::{EndPoint, FileType, ServiceConfig};
 use crate::error::ApiError;
-use crate::job::ProjectKey;
 use axum::body::Body;
 use derive_getters::Getters;
 use serde::Serialize;
 use std::fs::{create_dir_all, remove_dir_all};
+use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
 
 const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
-/// A project is a workspace for a user that holds input and output files
-/// It is also tied to a particular endpoint (each endpoint holds its own projects)
-#[derive(Getters)]
-pub struct Project<'a> {
-    /// The identifier of the project
-    id: String,
+#[derive(Getters, Clone, Eq, PartialEq, Hash)]
+/// Uniquely identifies a project
+pub struct ProjectKey {
+    /// Project name, also used in URLs
+    name: String,
 
     user: String,
 
     endpoint_index: usize,
+}
+
+impl ProjectKey {
+    pub fn new(name: impl Into<String>, user: impl Into<String>, endpoint_index: usize) -> Self {
+        Self {
+            name: name.into(),
+            user: user.into(),
+            endpoint_index,
+        }
+    }
+}
+
+/// A project is a workspace for a user that holds input and output files
+/// It is also tied to a particular endpoint (each endpoint holds its own projects)
+#[derive(Getters, Clone)]
+pub struct Project<'a> {
+    key: ProjectKey,
 
     config: &'a ServiceConfig,
+}
+
+impl<'a> PartialEq for Project<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key
+    }
 }
 
 impl<'a> Project<'a> {
@@ -35,9 +57,11 @@ impl<'a> Project<'a> {
         config: &'a ServiceConfig,
     ) -> Result<Self, ()> {
         let project = Self {
-            id: id.into(),
-            user: user.into(),
-            endpoint_index,
+            key: ProjectKey {
+                name: id.into(),
+                user: user.into(),
+                endpoint_index,
+            },
             config,
         };
         if project.is_valid() {
@@ -47,10 +71,18 @@ impl<'a> Project<'a> {
         }
     }
 
+    pub fn name(&self) -> &str {
+        self.key.name()
+    }
+
+    pub fn user(&self) -> &str {
+        self.key.user()
+    }
+
     pub fn endpoint(&self) -> &'a EndPoint {
         self.config
             .endpoints()
-            .get(self.endpoint_index)
+            .get(self.key.endpoint_index)
             .expect("endpoint must exist")
     }
 
@@ -71,27 +103,17 @@ impl<'a> Project<'a> {
     /// Checks whether a project is valid (valid ID, valid user, valid endpoint)
     /// These three components are encoded in the project path and must be safe
     pub fn is_valid(&self) -> bool {
-        if self.id.is_empty() || self.user.is_empty() {
+        if self.name().is_empty() || self.user().is_empty() {
             return false;
         }
-        if self
-            .id
-            .as_str()
-            .chars()
-            .any(|c| FORBIDDEN_CHARS.contains(&c))
-        {
+        if self.name().chars().any(|c| FORBIDDEN_CHARS.contains(&c)) {
             return false;
         }
 
-        if self
-            .user
-            .as_str()
-            .chars()
-            .any(|c| FORBIDDEN_CHARS.contains(&c))
-        {
+        if self.user().chars().any(|c| FORBIDDEN_CHARS.contains(&c)) {
             return false;
         }
-        if self.id.as_str().find("..").is_some() {
+        if self.name().find("..").is_some() {
             return false;
         }
         true
@@ -99,13 +121,13 @@ impl<'a> Project<'a> {
 
     /// Returns the path to the project on the filesystem
     pub fn path(&self) -> PathBuf {
-        let user: PathBuf = PathBuf::from(self.user.clone());
+        let user: PathBuf = PathBuf::from(self.user().clone());
         let checksum = format!(
             "{:x}",
             md5::compute(self.endpoint().path().as_str().as_bytes())
         );
         let endpoint: PathBuf = PathBuf::from(checksum);
-        let id: PathBuf = PathBuf::from(self.id.clone());
+        let id: PathBuf = PathBuf::from(self.name().clone());
         let mut p: PathBuf = self
             .config
             .rootdir()
