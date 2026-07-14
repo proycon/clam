@@ -319,11 +319,10 @@ async fn get_project(
     headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
@@ -379,11 +378,10 @@ async fn create_project(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
         if let Err(e) = project.create() {
@@ -402,9 +400,8 @@ async fn delete_project(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     let username = get_username(&headers);
-    if let Ok(project) = Project::new(project, username, endpoint.path(), state.config()) {
+    if let Ok(project) = Project::new(project, username, endpoint_index, state.config()) {
         let mut pids: Vec<u32> = Vec::new();
         if let Ok(mut project_job_map) = state.project_job_map.write() {
             let projectkey = ProjectKey {
@@ -447,22 +444,20 @@ async fn download_output_file(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
         //download output file without keeping it all in memory
         if let Some(filepath) = project.output_file(filename.as_str()) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
-            let contenttype =
-                if let Some(filetype) = project.output_filetype(filename.as_str(), endpoint) {
-                    filetype.contenttype().to_string()
-                } else {
-                    "application/octet-stream".to_string()
-                };
+            let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
+                filetype.contenttype().to_string()
+            } else {
+                "application/octet-stream".to_string()
+            };
             Ok(ClamResponse::Body {
                 stream,
                 contenttype,
@@ -483,16 +478,16 @@ async fn download_input_file(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
-    let parameter = endpoint
-        .parameter(parameter_id.as_str())
-        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
+        let parameter = project
+            .endpoint()
+            .parameter(parameter_id.as_str())
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
         //download input file without keeping it all in memory
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
@@ -522,18 +517,17 @@ async fn upload_input_file(
     headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
-    let parameter = endpoint
-        .parameter(parameter_id.as_str())
-        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
-    let filename = parameter.validate_filename(filename.as_str())?;
-
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
+        let parameter = project
+            .endpoint()
+            .parameter(parameter_id.as_str())
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+        let filename = parameter.validate_filename(filename.as_str())?;
         //upload input file without keeping it all in memory
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
             //MAYBE TODO: Check for matching content-type? We just accept anything as-is right now
@@ -573,17 +567,16 @@ async fn upload_input_file_multipart(
     headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
-
     let project = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     )
     .map_err(|_| ApiError::InvalidName("project name invalid"))?;
 
-    let parameter = endpoint
+    let parameter = project
+        .endpoint()
         .parameter(parameter_id.as_str())
         .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
 
@@ -629,17 +622,18 @@ async fn delete_input_file(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
-    let parameter = endpoint
-        .parameter(parameter_id.as_str())
-        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
-        endpoint.path(),
+        endpoint_index,
         state.config(),
     ) {
-        //download input file without keeping it all in memory
+        project
+            .endpoint()
+            .parameter(parameter_id.as_str())
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+
+        //delete input file
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
             std::fs::remove_file(filepath)?;
             Ok(ClamResponse::NoContent())

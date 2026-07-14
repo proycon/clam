@@ -1,6 +1,7 @@
 use crate::ParameterType;
 use crate::config::{EndPoint, FileType, ServiceConfig};
 use crate::error::ApiError;
+use crate::job::ProjectKey;
 use axum::body::Body;
 use derive_getters::Getters;
 use serde::Serialize;
@@ -20,7 +21,7 @@ pub struct Project<'a> {
 
     user: String,
 
-    endpoint: String,
+    endpoint_index: usize,
 
     config: &'a ServiceConfig,
 }
@@ -30,13 +31,13 @@ impl<'a> Project<'a> {
     pub fn new(
         id: impl Into<String>,
         user: impl Into<String>,
-        endpoint: impl Into<String>,
+        endpoint_index: usize,
         config: &'a ServiceConfig,
     ) -> Result<Self, ()> {
         let project = Self {
             id: id.into(),
             user: user.into(),
-            endpoint: endpoint.into(),
+            endpoint_index,
             config,
         };
         if project.is_valid() {
@@ -44,6 +45,13 @@ impl<'a> Project<'a> {
         } else {
             Err(())
         }
+    }
+
+    pub fn endpoint(&self) -> &'a EndPoint {
+        self.config
+            .endpoints()
+            .get(self.endpoint_index)
+            .expect("endpoint must exist")
     }
 
     /// Creates a project by writing the project directory to the filesystem
@@ -63,7 +71,7 @@ impl<'a> Project<'a> {
     /// Checks whether a project is valid (valid ID, valid user, valid endpoint)
     /// These three components are encoded in the project path and must be safe
     pub fn is_valid(&self) -> bool {
-        if self.id.is_empty() || self.user.is_empty() || self.endpoint.is_empty() {
+        if self.id.is_empty() || self.user.is_empty() {
             return false;
         }
         if self
@@ -92,7 +100,10 @@ impl<'a> Project<'a> {
     /// Returns the path to the project on the filesystem
     pub fn path(&self) -> PathBuf {
         let user: PathBuf = PathBuf::from(self.user.clone());
-        let checksum = format!("{:x}", md5::compute(self.endpoint.as_str().as_bytes()));
+        let checksum = format!(
+            "{:x}",
+            md5::compute(self.endpoint().path().as_str().as_bytes())
+        );
         let endpoint: PathBuf = PathBuf::from(checksum);
         let id: PathBuf = PathBuf::from(self.id.clone());
         let mut p: PathBuf = self
@@ -130,8 +141,8 @@ impl<'a> Project<'a> {
         Ok(body)
     }
 
-    pub fn output_filetype(&self, filename: &str, endpoint: &EndPoint) -> Option<&FileType> {
-        for parameter in endpoint.parameters().iter() {
+    pub fn output_filetype(&self, filename: &str) -> Option<&FileType> {
+        for parameter in self.endpoint().parameters().iter() {
             if let ParameterType::File {
                 filename: _,
                 filetype,
