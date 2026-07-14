@@ -537,7 +537,7 @@ async fn upload_input_file(
 
             Ok(ClamResponse::Created())
         } else {
-            Err(ApiError::NotFound("Output file not found"))
+            Err(ApiError::NotFound("Input file not found"))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -593,7 +593,7 @@ async fn upload_input_file_multipart(
                 ApiError::InternalError(format!("Flush error after file upload: {e}"))
             })?;
         } else {
-            return Err(ApiError::NotFound("Output file path generation failed"));
+            return Err(ApiError::NotFound("Input file path generation failed"));
         }
     }
 
@@ -606,9 +606,28 @@ async fn delete_input_file(
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
-    request: Request<Body>,
+    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    todo!("delete input file and return 204");
+    let endpoint = state.endpoint(endpoint_index);
+    endpoint
+        .parameter(parameter_id.as_str())
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified"))?;
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint.path(),
+        state.config(),
+    ) {
+        //download input file without keeping it all in memory
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+            std::fs::remove_file(filepath)?;
+            Ok(ClamResponse::NoContent())
+        } else {
+            Err(ApiError::NotFound("Input file not found"))
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
 }
 
 /// Landing page for the action (if text/html is requested), if the output content-type is requested (and the necessary parameters are supplied) it will run the action
