@@ -355,7 +355,6 @@ async fn submit_project(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-    request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(&state, endpoint_index, Some(project), &user, &headers);
     let (tx, rx) = oneshot::channel();
@@ -379,7 +378,6 @@ async fn create_project(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-    request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
@@ -403,7 +401,6 @@ async fn delete_project(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-    request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
@@ -428,7 +425,6 @@ async fn download_output_file(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-    request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     if let Ok(project) = Project::new(
@@ -465,7 +461,6 @@ async fn download_input_file(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-    request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let parameter = endpoint
@@ -552,7 +547,6 @@ async fn upload_input_file(
 async fn upload_input_file_multipart(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
-    Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
