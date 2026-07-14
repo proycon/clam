@@ -1,14 +1,17 @@
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::Message;
-use crate::job::{Job, JobId};
+use crate::job::{Job, JobId, ProjectKey};
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
+use serde::Deserializer;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
+
+use crate::project::{Project, ProjectStatus};
 
 pub struct Share {
     path: PathBuf,
@@ -21,8 +24,8 @@ pub struct ServiceState {
     pub(crate) running_jobs: RwLock<HashMap<JobId, Job>>,
     pub(crate) done_jobs: RwLock<HashMap<JobId, Job>>,
 
-    /// Map of users to projects
-    pub(crate) user_project_map: RwLock<HashMap<String, HashSet<String>>>,
+    /// Maps projects (pertaining to users and endpoints) to jobs, facilitates quick lookup of project status
+    pub(crate) project_job_map: RwLock<HashMap<ProjectKey, HashSet<JobId>>>,
 
     /// Public non-discoverable shared files (bypasses authentication)
     pub(crate) shares: RwLock<HashMap<String, Share>>,
@@ -105,7 +108,7 @@ impl ServiceState {
             pending_jobs: RwLock::new(Default::default()),
             running_jobs: RwLock::new(Default::default()),
             done_jobs: RwLock::new(Default::default()),
-            user_project_map: RwLock::new(Default::default()),
+            project_job_map: RwLock::new(Default::default()),
             shares: RwLock::new(Default::default()),
             user_db: RwLock::new(read_user_db(&config).expect(&format!(
                 "User database could not be read from {}",
@@ -139,4 +142,6 @@ impl ServiceState {
             .get(endpoint_index)
             .expect("endpoint must exist")
     }
+
+    pub fn project_status(&self, project: &Project) -> ProjectStatus {}
 }

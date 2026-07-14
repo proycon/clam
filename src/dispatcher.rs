@@ -1,9 +1,12 @@
 use crate::config::{DispatcherConfig, ServiceConfig};
 use crate::job::{Job, JobId};
+use crate::project;
 use crate::state::ServiceState;
+use std::collections::HashSet;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, Sender};
+use std::time::Duration;
 use tokio::sync::oneshot;
 
 /// The dispatcher is CLAM's job manager
@@ -22,6 +25,11 @@ pub enum Message {
     /// Forcibly stop a job, by job ID, discarding its results
     CancelJob(JobId, oneshot::Sender<ResponseMessage>),
 
+    StartedJob {
+        id: JobId,
+        pid: u32,
+    },
+
     /// Finish a job, this is sent by a job monitor thread to the dispatcher
     FinishJob {
         id: JobId,
@@ -33,7 +41,10 @@ pub enum Message {
     },
 
     /// Fail a job, this is sent by a job monitor thread to the dispatcher
-    FailStartJob { id: JobId, error: String },
+    FailStartJob {
+        id: JobId,
+        error: String,
+    },
 
     /// Poll job status
     PollJob(JobId, oneshot::Sender<ResponseMessage>),
@@ -80,6 +91,16 @@ impl Dispatcher {
                 // there should be no long-running blocking tasks in this loop!
                 match self.receiver.recv() {
                     Ok(Message::SubmitJob(job, responsechannel)) => {
+                        // add job to project map
+                        if let Some(projectkey) = job.projectkey() {
+                            if let Ok(mut project_job_map) = self.state.project_job_map.write() {
+                                project_job_map
+                                    .entry(projectkey)
+                                    .or_default()
+                                    .insert(*job.id());
+                            }
+                        }
+                        // add job to pending jobs
                         if let Ok(mut jobs) = self.state.pending_jobs.write() {
                             jobs.push_back(job);
                             let _ = responsechannel.send(ResponseMessage::JobSubmitted);
@@ -89,17 +110,34 @@ impl Dispatcher {
                         }
                     }
                     Ok(Message::CancelJob(job_id, responsechannel)) => {
-                        todo!("kill running process job");
+                        //we only send the kill signal here, the actual cleanup will be picked up by FinishJob
+                        if let Ok(jobs) = self.state.running_jobs.read() {
+                            if let Some(job) = jobs.get(&job_id) {
+                                job.kill();
+                            } else {
+                                let _ = responsechannel.send(ResponseMessage::JobError(
+                                    "No such job running".to_string(),
+                                ));
+                            }
+                        }
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),
+                    Ok(Message::StartedJob { id, pid }) => {
+                        if let Ok(mut jobs) = self.state.running_jobs.write() {
+                            if let Some(job) = jobs.get_mut(&id) {
+                                job.set_pid(pid);
+                            }
+                        }
+                    }
                     Ok(Message::PollJob(job_id, responsechannel)) => {
                         if let Ok(jobs) = self.state.running_jobs.read() {
                             if let Some(job) = jobs.get(&job_id) {
                                 let _ =
                                     responsechannel.send(ResponseMessage::JobStatus(job.clone()));
                             } else {
-                                let _ = responsechannel
-                                    .send(ResponseMessage::JobError("No such job".to_string()));
+                                let _ = responsechannel.send(ResponseMessage::JobError(
+                                    "No such job running".to_string(),
+                                ));
                             }
                         }
                     }

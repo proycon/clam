@@ -4,7 +4,7 @@ use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::{ApiError, ClamError};
-use crate::job::Job;
+use crate::job::{Job, ProjectKey, wait_for_pids};
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
@@ -403,12 +403,33 @@ async fn delete_project(
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint.path(),
-        state.config(),
-    ) {
+    let username = get_username(&headers);
+    if let Ok(project) = Project::new(project, username, endpoint.path(), state.config()) {
+        let mut pids: Vec<u32> = Vec::new();
+        if let Ok(mut project_job_map) = state.project_job_map.write() {
+            let projectkey = ProjectKey {
+                endpoint: endpoint_index,
+                user: username.to_string(),
+                project: project.id().clone(),
+            };
+
+            //kill all remaining running jobs
+            if let Some(job_ids) = project_job_map.get(&projectkey) {
+                if let Ok(running_jobs) = state.running_jobs.read() {
+                    for job_id in job_ids.iter() {
+                        if let Some(job) = running_jobs.get(job_id) {
+                            if let Some(pid) = job.pid() {
+                                pids.push(*pid);
+                            }
+                            job.kill();
+                        }
+                    }
+                }
+            }
+            project_job_map.remove(&projectkey);
+        }
+        // wait until all processes are done
+        wait_for_pids(pids).await;
         if let Err(e) = project.delete() {
             Err(e.into())
         } else {
@@ -609,9 +630,9 @@ async fn delete_input_file(
     headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    endpoint
+    let parameter = endpoint
         .parameter(parameter_id.as_str())
-        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified"))?;
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),

@@ -286,10 +286,10 @@ impl EndPoint {
                 );
                 delete_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| {
-                        "Deletes this project, including all input and output files".to_string()
+                        "Deletes this project, including all input and output files. Automatically aborts any associated running processes.".to_string()
                     }));
                 delete_operation.responses = ResponsesBuilder::new()
-                    .response("204", ResponseBuilder::new())
+                    .response("204", ResponseBuilder::new().description("Returned upon succesful deletion, it may take a while to return if jobs are runrning, because any associated processes are asked to terminate first"))
                     .response(
                         "404",
                         apierror_response("Returned when the project does not exist", error_schema),

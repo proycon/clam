@@ -2,6 +2,7 @@ use crate::ParameterType;
 use crate::config::{EndPoint, FileType, ServiceConfig};
 use crate::error::ApiError;
 use axum::body::Body;
+use derive_getters::Getters;
 use serde::Serialize;
 use std::fs::{create_dir_all, remove_dir_all};
 use std::path::{Path, PathBuf};
@@ -12,6 +13,7 @@ const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
 /// A project is a workspace for a user that holds input and output files
 /// It is also tied to a particular endpoint (each endpoint holds its own projects)
+#[derive(Getters)]
 pub struct Project<'a> {
     /// The identifier of the project
     id: String,
