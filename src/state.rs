@@ -144,7 +144,7 @@ impl ServiceState {
     }
 
     /// Returns the project status, or None if it does not exist yet
-    pub fn project_status<'a>(&self, project: &Project<'a>) -> Option<ProjectStatus<'a>> {
+    pub fn project_status(&self, project: &Project<'_>) -> Option<ProjectStatus> {
         //gather associated job (if any)
         let job_id = if let Ok(project_job_map) = self.project_job_map.read() {
             project_job_map.get(project.key()).map(|x| x.clone())

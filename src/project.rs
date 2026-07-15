@@ -221,7 +221,7 @@ impl<'a> Project<'a> {
     }
 
     /// Returns a list of output files, to be served as part of ProjectStatus (GET)
-    pub fn output_files(&self) -> Vec<IoFile<'a>> {
+    pub fn output_files(&self) -> Vec<IoFile> {
         let mut output_files = Vec::new();
         if let Ok(dir_iter) = std::fs::read_dir(self.path()) {
             for entry in dir_iter {
@@ -231,7 +231,7 @@ impl<'a> Project<'a> {
                         if let Ok(filename) = entry.file_name().into_string() {
                             if let Some(filetype) = self.output_filetype(filename.as_str()) {
                                 output_files.push(IoFile {
-                                    filetype: Some(filetype),
+                                    filetype: Some(filetype.clone()), //MAYBE TODO: not sure if I like so many clones of the same data (but reference not possible, tried)
                                     parameter: None,
                                     name: filename,
                                 })
@@ -252,7 +252,7 @@ impl<'a> Project<'a> {
     }
 
     /// Returns a list of input files (and associated filetype), served to the client as part of ProjectStatus (GET)
-    pub fn input_files(&self) -> Vec<IoFile<'a>> {
+    pub fn input_files(&self) -> Vec<IoFile> {
         let mut input_files = Vec::new();
         for parameter in self.endpoint().parameters().iter() {
             if let ParameterType::File {
@@ -281,8 +281,8 @@ impl<'a> Project<'a> {
                     FileName::Exact(name) => {
                         if found_files.contains(name) {
                             input_files.push(IoFile {
-                                filetype: self.config.filetype(filetype),
-                                parameter: Some(parameter.id()),
+                                filetype: self.config.filetype(filetype).cloned(),
+                                parameter: Some(parameter.id().clone()),
                                 name: name.clone(),
                             })
                         }
@@ -292,8 +292,8 @@ impl<'a> Project<'a> {
                         for file in found_files {
                             if pattern.is_match(file.as_str()) {
                                 input_files.push(IoFile {
-                                    filetype,
-                                    parameter: Some(parameter.id()),
+                                    filetype: filetype.cloned(),
+                                    parameter: Some(parameter.id().clone()),
                                     name: file,
                                 })
                             }
@@ -309,9 +309,9 @@ impl<'a> Project<'a> {
 #[derive(Debug, Clone, Serialize)]
 /// Returned to the client in JSON
 #[serde(tag = "stage", content = "data")]
-pub enum ProjectStatus<'a> {
+pub enum ProjectStatus {
     /// The project is in staging mode, you can upload files and when done start it
-    Staging { input_files: Vec<IoFile<'a>> },
+    Staging { input_files: Vec<IoFile> },
     /// Project is scheduled for execution (but not running yet)
     Scheduled,
     /// The project is running
@@ -323,21 +323,21 @@ pub enum ProjectStatus<'a> {
     Done {
         success: bool,
         statuslog: Option<String>,
-        input_files: Vec<IoFile<'a>>,
-        output_files: Vec<IoFile<'a>>,
+        input_files: Vec<IoFile>,
+        output_files: Vec<IoFile>,
     },
 }
 
 #[derive(Debug, Clone, Serialize)]
 /// Returned to the client in JSON as part of ProjectStatus, used for both input and output files
-pub struct IoFile<'a> {
+pub struct IoFile {
     /// Filename
     name: String,
 
     /// For input files, this is always something
-    parameter: Option<&'a str>,
+    parameter: Option<String>,
 
-    filetype: Option<&'a FileType>,
+    filetype: Option<FileType>,
 }
 
 /// Returns an index of projects **for a specific user and endpoint**

@@ -612,7 +612,7 @@ impl ApiError {
     }
 }
 
-impl<'a> ProjectStatus<'a> {
+impl ProjectStatus {
     pub fn schema() -> Schema {
         Schema::Object(
             ObjectBuilder::new()
