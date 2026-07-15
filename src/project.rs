@@ -1,5 +1,5 @@
 use crate::ParameterType;
-use crate::config::{EndPoint, FileType, ServiceConfig};
+use crate::config::{EndPoint, FileName, FileType, ServiceConfig};
 use crate::error::ApiError;
 use axum::body::Body;
 use derive_getters::Getters;
@@ -163,7 +163,7 @@ impl<'a> Project<'a> {
         Ok(body)
     }
 
-    pub fn output_filetype(&self, filename: &str) -> Option<&FileType> {
+    pub fn input_filetype(&self, filename: &str) -> Option<&'a FileType> {
         for parameter in self.endpoint().parameters().iter() {
             if let ParameterType::File {
                 filename: _,
@@ -172,24 +172,146 @@ impl<'a> Project<'a> {
             } = parameter.r#type()
             {
                 if parameter.validate_filename(filename).is_ok() {
-                    for ft in self.config.filetypes() {
-                        if filetype == ft.id() {
-                            return Some(ft);
-                        }
+                    return self.config.filetype(filetype.as_str());
+                }
+            }
+        }
+        None
+    }
+
+    pub fn input_parameter_filetype(
+        &self,
+        filename: &str,
+    ) -> (Option<&'a str>, Option<&'a FileType>) {
+        for parameter in self.endpoint().parameters().iter() {
+            if let ParameterType::File {
+                filename: _,
+                filetype,
+                conflictresolution: _,
+            } = parameter.r#type()
+            {
+                if parameter.validate_filename(filename).is_ok() {
+                    return (
+                        Some(parameter.id()),
+                        self.config.filetype(filetype.as_str()),
+                    );
+                }
+            }
+        }
+        (None, None)
+    }
+
+    /// Returns the file type for a given output file
+    pub fn output_filetype(&self, filename: &str) -> Option<&'a FileType> {
+        for outputfile in self.endpoint().outputfiles() {
+            match outputfile.filename() {
+                FileName::Exact(name) => {
+                    if name == filename {
+                        return self.config.filetype(outputfile.r#type().as_str());
+                    }
+                }
+                FileName::Pattern(pattern) => {
+                    if pattern.is_match(filename) {
+                        return self.config.filetype(outputfile.r#type().as_str());
                     }
                 }
             }
         }
         None
     }
+
+    /// Returns a list of output files, to be served as part of ProjectStatus (GET)
+    pub fn output_files(&self) -> Vec<IoFile<'a>> {
+        let mut output_files = Vec::new();
+        if let Ok(dir_iter) = std::fs::read_dir(self.path()) {
+            for entry in dir_iter {
+                if let Ok(entry) = entry {
+                    let path = entry.path();
+                    if path.is_file() {
+                        if let Ok(filename) = entry.file_name().into_string() {
+                            if let Some(filetype) = self.output_filetype(filename.as_str()) {
+                                output_files.push(IoFile {
+                                    filetype: Some(filetype),
+                                    parameter: None,
+                                    name: filename,
+                                })
+                            } else if self.endpoint().show_unknown_output() {
+                                // by default we skip files that can not be identified as output, unless show_unknown_output is explicitly enabled
+                                output_files.push(IoFile {
+                                    filetype: None,
+                                    parameter: None,
+                                    name: filename,
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        output_files
+    }
+
+    /// Returns a list of input files (and associated filetype), served to the client as part of ProjectStatus (GET)
+    pub fn input_files(&self) -> Vec<IoFile<'a>> {
+        let mut input_files = Vec::new();
+        for parameter in self.endpoint().parameters().iter() {
+            if let ParameterType::File {
+                filename,
+                filetype,
+                conflictresolution: _,
+            } = parameter.r#type()
+            {
+                // first collect the actual files for this parameter
+                let mut found_files: Vec<String> = Vec::new();
+                let mut p = self.path();
+                p.push(parameter.id());
+                if let Ok(dir_iter) = std::fs::read_dir(p) {
+                    for entry in dir_iter {
+                        if let Ok(entry) = entry {
+                            let path = entry.path();
+                            if path.is_file() {
+                                if let Ok(name) = entry.file_name().into_string() {
+                                    found_files.push(name)
+                                }
+                            }
+                        }
+                    }
+                }
+                match filename {
+                    FileName::Exact(name) => {
+                        if found_files.contains(name) {
+                            input_files.push(IoFile {
+                                filetype: self.config.filetype(filetype),
+                                parameter: Some(parameter.id()),
+                                name: name.clone(),
+                            })
+                        }
+                    }
+                    FileName::Pattern(pattern) => {
+                        let filetype = self.config.filetype(filetype);
+                        for file in found_files {
+                            if pattern.is_match(file.as_str()) {
+                                input_files.push(IoFile {
+                                    filetype,
+                                    parameter: Some(parameter.id()),
+                                    name: file,
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        input_files
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
-/// Returned to the client in JSON as part of `ProjectResponse`
+/// Returned to the client in JSON
 #[serde(tag = "stage", content = "data")]
-pub enum ProjectStatus {
+pub enum ProjectStatus<'a> {
     /// The project is in staging mode, you can upload files and when done start it
-    Staging { input_files: Vec<String> },
+    Staging { input_files: Vec<IoFile<'a>> },
     /// Project is scheduled for execution (but not running yet)
     Scheduled,
     /// The project is running
@@ -201,8 +323,21 @@ pub enum ProjectStatus {
     Done {
         success: bool,
         statuslog: Option<String>,
-        output_files: Vec<String>,
+        input_files: Vec<IoFile<'a>>,
+        output_files: Vec<IoFile<'a>>,
     },
+}
+
+#[derive(Debug, Clone, Serialize)]
+/// Returned to the client in JSON as part of ProjectStatus, used for both input and output files
+pub struct IoFile<'a> {
+    /// Filename
+    name: String,
+
+    /// For input files, this is always something
+    parameter: Option<&'a str>,
+
+    filetype: Option<&'a FileType>,
 }
 
 /// Returns an index of projects **for a specific user and endpoint**

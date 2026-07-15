@@ -34,17 +34,17 @@ pub struct Service {
     config: ServiceConfig,
 }
 
-pub enum ClamResponse {
+pub enum ClamResponse<'a> {
     Ok(),
     Created(),
     NoContent(),
     Text(String),
     Body { stream: Body, contenttype: String },
-    ProjectResponse(ProjectStatus),
+    ProjectResponse(ProjectStatus<'a>),
     JsonList(Vec<Value>),
 }
 
-impl IntoResponse for ClamResponse {
+impl<'a> IntoResponse for ClamResponse<'a> {
     fn into_response(self) -> Response {
         let cors = (
             header::ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -217,7 +217,7 @@ impl Service {
     }
 }
 
-async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiError> {
+async fn get_api<'a>(state: State<Arc<ServiceState>>) -> Result<ClamResponse<'a>, ApiError> {
     match state.openapi.to_json() {
         Ok(apidoc) => {
             return Ok(ClamResponse::Body {
@@ -232,10 +232,10 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
     }
 }
 
-async fn get_info(
+async fn get_info<'a>(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
@@ -247,11 +247,11 @@ async fn get_info(
     }
 }
 
-async fn get_porch(
+async fn get_porch<'a>(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
@@ -265,11 +265,11 @@ async fn get_porch(
 }
 
 /// Index of endpoints (actions & project endpoint with project list). The user will be directed here after login.
-async fn get_index(
+async fn get_index<'a>(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
@@ -285,12 +285,12 @@ async fn get_index(
 }
 
 /// Presents a list of projects for a given user and endpoint (Web API only, humans only use get_index)
-async fn get_projects(
+async fn get_projects<'a>(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let username = get_username(&headers);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
@@ -312,13 +312,13 @@ async fn get_projects(
     }
 }
 
-async fn get_project(
+async fn get_project<'a>(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -348,13 +348,13 @@ async fn get_project(
     }
 }
 
-async fn submit_project(
+async fn submit_project<'a>(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let job = Job::new(&state, endpoint_index, Some(project), &user, &headers);
     let (tx, rx) = oneshot::channel();
     state.send(Message::SubmitJob(job, tx));
@@ -372,12 +372,12 @@ async fn submit_project(
     }
 }
 
-async fn create_project(
+async fn create_project<'a>(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -394,12 +394,12 @@ async fn create_project(
     }
 }
 
-async fn delete_project(
+async fn delete_project<'a>(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let username = get_username(&headers);
     if let Ok(project) = Project::new(project, username, endpoint_index, state.config()) {
         if let Ok(mut project_job_map) = state.project_job_map.write() {
@@ -424,13 +424,13 @@ async fn delete_project(
     }
 }
 
-async fn download_output_file(
+async fn download_output_file<'a>(
     Path(project): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -457,14 +457,14 @@ async fn download_output_file(
     }
 }
 
-async fn download_input_file(
+async fn download_input_file<'a>(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -495,7 +495,7 @@ async fn download_input_file(
     }
 }
 
-async fn upload_input_file(
+async fn upload_input_file<'a>(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
@@ -503,7 +503,7 @@ async fn upload_input_file(
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -546,14 +546,14 @@ async fn upload_input_file(
     }
 }
 
-async fn upload_input_file_multipart(
+async fn upload_input_file_multipart<'a>(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
     mut multipart: Multipart,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let project = Project::new(
         project,
         get_username(&headers),
@@ -601,14 +601,14 @@ async fn upload_input_file_multipart(
     Ok(ClamResponse::Created())
 }
 
-async fn delete_input_file(
+async fn delete_input_file<'a>(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     if let Ok(project) = Project::new(
         project,
         get_username(&headers),
@@ -633,16 +633,16 @@ async fn delete_input_file(
 }
 
 /// Landing page for the action (if text/html is requested), if the output content-type is requested (and the necessary parameters are supplied) it will run the action
-async fn get_action(
+async fn get_action<'a>(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let mut accepted_data = vec![CONTENT_TYPE_HTML];
     let mut output_filetype = None;
     if let Some(filetype) = endpoint.filetype() {
-        if let Some(filetype) = state.config().get_filetype(filetype) {
+        if let Some(filetype) = state.config().filetype(filetype) {
             let contenttype = filetype.contenttype().as_str();
             if contenttype != "text/html" {
                 output_filetype = Some(contenttype);
@@ -670,11 +670,11 @@ async fn get_action(
 }
 
 /// Runs the action
-async fn post_action(
+async fn post_action<'a>(
     Extension(endpoint_index): Extension<usize>,
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse<'a>, ApiError> {
     todo!("Run the action");
 }
 

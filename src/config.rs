@@ -61,9 +61,6 @@ pub struct ServiceConfig {
     /// Viewer definitions, used by file types
     viewers: Vec<Viewer>,
 
-    /// Output file definitions  (ties matching filenames to filetypes)
-    outputfiles: Vec<OutputFile>,
-
     /// Endpoint configuration
     endpoints: Vec<EndPoint>,
 
@@ -215,6 +212,12 @@ pub struct EndPoint {
 
     /// Return type for the endpoint, used for actions
     filetype: Option<String>,
+
+    /// Output file definitions  (ties matching filenames to filetypes)
+    outputfiles: Vec<OutputFile>,
+
+    /// Show unknown output files (for project mode), will show output files that can not be associated to types and content types (i.e. for which no correct configuration is set up), this may be a security hazard as it can expose your process's intermediate files
+    show_unknown_output: bool,
     // One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
     //next: Vec<String>, //implement later
 
@@ -366,11 +369,7 @@ impl Parameter {
             conflictresolution: _,
         } = self.r#type()
         {
-            for ft in config.filetypes() {
-                if ft.id() == filetype {
-                    return Some(ft);
-                }
-            }
+            return config.filetype(filetype.as_str());
         }
         None
     }
@@ -550,7 +549,7 @@ impl ServiceConfig {
     }
 
     /// Get a filetype object by name
-    pub fn get_filetype(&self, filetype: &str) -> Option<&FileType> {
+    pub fn filetype(&self, filetype: &str) -> Option<&FileType> {
         for f in self.filetypes() {
             if f.id == filetype {
                 return Some(f);

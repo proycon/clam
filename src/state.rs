@@ -144,7 +144,7 @@ impl ServiceState {
     }
 
     /// Returns the project status, or None if it does not exist yet
-    pub fn project_status(&self, project: &Project) -> Option<ProjectStatus> {
+    pub fn project_status<'a>(&self, project: &Project<'a>) -> Option<ProjectStatus<'a>> {
         //gather associated job (if any)
         let job_id = if let Ok(project_job_map) = self.project_job_map.read() {
             project_job_map.get(project.key()).map(|x| x.clone())
@@ -167,12 +167,25 @@ impl ServiceState {
                     return Some(ProjectStatus::Done {
                         success: job.exitstatus() == &Some(0),
                         statuslog: Some(job.statuslog().clone()),
-                        output_files: (),
+                        input_files: project.input_files(),
+                        output_files: project.output_files(),
                     });
                 }
             }
-        }
 
+            if let Ok(pending_jobs) = self.pending_jobs.read() {
+                //MAYBE TODO: this scales poorly to huge numbers of pending jobs
+                for pending_job in pending_jobs.iter() {
+                    if *pending_job.id() == job_id {
+                        return Some(ProjectStatus::Scheduled);
+                    }
+                }
+            }
+
+            return Some(ProjectStatus::Staging {
+                input_files: project.input_files(),
+            });
+        }
         None
     }
 }

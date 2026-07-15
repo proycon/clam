@@ -107,7 +107,7 @@ impl EndPoint {
                 paths.add_path_operation(self.path(), vec![HttpMethod::Get], operation);
             }
             &EndPointMode::Action => {
-                let filetype = config.get_filetype(self.filetype().as_deref().unwrap_or("none"));
+                let filetype = config.filetype(self.filetype().as_deref().unwrap_or("none"));
 
                 let mut get_operation = Operation::new();
                 get_operation.summary = Some(
@@ -350,7 +350,7 @@ impl EndPoint {
                     } = parameter.r#type()
                     {
                         let filetype = config
-                            .get_filetype(filetype)
+                            .filetype(filetype)
                             .expect("A parameter references an undefined filetype");
                         file_parameters.push((parameter.id(), filetype));
 
@@ -612,7 +612,7 @@ impl ApiError {
     }
 }
 
-impl ProjectStatus {
+impl<'a> ProjectStatus<'a> {
     pub fn schema() -> Schema {
         Schema::Object(
             ObjectBuilder::new()
