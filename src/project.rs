@@ -121,13 +121,13 @@ impl<'a> Project<'a> {
 
     /// Returns the path to the project on the filesystem
     pub fn path(&self) -> PathBuf {
-        let user: PathBuf = PathBuf::from(self.user().clone());
+        let user: PathBuf = PathBuf::from(self.user());
         let checksum = format!(
             "{:x}",
             md5::compute(self.endpoint().path().as_str().as_bytes())
         );
         let endpoint: PathBuf = PathBuf::from(checksum);
-        let id: PathBuf = PathBuf::from(self.name().clone());
+        let id: PathBuf = PathBuf::from(self.name());
         let mut p: PathBuf = self
             .config
             .rootdir()
@@ -195,12 +195,12 @@ pub enum ProjectStatus {
     /// The project is running
     Running {
         progress: Option<u8>,
-        message: String,
+        statuslog: String,
     },
     /// The project is done (either succesfully or with a runtime error)
     Done {
         success: bool,
-        message: Option<String>,
+        statuslog: Option<String>,
         output_files: Vec<String>,
     },
 }

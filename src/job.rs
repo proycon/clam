@@ -8,8 +8,11 @@ use derive_getters::Getters;
 use nix::errno::Errno;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
+use regex::Regex;
 use std::collections::HashSet;
+use std::io::{BufRead, BufReader, Read};
 use std::sync::mpsc::Sender;
+use std::thread::JoinHandle;
 use std::time::Duration;
 
 pub type JobId = usize;
@@ -34,6 +37,14 @@ pub struct Job {
     /// command
     command: String,
     args: Vec<String>,
+
+    status_pattern: Option<Regex>,
+
+    /// Progress indicator (picks up percentages in lines extracted by `status_pattern`)
+    progress: Option<u8>,
+
+    /// status log (an extract of stderr matching the status_pattern), for running jobs
+    statuslog: String,
 
     /// Holds exit status (only for done jobs)
     exitstatus: Option<i32>,
@@ -60,10 +71,13 @@ impl Job {
             endpoint_index,
             project,
             user: user.as_str().to_string(),
-            command: endpoint.command().into(),
+            command,
+            progress: None,
+            status_pattern: endpoint.status_pattern().clone(),
             pid: None,
             output: None,
             error: None,
+            statuslog: String::new(),
             exitstatus: None,
             args,
         }
@@ -94,9 +108,17 @@ impl Job {
         }
     }
 
+    pub fn log(&mut self, message: &str) {
+        self.statuslog.push_str(message);
+    }
+
+    pub fn set_progress(&mut self, progress: u8) {
+        self.progress = Some(progress);
+    }
+
     /// Spawns the job (consumes it)
     /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
-    pub fn spawn(self, dispatcherchannel: Sender<Message>) {
+    pub fn spawn(self, dispatcherchannel: Sender<Message>) -> std::thread::JoinHandle<()> {
         std::thread::spawn(move || {
             match std::process::Command::new(self.command)
                 .args(self.args)
@@ -104,27 +126,70 @@ impl Job {
                 .stderr(std::process::Stdio::piped())
                 .spawn()
             {
-                Ok(child) => {
+                Ok(mut child) => {
                     if let Err(e) = dispatcherchannel.send(Message::StartedJob {
                         id: self.id,
                         pid: child.id(),
                     }) {
                         eprintln!("ERROR: Dispatcher send failure on start: {}", e)
                     }
-                    let result = child.wait_with_output().unwrap();
-                    let output: String = if let Ok(s) = result.stdout.try_into() {
-                        s
+
+                    let mut stderr = child.stderr.take().unwrap();
+                    let mut stdout = child.stdout.take().unwrap();
+                    let job_id = self.id;
+                    let dispatcherchannel2 = dispatcherchannel.clone();
+
+                    let error = if let Some(status_pattern) = self.status_pattern {
+                        // we spawn another thread to monitor stderr for the status pattern and send updates when this matches
+                        // we also collect all of stderr
+                        let stderr_thread = std::thread::spawn(move || {
+                            let mut full_stderr = String::new();
+
+                            for line in BufReader::new(stderr).lines() {
+                                match line {
+                                    Ok(line) => {
+                                        full_stderr.push_str(&line);
+                                        full_stderr.push('\n');
+
+                                        if status_pattern.is_match(line.as_str()) {
+                                            let _ = dispatcherchannel2
+                                                .send(Message::StatusLog(job_id, line));
+                                        }
+                                    }
+                                    Err(e) => {
+                                        full_stderr
+                                            .push_str(&format!("Error reading stderr: {}\n", e));
+                                        break;
+                                    }
+                                }
+                            }
+
+                            full_stderr
+                        });
+
+                        stderr_thread
+                            .join()
+                            .unwrap_or_else(|_| "Failed to read stderr".to_string())
                     } else {
-                        format!("Process stdout is invalid UTF-8!")
+                        // Collect all stderr (blocks until process exists)
+                        let mut error = String::new();
+                        if let Err(_) = stderr.read_to_string(&mut error) {
+                            error = "Process stderr is invalid UTF-8!".to_string();
+                        }
+                        error
                     };
-                    let error: String = if let Ok(s) = result.stderr.try_into() {
-                        s
-                    } else {
-                        format!("Process stderr is invalid UTF-8!")
-                    };
+
+                    // Collect all stdout (blocks until process exists)
+                    let mut output = String::new();
+                    if let Err(_) = stdout.read_to_string(&mut output) {
+                        output = "Process stdout is invalid UTF-8!".to_string();
+                    }
+
+                    let exitstatus = child.wait().unwrap();
+
                     if let Err(e) = dispatcherchannel.send(Message::FinishJob {
                         id: self.id,
-                        exitstatus: result.status,
+                        exitstatus,
                         output,
                         error,
                     }) {
@@ -140,7 +205,7 @@ impl Job {
                     }
                 }
             }
-        });
+        })
     }
 
     pub fn kill(&self) {

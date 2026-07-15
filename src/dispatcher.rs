@@ -1,4 +1,4 @@
-use crate::config::{DispatcherConfig, ServiceConfig};
+use crate::config::{self, DispatcherConfig, ServiceConfig};
 use crate::job::{Job, JobId};
 use crate::project;
 use crate::state::ServiceState;
@@ -6,7 +6,6 @@ use std::collections::HashSet;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, Sender};
-use std::time::Duration;
 use tokio::sync::oneshot;
 
 /// The dispatcher is CLAM's job manager
@@ -45,6 +44,9 @@ pub enum Message {
         id: JobId,
         error: String,
     },
+
+    /// Status message (matching a specific stderr pattern)
+    StatusLog(JobId, String),
 
     /// Poll job status
     PollJob(JobId, oneshot::Sender<ResponseMessage>),
@@ -93,11 +95,9 @@ impl Dispatcher {
                     Ok(Message::SubmitJob(job, responsechannel)) => {
                         // add job to project map
                         if let Some(projectkey) = job.projectkey() {
+                            //MAYBE TODO: check if a job is already associated, don't allow running two jobs
                             if let Ok(mut project_job_map) = self.state.project_job_map.write() {
-                                project_job_map
-                                    .entry(projectkey)
-                                    .or_default()
-                                    .insert(*job.id());
+                                project_job_map.insert(projectkey, *job.id());
                             }
                         }
                         // add job to pending jobs
@@ -176,6 +176,28 @@ impl Dispatcher {
                             }
                         }
                     }
+                    Ok(Message::StatusLog(job_id, message)) => {
+                        if let Ok(mut running_jobs) = self.state.running_jobs.write() {
+                            running_jobs.entry(job_id).and_modify(|job| {
+                                job.log(message.as_str());
+
+                                // convert any mentioned percentage into a progress number (0-100)
+                                if let Some(progress_pattern) =
+                                    self.state.config().progress_pattern()
+                                {
+                                    for (_, [percentage]) in progress_pattern
+                                        .captures_iter(message.as_str())
+                                        .map(|c| c.extract())
+                                    {
+                                        if let Ok(progress) = percentage.parse() {
+                                            job.set_progress(progress);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        //MAYBE TODO: also check done_jobs in case of race conditions?
+                    }
                     Err(e) => {
                         eprintln!("Corresponding sender died: {:?}", e);
                         break;
@@ -216,7 +238,7 @@ impl Dispatcher {
                     ) {
                         if let Some(job) = pending_jobs.pop_front() {
                             //run the job in a monitoring thread
-                            job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel
+                            job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
                             // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
                             running_jobs.insert(*job.id(), job);
                         }

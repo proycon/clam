@@ -402,25 +402,18 @@ async fn delete_project(
 ) -> Result<ClamResponse, ApiError> {
     let username = get_username(&headers);
     if let Ok(project) = Project::new(project, username, endpoint_index, state.config()) {
-        let mut pids: Vec<u32> = Vec::new();
         if let Ok(mut project_job_map) = state.project_job_map.write() {
-            //kill all remaining running jobs
-            if let Some(job_ids) = project_job_map.get(project.key()) {
+            project_job_map.remove(&project.key());
+            //kill all remaining associated job if any
+            if let Some(job_id) = project_job_map.get(project.key()) {
                 if let Ok(running_jobs) = state.running_jobs.read() {
-                    for job_id in job_ids.iter() {
-                        if let Some(job) = running_jobs.get(job_id) {
-                            if let Some(pid) = job.pid() {
-                                pids.push(*pid);
-                            }
-                            job.kill();
-                        }
+                    if let Some(job) = running_jobs.get(job_id) {
+                        job.kill();
+                        job.wait(); //wait until job is gone
                     }
                 }
             }
-            project_job_map.remove(&project.key());
         }
-        // wait until all processes are done
-        wait_for_pids(pids).await;
         if let Err(e) = project.delete() {
             Err(e.into())
         } else {

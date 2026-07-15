@@ -25,7 +25,7 @@ pub struct ServiceState {
     pub(crate) done_jobs: RwLock<HashMap<JobId, Job>>,
 
     /// Maps projects (pertaining to users and endpoints) to jobs, facilitates quick lookup of project status
-    pub(crate) project_job_map: RwLock<HashMap<ProjectKey, HashSet<JobId>>>,
+    pub(crate) project_job_map: RwLock<HashMap<ProjectKey, JobId>>,
 
     /// Public non-discoverable shared files (bypasses authentication)
     pub(crate) shares: RwLock<HashMap<String, Share>>,
@@ -143,5 +143,36 @@ impl ServiceState {
             .expect("endpoint must exist")
     }
 
-    pub fn project_status(&self, project: &Project) -> ProjectStatus {}
+    /// Returns the project status, or None if it does not exist yet
+    pub fn project_status(&self, project: &Project) -> Option<ProjectStatus> {
+        //gather associated job (if any)
+        let job_id = if let Ok(project_job_map) = self.project_job_map.read() {
+            project_job_map.get(project.key()).map(|x| x.clone())
+        } else {
+            None
+        };
+
+        if let Some(job_id) = job_id {
+            if let Ok(running_jobs) = self.running_jobs.read() {
+                if let Some(job) = running_jobs.get(&job_id) {
+                    return Some(ProjectStatus::Running {
+                        progress: job.progress().clone(),
+                        statuslog: job.statuslog().clone(),
+                    });
+                }
+            }
+
+            if let Ok(done_jobs) = self.done_jobs.read() {
+                if let Some(job) = done_jobs.get(&job_id) {
+                    return Some(ProjectStatus::Done {
+                        success: job.exitstatus() == &Some(0),
+                        statuslog: Some(job.statuslog().clone()),
+                        output_files: (),
+                    });
+                }
+            }
+        }
+
+        None
+    }
 }

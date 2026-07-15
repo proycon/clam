@@ -75,6 +75,14 @@ pub struct ServiceConfig {
 
     #[serde(default)]
     dispatcher: DispatcherConfig,
+
+    /// Regular expression to extract percentages from lines matching the status pattern, this usually does not require adaptation as the default suffices
+    #[serde(
+        deserialize_with = "deserialize_opt_regex",
+        serialize_with = "serialize_opt_regex",
+        default = "default_progress_pattern"
+    )]
+    progress_pattern: Option<Regex>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Default, Getters)]
@@ -199,7 +207,11 @@ pub struct EndPoint {
     errorstates: Vec<ErrorState>,
 
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
-    status_pattern: Option<String>,
+    #[serde(
+        deserialize_with = "deserialize_opt_regex",
+        serialize_with = "serialize_opt_regex"
+    )]
+    status_pattern: Option<Regex>,
 
     /// Return type for the endpoint, used for actions
     filetype: Option<String>,
@@ -208,6 +220,10 @@ pub struct EndPoint {
 
     // One or more endpoints that come before this endpoint, so the output of that endpoint acts as the input for this one. These are possible dependencies that the user can run before tis one.
     //before: Vec<String>, //implement later
+}
+
+fn default_progress_pattern() -> Option<Regex> {
+    Some(Regex::new(r"(\d+)%").unwrap())
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default, PartialEq)]
@@ -406,11 +422,36 @@ where
     Regex::new(&s).map_err(serde::de::Error::custom)
 }
 
+fn deserialize_opt_regex<'de, D>(d: D) -> Result<Option<Regex>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(d)?;
+    if !s.is_empty() {
+        Regex::new(&s)
+            .map(|s| Some(s))
+            .map_err(serde::de::Error::custom)
+    } else {
+        Ok(None)
+    }
+}
+
 fn serialize_regex<S>(re: &Regex, s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
     s.serialize_str(re.as_str())
+}
+
+fn serialize_opt_regex<S>(re: &Option<Regex>, s: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    if let Some(re) = re {
+        s.serialize_str(re.as_str())
+    } else {
+        s.serialize_str("")
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]

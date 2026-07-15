@@ -9,19 +9,6 @@ struct Args {
     config: String,
 }
 
-#[derive(Clone, Debug)]
-struct InputFile {
-    name: FileName,
-    filetype: FileType,
-}
-
-#[derive(Clone, Debug)]
-struct OutputFile {
-    ///Regular expression to capture output file(s)
-    pattern: String,
-    filetype: FileType,
-}
-
 fn main() {
     let args = Args::parse();
 
