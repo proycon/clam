@@ -1,15 +1,19 @@
 use crate::auth::CurrentUser;
+use crate::config::{CommandArg, EndPoint, FileName, FileType, ParameterType};
 use crate::dispatcher::Message;
+use crate::project::Project;
 use crate::project::ProjectKey;
 use crate::state::ServiceState;
-use axum::http::HeaderMap;
+use axum::body::Body;
+use axum::http::{HeaderMap, Request};
 use core::usize;
 use derive_getters::Getters;
 use nix::errno::Errno;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::mpsc::Sender;
 use std::thread::JoinHandle;
@@ -34,8 +38,9 @@ pub struct Job {
     /// The particular user this job is associated with (may be 'anonymous')
     user: String,
 
-    /// command
+    /// command to run (just the executable, without any arguments)
     command: String,
+
     args: Vec<String>,
 
     status_pattern: Option<Regex>,
@@ -55,31 +60,323 @@ pub struct Job {
 }
 
 impl Job {
-    pub fn new(
+    pub fn new<'a>(
         state: &ServiceState,
         endpoint_index: usize,
-        project: Option<String>,
+        project: Option<&Project<'a>>,
         user: &CurrentUser,
-        headers: &HeaderMap,
+        request_params: HashMap<String, String>,
     ) -> Self {
         let endpoint = state.endpoint(endpoint_index);
-        //TODO: process command and arguments (replace build time parameters with run-time parameters)
-        let command: String = endpoint.command().into();
-        let args = Vec::new();
+        let mut error = None;
+        let args = match Self::collect_arguments(endpoint, project, request_params) {
+            Ok(args) => args,
+            Err(e) => {
+                error = Some(e);
+                Vec::new()
+            }
+        };
         Self {
             id: rand::random_range(1..usize::MAX),
             endpoint_index,
-            project,
+            project: project.map(|x| x.name().to_string()),
             user: user.as_str().to_string(),
-            command,
+            command: endpoint.command().into(),
             progress: None,
             status_pattern: endpoint.status_pattern().clone(),
             pid: None,
             output: None,
-            error: None,
+            error,
             statuslog: String::new(),
             exitstatus: None,
             args,
+        }
+    }
+
+    /// Processes request parameters and transforms them to command line arguments, validating all parameters in the process
+    fn collect_arguments<'a>(
+        endpoint: &EndPoint,
+        project: Option<&Project<'a>>,
+        request_params: HashMap<String, String>,
+    ) -> Result<Vec<String>, String> {
+        let mut args = Vec::new();
+        let mut error = String::new();
+        for arg in endpoint.args() {
+            match arg {
+                CommandArg::Literal(arg) => args.push(arg.clone()),
+                CommandArg::FromParameter { parameter_id } => {
+                    if let Some(parameter) = endpoint.parameter(parameter_id) {
+                        let mut skip = false;
+                        if let Some(value) = request_params.get(parameter.id()) {
+                            // validate the value
+                            match parameter.r#type() {
+                                ParameterType::String {
+                                    maxlength,
+                                    validation_pattern,
+                                    default: _,
+                                } => {
+                                    if let Some(maxlength) = maxlength
+                                        && value.len() > *maxlength
+                                    {
+                                        error += &format!(
+                                            "parameter {}: maximum length exceeded ({})\n",
+                                            parameter.id(),
+                                            maxlength
+                                        );
+                                    }
+                                    if let Some(regex) = validation_pattern {
+                                        if !regex.is_match(value) {
+                                            error += &format!(
+                                                "parameter {}: did not match against validation pattern ({})\n",
+                                                parameter.id(),
+                                                regex
+                                            );
+                                        }
+                                    }
+                                }
+                                ParameterType::Int {
+                                    min,
+                                    max,
+                                    default: _,
+                                } => {
+                                    if let Ok(v) = value.parse::<isize>() {
+                                        if let Some(min) = min
+                                            && v < *min
+                                        {
+                                            error += &format!(
+                                                "parameter {}: value too low (< {})\n",
+                                                parameter.id(),
+                                                min
+                                            );
+                                        }
+                                        if let Some(max) = max
+                                            && v > *max
+                                        {
+                                            error += &format!(
+                                                "parameter {}: value too high (> {})\n",
+                                                parameter.id(),
+                                                max
+                                            );
+                                        }
+                                    } else {
+                                        error += &format!(
+                                            "parameter {}: expected integer\n",
+                                            parameter.id()
+                                        );
+                                    }
+                                }
+                                ParameterType::Float {
+                                    min,
+                                    max,
+                                    default: _,
+                                } => {
+                                    if let Ok(v) = value.parse::<f64>() {
+                                        if let Some(min) = min
+                                            && v < *min
+                                        {
+                                            error += &format!(
+                                                "parameter {}: value too low (< {})\n",
+                                                parameter.id(),
+                                                min
+                                            );
+                                        }
+                                        if let Some(max) = max
+                                            && v > *max
+                                        {
+                                            error += &format!(
+                                                "parameter {}: value too high (> {})\n",
+                                                parameter.id(),
+                                                max
+                                            );
+                                        }
+                                    } else {
+                                        error += &format!(
+                                            "parameter {}: expected integer\n",
+                                            parameter.id()
+                                        );
+                                    }
+                                }
+                                ParameterType::Bool { invert, .. } => {
+                                    let v = value == "1"
+                                        || value == "yes"
+                                        || value == "enabled"
+                                        || value == "true"
+                                        || value == "True"
+                                        || value == "TRUE";
+                                    if (v && invert.is_none() || invert == &Some(false))
+                                        || invert == &Some(true)
+                                    {
+                                        if let Some(flag) = parameter.flag() {
+                                            args.push(flag.clone());
+                                        }
+                                    }
+                                    skip = true;
+                                }
+                                ParameterType::File { filename, .. } => {
+                                    //a value for the file was provided, rather than it having been uploaded independently earlier
+                                    //this is acceptable only if an exact filename and a project is associated; we will use this value as the contents of the file and create (or overwrite!) it
+                                    if let Some(project) = project {
+                                        if let FileName::Exact(filename) = filename {
+                                            if let Some(filepath) = project.input_file(
+                                                parameter.id().as_str(),
+                                                filename.as_str(),
+                                            ) {
+                                                if let Err(e) = fs::write(filepath, value) {
+                                                    error += &format!(
+                                                        "parameter {}: internal file I/O error {}",
+                                                        parameter.id(),
+                                                        e
+                                                    );
+                                                }
+                                            }
+                                        } else {
+                                            error += &format!(
+                                                "parameter {}: file parameter must be provided separately in an earlier upload stage rather than in this request\n",
+                                                parameter.id()
+                                            );
+                                        }
+                                    } else {
+                                        //probably unreachable, but better safe than sorry:
+                                        error += &format!(
+                                            "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)\n",
+                                            parameter.id()
+                                        );
+                                    }
+                                }
+                                ParameterType::Selection {
+                                    choices,
+                                    multiple,
+                                    default: _,
+                                } => {
+                                    if *multiple {
+                                        for choice in value.split(",") {
+                                            if !choices.iter().any(|c| c == choice) {
+                                                error += &format!(
+                                                    "parameter {}: value must be one of {}, multiple comma-separated values allowed\n",
+                                                    parameter.id(),
+                                                    choices.join(", ")
+                                                );
+                                                break; //don't pile up errors if there are multiple mismatches for this same value
+                                            }
+                                        }
+                                    } else {
+                                        if !choices.contains(&value) {
+                                            error += &format!(
+                                                "parameter {}: value must be one of {}\n",
+                                                parameter.id(),
+                                                choices.join(", ")
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                            if error.is_empty() && !skip {
+                                if let Some(flag) = parameter.flag() {
+                                    if flag.chars().last() == Some('=') {
+                                        skip = true;
+                                        args.push(format!("{}{}", flag, value));
+                                    } else {
+                                        args.push(flag.clone());
+                                    }
+                                }
+                                if !skip {
+                                    args.push(value.clone());
+                                }
+                            }
+                        } else {
+                            // we got no request value, see if we can extract a default value:
+                            let value: Option<String> = match parameter.r#type() {
+                                ParameterType::String {
+                                    default: Some(default),
+                                    ..
+                                } => Some(default.clone()),
+                                ParameterType::Int {
+                                    default: Some(default),
+                                    ..
+                                } => Some(format!("{}", default)),
+                                ParameterType::Float {
+                                    default: Some(default),
+                                    ..
+                                } => Some(format!("{}", default)),
+                                ParameterType::File { .. } => {
+                                    if parameter.required() {
+                                        //check if the file was uploaded, we expect at least one match
+                                        if let Some(project) = project {
+                                            let mut p = project.path();
+                                            p.push(parameter.id());
+                                            let mut file_found = false;
+                                            if let Ok(dir_iter) = std::fs::read_dir(p) {
+                                                for entry in dir_iter {
+                                                    if let Ok(entry) = entry {
+                                                        let path = entry.path();
+                                                        if path.is_file() {
+                                                            file_found = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            if !file_found {
+                                                error += &format!(
+                                                    "parameter {}: missing required parameter\n",
+                                                    parameter.id().as_str()
+                                                );
+                                            }
+                                        } else {
+                                            //probably unreachable, but better safe than sorry:
+                                            error += &format!(
+                                                "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)\n",
+                                                parameter.id()
+                                            );
+                                        }
+                                    }
+                                    None
+                                }
+                                ParameterType::Selection {
+                                    default: Some(default),
+                                    ..
+                                } => Some(format!("{}", default.join(","))),
+                                _ => {
+                                    if parameter.required() {
+                                        error += &format!(
+                                            "parameter {}: missing required parameter\n",
+                                            parameter.id().as_str()
+                                        );
+                                    }
+                                    None
+                                }
+                            };
+
+                            // if we have a value and no errors, populate the arguments vector
+                            if error.is_empty()
+                                && !skip
+                                && let Some(value) = value
+                            {
+                                if let Some(flag) = parameter.flag() {
+                                    if flag.chars().last() == Some('=') {
+                                        skip = true;
+                                        args.push(format!("{}{}", flag, value));
+                                    } else {
+                                        args.push(flag.clone());
+                                    }
+                                }
+                                if !skip {
+                                    args.push(value.clone());
+                                }
+                            }
+                        }
+                    } else {
+                        error += &format!(
+                            "parameter {}: internal configuration error, non-existing parameter referenced!\n",
+                            parameter_id,
+                        );
+                    }
+                }
+            }
+        }
+        if !error.is_empty() {
+            Err(error)
+        } else {
+            Ok(args)
         }
     }
 

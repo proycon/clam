@@ -193,7 +193,7 @@ pub struct EndPoint {
     /// Public endpoints are available without authentication
     public: bool,
 
-    /// Command to invoke (mediated by dispatcher)
+    /// Command to invoke (mediated by dispatcher), just the executable without any arguments (those are in `args`)
     command: String,
 
     /// Arguments to pass to the command
@@ -247,7 +247,11 @@ pub enum ParameterType {
         #[serde(default)]
         maxlength: Option<usize>,
         #[serde(default)]
-        validation_pattern: Option<String>,
+        #[serde(
+            deserialize_with = "deserialize_opt_regex",
+            serialize_with = "serialize_opt_regex"
+        )]
+        validation_pattern: Option<Regex>,
 
         #[serde(default)]
         default: Option<String>,

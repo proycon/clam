@@ -17,12 +17,13 @@ use tower_http::trace::TraceLayer;
 use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Multipart, Path, State};
+use axum::extract::{Multipart, Path, Query, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::sync::{Arc, mpsc::Sender};
 
 const CONTENT_TYPE_JSON: &str = "application/json";
@@ -252,7 +253,6 @@ async fn get_porch(
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
@@ -270,7 +270,6 @@ async fn get_index(
     Extension(endpoint_index): Extension<usize>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) => {
@@ -354,21 +353,31 @@ async fn submit_project(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     headers: HeaderMap,
+    query: Query<HashMap<String, String>>,
 ) -> Result<ClamResponse, ApiError> {
-    let job = Job::new(&state, endpoint_index, Some(project), &user, &headers);
-    let (tx, rx) = oneshot::channel();
-    state.send(Message::SubmitJob(job, tx));
-    match rx.await {
-        Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
-        Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
-        Err(e) => Err(ApiError::InternalError(format!(
-            "oneshot sender dropped whilst submitting a job: {}",
-            e
-        ))),
-        Ok(m) => Err(ApiError::InternalError(format!(
-            "unexpected response message whilst submitting a job: {:?}",
-            m
-        ))),
+    if let Ok(project) = Project::new(
+        project,
+        get_username(&headers),
+        endpoint_index,
+        state.config(),
+    ) {
+        let job = Job::new(&state, endpoint_index, Some(&project), &user, query.0);
+        let (tx, rx) = oneshot::channel();
+        state.send(Message::SubmitJob(job, tx));
+        match rx.await {
+            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
+            Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
+            Err(e) => Err(ApiError::InternalError(format!(
+                "oneshot sender dropped whilst submitting a job: {}",
+                e
+            ))),
+            Ok(m) => Err(ApiError::InternalError(format!(
+                "unexpected response message whilst submitting a job: {:?}",
+                m
+            ))),
+        }
+    } else {
+        Err(ApiError::NotFound("No such project"))
     }
 }
 
@@ -519,6 +528,7 @@ async fn upload_input_file(
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
             //MAYBE TODO: Check for matching content-type? We just accept anything as-is right now
             let mut body_stream = request.into_body().into_data_stream();
+            project.create_parameter_dir(parameter_id.as_str())?;
             let mut file = File::create(&filepath)
                 .await
                 .map_err(|e| ApiError::InternalError(format!("Failed to create file: {}", e)))?;
@@ -576,6 +586,7 @@ async fn upload_input_file_multipart(
         let filename = parameter.validate_filename(field.name().unwrap_or_default())?;
 
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+            project.create_parameter_dir(parameter_id.as_str())?;
             let mut file = File::create(&filepath)
                 .await
                 .map_err(|e| ApiError::InternalError(format!("Failed to create file: {e}")))?;
@@ -675,6 +686,7 @@ async fn post_action(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
+    let endpoint = state.endpoint(endpoint_index);
     todo!("Run the action");
 }
 

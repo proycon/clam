@@ -155,6 +155,24 @@ impl<'a> Project<'a> {
         if path.is_file() { Some(path) } else { None }
     }
 
+    pub fn create_parameter_dir(&self, parameter_id: &str) -> Result<PathBuf, std::io::Error> {
+        let mut p = self.path();
+        p.push(parameter_id);
+        std::fs::create_dir_all(&p)?;
+        Ok(p)
+    }
+
+    pub fn set_input_file(
+        &self,
+        parameter_id: &str,
+        filename: &str,
+        value: String,
+    ) -> Result<(), std::io::Error> {
+        let mut p = self.create_parameter_dir(parameter_id)?;
+        p.push(parameter_id);
+        std::fs::write(filename, value)
+    }
+
     /// Returns the body of a file so it can be streamed to the client, use with `input_file()` or `output_file()'
     pub async fn file_body(&self, filepath: &Path) -> Result<axum::body::Body, ApiError> {
         let file = File::open(filepath).await?;
