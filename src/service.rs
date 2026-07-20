@@ -602,11 +602,37 @@ async fn delete_input_file(
     }
 }
 
+/// Runs the action (Helper function called by get_action or post_action)
+async fn run_action(
+    state: State<Arc<ServiceState>>,
+    endpoint_index: usize,
+    user: &CurrentUser,
+    query: HashMap<String, String>,
+) -> Result<ClamResponse, ApiError> {
+    let job = Job::new(&state, endpoint_index, None, user, query);
+    let (tx, rx) = oneshot::channel();
+    state.send(Message::SubmitJob(job, tx));
+    match rx.await {
+        Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
+        Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
+        Err(e) => Err(ApiError::InternalError(format!(
+            "oneshot sender dropped whilst submitting a job: {}",
+            e
+        ))),
+        Ok(m) => Err(ApiError::InternalError(format!(
+            "unexpected response message whilst submitting a job: {:?}",
+            m
+        ))),
+    }
+}
+
 /// Landing page for the action (if text/html is requested), if the output content-type is requested (and the necessary parameters are supplied) it will run the action
 async fn get_action(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
-    request: Request<Body>,
+    Extension(user): Extension<CurrentUser>,
+    headers: HeaderMap<HeaderValue>,
+    query: Query<HashMap<String, String>>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let mut accepted_data = vec![CONTENT_TYPE_HTML];
@@ -620,13 +646,13 @@ async fn get_action(
             }
         }
     }
-    match negotiate_content_type(request.headers(), &accepted_data) {
+    match negotiate_content_type(&headers, &accepted_data) {
         Ok(CONTENT_TYPE_HTML) => {
             todo!("Present action submission form");
         }
         Ok(filetype) => {
             if Some(filetype) == output_filetype {
-                todo!("Run the action");
+                run_action(state, endpoint_index, &user, query.0).await
             } else {
                 Err(ApiError::NotAcceptable(
                     "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
@@ -642,11 +668,31 @@ async fn get_action(
 /// Runs the action
 async fn post_action(
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    request: Request<Body>,
+    mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    let endpoint = state.endpoint(endpoint_index);
-    todo!("Run the action");
+    // load all parameters into memory
+    let mut param_map: HashMap<String, String> = HashMap::new();
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .expect("unable to extract field from multipart")
+    {
+        if let Some(key) = field.name().map(|s| s.to_string()) {
+            //if there are duplicate keys, the last one wins
+            param_map.insert(
+                key,
+                field
+                    .text()
+                    .await
+                    .expect("unable to extract value from multipart"),
+            );
+        }
+    }
+
+    //we ignore Accept headers for POST and just deliver what the action provides
+    run_action(state, endpoint_index, &user, param_map).await
 }
 
 async fn shutdown_signal(state: Arc<ServiceState>) {
