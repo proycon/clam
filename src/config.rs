@@ -2,7 +2,6 @@
     This modules contains data structures that are populated from the service configuration
 */
 
-use crate::envsubst::*;
 use crate::error::{ApiError, ClamError};
 use derive_getters::Getters;
 use regex::Regex;
@@ -559,68 +558,6 @@ impl ServiceConfig {
             }
         }
         None
-    }
-}
-
-// TODO: I might decide to toss this EnvSubst all away and just rely on external envsubst instead
-impl Envsubst for ServiceConfig {
-    fn envsubst(&mut self) -> Result<(), ClamError> {
-        envsubst(&mut self.version, EnvsubstMode::ErrorIfMissing)?;
-        envsubst(&mut self.name, EnvsubstMode::ErrorIfMissing)?;
-        if let Some(Err(e)) = self
-            .description
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        if let Some(Err(e)) = self
-            .email
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        if let Some(Err(e)) = self
-            .url
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        if let Some(Err(e)) = self
-            .documentation_url
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        if let Some(Err(e)) = self
-            .sourcerepo
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        for endpoint in self.endpoints.iter_mut() {
-            endpoint.envsubst()?;
-        }
-        Ok(())
-    }
-}
-
-impl Envsubst for EndPoint {
-    fn envsubst(&mut self) -> Result<(), ClamError> {
-        envsubst(&mut self.name, EnvsubstMode::ErrorIfMissing)?;
-        envsubst(&mut self.path, EnvsubstMode::ErrorIfMissing)?;
-        if let Some(Err(e)) = self
-            .description
-            .as_mut()
-            .map(|v| envsubst(v, EnvsubstMode::ErrorIfMissing))
-        {
-            return Err(e);
-        }
-        Ok(())
     }
 }
 

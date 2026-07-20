@@ -1,7 +1,6 @@
 mod auth;
 mod config;
 mod dispatcher;
-mod envsubst;
 mod error;
 mod job;
 mod openapi;
