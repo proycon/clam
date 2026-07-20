@@ -12,13 +12,26 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let config = if args.config == "-" {
+    match if args.config == "-" {
         clam::ServiceConfig::from_stdin()
     } else {
         clam::ServiceConfig::from_file(args.config.as_str())
+    } {
+        Ok(config) => {
+            let service = Service::new(config);
+            service.run();
+        }
+        Err(ClamError::ConfigError(e)) => {
+            eprintln!("Error parsing configuration: {}", e.to_string());
+            std::process::exit(1);
+        }
+        Err(ClamError::IoError(e)) => {
+            eprintln!("Error reading configuration: {}", e.to_string());
+            std::process::exit(1);
+        }
+        Err(e) => {
+            eprintln!("Error reading configuration: {:?}", e);
+            std::process::exit(1);
+        }
     }
-    .expect("Error reading configuration");
-
-    let service = Service::new(config);
-    service.run();
 }

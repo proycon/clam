@@ -178,7 +178,7 @@ pub struct EndPoint {
     path: String,
 
     /// Human-readable name or title of the endpoint
-    name: String,
+    name: Option<String>,
 
     /// Short summary of the endpoint (for human end-users)
     summary: Option<String>,
