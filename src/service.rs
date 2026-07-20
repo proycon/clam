@@ -3,8 +3,8 @@ use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
 use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
-use crate::error::{ApiError, ClamError};
-use crate::job::{Job, wait_for_pids};
+use crate::error::ApiError;
+use crate::job::Job;
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
@@ -24,12 +24,10 @@ use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
 use serde_json::Value;
 use std::collections::HashMap;
-use std::sync::{Arc, mpsc::Sender};
+use std::sync::Arc;
 
 const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
-const CONTENT_TYPE_TEXT: &str = "text/plain";
-const CONTENT_TYPE_FORMDATA: &str = "multipart/form-data";
 
 pub struct Service {
     config: ServiceConfig,
@@ -250,8 +248,6 @@ async fn get_info(
 
 async fn get_porch(
     state: State<Arc<ServiceState>>,
-    Extension(endpoint_index): Extension<usize>,
-    Extension(user): Extension<CurrentUser>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
@@ -268,8 +264,6 @@ async fn get_porch(
 /// Index of endpoints (actions & project endpoint with project list). The user will be directed here after login.
 async fn get_index(
     state: State<Arc<ServiceState>>,
-    Extension(endpoint_index): Extension<usize>,
-    Extension(user): Extension<CurrentUser>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
@@ -695,7 +689,7 @@ async fn post_action(
     run_action(state, endpoint_index, &user, param_map).await
 }
 
-async fn shutdown_signal(state: Arc<ServiceState>) {
+async fn shutdown_signal(_state: Arc<ServiceState>) {
     let ctrl_c = async {
         signal::ctrl_c()
             .await

@@ -1,16 +1,10 @@
-use std::fmt::format;
-use std::fs::FileType;
-
 use crate::config::{EndPoint, EndPointMode, ParameterType, ServiceConfig};
 use crate::error::ApiError;
 use crate::project::ProjectStatus;
-use utoipa::openapi::Object;
-use utoipa::openapi::request_body::RequestBody;
 use utoipa::openapi::{
-    Components, Content, ContentBuilder, HttpMethod, Info, ObjectBuilder, OpenApi, OpenApiBuilder,
-    PathItem, Paths, Required, Response, ResponseBuilder, Responses, ResponsesBuilder, Schema,
-    Server, path::Operation, path::Parameter, path::ParameterBuilder, path::ParameterIn,
-    request_body::RequestBodyBuilder, schema::Type,
+    Components, ContentBuilder, HttpMethod, Info, ObjectBuilder, OpenApi, OpenApiBuilder, Paths,
+    Required, ResponseBuilder, ResponsesBuilder, Schema, Server, path::Operation, path::Parameter,
+    path::ParameterBuilder, path::ParameterIn, request_body::RequestBodyBuilder, schema::Type,
 };
 
 impl From<&ServiceConfig> for OpenApi {

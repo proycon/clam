@@ -1,23 +1,17 @@
 use crate::auth::CurrentUser;
-use crate::config::{CommandArg, EndPoint, FileName, FileType, ParameterType};
+use crate::config::{CommandArg, EndPoint, FileName, ParameterType};
 use crate::dispatcher::Message;
 use crate::project::Project;
 use crate::project::ProjectKey;
 use crate::state::ServiceState;
-use axum::body::Body;
-use axum::http::{HeaderMap, Request};
-use core::usize;
 use derive_getters::Getters;
-use nix::errno::Errno;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::mpsc::Sender;
-use std::thread::JoinHandle;
-use std::time::Duration;
 
 pub type JobId = usize;
 
@@ -507,7 +501,7 @@ impl Job {
 
     pub fn kill(&self) {
         if let Some(pid) = self.pid {
-            kill(Pid::from_raw(pid as i32), Signal::SIGTERM); //sigterm asks nicely and assumes underlying processes comply (eventually)
+            let _ = kill(Pid::from_raw(pid as i32), Signal::SIGTERM); //sigterm asks nicely and assumes underlying processes comply (eventually)
         }
     }
 
@@ -517,25 +511,7 @@ impl Job {
 
     pub fn wait(&self) {
         if let Some(pid) = self.pid {
-            kill(Pid::from_raw(pid as i32), None);
-        }
-    }
-}
-
-pub async fn wait_for_pids(pids: Vec<u32>) {
-    //wait until all pids in the lists are gone/done
-    let mut pids: HashSet<Pid> = pids.iter().map(|&pid| Pid::from_raw(pid as i32)).collect();
-
-    while !pids.is_empty() {
-        pids.retain(|pid| match kill(*pid, None) {
-            Ok(()) => true,             // Process still exists.
-            Err(Errno::EPERM) => true,  // Exists, but we lack permission.
-            Err(Errno::ESRCH) => false, // Process no longer exists.
-            Err(_) => true,             // Unexpected error; keep trying.
-        });
-
-        if !pids.is_empty() {
-            tokio::time::sleep(Duration::from_millis(100)).await;
+            let _ = kill(Pid::from_raw(pid as i32), None);
         }
     }
 }

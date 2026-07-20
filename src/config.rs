@@ -4,7 +4,6 @@
 
 use crate::envsubst::*;
 use crate::error::{ApiError, ClamError};
-use axum::http::request;
 use derive_getters::Getters;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};

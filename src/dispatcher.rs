@@ -1,11 +1,9 @@
-use crate::config::{self, DispatcherConfig, ServiceConfig};
+use crate::config::ServiceConfig;
 use crate::job::{Job, JobId};
-use crate::project;
 use crate::state::ServiceState;
-use std::collections::HashSet;
 use std::process::ExitStatus;
 use std::sync::Arc;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::Receiver;
 use tokio::sync::oneshot;
 
 /// The dispatcher is CLAM's job manager

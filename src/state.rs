@@ -4,15 +4,14 @@ use crate::dispatcher::Message;
 use crate::job::{Job, JobId};
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
-use serde::Deserializer;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
-use std::sync::Arc;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
 
 use crate::project::{Project, ProjectKey, ProjectStatus};
 
+// TODO: implement shares
 pub struct Share {
     path: PathBuf,
     onetime: bool,

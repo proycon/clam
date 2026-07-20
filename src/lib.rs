@@ -12,7 +12,6 @@ pub use auth::*;
 pub use config::*;
 pub use dispatcher::*;
 pub use error::*;
-pub use openapi::*;
 pub use service::*;
 pub use state::*;
 
