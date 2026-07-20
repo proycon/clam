@@ -28,6 +28,7 @@ pub struct ServiceConfig {
     description: Option<String>,
 
     /// The authors of the webservice
+    #[serde(default)]
     authors: Vec<String>,
 
     email: Option<String>,
@@ -54,9 +55,11 @@ pub struct ServiceConfig {
     termsofservice: Option<String>,
 
     /// File type definitions
+    #[serde(default)]
     filetypes: Vec<FileType>,
 
     /// Viewer definitions, used by file types
+    #[serde(default)]
     viewers: Vec<Viewer>,
 
     /// Endpoint configuration
@@ -189,22 +192,27 @@ pub struct EndPoint {
     mode: EndPointMode,
 
     /// Public endpoints are available without authentication
+    #[serde(default)]
     public: bool,
 
     /// Command to invoke (mediated by dispatcher), just the executable without any arguments (those are in `args`)
-    command: String,
+    command: Option<String>,
 
     /// Arguments to pass to the command
+    #[serde(default)]
     args: Vec<CommandArg>,
 
+    #[serde(default)]
     parameters: Vec<Parameter>,
 
+    #[serde(default)]
     errorstates: Vec<ErrorState>,
 
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
     #[serde(
         deserialize_with = "deserialize_opt_regex",
-        serialize_with = "serialize_opt_regex"
+        serialize_with = "serialize_opt_regex",
+        default
     )]
     status_pattern: Option<Regex>,
 
@@ -212,9 +220,11 @@ pub struct EndPoint {
     filetype: Option<String>,
 
     /// Output file definitions  (ties matching filenames to filetypes)
+    #[serde(default)]
     outputfiles: Vec<OutputFile>,
 
     /// Show unknown output files (for project mode), will show output files that can not be associated to types and content types (i.e. for which no correct configuration is set up), this may be a security hazard as it can expose your process's intermediate files
+    #[serde(default)]
     show_unknown_output: bool,
     // One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
     //next: Vec<String>, //implement later
@@ -244,10 +254,11 @@ pub enum ParameterType {
     String {
         #[serde(default)]
         maxlength: Option<usize>,
-        #[serde(default)]
+
         #[serde(
             deserialize_with = "deserialize_opt_regex",
-            serialize_with = "serialize_opt_regex"
+            serialize_with = "serialize_opt_regex",
+            default
         )]
         validation_pattern: Option<Regex>,
 
@@ -392,9 +403,11 @@ pub struct Parameter {
     description: Option<String>,
 
     /// Is this parameter required?
+    #[serde(default)]
     required: bool,
 
     /// Allow multiple of these?
+    #[serde(default)]
     multiple: bool,
 
     /// the full parameter flag that is used to pass this parameter to the underlying tool, this includes any = sign
@@ -467,6 +480,7 @@ pub struct FileType {
     contenttype: String,
 
     /// URL to forward to
+    #[serde(default)]
     viewers: Vec<Viewer>,
 }
 

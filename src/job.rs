@@ -75,7 +75,7 @@ impl Job {
             endpoint_index,
             project: project.map(|x| x.name().to_string()),
             user: user.as_str().to_string(),
-            command: endpoint.command().into(),
+            command: endpoint.command().as_ref().unwrap().clone(),
             progress: None,
             status_pattern: endpoint.status_pattern().clone(),
             pid: None,

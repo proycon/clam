@@ -51,15 +51,17 @@ parameter_id = "tokinput"
 
 [[endpoints.parameters]]
 id = "tokinput"
-description = "Tokenised text input"
+name = "Input text"
+description = "Input text to process, must be tokenised already (spaces separating tokens)"
 required = true
-type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "*.txt" } }
+type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "\\.txt$" } }
 
 [[endpoints.parameters]]
 id = "casesensitive"
-description = "Case sensitivity"
+name = "Case sensitivity"
+description = "Treat items that differ in case as distinct?"
 required = false
-type = { parametertype = "Boolean", default = false, flag = "-c"  }
+type = { parametertype = "Bool", default = false, flag = "-c"  }
 
 [[outputfiles]]
 name = "Frequency list"
