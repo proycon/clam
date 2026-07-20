@@ -1,67 +1,67 @@
-[service]
 name = "freqlist"
 summary = "This webservice produces a frequency list for an input file"
 description = "You can upload a plain text file, and the tokens in it will be analysed and their frequency outputted in a TSV file"
 rootdir = "./data"
+version = "0.1"
 
-[service.auth]
+[auth]
 postauth_url = "/index"
 
-[service.license]
+[license]
 name = "GNU Affero General Public License"
 id = "AGPL-3.0-only"
 url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
 
-[service.contact]
+[contact]
 name = "Maarten van Gompel"
 url = "https://proycon.anaproy.nl"
 email = "proycon@anaproy.nl"
 
 
-[[service.filetypes]]
+[[filetypes]]
 id = "plaintext"
 name = "Plain Text (UTF-8)"
 contenttype = "text/plain; charset=utf-8"
 
-[[service.filetypes]]
+[[filetypes]]
 id = "tsv"
 name = "Tab Separated Values (UTF-8)"
 contenttype = "text/tsv"
 
-[[service.endpoints]]
+[[endpoints]]
 path = "/"
 mode = "Porch"
 
 #Index of endpoints and projects
-[[service.endpoints]]
+[[endpoints]]
 path = "/index"
 mode = "Index"
 
-[[service.endpoints]]
+[[endpoints]]
 path = "/"  #project name will be appended automatically
 mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
 command = "freqlist.sh"
 
-[[service.endpoints.args]]
+[[endpoints.args]]
 parameter_id = "casesensitive"
 
-[[service.endpoints.args]]
+[[endpoints.args]]
 parameter_id = "tokinput"
 
-[[service.endpoints.parameters]]
+[[endpoints.parameters]]
 id = "tokinput"
 description = "Tokenised text input"
 required = true
 type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "*.txt" } }
 
-[[service.endpoints.parameters]]
+[[endpoints.parameters]]
 id = "casesensitive"
 description = "Case sensitivity"
 required = false
 type = { parametertype = "Boolean", default = false, flag = "-c"  }
 
-[[service.outputfiles]]
+[[outputfiles]]
 name = "Frequency list"
 type = "tsv"
 filename = { nametype = "Pattern", value = "*.txt" }
