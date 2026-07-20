@@ -1,9 +1,8 @@
 [service]
 name = "freqlist"
 summary = "This webservice produces a frequency list for an input file"
-description = "You can unload a plain text file, and the tokens in it will be analysed and their frequency outputted in a TSV file"
+description = "You can upload a plain text file, and the tokens in it will be analysed and their frequency outputted in a TSV file"
 rootdir = "./data"
-command = "./freqlist.sh"
 
 [service.auth]
 postauth_url = "/index"
@@ -18,11 +17,6 @@ name = "Maarten van Gompel"
 url = "https://proycon.anaproy.nl"
 email = "proycon@anaproy.nl"
 
-[[service.args]]
-parameter_id = "casesensitive"
-
-[[service.args]]
-parameter_id = "tokinput"
 
 [[service.filetypes]]
 id = "plaintext"
@@ -47,6 +41,13 @@ mode = "Index"
 path = "/"  #project name will be appended automatically
 mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
+command = "freqlist.sh"
+
+[[service.endpoints.args]]
+parameter_id = "casesensitive"
+
+[[service.endpoints.args]]
+parameter_id = "tokinput"
 
 [[service.endpoints.parameters]]
 id = "tokinput"
