@@ -251,6 +251,7 @@ async fn get_info(
 async fn get_porch(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
@@ -268,6 +269,7 @@ async fn get_porch(
 async fn get_index(
     state: State<Arc<ServiceState>>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
@@ -286,16 +288,15 @@ async fn get_index(
 /// Presents a list of projects for a given user and endpoint (Web API only, humans only use get_index)
 async fn get_projects(
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    let username = get_username(&headers);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => {
             //return project list (for actions the OpenAPI endpoint already suffices)
-            match project_index(username, endpoint, state.config()) {
+            match project_index(user.as_str(), endpoint, state.config()) {
                 Ok(projects) => Ok(ClamResponse::JsonList(
                     projects.into_iter().map(|project| project.into()).collect(),
                 )),
@@ -314,16 +315,11 @@ async fn get_projects(
 async fn get_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
             Ok(CONTENT_TYPE_JSON) => {
                 if let Some(projectstatus) = state.project_status(&project) {
@@ -352,15 +348,9 @@ async fn submit_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
     query: Query<HashMap<String, String>>,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let job = Job::new(&state, endpoint_index, Some(&project), &user, query.0);
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
@@ -384,15 +374,10 @@ async fn submit_project(
 async fn create_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         if let Err(e) = project.create() {
             Err(e.into())
         } else {
@@ -406,11 +391,10 @@ async fn create_project(
 async fn delete_project(
     Path(project): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    let username = get_username(&headers);
-    if let Ok(project) = Project::new(project, username, endpoint_index, state.config()) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         if let Ok(mut project_job_map) = state.project_job_map.write() {
             project_job_map.remove(&project.key());
             //kill all remaining associated job if any
@@ -437,15 +421,10 @@ async fn download_output_file(
     Path(project): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         //download output file without keeping it all in memory
         if let Some(filepath) = project.output_file(filename.as_str()) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
@@ -471,15 +450,10 @@ async fn download_input_file(
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
@@ -509,16 +483,11 @@ async fn upload_input_file(
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
@@ -560,17 +529,12 @@ async fn upload_input_file_multipart(
     Path(project): Path<String>,
     Path(parameter_id): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
     mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    let project = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    )
-    .map_err(|_| ApiError::InvalidName("project name invalid"))?;
+    let project = Project::new(project, user.as_str(), endpoint_index, state.config())
+        .map_err(|_| ApiError::InvalidName("project name invalid"))?;
 
     let parameter = project
         .endpoint()
@@ -617,15 +581,10 @@ async fn delete_input_file(
     Path(parameter_id): Path<String>,
     Path(filename): Path<String>,
     Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    headers: HeaderMap,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(
-        project,
-        get_username(&headers),
-        endpoint_index,
-        state.config(),
-    ) {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         project
             .endpoint()
             .parameter(parameter_id.as_str())
@@ -750,8 +709,4 @@ fn negotiate_content_type<'a>(
     } else {
         Ok(offer_types[0])
     }
-}
-
-fn get_username(headers: &HeaderMap) -> &str {
-    todo!("return username")
 }
