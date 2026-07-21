@@ -8,11 +8,17 @@ struct Args {
     #[arg(short, long)]
     config: String,
 
+    /// Debug mode, output verbose information
     #[arg(short, long)]
     debug: bool,
 
+    /// Quiet mode, output as little as possible
     #[arg(short, long)]
     quiet: bool,
+
+    #[arg(long)]
+    /// Validate the configuration only, do not start the service
+    check: bool,
 }
 
 fn main() {
@@ -39,6 +45,9 @@ fn main() {
     } {
         Ok(config) => match config.validate() {
             Ok(()) => {
+                if args.check {
+                    std::process::exit(0);
+                }
                 let service = Service::new(config);
                 service.run();
             }

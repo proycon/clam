@@ -150,7 +150,7 @@ impl OAuthCredentials {
     }
 }
 
-#[derive(Deserialize, Serialize, Default, Clone)]
+#[derive(Deserialize, Serialize, Default, Clone, PartialEq)]
 pub enum EndPointMode {
     /// In action mode, a single response follows immediately upon a POST request. This assumes the job runs in limited time with singular output only. No file upload/download support.
     /// A GET on this endpoint (requesting HTML) presents the interface for that action.
@@ -399,6 +399,14 @@ impl Parameter {
         None
     }
 
+    pub fn is_file_parameter(&self) -> bool {
+        if let ParameterType::File { .. } = self.r#type() {
+            true
+        } else {
+            false
+        }
+    }
+
     /// validation just after config parsing
     pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
         let id_pattern = config
@@ -414,6 +422,11 @@ impl Parameter {
             Err(ClamError::ConfigValidationError(format!(
                 "Parameter {} has empty name",
                 self.id
+            )))
+        } else if self.is_file_parameter() && self.filetype(config).is_none() {
+            Err(ClamError::ConfigValidationError(format!(
+                "Parameter {} references undefined filetype",
+                self.id,
             )))
         } else {
             Ok(())
@@ -609,6 +622,9 @@ impl ServiceConfig {
 
     /// Validate the configuration
     pub fn validate(&self) -> Result<(), ClamError> {
+        for filetype in self.filetypes.iter() {
+            filetype.validate(self)?
+        }
         for endpoint in self.endpoints.iter() {
             endpoint.validate(self)?
         }
@@ -638,8 +654,47 @@ impl EndPoint {
         }
         if self.path.is_empty() || self.path.chars().next() != Some('/') {
             Err(ClamError::ConfigValidationError(format!(
-                "Endpoint paths must always start with a slash, got '{}' instead",
-                self.path
+                "Endpoint paths must always start with a slash, got '{}' instead (endpoint name: {})",
+                self.path,
+                self.name().as_deref().unwrap_or("none")
+            )))
+        } else if self.filetype().is_some()
+            && config.filetype(self.filetype().as_ref().unwrap()).is_none()
+        {
+            Err(ClamError::ConfigValidationError(format!(
+                "Endpoint {} (name: {}) references undefined filetype {}",
+                self.path,
+                self.name().as_deref().unwrap_or("none"),
+                self.filetype().as_ref().unwrap()
+            )))
+        } else if self.filetype().is_none() && self.mode() == &EndPointMode::Action {
+            Err(ClamError::ConfigValidationError(format!(
+                "Endpoint {} (name: {}) misses a `filetype` to indicate output filetype, required because it is an Action endpoint",
+                self.path,
+                self.name().as_deref().unwrap_or("none"),
+            )))
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl FileType {
+    /// validation just after config parsing
+    pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        let id_pattern = config
+            .id_pattern()
+            .as_ref()
+            .expect("id_pattern must be set");
+        if !id_pattern.is_match(self.id.as_str()) {
+            Err(ClamError::ConfigValidationError(format!(
+                "Invalid filetype ID: {}",
+                self.id
+            )))
+        } else if self.name.is_empty() {
+            Err(ClamError::ConfigValidationError(format!(
+                "Filetype {} has empty name",
+                self.id
             )))
         } else {
             Ok(())
