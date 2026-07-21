@@ -627,12 +627,10 @@ async fn get_action(
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let mut accepted_data = vec![CONTENT_TYPE_HTML];
-    let mut output_filetype = None;
     if let Some(filetype) = endpoint.filetype() {
         if let Some(filetype) = state.config().filetype(filetype) {
             let contenttype = filetype.contenttype().as_str();
             if contenttype != "text/html" {
-                output_filetype = Some(contenttype);
                 accepted_data.push(contenttype);
             }
         }
@@ -641,15 +639,7 @@ async fn get_action(
         Ok(CONTENT_TYPE_HTML) => {
             todo!("Present action submission form");
         }
-        Ok(filetype) => {
-            if Some(filetype) == output_filetype {
-                run_action(state, endpoint_index, &user, query.0).await
-            } else {
-                Err(ApiError::NotAcceptable(
-                    "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
-                ))
-            }
-        }
+        Ok(_filetype) => run_action(state, endpoint_index, &user, query.0).await,
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
         )),
@@ -721,19 +711,20 @@ fn negotiate_content_type<'a>(
         for (i, accept_type) in accept_types
             .to_str()
             .map_err(|_| ApiError::NotAcceptable("Invalid Accept header"))
-            .unwrap_or(CONTENT_TYPE_JSON)
+            .unwrap_or(CONTENT_TYPE_JSON) //if we get no accept header we assume we're dealing with a lazy automated client and serve JSON
             .split(",")
             .enumerate()
         {
             let accept_type = accept_type.split(";").next().unwrap();
             for offer_type in offer_types.iter() {
-                if *offer_type == accept_type
+                let offer_type = offer_type.split(";").next().unwrap();
+                if offer_type == accept_type
                     || accept_type == "*/*"
                         && (match_accept_index.is_none()
                             || (match_accept_index.is_some() && match_accept_index.unwrap() > i))
                 {
                     match_accept_index = Some(i);
-                    matching_offer = Some(*offer_type);
+                    matching_offer = Some(offer_type);
                 }
             }
         }
