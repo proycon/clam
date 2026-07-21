@@ -704,13 +704,12 @@ async fn shutdown_signal(_state: Arc<ServiceState>) {
             .await;
     };
 
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
     tokio::select! {
         _ = ctrl_c => {
+            std::process::exit(0);
         }
         _ = terminate => {
+            std::process::exit(0);
         }
     }
 }
