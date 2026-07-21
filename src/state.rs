@@ -109,10 +109,14 @@ impl ServiceState {
             done_jobs: RwLock::new(Default::default()),
             project_job_map: RwLock::new(Default::default()),
             shares: RwLock::new(Default::default()),
-            user_db: RwLock::new(read_user_db(&config).expect(&format!(
-                "User database could not be read from {}",
-                config.auth().user_file().as_deref().unwrap()
-            ))),
+            user_db: RwLock::new(if let Some(user_file) = config.auth().user_file() {
+                read_user_db(&config).expect(&format!(
+                    "User database could not be read from {}",
+                    user_file
+                ))
+            } else {
+                HashMap::new()
+            }),
             oauthcredentials,
             openidconfig,
             openapi: (&config).into(), //compute and associate openAPI specification
