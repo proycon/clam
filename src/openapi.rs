@@ -37,19 +37,11 @@ impl From<&ServiceConfig> for OpenApi {
         }
         {
             let mut operation = Operation::new();
-            operation.summary = Some("OpenAPI specification".to_string());
+            operation.summary = Some("Swagger interface".to_string());
             operation.description = Some(
-                "Presents the full [OpenAPI specification](https://spec.openapis.org) for this webservice if JSON content is requested, presents the interactive Swagger Web-UI for human end-users."
+                "Presents the interactive Swagger Web-UI for human end-users, allowing them to explore the full webservice API"
                     .to_string(),
             );
-            operation.responses = ResponsesBuilder::new()
-                .response(
-                    "200",
-                    ResponseBuilder::new()
-                        .content("application/json", ContentBuilder::new().into())
-                        .description("OpenAPI specification"),
-                )
-                .into();
             operation.responses = ResponsesBuilder::new()
                 .response(
                     "200",
