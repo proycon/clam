@@ -17,10 +17,17 @@ fn main() {
     } else {
         clam::ServiceConfig::from_file(args.config.as_str())
     } {
-        Ok(config) => {
-            let service = Service::new(config);
-            service.run();
-        }
+        Ok(config) => match config.validate() {
+            Ok(()) => {
+                let service = Service::new(config);
+                service.run();
+            }
+            Err(ClamError::ConfigValidationError(e)) => {
+                eprintln!("Error validating configuration: {}", e.to_string());
+                std::process::exit(1);
+            }
+            Err(_) => unreachable!("only configvalidationerror expected"),
+        },
         Err(ClamError::ConfigError(e)) => {
             eprintln!("Error parsing configuration: {}", e.to_string());
             std::process::exit(1);

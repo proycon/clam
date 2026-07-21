@@ -9,6 +9,7 @@ use serde::ser::SerializeStruct;
 pub enum ClamError {
     MissingEnvVariable(String),
     ConfigError(toml::de::Error),
+    ConfigValidationError(String),
     IoError(std::io::Error),
 }
 

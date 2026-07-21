@@ -81,6 +81,14 @@ pub struct ServiceConfig {
         default = "default_progress_pattern"
     )]
     progress_pattern: Option<Regex>,
+
+    /// Regular expression for validation of various identifiers, this usually does not require adaptation as the default suffices
+    #[serde(
+        deserialize_with = "deserialize_opt_regex",
+        serialize_with = "serialize_opt_regex",
+        default = "default_id_pattern"
+    )]
+    id_pattern: Option<Regex>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Default, Getters)]
@@ -177,7 +185,7 @@ pub enum CommandArg {
 
 #[derive(Deserialize, Serialize, Default, Getters, Clone)]
 pub struct EndPoint {
-    /// The path where the endpoint is accessible, this also serves as the primary identifier for the endpoint. All paths must start with /
+    /// The path where the endpoint is accessible, this also serves as the primary identifier for the endpoint. All paths must begin with a slash (/) and should NOT have an additional trailing slash
     path: String,
 
     /// Human-readable name or title of the endpoint
@@ -235,6 +243,10 @@ pub struct EndPoint {
 
 fn default_progress_pattern() -> Option<Regex> {
     Some(Regex::new(r"(\d+)%").unwrap())
+}
+
+fn default_id_pattern() -> Option<Regex> {
+    Some(Regex::new(r"^[a-zA-Z0-9_]+$").unwrap())
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Default, PartialEq)]
@@ -386,11 +398,32 @@ impl Parameter {
         }
         None
     }
+
+    /// validation just after config parsing
+    pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        let id_pattern = config
+            .id_pattern()
+            .as_ref()
+            .expect("id_pattern must be set");
+        if !id_pattern.is_match(self.id.as_str()) {
+            Err(ClamError::ConfigValidationError(format!(
+                "Invalid parameter ID: {}",
+                self.id
+            )))
+        } else if self.name.is_empty() {
+            Err(ClamError::ConfigValidationError(format!(
+                "Parameter {} has empty name",
+                self.id
+            )))
+        } else {
+            Ok(())
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Parameter {
-    /// Identifier for the parameter, used as variable name in HTTP requests
+    /// Identifier for the parameter, used as variable name in queries or fields in multipart data (depending on context)
     id: String,
 
     /// The type of parameter
@@ -573,6 +606,20 @@ impl ServiceConfig {
         }
         None
     }
+
+    /// Validate the configuration
+    pub fn validate(&self) -> Result<(), ClamError> {
+        for endpoint in self.endpoints.iter() {
+            endpoint.validate(self)?
+        }
+        if self.endpoints().is_empty() {
+            Err(ClamError::ConfigValidationError(format!(
+                "No endpoints were configured, this service can't do anything"
+            )))
+        } else {
+            Ok(())
+        }
+    }
 }
 
 impl EndPoint {
@@ -583,5 +630,19 @@ impl EndPoint {
             }
         }
         None
+    }
+
+    pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        for parameter in self.parameters.iter() {
+            parameter.validate(config)?
+        }
+        if self.path.is_empty() || self.path.chars().next() != Some('/') {
+            Err(ClamError::ConfigValidationError(format!(
+                "Endpoint paths must always start with a slash, got '{}' instead",
+                self.path
+            )))
+        } else {
+            Ok(())
+        }
     }
 }
