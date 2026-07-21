@@ -7,10 +7,30 @@ struct Args {
     /// Service configuration file (toml).
     #[arg(short, long)]
     config: String,
+
+    #[arg(short, long)]
+    debug: bool,
+
+    #[arg(short, long)]
+    quiet: bool,
 }
 
 fn main() {
     let args = Args::parse();
+
+    if args.debug {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::DEBUG)
+            .init();
+    } else if args.quiet {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::WARN)
+            .init();
+    } else {
+        tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::INFO)
+            .init();
+    }
 
     match if args.config == "-" {
         clam::ServiceConfig::from_stdin()

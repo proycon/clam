@@ -25,6 +25,7 @@ use axum::routing::{delete, get, post, put};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
+use utoipa_swagger_ui::SwaggerUi;
 
 const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
@@ -117,9 +118,7 @@ impl Service {
         let mut private_routes = Router::new();
         let mut public_routes = Router::new()
             .route("/login", get(login_handler))
-            .route("/oidc/callback", get(callback_handler))
-            .route("/openapi.json", get(get_api)) //openAPI endpoint
-            .route("/info", get(get_info)); //wrapped around, openAPI endpoint, may serve swagger UI
+            .route("/oidc/callback", get(callback_handler));
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
             if endpoint.public() {
                 public_routes = self.configure_endpoint(public_routes, i, endpoint);
@@ -131,11 +130,11 @@ impl Service {
         let router = Router::new()
             .merge(private_routes)
             .merge(public_routes)
-            //.merge(SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()))
-            .layer(TraceLayer::new_for_http())
+            .merge(SwaggerUi::new("/info").url("/openapi.json", state.openapi.clone()))
             .route_layer(from_fn_with_state(state.clone(), |state, req, next| {
                 auth(state, req, next)
             }))
+            .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 
         axum::serve(listener, router.into_make_service())
@@ -156,34 +155,41 @@ impl Service {
             EndPointMode::Project => {
                 let sep = if endpoint.path() == "/" { "" } else { "/" };
                 let index_path = format!("{}{}projects", endpoint.path(), sep);
-                router = router
-                    .route(index_path.as_str(), get(get_projects))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    index_path.as_str(),
+                    get(get_projects).layer(Extension(endpoint_index)),
+                );
                 let path = format!("{}{{project}}", endpoint.path());
-                router = router
-                    .route(path.as_str(), get(get_project))
-                    .layer(Extension(endpoint_index));
-                router = router
-                    .route(path.as_str(), put(create_project))
-                    .layer(Extension(endpoint_index));
-                router = router
-                    .route(path.as_str(), delete(delete_project))
-                    .layer(Extension(endpoint_index));
-                router = router
-                    .route(path.as_str(), post(submit_project))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    path.as_str(),
+                    get(get_project).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    path.as_str(),
+                    put(create_project).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    path.as_str(),
+                    delete(delete_project).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    path.as_str(),
+                    post(submit_project).layer(Extension(endpoint_index)),
+                );
 
                 // Generic file upload endpoint
                 let fpath = format!("{}{}{{project}}/upload", endpoint.path(), sep);
-                router = router
-                    .route(fpath.as_str(), get(upload_input_file_multipart))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    fpath.as_str(),
+                    get(upload_input_file_multipart).layer(Extension(endpoint_index)),
+                );
 
                 // File output endpoints
                 let fpath = format!("{}{}{{project}}/output/{{filename}}", endpoint.path(), sep);
-                router = router
-                    .route(fpath.as_str(), get(download_output_file))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    fpath.as_str(),
+                    get(download_output_file).layer(Extension(endpoint_index)),
+                );
 
                 //File uploading/download/deletion endpoints within a project
                 let fpath = format!(
@@ -191,23 +197,27 @@ impl Service {
                     endpoint.path(),
                     sep
                 );
-                router = router
-                    .route(fpath.as_str(), get(download_input_file))
-                    .layer(Extension(endpoint_index));
-                router = router
-                    .route(fpath.as_str(), put(upload_input_file))
-                    .layer(Extension(endpoint_index));
-                router = router
-                    .route(fpath.as_str(), delete(delete_input_file))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    fpath.as_str(),
+                    get(download_input_file).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    fpath.as_str(),
+                    put(upload_input_file).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    fpath.as_str(),
+                    delete(delete_input_file).layer(Extension(endpoint_index)),
+                );
 
                 router
             }
             EndPointMode::Action => {
                 // Both GET or POST are fine for actions
-                router = router
-                    .route(endpoint.path(), get(get_action))
-                    .layer(Extension(endpoint_index));
+                router = router.route(
+                    endpoint.path(),
+                    get(get_action).layer(Extension(endpoint_index)),
+                );
                 router = router.route(
                     endpoint.path(),
                     post(post_action).layer(Extension(endpoint_index)),
@@ -230,21 +240,6 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
             "Internal error whilst serializing OpenAPI specification to JSON: {}",
             e
         ))),
-    }
-}
-
-async fn get_info(
-    state: State<Arc<ServiceState>>,
-    request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
-        Ok(CONTENT_TYPE_HTML) => {
-            todo!("present swagger UI");
-        }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
     }
 }
 

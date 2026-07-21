@@ -30,5 +30,7 @@ tokio = { version = "1.52.0", features = ["signal", "macros", "rt-multi-thread",
 tokio-util = { version = "0.7.18", features = [ "io" ]}
 toml = "1.1.2"
 tower-http = { version = "0.6.8", features = ["trace", "normalize-path"] }
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
 utoipa = { version = "5.5.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
