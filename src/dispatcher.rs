@@ -5,6 +5,8 @@ use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use tokio::sync::oneshot;
+use tokio::time::{Duration, sleep};
+use tracing::debug;
 
 /// The dispatcher is CLAM's job manager
 /// It spawns jobs, in parallel, and monitors their execution
@@ -101,6 +103,7 @@ impl Dispatcher {
                         // add job to pending jobs
                         if let Ok(mut jobs) = self.state.pending_jobs.write() {
                             jobs.push_back(job);
+                            debug!("job submitted");
                             let _ = responsechannel.send(ResponseMessage::JobSubmitted);
                             self.send(Message::StartJobs);
                         } else {
@@ -111,6 +114,7 @@ impl Dispatcher {
                         //we only send the kill signal here, the actual cleanup will be picked up by FinishJob
                         if let Ok(jobs) = self.state.running_jobs.read() {
                             if let Some(job) = jobs.get(&job_id) {
+                                debug!("cancelling job {:?}", job);
                                 job.kill();
                             } else {
                                 let _ = responsechannel.send(ResponseMessage::JobError(
@@ -150,6 +154,7 @@ impl Dispatcher {
                             self.state.done_jobs.write(),
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
+                                debug!("finishing job {:?}", job);
                                 job.set_output(output);
                                 job.set_error(error);
                                 if let Some(code) = exitstatus.code() {
@@ -167,6 +172,7 @@ impl Dispatcher {
                             self.state.done_jobs.write(),
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
+                                debug!("failed to start job {:?}", job);
                                 job.set_error(error);
                                 done_jobs.insert(id, job);
                             } else {
@@ -213,6 +219,7 @@ impl Dispatcher {
         }
     }
 
+    // start all pendings jobs (if any, and up until a maximum of running jobs)
     pub fn start_jobs(&self) {
         loop {
             let running_job_count = if let Ok(running_jobs) = self.state.running_jobs.read() {
@@ -220,6 +227,11 @@ impl Dispatcher {
             } else {
                 panic!("running job lock poisoned!");
             };
+            debug!(
+                "start_jobs: {}/{} jobs running",
+                running_job_count,
+                self.state().config.dispatcher().max_running_jobs()
+            );
 
             if running_job_count < self.state().config.dispatcher().max_running_jobs() {
                 let have_pending_jobs = if let Ok(pending_jobs) = self.state.pending_jobs.read() {
@@ -236,12 +248,19 @@ impl Dispatcher {
                     ) {
                         if let Some(job) = pending_jobs.pop_front() {
                             //run the job in a monitoring thread
+                            debug!("start_jobs: starting job {:?}", job);
                             job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
                             // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
                             running_jobs.insert(*job.id(), job);
                         }
                     }
+                } else {
+                    //no jobs left
+                    break;
                 }
+            } else {
+                //maximum reached... TODO: start_jobs will have to be retriggered periodically to give the queue a chance to clear!!
+                break;
             }
         }
     }

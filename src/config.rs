@@ -10,6 +10,7 @@ use std::fmt::Debug;
 use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
+use tracing::Dispatch;
 
 const INVALID_FILENAME_CHARS: [char; 4] = ['/', '\n', '\t', ';'];
 
@@ -91,18 +92,38 @@ pub struct ServiceConfig {
     id_pattern: Option<Regex>,
 }
 
-#[derive(Deserialize, Serialize, Clone, Default, Getters)]
+#[derive(Deserialize, Serialize, Clone, Getters)]
 pub struct DispatcherConfig {
     /// Maximum number of running jobs at the same time
+    #[serde(default = "default_max_running_jobs")]
     max_running_jobs: usize,
 
     /// Maximum number of jobs waiting in the queue, if full, HTTP 503 will be returned
+    #[serde(default = "default_max_total_jobs")]
     max_total_jobs: usize,
 
     /// External script to launch prior to accepting tasks.
     /// It can be used to do a system load check
     /// HTTP 503 will be returned if this script fails (= returns a non-zero exit code).
     pre_accept_script: Option<String>,
+}
+
+impl Default for DispatcherConfig {
+    fn default() -> Self {
+        Self {
+            max_running_jobs: default_max_running_jobs(),
+            max_total_jobs: default_max_total_jobs(),
+            pre_accept_script: None,
+        }
+    }
+}
+
+fn default_max_running_jobs() -> usize {
+    100
+}
+
+fn default_max_total_jobs() -> usize {
+    1000
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]

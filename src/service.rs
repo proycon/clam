@@ -13,6 +13,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::signal;
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
+use tracing::debug;
 
 use axum::Extension;
 use axum::Router;
@@ -346,7 +347,7 @@ async fn submit_project(
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
         match rx.await {
-            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
+            Ok(ResponseMessage::JobStarted) => Ok(ClamResponse::Ok()),
             Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
             Err(e) => Err(ApiError::InternalError(format!(
                 "oneshot sender dropped whilst submitting a job: {}",
@@ -602,10 +603,17 @@ async fn run_action(
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(&state, endpoint_index, None, user, query);
     let (tx, rx) = oneshot::channel();
+    debug!("run_action: submitting job {:?}", job);
     state.send(Message::SubmitJob(job, tx));
     match rx.await {
-        Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
-        Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
+        Ok(ResponseMessage::JobSubmitted) => {
+            debug!("run_action: job submitted");
+            Ok(ClamResponse::Ok())
+        }
+        Ok(ResponseMessage::JobError(error)) => {
+            debug!("run_action: job failed");
+            Err(ApiError::ServiceUnavailable(error))
+        }
         Err(e) => Err(ApiError::InternalError(format!(
             "oneshot sender dropped whilst submitting a job: {}",
             e
@@ -693,9 +701,11 @@ async fn shutdown_signal(_state: Arc<ServiceState>) {
 
     tokio::select! {
         _ = ctrl_c => {
+            debug!("shutdown_signal: SIGINT received");
             std::process::exit(0);
         }
         _ = terminate => {
+            debug!("shutdown_signal: SIGTERM received");
             std::process::exit(0);
         }
     }
