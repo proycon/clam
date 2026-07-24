@@ -75,6 +75,11 @@ pub struct ServiceConfig {
     #[serde(default)]
     dispatcher: DispatcherConfig,
 
+    /// If set, do **NOT** add the current working directory clamservice is launched from to the $PATH.
+    /// By default this is set so wrapper scripts can be easily located.
+    #[serde(default)]
+    keep_path: bool,
+
     /// Regular expression to extract percentages from lines matching the status pattern, this usually does not require adaptation as the default suffices
     #[serde(
         deserialize_with = "deserialize_opt_regex",

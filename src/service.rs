@@ -8,7 +8,6 @@ use crate::job::Job;
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
-use nix::libc::sleep;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::signal;
@@ -611,6 +610,7 @@ async fn run_action(
     debug!("run_action: submitting job {:?}", job);
     let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
+    //MAYBE TODO: use a gradually increasing poll interval
     let poll_interval = tokio::time::Duration::new(0, 50000000); //50ms
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => {

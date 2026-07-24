@@ -11,8 +11,9 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Read};
+use std::path::PathBuf;
 use std::sync::mpsc::Sender;
-use tracing::debug;
+use tracing::{debug, error};
 
 pub type JobId = usize;
 
@@ -33,10 +34,17 @@ pub struct Job {
     /// The particular user this job is associated with (may be 'anonymous')
     user: String,
 
-    /// command to run (just the executable, without any arguments)
+    /// command to run (just the executable, without any arguments). Relative paths will be interpreted relative to the directory clamservice was started in
+    /// so use `./wrapper.sh` to launch a custom wrapper script. Other executables are searched in path to be in $PATH. Do not use absolute paths here for portability reasons.
     command: String,
 
     args: Vec<String>,
+
+    /// Current directory where the CLAM service was started and where wrapper scripts cana be found
+    current_dir: String,
+
+    /// working directory, this will be set for the spawned process
+    working_dir: Option<PathBuf>,
 
     status_pattern: Option<Regex>,
 
@@ -71,6 +79,18 @@ impl Job {
                 Vec::new()
             }
         };
+        let current_dir = std::env::current_dir()
+            .expect("Unable to get current working directory")
+            .into_os_string()
+            .into_string()
+            .expect("Unable to get current working directory");
+        let working_dir = {
+            if let Some(project) = project {
+                Some(project.path())
+            } else {
+                None
+            }
+        };
         Self {
             id: rand::random_range(1..usize::MAX),
             endpoint_index,
@@ -81,6 +101,8 @@ impl Job {
             status_pattern: endpoint.status_pattern().clone(),
             pid: None,
             output: None,
+            working_dir,
+            current_dir,
             error,
             statuslog: String::new(),
             exitstatus: None,
@@ -412,8 +434,19 @@ impl Job {
     /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
     pub fn spawn(self, dispatcherchannel: Sender<Message>) -> std::thread::JoinHandle<()> {
         std::thread::spawn(move || {
+            if let Some(working_dir) = self.working_dir() {
+                if let Err(e) = std::env::set_current_dir(working_dir) {
+                    if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
+                        id: self.id,
+                        error: format!("{}", e),
+                    }) {
+                        error!("Dispatcher error send failure: {}", e2)
+                    }
+                }
+            }
             match std::process::Command::new(self.command)
                 .args(self.args)
+                .current_dir(self.current_dir)
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
                 .spawn()
@@ -423,7 +456,7 @@ impl Job {
                         id: self.id,
                         pid: child.id(),
                     }) {
-                        eprintln!("ERROR: Dispatcher send failure on start: {}", e)
+                        error!("Dispatcher send failure on start: {}", e)
                     }
 
                     let mut stderr = child.stderr.take().unwrap();
@@ -485,7 +518,7 @@ impl Job {
                         output,
                         error,
                     }) {
-                        eprintln!("ERROR: Dispatcher send failure: {}", e)
+                        error!("Dispatcher send failure: {}", e)
                     }
                 }
                 Err(e) => {
@@ -494,7 +527,7 @@ impl Job {
                         id: self.id,
                         error: format!("{}", e),
                     }) {
-                        eprintln!("ERROR: Dispatcher error send failure: {}", e2)
+                        error!("Dispatcher error send failure: {}", e2)
                     }
                 }
             }

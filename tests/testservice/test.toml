@@ -42,7 +42,7 @@ description = "Endpoint to uppercase a text (batch processing, file based)"
 path = "/"  #project name will be appended automatically
 mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
-command = "testwrapper.sh"
+command = "./testwrapper.sh"
 
 [[endpoints.args]]
 parameter_id = "inputtxt"
@@ -67,7 +67,7 @@ name = "Uppercase (action)"
 description = "Endpoint to uppercase a text (single round-trip action, string-based)"
 path = "/uppercase"  #project name will be appended automatically
 mode = "Action"
-command = "testwrapper.sh"
+command = "./testwrapper.sh"
 filetype = "plaintext"
 
 [[endpoints.args]]
