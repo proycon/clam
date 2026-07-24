@@ -8,6 +8,7 @@ use crate::job::Job;
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
+use nix::libc::sleep;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::signal;
@@ -30,6 +31,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
+const CONTENT_TYPE_PLAINTEXT: &str = "text/plain; charset=UTF-8";
 
 pub struct Service {
     config: ServiceConfig,
@@ -317,7 +319,7 @@ async fn get_project(
                 if let Some(projectstatus) = state.project_status(&project) {
                     Ok(ClamResponse::ProjectResponse(projectstatus))
                 } else {
-                    Err(ApiError::NotFound("No such project"))
+                    Err(ApiError::NotFound("No such project".into()))
                 }
             }
             Ok(CONTENT_TYPE_HTML) => {
@@ -359,7 +361,7 @@ async fn submit_project(
             ))),
         }
     } else {
-        Err(ApiError::NotFound("No such project"))
+        Err(ApiError::NotFound("No such project".into()))
     }
 }
 
@@ -430,7 +432,7 @@ async fn download_output_file(
                 contenttype,
             })
         } else {
-            Err(ApiError::NotFound("Output file not found"))
+            Err(ApiError::NotFound("Output file not found".into()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -463,7 +465,7 @@ async fn download_input_file(
                 contenttype,
             })
         } else {
-            Err(ApiError::NotFound("Output file not found"))
+            Err(ApiError::NotFound("Output file not found".into()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -510,7 +512,7 @@ async fn upload_input_file(
 
             Ok(ClamResponse::Created())
         } else {
-            Err(ApiError::NotFound("Input file not found"))
+            Err(ApiError::NotFound("Input file not found".into()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -561,7 +563,9 @@ async fn upload_input_file_multipart(
                 ApiError::InternalError(format!("Flush error after file upload: {e}"))
             })?;
         } else {
-            return Err(ApiError::NotFound("Input file path generation failed"));
+            return Err(ApiError::NotFound(
+                "Input file path generation failed".into(),
+            ));
         }
     }
 
@@ -587,7 +591,7 @@ async fn delete_input_file(
             std::fs::remove_file(filepath)?;
             Ok(ClamResponse::NoContent())
         } else {
-            Err(ApiError::NotFound("Input file not found"))
+            Err(ApiError::NotFound("Input file not found".into()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -600,15 +604,69 @@ async fn run_action(
     endpoint_index: usize,
     user: &CurrentUser,
     query: HashMap<String, String>,
+    contenttype: String,
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(&state, endpoint_index, None, user, query);
     let (tx, rx) = oneshot::channel();
     debug!("run_action: submitting job {:?}", job);
+    let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
+    let poll_interval = tokio::time::Duration::new(0, 50000000); //50ms
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => {
-            debug!("run_action: job submitted");
-            Ok(ClamResponse::Ok())
+            debug!("run_action: job {} submitted", job_id);
+            //now poll for the job
+            loop {
+                let (tx, rx) = oneshot::channel();
+                state.send(Message::PollJob(job_id, tx));
+                match rx.await {
+                    Ok(ResponseMessage::JobFinished {
+                        id,
+                        exitstatus,
+                        output,
+                        error,
+                    }) => {
+                        debug!(
+                            "run_action: job {} finished with status {:?}",
+                            id, exitstatus
+                        );
+                        match exitstatus {
+                            0 => {
+                                return Ok(ClamResponse::Body {
+                                    stream: output.into(),
+                                    contenttype,
+                                });
+                            }
+                            40 => return Err(ApiError::ParameterError(error)),
+                            44 => return Err(ApiError::NotFound(error)),
+                            43 => return Err(ApiError::PermissionDenied(error)),
+                            _ => {
+                                return Err(ApiError::InternalError(format!(
+                                    "An error occurred during execution of this action (exitcode {}):\n\n{}",
+                                    exitstatus, error
+                                )));
+                            }
+                        }
+                    }
+                    Ok(ResponseMessage::JobRunning(..)) => tokio::time::sleep(poll_interval).await,
+                    Ok(ResponseMessage::JobError(error)) => {
+                        debug!("run_action: job error: {}", error);
+                        return Err(ApiError::InternalError(error));
+                    }
+                    Err(e) => {
+                        return Err(ApiError::InternalError(format!(
+                            "oneshot sender dropped whilst polling a job: {}",
+                            e
+                        )));
+                    }
+                    Ok(m) => {
+                        return Err(ApiError::InternalError(format!(
+                            "unexpected response message whilst polling a job: {:?}",
+                            m
+                        )));
+                    }
+                }
+            }
         }
         Ok(ResponseMessage::JobError(error)) => {
             debug!("run_action: job failed");
@@ -647,7 +705,10 @@ async fn get_action(
         Ok(CONTENT_TYPE_HTML) => {
             todo!("Present action submission form");
         }
-        Ok(_filetype) => run_action(state, endpoint_index, &user, query.0).await,
+        Ok(filetype) => {
+            let filetype = filetype.to_string();
+            run_action(state, endpoint_index, &user, query.0, filetype).await
+        }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
         )),
@@ -681,7 +742,16 @@ async fn post_action(
     }
 
     //we ignore Accept headers for POST and just deliver what the action provides
-    run_action(state, endpoint_index, &user, param_map).await
+
+    let mut contenttype = CONTENT_TYPE_PLAINTEXT;
+    let endpoint = state.endpoint(endpoint_index);
+    if let Some(filetype) = endpoint.filetype() {
+        if let Some(filetype) = state.config().filetype(filetype) {
+            contenttype = filetype.contenttype().as_str();
+        }
+    }
+    let contenttype: String = contenttype.into();
+    run_action(state, endpoint_index, &user, param_map, contenttype).await
 }
 
 async fn shutdown_signal(_state: Arc<ServiceState>) {

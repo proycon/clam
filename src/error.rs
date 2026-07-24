@@ -18,9 +18,9 @@ pub enum ApiError {
     InternalError(String),
     /// client-side upload error (HTTP 400)
     UploadError(String),
-    NotFound(&'static str),
+    NotFound(String),
     NotAcceptable(&'static str),
-    PermissionDenied(&'static str),
+    PermissionDenied(String),
     ParameterError(String),
     InvalidName(&'static str),
     ServiceUnavailable(String),
@@ -96,9 +96,9 @@ impl From<ClamError> for ApiError {
 impl From<std::io::Error> for ApiError {
     fn from(value: std::io::Error) -> Self {
         match value.kind() {
-            std::io::ErrorKind::NotFound => Self::NotFound("file not found on filesystem"),
+            std::io::ErrorKind::NotFound => Self::NotFound("file not found on filesystem".into()),
             std::io::ErrorKind::PermissionDenied => {
-                Self::PermissionDenied("permission denied on filesystem")
+                Self::PermissionDenied("permission denied on filesystem".into())
             }
             std::io::ErrorKind::NotSeekable => {
                 Self::InternalError(format!("file not seekable: {}", value))

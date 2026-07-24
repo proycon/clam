@@ -211,7 +211,8 @@ pub(crate) async fn login_handler(State(state): State<Arc<ServiceState>>) -> Res
         );
         Redirect::temporary(&auth_url).into_response()
     } else {
-        ApiError::NotFound("OAuth2 login endpoint is not enabled on this service").into_response()
+        ApiError::NotFound("OAuth2 login endpoint is not enabled on this service".into())
+            .into_response()
     }
 }
 

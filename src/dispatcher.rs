@@ -17,6 +17,7 @@ pub struct Dispatcher {
 }
 
 #[derive(Debug)]
+/// A nessage to the dispatcher (by a service or by the dispatcher to itself)
 pub enum Message {
     /// Submit a job to the queue
     SubmitJob(Job, oneshot::Sender<ResponseMessage>),
@@ -61,13 +62,16 @@ pub enum ResponseMessage {
     JobStopped,
     JobFinished {
         id: JobId,
-        exitstatus: ExitStatus,
+        exitstatus: i32,
         /// stdout
         output: String,
         /// stderr
         error: String,
     },
-    JobStatus(Job),
+    // Job is running, encapsulated the job so status can be extracted
+    JobRunning(Job),
+    // Job is pending execution
+    JobPending,
     JobStarted,
     // For example when a job failed to start
     JobError(String),
@@ -102,8 +106,8 @@ impl Dispatcher {
                         }
                         // add job to pending jobs
                         if let Ok(mut jobs) = self.state.pending_jobs.write() {
+                            debug!("job {} submitted", job.id());
                             jobs.push_back(job);
-                            debug!("job submitted");
                             let _ = responsechannel.send(ResponseMessage::JobSubmitted);
                             self.send(Message::StartJobs);
                         } else {
@@ -132,14 +136,46 @@ impl Dispatcher {
                         }
                     }
                     Ok(Message::PollJob(job_id, responsechannel)) => {
-                        if let Ok(jobs) = self.state.running_jobs.read() {
-                            if let Some(job) = jobs.get(&job_id) {
+                        debug!("polling job {:?}", job_id);
+                        if let (Ok(running_jobs), Ok(done_jobs)) =
+                            (self.state.running_jobs.read(), self.state.done_jobs.read())
+                        {
+                            if let Some(job) = running_jobs.get(&job_id) {
                                 let _ =
-                                    responsechannel.send(ResponseMessage::JobStatus(job.clone()));
+                                    responsechannel.send(ResponseMessage::JobRunning(job.clone()));
+                            } else if let Some(job) = done_jobs.get(&job_id) {
+                                if let Some(exitstatus) = job.exitstatus() {
+                                    let _ = responsechannel.send(ResponseMessage::JobFinished {
+                                        id: *job.id(),
+                                        exitstatus: *exitstatus,
+                                        output: job.output().as_ref().cloned().unwrap_or_default(),
+                                        error: job.error().as_ref().cloned().unwrap_or_default(),
+                                    });
+                                } else {
+                                    let _ =
+                                        responsechannel.send(ResponseMessage::JobError(format!(
+                                            "Job failed to start: {}",
+                                            job.error().as_deref().unwrap_or_default()
+                                        )));
+                                }
                             } else {
-                                let _ = responsechannel.send(ResponseMessage::JobError(
-                                    "No such job running".to_string(),
-                                ));
+                                let mut pending = false;
+                                if let Ok(pending_jobs) = self.state.pending_jobs.read() {
+                                    //MAYBE TODO: this scales poorly to huge numbers of pending jobs
+                                    for pending_job in pending_jobs.iter() {
+                                        if *pending_job.id() == job_id {
+                                            pending = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if pending {
+                                    let _ = responsechannel.send(ResponseMessage::JobPending);
+                                } else {
+                                    let _ = responsechannel.send(ResponseMessage::JobError(
+                                        "No such job found".to_string(),
+                                    ));
+                                }
                             }
                         }
                     }
@@ -172,7 +208,7 @@ impl Dispatcher {
                             self.state.done_jobs.write(),
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
-                                debug!("failed to start job {:?}", job);
+                                debug!("failed to start job {:?}: {}", job, error);
                                 job.set_error(error);
                                 done_jobs.insert(id, job);
                             } else {

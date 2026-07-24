@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::sync::mpsc::Sender;
+use tracing::debug;
 
 pub type JobId = usize;
 
@@ -488,6 +489,7 @@ impl Job {
                     }
                 }
                 Err(e) => {
+                    debug!("Job failed to start {:?}", e);
                     if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
                         id: self.id,
                         error: format!("{}", e),
