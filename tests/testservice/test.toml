@@ -78,7 +78,8 @@ id = "text"
 name = "Text"
 description = "Input text to turn to uppercase"
 required = true
-type = { parametertype = "String", flag = "-t" }
+type = { parametertype = "String" }
+flag = "-t"
 
 [[endpoints]]
 name = "Parameter test"

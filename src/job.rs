@@ -444,6 +444,12 @@ impl Job {
                     }
                 }
             }
+            debug!(
+                "Attempting to spawn job command={} args={:?} cwd={:?}",
+                &self.command,
+                &self.args,
+                std::env::current_dir().expect("current dir")
+            );
             match std::process::Command::new(self.command)
                 .args(self.args)
                 .current_dir(self.current_dir)
