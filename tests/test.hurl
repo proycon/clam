@@ -29,7 +29,12 @@ GET http://127.0.0.1:8080/non-existent-project
 accept: application/json
 HTTP 404
 
-# Non-existent project
+# Action test
 GET http://127.0.0.1:8080/uppercase?text=hello%20world
 accept: text/plain
 HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+HELLO WORLD
+```
