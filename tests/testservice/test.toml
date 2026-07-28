@@ -86,7 +86,7 @@ name = "Parameter test"
 description = "Endpoint for parameter tests"
 path = "/paramtest"
 mode = "Action"
-command = "paramtest.sh"
+command = "./paramtest.sh"
 filetype = "plaintext"
 
 [[endpoints.parameters]]
@@ -94,4 +94,29 @@ id = "bool"
 name = "Boolean test"
 description = "Boolean test parameter"
 required = false
-type = { parametertype = "Bool", default = false, flag = "-c"  }
+type = { parametertype = "Bool", default = false }
+flag = "-b"
+
+[[endpoints.parameters]]
+id = "int"
+name = "Integer test"
+description = "Integer between 1 and 10"
+required = false
+type = { parametertype = "Int", min = 1, max= 10  }
+flag = "-i"
+
+[[endpoints.parameters]]
+id = "float"
+name = "Float test"
+description = "Float test parameter with default"
+required = false
+type = { parametertype = "Float", default = 3.14  }
+flag = "-f"
+
+[[endpoints.parameters]]
+id = "string"
+name = "String test"
+description = "String test parameter"
+required = false
+type = { parametertype = "String"  }
+flag = "-s"

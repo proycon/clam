@@ -38,3 +38,43 @@ Content-type: text/plain
 ```
 HELLO WORLD
 ```
+
+# Action test: empty parameter test
+GET http://127.0.0.1:8080/paramtest
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-f 3.14
+```
+
+# Parameter test: boolean
+GET http://127.0.0.1:8080/paramtest?bool=1
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-b -f 3.14
+```
+
+# Parameter test: string
+GET http://127.0.0.1:8080/paramtest?string=hello%20world
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-f 3.14 -s hello world
+```
+
+# Parameter test: int
+GET http://127.0.0.1:8080/paramtest?int=5
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-i 5 -f 3.14
+```
