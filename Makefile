@@ -11,7 +11,11 @@ test:
 	if [ -e .pid ]; then rm .pid; fi
 	if [ -d tests/testservice/data ]; then rm -rf tests/testservice/data; fi
 	mkdir -p tests/testservice/data
-	cd tests/testservice && cargo run -- --config test.toml &
+	cd tests/testservice && cargo run -- --debug --config test.toml &
 	echo "(2s grace period for service to start)">&2 && sleep 2
-	hurl --test --verbose --jobs 1 tests/test.hurl
-	killall -w clam #wait for clam to die (this presumes you have no other clam services running besides this test)
+ifeq ($(STOP_SERVICE),0)
+	if hurl --test --verbose --jobs 1 tests/test.hurl; then exit 0; else exit 1; fi
+	@echo "don't forget to stop the clam service yourself..."
+else
+	if hurl --test --verbose --jobs 1 tests/test.hurl; then killall -w clam; exit 0; else killall -w clam; exit 1; fi
+endif

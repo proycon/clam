@@ -86,3 +86,15 @@ HTTP 400
 Content-type: application/json
 [Asserts]
 jsonpath "$.type" == "ParameterError"
+
+
+# Project test: Project creation (PUT)
+PUT http://127.0.0.1:8080/testproject
+HTTP 201
+
+# Project test: Project status (GET)
+GET http://127.0.0.1:8080/testproject
+HTTP 200
+Content-type: application/json
+[Asserts]
+jsonpath "$.stage" == "Staging"

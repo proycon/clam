@@ -148,11 +148,17 @@ impl ServiceState {
 
     /// Returns the project status, or None if it does not exist yet
     pub fn project_status(&self, project: &Project<'_>) -> Option<ProjectStatus> {
+        if !project.exists() {
+            return None;
+        }
+
         //gather associated job (if any)
         let job_id = if let Ok(project_job_map) = self.project_job_map.read() {
             project_job_map.get(project.key()).map(|x| x.clone())
         } else {
-            None
+            return Some(ProjectStatus::Staging {
+                input_files: project.input_files(),
+            });
         };
 
         if let Some(job_id) = job_id {
@@ -184,11 +190,10 @@ impl ServiceState {
                     }
                 }
             }
-
-            return Some(ProjectStatus::Staging {
-                input_files: project.input_files(),
-            });
         }
-        None
+
+        Some(ProjectStatus::Staging {
+            input_files: project.input_files(),
+        })
     }
 }

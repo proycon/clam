@@ -140,6 +140,10 @@ impl<'a> Project<'a> {
         p
     }
 
+    pub fn exists(&self) -> bool {
+        self.path().exists()
+    }
+
     /// Returns the path of the specified output file if it indeed exists
     pub fn output_file(&self, filename: &str) -> Option<PathBuf> {
         let mut path = self.path();
