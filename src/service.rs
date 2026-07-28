@@ -13,7 +13,7 @@ use tokio::io::AsyncWriteExt;
 use tokio::signal;
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
-use tracing::debug;
+use tracing::{debug, error, info};
 
 use axum::Extension;
 use axum::Router;
@@ -108,8 +108,13 @@ impl Service {
     #[tokio::main]
     pub async fn run(&self) {
         let bind = self.config.listen().as_deref().unwrap_or("127.0.0.1:8080");
-        eprintln!("[clamservice] listening on {}", bind);
-        let listener = tokio::net::TcpListener::bind(bind).await.unwrap();
+        let listener = tokio::net::TcpListener::bind(bind)
+            .await
+            .unwrap_or_else(|e| {
+                error!("{}", e);
+                std::process::exit(1)
+            });
+        info!("listening on {}", bind);
 
         let dispatcher = Dispatcher::new(self.config.clone());
         //launch the dispatcher/job manager as a background thread
