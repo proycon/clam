@@ -78,3 +78,11 @@ Content-type: text/plain
 ```
 -i 5 -f 3.14
 ```
+
+# Parameter test: integer out of bounds
+GET http://127.0.0.1:8080/paramtest?int=11
+accept: text/plain
+HTTP 400
+Content-type: application/json
+[Asserts]
+jsonpath "$.type" == "ParameterError"

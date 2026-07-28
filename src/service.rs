@@ -345,6 +345,9 @@ async fn submit_project(
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let job = Job::new(&state, endpoint_index, Some(&project), &user, query.0);
+        if let Some(error) = job.error {
+            return Err(ApiError::ParameterError(error));
+        }
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
         match rx.await {
@@ -606,6 +609,9 @@ async fn run_action(
     contenttype: String,
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(&state, endpoint_index, None, user, query);
+    if let Some(error) = job.error {
+        return Err(ApiError::ParameterError(error));
+    }
     let (tx, rx) = oneshot::channel();
     debug!("run_action: submitting job {:?}", job);
     let job_id = *job.id();

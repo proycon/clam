@@ -59,7 +59,7 @@ pub struct Job {
     /// Holds standard output (only for done jobs)
     output: Option<String>,
     /// Holds stderr output (only for done jobs)
-    error: Option<String>,
+    pub(crate) error: Option<String>,
 }
 
 impl Job {
