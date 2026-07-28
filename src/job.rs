@@ -118,7 +118,20 @@ impl Job {
     ) -> Result<Vec<String>, String> {
         let mut args = Vec::new();
         let mut error = String::new();
-        for arg in endpoint.args() {
+        let mut endpoint_args = Vec::new();
+        let endpoint_args = {
+            if !endpoint.args().is_empty() {
+                endpoint.args()
+            } else {
+                for parameter in endpoint.parameters() {
+                    endpoint_args.push(CommandArg::FromParameter {
+                        parameter_id: parameter.id().to_string(),
+                    });
+                }
+                &endpoint_args
+            }
+        };
+        for arg in endpoint_args {
             match arg {
                 CommandArg::Literal(arg) => args.push(arg.clone()),
                 CommandArg::FromParameter { parameter_id } => {
