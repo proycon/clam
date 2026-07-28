@@ -10,7 +10,7 @@ use std::fmt::Debug;
 use std::fs;
 use std::io::Read;
 use std::path::PathBuf;
-use tracing::Dispatch;
+use tracing::debug;
 
 const INVALID_FILENAME_CHARS: [char; 4] = ['/', '\n', '\t', ';'];
 

@@ -419,8 +419,7 @@ async fn delete_project(
 }
 
 async fn download_output_file(
-    Path(project): Path<String>,
-    Path(filename): Path<String>,
+    Path((project, filename)): Path<(String, String)>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
@@ -447,9 +446,7 @@ async fn download_output_file(
 }
 
 async fn download_input_file(
-    Path(project): Path<String>,
-    Path(parameter_id): Path<String>,
-    Path(filename): Path<String>,
+    Path((project, parameter_id, filename)): Path<(String, String, String)>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
@@ -458,9 +455,9 @@ async fn download_input_file(
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
-            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for download"))?;
         //download input file without keeping it all in memory
-        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), true) {
             let stream: axum::body::Body = project.file_body(&filepath).await?;
             let contenttype = if let Some(filetype) = parameter.filetype(state.config()) {
                 filetype.contenttype().to_string()
@@ -472,7 +469,7 @@ async fn download_input_file(
                 contenttype,
             })
         } else {
-            Err(ApiError::NotFound("Output file not found".into()))
+            Err(ApiError::NotFound("Input file not found".into()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -480,22 +477,27 @@ async fn download_input_file(
 }
 
 async fn upload_input_file(
-    Path(project): Path<String>,
-    Path(parameter_id): Path<String>,
-    Path(filename): Path<String>,
+    Path((project, parameter_id, filename)): Path<(String, String, String)>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
+        debug!(
+            "upload_input_file: project={}, parameter_id={}, filename={}",
+            project.name(),
+            parameter_id,
+            filename
+        );
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
             .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
         let filename = parameter.validate_filename(filename.as_str())?;
         //upload input file without keeping it all in memory
-        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), false)
+        {
             //MAYBE TODO: Check for matching content-type? We just accept anything as-is right now
             let mut body_stream = request.into_body().into_data_stream();
             project.create_parameter_dir(parameter_id.as_str())?;
@@ -519,7 +521,10 @@ async fn upload_input_file(
 
             Ok(ClamResponse::Created())
         } else {
-            Err(ApiError::NotFound("Input file not found".into()))
+            //should be unreachable, but just to be sure:
+            Err(ApiError::InternalError(
+                "upload_input_file, couldn't get input file (this should not happen)".into(),
+            ))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
@@ -527,8 +532,7 @@ async fn upload_input_file(
 }
 
 async fn upload_input_file_multipart(
-    Path(project): Path<String>,
-    Path(parameter_id): Path<String>,
+    Path((project, parameter_id)): Path<(String, String)>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
@@ -550,7 +554,8 @@ async fn upload_input_file_multipart(
     {
         let filename = parameter.validate_filename(field.name().unwrap_or_default())?;
 
-        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), false)
+        {
             project.create_parameter_dir(parameter_id.as_str())?;
             let mut file = File::create(&filepath)
                 .await
@@ -580,9 +585,7 @@ async fn upload_input_file_multipart(
 }
 
 async fn delete_input_file(
-    Path(project): Path<String>,
-    Path(parameter_id): Path<String>,
-    Path(filename): Path<String>,
+    Path((project, parameter_id, filename)): Path<(String, String, String)>,
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
@@ -594,7 +597,7 @@ async fn delete_input_file(
             .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
 
         //delete input file
-        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str()) {
+        if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), true) {
             std::fs::remove_file(filepath)?;
             Ok(ClamResponse::NoContent())
         } else {

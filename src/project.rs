@@ -152,11 +152,20 @@ impl<'a> Project<'a> {
     }
 
     /// Returns the path of the specified input file if it indeed exists
-    pub fn input_file(&self, parameter_id: &str, filename: &str) -> Option<PathBuf> {
+    pub fn input_file(
+        &self,
+        parameter_id: &str,
+        filename: &str,
+        must_exist: bool,
+    ) -> Option<PathBuf> {
         let mut path = self.path();
         path.push(parameter_id);
         path.push(filename);
-        if path.is_file() { Some(path) } else { None }
+        if path.is_file() || !must_exist {
+            Some(path)
+        } else {
+            None
+        }
     }
 
     pub fn create_parameter_dir(&self, parameter_id: &str) -> Result<PathBuf, std::io::Error> {

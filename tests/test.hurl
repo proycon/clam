@@ -99,6 +99,14 @@ Content-type: application/json
 [Asserts]
 jsonpath "$.stage" == "Staging"
 
+# Project test: File upload (PUT)
+PUT http://127.0.0.1:8080/testproject/text/hello.txt
+Content-type: text/plain
+```
+hello world!
+```
+HTTP 201
+
 # Project test: Project deletion (DELETE)
 DELETE http://127.0.0.1:8080/testproject
 HTTP 204
