@@ -621,7 +621,7 @@ async fn run_action(
     debug!("run_action: submitting job {:?}", job);
     let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
-    //MAYBE TODO: use a gradually increasing poll interval
+    //MAYBE TODO: use a gradually increasing poll interval or refactor messaging system to remove this latency altogether
     let poll_interval = tokio::time::Duration::new(0, 50000000); //50ms
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => {
