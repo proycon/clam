@@ -9,7 +9,9 @@ plan.pdf: PLAN.md
 test:
 	-if [ -e .pid ]; then kill `cat .pid`; fi
 	if [ -e .pid ]; then rm .pid; fi
-	cargo run -- --config tests/testservice/test.toml & echo $$! > .pid
+	if [ -d tests/testservice/data ]; then rm -rf tests/testservice/data; fi
+	mkdir -p tests/testservice/data
+	cd tests/testservice && cargo run -- --config test.toml &
 	echo "(2s grace period for service to start)">&2 && sleep 2
 	hurl --test --verbose --jobs 1 tests/test.hurl
-	kill `cat .pid` && rm .pid
+	killall -w clam #wait for clam to die (this presumes you have no other clam services running besides this test)
