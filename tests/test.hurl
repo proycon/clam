@@ -100,7 +100,7 @@ Content-type: application/json
 jsonpath "$.stage" == "Staging"
 
 # Project test: File upload (PUT)
-PUT http://127.0.0.1:8080/testproject/text/hello.txt
+PUT http://127.0.0.1:8080/testproject/inputtxt/hello.txt
 Content-type: text/plain
 ```
 hello world!
