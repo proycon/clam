@@ -251,7 +251,7 @@ async fn get_porch(
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
-        Ok(CONTENT_TYPE_HTML) => {
+        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
             todo!("present human-readable welcome porch");
         }
         _ => Err(ApiError::NotAcceptable(
@@ -267,7 +267,7 @@ async fn get_index(
 ) -> Result<ClamResponse, ApiError> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
-        Ok(CONTENT_TYPE_HTML) => {
+        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
             todo!(
                 "present human-readable list of actions and project endpoints, as well as the actual projects there (calls project_index() for each)"
             );
@@ -321,7 +321,7 @@ async fn get_project(
                     Err(ApiError::NotFound("No such project".into()))
                 }
             }
-            Ok(CONTENT_TYPE_HTML) => {
+            Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
                 //present staging interface, in progress message, or output interface, depending on project state
                 todo!(
                     "present staging interface, in progress message, or output interface, depending on project state"
@@ -708,7 +708,7 @@ async fn get_action(
         }
     }
     match negotiate_content_type(&headers, &accepted_data) {
-        Ok(CONTENT_TYPE_HTML) => {
+        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
             todo!("Present action submission form");
         }
         Ok(filetype) => {

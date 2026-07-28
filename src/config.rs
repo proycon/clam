@@ -95,6 +95,10 @@ pub struct ServiceConfig {
         default = "default_id_pattern"
     )]
     id_pattern: Option<Regex>,
+
+    /// Disable the Web User Interface
+    #[serde(default)]
+    disable_ui: bool,
 }
 
 #[derive(Deserialize, Serialize, Clone, Getters)]
@@ -661,6 +665,11 @@ impl ServiceConfig {
         } else {
             Ok(())
         }
+    }
+
+    /// Disable the Web UI
+    pub fn set_disable_ui(&mut self) {
+        self.disable_ui = true;
     }
 }
 
