@@ -107,6 +107,14 @@ hello world!
 ```
 HTTP 201
 
+# Project test: Input file download
+GET http://127.0.0.1:8080/testproject/inputtxt/hello.txt
+HTTP 200
+[Asserts]
+```
+hello world!
+```
+
 # Project test: Project deletion (DELETE)
 DELETE http://127.0.0.1:8080/testproject
 HTTP 204
