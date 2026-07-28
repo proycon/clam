@@ -98,3 +98,12 @@ HTTP 200
 Content-type: application/json
 [Asserts]
 jsonpath "$.stage" == "Staging"
+
+# Project test: Project deletion (DELETE)
+DELETE http://127.0.0.1:8080/testproject
+HTTP 204
+
+# Project test: Verify deletion (GET)
+GET http://127.0.0.1:8080/testproject
+Content-type: application/json
+HTTP 404
