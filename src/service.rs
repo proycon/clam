@@ -451,6 +451,11 @@ async fn download_input_file(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
 ) -> Result<ClamResponse, ApiError> {
+    if state.config().disable_input_download() {
+        return Err(ApiError::PermissionDenied(
+            "Input file download is disabled".into(),
+        ));
+    }
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let parameter = project
             .endpoint()

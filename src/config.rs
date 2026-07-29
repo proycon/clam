@@ -99,6 +99,11 @@ pub struct ServiceConfig {
     /// Disable the Web User Interface
     #[serde(default)]
     disable_ui: bool,
+
+    /// Disable download of input files
+    /// Setting this can prevent the service being abused as a file sharing service
+    #[serde(default)]
+    disable_input_download: bool,
 }
 
 #[derive(Deserialize, Serialize, Clone, Getters)]
