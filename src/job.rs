@@ -40,8 +40,8 @@ pub struct Job {
 
     args: Vec<String>,
 
-    /// Current directory where the CLAM service was started and where wrapper scripts cana be found
-    current_dir: String,
+    /// Current directory where the CLAM service was started and where wrapper scripts can be found
+    current_dir: PathBuf,
 
     /// working directory, this will be set for the spawned process
     working_dir: Option<PathBuf>,
@@ -79,11 +79,7 @@ impl Job {
                 Vec::new()
             }
         };
-        let current_dir = std::env::current_dir()
-            .expect("Unable to get current working directory")
-            .into_os_string()
-            .into_string()
-            .expect("Unable to get current working directory");
+        let current_dir = std::env::current_dir().expect("Unable to get current working directory");
         let working_dir = {
             if let Some(project) = project {
                 Some(project.path())
@@ -458,97 +454,117 @@ impl Job {
                     }
                 }
             }
-            debug!(
-                "Attempting to spawn job command={} args={:?} cwd={:?}",
-                &self.command,
-                &self.args,
-                std::env::current_dir().expect("current dir")
-            );
-            match std::process::Command::new(self.command)
-                .args(self.args)
-                .current_dir(self.current_dir)
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::piped())
-                .spawn()
+            if let Ok(command_path) = self
+                .current_dir()
+                .join(PathBuf::from(&self.command))
+                .canonicalize()
             {
-                Ok(mut child) => {
-                    if let Err(e) = dispatcherchannel.send(Message::StartedJob {
-                        id: self.id,
-                        pid: child.id(),
-                    }) {
-                        error!("Dispatcher send failure on start: {}", e)
-                    }
+                debug!(
+                    "Attempting to spawn job command={:?} args={:?} cwd={:?}",
+                    &command_path,
+                    &self.args,
+                    std::env::current_dir().expect("current dir")
+                );
+                match std::process::Command::new(command_path.into_os_string())
+                    .args(self.args)
+                    .stdout(std::process::Stdio::piped())
+                    .stderr(std::process::Stdio::piped())
+                    .spawn()
+                {
+                    Ok(mut child) => {
+                        if let Err(e) = dispatcherchannel.send(Message::StartedJob {
+                            id: self.id,
+                            pid: child.id(),
+                        }) {
+                            error!("Dispatcher send failure on start: {}", e)
+                        }
 
-                    let mut stderr = child.stderr.take().unwrap();
-                    let mut stdout = child.stdout.take().unwrap();
-                    let job_id = self.id;
-                    let dispatcherchannel2 = dispatcherchannel.clone();
+                        let mut stderr = child.stderr.take().unwrap();
+                        let mut stdout = child.stdout.take().unwrap();
+                        let job_id = self.id;
+                        let dispatcherchannel2 = dispatcherchannel.clone();
 
-                    let error = if let Some(status_pattern) = self.status_pattern {
-                        // we spawn another thread to monitor stderr for the status pattern and send updates when this matches
-                        // we also collect all of stderr
-                        let stderr_thread = std::thread::spawn(move || {
-                            let mut full_stderr = String::new();
+                        let error = if let Some(status_pattern) = self.status_pattern {
+                            // we spawn another thread to monitor stderr for the status pattern and send updates when this matches
+                            // we also collect all of stderr
+                            let stderr_thread = std::thread::spawn(move || {
+                                let mut full_stderr = String::new();
 
-                            for line in BufReader::new(stderr).lines() {
-                                match line {
-                                    Ok(line) => {
-                                        full_stderr.push_str(&line);
-                                        full_stderr.push('\n');
+                                for line in BufReader::new(stderr).lines() {
+                                    match line {
+                                        Ok(line) => {
+                                            full_stderr.push_str(&line);
+                                            full_stderr.push('\n');
 
-                                        if status_pattern.is_match(line.as_str()) {
-                                            let _ = dispatcherchannel2
-                                                .send(Message::StatusLog(job_id, line));
+                                            if status_pattern.is_match(line.as_str()) {
+                                                let _ = dispatcherchannel2
+                                                    .send(Message::StatusLog(job_id, line));
+                                            }
+                                        }
+                                        Err(e) => {
+                                            full_stderr.push_str(&format!(
+                                                "Error reading stderr: {}\n",
+                                                e
+                                            ));
+                                            break;
                                         }
                                     }
-                                    Err(e) => {
-                                        full_stderr
-                                            .push_str(&format!("Error reading stderr: {}\n", e));
-                                        break;
-                                    }
                                 }
+
+                                full_stderr
+                            });
+
+                            stderr_thread
+                                .join()
+                                .unwrap_or_else(|_| "Failed to read stderr".to_string())
+                        } else {
+                            // Collect all stderr (blocks until process exists)
+                            let mut error = String::new();
+                            if let Err(_) = stderr.read_to_string(&mut error) {
+                                error = "Process stderr is invalid UTF-8!".to_string();
                             }
+                            error
+                        };
 
-                            full_stderr
-                        });
-
-                        stderr_thread
-                            .join()
-                            .unwrap_or_else(|_| "Failed to read stderr".to_string())
-                    } else {
-                        // Collect all stderr (blocks until process exists)
-                        let mut error = String::new();
-                        if let Err(_) = stderr.read_to_string(&mut error) {
-                            error = "Process stderr is invalid UTF-8!".to_string();
+                        // Collect all stdout (blocks until process exists)
+                        let mut output = String::new();
+                        if let Err(_) = stdout.read_to_string(&mut output) {
+                            output = "Process stdout is invalid UTF-8!".to_string();
                         }
-                        error
-                    };
 
-                    // Collect all stdout (blocks until process exists)
-                    let mut output = String::new();
-                    if let Err(_) = stdout.read_to_string(&mut output) {
-                        output = "Process stdout is invalid UTF-8!".to_string();
+                        let exitstatus = child.wait().unwrap();
+
+                        if let Err(e) = dispatcherchannel.send(Message::FinishJob {
+                            id: self.id,
+                            exitstatus,
+                            output,
+                            error,
+                        }) {
+                            error!("Dispatcher send failure: {}", e)
+                        }
                     }
-
-                    let exitstatus = child.wait().unwrap();
-
-                    if let Err(e) = dispatcherchannel.send(Message::FinishJob {
-                        id: self.id,
-                        exitstatus,
-                        output,
-                        error,
-                    }) {
-                        error!("Dispatcher send failure: {}", e)
+                    Err(e) => {
+                        debug!("Job failed to start {:?}", e);
+                        if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
+                            id: self.id,
+                            error: format!("{}", e),
+                        }) {
+                            error!("Dispatcher error send failure: {}", e2)
+                        }
                     }
                 }
-                Err(e) => {
-                    debug!("Job failed to start {:?}", e);
-                    if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
-                        id: self.id,
-                        error: format!("{}", e),
-                    }) {
-                        error!("Dispatcher error send failure: {}", e2)
-                    }
+            } else {
+                let msg = format!(
+                    "No such commmand: {} (in {})",
+                    self.command,
+                    self.current_dir().to_string_lossy()
+                );
+                error!(msg);
+                if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
+                    id: self.id,
+                    error: msg,
+                }) {
+                    error!("Dispatcher error send failure: {}", e2)
                 }
             }
         })
