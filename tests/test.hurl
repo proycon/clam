@@ -115,6 +115,29 @@ HTTP 200
 hello world!
 ```
 
+# Project test: Project execution (POST)
+POST http://127.0.0.1:8080/testproject
+HTTP 200
+Content-type: application/json
+
+# Project test: Project status 1/2 (GET)
+GET http://127.0.0.1:8080/testproject
+[Options]
+delay: 1s
+HTTP 200
+Content-type: application/json
+[Asserts]
+jsonpath "$.stage" == "Running"
+
+# Project test: Project status 2/2 (GET)
+GET http://127.0.0.1:8080/testproject
+[Options]
+delay: 5s
+HTTP 200
+Content-type: application/json
+[Asserts]
+jsonpath "$.stage" == "Done"
+
 # Project test: Project deletion (DELETE)
 DELETE http://127.0.0.1:8080/testproject
 HTTP 204

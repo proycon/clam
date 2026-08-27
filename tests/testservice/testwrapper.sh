@@ -12,6 +12,9 @@ else
     ret=$?
 fi
 
+#artificial sleep to simulate longer running processes and allow more tests
+sleep 5
+
 if [ $ret = 0 ]; then
     echo "done...">&2
 else
