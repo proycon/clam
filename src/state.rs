@@ -2,6 +2,7 @@ use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::Message;
 use crate::job::{Job, JobId};
+use crate::templating::init_templating;
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, VecDeque};
@@ -49,6 +50,8 @@ pub struct ServiceState {
 
     /// JSON Web Key Set to efficiently validate tokens (it should never be fetched on each request, but fetched and cached as otherwise it is inefficient)
     pub(crate) jwkset: Option<JwkSet>,
+
+    pub(crate) templating: Option<upon::Engine<'static>>,
 }
 
 /// Parse the user database, a simple TSV file with a username, a tab and a hashed password on each line
@@ -122,6 +125,11 @@ impl ServiceState {
             openidconfig,
             openapi: (&config).into(), //compute and associate openAPI specification
             jwkset,
+            templating: if config.disable_ui() {
+                None
+            } else {
+                Some(init_templating())
+            },
             config,
         }
     }

@@ -7,12 +7,14 @@ mod openapi;
 mod project;
 mod service;
 mod state;
+mod templating;
 pub use auth::*;
 pub use config::*;
 pub use dispatcher::*;
 pub use error::*;
 pub use service::*;
 pub use state::*;
+pub use templating::*;
 
 use const_format::concatcp;
 
