@@ -157,7 +157,7 @@ impl Service {
         endpoint: &EndPoint,
     ) -> Router<Arc<ServiceState>> {
         match endpoint.mode() {
-            EndPointMode::Porch => router.route(endpoint.path(), get(get_porch)),
+            EndPointMode::LandingPage => router.route(endpoint.path(), get(get_landingpage)),
             EndPointMode::Index => router.route(endpoint.path(), get(get_index)),
             EndPointMode::Project => {
                 let sep = if endpoint.path() == "/" { "" } else { "/" };
@@ -250,7 +250,7 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
     }
 }
 
-async fn get_porch(
+async fn get_landingpage(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {

@@ -30,7 +30,7 @@ contenttype = "text/tsv"
 
 [[endpoints]]
 path = "/"
-mode = "Porch"
+mode = "LandingPage"
 
 #Index of endpoints and projects
 [[endpoints]]

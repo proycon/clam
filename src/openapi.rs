@@ -76,7 +76,7 @@ impl EndPoint {
         projectresponse_schema: &Schema,
     ) {
         match self.mode() {
-            &EndPointMode::Porch => {
+            &EndPointMode::LandingPage => {
                 let mut operation = Operation::new();
                 operation.summary = Some(
                     self.summary()

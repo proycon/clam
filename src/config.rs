@@ -199,10 +199,10 @@ pub enum EndPointMode {
     #[default]
     Project,
 
-    /// The Porch is a publicly accessible endpoint (unauthenticated) that gives information over the service and allows users to continue
+    /// The LandingPage is a publicly accessible endpoint (unauthenticated) that gives information over the service and allows users to continue
     /// to the authenticated sections
     /// It is typically served at path `/` and used as a landing page.
-    Porch,
+    LandingPage,
 
     /// Provides a list of project or action endpoints. This is what people will see after logging in (if such an endpoint is defined)
     Index,
