@@ -323,6 +323,7 @@ async fn get_project(
                 if let Some(projectstatus) = state.project_status(&project) {
                     Ok(ClamResponse::ProjectResponse(projectstatus))
                 } else {
+                    debug!("project not found: {}", project.name());
                     Err(ApiError::NotFound("No such project".into()))
                 }
             }
@@ -337,6 +338,7 @@ async fn get_project(
             )),
         }
     } else {
+        debug!("project name invalid");
         Err(ApiError::InvalidName("project name invalid"))
     }
 }

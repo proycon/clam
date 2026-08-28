@@ -444,16 +444,6 @@ impl Job {
     /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
     pub fn spawn(self, dispatcherchannel: Sender<Message>) -> std::thread::JoinHandle<()> {
         std::thread::spawn(move || {
-            if let Some(working_dir) = self.working_dir() {
-                if let Err(e) = std::env::set_current_dir(working_dir) {
-                    if let Err(e2) = dispatcherchannel.send(Message::FailStartJob {
-                        id: self.id,
-                        error: format!("{}", e),
-                    }) {
-                        error!("Dispatcher error send failure: {}", e2)
-                    }
-                }
-            }
             if let Ok(command_path) = self
                 .current_dir()
                 .join(PathBuf::from(&self.command))
@@ -465,12 +455,33 @@ impl Job {
                     &self.args,
                     std::env::current_dir().expect("current dir")
                 );
-                match std::process::Command::new(command_path.into_os_string())
-                    .args(self.args)
-                    .stdout(std::process::Stdio::piped())
-                    .stderr(std::process::Stdio::piped())
-                    .spawn()
-                {
+                let process = if let Some(working_dir) = self.working_dir() {
+                    if let Ok(working_dir) = working_dir.canonicalize() {
+                        std::process::Command::new(command_path.into_os_string())
+                            .current_dir(working_dir)
+                            .args(self.args)
+                            .stdout(std::process::Stdio::piped())
+                            .stderr(std::process::Stdio::piped())
+                            .spawn()
+                    } else {
+                        //rare edge-case, should never happen
+                        Err(std::io::Error::new(
+                            std::io::ErrorKind::NotFound,
+                            format!(
+                                "work directory not found: {}, cwd={}",
+                                working_dir.to_string_lossy(),
+                                std::env::current_dir().unwrap().to_string_lossy()
+                            ),
+                        ))
+                    }
+                } else {
+                    std::process::Command::new(command_path.into_os_string())
+                        .args(self.args)
+                        .stdout(std::process::Stdio::piped())
+                        .stderr(std::process::Stdio::piped())
+                        .spawn()
+                };
+                match process {
                     Ok(mut child) => {
                         if let Err(e) = dispatcherchannel.send(Message::StartedJob {
                             id: self.id,

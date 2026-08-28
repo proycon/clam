@@ -8,6 +8,7 @@ use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
+use tracing::debug;
 
 use crate::project::{Project, ProjectKey, ProjectStatus};
 
