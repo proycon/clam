@@ -257,7 +257,23 @@ async fn get_landingpage(
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
-            todo!("present human-readable welcome porch");
+            if let Some(engine) = &state.templating {
+                let result = engine
+                    .template("landingpage")
+                    .render(
+                        state
+                            .template_context
+                            .as_ref()
+                            .expect("template context must be defined"),
+                    )
+                    .to_string()?;
+                Ok(ClamResponse::Body {
+                    stream: result.into(),
+                    contenttype: "text/html; charset=utf-8".into(),
+                })
+            } else {
+                unreachable!("UI is enabled");
+            }
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",

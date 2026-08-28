@@ -24,6 +24,7 @@ pub enum ApiError {
     ParameterError(String),
     InvalidName(&'static str),
     ServiceUnavailable(String),
+    TemplateError(upon::Error),
 }
 
 impl Serialize for ApiError {
@@ -57,6 +58,10 @@ impl Serialize for ApiError {
                 state.serialize_field("type", "InternalError")?;
                 state.serialize_field("message", s)?;
             }
+            Self::TemplateError(e) => {
+                state.serialize_field("type", "TemplateError")?;
+                state.serialize_field("message", &format!("{}", e))?;
+            }
             Self::ServiceUnavailable(s) => {
                 state.serialize_field("type", "ServiceUnavailable")?;
                 state.serialize_field("message", s)?;
@@ -73,7 +78,7 @@ impl Serialize for ApiError {
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let statuscode = match self {
-            Self::InternalError(..) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::InternalError(..) | Self::TemplateError(..) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::PermissionDenied(..) => StatusCode::FORBIDDEN,
             Self::ServiceUnavailable(..) => StatusCode::SERVICE_UNAVAILABLE,
             Self::NotAcceptable(..) => StatusCode::NOT_ACCEPTABLE,
@@ -117,5 +122,11 @@ impl From<std::io::Error> for ApiError {
 impl From<axum::Error> for ApiError {
     fn from(value: axum::Error) -> Self {
         Self::InternalError(format!("web framework error: {}", value))
+    }
+}
+
+impl From<upon::Error> for ApiError {
+    fn from(value: upon::Error) -> Self {
+        Self::TemplateError(value)
     }
 }

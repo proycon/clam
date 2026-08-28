@@ -1,3 +1,4 @@
+use crate::config::ServiceConfig;
 use upon::Engine;
 
 // All templates are compiled in at build time
@@ -24,7 +25,28 @@ pub(crate) fn init_templating() -> Engine<'static> {
         .add_template("footer", TEMPLATE_FOOTER)
         .expect("Failed to compile footer template");
     engine
-        .add_template("landing", TEMPLATE_LANDING)
+        .add_template("landingpage", TEMPLATE_LANDING)
         .expect("Failed to compile landing page template");
+    engine.add_function("exists", |s: &str| !s.is_empty());
     engine
+}
+
+impl From<&ServiceConfig> for upon::Value {
+    fn from(config: &ServiceConfig) -> Self {
+        upon::value! {
+            name: config.name().clone(),
+            version: config.version().clone(),
+            description: config.description().clone().unwrap_or_default(),
+            authors: config.authors().clone(),
+            documentation_url: config.documentation_url().clone().unwrap_or_default(),
+            sourcerepo: config.documentation_url().clone().unwrap_or_default(),
+            termsofservice: config.termsofservice().clone().unwrap_or_default(),
+            contact_name: if let Some(contact) = config.contact() {
+                contact.name.clone().unwrap_or_default()
+            } else { String::new() },
+            contact_email: if let Some(contact) = config.contact() {
+                contact.email.clone().unwrap_or_default()
+            } else { String::new() },
+        }
+    }
 }

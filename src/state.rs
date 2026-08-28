@@ -52,6 +52,7 @@ pub struct ServiceState {
     pub(crate) jwkset: Option<JwkSet>,
 
     pub(crate) templating: Option<upon::Engine<'static>>,
+    pub(crate) template_context: Option<upon::Value>,
 }
 
 /// Parse the user database, a simple TSV file with a username, a tab and a hashed password on each line
@@ -129,6 +130,12 @@ impl ServiceState {
                 None
             } else {
                 Some(init_templating())
+            },
+            template_context: if config.disable_ui() {
+                None
+            } else {
+                let config: upon::Value = (&config).into();
+                Some(upon::value! { config: config })
             },
             config,
         }

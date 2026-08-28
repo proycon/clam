@@ -1,2 +1,32 @@
-<html>
-</html>
+{% include "header" %}
+
+<div id="systeminfo">
+    <table>
+        <tr><th>Version</th><td>{{ config.version }}</td></tr>
+        {% if config.sourcerepo | exists %}
+        <tr><th>Source repository</th><td class="sourcerepo">{{ config.sourcerepo }}</td></tr>
+        {% endif %}
+        {% if config.documentation_url | exists %}
+        <tr><th>Documentation</th><td class="documentation"><a href="{{ config.documentation_url }}">{{ config.documentation_url }}</a></td></tr>
+        {% endif %}
+        <tr><th>Author(s)</th><td class="authors"><ol>{% for author in config.authors %}<li>{{ author }}{% endfor %}</ol></td></tr>
+        {% if config.contact_name | exists %}
+        <tr><th>Contact</th><td class="contact">{% if config.contact_email | exists %}<a href="mailto:{{ config.contact_email }}">{% endif %}{{ config.contact_name }}{% if config.contact_email | exists %}</a>{% endif %}</td></tr>
+        {% endif %}
+    </table>
+</div>
+
+{% if config.description | exists %}
+<section class="description">
+{{ config.description }}
+</section>
+{% endif %}
+
+{% if config.termsofservice | exists %}
+<details class="termsofservice">
+<summary>Terms of Service</summary>
+<div>{{ config.termsofservice }}</div>
+</details>
+{% endif %}
+
+{% include "footer" %}
