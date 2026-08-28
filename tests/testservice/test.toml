@@ -26,7 +26,7 @@ contenttype = "text/plain; charset=utf-8"
 [[endpoints]]
 name = "porch"
 path = "/"
-mode = "Porch"
+mode = "LandingPage"
 
 #Index of endpoints and projects
 [[endpoints]]
