@@ -1,4 +1,4 @@
-use crate::config::ServiceConfig;
+use crate::config::{EndPointMode, ServiceConfig};
 use upon::Engine;
 
 // All templates are compiled in at build time
@@ -68,6 +68,17 @@ impl From<&ServiceConfig> for upon::Value {
             contact_email: if let Some(contact) = config.contact() {
                 contact.email.clone().unwrap_or_default()
             } else { String::new() },
+            endpoints: config.endpoints().iter().filter_map(|endpoint| {
+                if endpoint.mode() == &EndPointMode::Action || endpoint.mode() == &EndPointMode::Project {
+                    Some(upon::value! {
+                        name: endpoint.name(),
+                        path: endpoint.path(),
+                        description: endpoint.description(),
+                    })
+                } else {
+                    None
+                }
+            }).collect::<Vec<upon::Value>>()
         }
     }
 }

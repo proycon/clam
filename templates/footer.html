@@ -3,9 +3,12 @@
     {% if config.contact_name | exists %}
     {% endif %}
     — Powered by <a href="https://codeberg.org/proycon/clam"><strong>CLAM</strong></a> v{{ config.clam_version }} by Maarten van Gompel (<a href="https://ru.nl/clst">CLST</a>, <a href="https://www.ru.nl">Radboud University</a> &amp; <a href="https://huc.knaw.nl">KNAW Humanities Cluster</a>)<br>
+    </p>
     <address>
     <strong>For questions &amp; comments contact</strong> <td class="contact">{% if config.contact_email | exists %}<a href="mailto:{{ config.contact_email }}">{% endif %}{{ config.contact_name }}{% if config.contact_email | exists %}</a>{% endif %}
     </address>
+    <p>
+    <a href="/info">Web API Specification</a>
     </p>
 </footer>
 </body>

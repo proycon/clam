@@ -3,18 +3,20 @@
 <div class="block">
 
 <div id="systeminfo">
+    <h2><span class="emblem">ℹ</span> Service Information</h2>
     <table>
         <tr><th>Version</th><td>{{ config.version }}</td></tr>
         {% if config.sourcerepo | exists %}
         <tr><th>Source repository</th><td class="sourcerepo">{{ config.sourcerepo }}</td></tr>
         {% endif %}
-        {% if config.documentation_url | exists %}
-        <tr><th>Documentation</th><td class="documentation"><a href="{{ config.documentation_url }}">{{ config.documentation_url }}</a></td></tr>
-        {% endif %}
         <tr><th>Author(s)</th><td class="authors"><ol>{% for author in config.authors %}<li>{{ author }}{% endfor %}</ol></td></tr>
         {% if config.affiliation | exists %}
         <tr><th>Affiliation</th><td class="affiliation">{{ config.affiliation }}</td></tr>
         {% endif %}
+        {% if config.documentation_url | exists %}
+        <tr><th>Documentation</th><td class="documentation"><a href="{{ config.documentation_url }}">{{ config.documentation_url }}</a></td></tr>
+        {% endif %}
+        <tr><th>Web API Documentation</th><td class="documentation"><a href="/info">OpenAPI Specification</a></td></tr>
         {% if config.contact_name | exists %}
         <tr><th>Contact</th><td class="contact">{% if config.contact_email | exists %}<a href="mailto:{{ config.contact_email }}">{% endif %}{{ config.contact_name }}{% if config.contact_email | exists %}</a>{% endif %}</td></tr>
         {% endif %}
@@ -32,11 +34,21 @@
 
 {% if config.termsofservice | exists %}
 <div class="block">
-<details class="termsofservice">
+<details class="termsofservice" title="Click to expand the terms of service">
 <summary>Terms of Service</summary>
 <div>{{ config.termsofservice }}</div>
 </details>
 </div>
 {% endif %}
+
+{% for endpoint in config.endpoints %}
+<div class="block">
+    <div class="porch">
+        <a href="{{ endpoint.path }}" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+    </div>
+    <h2>{{ endpoint.name }}</h2>
+    <p>{{ endpoint.description }}</p>
+</div>
+{% endfor %}
 
 {% include "footer" %}

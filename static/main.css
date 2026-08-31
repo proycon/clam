@@ -1,6 +1,9 @@
 :root {
     --background-color: white;
-    --dark-accent: #343a40;
+    --dark-accent-bg: #343a40;
+    --dark-accent-fg: white;
+    --accent-bg: #0069d9;
+    --accent-fg: white;
 }
 
 body {
@@ -23,7 +26,42 @@ body {
     z-index: -100;
 }
 
+#systeminfo {
+    float: right;
+    width: 350px;
+    z-index: 50;
+    word-wrap: break-word;
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+#systeminfo th {
+    text-align: left;
+    vertical-align: top;
+    width: 25%;
+}
+#systeminfo td {
+    text-align: left;
+    vertical-align: top;
+    width: 75%;
+}
+#systeminfo .emblem {
+    float: right;
+}
+#systeminfo ol {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+details summary {
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .block {
+    clear: both;
+    padding: 10px;
     margin-left: auto;
     margin-right: auto;
     width: 100%;
@@ -33,7 +71,33 @@ body {
     border-radius: 0.25rem;
     border: 1px solid var(--background-color);
     margin-bottom: 2px;
+    overflow: hidden;
 }
+
+.porch {
+    float: right;
+    width: 350px;
+    z-index: 50;
+    word-wrap: break-word;
+    padding: 10px;
+}
+.porch a {
+    display: block;
+    width: 90%;
+    text-align: center;
+    font-weight: 400;
+    background: var(--accent-bg);
+    color: var(--accent-fg);
+    border-radius: 0.35rem;
+    appearance: button;
+    padding: 10px;
+    text-decoration: none;
+}
+.porch a:hover {
+    opacity: 90%;
+    box-shadow: 3px 3px 3px var(--dark-accent-bg);
+}
+
 
 header {
     margin-left: auto;
@@ -41,22 +105,19 @@ header {
     width: 100%;
     max-width: 1200px;
     margin-bottom: 2px;
-    background-color: var(--dark-accent);
+    background-color: var(--dark-accent-bg);
     word-wrap: break-word;
     border-radius: 0.25rem;
-    border: 1px solid var(--dark-accent);
+    border: 1px solid var(--dark-accent-bg);
     margin-bottom: 2px;
+    padding: 10px;
 }
 
 header h1 {
     display: inline-block;
-    color: white;
-    padding-bottom: 0.3rem;
-    padding-top: 0.3rem;
+    color: var(--dark-accent-fg);
     font-size: 1.25rem;
     white-space: nowrap;
-    margin-left: 1rem;
-    margin-right: 1rem;
 }
 
 footer {
