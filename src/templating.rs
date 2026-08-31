@@ -1,4 +1,7 @@
+use crate::ClamResponse;
 use crate::config::{EndPointMode, ServiceConfig};
+use crate::error::ApiError;
+use crate::state::ServiceState;
 use upon::Engine;
 
 // All templates are compiled in at build time
@@ -15,6 +18,10 @@ const TEMPLATE_LANDING: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/templates/landingpage.html"
 ));
+const TEMPLATE_PROJECTINDEX: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/templates/projectindex.html"
+));
 
 pub(crate) fn init_templating() -> Engine<'static> {
     let mut engine = Engine::new();
@@ -27,6 +34,9 @@ pub(crate) fn init_templating() -> Engine<'static> {
     engine
         .add_template("landingpage", TEMPLATE_LANDING)
         .expect("Failed to compile landing page template");
+    engine
+        .add_template("projectindex", TEMPLATE_PROJECTINDEX)
+        .expect("Failed to compile project index template");
     engine.add_function("exists", |s: &str| !s.is_empty());
     engine.add_function("join", |list: &upon::Value, delimiter: &str| match list {
         upon::Value::List(list) => {
@@ -73,12 +83,55 @@ impl From<&ServiceConfig> for upon::Value {
                     Some(upon::value! {
                         name: endpoint.name(),
                         path: endpoint.path(),
+                        is_project: endpoint.mode() == &EndPointMode::Project,
                         description: endpoint.description(),
                     })
                 } else {
                     None
                 }
             }).collect::<Vec<upon::Value>>()
+        }
+    }
+}
+
+impl ServiceState {
+    pub fn render_template(
+        &self,
+        template_name: &str,
+        content_type: impl Into<String>,
+        context: Option<upon::Value>,
+    ) -> Result<ClamResponse, ApiError> {
+        if let Some(engine) = &self.templating {
+            let result = if let Some(custom_context) = context {
+                let context = self.template_context.clone().unwrap(); //MAYBE TODO: see if we can do this without copies
+                if let (upon::Value::Map(mut map), upon::Value::Map(custom_map)) =
+                    (context, custom_context)
+                {
+                    map.extend(custom_map);
+                    engine
+                        .template(template_name)
+                        .render(upon::Value::Map(map))
+                        .to_string()?
+                } else {
+                    return Err(ApiError::InternalError("Context must be a map!".into()));
+                }
+            } else {
+                //no custom context? take cheaper path
+                engine
+                    .template(template_name)
+                    .render(
+                        self.template_context
+                            .as_ref()
+                            .expect("template context must be defined"),
+                    )
+                    .to_string()?
+            };
+            Ok(ClamResponse::Body {
+                stream: result.into(),
+                contenttype: content_type.into(),
+            })
+        } else {
+            unreachable!("UI is enabled so engine must exist");
         }
     }
 }

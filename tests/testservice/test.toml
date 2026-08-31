@@ -7,9 +7,6 @@ termsofservice = "Use and adapt this example as you please"
 rootdir = "./data"
 version = "0.1"
 
-[auth]
-postauth_url = "/index"
-
 [license]
 name = "GNU Affero General Public License"
 id = "AGPL-3.0-only"

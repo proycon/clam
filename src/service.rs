@@ -276,23 +276,7 @@ async fn get_landingpage(
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => get_api(state).await,
         Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
-            if let Some(engine) = &state.templating {
-                let result = engine
-                    .template("landingpage")
-                    .render(
-                        state
-                            .template_context
-                            .as_ref()
-                            .expect("template context must be defined"),
-                    )
-                    .to_string()?;
-                Ok(ClamResponse::Body {
-                    stream: result.into(),
-                    contenttype: "text/html; charset=utf-8".into(),
-                })
-            } else {
-                unreachable!("UI is enabled");
-            }
+            state.render_template("landingpage", "text/html; charset=utf-8", None)
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
@@ -308,19 +292,31 @@ async fn get_projects(
     request: Request<Body>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => {
-            //return project list (for actions the OpenAPI endpoint already suffices)
-            match project_index(user.as_str(), endpoint, state.config()) {
-                Ok(projects) => Ok(ClamResponse::JsonList(
-                    projects.into_iter().map(|project| project.into()).collect(),
-                )),
-                Err(e) => Err(ApiError::InternalError(format!(
-                    "Unable to obtain project list: {}",
-                    e
-                ))),
-            }
-        }
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
+        Ok(CONTENT_TYPE_JSON) => match project_index(user.as_str(), endpoint, state.config()) {
+            Ok(projects) => Ok(ClamResponse::JsonList(
+                projects.into_iter().map(|project| project.into()).collect(),
+            )),
+            Err(e) => Err(ApiError::InternalError(format!(
+                "Unable to obtain project list: {}",
+                e
+            ))),
+        },
+        Ok(CONTENT_TYPE_HTML) => match project_index(user.as_str(), endpoint, state.config()) {
+            Ok(projects) => state.render_template(
+                "projectindex",
+                "text/html; charset=utf-8",
+                Some(upon::value! {
+                    name: endpoint.name().clone().unwrap_or_default(),
+                    description: endpoint.description().clone().unwrap_or_default(),
+                    projects: projects.into_iter().map(|project| project.into()).collect::<Vec<String>>(),
+                }),
+            ),
+            Err(e) => Err(ApiError::InternalError(format!(
+                "Unable to obtain project list: {}",
+                e
+            ))),
+        },
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
         )),

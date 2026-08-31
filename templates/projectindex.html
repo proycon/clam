@@ -1,0 +1,39 @@
+{% include "header" %}
+
+<div class="block">
+
+<h2>{{ name }}</h2>
+
+<section class="description">
+{{ description }}
+</section>
+
+</div>
+
+{% if config.termsofservice | exists %}
+<div class="block">
+<details class="termsofservice" title="Click to expand the terms of service">
+<summary>Terms of Service</summary>
+<div>{{ config.termsofservice }}</div>
+</details>
+</div>
+{% endif %}
+
+<div class="block">
+<h2>New project?</h2>
+<form>
+    <input type="text" name="project">
+    <input type="button" value="Create project">
+</form>
+</div>
+
+<div class="block">
+<h2>Existing Projects</h2>
+<ul>
+{% for project in projects %}
+    <li>{{ project }}</li>
+{% endfor %}
+</ul>
+</div>
+
+{% include "footer" %}

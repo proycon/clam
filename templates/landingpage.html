@@ -44,7 +44,11 @@
 {% for endpoint in config.endpoints %}
 <div class="block">
     <div class="porch">
-        <a href="{{ endpoint.path }}" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+        {% if endpoint.is_project %}
+            <a href="{{ endpoint.path }}projects" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+        {% else %}
+            <a href="{{ endpoint.path }}" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+        {% endif %}
     </div>
     <h2>{{ endpoint.name }}</h2>
     <p>{{ endpoint.description }}</p>
