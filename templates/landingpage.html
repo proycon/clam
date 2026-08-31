@@ -1,5 +1,7 @@
 {% include "header" %}
 
+<div class="block">
+
 <div id="systeminfo">
     <table>
         <tr><th>Version</th><td>{{ config.version }}</td></tr>
@@ -10,11 +12,15 @@
         <tr><th>Documentation</th><td class="documentation"><a href="{{ config.documentation_url }}">{{ config.documentation_url }}</a></td></tr>
         {% endif %}
         <tr><th>Author(s)</th><td class="authors"><ol>{% for author in config.authors %}<li>{{ author }}{% endfor %}</ol></td></tr>
+        {% if config.affiliation | exists %}
+        <tr><th>Affiliation</th><td class="affiliation">{{ config.affiliation }}</td></tr>
+        {% endif %}
         {% if config.contact_name | exists %}
         <tr><th>Contact</th><td class="contact">{% if config.contact_email | exists %}<a href="mailto:{{ config.contact_email }}">{% endif %}{{ config.contact_name }}{% if config.contact_email | exists %}</a>{% endif %}</td></tr>
         {% endif %}
     </table>
 </div>
+
 
 {% if config.description | exists %}
 <section class="description">
@@ -22,11 +28,15 @@
 </section>
 {% endif %}
 
+</div>
+
 {% if config.termsofservice | exists %}
+<div class="block">
 <details class="termsofservice">
 <summary>Terms of Service</summary>
 <div>{{ config.termsofservice }}</div>
 </details>
+</div>
 {% endif %}
 
 {% include "footer" %}

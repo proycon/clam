@@ -32,6 +32,9 @@ pub struct ServiceConfig {
     #[serde(default)]
     authors: Vec<String>,
 
+    /// Affiliation/producer/provider for the webservice
+    affiliation: Option<String>,
+
     email: Option<String>,
 
     /// base URL where this webservice is served

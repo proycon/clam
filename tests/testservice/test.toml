@@ -1,6 +1,8 @@
 name = "test"
 summary = "Test suite"
 description = "Test suite for CLAM, this webservice doesn't do anything actually useful. It just provides a testing bed for various CLAM features."
+authors = [ "Maarten van Gompel" ]
+affiliation = "CLST, Radboud University"
 rootdir = "./data"
 version = "0.1"
 

@@ -28,6 +28,25 @@ pub(crate) fn init_templating() -> Engine<'static> {
         .add_template("landingpage", TEMPLATE_LANDING)
         .expect("Failed to compile landing page template");
     engine.add_function("exists", |s: &str| !s.is_empty());
+    engine.add_function("join", |list: &upon::Value, delimiter: &str| match list {
+        upon::Value::List(list) => {
+            //too much cloning but it'll do for now
+            let newlist: Vec<String> = list
+                .iter()
+                .map(|v| match v {
+                    upon::Value::String(s) => s.clone(),
+                    upon::Value::Integer(d) => format!("{}", d),
+                    upon::Value::Float(d) => format!("{}", d),
+                    upon::Value::Bool(d) => format!("{}", d),
+                    _ => String::new(),
+                })
+                .collect();
+            upon::Value::String(newlist.join(delimiter))
+        }
+        _ => {
+            list.clone() //was not really a list after all, just pass it on so we don't need to panic
+        }
+    });
     engine
 }
 
@@ -36,8 +55,10 @@ impl From<&ServiceConfig> for upon::Value {
         upon::value! {
             name: config.name().clone(),
             version: config.version().clone(),
+            clam_version: env!("CARGO_PKG_VERSION"),
             description: config.description().clone().unwrap_or_default(),
             authors: config.authors().clone(),
+            affiliation: config.affiliation().clone().unwrap_or_default(),
             documentation_url: config.documentation_url().clone().unwrap_or_default(),
             sourcerepo: config.documentation_url().clone().unwrap_or_default(),
             termsofservice: config.termsofservice().clone().unwrap_or_default(),

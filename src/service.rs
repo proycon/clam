@@ -32,6 +32,10 @@ const CONTENT_TYPE_JSON: &str = "application/json";
 const CONTENT_TYPE_HTML: &str = "text/html";
 const CONTENT_TYPE_PLAINTEXT: &str = "text/plain; charset=UTF-8";
 
+// static resources will be baked into the binary at compile time:
+const CSS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/main.css"));
+const BACKPNG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/back.png"));
+
 pub struct Service {
     config: ServiceConfig,
 }
@@ -124,6 +128,8 @@ impl Service {
 
         let mut private_routes = Router::new();
         let mut public_routes = Router::new()
+            .route("/main.css", get(get_css))
+            .route("/back.png", get(get_backpng))
             .route("/login", get(login_handler))
             .route("/oidc/callback", get(callback_handler));
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
@@ -248,6 +254,20 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
             e
         ))),
     }
+}
+
+async fn get_css() -> Result<ClamResponse, ApiError> {
+    Ok(ClamResponse::Body {
+        stream: CSS.into(),
+        contenttype: "text/css".into(),
+    })
+}
+
+async fn get_backpng() -> Result<ClamResponse, ApiError> {
+    Ok(ClamResponse::Body {
+        stream: BACKPNG.into(),
+        contenttype: "image/png".into(),
+    })
 }
 
 async fn get_landingpage(

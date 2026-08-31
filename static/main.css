@@ -1,7 +1,67 @@
+:root {
+    --background-color: white;
+    --dark-accent: #343a40;
+}
+
 body {
     font-family: sans-serif;
     margin: 0px;
+    background: url(back.png);
+    font-size: 12px;
 }
 
+#gradient {
+    background: rgba(0, 0, 0, 0) linear-gradient(rgba(30, 30, 30, 0.7), rgba(0, 0, 0, 0.1)) repeat scroll 0 0;
+    display: block;
+    height: 100%;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: -100;
+}
 
+.block {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 1200px;
+    background-color: var(--background-color);
+    word-wrap: break-word;
+    border-radius: 0.25rem;
+    border: 1px solid var(--background-color);
+    margin-bottom: 2px;
+}
+
+header {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 2px;
+    background-color: var(--dark-accent);
+    word-wrap: break-word;
+    border-radius: 0.25rem;
+    border: 1px solid var(--dark-accent);
+    margin-bottom: 2px;
+}
+
+header h1 {
+    display: inline-block;
+    color: white;
+    padding-bottom: 0.3rem;
+    padding-top: 0.3rem;
+    font-size: 1.25rem;
+    white-space: nowrap;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+
+footer {
+    font-family: monospace;
+    font-size: 80%;
+    text-align: center;
+}
 
