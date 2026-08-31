@@ -7,6 +7,8 @@ use utoipa::openapi::{
     path::ParameterBuilder, path::ParameterIn, request_body::RequestBodyBuilder, schema::Type,
 };
 
+//TODO: add projects/ endpoint
+
 impl From<&ServiceConfig> for OpenApi {
     fn from(config: &ServiceConfig) -> Self {
         let error_schema = ApiError::schema();
@@ -500,24 +502,6 @@ impl EndPoint {
                         upload_inputfile_operation,
                     );
                 }
-            }
-            &EndPointMode::Index => {
-                let mut operation = Operation::new();
-                operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Index page, provides a list of endpoints and underlying projects to human end-users. Authentication may be required.".to_string()),
-                );
-                operation.description = self.description().clone();
-                operation.responses = ResponsesBuilder::new()
-                    .response(
-                        "200",
-                        ResponseBuilder::new()
-                            .content("text/html", ContentBuilder::new().into())
-                            .description("List of endpoints (with underlying projects if applicable). Provides an interface to start new projects or delete existing ones (if applicable)."),
-                    )
-                    .into();
-                paths.add_path_operation(self.path(), vec![HttpMethod::Get], operation);
             }
         }
     }

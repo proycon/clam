@@ -164,7 +164,6 @@ impl Service {
     ) -> Router<Arc<ServiceState>> {
         match endpoint.mode() {
             EndPointMode::LandingPage => router.route(endpoint.path(), get(get_landingpage)),
-            EndPointMode::Index => router.route(endpoint.path(), get(get_index)),
             EndPointMode::Project => {
                 let sep = if endpoint.path() == "/" { "" } else { "/" };
                 let index_path = format!("{}{}projects", endpoint.path(), sep);
@@ -301,25 +300,7 @@ async fn get_landingpage(
     }
 }
 
-/// Index of endpoints (actions & project endpoint with project list). The user will be directed here after login.
-async fn get_index(
-    state: State<Arc<ServiceState>>,
-    request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
-        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
-        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
-            todo!(
-                "present human-readable list of actions and project endpoints, as well as the actual projects there (calls project_index() for each)"
-            );
-        }
-        _ => Err(ApiError::NotAcceptable(
-            "Accept header could not be satisfied (try application/json)",
-        )),
-    }
-}
-
-/// Presents a list of projects for a given user and endpoint (Web API only, humans only use get_index)
+/// Presents a list of projects for a given user and endpoint
 async fn get_projects(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,

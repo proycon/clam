@@ -206,9 +206,6 @@ pub enum EndPointMode {
     /// to the authenticated sections
     /// It is typically served at path `/` and used as a landing page.
     LandingPage,
-
-    /// Provides a list of project or action endpoints. This is what people will see after logging in (if such an endpoint is defined)
-    Index,
 }
 
 #[derive(Deserialize, Serialize, Clone)]

@@ -31,12 +31,6 @@ name = "porch"
 path = "/"
 mode = "LandingPage"
 
-#Index of endpoints and projects
-[[endpoints]]
-name = "index"
-path = "/index"
-mode = "Index"
-
 #---------------------------------------------------------------------------------
 
 [[endpoints]]
