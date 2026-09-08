@@ -1,12 +1,14 @@
+use crate::BackgroundServiceState;
 use crate::config::ServiceConfig;
-use crate::job::{Job, JobId};
+use crate::job::{Job, JobId, JobMaster};
+use crate::project::ProjectKey;
 use crate::state::ServiceState;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::oneshot;
-use tokio::time::{Duration, sleep};
-use tracing::debug;
+use tracing::{debug, error};
 
 /// The dispatcher is CLAM's job manager
 /// It spawns jobs, in parallel, and monitors their execution
@@ -49,6 +51,9 @@ pub enum Message {
     /// Status message (matching a specific stderr pattern)
     StatusLog(JobId, String),
 
+    /// This message indicates that a background service is done loading and ready to be used
+    Up(JobId),
+
     /// Poll job status
     PollJob(JobId, oneshot::Sender<ResponseMessage>),
 
@@ -68,7 +73,7 @@ pub enum ResponseMessage {
         /// stderr
         error: String,
     },
-    // Job is running, encapsulated the job so status can be extracted
+    // Job is running, encapsulating the job so status can be extracted
     JobRunning(Job),
     // Job is pending execution
     JobPending,
@@ -90,6 +95,71 @@ impl Dispatcher {
         self.state.clone()
     }
 
+    pub fn associate_project_with_job(
+        &self,
+        projectkey: ProjectKey,
+        job: &Job,
+    ) -> Result<(), &'static str> {
+        // this job is for a project, add it the project map
+        if let Ok(mut project_job_map) = self.state.project_job_map.write() {
+            // check if a job is already associated, don't allow running two jobs for the same project and user combination
+            if let Some(job_id) = project_job_map.get(&projectkey) {
+                let mut already_exists = false;
+                if let Ok(jobs) = self.state.running_jobs.read() {
+                    if jobs.contains_key(&job_id) {
+                        already_exists = true;
+                    }
+                }
+                if let Ok(jobs) = self.state.pending_jobs.read() {
+                    if jobs.iter().any(|j| j.id() == job_id) {
+                        already_exists = true;
+                    }
+                }
+                if already_exists {
+                    return Err(
+                        "A job is already running for this project, refusing to start another one!",
+                    );
+                }
+            }
+            project_job_map.insert(projectkey, *job.id());
+            Ok(())
+        } else {
+            panic!("project map poisoned");
+        }
+    }
+
+    pub fn associate_background_service_with_job(
+        &self,
+        index: usize,
+        job: &Job,
+    ) -> Result<(), String> {
+        if let Ok(mut bgservicestate_map) = self.state.bgservicestate_map.write() {
+            match bgservicestate_map.get(index) {
+                Some(BackgroundServiceState::Down)
+                | Some(BackgroundServiceState::Failed { .. }) => {
+                    bgservicestate_map[index] = BackgroundServiceState::Loading {
+                        start_time: SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs() as usize,
+                        job: *job.id(),
+                    }
+                }
+                Some(BackgroundServiceState::Up { .. })
+                | Some(BackgroundServiceState::Loading { .. }) => {
+                    return Err(format!(
+                        "Background service #{} already up or loading, refusing to start twice!",
+                        index + 1
+                    ));
+                }
+                None => unreachable!("No such background service"),
+            }
+            Ok(())
+        } else {
+            panic!("bgservice map poisoned");
+        }
+    }
+
     /// Non-blocking function that spawns a new thread for the dispatcher
     pub fn spawn(self) {
         tokio::task::spawn_blocking(move || {
@@ -97,13 +167,23 @@ impl Dispatcher {
                 // there should be no long-running blocking tasks in this loop!
                 match self.receiver.recv() {
                     Ok(Message::SubmitJob(job, responsechannel)) => {
-                        // add job to project map
                         if let Some(projectkey) = job.projectkey() {
-                            //MAYBE TODO: check if a job is already associated, don't allow running two jobs
-                            if let Ok(mut project_job_map) = self.state.project_job_map.write() {
-                                project_job_map.insert(projectkey, *job.id());
+                            // this job is for a project, register the association
+                            if let Err(e) = self.associate_project_with_job(projectkey, &job) {
+                                let _ = responsechannel.send(ResponseMessage::JobError(e.into()));
+                                continue;
+                            }
+                        } else if let JobMaster::BackgroundService(index) = job.master() {
+                            // this job is for a background service, register the association
+                            if let Err(e) = self.associate_background_service_with_job(*index, &job)
+                            {
+                                let _ = responsechannel.send(ResponseMessage::JobError(e));
+                                continue;
                             }
                         }
+
+                        //Note: it it not the task of the dispatcher at this point to schedule background services, that is the task of the caller that sent SubmitJob
+
                         // add job to pending jobs
                         if let Ok(mut jobs) = self.state.pending_jobs.write() {
                             debug!("job {} submitted", job.id());
@@ -132,6 +212,27 @@ impl Dispatcher {
                         if let Ok(mut jobs) = self.state.running_jobs.write() {
                             if let Some(job) = jobs.get_mut(&id) {
                                 job.set_pid(pid);
+
+                                //this is a background service, update itds state
+                                if let JobMaster::BackgroundService(index) = job.master() {
+                                    let bgservice = self.state.background_service(*index);
+                                    if bgservice.up_pattern().is_none() {
+                                        //background service does not define an output cue we can use to determine it's ready, so we consider it ready now it's been started
+                                        if let Ok(mut bgservicestate_map) =
+                                            self.state.bgservicestate_map.write()
+                                        {
+                                            bgservicestate_map[*index] =
+                                                BackgroundServiceState::Up {
+                                                    last_used_time: SystemTime::now()
+                                                        .duration_since(UNIX_EPOCH)
+                                                        .unwrap()
+                                                        .as_secs()
+                                                        as usize,
+                                                    job: *job.id(),
+                                                }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -238,6 +339,30 @@ impl Dispatcher {
                         }
                         //MAYBE TODO: also check done_jobs in case of race conditions?
                     }
+                    Ok(Message::Up(job_id)) => {
+                        //job is a background service that has finished loading and now up and ready to receive connections
+                        //we adapt the background service state in the map
+                        if let Ok(mut running_jobs) = self.state.running_jobs.write() {
+                            running_jobs.entry(job_id).and_modify(|job| {
+                                job.mark_ready(); //this ensures we only receive this signal once
+                                if let JobMaster::BackgroundService(index) = job.master() {
+                                    //mark the entire background service as up
+                                    if let Ok(mut bgservicestate_map) =
+                                        self.state.bgservicestate_map.write()
+                                    {
+                                        bgservicestate_map[*index] = BackgroundServiceState::Up {
+                                            last_used_time: SystemTime::now()
+                                                .duration_since(UNIX_EPOCH)
+                                                .unwrap()
+                                                .as_secs()
+                                                as usize,
+                                            job: *job.id(),
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
                     Err(e) => {
                         eprintln!("Corresponding sender died: {:?}", e);
                         break;
@@ -256,7 +381,9 @@ impl Dispatcher {
     }
 
     // start all pendings jobs (if any, and up until a maximum of running jobs)
+    // there should be no long-running blocking tasks in this loop!
     pub fn start_jobs(&self) {
+        let mut postpone_jobs = Vec::new(); //holds jobs that will be postponed until next call (e.g. because they are waiting for background services)
         loop {
             let running_job_count = if let Ok(running_jobs) = self.state.running_jobs.read() {
                 running_jobs.len()
@@ -283,11 +410,15 @@ impl Dispatcher {
                         self.state.sender.read(),
                     ) {
                         if let Some(job) = pending_jobs.pop_front() {
-                            //run the job in a monitoring thread
-                            debug!("start_jobs: starting job {:?}", job);
-                            job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
-                            // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
-                            running_jobs.insert(*job.id(), job);
+                            if self.background_services_up(&job) {
+                                //run the job in a monitoring thread
+                                debug!("start_jobs: starting job {:?}", job);
+                                job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
+                                // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
+                                running_jobs.insert(*job.id(), job);
+                            } else {
+                                postpone_jobs.push(job);
+                            }
                         }
                     }
                 } else {
@@ -298,6 +429,61 @@ impl Dispatcher {
                 //maximum reached... TODO: start_jobs will have to be retriggered periodically to give the queue a chance to clear!!
                 break;
             }
+        }
+
+        //add postponed jobs back to the front of the queue
+        if !postpone_jobs.is_empty() {
+            if let Ok(mut pending_jobs) = self.state.pending_jobs.write() {
+                postpone_jobs.reverse();
+                for job in postpone_jobs {
+                    pending_jobs.push_front(job);
+                }
+            }
+        }
+    }
+
+    /// Checks whether all background service dependencies are up, and if so, updates their last used timestamp.
+    /// If there are no background services, this always returns true immediately.
+    pub fn background_services_up(&self, job: &Job) -> bool {
+        if job.background_services().is_empty() {
+            //bail out early and cheaply if we don't rely on any background services
+            return true;
+        }
+        if let Ok(mut bgservicestate_map) = self.state.bgservicestate_map.write() {
+            for bgservice_index in job.background_services().iter() {
+                if let Some(BackgroundServiceState::Up { last_used_time, .. }) =
+                    bgservicestate_map.get_mut(*bgservice_index)
+                {
+                    *last_used_time = SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs() as usize;
+                } else {
+                    return false;
+                }
+            }
+        } else {
+            panic!("bgservicestate_map lock poisoned");
+        }
+        true
+    }
+
+    /// Checks whether a background service is up, and if so, updates its last used timestamp
+    pub fn background_service_up(&self, bgservice_index: usize) -> bool {
+        if let Ok(mut bgservicestate_map) = self.state.bgservicestate_map.write() {
+            if let Some(BackgroundServiceState::Up { last_used_time, .. }) =
+                bgservicestate_map.get_mut(bgservice_index)
+            {
+                *last_used_time = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs() as usize;
+                true
+            } else {
+                false
+            }
+        } else {
+            panic!("bgservicestate_map lock poisoned");
         }
     }
 }

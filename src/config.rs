@@ -115,11 +115,11 @@ pub struct ServiceConfig {
 
 #[derive(Deserialize, Serialize, Clone, Getters)]
 pub struct DispatcherConfig {
-    /// Maximum number of running jobs at the same time
+    /// Maximum number of running jobs at the same time. Note that this also includes background service jobs.
     #[serde(default = "default_max_running_jobs")]
     max_running_jobs: usize,
 
-    /// Maximum number of jobs waiting in the queue, if full, HTTP 503 will be returned
+    /// Maximum number of jobs waiting in the queue, if full, HTTP 503 will be returned. note that this also includes background service jobs.
     #[serde(default = "default_max_total_jobs")]
     max_total_jobs: usize,
 
@@ -314,14 +314,14 @@ pub struct BackgroundService {
     )]
     status_pattern: Option<Regex>,
 
-    /// Regular expression to select which stderr line determines whether the service is fully loaded and ready to serve requests
+    /// Regular expression to select which stderr line determines whether the service is fully up and ready to serve requests
     /// If not set, a service is considered ready immediately
     #[serde(
         deserialize_with = "deserialize_opt_regex",
         serialize_with = "serialize_opt_regex",
         default
     )]
-    loaded_pattern: Option<Regex>,
+    up_pattern: Option<Regex>,
 
     /// Unload time in seconds: after this many seconds of idle time the background service will be stopped again
     /// An unload of **all** background services can also be forced via signal USR1

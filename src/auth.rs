@@ -54,7 +54,7 @@ pub struct TokenResponse {
     expires_in: i64,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Default)]
 pub struct CurrentUser(Option<String>);
 
 impl CurrentUser {

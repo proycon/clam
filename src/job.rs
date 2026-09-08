@@ -35,6 +35,9 @@ pub struct Job {
     /// The particular project this job is associated with (if any, actions have no projects)
     project: Option<String>,
 
+    /// The particular background services this job requires to be up (by index)
+    background_services: Vec<usize>,
+
     /// PID of underlying process
     pid: Option<u32>,
 
@@ -55,6 +58,10 @@ pub struct Job {
 
     status_pattern: Option<Regex>,
 
+    /// a regex on stderr that determines when a background service is up and ready to receive requests
+    /// If not set, it is assumed to be up immediately after starting
+    up_pattern: Option<Regex>,
+
     /// Progress indicator (picks up percentages in lines extracted by `status_pattern`)
     progress: Option<u8>,
 
@@ -74,11 +81,22 @@ impl Job {
         state: &ServiceState,
         master: JobMaster,
         project: Option<&Project<'a>>,
+        background_services: &Vec<String>,
         user: &CurrentUser,
         request_params: HashMap<String, String>,
     ) -> Self {
         let mut error = None;
         let current_dir = std::env::current_dir().expect("Unable to get current working directory");
+        let background_services: Vec<usize> = background_services
+            .iter()
+            .filter_map(|id| {
+                let index = state.background_service_index_by_id(id);
+                if index.is_none() {
+                    error!("Background service {} is not defined!!", id);
+                }
+                index
+            })
+            .collect();
         match master {
             JobMaster::EndPoint(endpoint_index) => {
                 let working_dir = {
@@ -102,8 +120,10 @@ impl Job {
                     project: project.map(|x| x.name().to_string()),
                     user: user.as_str().to_string(),
                     command: endpoint.command().as_ref().unwrap().clone(),
+                    background_services,
                     progress: None,
                     status_pattern: endpoint.status_pattern().clone(),
+                    up_pattern: None,
                     pid: None,
                     output: None,
                     working_dir,
@@ -122,8 +142,10 @@ impl Job {
                     project: project.map(|x| x.name().to_string()),
                     user: user.as_str().to_string(),
                     command: bgservice.command().as_ref().unwrap().clone(),
+                    background_services,
                     progress: None,
                     status_pattern: bgservice.status_pattern().clone(),
+                    up_pattern: bgservice.up_pattern().clone(),
                     pid: None,
                     output: None,
                     working_dir: None,
@@ -523,8 +545,11 @@ impl Job {
                         let job_id = self.id;
                         let dispatcherchannel2 = dispatcherchannel.clone();
 
-                        let error = if let Some(status_pattern) = self.status_pattern {
-                            // we spawn another thread to monitor stderr for the status pattern and send updates when this matches
+                        let status_pattern = self.status_pattern;
+                        let ready_pattern = self.up_pattern;
+
+                        let error = if status_pattern.is_some() || ready_pattern.is_some() {
+                            // we spawn another thread to monitor stderr for the status pattern or ready pattern and send updates when this matches
                             // we also collect all of stderr
                             let stderr_thread = std::thread::spawn(move || {
                                 let mut full_stderr = String::new();
@@ -535,9 +560,19 @@ impl Job {
                                             full_stderr.push_str(&line);
                                             full_stderr.push('\n');
 
-                                            if status_pattern.is_match(line.as_str()) {
-                                                let _ = dispatcherchannel2
-                                                    .send(Message::StatusLog(job_id, line));
+                                            if let Some(ready_pattern) = ready_pattern.as_ref() {
+                                                //job is for a background service and is done loading, ready to receive requests
+                                                if ready_pattern.is_match(line.as_str()) {
+                                                    let _ = dispatcherchannel2
+                                                        .send(Message::Up(job_id));
+                                                }
+                                            } else if let Some(status_pattern) =
+                                                status_pattern.as_ref()
+                                            {
+                                                if status_pattern.is_match(line.as_str()) {
+                                                    let _ = dispatcherchannel2
+                                                        .send(Message::StatusLog(job_id, line));
+                                                }
                                             }
                                         }
                                         Err(e) => {
@@ -617,6 +652,11 @@ impl Job {
 
     pub fn set_pid(&mut self, pid: u32) {
         self.pid = Some(pid);
+    }
+
+    pub fn mark_ready(&mut self) {
+        //we don't need to watch for the ready pattern anymore
+        self.up_pattern = None;
     }
 
     pub fn wait(&self) {

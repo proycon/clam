@@ -1,7 +1,8 @@
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig};
-use crate::dispatcher::Message;
-use crate::job::{Job, JobId};
+use crate::dispatcher::{Message, ResponseMessage};
+use crate::error::ApiError;
+use crate::job::{Job, JobId, JobMaster};
 use crate::templating::init_templating;
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
@@ -9,6 +10,7 @@ use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
+use tokio::sync::oneshot;
 use tracing::debug;
 
 use crate::project::{Project, ProjectKey, ProjectStatus};
@@ -65,10 +67,10 @@ pub enum BackgroundServiceState {
 
     /// Loading, with unix timestamp of start time use
     /// In this state, the background service is not ready yet.
-    Loading { start_time: usize },
+    Loading { start_time: usize, job: JobId },
 
     /// Up and ready, with unix timestamp of last use (will initially be set to the load complete time)
-    Up { last_used_time: usize },
+    Up { last_used_time: usize, job: JobId },
 
     /// Service failed
     Failed { errormsg: String },
@@ -197,6 +199,49 @@ impl ServiceState {
             .background_services()
             .get(index)
             .expect("background service must exist")
+    }
+
+    /// Retrieve a background_service by index, will panic if it does not exist!
+    pub fn background_service_index_by_id(&self, id: &str) -> Option<usize> {
+        for (i, bgservice) in self.config.background_services().iter().enumerate() {
+            if bgservice.id() == id {
+                return Some(i);
+            }
+        }
+        None
+    }
+
+    //// Ensure the background service is scheduled or already running
+    pub async fn schedule_background_service(&self, index: usize) -> Result<(), ApiError> {
+        if let Ok(bgservicestate_map) = self.bgservicestate_map.read() {
+            match bgservicestate_map.get(index) {
+                Some(BackgroundServiceState::Up { .. })
+                | Some(BackgroundServiceState::Loading { .. }) => return Ok(()), //we are already loading or up, nothing to do
+                _ => {}
+            }
+        }
+        let job = Job::new(
+            &self,
+            JobMaster::BackgroundService(index),
+            None,
+            &Vec::new(),
+            &Default::default(), //background services do not run under a specific user
+            std::collections::HashMap::new(),
+        );
+        let (tx, rx) = oneshot::channel();
+        self.send(Message::SubmitJob(job, tx));
+        match rx.await {
+            Ok(ResponseMessage::JobSubmitted) => Ok(()),
+            Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
+            Err(e) => Err(ApiError::InternalError(format!(
+                "oneshot sender dropped whilst submitting a background service job: {}",
+                e
+            ))),
+            Ok(m) => Err(ApiError::InternalError(format!(
+                "unexpected response message whilst submitting a background service job: {:?}",
+                m
+            ))),
+        }
     }
 
     /// Returns the project status, or None if it does not exist yet

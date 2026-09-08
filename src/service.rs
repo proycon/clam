@@ -405,11 +405,16 @@ async fn submit_project(
             &state,
             JobMaster::EndPoint(endpoint_index),
             Some(&project),
+            state.endpoint(endpoint_index).background_services(),
             &user,
             query.0,
         );
         if let Some(error) = job.error {
             return Err(ApiError::ParameterError(error));
+        }
+        //ensure necessary background services are scheduled or already running
+        for bgservice in job.background_services().iter() {
+            state.schedule_background_service(*bgservice).await?
         }
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
@@ -707,6 +712,7 @@ async fn run_action(
         &state,
         JobMaster::EndPoint(endpoint_index),
         None,
+        state.endpoint(endpoint_index).background_services(),
         user,
         query,
     );
@@ -715,6 +721,10 @@ async fn run_action(
     }
     let (tx, rx) = oneshot::channel();
     debug!("run_action: submitting job {:?}", job);
+    //ensure necessary background services are scheduled or already running
+    for bgservice in job.background_services().iter() {
+        state.schedule_background_service(*bgservice).await?
+    }
     let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
     //MAYBE TODO: use a gradually increasing poll interval or refactor messaging system to remove this latency altogether
