@@ -17,13 +17,20 @@ use tracing::{debug, error};
 
 pub type JobId = usize;
 
+#[derive(Debug, Clone, Copy)]
+/// Indicated who owns a job (both by index)
+pub enum JobMaster {
+    EndPoint(usize),
+    BackgroundService(usize),
+}
+
 #[derive(Debug, Clone, Getters)]
 pub struct Job {
     /// Job identifier
     id: JobId,
 
     /// The particular endpoint in the service configuration this job is associated with (by index)
-    endpoint_index: usize,
+    master: JobMaster,
 
     /// The particular project this job is associated with (if any, actions have no projects)
     project: Option<String>,
@@ -65,44 +72,68 @@ pub struct Job {
 impl Job {
     pub fn new<'a>(
         state: &ServiceState,
-        endpoint_index: usize,
+        master: JobMaster,
         project: Option<&Project<'a>>,
         user: &CurrentUser,
         request_params: HashMap<String, String>,
     ) -> Self {
-        let endpoint = state.endpoint(endpoint_index);
         let mut error = None;
-        let args = match Self::collect_arguments(endpoint, project, request_params) {
-            Ok(args) => args,
-            Err(e) => {
-                error = Some(e);
-                Vec::new()
-            }
-        };
         let current_dir = std::env::current_dir().expect("Unable to get current working directory");
-        let working_dir = {
-            if let Some(project) = project {
-                Some(project.path())
-            } else {
-                None
+        match master {
+            JobMaster::EndPoint(endpoint_index) => {
+                let working_dir = {
+                    if let Some(project) = project {
+                        Some(project.path())
+                    } else {
+                        None
+                    }
+                };
+                let endpoint = state.endpoint(endpoint_index);
+                let args = match Self::collect_arguments(endpoint, project, request_params) {
+                    Ok(args) => args,
+                    Err(e) => {
+                        error = Some(e);
+                        Vec::new()
+                    }
+                };
+                Self {
+                    id: rand::random_range(1..usize::MAX),
+                    master,
+                    project: project.map(|x| x.name().to_string()),
+                    user: user.as_str().to_string(),
+                    command: endpoint.command().as_ref().unwrap().clone(),
+                    progress: None,
+                    status_pattern: endpoint.status_pattern().clone(),
+                    pid: None,
+                    output: None,
+                    working_dir,
+                    current_dir,
+                    error,
+                    statuslog: String::new(),
+                    exitstatus: None,
+                    args,
+                }
             }
-        };
-        Self {
-            id: rand::random_range(1..usize::MAX),
-            endpoint_index,
-            project: project.map(|x| x.name().to_string()),
-            user: user.as_str().to_string(),
-            command: endpoint.command().as_ref().unwrap().clone(),
-            progress: None,
-            status_pattern: endpoint.status_pattern().clone(),
-            pid: None,
-            output: None,
-            working_dir,
-            current_dir,
-            error,
-            statuslog: String::new(),
-            exitstatus: None,
-            args,
+            JobMaster::BackgroundService(bgservice_index) => {
+                let bgservice = state.background_service(bgservice_index);
+                Self {
+                    id: rand::random_range(1..usize::MAX),
+                    master,
+                    project: project.map(|x| x.name().to_string()),
+                    user: user.as_str().to_string(),
+                    command: bgservice.command().as_ref().unwrap().clone(),
+                    progress: None,
+                    status_pattern: bgservice.status_pattern().clone(),
+                    pid: None,
+                    output: None,
+                    working_dir: None,
+                    current_dir,
+                    error,
+                    statuslog: String::new(),
+                    exitstatus: None,
+                    args: bgservice.args().clone(),
+                }
+            }
         }
     }
 
@@ -421,15 +452,12 @@ impl Job {
 
     /// Returns the project key, an aggregate encoding endpoint, user and project and used by the project_job_map
     pub fn projectkey(&self) -> Option<ProjectKey> {
-        if let Some(project) = self.project() {
-            Some(ProjectKey::new(
-                project,
-                self.user.clone(),
-                self.endpoint_index,
-            ))
-        } else {
-            None
+        if let JobMaster::EndPoint(endpoint_index) = self.master {
+            if let Some(project) = self.project() {
+                return Some(ProjectKey::new(project, self.user.clone(), endpoint_index));
+            }
         }
+        None
     }
 
     pub fn log(&mut self, message: &str) {

@@ -4,7 +4,7 @@ use crate::config::EndPointMode;
 use crate::config::{EndPoint, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
-use crate::job::Job;
+use crate::job::{Job, JobMaster};
 use crate::project::{Project, ProjectStatus, project_index};
 use crate::state::ServiceState;
 use futures_util::StreamExt;
@@ -401,7 +401,13 @@ async fn submit_project(
     query: Query<HashMap<String, String>>,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        let job = Job::new(&state, endpoint_index, Some(&project), &user, query.0);
+        let job = Job::new(
+            &state,
+            JobMaster::EndPoint(endpoint_index),
+            Some(&project),
+            &user,
+            query.0,
+        );
         if let Some(error) = job.error {
             return Err(ApiError::ParameterError(error));
         }
@@ -697,7 +703,13 @@ async fn run_action(
     query: HashMap<String, String>,
     contenttype: String,
 ) -> Result<ClamResponse, ApiError> {
-    let job = Job::new(&state, endpoint_index, None, user, query);
+    let job = Job::new(
+        &state,
+        JobMaster::EndPoint(endpoint_index),
+        None,
+        user,
+        query,
+    );
     if let Some(error) = job.error {
         return Err(ApiError::ParameterError(error));
     }

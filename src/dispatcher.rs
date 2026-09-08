@@ -17,7 +17,7 @@ pub struct Dispatcher {
 }
 
 #[derive(Debug)]
-/// A nessage to the dispatcher (by a service or by the dispatcher to itself)
+/// A message to the dispatcher (by a service or by the dispatcher to itself)
 pub enum Message {
     /// Submit a job to the queue
     SubmitJob(Job, oneshot::Sender<ResponseMessage>),

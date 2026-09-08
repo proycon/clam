@@ -69,6 +69,10 @@ pub struct ServiceConfig {
     /// Endpoint configuration
     endpoints: Vec<EndPoint>,
 
+    /// Background services (daemons)
+    #[serde(default)]
+    background_services: Vec<BackgroundService>,
+
     #[serde(default)]
     auth: AuthConfig,
 
@@ -241,6 +245,10 @@ pub struct EndPoint {
     /// Command to invoke (mediated by dispatcher), just the executable without any arguments (those are in `args`)
     command: Option<String>,
 
+    /// List of background services required for this endpoin, by ID, multiple allowed
+    #[serde(default)]
+    background_services: Vec<String>,
+
     /// Arguments to pass to the command
     #[serde(default)]
     args: Vec<CommandArg>,
@@ -249,6 +257,7 @@ pub struct EndPoint {
     parameters: Vec<Parameter>,
 
     #[serde(default)]
+    /// Maps exit codes to error messages
     errorstates: Vec<ErrorState>,
 
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
@@ -274,6 +283,52 @@ pub struct EndPoint {
 
     // One or more endpoints that come before this endpoint, so the output of that endpoint acts as the input for this one. These are possible dependencies that the user can run before tis one.
     //before: Vec<String>, //implement later
+}
+
+#[derive(Deserialize, Serialize, Default, Getters, Clone)]
+pub struct BackgroundService {
+    /// Identifier for this background service
+    id: String,
+
+    /// Description for the background service
+    description: Option<String>,
+
+    /// Command to invoke to load background services **shared** between all requests on this endpoint. This is just the executable, arguments are in args.
+    /// The process should be designed to stay running, and should respond to SIGTERM appropriately.
+    #[serde(default)]
+    command: Option<String>,
+
+    #[serde(default)]
+    /// Static arguments to pass to the background service
+    args: Vec<String>,
+
+    /// Maps exit codes to error messages
+    #[serde(default)]
+    errorstates: Vec<ErrorState>,
+
+    /// Regular expression to select which stderr lines propagate to the webinterface's status message
+    #[serde(
+        deserialize_with = "deserialize_opt_regex",
+        serialize_with = "serialize_opt_regex",
+        default
+    )]
+    status_pattern: Option<Regex>,
+
+    /// Regular expression to select which stderr line determines whether the service is fully loaded and ready to serve requests
+    /// If not set, a service is considered ready immediately
+    #[serde(
+        deserialize_with = "deserialize_opt_regex",
+        serialize_with = "serialize_opt_regex",
+        default
+    )]
+    loaded_pattern: Option<Regex>,
+
+    /// Unload time in seconds: after this many seconds of idle time the background service will be stopped again
+    /// An unload of **all** background services can also be forced via signal USR1
+    unload_time: Option<usize>,
+
+    /// Automatically start when CLAM starts (rather than on first request)
+    autostart: bool,
 }
 
 fn default_progress_pattern() -> Option<Regex> {

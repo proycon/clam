@@ -1,5 +1,5 @@
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
-use crate::config::{EndPoint, OAuthCredentials, ServiceConfig};
+use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::Message;
 use crate::job::{Job, JobId};
 use crate::templating::init_templating;
@@ -28,6 +28,9 @@ pub struct ServiceState {
     /// Maps projects (pertaining to users and endpoints) to jobs, facilitates quick lookup of project status
     pub(crate) project_job_map: RwLock<HashMap<ProjectKey, JobId>>,
 
+    /// Maps endpoints by index to a boolean indicating whether background services are loaded
+    pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
+
     /// Public non-discoverable shared files (bypasses authentication)
     pub(crate) shares: RwLock<HashMap<String, Share>>,
 
@@ -53,6 +56,28 @@ pub struct ServiceState {
 
     pub(crate) templating: Option<upon::Engine<'static>>,
     pub(crate) template_context: Option<upon::Value>,
+}
+
+#[derive(Clone, Debug)]
+pub enum BackgroundServiceState {
+    /// Service down
+    Down,
+
+    /// Loading, with unix timestamp of start time use
+    /// In this state, the background service is not ready yet.
+    Loading { start_time: usize },
+
+    /// Up and ready, with unix timestamp of last use (will initially be set to the load complete time)
+    Up { last_used_time: usize },
+
+    /// Service failed
+    Failed { errormsg: String },
+}
+
+impl Default for BackgroundServiceState {
+    fn default() -> Self {
+        Self::Down
+    }
 }
 
 /// Parse the user database, a simple TSV file with a username, a tab and a hashed password on each line
@@ -113,6 +138,10 @@ impl ServiceState {
             running_jobs: RwLock::new(Default::default()),
             done_jobs: RwLock::new(Default::default()),
             project_job_map: RwLock::new(Default::default()),
+            bgservicestate_map: RwLock::new(vec![
+                BackgroundServiceState::Down;
+                config.endpoints().iter().count()
+            ]),
             shares: RwLock::new(Default::default()),
             user_db: RwLock::new(if let Some(user_file) = config.auth().user_file() {
                 read_user_db(&config).expect(&format!(
@@ -160,6 +189,14 @@ impl ServiceState {
             .endpoints()
             .get(endpoint_index)
             .expect("endpoint must exist")
+    }
+
+    /// Retrieve a background_service by index, will panic if it does not exist!
+    pub fn background_service(&self, index: usize) -> &BackgroundService {
+        self.config()
+            .background_services()
+            .get(index)
+            .expect("background service must exist")
     }
 
     /// Returns the project status, or None if it does not exist yet
