@@ -21,9 +21,9 @@
 
 <div class="block">
 <h2>New project?</h2>
-<form>
-    <input type="text" name="project">
-    <input type="button" value="Create project">
+<form method="post" action="{{ path }}projects" type="application/x-www-form-urlencoded">
+    <input type="text" name="project" title="This is the name/identifier of the project. It may not contain any spaces or special characters.">
+    <input type="submit" value="Create new project">
 </form>
 </div>
 
@@ -31,7 +31,7 @@
 <h2>Existing Projects</h2>
 <ul>
 {% for project in projects %}
-    <li>{{ project }}</li>
+<li><a href="{{ path }}{{ project }}">{{ project }}</a></li>
 {% endfor %}
 </ul>
 </div>

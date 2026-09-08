@@ -18,11 +18,12 @@ use tracing::{debug, error, info};
 use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Multipart, Path, Query, State};
+use axum::extract::{Form, Multipart, Path, Query, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
+use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -45,8 +46,15 @@ pub enum ClamResponse {
     Created(),
     NoContent(),
     Text(String),
-    Body { stream: Body, contenttype: String },
+    Body {
+        stream: Body,
+        contenttype: String,
+    },
     ProjectResponse(ProjectStatus),
+    /// 302 Temporary Redirect
+    Redirect(String),
+    /// 303 See Other
+    RedirectGet(String),
     JsonList(Vec<Value>),
 }
 
@@ -66,6 +74,30 @@ impl IntoResponse for ClamResponse {
             Self::NoContent() => {
                 (StatusCode::NO_CONTENT, [cors, server], "deleted").into_response()
             }
+            Self::Redirect(url) => (
+                StatusCode::TEMPORARY_REDIRECT,
+                [
+                    cors,
+                    server,
+                    (
+                        header::LOCATION,
+                        HeaderValue::try_from(url.as_str()).unwrap(),
+                    ),
+                ],
+            )
+                .into_response(),
+            Self::RedirectGet(url) => (
+                StatusCode::SEE_OTHER,
+                [
+                    cors,
+                    server,
+                    (
+                        header::LOCATION,
+                        HeaderValue::try_from(url.as_str()).unwrap(),
+                    ),
+                ],
+            )
+                .into_response(),
             Self::Text(s) => (
                 StatusCode::OK,
                 [
@@ -170,6 +202,10 @@ impl Service {
                 router = router.route(
                     index_path.as_str(),
                     get(get_projects).layer(Extension(endpoint_index)),
+                );
+                router = router.route(
+                    index_path.as_str(),
+                    post(post_create_project).layer(Extension(endpoint_index)),
                 );
                 let path = format!("{}{{project}}", endpoint.path());
                 router = router.route(
@@ -309,6 +345,7 @@ async fn get_projects(
                 Some(upon::value! {
                     name: endpoint.name().clone().unwrap_or_default(),
                     description: endpoint.description().clone().unwrap_or_default(),
+                    path: endpoint.path(),
                     projects: projects.into_iter().map(|project| project.into()).collect::<Vec<String>>(),
                 }),
             ),
@@ -398,6 +435,30 @@ async fn create_project(
             Err(e.into())
         } else {
             Ok(ClamResponse::Created())
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
+}
+
+#[derive(Deserialize)]
+struct CreateForm {
+    project: String,
+}
+
+/// Alternative endpoint for project creation using POST request on index
+async fn post_create_project(
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+    form: Form<CreateForm>,
+) -> Result<ClamResponse, ApiError> {
+    if let Ok(project) = Project::new(&form.project, user.as_str(), endpoint_index, state.config())
+    {
+        if let Err(e) = project.create() {
+            Err(e.into())
+        } else {
+            Ok(ClamResponse::RedirectGet(project.url()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))

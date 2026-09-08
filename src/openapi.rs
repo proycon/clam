@@ -3,8 +3,9 @@ use crate::error::ApiError;
 use crate::project::ProjectStatus;
 use utoipa::openapi::{
     Components, ContentBuilder, HttpMethod, Info, ObjectBuilder, OpenApi, OpenApiBuilder, Paths,
-    Required, ResponseBuilder, ResponsesBuilder, Schema, Server, path::Operation, path::Parameter,
-    path::ParameterBuilder, path::ParameterIn, request_body::RequestBodyBuilder, schema::Type,
+    Required, ResponseBuilder, ResponsesBuilder, Schema, Server, content::Content, path::Operation,
+    path::Parameter, path::ParameterBuilder, path::ParameterIn, request_body::RequestBodyBuilder,
+    schema::Type,
 };
 
 //TODO: add projects/ endpoint
@@ -88,10 +89,9 @@ impl EndPoint {
                 operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "This is the public landing page that is accessible without authentication and gives information and metadata about the webservice. It allows users to continue to the authenticated sections (if available). If JSON content is requested, it returns the full OpenAPI specification of the service.".to_string()));
                 operation.responses = ResponsesBuilder::new().response("200",
-                    ResponseBuilder::new().content("text/html", ContentBuilder::new().into()).description("Information and metadata about the webservice, includes a button to proceed to the next (possibly authenticated) stage")
-                ).response("200",
-                    ResponseBuilder::new().content("application/json", ContentBuilder::new().into()).description("OpenAPI specification")
-                ).into();
+                    ResponseBuilder::new().content("text/html", ContentBuilder::new().into()).content("application/json", ContentBuilder::new().into()).description("Information and metadata about the webservice, the HTML versio includes a button to proceed to the next (possibly authenticated) stage. The JSON version presents the OpenAPI specification")
+                ).
+                into();
                 paths.add_path_operation(self.path(), vec![HttpMethod::Get], operation);
             }
             &EndPointMode::Action => {
@@ -199,7 +199,87 @@ impl EndPoint {
                 paths.add_path_operation(self.path(), vec![HttpMethod::Post], post_operation);
             }
             &EndPointMode::Project => {
-                //GET
+                //GET projects -- project index
+                let mut get_index_operation = Operation::new();
+                get_index_operation.summary = Some(
+                    self.summary()
+                        .clone()
+                        .unwrap_or_else(|| "Project index".to_string()),
+                );
+                get_index_operation.description =
+                    Some(self.description().clone().unwrap_or_else(|| {
+                        "This endpoint provides a list of all projects (pertaining to this this project path)".to_string()
+                    }));
+                get_index_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "200",
+                        ResponseBuilder::new()
+                            .content(
+                                "application/json",
+                                ContentBuilder::new()
+                                    .into(),
+                            )
+                            .content("text/html", ContentBuilder::new().into())
+                            .description("Project listing, returns all project names. The html interface also presents a form to create a new project."),
+                    )
+                    .response(
+                        "404",
+                        apierror_response("Returned when the underlying endpoint does not exist", error_schema),
+                    )
+                    .into();
+                paths.add_path_operation(
+                    format!("{}projects", self.path()),
+                    vec![HttpMethod::Get],
+                    get_index_operation,
+                );
+
+                let form_schema = ObjectBuilder::new()
+                    .property("project", ObjectBuilder::new().schema_type(Type::String))
+                    .required("project")
+                    .build();
+
+                //POST projects -- post to the index project creation (alternative)
+                let mut post_index_operation = Operation::new();
+                post_index_operation.summary = Some(
+                    self.summary()
+                        .clone()
+                        .unwrap_or_else(|| "Project creation (alternative endpoint)".to_string()),
+                );
+                post_index_operation.description = Some(
+                    self.description()
+                        .clone()
+                        .unwrap_or_else(|| "Alternative endpoint for project creation (application/x-www-form-urlencoded); usually invoked from the web interface".to_string()),
+                );
+                post_index_operation.request_body = Some(
+                    RequestBodyBuilder::new()
+                        .content(
+                            "application/x-www-form-urlencoded",
+                            Content::new(Some(form_schema)),
+                        )
+                        .build(),
+                );
+                post_index_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "303",
+                        ResponseBuilder::new().description(
+                            "Redirects to the new project's status page upon successful creation",
+                        ),
+                    )
+                    .response(
+                        "404",
+                        apierror_response(
+                            "Returned when the project can not be created",
+                            error_schema,
+                        ),
+                    )
+                    .into();
+                paths.add_path_operation(
+                    format!("{}projects", self.path()),
+                    vec![HttpMethod::Post],
+                    post_index_operation,
+                );
+
+                //GET $project
                 let mut get_operation = Operation::new();
                 get_operation.summary = Some(
                     self.summary()
@@ -212,18 +292,13 @@ impl EndPoint {
                     .response(
                         "200",
                         ResponseBuilder::new()
-                            .content("text/html", ContentBuilder::new().into())
-                            .description("Project page for human end-users"),
-                    )
-                    .response(
-                        "200",
-                        ResponseBuilder::new()
                             .content(
                                 "application/json",
                                 ContentBuilder::new()
                                     .schema(Some(projectresponse_schema.clone()))
                                     .into(),
                             )
+                            .content("text/html", ContentBuilder::new().into())
                             .description("Project information"),
                     )
                     .response(
@@ -238,7 +313,7 @@ impl EndPoint {
                     get_operation,
                 );
 
-                //PUT (create)
+                //PUT $project (create)
                 let mut put_operation = Operation::new();
                 put_operation.summary = Some(
                     self.summary()
@@ -265,7 +340,7 @@ impl EndPoint {
                     put_operation,
                 );
 
-                //DELETE
+                //DELETE $project
                 let mut delete_operation = Operation::new();
                 delete_operation.summary = Some(
                     self.summary()
@@ -289,7 +364,7 @@ impl EndPoint {
                     delete_operation,
                 );
 
-                //POST
+                //POST $project
                 let mut post_operation = Operation::new();
                 post_operation.summary = Some(
                     self.summary()

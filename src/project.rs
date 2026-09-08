@@ -140,6 +140,11 @@ impl<'a> Project<'a> {
         p
     }
 
+    /// Returns the URL to the project on the server
+    pub fn url(&self) -> String {
+        format!("{}{}", self.endpoint().path(), self.name())
+    }
+
     pub fn exists(&self) -> bool {
         self.path().exists()
     }
