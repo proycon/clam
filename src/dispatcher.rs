@@ -293,12 +293,29 @@ impl Dispatcher {
                             if let Some(mut job) = running_jobs.remove(&id) {
                                 debug!("finishing job {:?}", job);
                                 job.set_output(output);
-                                job.set_error(error);
-                                if let Some(code) = exitstatus.code() {
+                                let failed = if let Some(code) = exitstatus.code() {
                                     job.set_exitstatus(code);
+                                    code != 0
+                                } else {
+                                    false
+                                };
+                                // if this was a background service, mark it as down now
+                                if let JobMaster::BackgroundService(bgservice_index) = *job.master()
+                                {
+                                    job.set_error(error.clone());
+                                    if let Ok(mut bgservicestate_map) =
+                                        self.state.bgservicestate_map.write()
+                                    {
+                                        bgservicestate_map[bgservice_index] = if !failed {
+                                            BackgroundServiceState::Down
+                                        } else {
+                                            BackgroundServiceState::Failed { errormsg: error }
+                                        };
+                                    }
+                                } else {
+                                    job.set_error(error);
                                 }
                                 done_jobs.insert(id, job);
-                            } else {
                                 eprintln!("Warning: Job not found: {}", id);
                             }
                         }
@@ -310,7 +327,19 @@ impl Dispatcher {
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
                                 debug!("failed to start job {:?}: {}", job, error);
-                                job.set_error(error);
+                                // if this was a background service, mark it as failed now
+                                if let JobMaster::BackgroundService(bgservice_index) = *job.master()
+                                {
+                                    job.set_error(error.clone());
+                                    if let Ok(mut bgservicestate_map) =
+                                        self.state.bgservicestate_map.write()
+                                    {
+                                        bgservicestate_map[bgservice_index] =
+                                            BackgroundServiceState::Failed { errormsg: error };
+                                    }
+                                } else {
+                                    job.set_error(error.clone());
+                                }
                                 done_jobs.insert(id, job);
                             } else {
                                 eprintln!("Warning: Job not found: {}", id);
