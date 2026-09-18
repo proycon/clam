@@ -1,5 +1,7 @@
 # Get OpenAPI specification
 GET http://127.0.0.1:8080/openapi.json
+[Options]
+delay: 1s
 HTTP 200
 [Asserts]
 jsonpath "$.openapi" exists
