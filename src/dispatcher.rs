@@ -180,13 +180,13 @@ impl Dispatcher {
                 counter += 1;
                 if let Ok(sender) = state.sender.read() {
                     if let Err(e) = sender.send(Message::StartJobs) {
-                        eprintln!("ERROR: Dispatcher send failed: {}", e);
+                        eprintln!("ERROR: Ticker send failed: {}", e);
                         break;
                     }
                     if counter >= checkbackgroundservices_interval {
                         counter = 0;
                         if let Err(e) = sender.send(Message::CheckBackgroundServices) {
-                            eprintln!("ERROR: Dispatcher send failed: {}", e);
+                            eprintln!("ERROR: Ticker send failed: {}", e);
                             break;
                         }
                     }
@@ -275,10 +275,12 @@ impl Dispatcher {
                             (self.state.running_jobs.read(), self.state.done_jobs.read())
                         {
                             if let Some(job) = running_jobs.get(&job_id) {
+                                debug!("...running");
                                 let _ =
                                     responsechannel.send(ResponseMessage::JobRunning(job.clone()));
                             } else if let Some(job) = done_jobs.get(&job_id) {
                                 if let Some(exitstatus) = job.exitstatus() {
+                                    debug!("...finished");
                                     let _ = responsechannel.send(ResponseMessage::JobFinished {
                                         id: *job.id(),
                                         exitstatus: *exitstatus,
@@ -286,6 +288,7 @@ impl Dispatcher {
                                         error: job.error().as_ref().cloned().unwrap_or_default(),
                                     });
                                 } else {
+                                    debug!("...job error");
                                     let _ =
                                         responsechannel.send(ResponseMessage::JobError(format!(
                                             "Job failed to start: {}",
@@ -304,8 +307,10 @@ impl Dispatcher {
                                     }
                                 }
                                 if pending {
+                                    debug!("...pending");
                                     let _ = responsechannel.send(ResponseMessage::JobPending);
                                 } else {
+                                    debug!("...job error");
                                     let _ = responsechannel.send(ResponseMessage::JobError(
                                         "No such job found".to_string(),
                                     ));
@@ -440,7 +445,7 @@ impl Dispatcher {
                                         job,
                                     } = state
                                     {
-                                        if *last_used_time + unload_time < now {
+                                        if *last_used_time + unload_time >= now {
                                             if let Ok(jobs) = self.state.running_jobs.read() {
                                                 if let Some(job) = jobs.get(&job) {
                                                     debug!("unloading background job {:?}", job);
@@ -461,6 +466,7 @@ impl Dispatcher {
                     }
                 }
             }
+            debug!("dispatcher died");
         });
     }
 

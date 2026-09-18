@@ -23,6 +23,16 @@ id = "plaintext"
 name = "Plain Text (UTF-8)"
 contenttype = "text/plain; charset=utf-8"
 
+#---------------------------------------------------------------------------------
+
+[[background_services]]
+id = "echo"
+description = "simple echo service"
+command = "./bgservice.sh"
+unload_time = 60
+
+#---------------------------------------------------------------------------------
+
 [[endpoints]]
 name = "porch"
 path = "/"
@@ -59,7 +69,7 @@ filename = { nametype = "Pattern", value = "\\.txt$" }
 [[endpoints]]
 name = "Uppercase (action)"
 description = "Endpoint to uppercase a text (single round-trip action, string-based)"
-path = "/uppercase"  #project name will be appended automatically
+path = "/uppercase"
 mode = "Action"
 command = "./testwrapper.sh"
 filetype = "plaintext"
@@ -71,6 +81,26 @@ parameter_id = "text"
 id = "text"
 name = "Text"
 description = "Input text to turn to uppercase"
+required = true
+type = { parametertype = "String" }
+flag = "-t"
+
+[[endpoints]]
+name = "Echo (action)"
+description = "Endpoint to echo a text (single round-trip action, string-based) via a background service"
+path = "/echo"
+mode = "Action"
+command = "./testwrapper_bgservice.sh"
+filetype = "plaintext"
+background_services = [ "echo" ]
+
+[[endpoints.args]]
+parameter_id = "text"
+
+[[endpoints.parameters]]
+id = "text"
+name = "Text"
+description = "Input text to echo"
 required = true
 type = { parametertype = "String" }
 flag = "-t"

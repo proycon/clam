@@ -765,7 +765,9 @@ async fn run_action(
                             }
                         }
                     }
-                    Ok(ResponseMessage::JobRunning(..)) => tokio::time::sleep(poll_interval).await,
+                    Ok(ResponseMessage::JobRunning(..)) | Ok(ResponseMessage::JobPending) => {
+                        tokio::time::sleep(poll_interval).await
+                    }
                     Ok(ResponseMessage::JobError(error)) => {
                         debug!("run_action: job error: {}", error);
                         return Err(ApiError::InternalError(error));

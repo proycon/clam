@@ -300,6 +300,7 @@ pub struct BackgroundService {
     id: String,
 
     /// Description for the background service
+    #[serde(default)]
     description: Option<String>,
 
     /// Command to invoke to load background services **shared** between all requests on this endpoint. This is just the executable, arguments are in args.
@@ -334,9 +335,11 @@ pub struct BackgroundService {
 
     /// Unload time in seconds: after this many seconds of idle time the background service will be stopped again
     /// An unload of **all** background services can also be forced via signal USR1
+    #[serde(default)]
     unload_time: Option<usize>,
 
     /// Automatically start when CLAM starts (rather than on first request)
+    #[serde(default)]
     autostart: bool,
 }
 

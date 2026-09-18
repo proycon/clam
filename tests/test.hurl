@@ -147,3 +147,13 @@ HTTP 204
 GET http://127.0.0.1:8080/testproject
 Content-type: application/json
 HTTP 404
+
+# Echo test
+GET http://127.0.0.1:8080/echo?text=hello%20world
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+hello world
+```

@@ -145,7 +145,7 @@ impl ServiceState {
             project_job_map: RwLock::new(Default::default()),
             bgservicestate_map: RwLock::new(vec![
                 BackgroundServiceState::Down;
-                config.endpoints().iter().count()
+                config.background_services().iter().count()
             ]),
             shares: RwLock::new(Default::default()),
             user_db: RwLock::new(if let Some(user_file) = config.auth().user_file() {
@@ -232,9 +232,13 @@ impl ServiceState {
             std::collections::HashMap::new(),
         );
         let (tx, rx) = oneshot::channel();
+        debug!("Scheduling background service #{}", index + 1);
         self.send(Message::SubmitJob(job, tx));
         match rx.await {
-            Ok(ResponseMessage::JobSubmitted) => Ok(()),
+            Ok(ResponseMessage::JobSubmitted) => {
+                debug!("Background service #{} job submitted", index + 1);
+                Ok(())
+            }
             Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
             Err(e) => Err(ApiError::InternalError(format!(
                 "oneshot sender dropped whilst submitting a background service job: {}",
