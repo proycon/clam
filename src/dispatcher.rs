@@ -2,6 +2,7 @@ use crate::BackgroundServiceState;
 use crate::config::ServiceConfig;
 use crate::job::{Job, JobId, JobMaster};
 use crate::project::ProjectKey;
+use crate::project::ProjectStatus::Running;
 use crate::state::ServiceState;
 use std::process::ExitStatus;
 use std::sync::Arc;
@@ -59,6 +60,9 @@ pub enum Message {
 
     /// Checks the queue for new jobs and spawns them, will be send after SubmitJob
     StartJobs,
+
+    /// Checks background services and unloads services that are not used
+    CheckBackgroundServices,
 }
 
 #[derive(Debug)]
@@ -146,9 +150,10 @@ impl Dispatcher {
                     }
                 }
                 Some(BackgroundServiceState::Up { .. })
-                | Some(BackgroundServiceState::Loading { .. }) => {
+                | Some(BackgroundServiceState::Loading { .. })
+                | Some(BackgroundServiceState::Terminating { .. }) => {
                     return Err(format!(
-                        "Background service #{} already up or loading, refusing to start twice!",
+                        "Background service #{} already up, loading or still terminating, refusing to start twice!",
                         index + 1
                     ));
                 }
@@ -162,6 +167,34 @@ impl Dispatcher {
 
     /// Non-blocking function that spawns a new thread for the dispatcher
     pub fn spawn(self) {
+        // spawn a clock/ticker thread to send signals at regular intervals to the dispatcher thread
+        let state = self.state();
+        let checkbackgroundservices_interval = self
+            .state()
+            .config()
+            .dispatcher()
+            .checkbackgroundservices_interval();
+        let mut counter = 0;
+        tokio::task::spawn(async move {
+            loop {
+                counter += 1;
+                if let Ok(sender) = state.sender.read() {
+                    if let Err(e) = sender.send(Message::StartJobs) {
+                        eprintln!("ERROR: Dispatcher send failed: {}", e);
+                        break;
+                    }
+                    if counter >= checkbackgroundservices_interval {
+                        counter = 0;
+                        if let Err(e) = sender.send(Message::CheckBackgroundServices) {
+                            eprintln!("ERROR: Dispatcher send failed: {}", e);
+                            break;
+                        }
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            }
+        });
+        // MAYBE TODO: consider thread::spawn instead?
         tokio::task::spawn_blocking(move || {
             loop {
                 // there should be no long-running blocking tasks in this loop!
@@ -390,6 +423,36 @@ impl Dispatcher {
                                     }
                                 }
                             });
+                        }
+                    }
+                    Ok(Message::CheckBackgroundServices) => {
+                        let now = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs() as usize;
+                        if let Ok(mut bgservicestate_map) = self.state.bgservicestate_map.write() {
+                            for (i, state) in bgservicestate_map.iter_mut().enumerate() {
+                                if let Some(unload_time) =
+                                    *self.state.background_service(i).unload_time()
+                                {
+                                    if let BackgroundServiceState::Up {
+                                        last_used_time,
+                                        job,
+                                    } = state
+                                    {
+                                        if *last_used_time + unload_time < now {
+                                            if let Ok(jobs) = self.state.running_jobs.read() {
+                                                if let Some(job) = jobs.get(&job) {
+                                                    debug!("unloading background job {:?}", job);
+                                                    job.kill();
+                                                }
+                                            }
+                                            *state =
+                                                BackgroundServiceState::Terminating { job: *job }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     Err(e) => {

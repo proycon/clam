@@ -74,6 +74,9 @@ pub enum BackgroundServiceState {
 
     /// Service failed
     Failed { errormsg: String },
+
+    /// Job has been sent the kill signal and is waiting to terminating
+    Terminating { job: JobId },
 }
 
 impl Default for BackgroundServiceState {

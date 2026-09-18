@@ -123,6 +123,10 @@ pub struct DispatcherConfig {
     #[serde(default = "default_max_total_jobs")]
     max_total_jobs: usize,
 
+    /// Interval in seconds to check background services and spin them down if necessary.
+    #[serde(default = "default_checkbackgroundservice_interval")]
+    checkbackgroundservices_interval: usize,
+
     /// External script to launch prior to accepting tasks.
     /// It can be used to do a system load check
     /// HTTP 503 will be returned if this script fails (= returns a non-zero exit code).
@@ -134,6 +138,7 @@ impl Default for DispatcherConfig {
         Self {
             max_running_jobs: default_max_running_jobs(),
             max_total_jobs: default_max_total_jobs(),
+            checkbackgroundservices_interval: default_checkbackgroundservice_interval(),
             pre_accept_script: None,
         }
     }
@@ -145,6 +150,10 @@ fn default_max_running_jobs() -> usize {
 
 fn default_max_total_jobs() -> usize {
     1000
+}
+
+fn default_checkbackgroundservice_interval() -> usize {
+    60
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
