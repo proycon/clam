@@ -518,7 +518,7 @@ impl Dispatcher {
                     break;
                 }
             } else {
-                //maximum reached... TODO: start_jobs will have to be retriggered periodically to give the queue a chance to clear!!
+                //maximum reached... start_jobs will be retriggered periodically to give the queue a chance to clear (from the clock/ticker thread)
                 break;
             }
         }
