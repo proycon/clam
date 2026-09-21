@@ -179,6 +179,9 @@ input[type="submit"] {
     padding: 10px;
     text-decoration: none;
 }
+.parameters td input:invalid {
+    border: 2px red solid;
+}
 .error {
     font-weight: bold;
     color: red;

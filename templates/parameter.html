@@ -10,9 +10,9 @@
     {% if parameter.type.parametertype | eq: "String" %}
     <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.validation_pattern_js %} pattern="{{ parameter.type.validation_pattern_js }}"{% endif %}{% if parameter.type.maxlength %} maxlength="{{ parameter.type.maxlength }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Float" %}
-    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text" pattern="[+-]?(?:\d+(?:\.\d*)?|\.\d+)" {% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.required %} required{% endif %}>
+    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text" pattern="(?:\+|-)?(?:\d+(?:\.\d*)?|\.\d+)" {% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Int" %}
-    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="number"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.min %} min="{{ parameter.type.max }}"{% endif %}{% if parameter.type.max %} max="{{ parameter.type.max }}"{% endif %}{% if parameter.required %} required{% endif %}>
+    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="number"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.min %} min="{{ parameter.type.min }}"{% endif %}{% if parameter.type.max %} max="{{ parameter.type.max }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Bool" %}
     <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="checkbox">
     {% else if parameter.type.parametertype | eq: "Selection" %}
