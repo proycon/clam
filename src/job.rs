@@ -192,6 +192,7 @@ impl Job {
                                 ParameterType::String {
                                     maxlength,
                                     validation_pattern,
+                                    validation_pattern_js: _,
                                     default: _,
                                 } => {
                                     if let Some(maxlength) = maxlength

@@ -369,12 +369,17 @@ pub enum ParameterType {
         #[serde(default)]
         maxlength: Option<usize>,
 
+        /// Validation pattern in Rust notation, this will be used server-side. Please also specify `validation_pattern_js` for client-side validation if you use the interface.
         #[serde(
             deserialize_with = "deserialize_opt_regex",
             serialize_with = "serialize_opt_regex",
             default
         )]
         validation_pattern: Option<Regex>,
+
+        /// Client-side validation pattern in javascript notation, please specify this if you specify `validation_pattern`
+        #[serde(default)]
+        validation_pattern_js: Option<String>,
 
         #[serde(default)]
         default: Option<String>,

@@ -4,6 +4,9 @@
     --dark-accent-fg: white;
     --accent-bg: #0069d9;
     --accent-fg: white;
+    --form-bg: #bbb;
+    --form-border: #ced4da;
+    --form-fg: #495057;
 }
 
 body {
@@ -126,3 +129,57 @@ footer {
     text-align: center;
 }
 
+table.parameters {
+    width: 95%;
+}
+.parameters th {
+    font-weight: bold;
+    text-align: left;
+    width: 40%;
+}
+.parameters .description {
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 20px;
+    font-size: 90%;
+}
+.parameters td {
+    width: 60%;
+    text-align: left;
+}
+.parameters td input, .parameters td select {
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--form-fg);
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+    width: 100%;
+}
+.parameters td option {
+    background: var(--form-bg);
+    color: var(--form-fg);
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+}
+input[type="submit"] {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 90%;
+    text-align: center;
+    font-weight: 400;
+    background: var(--accent-bg);
+    cursor: pointer;
+    color: var(--accent-fg);
+    border-radius: 0.35rem;
+    border: none;
+    appearance: button;
+    padding: 10px;
+    text-decoration: none;
+}
+.error {
+    font-weight: bold;
+    color: red;
+}

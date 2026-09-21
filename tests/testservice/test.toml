@@ -144,3 +144,15 @@ description = "String test parameter"
 required = false
 type = { parametertype = "String"  }
 flag = "-s"
+
+[[endpoints.parameters]]
+id = "selection"
+name = "Selection test"
+description = "Selection test parameter"
+required = false
+flag = "-s"
+
+[endpoints.parameters.type]
+parametertype = "Selection"
+choices = [ "apple", "pear", "banana" ]
+default = [ "pear" ]

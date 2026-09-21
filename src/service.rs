@@ -23,7 +23,7 @@ use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -821,9 +821,16 @@ async fn get_action(
         }
     }
     match negotiate_content_type(&headers, &accepted_data) {
-        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
-            todo!("Present action submission form");
-        }
+        Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => state.render_template(
+            "action",
+            "text/html; charset=utf-8",
+            Some(upon::value! {
+                name: endpoint.name().clone().unwrap_or_default(),
+                description: endpoint.description().clone().unwrap_or_default(),
+                path: endpoint.path(),
+                parameters: endpoint.parameters(),
+            }),
+        ),
         Ok(filetype) => {
             let filetype = filetype.to_string();
             run_action(state, endpoint_index, &user, query.0, filetype).await

@@ -739,6 +739,7 @@ impl ParameterType {
             ParameterType::String {
                 maxlength,
                 validation_pattern: _,
+                validation_pattern_js: _,
                 default,
             } => Schema::Object(
                 ObjectBuilder::new()

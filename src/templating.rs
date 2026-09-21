@@ -22,6 +22,14 @@ const TEMPLATE_PROJECTINDEX: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/templates/projectindex.html"
 ));
+const TEMPLATE_ACTION: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/templates/action.html"
+));
+const TEMPLATE_PARAMETER: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/templates/parameter.html"
+));
 
 pub(crate) fn init_templating() -> Engine<'static> {
     let mut engine = Engine::new();
@@ -35,9 +43,25 @@ pub(crate) fn init_templating() -> Engine<'static> {
         .add_template("landingpage", TEMPLATE_LANDING)
         .expect("Failed to compile landing page template");
     engine
+        .add_template("parameter", TEMPLATE_PARAMETER)
+        .expect("Failed to compile parameter template");
+    engine
         .add_template("projectindex", TEMPLATE_PROJECTINDEX)
         .expect("Failed to compile project index template");
+    engine
+        .add_template("action", TEMPLATE_ACTION)
+        .expect("Failed to compile action template");
     engine.add_function("exists", |s: &str| !s.is_empty());
+    engine.add_function("eq", |a: &upon::Value, b: &upon::Value| a == b);
+    engine.add_function("ne", |a: &upon::Value, b: &upon::Value| a != b);
+    engine.add_function("test", |a: bool| a);
+    engine.add_function(
+        "contains",
+        |list: &upon::Value, value: &upon::Value| match list {
+            upon::Value::List(list) => list.contains(value),
+            _ => false,
+        },
+    );
     engine.add_function("join", |list: &upon::Value, delimiter: &str| match list {
         upon::Value::List(list) => {
             //too much cloning but it'll do for now

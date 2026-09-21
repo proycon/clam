@@ -1,0 +1,38 @@
+{% include "header" %}
+
+<div class="block">
+
+<h2>{{ name }}</h2>
+
+<section class="description">
+{{ description }}
+</section>
+
+</div>
+
+{% if config.termsofservice | exists %}
+<div class="block">
+<details class="termsofservice" title="Click to expand the terms of service">
+<summary>Terms of Service</summary>
+<div>{{ config.termsofservice }}</div>
+</details>
+</div>
+{% endif %}
+
+<form method="post" action="{{ path }}" type="application/x-www-form-urlencoded">
+
+<div class="block">
+<h2>Parameters</h2>
+<table class="parameters">
+{% for parameter in parameters %}
+{% include "parameter" %}
+{% endfor %}
+</table>
+</div>
+
+<div class="block">
+    <input type="submit" value="Run">
+</div>
+</form>
+
+{% include "footer" %}
