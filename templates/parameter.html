@@ -8,21 +8,21 @@
 </th>
 <td>
     {% if parameter.type.parametertype | eq: "String" %}
-    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.validation_pattern_js %} pattern="{{ parameter.type.validation_pattern_js }}"{% endif %}{% if parameter.type.maxlength %} maxlength="{{ parameter.type.maxlength }}"{% endif %}{% if parameter.required %} required{% endif %}>
+    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.validation_pattern_js %} pattern="{{ parameter.type.validation_pattern_js }}"{% endif %}{% if parameter.type.maxlength %} maxlength="{{ parameter.type.maxlength }}"{% endif %}{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Float" %}
-    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text" pattern="(?:\+|-)?(?:\d+(?:\.\d*)?|\.\d+)" {% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.required %} required{% endif %}>
+    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="text" pattern="(?:\+|-)?(?:\d+(?:\.\d*)?|\.\d+)" {% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Int" %}
     <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="number"{% if parameter.type.default %} value="{{ parameter.type.default }}"{% endif %}{% if parameter.type.min %} min="{{ parameter.type.min }}"{% endif %}{% if parameter.type.max %} max="{{ parameter.type.max }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else if parameter.type.parametertype | eq: "Bool" %}
     <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="checkbox">
     {% else if parameter.type.parametertype | eq: "Selection" %}
-    <select id="{{ parameter.id }}" name="{{ parameter.id }}"{% if parameter.type.multiple %} multiple{% endif %}{% if parameter.required %} required{% endif %}>
+    <select id="{{ parameter.id }}" name="{{ parameter.id }}"{% if parameter.type.multiple %} multiple{% endif %}{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
         {% for choice in parameter.type.choices %}
         <option value="{{ choice }}"{% if parameter.type.default | contains: choice %} selected{% endif %}>{{ choice }}</option>
         {% endfor %}
     </select>
     {% else if parameter.type.parametertype | eq: "File" %}
-    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="file">
+    <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="file"{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
     {% else %}
     <div class="error">(Internal error: parameter type not implemented: {{ parameter.type.parametertype }})</div>
     {% endif %}
