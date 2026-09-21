@@ -22,7 +22,15 @@
 <div class="block">
 <h2>New project?</h2>
 <form method="post" action="{{ path }}projects" type="application/x-www-form-urlencoded">
-    <input type="text" name="project" title="This is the name/identifier of the project. It may not contain any spaces or special characters.">
+    <table class="parameters">
+        <tr><th>
+        <label>Project name</label>
+        <div class="description">Name/identifier of the project</div>
+        </th>
+        </td><td>
+        <input type="text" id="project" name="project" title="This is the name/identifier of the project. It may not contain any spaces or special characters." pattern="[a-zA-Z1-9_]*">
+        </td></tr>
+    </table>
     <input type="submit" value="Create new project">
 </form>
 </div>
