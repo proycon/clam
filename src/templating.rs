@@ -30,6 +30,10 @@ const TEMPLATE_PARAMETER: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/templates/parameter.html"
 ));
+const TEMPLATE_PROJECT: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/templates/project.html"
+));
 
 pub(crate) fn init_templating() -> Engine<'static> {
     let mut engine = Engine::new();
@@ -51,6 +55,9 @@ pub(crate) fn init_templating() -> Engine<'static> {
     engine
         .add_template("action", TEMPLATE_ACTION)
         .expect("Failed to compile action template");
+    engine
+        .add_template("project", TEMPLATE_PROJECT)
+        .expect("Failed to compile project template");
     engine.add_function("exists", |s: &str| !s.is_empty());
     engine.add_function("eq", |a: &upon::Value, b: &upon::Value| a == b);
     engine.add_function("ne", |a: &upon::Value, b: &upon::Value| a != b);
@@ -131,6 +138,10 @@ impl ServiceState {
                 if let (upon::Value::Map(mut map), upon::Value::Map(custom_map)) =
                     (context, custom_context)
                 {
+                    /*eprintln!(
+                        "Template custom context for {}: {:?}",
+                        template_name, custom_map
+                    );*/
                     map.extend(custom_map);
                     engine
                         .template(template_name)

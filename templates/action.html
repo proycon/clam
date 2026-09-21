@@ -1,6 +1,10 @@
 {% include "header" %}
 
 <div class="block">
+<a href="../">◂ Back to the landing page</a>
+</div>
+
+<div class="block">
 
 <h2>{{ name }}</h2>
 
@@ -12,7 +16,7 @@
 
 {% if config.termsofservice | exists %}
 <div class="block">
-<details class="termsofservice" title="Click to expand the terms of service">
+<details class="termsofservice" title="click to expand the terms of service">
 <summary>Terms of Service</summary>
 <div>{{ config.termsofservice }}</div>
 </details>
@@ -22,7 +26,7 @@
 <form method="post" action="{{ path }}" enctype="multipart/form-data">
 
 <div class="block">
-<h2>Parameters</h2>
+<h2>parameters</h2>
 <table class="parameters">
 {% for parameter in parameters %}
 {% include "parameter" %}

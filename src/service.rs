@@ -378,10 +378,24 @@ async fn get_project(
                 }
             }
             Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
-                //present staging interface, in progress message, or output interface, depending on project state
-                todo!(
-                    "present staging interface, in progress message, or output interface, depending on project state"
-                );
+                if let Some(projectstatus) = state.project_status(&project) {
+                    state.render_template(
+                        "project",
+                        "text/html; charset=utf-8",
+                        Some(upon::value! {
+                            name: project.endpoint().name().clone().unwrap_or_default(),
+                            description: project.endpoint().description().clone().unwrap_or_default(),
+                            parentpath: format!("{}{}", project.endpoint().path(), "projects"),
+                            project: project.name(),
+                            path: project.path(),
+                            status: projectstatus,
+                            parameters: project.endpoint().parameters(),
+                        }),
+                    )
+                } else {
+                    debug!("project not found: {}", project.name());
+                    Err(ApiError::NotFound("No such project".into()))
+                }
             }
             _ => Err(ApiError::NotAcceptable(
                 "Accept header could not be satisfied (try application/json)",

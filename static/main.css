@@ -179,6 +179,10 @@ input[type="submit"] {
     padding: 10px;
     text-decoration: none;
 }
+input[type="submit"]:hover {
+  opacity: 90%;
+  box-shadow: 3px 3px 3px var(--dark-accent-bg);
+}
 .parameters td input:invalid {
     border: 2px red solid;
 }

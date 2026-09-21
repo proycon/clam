@@ -1,0 +1,72 @@
+{% include "header" %}
+
+<div class="block">
+<a href="{{ parentpath }}">◂ Back to the project list</a>
+</div>
+
+<div class="block">
+
+<h2>{{ name }} :: {{ project }}</h2>
+
+
+<section class="description">
+{{ description }}
+</section>
+
+
+</div>
+
+
+{% if config.termsofservice | exists %}
+<div class="block">
+<details class="termsofservice" title="click to expand the terms of service">
+<summary>terms of service</summary>
+<div>{{ config.termsofservice }}</div>
+</details>
+</div>
+{% endif %}
+
+{% if status.stage | eq: "Staging" %}
+<div class="block">
+<h2>Input files</h2>
+<ul>
+{% for inputfile in status.data.input_files %}
+    <li>{{ inputfile.name }}</li>
+{% endfor %}
+</ul>
+</div>
+
+<form method="post" action="{{ path }}" enctype="multipart/form-data">
+
+<div class="block">
+<h2>Parameters</h2>
+<table class="parameters">
+{% for parameter in parameters %}
+{% include "parameter" %}
+{% endfor %}
+</table>
+</div>
+
+<div class="block">
+    <input type="submit" value="Run">
+</div>
+</form>
+{% else if status.stage | eq: "Running" %}
+<div class="block">
+    {% if status.data.progress %}
+    <progress value="{{ status.progress }}" max="100">{{ status.data.progress }}%</progress>
+    {% endif %}
+    {% if status.data.statuslog %}
+    <pre class="statuslog">{{ status.data.statuslog }}</pre>
+    {% endif %}
+</div>
+{% else if status.stage | eq: "Done" %}
+<div class="block">
+<h2>Output Files</h2>
+{% for outputfile in status.data.output_files %}
+    <li>{{ outputfile.name }}</li>
+{% endfor %}
+</div>
+{% endif %}
+
+{% include "footer" %}
