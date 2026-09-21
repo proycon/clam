@@ -143,6 +143,7 @@ name = "String test"
 description = "String test parameter"
 required = false
 type = { parametertype = "String"  }
+multiple = true
 flag = "-s"
 
 [[endpoints.parameters]]

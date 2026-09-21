@@ -35,6 +35,7 @@ const CONTENT_TYPE_PLAINTEXT: &str = "text/plain; charset=UTF-8";
 
 // static resources will be baked into the binary at compile time:
 const CSS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/main.css"));
+const JS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/ui.js"));
 const BACKPNG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/back.png"));
 
 pub struct Service {
@@ -161,6 +162,7 @@ impl Service {
         let mut private_routes = Router::new();
         let mut public_routes = Router::new()
             .route("/main.css", get(get_css))
+            .route("/ui.js", get(get_js))
             .route("/back.png", get(get_backpng))
             .route("/login", get(login_handler))
             .route("/oidc/callback", get(callback_handler));
@@ -295,6 +297,13 @@ async fn get_css() -> Result<ClamResponse, ApiError> {
     Ok(ClamResponse::Body {
         stream: CSS.into(),
         contenttype: "text/css".into(),
+    })
+}
+
+async fn get_js() -> Result<ClamResponse, ApiError> {
+    Ok(ClamResponse::Body {
+        stream: JS.into(),
+        contenttype: "text/javascript".into(),
     })
 }
 

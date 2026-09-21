@@ -26,4 +26,9 @@
     {% else %}
     <div class="error">(Internal error: parameter type not implemented: {{ parameter.type.parametertype }})</div>
     {% endif %}
+    {% if parameter.multiple %}
+    <div id="expspace_{{ parameter.id }}"></div>
+    <button type="button" title="Add an extra field for this parameter; it may be specified multiple times" onclick="duplicateParameter('{{ parameter.id }}')">+ add more</button>
+    <noscript>(Note: You have Javascript disabled so the above button will not work, enable javascript first if you want to add more of this parameter)</noscript>
+    {% endif %}
 </td>

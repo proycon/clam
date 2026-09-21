@@ -136,6 +136,7 @@ table.parameters {
     font-weight: bold;
     text-align: left;
     width: 40%;
+    vertical-align: top;
 }
 .parameters .description {
     font-weight: normal;
