@@ -186,6 +186,10 @@ input[type="submit"]:hover {
 .parameters td input:invalid {
     border: 2px red solid;
 }
+span.required {
+    color: darkorange;
+    cursor: help;
+}
 .error {
     font-weight: bold;
     color: red;

@@ -1,7 +1,7 @@
 <tr>
 <th>
     <label for="{{ parameter.id }}">{{ parameter.name }}</label>
-    {% if parameter.required | test %}<span title="this parameter is required">*</span>{% endif %}
+    {% if parameter.required | test %}<span class="required" title="this parameter is required">*</span>{% endif %}
     {% if parameter.description | exists %}
     <div class="description">{{ parameter.description }}</div>
     {% endif %}
