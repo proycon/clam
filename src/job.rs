@@ -187,6 +187,10 @@ impl Job {
                     if let Some(parameter) = endpoint.parameter(parameter_id) {
                         let mut skip = false;
                         if let Some(value) = request_params.get(parameter.id()) {
+                            if value.is_empty() && !parameter.required() {
+                                //optional value is not provided, skip it
+                                continue;
+                            }
                             // validate the value
                             match parameter.r#type() {
                                 ParameterType::String {
