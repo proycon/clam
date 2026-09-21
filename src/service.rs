@@ -849,6 +849,7 @@ async fn post_action(
     mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
     // load all parameters into memory
+    debug!("post_action: Processing multipart body...");
     let mut param_map: HashMap<String, String> = HashMap::new();
     while let Some(field) = multipart
         .next_field()
