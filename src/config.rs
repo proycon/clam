@@ -156,6 +156,10 @@ fn default_checkbackgroundservice_interval() -> usize {
     60
 }
 
+fn default_max_body_size() -> usize {
+    100
+}
+
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
 /// Authorization Configuration, points to external files that holds credentials so it is
 /// easier to separate the service configuration from secret configurations.
@@ -287,6 +291,10 @@ pub struct EndPoint {
     /// Show unknown output files (for project mode), will show output files that can not be associated to types and content types (i.e. for which no correct configuration is set up), this may be a security hazard as it can expose your process's intermediate files
     #[serde(default)]
     show_unknown_output: bool,
+
+    /// Maximum size of the request body in MB (defaults to 100MB which is often too conservative), this limits upload and parameter size. Only used on action/project endpoints that take such data.
+    #[serde(default = "default_max_body_size")]
+    max_body_size: usize,
     // One or more endpoints that can come after this, so for which the output of this endpoint acts at the input, the user can choose one to continue
     //next: Vec<String>, //implement later
 

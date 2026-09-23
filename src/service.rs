@@ -18,7 +18,7 @@ use tracing::{debug, error, info};
 use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Form, Multipart, Path, Query, State};
+use axum::extract::{DefaultBodyLimit, Form, Multipart, Path, Query, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
@@ -26,6 +26,7 @@ use axum::routing::{delete, get, post, put};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::convert::Infallible;
 use std::sync::Arc;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -224,14 +225,22 @@ impl Service {
                 );
                 router = router.route(
                     path.as_str(),
-                    post(submit_project).layer(Extension(endpoint_index)),
+                    post(submit_project)
+                        .layer::<Extension<usize>, Infallible>(Extension(endpoint_index))
+                        .layer(DefaultBodyLimit::max(
+                            endpoint.max_body_size() * 1024 * 1024,
+                        )),
                 );
 
                 // Generic file upload endpoint
                 let fpath = format!("{}{}{{project}}/upload", endpoint.path(), sep);
                 router = router.route(
                     fpath.as_str(),
-                    get(upload_input_file_multipart).layer(Extension(endpoint_index)),
+                    get(upload_input_file_multipart)
+                        .layer::<Extension<usize>, Infallible>(Extension(endpoint_index))
+                        .layer(DefaultBodyLimit::max(
+                            endpoint.max_body_size() * 1024 * 1024,
+                        )),
                 );
 
                 // File output endpoints
@@ -253,7 +262,11 @@ impl Service {
                 );
                 router = router.route(
                     fpath.as_str(),
-                    put(upload_input_file).layer(Extension(endpoint_index)),
+                    put(upload_input_file)
+                        .layer::<Extension<usize>, Infallible>(Extension(endpoint_index))
+                        .layer(DefaultBodyLimit::max(
+                            endpoint.max_body_size() * 1024 * 1024,
+                        )),
                 );
                 router = router.route(
                     fpath.as_str(),
@@ -270,7 +283,11 @@ impl Service {
                 );
                 router = router.route(
                     endpoint.path(),
-                    post(post_action).layer(Extension(endpoint_index)),
+                    post(post_action)
+                        .layer::<Extension<usize>, Infallible>(Extension(endpoint_index))
+                        .layer(DefaultBodyLimit::max(
+                            endpoint.max_body_size() * 1024 * 1024,
+                        )),
                 );
                 router
             }
@@ -864,14 +881,14 @@ async fn get_action(
     }
 }
 
-/// Runs the action
+/// Runs the action.
 async fn post_action(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     mut multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    // load all parameters into memory
+    // loads all parameters into memory
     debug!("post_action: Processing multipart body...");
     let mut param_map: Vec<(String, String)> = Vec::new();
     while let Some(field) = multipart
