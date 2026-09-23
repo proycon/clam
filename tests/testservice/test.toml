@@ -151,7 +151,7 @@ id = "selection"
 name = "Selection test"
 description = "Selection test parameter"
 required = false
-flag = "-s"
+flag = "-S"
 
 [endpoints.parameters.type]
 parametertype = "Selection"

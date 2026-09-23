@@ -229,7 +229,7 @@ impl ServiceState {
             None,
             &Vec::new(),
             &Default::default(), //background services do not run under a specific user
-            std::collections::HashMap::new(),
+            Vec::new(),
         );
         let (tx, rx) = oneshot::channel();
         debug!("Scheduling background service #{}", index + 1);

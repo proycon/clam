@@ -421,7 +421,7 @@ async fn submit_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    query: Query<HashMap<String, String>>,
+    query: Query<Vec<(String, String)>>,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let job = Job::new(
@@ -728,7 +728,7 @@ async fn run_action(
     state: State<Arc<ServiceState>>,
     endpoint_index: usize,
     user: &CurrentUser,
-    query: HashMap<String, String>,
+    query: Vec<(String, String)>,
     contenttype: String,
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(
@@ -831,7 +831,7 @@ async fn get_action(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     headers: HeaderMap<HeaderValue>,
-    query: Query<HashMap<String, String>>,
+    query: Query<Vec<(String, String)>>,
 ) -> Result<ClamResponse, ApiError> {
     let endpoint = state.endpoint(endpoint_index);
     let mut accepted_data = vec![CONTENT_TYPE_HTML];
@@ -873,22 +873,19 @@ async fn post_action(
 ) -> Result<ClamResponse, ApiError> {
     // load all parameters into memory
     debug!("post_action: Processing multipart body...");
-    let mut param_map: HashMap<String, String> = HashMap::new();
+    let mut param_map: Vec<(String, String)> = Vec::new();
     while let Some(field) = multipart
         .next_field()
         .await
         .expect("unable to extract field from multipart")
     {
-        if let Some(key) = field.name().map(|s| s.to_string()) {
-            //if there are duplicate keys, the last one wins
-            param_map.insert(
-                key,
-                field
-                    .text()
-                    .await
-                    .expect("unable to extract value from multipart"),
-            );
-        }
+        param_map.push((
+            field.name().expect("field must have a name").to_string(),
+            field
+                .text()
+                .await
+                .expect("unable to extract value from multipart"),
+        ));
     }
 
     //we ignore Accept headers for POST and just deliver what the action provides

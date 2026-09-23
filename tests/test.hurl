@@ -48,7 +48,7 @@ HTTP 200
 Content-type: text/plain
 [Asserts]
 ```
--f 3.14
+-f 3.14 -S pear
 ```
 
 # Parameter test: boolean
@@ -58,7 +58,7 @@ HTTP 200
 Content-type: text/plain
 [Asserts]
 ```
--b -f 3.14
+-b -f 3.14 -S pear
 ```
 
 # Parameter test: string
@@ -68,8 +68,9 @@ HTTP 200
 Content-type: text/plain
 [Asserts]
 ```
--f 3.14 -s hello world
+-f 3.14 -s hello world -S pear
 ```
+#fact that -s argument isn't quoted here is not an issue, it is internally, this is only a limited echo
 
 # Parameter test: int
 GET http://127.0.0.1:8080/paramtest?int=5
@@ -78,7 +79,7 @@ HTTP 200
 Content-type: text/plain
 [Asserts]
 ```
--i 5 -f 3.14
+-i 5 -f 3.14 -S pear
 ```
 
 # Parameter test: integer out of bounds

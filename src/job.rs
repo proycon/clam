@@ -8,7 +8,6 @@ use derive_getters::Getters;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
 use regex::Regex;
-use std::collections::HashMap;
 use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::path::PathBuf;
@@ -83,7 +82,7 @@ impl Job {
         project: Option<&Project<'a>>,
         background_services: &Vec<String>,
         user: &CurrentUser,
-        request_params: HashMap<String, String>,
+        request_params: Vec<(String, String)>,
     ) -> Self {
         let mut error = None;
         let current_dir = std::env::current_dir().expect("Unable to get current working directory");
@@ -163,7 +162,7 @@ impl Job {
     fn collect_arguments<'a>(
         endpoint: &EndPoint,
         project: Option<&Project<'a>>,
-        request_params: HashMap<String, String>,
+        request_params: Vec<(String, String)>,
     ) -> Result<Vec<String>, String> {
         let mut args = Vec::new();
         let mut error = String::new();
@@ -186,7 +185,10 @@ impl Job {
                 CommandArg::FromParameter { parameter_id } => {
                     if let Some(parameter) = endpoint.parameter(parameter_id) {
                         let mut skip = false;
-                        if let Some(value) = request_params.get(parameter.id()) {
+                        if let Some(value) = request_params
+                            .iter()
+                            .find_map(|(k, v)| if k == parameter.id() { Some(v) } else { None })
+                        {
                             if value.is_empty() && !parameter.required() {
                                 //optional value is not provided, skip it
                                 continue;
