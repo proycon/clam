@@ -156,7 +156,7 @@ table.parameters {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     line-height: 1.5;
     padding: 0.375rem 0.75rem;
-    width: 100%;
+    width: 90%;
 }
 .parameters td option {
     background: var(--form-bg);
@@ -194,4 +194,22 @@ span.required {
 .error {
     font-weight: bold;
     color: red;
+}
+button.toggleeditor  {
+    float: right;
+    border-radius: 25px;
+}
+button.remove  {
+    float: right;
+    border-radius: 25px;
+}
+textarea {
+    height: 200px;
+    border: 1px solid var(--form-border);
+    background: var(--form-bg);
+    color: var(--form-fg);
+    border-radius: 0.25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    padding: 0.375rem 0.75rem;
+    width: 90%;
 }

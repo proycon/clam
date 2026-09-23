@@ -23,6 +23,7 @@
     </select>
     {% else if parameter.type.parametertype | eq: "File" %}
     <input id="{{ parameter.id }}" name="{{ parameter.id }}" type="file"{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
+    <button id="toggleeditor_{{ parameter.id }}" type="button" class="toggleeditor" title="Toggle between file upload and a live text edit field to provide textual contents directly" onclick="toggleEditor('{{ parameter.id }}')">🖊</button>
     {% else %}
     <div class="error">(Internal error: parameter type not implemented: {{ parameter.type.parametertype }})</div>
     {% endif %}
