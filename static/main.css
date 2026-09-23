@@ -156,7 +156,7 @@ table.parameters {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     line-height: 1.5;
     padding: 0.375rem 0.75rem;
-    width: 90%;
+    width: 80%;
 }
 .parameters td option {
     background: var(--form-bg);
@@ -211,5 +211,5 @@ textarea {
     border-radius: 0.25rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     padding: 0.375rem 0.75rem;
-    width: 90%;
+    width: 80%;
 }

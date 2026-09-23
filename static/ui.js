@@ -25,10 +25,13 @@ function duplicateParameter(id) {
     if (toggleeditor !== null) {
         var toggleeditor_new = toggleeditor.cloneNode(true);
         toggleeditor_new.id = "toggleeditor_" + newparam.id
+        toggleeditor_new.onclick = null;
+        toggleeditor_new.removeAttribute("onclick");
+        toggleeditor_new.addEventListener("click", function() { toggleEditor(newparam.id); });
         expansionSpace.appendChild(toggleeditor_new);
-        expansionSpace.insertAdjacentHTML("beforeend", '<button type="button" class="remove" title="remove this field" onClick="document.getElementById(\'' + newparam.id + '\').remove(); document.getElementById(\'toggleeditor_' + newparam.id + '\').remove(); this.remove()">❌</button>');
+        expansionSpace.insertAdjacentHTML("beforeend", '<button type="button" class="remove" title="remove this field" onclick="document.getElementById(\'' + newparam.id + '\').remove(); document.getElementById(\'toggleeditor_' + newparam.id + '\').remove(); this.remove()">❌</button>');
     } else {
-        expansionSpace.insertAdjacentHTML("beforeend", '<button type="button" class="remove" title="remove this field" onClick="document.getElementById(\'' + newparam.id + '\').remove(); this.remove()">❌</button>');
+        expansionSpace.insertAdjacentHTML("beforeend", '<button type="button" class="remove" title="remove this field" onclick="document.getElementById(\'' + newparam.id + '\').remove(); this.remove()">❌</button>');
     }
 }
 

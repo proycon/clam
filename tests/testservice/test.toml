@@ -57,7 +57,7 @@ name = "Input text"
 description = "Input text file"
 required = true
 type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "\\.txt$" } }
-multipe = true
+multiple = true
 
 [[endpoints.outputfiles]]
 name = "Output text"
