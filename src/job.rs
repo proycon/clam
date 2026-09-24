@@ -3,7 +3,7 @@ use crate::config::{CommandArg, EndPoint, FileName, ParameterType};
 use crate::dispatcher::Message;
 use crate::project::Project;
 use crate::project::ProjectKey;
-use crate::state::ServiceState;
+use crate::state::{ParameterMap, ParameterValue, ServiceState};
 use derive_getters::Getters;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
@@ -82,7 +82,7 @@ impl Job {
         project: Option<&Project<'a>>,
         background_services: &Vec<String>,
         user: &CurrentUser,
-        request_params: Vec<(String, String)>,
+        request_params: ParameterMap,
     ) -> Self {
         let mut error = None;
         let current_dir = std::env::current_dir().expect("Unable to get current working directory");
@@ -162,7 +162,7 @@ impl Job {
     fn collect_arguments<'a>(
         endpoint: &EndPoint,
         project: Option<&Project<'a>>,
-        request_params: Vec<(String, String)>,
+        request_params: ParameterMap,
     ) -> Result<Vec<String>, String> {
         let mut args = Vec::new();
         let mut error = String::new();
@@ -187,9 +187,9 @@ impl Job {
                         let mut skip = false;
                         if let Some(value) = request_params
                             .iter()
-                            .find_map(|(k, v)| if k == parameter.id() { Some(v) } else { None })
+                            .find_map(|(k, v)| if k == parameter_id { Some(v) } else { None })
                         {
-                            if value.is_empty() && !parameter.required() {
+                            if value.as_str().is_empty() && !parameter.required() {
                                 //optional value is not provided, skip it
                                 continue;
                             }
@@ -202,7 +202,7 @@ impl Job {
                                     default: _,
                                 } => {
                                     if let Some(maxlength) = maxlength
-                                        && value.len() > *maxlength
+                                        && value.as_str().len() > *maxlength
                                     {
                                         error += &format!(
                                             "parameter {}: maximum length exceeded ({})\n",
@@ -211,7 +211,7 @@ impl Job {
                                         );
                                     }
                                     if let Some(regex) = validation_pattern {
-                                        if !regex.is_match(value) {
+                                        if !regex.is_match(value.as_str()) {
                                             error += &format!(
                                                 "parameter {}: did not match against validation pattern ({})\n",
                                                 parameter.id(),
@@ -225,7 +225,7 @@ impl Job {
                                     max,
                                     default: _,
                                 } => {
-                                    if let Ok(v) = value.parse::<isize>() {
+                                    if let Ok(v) = value.as_str().parse::<isize>() {
                                         if let Some(min) = min
                                             && v < *min
                                         {
@@ -256,7 +256,7 @@ impl Job {
                                     max,
                                     default: _,
                                 } => {
-                                    if let Ok(v) = value.parse::<f64>() {
+                                    if let Ok(v) = value.as_str().parse::<f64>() {
                                         if let Some(min) = min
                                             && v < *min
                                         {
@@ -283,6 +283,7 @@ impl Job {
                                     }
                                 }
                                 ParameterType::Bool { invert, .. } => {
+                                    let value = value.as_str();
                                     let v = value == "1"
                                         || value == "yes"
                                         || value == "enabled"
@@ -299,33 +300,74 @@ impl Job {
                                     skip = true;
                                 }
                                 ParameterType::File { filename, .. } => {
-                                    //a value for the file was provided, rather than it having been uploaded independently earlier
-                                    //this is acceptable only if an exact filename and a project is associated; we will use this value as the contents of the file and create (or overwrite!) it
+                                    //a file was provided directly in the project submission form (rather than it having been uploaded independently earlier)
+
                                     if let Some(project) = project {
                                         if let FileName::Exact(filename) = filename {
+                                            //server coerces an exact filename, we don't care what the client provided
                                             if let Some(filepath) = project.input_file(
                                                 parameter.id().as_str(),
                                                 filename.as_str(),
                                                 false,
                                             ) {
-                                                if let Err(e) = fs::write(filepath, value) {
+                                                if let Err(e) = project.set_input_file(
+                                                    parameter_id,
+                                                    &filepath,
+                                                    value.as_str(),
+                                                ) {
                                                     error += &format!(
-                                                        "parameter {}: internal file I/O error {}",
+                                                        "parameter {}: internal file I/O error writing to {:?}: {}",
                                                         parameter.id(),
+                                                        filepath,
+                                                        e
+                                                    );
+                                                }
+                                            }
+                                        } else if let ParameterValue::File {
+                                            contents,
+                                            filename: client_filename,
+                                        } = value
+                                        {
+                                            //client provides a filename, validate it:
+                                            if let FileName::Pattern(pattern) = filename {
+                                                if !pattern.is_match(client_filename) {
+                                                    error += &format!(
+                                                        "parameter {}: provided filename {} did not match pattern {}",
+                                                        parameter.id(),
+                                                        client_filename,
+                                                        pattern
+                                                    );
+                                                    break;
+                                                }
+                                            }
+                                            if let Some(filepath) = project.input_file(
+                                                parameter.id().as_str(),
+                                                client_filename.as_str(),
+                                                false,
+                                            ) {
+                                                if let Err(e) = project.set_input_file(
+                                                    parameter_id,
+                                                    &filepath,
+                                                    contents,
+                                                ) {
+                                                    error += &format!(
+                                                        "parameter {}: internal file I/O error writing to {:?}: {}",
+                                                        parameter.id(),
+                                                        filepath,
                                                         e
                                                     );
                                                 }
                                             }
                                         } else {
                                             error += &format!(
-                                                "parameter {}: file parameter must be provided separately in an earlier upload stage rather than in this request\n",
+                                                "parameter {}: file parameter was provided without a filename",
                                                 parameter.id()
                                             );
                                         }
                                     } else {
                                         //probably unreachable, but better safe than sorry:
                                         error += &format!(
-                                            "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)\n",
+                                            "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)",
                                             parameter.id()
                                         );
                                     }
@@ -336,7 +378,7 @@ impl Job {
                                     default: _,
                                 } => {
                                     if *multiple {
-                                        for choice in value.split(",") {
+                                        for choice in value.as_str().split(",") {
                                             if !choices.iter().any(|c| c == choice) {
                                                 error += &format!(
                                                     "parameter {}: value must be one of {}, multiple comma-separated values allowed\n",
@@ -347,7 +389,7 @@ impl Job {
                                             }
                                         }
                                     } else {
-                                        if !choices.contains(&value) {
+                                        if !choices.iter().any(|c| c == value.as_str()) {
                                             error += &format!(
                                                 "parameter {}: value must be one of {}\n",
                                                 parameter.id(),
@@ -367,7 +409,7 @@ impl Job {
                                     }
                                 }
                                 if !skip {
-                                    args.push(value.clone());
+                                    args.push(value.as_str().to_string());
                                 }
                             }
                         } else {
@@ -404,7 +446,7 @@ impl Job {
                                             }
                                             if !file_found {
                                                 error += &format!(
-                                                    "parameter {}: missing required parameter\n",
+                                                    "parameter {}: missing required parameter (file not provided in request)\n",
                                                     parameter.id().as_str()
                                                 );
                                             }

@@ -156,7 +156,8 @@ impl<'a> Project<'a> {
         if path.is_file() { Some(path) } else { None }
     }
 
-    /// Returns the path of the specified input file if it indeed exists
+    /// Returns the path of the specified input file
+    /// Optionally verifies it exists
     pub fn input_file(
         &self,
         parameter_id: &str,
@@ -183,12 +184,12 @@ impl<'a> Project<'a> {
     pub fn set_input_file(
         &self,
         parameter_id: &str,
-        filename: &str,
-        value: String,
+        filepath: &Path,
+        contents: &str,
     ) -> Result<(), std::io::Error> {
         let mut p = self.create_parameter_dir(parameter_id)?;
         p.push(parameter_id);
-        std::fs::write(filename, value)
+        std::fs::write(filepath, contents)
     }
 
     /// Returns the body of a file so it can be streamed to the client, use with `input_file()` or `output_file()'

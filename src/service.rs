@@ -6,7 +6,7 @@ use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
 use crate::job::{Job, JobMaster};
 use crate::project::{Project, ProjectStatus, project_index};
-use crate::state::ServiceState;
+use crate::state::{ParameterMap, ParameterValue, ServiceState};
 use futures_util::StreamExt;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
@@ -413,7 +413,7 @@ async fn get_project(
                             description: project.endpoint().description().clone().unwrap_or_default(),
                             parentpath: format!("{}{}", project.endpoint().path(), "projects"),
                             project: project.name(),
-                            path: project.path(),
+                            path: format!("{}{}", project.endpoint().path(), project.name()),
                             status: projectstatus,
                             parameters: project.endpoint().parameters(),
                         }),
@@ -438,16 +438,21 @@ async fn submit_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    query: Query<Vec<(String, String)>>,
+    multipart: Option<Multipart>,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
+        let param_map = if let Some(multipart) = multipart {
+            parse_multipart(multipart).await
+        } else {
+            Vec::new()
+        };
         let job = Job::new(
             &state,
             JobMaster::EndPoint(endpoint_index),
             Some(&project),
             state.endpoint(endpoint_index).background_services(),
             &user,
-            query.0,
+            param_map,
         );
         if let Some(error) = job.error {
             return Err(ApiError::ParameterError(error));
@@ -745,7 +750,7 @@ async fn run_action(
     state: State<Arc<ServiceState>>,
     endpoint_index: usize,
     user: &CurrentUser,
-    query: Vec<(String, String)>,
+    query: ParameterMap,
     contenttype: String,
 ) -> Result<ClamResponse, ApiError> {
     let job = Job::new(
@@ -873,7 +878,18 @@ async fn get_action(
         ),
         Ok(filetype) => {
             let filetype = filetype.to_string();
-            run_action(state, endpoint_index, &user, query.0, filetype).await
+            run_action(
+                state,
+                endpoint_index,
+                &user,
+                query
+                    .0
+                    .into_iter()
+                    .map(|(k, v)| (k, Into::<ParameterValue>::into(v)))
+                    .collect(), //MAYBE TODO: work away extra allocation?
+                filetype,
+            )
+            .await
         }
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
@@ -886,27 +902,11 @@ async fn post_action(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    mut multipart: Multipart,
+    multipart: Multipart,
 ) -> Result<ClamResponse, ApiError> {
-    // loads all parameters into memory
-    debug!("post_action: Processing multipart body...");
-    let mut param_map: Vec<(String, String)> = Vec::new();
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .expect("unable to extract field from multipart")
-    {
-        param_map.push((
-            field.name().expect("field must have a name").to_string(),
-            field
-                .text()
-                .await
-                .expect("unable to extract value from multipart"),
-        ));
-    }
+    let param_map = parse_multipart(multipart).await;
 
     //we ignore Accept headers for POST and just deliver what the action provides
-
     let mut contenttype = CONTENT_TYPE_PLAINTEXT;
     let endpoint = state.endpoint(endpoint_index);
     if let Some(filetype) = endpoint.filetype() {
@@ -943,6 +943,40 @@ async fn shutdown_signal(_state: Arc<ServiceState>) {
             std::process::exit(0);
         }
     }
+}
+
+/// loads all parameters from Multipart request body into memory
+async fn parse_multipart(mut multipart: Multipart) -> ParameterMap {
+    debug!("post_action: Processing multipart body...");
+    let mut param_map = Vec::new();
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .expect("unable to extract field from multipart")
+    {
+        if let Some(filename) = field.file_name() {
+            param_map.push((
+                field.name().expect("field must have a name").to_string(),
+                ParameterValue::File {
+                    filename: filename.to_string(),
+                    contents: field
+                        .text()
+                        .await
+                        .expect("unable to extract value from multipart"),
+                },
+            ));
+        } else {
+            param_map.push((
+                field.name().expect("field must have a name").to_string(),
+                field
+                    .text()
+                    .await
+                    .expect("unable to extract value from multipart")
+                    .into(),
+            ));
+        }
+    }
+    param_map
 }
 
 fn negotiate_content_type<'a>(

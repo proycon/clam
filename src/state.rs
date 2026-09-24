@@ -302,3 +302,65 @@ impl ServiceState {
         })
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ParameterValue {
+    String(String),
+    File { contents: String, filename: String },
+}
+
+impl From<String> for ParameterValue {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl AsRef<[u8]> for ParameterValue {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Self::String(s) => s.as_bytes(),
+            Self::File {
+                contents,
+                filename: _,
+            } => contents.as_bytes(),
+        }
+    }
+}
+
+impl AsRef<str> for ParameterValue {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::String(s) => s.as_str(),
+            Self::File {
+                contents,
+                filename: _,
+            } => contents.as_str(),
+        }
+    }
+}
+
+impl std::fmt::Display for ParameterValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String(s) => f.write_str(s),
+            Self::File {
+                contents,
+                filename: _,
+            } => f.write_str(contents),
+        }
+    }
+}
+
+impl ParameterValue {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::String(s) => s.as_str(),
+            Self::File {
+                contents,
+                filename: _,
+            } => contents.as_str(),
+        }
+    }
+}
+
+pub type ParameterMap = Vec<(String, ParameterValue)>;
