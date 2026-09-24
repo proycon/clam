@@ -5,7 +5,7 @@ use utoipa::openapi::{
     Components, ContentBuilder, HttpMethod, Info, ObjectBuilder, OpenApi, OpenApiBuilder, Paths,
     Required, ResponseBuilder, ResponsesBuilder, Schema, Server, content::Content, path::Operation,
     path::Parameter, path::ParameterBuilder, path::ParameterIn, request_body::RequestBodyBuilder,
-    schema::Type,
+    schema::ArrayBuilder, schema::Type,
 };
 
 //TODO: add projects/ endpoint
@@ -120,7 +120,7 @@ impl EndPoint {
                         }
                     )
                 ));
-                self.register_parameters_in(&mut get_operation);
+                self.register_query_parameters_in(&mut get_operation);
 
                 get_operation.responses = ResponsesBuilder::new()
                     .response(
@@ -167,7 +167,7 @@ impl EndPoint {
                 );
                 post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "An action endpoint takes zero or more parameters, runs a process in the background, and returns within the same round-trip with the result".to_string()));
-                self.register_parameters_in(&mut post_operation);
+                self.register_multipart_parameters_in(&mut post_operation);
 
                 post_operation.responses = ResponsesBuilder::new()
                     .response(
@@ -374,7 +374,7 @@ impl EndPoint {
                 post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "This starts a project, with the specified parameters and runs the background job(s).".to_string()));
                 post_operation.parameters = Some(vec![project_path_parameter()]);
-                self.register_parameters_in(&mut post_operation);
+                self.register_multipart_parameters_in(&mut post_operation);
                 post_operation.responses = ResponsesBuilder::new()
                     .response(
                         "200",
@@ -583,7 +583,7 @@ impl EndPoint {
 }
 
 impl EndPoint {
-    fn register_parameters_in(&self, operation: &mut Operation) {
+    fn register_query_parameters_in(&self, operation: &mut Operation) {
         if operation.parameters.is_none() {
             operation.parameters = Some(Vec::new());
         }
@@ -602,6 +602,38 @@ impl EndPoint {
                 parameters.push(builder.build());
             }
         });
+    }
+
+    fn register_multipart_parameters_in(&self, operation: &mut Operation) {
+        if operation.parameters.is_none() {
+            operation.parameters = Some(Vec::new());
+        }
+        let mut multipart_schema_builder = ObjectBuilder::new();
+        for parameter in self.parameters().iter() {
+            multipart_schema_builder = if parameter.multiple() {
+                multipart_schema_builder.property(
+                    parameter.id(),
+                    ArrayBuilder::new()
+                        .items(parameter.r#type().objectbuilder().build())
+                        .min_items(Some(if parameter.required() { 1 } else { 0 })),
+                )
+            } else {
+                multipart_schema_builder.property(parameter.id(), parameter.r#type().schema())
+            };
+        }
+
+        operation.request_body = Some(
+            RequestBodyBuilder::new()
+                .required(Some(Required::True))
+                .description(Some("Project parameters"))
+                .content(
+                    "multipart/form-data",
+                    ContentBuilder::new()
+                        .schema(Some(Schema::Object(multipart_schema_builder.build())))
+                        .build(),
+                )
+                .build(),
+        );
     }
 }
 
@@ -705,76 +737,65 @@ impl ProjectStatus {
 }
 
 impl ParameterType {
-    pub fn schema(&self) -> Schema {
+    pub fn objectbuilder(&self) -> ObjectBuilder {
         match self {
-            ParameterType::Int { min, max, default } => Schema::Object(
-                ObjectBuilder::new()
-                    .schema_type(Type::Integer)
-                    .default(default.map(|x| x.into()))
-                    .minimum(min.clone())
-                    .maximum(max.clone())
-                    .description(Some("Integer value"))
-                    .build(),
-            ),
-            ParameterType::Float { min, max, default } => Schema::Object(
-                ObjectBuilder::new()
-                    .schema_type(Type::Number)
-                    .default(default.map(|x| x.into()))
-                    .minimum(min.clone())
-                    .maximum(max.clone())
-                    .description(Some("Integer value"))
-                    .build(),
-            ),
-            ParameterType::Bool { invert, default } => Schema::Object(
-                ObjectBuilder::new()
-                    .schema_type(Type::Boolean)
-                    .default(default.map(|x| x.into()))
-                    .description(if invert == &Some(true) {
-                        Some("Boolean value (inverted)")
-                    } else {
-                        Some("Boolean value")
-                    })
-                    .build(),
-            ),
+            ParameterType::Int { min, max, default } => ObjectBuilder::new()
+                .schema_type(Type::Integer)
+                .default(default.map(|x| x.into()))
+                .minimum(min.clone())
+                .maximum(max.clone())
+                .description(Some("Integer value")),
+            ParameterType::Float { min, max, default } => ObjectBuilder::new()
+                .schema_type(Type::Number)
+                .default(default.map(|x| x.into()))
+                .minimum(min.clone())
+                .maximum(max.clone())
+                .description(Some("Floating point value")),
+            ParameterType::Bool { invert, default } => ObjectBuilder::new()
+                .schema_type(Type::Boolean)
+                .default(default.map(|x| x.into()))
+                .description(if invert == &Some(true) {
+                    Some("Boolean value (inverted)")
+                } else {
+                    Some("Boolean value")
+                }),
             ParameterType::String {
                 maxlength,
                 validation_pattern: _,
                 validation_pattern_js: _,
                 default,
-            } => Schema::Object(
-                ObjectBuilder::new()
-                    .schema_type(Type::String)
-                    .default(default.clone().map(|x| x.into()))
-                    .description(Some("String value"))
-                    .max_length(maxlength.clone())
-                    .build(),
-            ),
+            } => ObjectBuilder::new()
+                .schema_type(Type::String)
+                .default(default.clone().map(|x| x.into()))
+                .description(Some("String value"))
+                .max_length(maxlength.clone()),
             ParameterType::Selection {
                 choices,
                 multiple,
                 default,
-            } => Schema::Object(
-                ObjectBuilder::new()
-                    .schema_type(Type::String)
-                    .default(default.clone().map(|x| x.into()))
-                    .description(Some(format!(
-                        "String value from the following predefined list: {} {}",
-                        choices.join(", "),
-                        if *multiple {
-                            "(multiple comma-separated values are allowed)"
-                        } else {
-                            ""
-                        }
-                    )))
-                    .build(),
-            ),
-            ParameterType::File { .. } => Schema::Object(
-                //this one isn't really used here, as files are handled separately and not as query parameters in the API
+            } => ObjectBuilder::new()
+                .schema_type(Type::String)
+                .default(default.clone().map(|x| x.into()))
+                .description(Some(format!(
+                    "String value from the following predefined list: {} {}",
+                    choices.join(", "),
+                    if *multiple {
+                        "(multiple comma-separated values are allowed)"
+                    } else {
+                        ""
+                    }
+                ))),
+            ParameterType::File { .. } =>
+            //this one isn't really used here, as files are handled separately and not as query parameters in the API
+            {
                 ObjectBuilder::new()
                     .schema_type(Type::String)
                     .description(Some("File contents"))
-                    .build(),
-            ),
+            }
         }
+    }
+
+    pub fn schema(&self) -> Schema {
+        Schema::Object(self.objectbuilder().build())
     }
 }
