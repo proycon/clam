@@ -549,6 +549,19 @@ impl Parameter {
     }
 }
 
+impl std::fmt::Display for ParameterType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String { .. } => f.write_str("string"),
+            Self::Int { .. } => f.write_str("integer"),
+            Self::Float { .. } => f.write_str("float"),
+            Self::Bool { .. } => f.write_str("bool"),
+            Self::Selection { .. } => f.write_str("selection"),
+            Self::File { .. } => f.write_str("file"),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Parameter {
     /// Identifier for the parameter, used as variable name in queries or fields in multipart data (depending on context)

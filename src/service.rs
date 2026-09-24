@@ -1,7 +1,6 @@
 use crate::ResponseMessage;
 use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
-use crate::config::EndPointMode;
-use crate::config::{EndPoint, ServiceConfig};
+use crate::config::{EndPoint, EndPointMode, FileName, ParameterType, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
 use crate::job::{Job, JobMaster};
@@ -14,19 +13,21 @@ use tokio::signal;
 use tokio::sync::oneshot;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, error, info};
+use uuid::Uuid;
 
 use axum::Extension;
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{DefaultBodyLimit, Form, Multipart, Path, Query, State};
+use axum::extract::{DefaultBodyLimit, Form, FromRequest, Multipart, Path, Query, State};
 use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::Value;
-use std::collections::HashMap;
 use std::convert::Infallible;
+use std::fs::create_dir_all;
+use std::path::PathBuf;
 use std::sync::Arc;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -438,14 +439,11 @@ async fn submit_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    multipart: Option<Multipart>,
+    mut param_map: ParameterMap,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        let param_map = if let Some(multipart) = multipart {
-            parse_multipart(multipart).await
-        } else {
-            Vec::new()
-        };
+        param_map.finish_uploads(state.endpoint(endpoint_index), &project)?;
+        debug!("Received project parameters: {:?}", param_map);
         let job = Job::new(
             &state,
             JobMaster::EndPoint(endpoint_index),
@@ -882,11 +880,13 @@ async fn get_action(
                 state,
                 endpoint_index,
                 &user,
-                query
-                    .0
-                    .into_iter()
-                    .map(|(k, v)| (k, Into::<ParameterValue>::into(v)))
-                    .collect(), //MAYBE TODO: work away extra allocation?
+                ParameterMap(
+                    query
+                        .0
+                        .into_iter()
+                        .map(|(k, v)| (k, Into::<ParameterValue>::into(v)))
+                        .collect(),
+                ), //MAYBE TODO: work away extra allocation?
                 filetype,
             )
             .await
@@ -902,10 +902,8 @@ async fn post_action(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-    multipart: Multipart,
+    param_map: ParameterMap,
 ) -> Result<ClamResponse, ApiError> {
-    let param_map = parse_multipart(multipart).await;
-
     //we ignore Accept headers for POST and just deliver what the action provides
     let mut contenttype = CONTENT_TYPE_PLAINTEXT;
     let endpoint = state.endpoint(endpoint_index);
@@ -945,38 +943,190 @@ async fn shutdown_signal(_state: Arc<ServiceState>) {
     }
 }
 
-/// loads all parameters from Multipart request body into memory
-async fn parse_multipart(mut multipart: Multipart) -> ParameterMap {
-    debug!("post_action: Processing multipart body...");
-    let mut param_map = Vec::new();
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .expect("unable to extract field from multipart")
-    {
-        if let Some(filename) = field.file_name() {
-            param_map.push((
-                field.name().expect("field must have a name").to_string(),
-                ParameterValue::File {
-                    filename: filename.to_string(),
-                    contents: field
-                        .text()
-                        .await
-                        .expect("unable to extract value from multipart"),
-                },
-            ));
+impl<S> FromRequest<S> for ParameterMap
+where
+    S: Send + Sync,
+{
+    type Rejection = Response;
+
+    async fn from_request(request: Request<Body>, state: &S) -> Result<Self, Self::Rejection> {
+        let is_multipart = request
+            .headers()
+            .get(axum::http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.starts_with("multipart/form-data"));
+
+        let is_form = request
+            .headers()
+            .get(axum::http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.starts_with("application/x-www-form-urlencoded"));
+
+        if is_multipart {
+            let multipart = Multipart::from_request(request, state)
+                .await
+                .map_err(IntoResponse::into_response)?;
+            Ok(Self::from_multipart(multipart).await)
+        } else if is_form {
+            Form::<Vec<(String, String)>>::from_request(request, state)
+                .await
+                .map(|Form(value)| {
+                    ParameterMap(value.into_iter().map(|x| (x.0, x.1.into())).collect())
+                })
+                .map_err(IntoResponse::into_response)
         } else {
-            param_map.push((
-                field.name().expect("field must have a name").to_string(),
-                field
-                    .text()
-                    .await
-                    .expect("unable to extract value from multipart")
-                    .into(),
-            ));
+            let (_, body) = request.into_parts();
+            let body = axum::body::to_bytes(body, usize::MAX)
+                .await
+                .map_err(|error| {
+                    (
+                        StatusCode::BAD_REQUEST,
+                        format!("failed to read request body: {error}"),
+                    )
+                        .into_response()
+                })?;
+
+            if body.is_empty() {
+                //empty body -> empty map, this is an allowed scenario
+                Ok(ParameterMap::new())
+            } else {
+                Err((
+                    StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                    "Request body must be multipart/form-data or application/x-www-form-urlencoded",
+                )
+                    .into_response())
+            }
         }
     }
-    param_map
+}
+
+impl ParameterMap {
+    /// loads all parameters from Multipart request body into memory (and files immediately to disk)
+    async fn from_multipart(mut multipart: Multipart) -> Self {
+        debug!("post_action: Processing multipart body...");
+        let mut param_map = Vec::new();
+        while let Some(mut field) = multipart
+            .next_field()
+            .await
+            .expect("unable to extract field from multipart")
+        {
+            if let Some(filename) = field.file_name() {
+                let filename = filename.to_string();
+                // put file in a temporary upload area so it's not kept in memory
+                // at this point we don't know the project path yet
+                // the final move will be done later by `finish_upload()`
+                let tmpid = Uuid::new_v4();
+                let mut tmpfilepath: PathBuf = "./data/tmpupload/".into();
+                create_dir_all(&tmpfilepath).expect("Failed to create tmpupload directory");
+                tmpfilepath.push(format!("{}", tmpid));
+
+                let mut file = File::create(&tmpfilepath)
+                    .await
+                    .expect("Failed to upload file into temporary upload");
+
+                // Stream chunks directly from the network to the disk
+                while let Ok(Some(chunk_result)) = field.chunk().await {
+                    file.write_all(&chunk_result)
+                        .await
+                        .expect("Failed to write uploaded chunk");
+                }
+
+                param_map.push((
+                    field.name().expect("field must have a name").to_string(),
+                    ParameterValue::File {
+                        filename,
+                        contents: String::new(),
+                        tmpfilepath: Some(tmpfilepath),
+                    },
+                ));
+            } else {
+                param_map.push((
+                    field.name().expect("field must have a name").to_string(),
+                    field
+                        .text()
+                        .await
+                        .expect("unable to extract value from multipart")
+                        .into(),
+                ));
+            }
+        }
+        ParameterMap(param_map)
+    }
+
+    pub(crate) fn get(&self, parameter_id: &str) -> Option<&ParameterValue> {
+        self.iter()
+            .find_map(|(k, v)| if k == parameter_id { Some(v) } else { None })
+    }
+
+    /// Moves uploaded files from the temporary upload to the project path, validating the filenames in the process. Returns true if all input files are accepted
+    pub(crate) fn finish_uploads(
+        &mut self,
+        endpoint: &EndPoint,
+        project: &Project,
+    ) -> Result<(), ApiError> {
+        let mut err = None;
+        for (parameter_id, value) in self.0.iter_mut() {
+            if let ParameterValue::File {
+                filename,
+                tmpfilepath,
+                ..
+            } = value
+            {
+                if let Some(parameter) = endpoint.parameter(parameter_id) {
+                    if let ParameterType::File {
+                        filename: reffilename,
+                        ..
+                    } = parameter.r#type()
+                    {
+                        //validate filename
+                        let filename = if let FileName::Exact(reffilename) = reffilename {
+                            //server coerces an exact filename, we don't care what the client provided and override it
+                            reffilename.as_str()
+                        } else if let FileName::Pattern(pattern) = reffilename {
+                            //client filename must match pattern
+                            if !pattern.is_match(filename.as_str()) && err.is_none() {
+                                err = Some(ApiError::ParameterError(format!(
+                                    "parameter {}: provided filename {} did not match pattern {}",
+                                    parameter.id(),
+                                    filename,
+                                    pattern
+                                )));
+                            }
+                            filename.as_str()
+                        } else {
+                            filename.as_str()
+                        };
+
+                        //move file from temporary upload to final destination in project
+                        if let Some(tmpfilepath) = tmpfilepath.take() {
+                            if err.is_some() {
+                                std::fs::remove_file(tmpfilepath)?;
+                            } else if let Some(filepath) =
+                                project.input_file(parameter_id.as_str(), filename, false)
+                            {
+                                std::fs::rename(tmpfilepath, filepath)?;
+                            } else {
+                                //or if input is not accepted for any other reason, delete it
+                                // MAYBE TODO: I don't think this can happen
+                                std::fs::remove_file(tmpfilepath)?;
+                                err = Some(ApiError::InternalError(format!(
+                                    "file input not accepted for parameter {}",
+                                    parameter.id(),
+                                )));
+                            }
+                        }
+                    } else {
+                        unreachable!("parameter type must be file");
+                    }
+                }
+            }
+        }
+        if let Some(err) = err {
+            Err(err) //in case of multiple errors, only the first one is returned, but proper cleanup is done for all
+        } else {
+            Ok(())
+        }
+    }
 }
 
 fn negotiate_content_type<'a>(

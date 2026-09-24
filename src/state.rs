@@ -7,6 +7,7 @@ use crate::templating::init_templating;
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, VecDeque};
+use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
@@ -229,7 +230,7 @@ impl ServiceState {
             None,
             &Vec::new(),
             &Default::default(), //background services do not run under a specific user
-            Vec::new(),
+            ParameterMap::new(),
         );
         let (tx, rx) = oneshot::channel();
         debug!("Scheduling background service #{}", index + 1);
@@ -306,7 +307,11 @@ impl ServiceState {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParameterValue {
     String(String),
-    File { contents: String, filename: String },
+    File {
+        contents: String,
+        filename: String,
+        tmpfilepath: Option<PathBuf>,
+    },
 }
 
 impl From<String> for ParameterValue {
@@ -319,10 +324,7 @@ impl AsRef<[u8]> for ParameterValue {
     fn as_ref(&self) -> &[u8] {
         match self {
             Self::String(s) => s.as_bytes(),
-            Self::File {
-                contents,
-                filename: _,
-            } => contents.as_bytes(),
+            Self::File { contents, .. } => contents.as_bytes(),
         }
     }
 }
@@ -331,10 +333,7 @@ impl AsRef<str> for ParameterValue {
     fn as_ref(&self) -> &str {
         match self {
             Self::String(s) => s.as_str(),
-            Self::File {
-                contents,
-                filename: _,
-            } => contents.as_str(),
+            Self::File { contents, .. } => contents.as_str(),
         }
     }
 }
@@ -343,10 +342,7 @@ impl std::fmt::Display for ParameterValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::String(s) => f.write_str(s),
-            Self::File {
-                contents,
-                filename: _,
-            } => f.write_str(contents),
+            Self::File { contents, .. } => f.write_str(contents),
         }
     }
 }
@@ -355,12 +351,20 @@ impl ParameterValue {
     pub fn as_str(&self) -> &str {
         match self {
             Self::String(s) => s.as_str(),
-            Self::File {
-                contents,
-                filename: _,
-            } => contents.as_str(),
+            Self::File { contents, .. } => contents.as_str(),
         }
     }
 }
 
-pub type ParameterMap = Vec<(String, ParameterValue)>;
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct ParameterMap(pub(crate) Vec<(String, ParameterValue)>);
+
+impl ParameterMap {
+    pub(crate) fn new() -> Self {
+        Self(Vec::new())
+    }
+
+    pub(crate) fn iter<'a>(&'a self) -> std::slice::Iter<'a, (String, ParameterValue)> {
+        self.0.iter()
+    }
+}

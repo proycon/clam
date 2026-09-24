@@ -167,7 +167,7 @@ impl EndPoint {
                 );
                 post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "An action endpoint takes zero or more parameters, runs a process in the background, and returns within the same round-trip with the result".to_string()));
-                self.register_multipart_parameters_in(&mut post_operation);
+                self.register_body_parameters_in(&mut post_operation);
 
                 post_operation.responses = ResponsesBuilder::new()
                     .response(
@@ -374,7 +374,7 @@ impl EndPoint {
                 post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "This starts a project, with the specified parameters and runs the background job(s).".to_string()));
                 post_operation.parameters = Some(vec![project_path_parameter()]);
-                self.register_multipart_parameters_in(&mut post_operation);
+                self.register_body_parameters_in(&mut post_operation);
                 post_operation.responses = ResponsesBuilder::new()
                     .response(
                         "200",
@@ -604,32 +604,46 @@ impl EndPoint {
         });
     }
 
-    fn register_multipart_parameters_in(&self, operation: &mut Operation) {
+    fn register_body_parameters_in(&self, operation: &mut Operation) {
         if operation.parameters.is_none() {
             operation.parameters = Some(Vec::new());
         }
-        let mut multipart_schema_builder = ObjectBuilder::new();
+        let mut body_schema_builder = ObjectBuilder::new();
         for parameter in self.parameters().iter() {
-            multipart_schema_builder = if parameter.multiple() {
-                multipart_schema_builder.property(
+            body_schema_builder = if parameter.multiple() {
+                body_schema_builder.property(
                     parameter.id(),
                     ArrayBuilder::new()
+                        .description(parameter.description().as_ref().map(|s| {
+                            format!(
+                                "{}. This {} parameter may be passed multiple times",
+                                s,
+                                parameter.r#type()
+                            )
+                        }))
                         .items(parameter.r#type().objectbuilder().build())
                         .min_items(Some(if parameter.required() { 1 } else { 0 })),
                 )
             } else {
-                multipart_schema_builder.property(parameter.id(), parameter.r#type().schema())
+                body_schema_builder.property(parameter.id(), parameter.r#type().schema())
             };
         }
 
+        let body_schema = body_schema_builder.build();
         operation.request_body = Some(
             RequestBodyBuilder::new()
                 .required(Some(Required::True))
-                .description(Some("Project parameters"))
+                .description(Some("Project parameters. These are passed in the request body as multipart/form-data or application/x-www-form-urlencoded . The former is recommended when passing files to upload in this request (it supports streaming), the latter when files have already been uploaded separately in an earlier stage and only lightweight parameters remain."))
                 .content(
                     "multipart/form-data",
                     ContentBuilder::new()
-                        .schema(Some(Schema::Object(multipart_schema_builder.build())))
+                        .schema(Some(Schema::Object(body_schema.clone())))
+                        .build(),
+                )
+                .content(
+                    "application/x-www-form-urlencoded",
+                    ContentBuilder::new()
+                        .schema(Some(Schema::Object(body_schema)))
                         .build(),
                 )
                 .build(),

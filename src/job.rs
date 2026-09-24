@@ -185,10 +185,7 @@ impl Job {
                 CommandArg::FromParameter { parameter_id } => {
                     if let Some(parameter) = endpoint.parameter(parameter_id) {
                         let mut skip = false;
-                        if let Some(value) = request_params
-                            .iter()
-                            .find_map(|(k, v)| if k == parameter_id { Some(v) } else { None })
-                        {
+                        if let Some(value) = request_params.get(parameter_id) {
                             if value.as_str().is_empty() && !parameter.required() {
                                 //optional value is not provided, skip it
                                 continue;
@@ -299,71 +296,11 @@ impl Job {
                                     }
                                     skip = true;
                                 }
-                                ParameterType::File { filename, .. } => {
-                                    //a file was provided directly in the project submission form (rather than it having been uploaded independently earlier)
-
-                                    if let Some(project) = project {
-                                        if let FileName::Exact(filename) = filename {
-                                            //server coerces an exact filename, we don't care what the client provided
-                                            if let Some(filepath) = project.input_file(
-                                                parameter.id().as_str(),
-                                                filename.as_str(),
-                                                false,
-                                            ) {
-                                                if let Err(e) = project.set_input_file(
-                                                    parameter_id,
-                                                    &filepath,
-                                                    value.as_str(),
-                                                ) {
-                                                    error += &format!(
-                                                        "parameter {}: internal file I/O error writing to {:?}: {}",
-                                                        parameter.id(),
-                                                        filepath,
-                                                        e
-                                                    );
-                                                }
-                                            }
-                                        } else if let ParameterValue::File {
-                                            contents,
-                                            filename: client_filename,
-                                        } = value
-                                        {
-                                            //client provides a filename, validate it:
-                                            if let FileName::Pattern(pattern) = filename {
-                                                if !pattern.is_match(client_filename) {
-                                                    error += &format!(
-                                                        "parameter {}: provided filename {} did not match pattern {}",
-                                                        parameter.id(),
-                                                        client_filename,
-                                                        pattern
-                                                    );
-                                                    break;
-                                                }
-                                            }
-                                            if let Some(filepath) = project.input_file(
-                                                parameter.id().as_str(),
-                                                client_filename.as_str(),
-                                                false,
-                                            ) {
-                                                if let Err(e) = project.set_input_file(
-                                                    parameter_id,
-                                                    &filepath,
-                                                    contents,
-                                                ) {
-                                                    error += &format!(
-                                                        "parameter {}: internal file I/O error writing to {:?}: {}",
-                                                        parameter.id(),
-                                                        filepath,
-                                                        e
-                                                    );
-                                                }
-                                            }
-                                        } else {
-                                            error += &format!(
-                                                "parameter {}: file parameter was provided without a filename",
-                                                parameter.id()
-                                            );
-                                        }
+                                ParameterType::File { .. } => {
+                                    // a file was provided directly in the project submission form,
+                                    // this means it was validated before already in ParameterMap.finish_uploads()
+                                    if project.is_some() {
+                                        //nothing to do, file was already handled
                                     } else {
                                         //probably unreachable, but better safe than sorry:
                                         error += &format!(
