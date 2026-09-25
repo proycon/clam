@@ -25,6 +25,7 @@ use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::convert::Infallible;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
@@ -916,7 +917,7 @@ async fn post_action(
     run_action(state, endpoint_index, &user, param_map, contenttype).await
 }
 
-async fn shutdown_signal(_state: Arc<ServiceState>) {
+async fn shutdown_signal(state: Arc<ServiceState>) {
     let ctrl_c = async {
         signal::ctrl_c()
             .await
@@ -933,13 +934,37 @@ async fn shutdown_signal(_state: Arc<ServiceState>) {
 
     tokio::select! {
         _ = ctrl_c => {
-            debug!("shutdown_signal: SIGINT received");
+            info!("SIGINT received, waiting for jobs to end..");
+            wait_shutdown(state).await;
+            info!("Bye bye!");
             std::process::exit(0);
         }
         _ = terminate => {
-            debug!("shutdown_signal: SIGTERM received");
+            info!("SIGTERM received, waiting for jobs to end..");
+            wait_shutdown(state).await;
+            info!("Bye bye!");
             std::process::exit(0);
         }
+    }
+}
+
+async fn wait_shutdown(state: Arc<ServiceState>) {
+    let mut have_running_jobs = true;
+    let mut signaled: HashMap<usize, oneshot::Receiver<ResponseMessage>> = HashMap::new();
+    while have_running_jobs {
+        if let Ok(running_jobs) = state.running_jobs.read() {
+            have_running_jobs = false;
+            for (job_id, _) in running_jobs.iter() {
+                have_running_jobs = true;
+                if !signaled.contains_key(job_id) {
+                    //we don't really use the receiver currently
+                    let (tx, rx) = oneshot::channel();
+                    state.send(Message::CancelJob(*job_id, tx));
+                    signaled.insert(*job_id, rx);
+                }
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await
     }
 }
 
