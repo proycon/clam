@@ -7,6 +7,8 @@ plan.pdf: PLAN.md
 
 .PHONY: test
 test:
+	@if ! command -v hurl > /dev/null; then echo "test dependency 'hurl' is not installed, please install it first..">&2; exit 1; fi
+	@if ! command -v socat > /dev/null; then echo "test dependency 'socat' is not installed, please install it first..">&2; exit 1; fi
 	-if [ -e .pid ]; then kill `cat .pid`; fi
 	if [ -e .pid ]; then rm .pid; fi
 	if [ -d tests/testservice/data ]; then rm -rf tests/testservice/data; fi
@@ -17,5 +19,5 @@ ifeq ($(STOP_SERVICE),0)
 	if hurl --test --verbose --jobs 1 tests/test.hurl; then exit 0; else exit 1; fi
 	@echo "don't forget to stop the clam service yourself..."
 else
-	if hurl --test --verbose --jobs 1 tests/test.hurl; then killall -w clam; exit 0; else killall -w clam; exit 1; fi
+	if hurl --test --verbose --jobs 1 tests/test.hurl; then killall clam; exit 0; else killall clam; exit 1; fi
 endif

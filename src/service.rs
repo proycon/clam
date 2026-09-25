@@ -25,7 +25,7 @@ use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::convert::Infallible;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
@@ -954,17 +954,18 @@ async fn shutdown_signal(state: Arc<ServiceState>) {
 
 async fn wait_shutdown(state: Arc<ServiceState>) {
     let mut have_running_jobs = true;
-    let mut signaled: HashMap<usize, oneshot::Receiver<ResponseMessage>> = HashMap::new();
+    let mut signaled: HashSet<usize> = HashSet::new();
+    if let Ok(mut pending_jobs) = state.pending_jobs.write() {
+        pending_jobs.clear();
+    }
     while have_running_jobs {
         if let Ok(running_jobs) = state.running_jobs.read() {
             have_running_jobs = false;
             for (job_id, _) in running_jobs.iter() {
                 have_running_jobs = true;
-                if !signaled.contains_key(job_id) {
-                    //we don't really use the receiver currently
-                    let (tx, rx) = oneshot::channel();
-                    state.send(Message::CancelJob(*job_id, tx));
-                    signaled.insert(*job_id, rx);
+                if !signaled.contains(job_id) {
+                    signaled.insert(*job_id);
+                    state.send(Message::CancelJob(*job_id, None));
                 }
             }
         }

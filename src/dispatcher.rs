@@ -26,7 +26,7 @@ pub enum Message {
     SubmitJob(Job, oneshot::Sender<ResponseMessage>),
 
     /// Forcibly stop a job, by job ID, discarding its results
-    CancelJob(JobId, oneshot::Sender<ResponseMessage>),
+    CancelJob(JobId, Option<oneshot::Sender<ResponseMessage>>),
 
     StartedJob {
         id: JobId,
@@ -82,8 +82,10 @@ pub enum ResponseMessage {
     // Job is pending execution
     JobPending,
     JobStarted,
-    // For example when a job failed to start
+    // For example when a job failed to start or was cancelled
     JobError(String),
+    // Job was cancelled
+    JobCancelled,
 }
 
 impl Dispatcher {
@@ -229,16 +231,30 @@ impl Dispatcher {
                     }
                     Ok(Message::CancelJob(job_id, responsechannel)) => {
                         //we only send the kill signal here, the actual cleanup will be picked up by FinishJob
+                        //the job may be either running or pending
+                        let mut found = false;
                         if let Ok(jobs) = self.state.running_jobs.read() {
                             if let Some(job) = jobs.get(&job_id) {
                                 debug!("cancelling job {:?}", job);
                                 job.kill();
+                                found = true;
+                            }
+                        }
+                        if !found {
+                            if let Ok(mut jobs) = self.state.pending_jobs.write() {
+                                jobs.retain_mut(|job| if job.id() != &job_id { true } else { found = true; false } );
+                            }
+                        }
+                        if let Some(responsechannel) = responsechannel {
+                            if found {
+                                let _ = responsechannel.send(ResponseMessage::JobCancelled);
                             } else {
                                 let _ = responsechannel.send(ResponseMessage::JobError(
-                                    "No such job running".to_string(),
+                                    "No such job running or pending".to_string(),
                                 ));
                             }
                         }
+
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),
                     Ok(Message::StartedJob { id, pid }) => {
@@ -312,7 +328,7 @@ impl Dispatcher {
                                 } else {
                                     debug!("...job error");
                                     let _ = responsechannel.send(ResponseMessage::JobError(
-                                        "No such job found".to_string(),
+                                        "Job was cancelled before starting".to_string(),
                                     ));
                                 }
                             }
@@ -349,6 +365,19 @@ impl Dispatcher {
                                         } else {
                                             BackgroundServiceState::Failed { errormsg: error }
                                         };
+                                    }
+                                    //cancel all running jobs or pending jobs that depend on this background service
+                                    for (job_id,job) in running_jobs.iter() {
+                                        if job.background_services().contains(&bgservice_index) {
+                                            self.state.send(Message::CancelJob(*job_id, None));
+                                        }
+                                    }
+                                    if let Ok(pending_jobs) = self.state.pending_jobs.read() {
+                                        for job in pending_jobs.iter() {
+                                            if job.background_services().contains(&bgservice_index) {
+                                                self.state.send(Message::CancelJob(*job.id(), None));
+                                            }
+                                        }
                                     }
                                 } else {
                                     job.set_error(error);
