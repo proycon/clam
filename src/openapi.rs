@@ -633,7 +633,7 @@ impl EndPoint {
         operation.request_body = Some(
             RequestBodyBuilder::new()
                 .required(Some(Required::True))
-                .description(Some("Project parameters. These are passed in the request body as multipart/form-data or application/x-www-form-urlencoded . The former is recommended when passing files to upload in this request (it supports streaming), the latter when files have already been uploaded separately in an earlier stage and only lightweight parameters remain."))
+                .description(Some("Parameters. These are passed in the request body as multipart/form-data or application/x-www-form-urlencoded . The former is recommended when passing files to upload in this request (it supports streaming), the latter when files have already been uploaded separately in an earlier stage and only lightweight parameters remain."))
                 .content(
                     "multipart/form-data",
                     ContentBuilder::new()
