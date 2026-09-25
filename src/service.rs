@@ -463,7 +463,11 @@ async fn submit_project(
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
         match rx.await {
-            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::Ok()),
+            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::RedirectGet(format!(
+                "{}{}",
+                state.config().url().as_deref().unwrap_or_default(),
+                project.endpoint().path(),
+            ))),
             Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
             Err(e) => Err(ApiError::InternalError(format!(
                 "oneshot sender dropped whilst submitting a job: {}",

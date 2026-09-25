@@ -120,7 +120,7 @@ hello world!
 
 # Project test: Project execution (POST)
 POST http://127.0.0.1:8080/testproject
-HTTP 200
+HTTP 303
 
 # Project test: Project status 1/2 (GET)
 GET http://127.0.0.1:8080/testproject
