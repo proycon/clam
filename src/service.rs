@@ -1030,7 +1030,7 @@ where
 impl ParameterMap {
     /// loads all parameters from Multipart request body into memory (and files immediately to disk)
     async fn from_multipart(mut multipart: Multipart) -> Self {
-        debug!("post_action: Processing multipart body...");
+        debug!("from_multipart: Processing multipart body...");
         let mut param_map = Vec::new();
         while let Some(mut field) = multipart
             .next_field()
@@ -1058,6 +1058,12 @@ impl ParameterMap {
                         .expect("Failed to write uploaded chunk");
                 }
 
+                debug!(
+                    "from_multipart: Uploaded {} for parameter {} to temporary storage as {:?}",
+                    filename,
+                    field.name().unwrap_or_default(),
+                    tmpfilepath
+                );
                 param_map.push((
                     field.name().expect("field must have a name").to_string(),
                     ParameterValue::File {
@@ -1126,12 +1132,22 @@ impl ParameterMap {
 
                         //move file from temporary upload to final destination in project
                         if let Some(tmpfilepath) = tmpfilepath.take() {
+                            if err.is_none() {
+                                project.create_parameter_dir(parameter_id)?;
+                            }
                             if err.is_some() {
                                 std::fs::remove_file(tmpfilepath)?;
                             } else if let Some(filepath) =
                                 project.input_file(parameter_id.as_str(), filename, false)
                             {
-                                std::fs::rename(tmpfilepath, filepath)?;
+                                if let Err(e) = std::fs::rename(tmpfilepath, filepath) {
+                                    err = Some(ApiError::InternalError(format!(
+                                        "Failed to finish upload for parameter {}, file {}: {}",
+                                        parameter.id(),
+                                        filename,
+                                        e
+                                    )));
+                                }
                             } else {
                                 //or if input is not accepted for any other reason, delete it
                                 // MAYBE TODO: I don't think this can happen
