@@ -120,7 +120,10 @@ impl From<&ServiceConfig> for upon::Value {
                 } else {
                     None
                 }
-            }).collect::<Vec<upon::Value>>()
+            }).collect::<Vec<upon::Value>>(),
+            custom_css: config.custom_css().clone().unwrap_or_default(),
+            custom_js: config.custom_js().clone().unwrap_or_default(),
+            url: config.url().clone().unwrap_or_default(),
         }
     }
 }

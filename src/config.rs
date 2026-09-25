@@ -111,6 +111,12 @@ pub struct ServiceConfig {
     /// Setting this can prevent the service being abused as a file sharing service
     #[serde(default)]
     disable_input_download: bool,
+
+    /// Custom stylesheet to associate with the webservice. Use a full URL or start with / (relative to url)
+    custom_css: Option<String>,
+
+    /// Custom javascript to associate with the webservice. Use a full URL or start with / (relative to url)
+    custom_js: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Clone, Getters)]

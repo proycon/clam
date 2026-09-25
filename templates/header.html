@@ -3,9 +3,18 @@
 <head lang="en">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% if config.url %}
+    <base href="{{ config.url }}">
+    {% endif %}
     <title>{{ config.name }}</title>
     <link rel="stylesheet" href="/main.css" type="text/css">
+    {% if config.custom_css %}
+    <link rel="stylesheet" href="{{ config.custom_css }}" type="text/css">
+    {% endif %}
     <script type="text/javascript" src="/ui.js"></script>
+    {% if config.custom_js %}
+    <script type="text/javascript" src="{{ config.custom_js }}"></script>
+    {% endif %}
 </head>
 <body>
     <div id="gradient"></div>
