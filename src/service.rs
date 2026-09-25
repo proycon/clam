@@ -964,7 +964,9 @@ async fn wait_shutdown(state: Arc<ServiceState>) {
                 }
             }
         }
-        tokio::time::sleep(std::time::Duration::from_millis(100)).await
+        if have_running_jobs {
+            tokio::time::sleep(std::time::Duration::from_millis(100)).await
+        }
     }
 }
 
