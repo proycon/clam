@@ -185,9 +185,13 @@ impl Job {
                 CommandArg::FromParameter { parameter_id } => {
                     if let Some(parameter) = endpoint.parameter(parameter_id) {
                         let mut skip = false;
-                        if let Some(value) = request_params.get(parameter_id) {
-                            if value.as_str().is_empty() && !parameter.required() {
-                                //optional value is not provided, skip it
+                        let mut found = false; //signals if the parameter was found in the request
+                        for value in request_params.get_all(parameter_id) {
+                            if value.as_str().is_empty()
+                                && value.path(parameter_id).is_none()
+                                && !parameter.required()
+                            {
+                                //optional value is not actually provided (empty content), skip it
                                 continue;
                             }
                             // validate the value
@@ -337,19 +341,33 @@ impl Job {
                                 }
                             }
                             if error.is_empty() && !skip {
+                                found = true;
                                 if let Some(flag) = parameter.flag() {
                                     if flag.chars().last() == Some('=') {
                                         skip = true;
-                                        args.push(format!("{}{}", flag, value));
+                                        if let Some(path) = value.path(parameter.id()) {
+                                            args.push(format!(
+                                                "{}{}",
+                                                flag,
+                                                path.to_string_lossy()
+                                            ));
+                                        } else {
+                                            args.push(format!("{}{}", flag, value));
+                                        }
                                     } else {
                                         args.push(flag.clone());
                                     }
                                 }
                                 if !skip {
-                                    args.push(value.as_str().to_string());
+                                    if let Some(path) = value.path(parameter.id()) {
+                                        args.push(path.to_string_lossy().into());
+                                    } else {
+                                        args.push(value.as_str().to_string());
+                                    }
                                 }
                             }
-                        } else {
+                        }
+                        if !found {
                             // we got no request value, see if we can extract a default value:
                             let value: Option<String> = match parameter.r#type() {
                                 ParameterType::String {
@@ -366,17 +384,43 @@ impl Job {
                                 } => Some(format!("{}", default)),
                                 ParameterType::File { .. } => {
                                     if parameter.required() {
-                                        //check if the file was uploaded, we expect at least one match
+                                        //check if the file was uploaded before, we expect at least one match, but there may be multiple if parameter.multiple is set!
                                         if let Some(project) = project {
                                             let mut p = project.path();
                                             p.push(parameter.id());
                                             let mut file_found = false;
-                                            if let Ok(dir_iter) = std::fs::read_dir(p) {
+                                            if let Ok(dir_iter) = std::fs::read_dir(&p) {
                                                 for entry in dir_iter {
                                                     if let Ok(entry) = entry {
                                                         let path = entry.path();
                                                         if path.is_file() {
                                                             file_found = true;
+
+                                                            //add to arguments here
+                                                            if let Some(flag) = parameter.flag() {
+                                                                if flag.chars().last() == Some('=')
+                                                                {
+                                                                    args.push(format!(
+                                                                        "{}{}",
+                                                                        flag,
+                                                                        path.to_string_lossy()
+                                                                    ));
+                                                                } else {
+                                                                    args.push(flag.clone()); //if there are multiple values, the flag is repeated for each
+                                                                    args.push(
+                                                                        path.to_string_lossy()
+                                                                            .into(),
+                                                                    );
+                                                                }
+                                                            } else {
+                                                                args.push(
+                                                                    path.to_string_lossy().into(),
+                                                                );
+                                                            }
+                                                            if !parameter.multiple() {
+                                                                //stop after first match
+                                                                break;
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -395,6 +439,7 @@ impl Job {
                                             );
                                         }
                                     }
+                                    skip = true; //if there was anything to add, we already handled it here
                                     None
                                 }
                                 ParameterType::Selection {

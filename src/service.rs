@@ -1096,6 +1096,14 @@ impl ParameterMap {
             .find_map(|(k, v)| if k == parameter_id { Some(v) } else { None })
     }
 
+    pub(crate) fn get_all<'a>(
+        &'a self,
+        parameter_id: &'a str,
+    ) -> impl Iterator<Item = &'a ParameterValue> + 'a {
+        self.iter()
+            .filter_map(move |(k, v)| if k == parameter_id { Some(v) } else { None })
+    }
+
     /// Moves uploaded files from the temporary upload to the project path, validating the filenames in the process. Returns true if all input files are accepted
     pub(crate) fn finish_uploads(
         &mut self,

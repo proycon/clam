@@ -7,6 +7,10 @@ if [ "$1" = "-t" ]; then
     ret=$?
 else
     echo "starting (project)...">&2
+    if [ ! -e "$1" ]; then
+        echo "No such input file: $1">&2
+        exit 2
+    fi
     #file passed (CLAM project)
     tr "[:lower:]" "[:upper:]" < "$1" > "$(basename "$1")"
     ret=$?

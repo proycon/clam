@@ -2,14 +2,13 @@ use crate::BackgroundServiceState;
 use crate::config::ServiceConfig;
 use crate::job::{Job, JobId, JobMaster};
 use crate::project::ProjectKey;
-use crate::project::ProjectStatus::Running;
 use crate::state::ServiceState;
 use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::oneshot;
-use tracing::{debug, error};
+use tracing::debug;
 
 /// The dispatcher is CLAM's job manager
 /// It spawns jobs, in parallel, and monitors their execution
@@ -242,7 +241,14 @@ impl Dispatcher {
                         }
                         if !found {
                             if let Ok(mut jobs) = self.state.pending_jobs.write() {
-                                jobs.retain_mut(|job| if job.id() != &job_id { true } else { found = true; false } );
+                                jobs.retain_mut(|job| {
+                                    if job.id() != &job_id {
+                                        true
+                                    } else {
+                                        found = true;
+                                        false
+                                    }
+                                });
                             }
                         }
                         if let Some(responsechannel) = responsechannel {
@@ -254,7 +260,6 @@ impl Dispatcher {
                                 ));
                             }
                         }
-
                     }
                     Ok(Message::StartJobs) => self.start_jobs(),
                     Ok(Message::StartedJob { id, pid }) => {
@@ -367,15 +372,17 @@ impl Dispatcher {
                                         };
                                     }
                                     //cancel all running jobs or pending jobs that depend on this background service
-                                    for (job_id,job) in running_jobs.iter() {
+                                    for (job_id, job) in running_jobs.iter() {
                                         if job.background_services().contains(&bgservice_index) {
                                             self.state.send(Message::CancelJob(*job_id, None));
                                         }
                                     }
                                     if let Ok(pending_jobs) = self.state.pending_jobs.read() {
                                         for job in pending_jobs.iter() {
-                                            if job.background_services().contains(&bgservice_index) {
-                                                self.state.send(Message::CancelJob(*job.id(), None));
+                                            if job.background_services().contains(&bgservice_index)
+                                            {
+                                                self.state
+                                                    .send(Message::CancelJob(*job.id(), None));
                                             }
                                         }
                                     }

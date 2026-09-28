@@ -354,6 +354,17 @@ impl ParameterValue {
             Self::File { contents, .. } => contents.as_str(),
         }
     }
+
+    pub fn path(&self, parameter_id: &str) -> Option<PathBuf> {
+        if let Self::File { filename, .. } = self {
+            let mut path = PathBuf::new();
+            path.push(parameter_id);
+            path.push(filename);
+            Some(path)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
