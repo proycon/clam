@@ -466,7 +466,7 @@ async fn submit_project(
             Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::RedirectGet(format!(
                 "{}{}",
                 state.config().url().as_deref().unwrap_or_default(),
-                project.endpoint().path(),
+                project.url(),
             ))),
             Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
             Err(e) => Err(ApiError::InternalError(format!(
