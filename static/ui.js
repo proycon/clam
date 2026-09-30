@@ -54,3 +54,12 @@ function toggleEditor(id) {
         document.getElementById("filename_" + id).remove();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    //scroll status log to the bottom
+    const statusLog = document.querySelector('#statuslog');
+
+    if (statusLog) {
+        statusLog.scrollTop = statusLog.scrollHeight;
+    }
+});

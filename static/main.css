@@ -7,6 +7,8 @@
     --form-bg: #bbb;
     --form-border: #ced4da;
     --form-fg: #495057;
+    --statuslog-bg: black;
+    --statuslog-fg: white;
 }
 
 body {
@@ -226,4 +228,15 @@ table.files td.filename {
 }
 table.files td.filetype {
     font-style: italic;
+}
+
+pre#statuslog {
+    width: 90%;
+    height: 250px;
+    padding: 25px;
+    background: var(--statuslog-bg);
+    color: var(--statuslog-fg);
+    border-radius: 25px;
+    overflow-x: auto;
+    overflow-y: auto;
 }

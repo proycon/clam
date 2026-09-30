@@ -28,6 +28,12 @@
 
 {% if status.stage | eq: "Staging" %}
 <div class="block">
+<h2 class="staging">Status: 🏗 Staging (1/4)</h2>
+
+<p>Set the desired input parameters for your project and press the <strong>Run</strong> button when ready...</p>
+</div>
+
+<div class="block">
 <h2>Input files</h2>
 <table class="files">
 <thead>
@@ -56,16 +62,43 @@
     <input type="submit" value="Run">
 </div>
 </form>
+{% else if status.stage | eq: "Scheduled" %}
+<div class="block">
+    <h2 class="staging">Status: ⏳ Scheduled (2/4)</h2>
+
+    <p>Your project is scheduled to start automatically, this may take some time. You can close this page and come back to it at any time.</p>
+</div>
 {% else if status.stage | eq: "Running" %}
 <div class="block">
+    <h2 class="staging">Status: 🏃 Running (3/4)</h2>
+
+    <p>Your project is running and may take some time to complete. You can close this page and come back to it at any time.</p>
+
     {% if status.data.progress %}
     <progress value="{{ status.progress }}" max="100">{{ status.data.progress }}%</progress>
     {% endif %}
     {% if status.data.statuslog %}
-    <pre class="statuslog">{{ status.data.statuslog }}</pre>
+    <pre id="statuslog">{{ status.data.statuslog }}</pre>
     {% endif %}
 </div>
 {% else if status.stage | eq: "Done" %}
+<div class="block">
+    {%if status.data.success %}
+    <h2 class="done">Status: ✅ Done (4/4)</h2>
+
+    <p>Your project is done! You can inspect the output log and output files below.</p>
+
+    <progress value="100" max="100">100%</progress>
+    {% else %}
+    <h2 class="failed">Status: ❌ Failed (4/4)</h2>
+
+    <p>Your project has failed, please inspect the error log below.</p>
+    {% endif %}
+
+    {% if status.data.statuslog %}
+    <pre id="statuslog">{{ status.data.statuslog }}</pre>
+    {% endif %}
+</div>
 <div class="block">
 <h2>Output Files</h2>
 <table class="files">
