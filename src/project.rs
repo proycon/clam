@@ -269,14 +269,16 @@ impl<'a> Project<'a> {
                             if let Some(filetype) = self.output_filetype(filename.as_str()) {
                                 output_files.push(IoFile {
                                     filetype: Some(filetype.clone()), //MAYBE TODO: not sure if I like so many clones of the same data (but reference not possible, tried)
-                                    parameter: None,
+                                    parameter_id: None,
+                                    parameter_name: None,
                                     name: filename,
                                 })
                             } else if self.endpoint().show_unknown_output() {
                                 // by default we skip files that can not be identified as output, unless show_unknown_output is explicitly enabled
                                 output_files.push(IoFile {
                                     filetype: None,
-                                    parameter: None,
+                                    parameter_id: None,
+                                    parameter_name: None,
                                     name: filename,
                                 })
                             }
@@ -319,7 +321,8 @@ impl<'a> Project<'a> {
                         if found_files.contains(name) {
                             input_files.push(IoFile {
                                 filetype: self.config.filetype(filetype).cloned(),
-                                parameter: Some(parameter.id().clone()),
+                                parameter_id: Some(parameter.id().clone()),
+                                parameter_name: Some(parameter.name().clone()),
                                 name: name.clone(),
                             })
                         }
@@ -330,7 +333,8 @@ impl<'a> Project<'a> {
                             if pattern.is_match(file.as_str()) {
                                 input_files.push(IoFile {
                                     filetype: filetype.cloned(),
-                                    parameter: Some(parameter.id().clone()),
+                                    parameter_id: Some(parameter.id().clone()),
+                                    parameter_name: Some(parameter.name().clone()),
                                     name: file,
                                 })
                             }
@@ -372,7 +376,8 @@ pub struct IoFile {
     name: String,
 
     /// For input files, this is always something
-    parameter: Option<String>,
+    parameter_id: Option<String>,
+    parameter_name: Option<String>,
 
     filetype: Option<FileType>,
 }

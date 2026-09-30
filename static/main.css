@@ -213,3 +213,17 @@ textarea {
     padding: 0.375rem 0.75rem;
     width: 80%;
 }
+
+table.files {
+    width: 90%;
+}
+table.files th {
+    width: 30%;
+    text-align: left;
+}
+table.files td.filename {
+    font-family: monospace;
+}
+table.files td.filetype {
+    font-style: italic;
+}

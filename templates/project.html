@@ -29,11 +29,16 @@
 {% if status.stage | eq: "Staging" %}
 <div class="block">
 <h2>Input files</h2>
-<ul>
+<table class="files">
+<thead>
+    <tr><th>Filename</th><th>Parameter</th><th>File type</th></tr>
+</thead>
+<tbody>
 {% for inputfile in status.data.input_files %}
-    <li>{{ inputfile.name }}</li>
+<tr><td class="filename"><a href="{{ path}}/{{ inputfile.parameter_id }}/{{inputfile.name }}">{{ inputfile.name }}</a></td><td class="parameter">{{inputfile.parameter_name}}</td><td class="filetype">{{ inputfile.filetype.name }}</td></tr>
 {% endfor %}
-</ul>
+</tbody>
+</table>
 </div>
 
 <form method="post" action="{{ path }}" enctype="multipart/form-data">
