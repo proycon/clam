@@ -298,6 +298,22 @@ impl ServiceState {
             }
         }
 
+        // no associated job found
+        // check if there are any output files or not (job may have run during a previous
+        // incarnation of this webservice)
+
+        if project.path().exists() {
+            let output_files = project.output_files();
+            if !output_files.is_empty() {
+                return Some(ProjectStatus::Done {
+                    success: true, //MAYBE TODO: clean failed jobs on CLAM exit?
+                    statuslog: Some("The log for this run is no longer available".into()),
+                    input_files: project.input_files(),
+                    output_files,
+                });
+            }
+        }
+
         Some(ProjectStatus::Staging {
             input_files: project.input_files(),
         })

@@ -68,9 +68,16 @@
 {% else if status.stage | eq: "Done" %}
 <div class="block">
 <h2>Output Files</h2>
+<table class="files">
+<thead>
+    <tr><th>Filename</th><th>File type</th></tr>
+</thead>
+<tbody>
 {% for outputfile in status.data.output_files %}
-    <li>{{ outputfile.name }}</li>
+<tr><td class="filename"><a href="{{ path }}/output/{{outputfile.name }}">{{ outputfile.name }}</a></td><td class="filetype">{{ outputfile.filetype.name }}</td></tr>
 {% endfor %}
+</tbody>
+</table>
 </div>
 {% endif %}
 
