@@ -369,7 +369,7 @@ pub enum ProjectStatus {
     },
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Getters)]
 /// Returned to the client in JSON as part of ProjectStatus, used for both input and output files
 pub struct IoFile {
     /// Filename
@@ -380,6 +380,17 @@ pub struct IoFile {
     parameter_name: Option<String>,
 
     filetype: Option<FileType>,
+}
+
+impl IoFile {
+    pub fn path(&self, project: &Project) -> PathBuf {
+        let mut outputpath = project.path();
+        if let Some(parameter_id) = self.parameter_id() {
+            outputpath.push(parameter_id);
+        }
+        outputpath.push(self.name());
+        outputpath
+    }
 }
 
 /// Returns an index of projects **for a specific user and endpoint**

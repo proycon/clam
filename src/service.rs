@@ -604,9 +604,9 @@ async fn cancel_project(
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         cancel_job_in_project(project.key().clone(), (*state).clone()).await?;
         // Delete all output files (this will effectively put the project back in Staging state)
-        let mut outputpath = project.path();
-        outputpath.push("output");
-        std::fs::remove_dir_all(outputpath)?;
+        for file in project.output_files() {
+            std::fs::remove_file(file.path(&project))?;
+        }
         Ok(ClamResponse::RedirectGet(format!("{}", project.url())))
     } else {
         Err(ApiError::InvalidName("project name invalid"))
