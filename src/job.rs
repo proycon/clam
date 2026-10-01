@@ -690,9 +690,20 @@ impl Job {
         self.up_pattern = None;
     }
 
-    pub fn wait(&self) {
+    pub async fn wait(&self) {
         if let Some(pid) = self.pid {
-            let _ = kill(Pid::from_raw(pid as i32), None);
+            wait_for_pid(pid).await
         }
+    }
+}
+
+pub async fn wait_for_pid(pid: u32) {
+    let poll_interval = tokio::time::Duration::new(0, 50000000); //50ms
+
+    // (note: if signaling fails for any other reason than that the PID doesn't exist, the wait is aborted too)
+    // the edge case that the same PID is quickly being retaken by another process is deemed unlikely and not considered here
+    while kill(Pid::from_raw(pid as i32), None).is_ok() {
+        //pid still exists
+        tokio::time::sleep(poll_interval).await
     }
 }

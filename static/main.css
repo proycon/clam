@@ -240,3 +240,18 @@ pre#statuslog {
     overflow-x: auto;
     overflow-y: auto;
 }
+
+div.dangerbuttons {
+    text-align: right;
+}
+
+div.dangerbuttons input[type="submit"] {
+    margin-top: 5px;
+    margin-left: auto;
+    margin-right: 10px;
+    width: 320px;
+    max-width: 320px;
+    background: #aa0000;
+    cursor: pointer;
+    color: white;
+}

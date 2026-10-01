@@ -81,6 +81,16 @@
     <pre id="statuslog">{{ status.data.statuslog }}</pre>
     {% endif %}
 </div>
+<div class="block">
+    <div class="dangerbuttons">
+        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Cancel and delete project" title="All results and input files and will be lost">
+        </form>
+        <form method="post" action="{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Cancel and restart" title="This offers you the opportunity to go back to the staging state to resubmit parameters and try again. All results will be lost, but input files will be retained.">
+        </form>
+    </div>
+</div>
 {% else if status.stage | eq: "Done" %}
 <div class="block">
     {%if status.data.success %}
@@ -111,6 +121,16 @@
 {% endfor %}
 </tbody>
 </table>
+</div>
+<div class="block ">
+    <div class="dangerbuttons">
+        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Delete this project" title="All results and input files will be lost">
+        </form>
+        <form method="post" action="{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Discard all results and restart" title="This offers you the opportunity to go back to the staging state to resubmit parameters and try again. All results will be lost, but input files will be retained.">
+        </form>
+    </div>
 </div>
 {% endif %}
 

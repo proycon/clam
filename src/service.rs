@@ -3,8 +3,8 @@ use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
 use crate::config::{EndPoint, EndPointMode, FileName, ParameterType, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
-use crate::job::{Job, JobMaster};
-use crate::project::{Project, ProjectStatus, project_index};
+use crate::job::{Job, JobMaster, wait_for_pid};
+use crate::project::{Project, ProjectKey, ProjectStatus, project_index};
 use crate::state::{ParameterMap, ParameterValue, ServiceState};
 use futures_util::StreamExt;
 use tokio::fs::File;
@@ -19,11 +19,10 @@ use axum::Extension;
 use axum::Router;
 use axum::body::Body;
 use axum::extract::{DefaultBodyLimit, Form, FromRequest, Multipart, Path, Query, State};
-use axum::http::{HeaderMap, HeaderValue, Request, StatusCode, header};
+use axum::http::{HeaderMap, HeaderValue, Method, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
-use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashSet;
 use std::convert::Infallible;
@@ -210,7 +209,7 @@ impl Service {
                 );
                 router = router.route(
                     index_path.as_str(),
-                    post(post_create_project).layer(Extension(endpoint_index)),
+                    post(create_project).layer(Extension(endpoint_index)),
                 );
                 let path = format!("{}{{project}}", endpoint.path());
                 router = router.route(
@@ -232,6 +231,18 @@ impl Service {
                         .layer(DefaultBodyLimit::max(
                             endpoint.max_body_size() * 1024 * 1024,
                         )),
+                );
+
+                // Alternative POST endpoints used by the interface for project management operations
+                let delete_path = format!("{}/delete", path);
+                router = router.route(
+                    delete_path.as_str(),
+                    post(delete_project).layer(Extension(endpoint_index)),
+                );
+                let cancel_path = format!("{}/cancel", path);
+                router = router.route(
+                    cancel_path.as_str(),
+                    post(cancel_project).layer(Extension(endpoint_index)),
                 );
 
                 // Generic file upload endpoint
@@ -488,40 +499,75 @@ async fn create_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    method: Method,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         if let Err(e) = project.create() {
             Err(e.into())
         } else {
-            Ok(ClamResponse::Created())
+            match method {
+                Method::PUT => Ok(ClamResponse::Created()),
+                _ => Ok(ClamResponse::RedirectGet(project.url())),
+            }
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
 }
 
-#[derive(Deserialize)]
-struct CreateForm {
-    project: String,
-}
-
-/// Alternative endpoint for project creation using POST request on index
-async fn post_create_project(
-    Extension(endpoint_index): Extension<usize>,
-    Extension(user): Extension<CurrentUser>,
-    state: State<Arc<ServiceState>>,
-    form: Form<CreateForm>,
-) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(&form.project, user.as_str(), endpoint_index, state.config())
-    {
-        if let Err(e) = project.create() {
-            Err(e.into())
-        } else {
-            Ok(ClamResponse::RedirectGet(project.url()))
-        }
+/// Helper function to cancel a job pertaining to a project
+async fn cancel_job_in_project(
+    project_key: ProjectKey,
+    state: Arc<ServiceState>,
+) -> Result<(), ApiError> {
+    let job_id = if let Ok(project_job_map) = state.project_job_map.read() {
+        project_job_map.get(&project_key).map(|x| x.clone())
     } else {
-        Err(ApiError::InvalidName("project name invalid"))
+        None
+    };
+    if job_id.is_none() {
+        //nothing to do
+        return Ok(());
     }
+    let job_id = job_id.unwrap();
+    //kill any remaining associated job
+    let (tx, rx) = oneshot::channel();
+    state.send(Message::CancelJob(job_id, Some(tx)));
+    //get the pid of the job
+    let mut pid = None;
+    match rx.await {
+        Ok(ResponseMessage::JobCancelled) => {
+            if let Ok(running_jobs) = state.running_jobs.read() {
+                if let Some(job) = running_jobs.get(&job_id) {
+                    pid = job.pid().clone()
+                }
+            }
+        }
+        Ok(ResponseMessage::JobError(error)) => {
+            return Err(ApiError::ServiceUnavailable(error));
+        }
+        Err(e) => {
+            return Err(ApiError::InternalError(format!(
+                "oneshot sender dropped whilst cancelling a job: {}",
+                e
+            )));
+        }
+        Ok(m) => {
+            return Err(ApiError::InternalError(format!(
+                "unexpected response message whilst submitting a background service job: {:?}",
+                m
+            )));
+        }
+    }
+    //wait until the job is completely gone
+    if let Some(pid) = pid {
+        wait_for_pid(pid).await
+    }
+    //remove from map
+    if let Ok(mut project_job_map) = state.project_job_map.write() {
+        project_job_map.remove(&project_key);
+    }
+    Ok(())
 }
 
 async fn delete_project(
@@ -529,25 +575,39 @@ async fn delete_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    method: Method,
 ) -> Result<ClamResponse, ApiError> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        if let Ok(mut project_job_map) = state.project_job_map.write() {
-            project_job_map.remove(&project.key());
-            //kill all remaining associated job if any
-            if let Some(job_id) = project_job_map.get(project.key()) {
-                if let Ok(running_jobs) = state.running_jobs.read() {
-                    if let Some(job) = running_jobs.get(job_id) {
-                        job.kill();
-                        job.wait(); //wait until job is gone
-                    }
-                }
-            }
-        }
+        cancel_job_in_project(project.key().clone(), (*state).clone()).await?;
         if let Err(e) = project.delete() {
             Err(e.into())
         } else {
-            Ok(ClamResponse::NoContent())
+            match method {
+                Method::DELETE => Ok(ClamResponse::NoContent()),
+                _ => Ok(ClamResponse::RedirectGet(format!(
+                    "{}index",
+                    project.endpoint().path()
+                ))),
+            }
         }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
+}
+
+async fn cancel_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+) -> Result<ClamResponse, ApiError> {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
+        cancel_job_in_project(project.key().clone(), (*state).clone()).await?;
+        // Delete all output files (this will effectively put the project back in Staging state)
+        let mut outputpath = project.path();
+        outputpath.push("output");
+        std::fs::remove_dir_all(outputpath)?;
+        Ok(ClamResponse::RedirectGet(format!("{}", project.url())))
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
