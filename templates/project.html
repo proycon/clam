@@ -62,6 +62,13 @@
     <input type="submit" value="Run">
 </div>
 </form>
+<div class="block">
+    <div class="dangerbuttons">
+        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+            <input type="submit" value="Delete this project" title="All input files will be lost">
+        </form>
+    </div>
+</div>
 {% else if status.stage | eq: "Scheduled" %}
 <div class="block">
     <h2 class="staging">Status: ⏳ Scheduled (2/4)</h2>
