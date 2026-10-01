@@ -543,8 +543,8 @@ async fn cancel_job_in_project(
                 }
             }
         }
-        Ok(ResponseMessage::JobError(error)) => {
-            return Err(ApiError::ServiceUnavailable(error));
+        Ok(ResponseMessage::JobError(_)) => {
+            //this is returned for 'no such job running or pending', and that is perfectly okay, skip this
         }
         Err(e) => {
             return Err(ApiError::InternalError(format!(
