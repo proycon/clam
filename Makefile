@@ -16,8 +16,8 @@ test:
 	cd tests/testservice && cargo run -- --debug --config test.toml &
 	echo "(2s grace period for service to start)">&2 && sleep 2
 ifeq ($(STOP_SERVICE),0)
-	if hurl --test --verbose --jobs 1 tests/test.hurl; then exit 0; else exit 1; fi
+	if hurl --test --very-verbose --jobs 1 tests/test.hurl; then exit 0; else exit 1; fi
 	@echo "don't forget to stop the clam service yourself..."
 else
-	if hurl --test --verbose --jobs 1 tests/test.hurl; then killall clam; exit 0; else killall clam; exit 1; fi
+	if hurl --test --very-verbose --jobs 1 tests/test.hurl; then killall clam; exit 0; else killall clam; exit 1; fi
 endif
