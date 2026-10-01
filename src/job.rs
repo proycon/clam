@@ -395,6 +395,8 @@ impl Job {
                                                         let path = entry.path();
                                                         if path.is_file() {
                                                             file_found = true;
+                                                            let path =
+                                                                path.strip_prefix(project.path()).map_err(|e| format!("Failed to strip project path from {:?}: {}", path, e))?;
 
                                                             //add to arguments here
                                                             if let Some(flag) = parameter.flag() {
