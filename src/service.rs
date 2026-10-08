@@ -23,6 +23,7 @@ use axum::http::{HeaderMap, HeaderValue, Method, Request, StatusCode, header};
 use axum::middleware::from_fn_with_state;
 use axum::response::{IntoResponse, Json, Response};
 use axum::routing::{delete, get, post, put};
+use serde::Deserialize;
 use serde_json::Value;
 use std::collections::HashSet;
 use std::convert::Infallible;
@@ -209,7 +210,7 @@ impl Service {
                 );
                 router = router.route(
                     index_path.as_str(),
-                    post(create_project).layer(Extension(endpoint_index)),
+                    post(post_create_project).layer(Extension(endpoint_index)),
                 );
                 let path = format!("{}{{project}}", endpoint.path());
                 router = router.route(
@@ -509,6 +510,29 @@ async fn create_project(
                 Method::PUT => Ok(ClamResponse::Created()),
                 _ => Ok(ClamResponse::RedirectGet(project.url())),
             }
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
+}
+
+#[derive(Deserialize)]
+struct CreateForm {
+    project: String,
+}
+
+async fn post_create_project(
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+    form: Form<CreateForm>,
+) -> Result<ClamResponse, ApiError> {
+    if let Ok(project) = Project::new(&form.project, user.as_str(), endpoint_index, state.config())
+    {
+        if let Err(e) = project.create() {
+            Err(e.into())
+        } else {
+            Ok(ClamResponse::RedirectGet(project.url()))
         }
     } else {
         Err(ApiError::InvalidName("project name invalid"))
