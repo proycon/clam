@@ -170,7 +170,7 @@ impl ServiceState {
                 None
             } else {
                 let config: upon::Value = (&config).into();
-                Some(upon::value! { config: config })
+                Some(upon::value! { config: config, refresh: 0 })
             },
             config,
         }

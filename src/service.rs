@@ -428,6 +428,10 @@ async fn get_project(
                             parentpath: format!("{}{}", project.endpoint().path(), "projects"),
                             project: project.name(),
                             path: format!("{}{}", project.endpoint().path(), project.name()),
+                            refresh: match projectstatus {
+                                ProjectStatus::Running { .. } | ProjectStatus::Scheduled=> 3,
+                                _ => 0,
+                            },
                             status: projectstatus,
                             parameters: project.endpoint().parameters(),
                         }),
