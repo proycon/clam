@@ -345,6 +345,28 @@ impl<'a> Project<'a> {
         }
         input_files
     }
+
+    /// Returns a list of parameters IDs for all parameters that have input files uploaded
+    pub fn uploaded_parameters(&self) -> Vec<&str> {
+        let mut found_parameters = Vec::new();
+        for parameter in self.endpoint().parameters().iter() {
+            if let ParameterType::File { .. } = parameter.r#type() {
+                let mut p = self.path();
+                p.push(parameter.id());
+                if let Ok(dir_iter) = std::fs::read_dir(p) {
+                    for entry in dir_iter {
+                        if let Ok(entry) = entry {
+                            let path = entry.path();
+                            if path.is_file() {
+                                found_parameters.push(parameter.id().as_str())
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        found_parameters
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -419,6 +419,40 @@ async fn get_project(
             }
             Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
                 if let Some(projectstatus) = state.project_status(&project) {
+                    let uploaded_parameters = match projectstatus {
+                        ProjectStatus::Staging { .. } => project.uploaded_parameters(),
+                        _ => Vec::new(),
+                    };
+                    // collect required parameters (some file parameters are excluded if they have already been uploaded)
+                    // (the templating language is not expressive enough to express this so we do it here)
+                    let required_file_parameters: Vec<&str> = project
+                        .endpoint()
+                        .parameters()
+                        .iter()
+                        .filter_map(|p| {
+                            if p.is_file_parameter()
+                                && p.required()
+                                && !uploaded_parameters.contains(&p.id().as_str())
+                            {
+                                Some(p.id().as_str())
+                            } else {
+                                None
+                            }
+                        })
+                        .collect();
+                    //we can skip parameters that have been uploaded and do not allow multiple files
+                    // (the templating language is not expressive enough to express this so we do it here)
+                    let skip_file_parameters: Vec<&str> = uploaded_parameters
+                        .into_iter()
+                        .filter(|parameter_id| {
+                            !project
+                                .endpoint()
+                                .parameter(parameter_id)
+                                .unwrap()
+                                .multiple()
+                        })
+                        .collect();
+                    // exclude files that have already been uploaded from required parameters
                     state.render_template(
                         "project",
                         "text/html; charset=utf-8",
@@ -432,8 +466,10 @@ async fn get_project(
                                 ProjectStatus::Running { .. } | ProjectStatus::Scheduled=> 3,
                                 _ => 0,
                             },
-                            status: projectstatus,
                             parameters: project.endpoint().parameters(),
+                            skip_file_parameters: skip_file_parameters,
+                            required_file_parameters: required_file_parameters,
+                            status: projectstatus,
                         }),
                     )
                 } else {
@@ -780,6 +816,10 @@ async fn upload_input_file_multipart(
         .await
         .map_err(|e| ApiError::UploadError(format!("Upload error in Multipart: {e}")))?
     {
+        if field.file_name().is_none() || field.file_name() == Some("") {
+            //ignore empty file fields
+            continue;
+        }
         let filename = parameter.validate_filename(field.name().unwrap_or_default())?;
 
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), false)
@@ -1131,6 +1171,10 @@ impl ParameterMap {
             .expect("unable to extract field from multipart")
         {
             if let Some(filename) = field.file_name() {
+                if filename.is_empty() {
+                    //no file was provided
+                    continue;
+                }
                 let filename = filename.to_string();
                 // put file in a temporary upload area so it's not kept in memory
                 // at this point we don't know the project path yet
