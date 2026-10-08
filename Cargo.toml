@@ -1,6 +1,6 @@
 [package]
 name = "clam"
-version = "0.4.0"
+version = "4.0.0"
 edition = "2024"
 authors = ["Maarten van Gompel <proycon@anaproy.nl>"]
 description = "Quickly build RESTful webservices and user interfaces around your command-line tools"
