@@ -182,6 +182,8 @@ fn validate_basic_auth(credentials: &str, state: &ServiceState) -> Option<String
 /// Returns None if validation did not succeed
 async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String> {
     //Decode the token header to find which key was used to sign it
+    debug!("Validating OIDC token...");
+
     let header = match jsonwebtoken::decode_header(token) {
         Ok(h) => h,
         Err(_) => return None,
@@ -213,6 +215,7 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
                         jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation)
                     {
                         // Return email if available, otherwise fall back to the subject string
+                        debug!("...success");
                         return Some(token_data.claims.email.unwrap_or(token_data.claims.sub));
                     }
                 }
@@ -224,6 +227,7 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
             }
         }
     }
+    debug!("...failed");
     None
 }
 
