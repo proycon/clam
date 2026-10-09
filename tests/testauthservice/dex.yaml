@@ -1,0 +1,22 @@
+issuer: http://127.0.0.1:5556/dex
+
+storage:
+  type: memory
+
+web:
+  http: 0.0.0.0:5556
+
+oauth2:
+  skipApprovalScreen: false
+
+staticClients:
+  - id: testauth
+    name: Test Authentication
+    secret: testauthsecret
+    redirectURIs:
+      - http://127.0.0.1:8080/oidc/callback
+
+connectors:
+  - type: mockCallback
+    id: mock
+    name: Mock Login

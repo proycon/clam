@@ -160,30 +160,30 @@ impl Service {
         //launch the dispatcher/job manager as a background thread
         //this is a non-blocking function that spawns the thread and returns immediately
         let state: Arc<ServiceState> = dispatcher.state(); //the dispatcher initiates the state for us
+        if let Err(e) = state.healthy() {
+            error!(e);
+            return;
+        }
+
         dispatcher.spawn(); //consumes the dispatcher
 
-        let mut private_routes = Router::new();
-        let mut public_routes = Router::new()
+        let mut routes = Router::new()
             .route("/main.css", get(get_css))
             .route("/ui.js", get(get_js))
             .route("/back.png", get(get_backpng))
-            .route("/login", get(login_handler))
-            .route("/oidc/callback", get(callback_handler));
+            .route("/login/{endpoint_index}", get(login_handler))
+            .route("/oidc/callback", get(callback_handler)); //this is the redirect URI
+
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
-            if endpoint.public() {
-                public_routes = self.configure_endpoint(public_routes, i, endpoint);
-            } else {
-                private_routes = self.configure_endpoint(private_routes, i, endpoint);
-            }
+            routes = routes.merge(
+                self.configure_endpoint(i, endpoint)
+                    .route_layer(from_fn_with_state((state.clone(), i), auth)),
+            );
         }
 
         let router = Router::new()
-            .merge(private_routes)
-            .merge(public_routes)
+            .merge(routes)
             .merge(SwaggerUi::new("/info").url("/openapi.json", state.openapi.clone()))
-            .route_layer(from_fn_with_state(state.clone(), |state, req, next| {
-                auth(state, req, next)
-            }))
             .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 
@@ -195,14 +195,28 @@ impl Service {
 
     pub fn configure_endpoint(
         &self,
-        mut router: Router<Arc<ServiceState>>,
         endpoint_index: usize,
         endpoint: &EndPoint,
     ) -> Router<Arc<ServiceState>> {
+        let mut router = Router::new();
+        let public_label = if endpoint.public() {
+            "public"
+        } else {
+            "private"
+        };
         match endpoint.mode() {
-            EndPointMode::LandingPage => router.route(endpoint.path(), get(get_landingpage)),
+            EndPointMode::LandingPage => {
+                info!("Configuring landing page endpoint: {}", endpoint.path());
+                router.route(endpoint.path(), get(get_landingpage))
+            }
             EndPointMode::Project => {
                 let sep = if endpoint.path() == "/" { "" } else { "/" };
+                info!(
+                    "Configuring {} project endpoint: {}{}$PROJECT",
+                    public_label,
+                    endpoint.path(),
+                    sep
+                );
                 let index_path = format!("{}{}projects", endpoint.path(), sep);
                 router = router.route(
                     index_path.as_str(),
@@ -291,6 +305,11 @@ impl Service {
             }
             EndPointMode::Action => {
                 // Both GET or POST are fine for actions
+                info!(
+                    "Configuring {} action endpoint: {}",
+                    public_label,
+                    endpoint.path()
+                );
                 router = router.route(
                     endpoint.path(),
                     get(get_action).layer(Extension(endpoint_index)),

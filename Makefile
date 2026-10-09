@@ -21,3 +21,18 @@ ifeq ($(STOP_SERVICE),0)
 else
 	if hurl --test --very-verbose --jobs 1 tests/test.hurl; then killall clam; exit 0; else killall clam; exit 1; fi
 endif
+
+.PHONY: testauth
+testauth:
+	@if ! command -v hurl > /dev/null; then echo "test dependency 'hurl' is not installed, please install it first..">&2; exit 1; fi
+	@if ! command -v dex > /dev/null; then echo "test dependency 'dex' is not installed, please install it first..">&2; exit 1; fi
+	dex serve tests/testauthservice/dex.yaml &
+	echo "(2s grace period for dex to start)">&2 && sleep 2
+	cd tests/testauthservice && cargo run -- --debug --config test.toml &
+	echo "(2s grace period for service to start)">&2 && sleep 2
+ifeq ($(STOP_SERVICE),0)
+	if hurl --test --very-verbose --jobs 1 tests/testauth.hurl; then exit 0; else exit 1; fi
+	@echo "don't forget to stop the clam and dex services yourself..."
+else
+	if hurl --test --very-verbose --jobs 1 tests/testauth.hurl; then killall clam dex; exit 0; else killall clam dex; exit 1; fi
+endif

@@ -1,0 +1,4 @@
+openid_configuration_url = "http://127.0.0.1:5556/dex/.well-known/openid-configuration"
+oauth_client_id = "testauth"
+oauth_client_secret = "testauthsecret"
+oauth_scope = [ "openid" ]

@@ -4,9 +4,6 @@ description = "You can upload a plain text file, and the tokens in it will be an
 rootdir = "./data"
 version = "0.1"
 
-[auth]
-postauth_url = "/index"
-
 [license]
 name = "GNU Affero General Public License"
 id = "AGPL-3.0-only"

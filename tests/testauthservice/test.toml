@@ -1,0 +1,87 @@
+name = "testauth"
+summary = "Test authentication"
+description = "Test service for authentication, doesn't do anything useful"
+authors = [ "Maarten van Gompel" ]
+affiliation = "CLST, Radboud University"
+termsofservice = "Use and adapt this example as you please"
+rootdir = "./data"
+version = "0.1"
+url = "http://127.0.0.1:8080"
+
+[license]
+name = "GNU Affero General Public License"
+id = "AGPL-3.0-only"
+url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
+
+[contact]
+name = "Maarten van Gompel"
+url = "https://proycon.anaproy.nl"
+email = "proycon@anaproy.nl"
+
+[auth]
+#User file is for HTTP Basic Authentication only
+user_file = "users.tsv"
+
+oauth_config_file = "oidc.toml"
+
+
+[[filetypes]]
+id = "plaintext"
+name = "Plain Text (UTF-8)"
+contenttype = "text/plain; charset=utf-8"
+
+[[endpoints]]
+name = "porch"
+path = "/"
+mode = "LandingPage"
+public = true
+
+#---------------------------------------------------------------------------------
+
+[[endpoints]]
+name = "Uppercase (project)"
+description = "Endpoint to uppercase a text (batch processing, file based)"
+path = "/"  #project name will be appended automatically
+mode = "Project"
+status_pattern = ".*" #every line from stderr qualifies as a status message
+command = "./testwrapper.sh"
+public = false
+
+[[endpoints.args]]
+parameter_id = "inputtxt"
+
+[[endpoints.parameters]]
+id = "inputtxt"
+name = "Input text"
+description = "Input text file"
+required = true
+type = { parametertype = "File", filetype = "plaintext", filename = { nametype = "Pattern", value = "\\.txt$" } }
+multiple = true
+
+[[endpoints.outputfiles]]
+name = "Output text"
+type = "plaintext"
+filename = { nametype = "Pattern", value = "\\.txt$" }
+
+#---------------------------------------------------------------------------------
+
+[[endpoints]]
+name = "Uppercase (action)"
+description = "Endpoint to uppercase a text (single round-trip action, string-based)"
+path = "/uppercase"
+mode = "Action"
+command = "./testwrapper.sh"
+filetype = "plaintext"
+public = false
+
+[[endpoints.args]]
+parameter_id = "text"
+
+[[endpoints.parameters]]
+id = "text"
+name = "Text"
+description = "Input text to turn to uppercase"
+required = true
+type = { parametertype = "String" }
+flag = "-t"
+

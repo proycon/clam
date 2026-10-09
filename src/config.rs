@@ -37,7 +37,7 @@ pub struct ServiceConfig {
 
     email: Option<String>,
 
-    /// base URL where this webservice is served
+    /// base URL where this webservice is served. This is required if you use OpenID Connect authentication. Do not add a trailing slash.
     url: Option<String>,
 
     /// base path where the user files for the webservice are stored at runtime, must be writable by the user the clam runs as. Defaults to current working directory if not set.
@@ -170,14 +170,11 @@ fn default_max_body_size() -> usize {
 /// Authorization Configuration, points to external files that holds credentials so it is
 /// easier to separate the service configuration from secret configurations.
 pub struct AuthConfig {
-    /// Path to a tab seperated file of usernames and hashed passwords for HTTP Basic Authentication.
+    /// Path to a tab separated file of usernames and hashed passwords for HTTP Basic Authentication.
     user_file: Option<String>,
 
     /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication
     oauth_config_file: Option<String>,
-
-    /// The URL to redirect to after succesful authentication
-    postauth_url: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
@@ -185,7 +182,6 @@ pub struct OAuthCredentials {
     /// URL from where to obtain the OpenID configuration at run-time, is usually something like https://example.com/.well-known/openid-configuration
     /// and obtained once when the service starts
     pub(crate) openid_configuration_url: String,
-    pub(crate) openid_redirect_url: String,
 
     pub(crate) oauth_client_id: String,
     pub(crate) oauth_client_secret: String,
@@ -207,7 +203,6 @@ impl OAuthCredentials {
         !self.openid_configuration_url.is_empty()
             && !self.oauth_client_id.is_empty()
             && !self.oauth_client_secret.is_empty()
-            && !self.openid_redirect_url.is_empty()
     }
 }
 
@@ -257,7 +252,7 @@ pub struct EndPoint {
 
     mode: EndPointMode,
 
-    /// Public endpoints are available without authentication
+    /// Public endpoints are available without authentication. Note that this only has effect if you actually set up OpenID Connect and/or HTTP Basic Authentication for your service.
     #[serde(default)]
     public: bool,
 

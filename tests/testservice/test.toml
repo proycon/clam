@@ -37,6 +37,7 @@ unload_time = 60
 name = "porch"
 path = "/"
 mode = "LandingPage"
+public = true
 
 #---------------------------------------------------------------------------------
 
@@ -47,6 +48,7 @@ path = "/"  #project name will be appended automatically
 mode = "Project"
 status_pattern = ".*" #every line from stderr qualifies as a status message
 command = "./testwrapper.sh"
+public = true
 
 [[endpoints.args]]
 parameter_id = "inputtxt"
@@ -73,6 +75,7 @@ path = "/uppercase"
 mode = "Action"
 command = "./testwrapper.sh"
 filetype = "plaintext"
+public = true
 
 [[endpoints.args]]
 parameter_id = "text"
@@ -93,6 +96,7 @@ mode = "Action"
 command = "./testwrapper_bgservice.sh"
 filetype = "plaintext"
 background_services = [ "echo" ]
+public = true
 
 [[endpoints.args]]
 parameter_id = "text"
@@ -112,6 +116,7 @@ path = "/paramtest"
 mode = "Action"
 command = "./paramtest.sh"
 filetype = "plaintext"
+public = true
 
 [[endpoints.parameters]]
 id = "bool"

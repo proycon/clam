@@ -1,3 +1,4 @@
+use crate::EndPointMode;
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig};
 use crate::dispatcher::{Message, ResponseMessage};
@@ -46,6 +47,9 @@ pub struct ServiceState {
     /// OpenID configuration as obtained from .well-know/openid-configuration endpoint
     pub(crate) openidconfig: Option<OpenIdConfiguration>,
 
+    /// Absolute URL to /oidc/callback on this server
+    pub(crate) openid_redirect_url: Option<String>,
+
     pub(crate) sender: RwLock<Sender<Message>>,
 
     /// Service Configuration
@@ -59,6 +63,9 @@ pub struct ServiceState {
 
     pub(crate) templating: Option<upon::Engine<'static>>,
     pub(crate) template_context: Option<upon::Value>,
+
+    /// Records a fatal last error message
+    pub(crate) tainted: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -120,13 +127,31 @@ fn read_oauth_config(config: &ServiceConfig) -> Result<OAuthCredentials, String>
 
 impl ServiceState {
     pub fn new(config: ServiceConfig, sender: Sender<Message>) -> Self {
+        let mut openid_redirect_url = None;
+        let mut tainted: Option<String> = None;
         //read oauth credentials and metadata endpoint
         let oauthcredentials = read_oauth_config(&config).expect("Unable to read oauth config");
+        if oauthcredentials.enabled() {
+            if config.url().is_none() {
+                tainted = Some(
+                    "A full URL must be configured in your service configuration when OpenID Connect authentication is enabled"
+                        .into(),
+                );
+            } else {
+                openid_redirect_url =
+                    Some(format!("{}/oidc/callback", config.url().as_ref().unwrap()));
+            }
+        }
+
         // get configuration from metadata endpoint
         let openidconfig = if oauthcredentials.enabled() {
-            Some(get_openid_config(
-                &oauthcredentials.openid_configuration_url,
-            ))
+            match get_openid_config(&oauthcredentials.openid_configuration_url) {
+                Ok(openidconfig) => Some(openidconfig),
+                Err(e) => {
+                    tainted = Some(e);
+                    None
+                }
+            }
         } else {
             None
         };
@@ -159,6 +184,7 @@ impl ServiceState {
             }),
             oauthcredentials,
             openidconfig,
+            openid_redirect_url,
             openapi: (&config).into(), //compute and associate openAPI specification
             jwkset,
             templating: if config.disable_ui() {
@@ -172,7 +198,16 @@ impl ServiceState {
                 let config: upon::Value = (&config).into();
                 Some(upon::value! { config: config, refresh: 0 })
             },
+            tainted,
             config,
+        }
+    }
+
+    pub fn healthy(&self) -> Result<(), &str> {
+        if let Some(tainted) = self.tainted.as_ref() {
+            Err(tainted.as_str())
+        } else {
+            Ok(())
         }
     }
 
@@ -195,6 +230,30 @@ impl ServiceState {
             .endpoints()
             .get(endpoint_index)
             .expect("endpoint must exist")
+    }
+
+    /// Retrieve an endpoint by index
+    pub fn try_endpoint(&self, endpoint_index: usize) -> Option<&EndPoint> {
+        self.config().endpoints().get(endpoint_index)
+    }
+
+    /// Get the full redirect URL for a given endpoint
+    pub fn redirect_url(&self, endpoint_index: usize) -> Option<String> {
+        if let Some(base_url) = self.config().url() {
+            if let Some(endpoint) = self.try_endpoint(endpoint_index) {
+                return Some(format!(
+                    "{}{}{}",
+                    base_url,
+                    &endpoint.path(),
+                    if EndPointMode::Project == *endpoint.mode() {
+                        "projects" //redirect to project index page
+                    } else {
+                        ""
+                    }
+                ));
+            }
+        }
+        None
     }
 
     /// Retrieve a background_service by index, will panic if it does not exist!

@@ -1,8 +1,9 @@
 use crate::error::ApiError;
 use crate::state::ServiceState;
-use axum::extract::Request;
+use crate::{ClamResponse, EndPointMode};
+use axum::extract::{Path, Request};
 use axum::extract::{Query, State};
-use axum::http::{StatusCode, header};
+use axum::http::{HeaderValue, StatusCode, header};
 use axum::middleware::Next;
 use axum::response::Response;
 use axum::response::{IntoResponse, Redirect};
@@ -10,6 +11,8 @@ use axum_extra::extract::cookie::{Cookie, CookieJar};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+
+use tracing::debug;
 
 use jsonwebtoken;
 
@@ -36,6 +39,7 @@ pub struct OpenIdConfiguration {
 /// Auth code as passed from the OIDC IdP to our callback endpoint after succesful login
 pub struct AuthRequest {
     code: String,
+    state: usize,
 }
 
 #[derive(Deserialize)]
@@ -71,13 +75,16 @@ impl CurrentUser {
     }
 }
 
+type AuthState = (Arc<ServiceState>, usize); //holds state and endpoint index
+
 /// Authentication middleware function
 /// adds username to the request if login succesful
 pub(crate) async fn auth(
-    state: State<Arc<ServiceState>>,
+    State((state, endpoint_index)): State<AuthState>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    let endpoint = state.endpoint(endpoint_index);
     let auth_header = req
         .headers()
         .get(header::AUTHORIZATION)
@@ -100,13 +107,10 @@ pub(crate) async fn auth(
                 return Err(StatusCode::UNAUTHORIZED);
             }
         }
-        None => {
-            //No authentication header supplied, we are 'anonymous'
-            req.extensions_mut().insert(CurrentUser(None));
-        }
         _ => {}
     };
 
+    //no header supplied
     //fallback: get OIDC token from cookie
     if let Some(cookie_header) = req.headers().get(header::COOKIE) {
         for cookie in cookie_header.to_str().unwrap().split(";") {
@@ -124,8 +128,33 @@ pub(crate) async fn auth(
         }
     }
 
-    //no authentication supplied, we are anonymous
-    req.extensions_mut().insert(CurrentUser(None));
+    if endpoint.public()
+        || (!state.oauthcredentials.enabled() && state.config().auth().user_file().is_none())
+    {
+        // No authentication information supplied, that's okay
+        // for public endpoints (or whenever no authentication is enabled for the entire service)
+        // we are user 'anonymous'
+        req.extensions_mut().insert(CurrentUser(None));
+    } else {
+        //Not a public endpoint, we are unauthorized and need to login!
+
+        if state.oauthcredentials.enabled() {
+            // Redirect to login page for OIDC
+            return Ok(
+                ClamResponse::RedirectGet(format!("/login/{}", endpoint_index)).into_response(),
+            );
+        } else {
+            return Ok((
+                StatusCode::UNAUTHORIZED,
+                [(
+                    header::WWW_AUTHENTICATE,
+                    format!("Basic realm=\"{}\"", state.config().name()),
+                )],
+            )
+                .into_response());
+        }
+    }
+
     return Ok(next.run(req).await);
 }
 
@@ -199,15 +228,19 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
 }
 
 /// Initiate the login process by redirecting to the authorization endpoint
-pub(crate) async fn login_handler(State(state): State<Arc<ServiceState>>) -> Response {
+pub(crate) async fn login_handler(
+    State(state): State<Arc<ServiceState>>,
+    Path(endpoint_index): Path<usize>,
+) -> Response {
     if let Some(openidconfig) = state.openidconfig.as_ref() {
         let scope: String = state.oauthcredentials.oauth_scope.join("%20");
         let auth_url = format!(
-            "{}?response_type=code&client_id={}&redirect_uri={}&scope={}",
+            "{}?response_type=code&client_id={}&redirect_uri={}&scope={}&state={}",
             openidconfig.authorization_endpoint,
             state.oauthcredentials.oauth_client_id,
-            state.oauthcredentials.openid_redirect_url,
-            scope
+            state.openid_redirect_url.as_ref().unwrap(),
+            scope,
+            endpoint_index, //this is the state, it will be send back to the callback and will redirect us once more to the final destination
         );
         Redirect::temporary(&auth_url).into_response()
     } else {
@@ -217,19 +250,29 @@ pub(crate) async fn login_handler(State(state): State<Arc<ServiceState>>) -> Res
 }
 
 // Get OpenID Configuration from the Identity Service Provider
-pub fn get_openid_config(url: &str) -> OpenIdConfiguration {
-    let response = reqwest::blocking::get(url)
-        .expect("Failed to obtain OpenID Configuration from identity provider");
-    response
-        .json()
-        .expect("Failed to parse OpenID Configuration")
+pub fn get_openid_config(url: &str) -> Result<OpenIdConfiguration, String> {
+    debug!("Obtaining OpenID configuration from {}", url);
+    match ureq::get(url).call() {
+        Ok(mut response) => response
+            .body_mut()
+            .read_json::<OpenIdConfiguration>()
+            .map_err(|e| format!("Failed to parse OpenID Configuration: {}", e)),
+        Err(e) => Err(format!(
+            "Failed to obtain OpenID Configuration from identity provider: {}",
+            e
+        )),
+    }
 }
 
 // Get JSON Web Key Set
 pub fn get_jwks(url: &str) -> jsonwebtoken::jwk::JwkSet {
-    let response = reqwest::blocking::get(url)
+    let mut response = ureq::get(url)
+        .call()
         .expect("Failed to obtain JSON Web Token Set from identity provider");
-    response.json().expect("Failed to parse JWKS")
+    response
+        .body_mut()
+        .read_json::<jsonwebtoken::jwk::JwkSet>()
+        .expect("Failed to parse JWKS")
 }
 
 /// Handles the callback and exchanges the code for a token
@@ -239,8 +282,17 @@ pub async fn callback_handler(
     Query(auth_req): Query<AuthRequest>,
 ) -> Result<(CookieJar, Redirect), StatusCode> {
     if let Some(openidconfig) = state.openidconfig.as_ref() {
+        // we passed the endpoint_index as state in the original auth request, now we pick it up again
+        // so we can derive the actual endpoint to redrect to from it redirect_uri from it
+        let redirect_uri = state.redirect_url(auth_req.state);
+        if redirect_uri.is_none() {
+            debug!("Invalid endpoint_index provided to OIDC callback!");
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+
         let client = reqwest::Client::new();
 
+        //let state_as_str = format!("{}", auth_req.state);
         let params = [
             ("grant_type", "authorization_code"),
             ("code", &auth_req.code),
@@ -251,8 +303,12 @@ pub async fn callback_handler(
             ),
             (
                 "redirect_uri",
-                state.oauthcredentials.openid_redirect_url.as_str(),
+                state
+                    .openid_redirect_url
+                    .as_ref()
+                    .expect("openid_redirect_url should have been computed earlier"),
             ),
+            //("state", &state_as_str),
         ];
 
         let res = client
@@ -276,14 +332,7 @@ pub async fn callback_handler(
             let updated_jar = jar.add(cookie);
 
             // Redirect
-            if let Some(url) = state.config().url() {
-                return Ok((updated_jar, Redirect::to(url)));
-            } else {
-                return Ok((
-                    updated_jar,
-                    Redirect::to(state.oauthcredentials.cookie_path()),
-                ));
-            }
+            return Ok((updated_jar, Redirect::to(redirect_uri.as_ref().unwrap())));
         }
     }
     Err(StatusCode::UNAUTHORIZED)
