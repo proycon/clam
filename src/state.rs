@@ -109,9 +109,9 @@ fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::
 fn read_oauth_config(config: &ServiceConfig) -> Result<OAuthCredentials, String> {
     if let Some(filename) = config.auth().oauth_config_file() {
         let data = std::fs::read_to_string(filename)
-            .map_err(|e| format!("Failed to read OAuth config file: {}", e))?;
-        let oauth2_config: OAuthCredentials = serde_json::from_str(&data)
-            .map_err(|e| format!("Failed to parse OAuth config file: {}", e))?;
+            .map_err(|e| format!("Failed to read OAuth config file {}: {}", filename, e))?;
+        let oauth2_config: OAuthCredentials = toml::from_str(&data)
+            .map_err(|e| format!("Failed to parse OAuth config file {}: {}", filename, e))?;
         Ok(oauth2_config)
     } else {
         Ok(Default::default())
