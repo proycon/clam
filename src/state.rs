@@ -135,7 +135,7 @@ impl ServiceState {
         //read oauth credentials and metadata endpoint
         let oauthcredentials = read_oauth_config(&config).expect("Unable to read oauth config");
         if oauthcredentials.enabled() {
-            if config.url().is_none() {
+            if config.url().is_none() || config.url().as_ref().unwrap().is_empty() {
                 tainted = Some(
                     "A full URL must be configured in your service configuration when OpenID Connect authentication is enabled"
                         .into(),
