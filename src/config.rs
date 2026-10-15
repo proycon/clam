@@ -226,7 +226,7 @@ pub enum EndPointMode {
     LandingPage,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum CommandArg {
     /// Literal static parameter passed at configuration time
@@ -266,6 +266,10 @@ pub struct EndPoint {
     /// Arguments to pass to the command
     #[serde(default)]
     args: Vec<CommandArg>,
+
+    /// Automatically add all parameters to the arguments (If you didn't specify 'args' at all, then this is enabled by default),
+    #[serde(default)]
+    auto_add_args: bool,
 
     #[serde(default)]
     parameters: Vec<Parameter>,

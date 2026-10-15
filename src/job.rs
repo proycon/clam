@@ -1,4 +1,5 @@
 use crate::auth::CurrentUser;
+use crate::config::ServiceConfig;
 use crate::config::{CommandArg, EndPoint, FileName, ParameterType};
 use crate::dispatcher::Message;
 use crate::project::Project;
@@ -8,7 +9,6 @@ use derive_getters::Getters;
 use nix::sys::signal::{Signal, kill};
 use nix::unistd::Pid;
 use regex::Regex;
-use std::fs;
 use std::io::{BufRead, BufReader, Read};
 use std::path::PathBuf;
 use std::sync::mpsc::Sender;
@@ -168,13 +168,22 @@ impl Job {
         let mut error = String::new();
         let mut endpoint_args = Vec::new();
         let endpoint_args = {
-            if !endpoint.args().is_empty() {
-                endpoint.args()
+            if !endpoint.args().is_empty() && !endpoint.auto_add_args() {
+                endpoint.args() //shortcut without any extra allocations
             } else {
+                let mut prevent_duplicates = false;
+                for arg in endpoint.args() {
+                    endpoint_args.push(arg.clone());
+                    prevent_duplicates = true;
+                }
                 for parameter in endpoint.parameters() {
-                    endpoint_args.push(CommandArg::FromParameter {
+                    let arg = CommandArg::FromParameter {
                         parameter_id: parameter.id().to_string(),
-                    });
+                    };
+                    if prevent_duplicates && endpoint_args.contains(&arg) {
+                        continue;
+                    }
+                    endpoint_args.push(arg);
                 }
                 &endpoint_args
             }
