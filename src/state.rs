@@ -97,15 +97,17 @@ impl Default for BackgroundServiceState {
 fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::io::Error> {
     let mut user_db: HashMap<String, String> = HashMap::new();
     if let Some(user_file) = config.auth().user_file() {
-        let f = std::fs::File::open(user_file)?;
-        let reader = std::io::BufReader::new(f);
-        for line in std::io::BufRead::lines(reader) {
-            let line = line.unwrap();
-            let parts: Vec<&str> = line.split('\t').collect();
-            if parts.len() >= 2 {
-                let username = parts[0];
-                let password_hash = parts[1];
-                user_db.insert(username.to_string(), password_hash.to_string());
+        if !user_file.is_empty() {
+            let f = std::fs::File::open(user_file)?;
+            let reader = std::io::BufReader::new(f);
+            for line in std::io::BufRead::lines(reader) {
+                let line = line.unwrap();
+                let parts: Vec<&str> = line.split('\t').collect();
+                if parts.len() >= 2 {
+                    let username = parts[0];
+                    let password_hash = parts[1];
+                    user_db.insert(username.to_string(), password_hash.to_string());
+                }
             }
         }
     }
@@ -115,14 +117,15 @@ fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::
 /// Read the OAuth config with the openid credentials and the configuration endpoint
 fn read_oauth_config(config: &ServiceConfig) -> Result<OAuthCredentials, String> {
     if let Some(filename) = config.auth().oauth_config_file() {
-        let data = std::fs::read_to_string(filename)
-            .map_err(|e| format!("Failed to read OAuth config file {}: {}", filename, e))?;
-        let oauth2_config: OAuthCredentials = toml::from_str(&data)
-            .map_err(|e| format!("Failed to parse OAuth config file {}: {}", filename, e))?;
-        Ok(oauth2_config)
-    } else {
-        Ok(Default::default())
+        if !filename.is_empty() {
+            let data = std::fs::read_to_string(filename)
+                .map_err(|e| format!("Failed to read OAuth config file {}: {}", filename, e))?;
+            let oauth2_config: OAuthCredentials = toml::from_str(&data)
+                .map_err(|e| format!("Failed to parse OAuth config file {}: {}", filename, e))?;
+            return Ok(oauth2_config);
+        }
     }
+    Ok(Default::default())
 }
 
 impl ServiceState {
@@ -175,10 +178,14 @@ impl ServiceState {
             ]),
             shares: RwLock::new(Default::default()),
             user_db: RwLock::new(if let Some(user_file) = config.auth().user_file() {
-                read_user_db(&config).expect(&format!(
-                    "User database could not be read from {}",
-                    user_file
-                ))
+                if !user_file.is_empty() {
+                    read_user_db(&config).expect(&format!(
+                        "User database could not be read from {}",
+                        user_file
+                    ))
+                } else {
+                    HashMap::new()
+                }
             } else {
                 HashMap::new()
             }),
@@ -200,6 +207,14 @@ impl ServiceState {
             },
             tainted,
             config,
+        }
+    }
+
+    pub fn basicauth_enabled(&self) -> bool {
+        if let Some(user_file) = self.config().auth().user_file() {
+            !user_file.is_empty()
+        } else {
+            false
         }
     }
 

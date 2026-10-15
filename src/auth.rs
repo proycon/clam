@@ -128,9 +128,7 @@ pub(crate) async fn auth(
         }
     }
 
-    if endpoint.public()
-        || (!state.oauthcredentials.enabled() && state.config().auth().user_file().is_none())
-    {
+    if endpoint.public() || (!state.oauthcredentials.enabled() && !state.basicauth_enabled()) {
         // No authentication information supplied, that's okay
         // for public endpoints (or whenever no authentication is enabled for the entire service)
         // we are user 'anonymous'

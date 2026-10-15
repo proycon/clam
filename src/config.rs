@@ -170,10 +170,10 @@ fn default_max_body_size() -> usize {
 /// Authorization Configuration, points to external files that holds credentials so it is
 /// easier to separate the service configuration from secret configurations.
 pub struct AuthConfig {
-    /// Path to a tab separated file of usernames and hashed passwords for HTTP Basic Authentication.
+    /// Path to a tab separated file of usernames and hashed passwords for HTTP Basic Authentication. An empty string value is also allowed to disable this.
     user_file: Option<String>,
 
-    /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication
+    /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication. An empty string value is also allowed to disable this.
     oauth_config_file: Option<String>,
 }
 
