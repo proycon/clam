@@ -210,14 +210,12 @@ impl Service {
                 router.route(endpoint.path(), get(get_landingpage))
             }
             EndPointMode::Project => {
-                let sep = if endpoint.path() == "/" { "" } else { "/" };
                 info!(
-                    "Configuring {} project endpoint: {}{}$PROJECT",
+                    "Configuring {} project endpoint: {}/$PROJECT",
                     public_label,
-                    endpoint.path(),
-                    sep
+                    endpoint.normpath(),
                 );
-                let index_path = format!("{}{}projects", endpoint.path(), sep);
+                let index_path = format!("{}/projects", endpoint.normpath());
                 router = router.route(
                     index_path.as_str(),
                     get(get_projects).layer(Extension(endpoint_index)),
@@ -226,7 +224,7 @@ impl Service {
                     index_path.as_str(),
                     post(post_create_project).layer(Extension(endpoint_index)),
                 );
-                let path = format!("{}{{project}}", endpoint.path());
+                let path = format!("{}/{{project}}", endpoint.normpath());
                 router = router.route(
                     path.as_str(),
                     get(get_project).layer(Extension(endpoint_index)),
@@ -261,7 +259,7 @@ impl Service {
                 );
 
                 // Generic file upload endpoint
-                let fpath = format!("{}{}{{project}}/upload", endpoint.path(), sep);
+                let fpath = format!("{}/{{project}}/upload", endpoint.normpath());
                 router = router.route(
                     fpath.as_str(),
                     get(upload_input_file_multipart)
@@ -272,7 +270,7 @@ impl Service {
                 );
 
                 // File output endpoints
-                let fpath = format!("{}{}{{project}}/output/{{filename}}", endpoint.path(), sep);
+                let fpath = format!("{}/{{project}}/output/{{filename}}", endpoint.normpath());
                 router = router.route(
                     fpath.as_str(),
                     get(download_output_file).layer(Extension(endpoint_index)),
@@ -280,9 +278,8 @@ impl Service {
 
                 //File uploading/download/deletion endpoints within a project
                 let fpath = format!(
-                    "{}{}{{project}}/{{parameter_id}}/{{filename}}",
-                    endpoint.path(),
-                    sep
+                    "{}/{{project}}/{{parameter_id}}/{{filename}}",
+                    endpoint.normpath(),
                 );
                 router = router.route(
                     fpath.as_str(),

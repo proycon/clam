@@ -228,7 +228,7 @@ impl EndPoint {
                     )
                     .into();
                 paths.add_path_operation(
-                    format!("{}projects", self.path()),
+                    format!("{}/projects", self.normpath()),
                     vec![HttpMethod::Get],
                     get_index_operation,
                 );
@@ -274,7 +274,7 @@ impl EndPoint {
                     )
                     .into();
                 paths.add_path_operation(
-                    format!("{}projects", self.path()),
+                    format!("{}/projects", self.normpath()),
                     vec![HttpMethod::Post],
                     post_index_operation,
                 );
@@ -308,7 +308,7 @@ impl EndPoint {
                     .into();
                 get_operation.parameters = Some(vec![project_path_parameter()]);
                 paths.add_path_operation(
-                    format!("{}{{project}}", self.path()),
+                    format!("{}/{{project}}", self.normpath()),
                     vec![HttpMethod::Get],
                     get_operation,
                 );
@@ -335,7 +335,7 @@ impl EndPoint {
                     )
                     .build();
                 paths.add_path_operation(
-                    format!("{}{{project}}", self.path()),
+                    format!("{}/{{project}}", self.normpath()),
                     vec![HttpMethod::Put],
                     put_operation,
                 );
@@ -359,7 +359,7 @@ impl EndPoint {
                     )
                     .build();
                 paths.add_path_operation(
-                    format!("{}{{project}}", self.path()),
+                    format!("{}/{{project}}", self.normpath()),
                     vec![HttpMethod::Delete],
                     delete_operation,
                 );
@@ -397,7 +397,7 @@ impl EndPoint {
                     )
                     .into();
                 paths.add_path_operation(
-                    format!("{}{{project}}", self.path()),
+                    format!("{}/{{project}}", self.normpath()),
                     vec![HttpMethod::Post],
                     post_operation,
                 );
@@ -444,7 +444,11 @@ impl EndPoint {
                             .as_mut()
                             .map(|parameters| parameters.push(filename_path_parameter()));
                         paths.add_path_operation(
-                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            format!(
+                                "{}/{{project}}/{}/{{filename}}",
+                                self.normpath(),
+                                parameter.id()
+                            ),
                             vec![HttpMethod::Get],
                             get_inputfile_operation,
                         );
@@ -476,7 +480,11 @@ impl EndPoint {
                             .as_mut()
                             .map(|parameters| parameters.push(filename_path_parameter()));
                         paths.add_path_operation(
-                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            format!(
+                                "{}/{{project}}/{}/{{filename}}",
+                                self.normpath(),
+                                parameter.id()
+                            ),
                             vec![HttpMethod::Delete],
                             delete_inputfile_operation,
                         );
@@ -520,7 +528,11 @@ impl EndPoint {
                             .as_mut()
                             .map(|parameters| parameters.push(filename_path_parameter()));
                         paths.add_path_operation(
-                            format!("{}{{project}}/{}/{{filename}}", self.path(), parameter.id()),
+                            format!(
+                                "{}/{{project}}/{}/{{filename}}",
+                                self.normpath(),
+                                parameter.id()
+                            ),
                             vec![HttpMethod::Put],
                             upload_inputfile_operation,
                         );
@@ -572,7 +584,7 @@ impl EndPoint {
                     );
                     upload_inputfile_operation.parameters = Some(vec![project_path_parameter()]);
                     paths.add_path_operation(
-                        format!("{}{{project}}/upload", self.path()),
+                        format!("{}/{{project}}/upload", self.normpath()),
                         vec![HttpMethod::Post],
                         upload_inputfile_operation,
                     );

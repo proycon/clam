@@ -777,6 +777,16 @@ impl ServiceConfig {
 }
 
 impl EndPoint {
+    /// Normalized path, ensures there is NO trailing slash
+    /// Returns an empty string for the root path ( / )
+    pub fn normpath(&self) -> &str {
+        if self.path.chars().last() == Some('/') {
+            &self.path[0..self.path.len() - 1]
+        } else {
+            self.path.as_str()
+        }
+    }
+
     pub fn parameter<'a>(&'a self, parameter_id: &str) -> Option<&'a Parameter> {
         for parameter in self.parameters.iter() {
             if parameter.id.as_str() == parameter_id {
@@ -793,6 +803,12 @@ impl EndPoint {
         if self.path.is_empty() || self.path.chars().next() != Some('/') {
             Err(ClamError::ConfigValidationError(format!(
                 "Endpoint paths must always start with a slash, got '{}' instead (endpoint name: {})",
+                self.path,
+                self.name().as_deref().unwrap_or("none")
+            )))
+        } else if self.path != "/" && self.path.chars().last() == Some('/') {
+            Err(ClamError::ConfigValidationError(format!(
+                "Endpoint paths must not have a trailing slash, got '{}' (endpoint name: {})",
                 self.path,
                 self.name().as_deref().unwrap_or("none")
             )))
