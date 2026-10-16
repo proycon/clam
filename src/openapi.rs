@@ -199,11 +199,10 @@ impl EndPoint {
             &EndPointMode::Project => {
                 //GET projects -- project index
                 let mut get_index_operation = Operation::new();
-                get_index_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Project index".to_string()),
-                );
+                get_index_operation.summary = Some(format!(
+                    "{} - Project index",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 get_index_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| {
                         "This endpoint provides a list of all projects (pertaining to this this project path)".to_string()
@@ -238,11 +237,10 @@ impl EndPoint {
 
                 //POST projects -- post to the index project creation (alternative)
                 let mut post_index_operation = Operation::new();
-                post_index_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Project creation (alternative endpoint)".to_string()),
-                );
+                post_index_operation.summary = Some(format!(
+                    "{} - Project creation (alternative endpoint)",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 post_index_operation.description = Some(
                     self.description()
                         .clone()
@@ -279,11 +277,10 @@ impl EndPoint {
 
                 //GET $project
                 let mut get_operation = Operation::new();
-                get_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Project state and information".to_string()),
-                );
+                get_operation.summary = Some(format!(
+                    "{} - Project state and information",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 get_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "Retrieves the project state and depending on it presents a 1) a listing of uploaded input files and parameters in a staging area, 2) an in progress notification, or 3) a list of output files when the project is done".to_string()));
                 get_operation.responses = ResponsesBuilder::new()
@@ -313,11 +310,10 @@ impl EndPoint {
 
                 //PUT $project (create)
                 let mut put_operation = Operation::new();
-                put_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Create a new project".to_string()),
-                );
+                put_operation.summary = Some(format!(
+                    "{} - Create a new project",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 put_operation.description = Some(self.description().clone().unwrap_or_else(|| {
                     "Creates a new (empty) project, you can upload files in subsequent requests"
                         .to_string()
@@ -340,11 +336,10 @@ impl EndPoint {
 
                 //DELETE $project
                 let mut delete_operation = Operation::new();
-                delete_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Delete a project".to_string()),
-                );
+                delete_operation.summary = Some(format!(
+                    "{} - Delete a project",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 delete_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| {
                         "Deletes this project, including all input and output files. Automatically aborts any associated running processes.".to_string()
@@ -364,11 +359,10 @@ impl EndPoint {
 
                 //POST $project
                 let mut post_operation = Operation::new();
-                post_operation.summary = Some(
-                    self.summary()
-                        .clone()
-                        .unwrap_or_else(|| "Start a project run".to_string()),
-                );
+                post_operation.summary = Some(format!(
+                    "{} - Start a project run",
+                    self.name().as_deref().unwrap_or_default()
+                ));
                 post_operation.description =
                     Some(self.description().clone().unwrap_or_else(|| "This starts a project, with the specified parameters and runs the background job(s).".to_string()));
                 post_operation.parameters = Some(vec![project_path_parameter()]);
@@ -418,8 +412,9 @@ impl EndPoint {
                         //GET inputfile
                         let mut get_inputfile_operation = Operation::new();
                         get_inputfile_operation.summary = Some(format!(
-                            "Retrieves the specified inputfile for parameter: {}",
-                            parameter.name(),
+                            "{} - Retrieves the specified inputfile for parameter: {}",
+                            self.name().as_deref().unwrap_or_default(),
+                            parameter.name()
                         ));
                         get_inputfile_operation.responses = ResponsesBuilder::new()
                             .response(
@@ -454,8 +449,9 @@ impl EndPoint {
                         //DELETE inputfile
                         let mut delete_inputfile_operation = Operation::new();
                         delete_inputfile_operation.summary = Some(format!(
-                            "Removes the specified inputfile for parameter: {}",
-                            parameter.name(),
+                            "{} - Removes the specified inputfile for parameter: {}",
+                            self.name().as_deref().unwrap_or_default(),
+                            parameter.name()
                         ));
                         delete_inputfile_operation.responses = ResponsesBuilder::new()
                             .response(
@@ -490,7 +486,8 @@ impl EndPoint {
                         //Upload inputfile (PUT), file contents is directly in request body and filename encoded in URL
                         let mut upload_inputfile_operation = Operation::new();
                         upload_inputfile_operation.summary = Some(format!(
-                            "Upload the specified inputfile for parameter: {}{}",
+                            "{} - Upload the specified inputfile for parameter: {}{}",
+                            self.name().as_deref().unwrap_or_default(),
                             parameter.name(),
                             if parameter.multiple() {
                                 ", this may be called multiple times to upload multiple files"
@@ -539,7 +536,10 @@ impl EndPoint {
                 if !file_parameters.is_empty() {
                     //Upload inputfile (POST), secondary upload point, file name and contents are form-encoded in request body
                     let mut upload_inputfile_operation = Operation::new();
-                    upload_inputfile_operation.summary = Some(format!("Generic upload endpoint"));
+                    upload_inputfile_operation.summary = Some(format!(
+                        "{} - Generic upload endpoint",
+                        self.name().as_deref().unwrap_or_default()
+                    ));
                     upload_inputfile_operation.description = Some(format!(
                         "This upload endpoint accepts multipart/form-data, the field names must correspond with the parameter IDs you want to upload for",
                     ));
