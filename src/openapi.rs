@@ -8,8 +8,6 @@ use utoipa::openapi::{
     schema::ArrayBuilder, schema::Type,
 };
 
-//TODO: add projects/ endpoint
-
 impl From<&ServiceConfig> for OpenApi {
     fn from(config: &ServiceConfig) -> Self {
         let error_schema = ApiError::schema();
