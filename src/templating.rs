@@ -114,6 +114,7 @@ impl From<&ServiceConfig> for upon::Value {
                     Some(upon::value! {
                         name: endpoint.name(),
                         path: endpoint.path(),
+                        normpath: endpoint.normpath(),
                         is_project: endpoint.mode() == &EndPointMode::Project,
                         description: endpoint.description(),
                     })

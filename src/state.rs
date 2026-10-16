@@ -259,9 +259,9 @@ impl ServiceState {
                 return Some(format!(
                     "{}{}{}",
                     base_url,
-                    &endpoint.path(),
+                    &endpoint.normpath(),
                     if EndPointMode::Project == *endpoint.mode() {
-                        "projects" //redirect to project index page
+                        "/projects" //redirect to project index page
                     } else {
                         ""
                     }

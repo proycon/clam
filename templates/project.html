@@ -41,7 +41,7 @@
 </thead>
 <tbody>
 {% for inputfile in status.data.input_files %}
-<tr><td class="filename"><a href="{{ path}}/{{ inputfile.parameter_id }}/{{inputfile.name }}">{{ inputfile.name }}</a></td><td class="parameter">{{inputfile.parameter_name}}</td><td class="filetype">{{ inputfile.filetype.name }}</td></tr>
+<tr><td class="filename"><a href="{{ path }}/{{ inputfile.parameter_id }}/{{inputfile.name }}">{{ inputfile.name }}</a></td><td class="parameter">{{inputfile.parameter_name}}</td><td class="filetype">{{ inputfile.filetype.name }}</td></tr>
 {% endfor %}
 </tbody>
 </table>

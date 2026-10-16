@@ -402,6 +402,7 @@ async fn get_projects(
                     name: endpoint.name().clone().unwrap_or_default(),
                     description: endpoint.description().clone().unwrap_or_default(),
                     path: endpoint.path(),
+                    normpath: endpoint.normpath(),
                     projects: projects.into_iter().map(|project| project.into()).collect::<Vec<String>>(),
                 }),
             ),
@@ -475,9 +476,9 @@ async fn get_project(
                         Some(upon::value! {
                             name: project.endpoint().name().clone().unwrap_or_default(),
                             description: project.endpoint().description().clone().unwrap_or_default(),
-                            parentpath: format!("{}{}", project.endpoint().path(), "projects"),
+                            parentpath: format!("{}/{}", project.endpoint().normpath(), "projects"),
                             project: project.name(),
-                            path: format!("{}{}", project.endpoint().path(), project.name()),
+                            path: format!("{}/{}", project.endpoint().normpath(), project.name()),
                             refresh: match projectstatus {
                                 ProjectStatus::Running { .. } | ProjectStatus::Scheduled=> 3,
                                 _ => 0,
@@ -666,7 +667,7 @@ async fn delete_project(
                 Method::DELETE => Ok(ClamResponse::NoContent()),
                 _ => Ok(ClamResponse::RedirectGet(format!(
                     "{}index",
-                    project.endpoint().path()
+                    project.endpoint().normpath()
                 ))),
             }
         }
@@ -1020,6 +1021,7 @@ async fn get_action(
                 name: endpoint.name().clone().unwrap_or_default(),
                 description: endpoint.description().clone().unwrap_or_default(),
                 path: endpoint.path(),
+                normpath: endpoint.normpath(),
                 parameters: endpoint.parameters(),
             }),
         ),
