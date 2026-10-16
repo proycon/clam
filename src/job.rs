@@ -526,6 +526,7 @@ impl Job {
 
     pub fn log(&mut self, message: &str) {
         self.statuslog.push_str(message);
+        self.statuslog.push('\n');
     }
 
     pub fn set_progress(&mut self, progress: u8) {
