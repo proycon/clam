@@ -226,7 +226,7 @@ pub enum EndPointMode {
     LandingPage,
 }
 
-#[derive(Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
 #[serde(untagged)]
 pub enum CommandArg {
     /// Literal static parameter passed at configuration time

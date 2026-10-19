@@ -392,65 +392,62 @@ impl Job {
                                     ..
                                 } => Some(format!("{}", default)),
                                 ParameterType::File { .. } => {
-                                    if parameter.required() {
-                                        //check if the file was uploaded before, we expect at least one match, but there may be multiple if parameter.multiple is set!
-                                        if let Some(project) = project {
-                                            let mut p = project.path();
-                                            p.push(parameter.id());
-                                            let mut file_found = false;
-                                            if let Ok(dir_iter) = std::fs::read_dir(&p) {
-                                                for entry in dir_iter {
-                                                    if let Ok(entry) = entry {
-                                                        let path = entry.path();
-                                                        if path.is_file() {
-                                                            file_found = true;
-                                                            let path =
-                                                                path.strip_prefix(project.path()).map_err(|e| format!("Failed to strip project path from {:?}: {}", path, e))?;
+                                    //check if the file was uploaded before,
+                                    //we expect at least one match, but there may be multiple if parameter.multiple is set!
+                                    if let Some(project) = project {
+                                        let mut p = project.path();
+                                        p.push(parameter.id());
+                                        let mut file_found = false;
+                                        if let Ok(dir_iter) = std::fs::read_dir(&p) {
+                                            for entry in dir_iter {
+                                                if let Ok(entry) = entry {
+                                                    let path = entry.path();
+                                                    if path.is_file() {
+                                                        file_found = true;
+                                                        let path =
+                                                            path.strip_prefix(project.path()).map_err(|e| format!("Failed to strip project path from {:?}: {}", path, e))?;
 
-                                                            //add to arguments here
-                                                            if let Some(flag) = parameter.flag() {
-                                                                if flag.chars().last() == Some('=')
-                                                                {
-                                                                    args.push(format!(
-                                                                        "{}{}",
-                                                                        flag,
-                                                                        path.to_string_lossy()
-                                                                    ));
-                                                                } else {
-                                                                    args.push(flag.clone()); //if there are multiple values, the flag is repeated for each
-                                                                    args.push(
-                                                                        path.to_string_lossy()
-                                                                            .into(),
-                                                                    );
-                                                                }
+                                                        //add to arguments here
+                                                        if let Some(flag) = parameter.flag() {
+                                                            if flag.chars().last() == Some('=') {
+                                                                args.push(format!(
+                                                                    "{}{}",
+                                                                    flag,
+                                                                    path.to_string_lossy()
+                                                                ));
                                                             } else {
+                                                                args.push(flag.clone()); //if there are multiple values, the flag is repeated for each
                                                                 args.push(
                                                                     path.to_string_lossy().into(),
                                                                 );
                                                             }
-                                                            if !parameter.multiple() {
-                                                                //stop after first match
-                                                                break;
-                                                            }
+                                                        } else {
+                                                            args.push(
+                                                                path.to_string_lossy().into(),
+                                                            );
+                                                        }
+                                                        if !parameter.multiple() {
+                                                            //stop after first match
+                                                            break;
                                                         }
                                                     }
                                                 }
                                             }
-                                            if !file_found {
-                                                error += &format!(
-                                                    "parameter {}: missing required parameter (file not provided in request)\n",
-                                                    parameter.id().as_str()
-                                                );
-                                            }
-                                        } else {
-                                            //probably unreachable, but better safe than sorry:
+                                        }
+                                        if !file_found && parameter.required() {
                                             error += &format!(
-                                                "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)\n",
-                                                parameter.id()
+                                                "parameter {}: missing required parameter (file not provided in request)\n",
+                                                parameter.id().as_str()
                                             );
                                         }
+                                    } else {
+                                        //probably unreachable, but better safe than sorry:
+                                        error += &format!(
+                                            "parameter {}: file parameter is invalid on action endpoints (internal configuration error!)\n",
+                                            parameter.id()
+                                        );
                                     }
-                                    skip = true; //if there was anything to add, we already handled it here
+                                    skip = true; //if there was anything to add, we already handled it here so we can skip the handler later on
                                     None
                                 }
                                 ParameterType::Selection {
