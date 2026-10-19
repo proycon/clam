@@ -586,9 +586,9 @@ impl Job {
                         let dispatcherchannel2 = dispatcherchannel.clone();
 
                         let status_pattern = self.status_pattern;
-                        let ready_pattern = self.up_pattern;
+                        let up_pattern = self.up_pattern;
 
-                        let error = if status_pattern.is_some() || ready_pattern.is_some() {
+                        let error = if status_pattern.is_some() || up_pattern.is_some() {
                             // we spawn another thread to monitor stderr for the status pattern or ready pattern and send updates when this matches
                             // we also collect all of stderr
                             let stderr_thread = std::thread::spawn(move || {
@@ -600,9 +600,9 @@ impl Job {
                                             full_stderr.push_str(&line);
                                             full_stderr.push('\n');
 
-                                            if let Some(ready_pattern) = ready_pattern.as_ref() {
+                                            if let Some(up_pattern) = up_pattern.as_ref() {
                                                 //job is for a background service and is done loading, ready to receive requests
-                                                if ready_pattern.is_match(line.as_str()) {
+                                                if up_pattern.is_match(line.as_str()) {
                                                     let _ = dispatcherchannel2
                                                         .send(Message::Up(job_id));
                                                 }
