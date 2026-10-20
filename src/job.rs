@@ -650,7 +650,7 @@ impl Job {
 
                         if let Err(e) = dispatcherchannel.send(Message::FinishJob {
                             id: self.id,
-                            exitstatus,
+                            exitstatus: exitstatus.code().unwrap_or(127),
                             output,
                             error,
                         }) {

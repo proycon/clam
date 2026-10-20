@@ -35,7 +35,7 @@ pub enum Message {
     /// Finish a job, this is sent by a job monitor thread to the dispatcher
     FinishJob {
         id: JobId,
-        exitstatus: ExitStatus,
+        exitstatus: i32,
         /// stdout
         output: String,
         /// stderr
@@ -350,14 +350,10 @@ impl Dispatcher {
                             self.state.done_jobs.write(),
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
-                                debug!("finishing job {:?}", job);
                                 job.set_output(output);
-                                let failed = if let Some(code) = exitstatus.code() {
-                                    job.set_exitstatus(code);
-                                    code != 0
-                                } else {
-                                    false
-                                };
+                                job.set_exitstatus(exitstatus);
+                                debug!("finishing job {:?}", job);
+                                let failed = exitstatus != 0;
                                 // if this was a background service, mark it as down now
                                 if let JobMaster::BackgroundService(bgservice_index) = *job.master()
                                 {
