@@ -10,6 +10,7 @@ use axum::response::{IntoResponse, Redirect};
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::sync::Arc;
 
 use tracing::debug;
@@ -161,11 +162,16 @@ fn validate_basic_auth(credentials: &str, state: &ServiceState) -> Option<String
     if let Ok(credentials) = STANDARD.decode(credentials.as_bytes()) {
         if let Ok(credentials) = std::str::from_utf8(&credentials) {
             let mut fields = credentials.splitn(2, ':');
-            if let (Some(user), Some(pwhash)) = (fields.next(), fields.next()) {
+            if let (Some(user), Some(password)) = (fields.next(), fields.next()) {
+                // hash password (SHA256)
+                let pwhash: String = Sha256::digest(password.as_bytes())
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect();
                 //lookup in user database
                 if let Ok(user_db) = state.user_db.read() {
                     if let Some(ref_pwhash) = user_db.get(user) {
-                        if ref_pwhash == pwhash {
+                        if &ref_pwhash.to_lowercase() == &pwhash {
                             return Some(user.to_string());
                         }
                     }

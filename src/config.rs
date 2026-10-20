@@ -53,7 +53,7 @@ pub struct ServiceConfig {
     /// The contact person/organisation for this deployment of the webservice (may differ from the actual authors!)
     contact: Option<utoipa::openapi::Contact>,
 
-    /// URL for the Terms of Service for this API
+    /// The Terms of Service for this API
     termsofservice: Option<String>,
 
     /// File type definitions
@@ -168,7 +168,7 @@ fn default_max_body_size() -> usize {
 /// Authorization Configuration, points to external files that holds credentials so it is
 /// easier to separate the service configuration from secret configurations.
 pub struct AuthConfig {
-    /// Path to a tab separated file of usernames and hashed passwords for HTTP Basic Authentication. An empty string value is also allowed to disable this.
+    /// Path to a tab separated file of usernames and SHA-256 hashed passwords for HTTP Basic Authentication. An empty string value is also allowed to disable this.
     user_file: Option<String>,
 
     /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication. An empty string value is also allowed to disable this.
