@@ -450,10 +450,7 @@ impl Dispatcher {
                                     if let Ok(mut bgservicestate_map) =
                                         self.state.bgservicestate_map.write()
                                     {
-                                        debug!(
-                                            "background service {} signaled itself as up!",
-                                            job_id
-                                        );
+                                        debug!("background service {} signaled it is up!", job_id);
                                         bgservicestate_map[*index] = BackgroundServiceState::Up {
                                             last_used_time: SystemTime::now()
                                                 .duration_since(UNIX_EPOCH)
