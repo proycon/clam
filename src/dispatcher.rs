@@ -420,6 +420,7 @@ impl Dispatcher {
                         if let Ok(mut running_jobs) = self.state.running_jobs.write() {
                             running_jobs.entry(job_id).and_modify(|job| {
                                 job.log(message.as_str());
+                                debug!("status update for job {}: {}", job_id, message.as_str(),);
 
                                 // convert any mentioned percentage into a progress number (0-100)
                                 if let Some(progress_pattern) =
