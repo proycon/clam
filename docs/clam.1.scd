@@ -58,7 +58,7 @@ until they explicitly deleted the project.
 # FEATURES
 
 - **Human & Machine interface**: Designed both for automated clients as-well as human end-users.
-	- **OpenAPI REST API**: The webservices you create with CLAM are fully described by an OpenAPI <https://openapis.org> specification that is automatically generated on the basis of the configuration you provide. An additional Swagger interface is available for humans to serve as API documentation.
+	- **OpenAPI REST API**: The webservices you create with CLAM are fully described by an OpenAPI (https://openapis.org) specification that is automatically generated on the basis of the configuration you provide. An additional Swagger interface is available for humans to serve as API documentation.
 	- **Simple generic webinterface**: CLAM offers a simple generic web UI for human end-users. It is a server-side multi-page-application with only minimal vanilla Javascript and no additional client-side frameworks/libraries.
 - **Authentication**: Choose between two forms of authentication (or none at all, not recommended if you make use of **projects**)
 	- HTTP Basic Authentication
@@ -83,9 +83,15 @@ The exact Web API is shaped based on the configuration you provide to CLAM. The 
 *GET* _/info/_
 	Web-interface for API inspection (Swagger)
 
-# SOURCE & CONTRIBUTE
+# SOURCE & CONTRIBUTING
 
 See https://codeberg.org/proycon/clam
+
+Please read the contributing guidelines there first.
+
+# REPORTING BUGS
+
+Report bugs at https://codeberg.org/proycon/clam/issues
 
 # LICENSE
 

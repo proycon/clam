@@ -34,6 +34,8 @@ At the root of the configuration, the following fields are available:
 	URL for extra documentation
 *sourcerepo* (string)
 	Link to a source code repository where the source code of the webservice or the underlying tool is maintained
+*termsofservice* (string)
+	The terms of service, either full text or a URL.
 
 Example:
 
@@ -71,7 +73,67 @@ url = "https://www.gnu.org/licenses/agpl-3.0.en.html"
 
 # CONTACT CONFIGURATION
 
-TODO: To be written...
+You can have one *contact* section that gives the users of your service contact
+information. It has the following fields:
+
+*name* (string)
+	Identifying name of the contact person or organization of the webservice.
+*email* (string)
+	Email of the contact person or the organization of the API.
+*url* (string)
+    Url associated with the contact
+
+Example:
+
+```
+[contact]
+name = "Maarten van Gompel"
+url = "https://proycon.anaproy.nl"
+email = "proycon@anaproy.nl"
+```
+
+# AUTHENTICATION CONFIGURATION
+
+You can have one *auth* section with the following fields:
+
+*user_file* (string)
+	Path to a tab separated file that holds user names and hashed passwords for HTTP Basic
+	Authentication. Setting this enables HTTP Basic Authentication.
+*oauth_config_file* (string)
+	Path to a TOML file that holds the configuration for OpenID Connect. Setting this
+	enabled OpenID Authentication. 
+
+Note that these two options refer to external files as this is sensitive
+information which you do not want to keep with the main configuration nor inside
+e version controlled repository.
+
+## USER_FILE
+
+The user file is a simple tab separated file with on each line a username, a tab and a SHA256 hashed password (hex notation).
+
+## OAUTH_CONFIG_FILE
+
+The TOML configuration file for OpenID Connect has the following mandatory fields:
+
+*openid_configuration_url* (string)
+	The URL at which the provider's configuration can be automatically retrieved from the
+	OpenID Connect provider. Following the spec, this is often a URL that ends in `.well-known/openid-configuration`
+	Manual configuration is not supported.
+*oauth_client_id* (string)
+	The ID for your service, as registered with the remote provider.
+*oauth_client_secret* (string)
+	The secret for your service, as registered with the remote provider.
+*oauth_client_scope* (list of strings)
+	The Oauth scope, this is at least always: `[ "openid" ]`
+
+Example:
+
+```
+openid_configuration_url = "https://oidc-provider.example.org/.well-known/openid-configuration"
+oauth_client_id = "myservice"
+oauth_client_secret = "mysecret"
+oauth_scope = [ "openid" ]
+```
 
 # FILETYPES CONFIGURATION
 
