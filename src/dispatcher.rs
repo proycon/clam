@@ -352,7 +352,7 @@ impl Dispatcher {
                             if let Some(mut job) = running_jobs.remove(&id) {
                                 job.set_output(output);
                                 job.set_exitstatus(exitstatus);
-                                debug!("finishing job {:?}", job);
+                                debug!("finishing job: {:?}", job);
                                 let failed = exitstatus != 0;
                                 // if this was a background service, mark it as down now
                                 if let JobMaster::BackgroundService(bgservice_index) = *job.master()
@@ -449,6 +449,10 @@ impl Dispatcher {
                                     if let Ok(mut bgservicestate_map) =
                                         self.state.bgservicestate_map.write()
                                     {
+                                        debug!(
+                                            "background service {} signaled itself as up!",
+                                            job_id
+                                        );
                                         bgservicestate_map[*index] = BackgroundServiceState::Up {
                                             last_used_time: SystemTime::now()
                                                 .duration_since(UNIX_EPOCH)
@@ -542,7 +546,7 @@ impl Dispatcher {
                         if let Some(job) = pending_jobs.pop_front() {
                             if self.background_services_up(&job) {
                                 //run the job in a monitoring thread
-                                debug!("start_jobs: starting job {:?}", job);
+                                debug!("start_jobs: starting job: {:?}", job);
                                 job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
                                 // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
                                 running_jobs.insert(*job.id(), job);
