@@ -35,18 +35,16 @@ pub struct ServiceConfig {
     /// Affiliation/producer/provider for the webservice
     affiliation: Option<String>,
 
-    email: Option<String>,
-
     /// base URL where this webservice is served. This is required if you use OpenID Connect authentication. Do not add a trailing slash.
     url: Option<String>,
 
-    /// base path where the user files for the webservice are stored at runtime, must be writable by the user the clam runs as. Defaults to current working directory if not set.
+    /// base path on the filesystem where the user files for the webservice are stored at runtime, must be writable by the user the clam runs as. Defaults to current working directory if not set.
     rootdir: Option<PathBuf>,
 
     /// URL for extra documentation
     documentation_url: Option<String>,
 
-    /// Link to a source code repository
+    /// Link to a source code repository where the source code of the webservice or the underlying tool is maintained
     sourcerepo: Option<String>,
 
     /// The license of the service, has fields name, id (SPDX identifier) and URL.
