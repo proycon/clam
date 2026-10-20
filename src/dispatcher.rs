@@ -3,7 +3,6 @@ use crate::config::ServiceConfig;
 use crate::job::{Job, JobId, JobMaster};
 use crate::project::ProjectKey;
 use crate::state::ServiceState;
-use std::process::ExitStatus;
 use std::sync::Arc;
 use std::sync::mpsc::Receiver;
 use std::time::{SystemTime, UNIX_EPOCH};
