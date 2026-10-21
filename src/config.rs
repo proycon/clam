@@ -656,7 +656,7 @@ pub struct FileType {
     /// Content-Type header as returned in HTTP responses
     contenttype: String,
 
-    /// URL to forward to
+    /// Viewers for the file type
     #[serde(default)]
     viewers: Vec<Viewer>,
 }
@@ -675,36 +675,23 @@ pub struct OutputFile {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Viewer {
+    /// ID for the viewer, this appears in URLs
     id: String,
 
     /// Human readable name
     name: String,
 
-    r#type: ViewerType,
+    /// Command to invoke (mediated by dispatcher), just the executable without any arguments (those are in `args`)
+    command: String,
 
-    /// Parameters to pass to the command or to the URL
-    args: Vec<ViewerArg>,
-}
+    /// Content-Type of the viewer. If not set, this defaults to text/html, which is what you want in most cases.
+    #[serde(default)]
+    contenttype: Option<String>,
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
-#[serde(untagged)]
-pub enum ViewerArg {
-    /// Literal static parameter passed at configuration time
-    Literal(String),
-
-    /// The argument comes from a parameter passed by the user
-    FromParameter { parameter_id: String },
-    /// The argument is a **publicly accessible** anonimized URL where the file can be obtained (for use with `ViewerType::URL`)
-    PublicDownloadURL,
-
-    /// The argument is the path to the local file (for use with `ViewerType::Command`)
-    LocalPath,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub enum ViewerType {
-    Command(String),
-    URL(String),
+    /// Parameters to pass to the command. Use the string FILE (case-sensitive) to refer to the path of the input file to be viewed.
+    /// It will be automatically substituted prior to calling `command`. If this substitution is not used, input is simply passed via stdin.
+    #[serde(default)]
+    args: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
