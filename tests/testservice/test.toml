@@ -17,6 +17,8 @@ name = "Maarten van Gompel"
 url = "https://proycon.anaproy.nl"
 email = "proycon@anaproy.nl"
 
+[auth]
+user_file = "../testauthservice/users.tsv"
 
 [[filetypes]]
 id = "plaintext"
@@ -76,6 +78,26 @@ mode = "Action"
 command = "./testwrapper.sh"
 filetype = "plaintext"
 public = true
+
+[[endpoints.args]]
+parameter_id = "text"
+
+[[endpoints.parameters]]
+id = "text"
+name = "Text"
+description = "Input text to turn to uppercase"
+required = true
+type = { parametertype = "String" }
+flag = "-t"
+
+[[endpoints]]
+name = "Uppercase (action, basic auth)"
+description = "Endpoint to uppercase a text (single round-trip action, string-based), with HTTP Basic Authentication"
+path = "/authuppercase"
+mode = "Action"
+command = "./testwrapper.sh"
+filetype = "plaintext"
+public = false
 
 [[endpoints.args]]
 parameter_id = "text"

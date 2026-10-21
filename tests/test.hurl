@@ -158,3 +158,20 @@ Content-type: text/plain
 ```
 hello world
 ```
+
+# HTTP Basic Authentication test - no credentials supplied
+GET http://127.0.0.1:8080/authuppercase?text=hello%20world
+accept: text/plain
+HTTP 401
+
+# HTTP Basic Authentication test - credentials supplied
+GET http://127.0.0.1:8080/authuppercase?text=hello%20world
+accept: text/plain
+[BasicAuth]
+test: test
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+HELLO WORLD
+```

@@ -2,7 +2,6 @@
 
 ## Backlog
 
-- [ ] Test HTTP Basic Authentication
 - [ ] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
        It can create a project and upload files with its own API key;
@@ -19,3 +18,5 @@
 
 ## Done
 
+- [x] Test OpenID Connect Authentication
+- [x] Test HTTP Basic Authentication
