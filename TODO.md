@@ -11,6 +11,7 @@
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
 - [ ] Implement viewers
     - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
+- [ ] Test interface on mobile devices
 
 ## In progress
 
