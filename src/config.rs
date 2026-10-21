@@ -692,6 +692,9 @@ pub struct Viewer {
     /// It will be automatically substituted prior to calling `command`. If this substitution is not used, input is simply passed via stdin.
     #[serde(default)]
     args: Vec<String>,
+
+    /// Embed the viewer output in the default CLAM UI, this assumes the output only sends partial HTML (no html/head/body tags)
+    embed: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
