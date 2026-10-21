@@ -41,6 +41,11 @@ const CSS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/main
 const JS: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/ui.js"));
 const BACKPNG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/static/back.png"));
 
+//gradually increasing list of poll intervals for actions
+const POLL_INTERVALS_MS: [u32; 17] = [
+    1, 5, 10, 25, 50, 75, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 250,
+];
+
 pub struct Service {
     config: ServiceConfig,
 }
@@ -921,12 +926,27 @@ async fn run_action(
     let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
     //MAYBE TODO: use a gradually increasing poll interval or refactor messaging system to remove this latency altogether
-    let poll_interval = tokio::time::Duration::new(0, 50000000); //50ms
+    let mut poll_counter: usize = 0;
+    let mut running = false;
+    let mut pending = false;
     match rx.await {
         Ok(ResponseMessage::JobSubmitted) => {
             debug!("run_action: job {} submitted", job_id);
             //now poll for the job
             loop {
+                // poll interval quickly increments in steps, so we reduce startup latency
+                let poll_interval = tokio::time::Duration::new(
+                    0,
+                    POLL_INTERVALS_MS
+                        .get(poll_counter)
+                        .unwrap_or(POLL_INTERVALS_MS.last().unwrap())
+                        * 1000000,
+                );
+                poll_counter += 1;
+                if poll_counter == usize::MAX {
+                    poll_counter = 0;
+                }
+
                 let (tx, rx) = oneshot::channel();
                 state.send(Message::PollJob(job_id, tx));
                 match rx.await {
@@ -958,11 +978,22 @@ async fn run_action(
                             }
                         }
                     }
-                    Ok(ResponseMessage::JobRunning(..)) | Ok(ResponseMessage::JobPending) => {
+                    Ok(ResponseMessage::JobRunning(..)) => {
+                        if !running {
+                            debug!("run_action: job {} is now running", job_id);
+                            running = true;
+                        }
                         tokio::time::sleep(poll_interval).await
                     }
+                    Ok(ResponseMessage::JobPending) => {
+                        if !pending {
+                            debug!("run_action: job {} is now pending", job_id);
+                            pending = true;
+                        }
+                        tokio::time::sleep(poll_interval * 4).await
+                    }
                     Ok(ResponseMessage::JobError(error)) => {
-                        debug!("run_action: job error: {}", error);
+                        debug!("run_action: job {} failed with error: {}", job_id, error);
                         return Err(ApiError::InternalError(error));
                     }
                     Err(e) => {
@@ -981,7 +1012,10 @@ async fn run_action(
             }
         }
         Ok(ResponseMessage::JobError(error)) => {
-            debug!("run_action: job failed");
+            debug!(
+                "run_action: job {} failed prematurely with error: {}",
+                job_id, error
+            );
             Err(ApiError::ServiceUnavailable(error))
         }
         Err(e) => Err(ApiError::InternalError(format!(

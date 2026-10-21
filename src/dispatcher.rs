@@ -290,17 +290,15 @@ impl Dispatcher {
                         }
                     }
                     Ok(Message::PollJob(job_id, responsechannel)) => {
-                        debug!("polling job {:?}", job_id);
                         if let (Ok(running_jobs), Ok(done_jobs)) =
                             (self.state.running_jobs.read(), self.state.done_jobs.read())
                         {
                             if let Some(job) = running_jobs.get(&job_id) {
-                                debug!("...running");
                                 let _ =
                                     responsechannel.send(ResponseMessage::JobRunning(job.clone()));
                             } else if let Some(job) = done_jobs.get(&job_id) {
                                 if let Some(exitstatus) = job.exitstatus() {
-                                    debug!("...finished");
+                                    //debug!("polled job {:?}: finished", job_id);
                                     let _ = responsechannel.send(ResponseMessage::JobFinished {
                                         id: *job.id(),
                                         exitstatus: *exitstatus,
@@ -308,7 +306,7 @@ impl Dispatcher {
                                         error: job.error().as_ref().cloned().unwrap_or_default(),
                                     });
                                 } else {
-                                    debug!("...job error");
+                                    //debug!("polled job {:?}: job error", job_id);
                                     let _ =
                                         responsechannel.send(ResponseMessage::JobError(format!(
                                             "Job failed to start: {}",
@@ -327,10 +325,10 @@ impl Dispatcher {
                                     }
                                 }
                                 if pending {
-                                    debug!("...pending");
+                                    //debug!("...pending");
                                     let _ = responsechannel.send(ResponseMessage::JobPending);
                                 } else {
-                                    debug!("...job error");
+                                    //debug!("polled job {:?}: job error", job_id);
                                     let _ = responsechannel.send(ResponseMessage::JobError(
                                         "Job was cancelled before starting".to_string(),
                                     ));
