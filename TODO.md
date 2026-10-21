@@ -9,16 +9,16 @@
     - [ ] The user the *transfer* endpoint to claim the project *from* (query parameter) a particular user.
           This URL can be provided to the user by a tool like the Switchboard after it has released a project.
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
-- [ ] Implement viewers
-    - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 - [ ] Test interface on mobile devices
 - [ ] Generate random project name if none was specified in UI
 - [ ] Search for commands in $PATH so they don't have to be absolute (without invoking a shell)
-- [ ] Fix job monitoring thread (stderr,stdout are not drained concurrently)
 
 ## In progress
 
 - [ ] Write documentation for service configuration files
+- [ ] Fix job monitoring thread (stderr,stdout are not drained concurrently)
+- [ ] Implement viewers
+    - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 
 ## Done
 

@@ -613,11 +613,7 @@ impl Job {
                         std::process::Command::new(command_path.into_os_string())
                             .current_dir(working_dir)
                             .args(self.args)
-                            .stdin(if let Some(inputfile_handle) = inputfile_handle {
-                                std::process::Stdio::from(inputfile_handle)
-                            } else {
-                                std::process::Stdio::null()
-                            })
+                            .stdin(std::process::Stdio::null())
                             .stdout(std::process::Stdio::piped())
                             .stderr(std::process::Stdio::piped())
                             .spawn()
@@ -635,6 +631,11 @@ impl Job {
                 } else {
                     std::process::Command::new(command_path.into_os_string())
                         .args(self.args)
+                        .stdin(if let Some(inputfile_handle) = inputfile_handle {
+                            std::process::Stdio::from(inputfile_handle)
+                        } else {
+                            std::process::Stdio::null()
+                        })
                         .stdout(std::process::Stdio::piped())
                         .stderr(std::process::Stdio::piped())
                         .spawn()
@@ -648,7 +649,7 @@ impl Job {
                             error!("Dispatcher send failure on start: {}", e)
                         }
 
-                        let mut stderr = child.stderr.take().unwrap();
+                        let stderr = child.stderr.take().unwrap();
                         let mut stdout = child.stdout.take().unwrap();
                         let job_id = self.id;
                         let dispatcherchannel2 = dispatcherchannel.clone();
@@ -656,61 +657,60 @@ impl Job {
                         let status_pattern = self.status_pattern;
                         let up_pattern = self.up_pattern;
 
-                        let error = if status_pattern.is_some() || up_pattern.is_some() {
-                            // we spawn another thread to monitor stderr for the status pattern or ready pattern and send updates when this matches
-                            // we also collect all of stderr
-                            let stderr_thread = std::thread::spawn(move || {
-                                let mut full_stderr = String::new();
+                        //spawn a thread to collect stdout
+                        let stdout_thread = std::thread::spawn(move || {
+                            let mut output = String::new();
+                            let result = stdout.read_to_string(&mut output);
+                            (output, result)
+                        });
 
-                                for line in BufReader::new(stderr).lines() {
-                                    match line {
-                                        Ok(line) => {
-                                            full_stderr.push_str(&line);
-                                            full_stderr.push('\n');
+                        // we spawn another thread to monitor stderr for the status pattern or ready pattern and send updates when this matches
+                        // we also collect all of stderr
+                        let stderr_thread = std::thread::spawn(move || {
+                            let mut full_stderr = String::new();
 
-                                            if let Some(up_pattern) = up_pattern.as_ref() {
-                                                //job is for a background service and is done loading, ready to receive requests
-                                                if up_pattern.is_match(line.as_str()) {
-                                                    let _ = dispatcherchannel2
-                                                        .send(Message::Up(job_id));
-                                                }
-                                            } else if let Some(status_pattern) =
-                                                status_pattern.as_ref()
-                                            {
-                                                if status_pattern.is_match(line.as_str()) {
-                                                    let _ = dispatcherchannel2
-                                                        .send(Message::StatusLog(job_id, line));
-                                                }
+                            for line in BufReader::new(stderr).lines() {
+                                match line {
+                                    Ok(line) => {
+                                        full_stderr.push_str(&line);
+                                        full_stderr.push('\n');
+
+                                        if let Some(up_pattern) = up_pattern.as_ref() {
+                                            //job is for a background service and is done loading, ready to receive requests
+                                            if up_pattern.is_match(line.as_str()) {
+                                                let _ =
+                                                    dispatcherchannel2.send(Message::Up(job_id));
+                                            }
+                                        } else if let Some(status_pattern) = status_pattern.as_ref()
+                                        {
+                                            if status_pattern.is_match(line.as_str()) {
+                                                let _ = dispatcherchannel2
+                                                    .send(Message::StatusLog(job_id, line));
                                             }
                                         }
-                                        Err(e) => {
-                                            full_stderr.push_str(&format!(
-                                                "Error reading stderr: {}\n",
-                                                e
-                                            ));
-                                            break;
-                                        }
+                                    }
+                                    Err(e) => {
+                                        full_stderr
+                                            .push_str(&format!("Error reading stderr: {}\n", e));
+                                        break;
                                     }
                                 }
+                            }
 
-                                full_stderr
+                            full_stderr
+                        });
+
+                        let error = stderr_thread.join().unwrap_or_default();
+
+                        let (mut output, stdout_result) =
+                            stdout_thread.join().unwrap_or_else(|_| {
+                                (
+                                    String::new(),
+                                    Err(std::io::Error::other("Failed to read stdout")),
+                                )
                             });
 
-                            stderr_thread
-                                .join()
-                                .unwrap_or_else(|_| "Failed to read stderr".to_string())
-                        } else {
-                            // Collect all stderr (blocks until process exists)
-                            let mut error = String::new();
-                            if let Err(_) = stderr.read_to_string(&mut error) {
-                                error = "Process stderr is invalid UTF-8!".to_string();
-                            }
-                            error
-                        };
-
-                        // Collect all stdout (blocks until process exists)
-                        let mut output = String::new();
-                        if let Err(_) = stdout.read_to_string(&mut output) {
+                        if stdout_result.is_err() {
                             output = "Process stdout is invalid UTF-8!".to_string();
                         }
 
