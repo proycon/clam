@@ -385,6 +385,7 @@ impl Dispatcher {
                                     job.set_error(error);
                                 }
                                 done_jobs.insert(id, job);
+                            } else {
                                 eprintln!("Warning: Job not found: {}", id);
                             }
                         }
