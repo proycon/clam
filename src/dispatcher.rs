@@ -351,7 +351,7 @@ impl Dispatcher {
                             if let Some(mut job) = running_jobs.remove(&id) {
                                 job.set_output(output);
                                 job.set_exitstatus(exitstatus);
-                                debug!("finishing job: {:?}", job);
+                                debug!("finishing job #{}: {:?}", running_jobs.len() + 1, job);
                                 let failed = exitstatus != 0;
                                 // if this was a background service, mark it as down now
                                 if let JobMaster::BackgroundService(bgservice_index) = *job.master()
@@ -395,7 +395,12 @@ impl Dispatcher {
                             self.state.done_jobs.write(),
                         ) {
                             if let Some(mut job) = running_jobs.remove(&id) {
-                                debug!("failed to start job {:?}: {}", job, error);
+                                debug!(
+                                    "failed to start job #{} {:?}: {}",
+                                    running_jobs.len() + 1,
+                                    job,
+                                    error
+                                );
                                 // if this was a background service, mark it as failed now
                                 if let JobMaster::BackgroundService(bgservice_index) = *job.master()
                                 {
@@ -521,11 +526,6 @@ impl Dispatcher {
             } else {
                 panic!("running job lock poisoned!");
             };
-            debug!(
-                "start_jobs: {}/{} jobs running",
-                running_job_count,
-                self.state().config.dispatcher().max_running_jobs()
-            );
 
             if running_job_count < self.state().config.dispatcher().max_running_jobs() {
                 let have_pending_jobs = if let Ok(pending_jobs) = self.state.pending_jobs.read() {
@@ -543,7 +543,11 @@ impl Dispatcher {
                         if let Some(job) = pending_jobs.pop_front() {
                             if self.background_services_up(&job) {
                                 //run the job in a monitoring thread
-                                debug!("start_jobs: starting job: {:?}", job);
+                                debug!(
+                                    "start_jobs: starting job #{}: {:?}",
+                                    running_job_count + 1,
+                                    job
+                                );
                                 job.clone().spawn(dispatcherchannel.clone()); //the sender sends back to the dispatcher channel, we discard the joinhandle, the process will be *detached*
                                 // even if a job fails to start, it's temporarily added to running_jobs, the cleanup happens when handling Message::FailStartJob
                                 running_jobs.insert(*job.id(), job);
