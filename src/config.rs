@@ -257,7 +257,7 @@ pub struct EndPoint {
     /// Command to invoke (mediated by dispatcher), just the executable without any arguments (those are in `args`)
     command: Option<String>,
 
-    /// List of background services required for this endpoin, by ID, multiple allowed
+    /// List of background services required for this endpoint, by ID, multiple allowed
     #[serde(default)]
     background_services: Vec<String>,
 
@@ -656,9 +656,9 @@ pub struct FileType {
     /// Content-Type header as returned in HTTP responses
     contenttype: String,
 
-    /// Viewers for the file type
+    /// Viewers for the file type, links to IDs
     #[serde(default)]
-    viewers: Vec<Viewer>,
+    viewers: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
@@ -673,9 +673,9 @@ pub struct OutputFile {
     filename: FileName,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Viewer {
-    /// ID for the viewer, this appears in URLs
+    /// ID for the viewer, this is referenced from file types and appears in URLs
     id: String,
 
     /// Human readable name
@@ -695,6 +695,10 @@ pub struct Viewer {
 
     /// Embed the viewer output in the default CLAM UI, this assumes the output only sends partial HTML (no html/head/body tags)
     embed: bool,
+
+    /// List of background services required for this endpoint, by ID, multiple allowed
+    #[serde(default)]
+    background_services: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -736,6 +740,26 @@ impl ServiceConfig {
         for f in self.filetypes() {
             if f.id == filetype {
                 return Some(f);
+            }
+        }
+        None
+    }
+
+    /// Get a viewer object by name
+    pub fn viewer(&self, viewer: &str) -> Option<&Viewer> {
+        for v in self.viewers() {
+            if v.id == viewer {
+                return Some(v);
+            }
+        }
+        None
+    }
+
+    /// Get a viewer index by name
+    pub fn viewer_index(&self, viewer: &str) -> Option<usize> {
+        for (i, v) in self.viewers().iter().enumerate() {
+            if v.id == viewer {
+                return Some(i);
             }
         }
         None

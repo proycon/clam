@@ -1,6 +1,6 @@
 use crate::ResponseMessage;
 use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
-use crate::config::{EndPoint, EndPointMode, FileName, ParameterType, ServiceConfig};
+use crate::config::{EndPoint, EndPointMode, FileName, FileType, ParameterType, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
 use crate::job::{Job, JobMaster, wait_for_pid};
@@ -279,6 +279,16 @@ impl Service {
                 router = router.route(
                     fpath.as_str(),
                     get(download_output_file).layer(Extension(endpoint_index)),
+                );
+
+                // File output endpoints
+                let viewerpath = format!(
+                    "{}/{{project}}/output/{{filename}}/{{viewer}}",
+                    endpoint.normpath()
+                );
+                router = router.route(
+                    viewerpath.as_str(),
+                    get(viewer).layer(Extension(endpoint_index)),
                 );
 
                 //File uploading/download/deletion endpoints within a project
@@ -898,6 +908,207 @@ async fn delete_input_file(
     }
 }
 
+async fn viewer(
+    Path((project, filename, viewer)): Path<(String, String, String)>,
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+) -> Result<ClamResponse, ApiError> {
+    let state2 = (*state).clone();
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
+        //download output file without keeping it all in memory
+        if let Some(filepath) = project.output_file(filename.as_str()) {
+            if let Some(filetype) = project.output_filetype(filename.as_str()) {
+                if filetype
+                    .viewers()
+                    .iter()
+                    .any(|x| x.as_str() == viewer.as_str())
+                {
+                    if let Some(viewer_index) = state.config().viewer_index(viewer.as_str()) {
+                        run_viewer(state2, viewer_index, &user, filepath, filetype).await
+                    } else {
+                        Err(ApiError::InternalError(format!(
+                            "Viewer {} is referenced but not defined!",
+                            viewer
+                        )))
+                    }
+                } else {
+                    Err(ApiError::NotFound(
+                        "No such viewer associated with this file".into(),
+                    ))
+                }
+            } else {
+                Err(ApiError::NotFound(
+                    "No viewers associated with this file".into(),
+                ))
+            }
+        } else {
+            Err(ApiError::NotFound("Output file not found".into()))
+        }
+    } else {
+        Err(ApiError::InvalidName("project name invalid"))
+    }
+}
+
+/// Runs the action (Helper function called by viewer)
+async fn run_viewer(
+    state: Arc<ServiceState>,
+    viewer_index: usize,
+    user: &CurrentUser,
+    filepath: PathBuf,
+    filetype: &FileType,
+) -> Result<ClamResponse, ApiError> {
+    let viewer = state.viewer(viewer_index);
+    let filename = if viewer.embed() {
+        filepath
+            .file_name()
+            .expect("output file must have a name")
+            .to_string_lossy()
+            .into_owned()
+    } else {
+        //we can leave it empty and save the allocation as we only use it in embed mode
+        String::new()
+    };
+    let job = Job::new(
+        &state,
+        JobMaster::Viewer(viewer_index, filepath),
+        None,
+        viewer.background_services(),
+        user,
+        ParameterMap::new(),
+    );
+    let (tx, rx) = oneshot::channel();
+    debug!("run_viewer: submitting job {:?}", job);
+    //ensure necessary background services are scheduled or already running
+    for bgservice in job.background_services().iter() {
+        state.schedule_background_service(*bgservice).await?
+    }
+    let job_id = *job.id();
+    state.send(Message::SubmitJob(job, tx));
+    let mut poll_counter: usize = 0;
+    let mut running = false;
+    let mut pending = false;
+    match rx.await {
+        Ok(ResponseMessage::JobSubmitted) => {
+            debug!("run_viewer: job {} submitted", job_id);
+            //now poll for the job
+            loop {
+                // poll interval quickly increments in steps, so we reduce startup latency
+                let poll_interval = tokio::time::Duration::new(
+                    0,
+                    POLL_INTERVALS_MS
+                        .get(poll_counter)
+                        .unwrap_or(POLL_INTERVALS_MS.last().unwrap())
+                        * 1000000,
+                );
+                poll_counter += 1;
+                if poll_counter == usize::MAX {
+                    poll_counter = 0;
+                }
+
+                let (tx, rx) = oneshot::channel();
+                state.send(Message::PollJob(job_id, tx));
+                match rx.await {
+                    Ok(ResponseMessage::JobFinished {
+                        id,
+                        exitstatus,
+                        output,
+                        error,
+                    }) => {
+                        debug!(
+                            "run_viewer: job {} finished with status {:?}",
+                            id, exitstatus
+                        );
+                        match exitstatus {
+                            0 => {
+                                if viewer.embed() {
+                                    //embed viewer output in a generic viewer to fit the rest of the UI:
+                                    let content: String = output.into();
+                                    return state.render_template(
+                                        "viewer",
+                                        "text/html; charset=utf-8",
+                                        Some(upon::value! {
+                                            viewer_name: viewer.name().clone(),
+                                            filename: filename,
+                                            filetype_id: filetype.id(),
+                                            filetype_name: filetype.name(),
+                                            content: content,
+                                        }),
+                                    );
+                                } else {
+                                    // viewer takes care of entire response
+                                    return Ok(ClamResponse::Body {
+                                        stream: output.into(),
+                                        contenttype: viewer
+                                            .contenttype()
+                                            .as_deref()
+                                            .unwrap_or("text/html; charset=utf-8")
+                                            .to_string(),
+                                    });
+                                }
+                            }
+                            40 => return Err(ApiError::ParameterError(error)),
+                            44 => return Err(ApiError::NotFound(error)),
+                            43 => return Err(ApiError::PermissionDenied(error)),
+                            _ => {
+                                return Err(ApiError::InternalError(format!(
+                                    "An error occurred during execution of this viewer (exitcode {}):\n\n{}",
+                                    exitstatus, error
+                                )));
+                            }
+                        }
+                    }
+                    Ok(ResponseMessage::JobRunning(..)) => {
+                        if !running {
+                            debug!("run_viewer: job {} is now running", job_id);
+                            running = true;
+                        }
+                        tokio::time::sleep(poll_interval).await
+                    }
+                    Ok(ResponseMessage::JobPending) => {
+                        if !pending {
+                            debug!("run_viewer: job {} is now pending", job_id);
+                            pending = true;
+                        }
+                        tokio::time::sleep(poll_interval * 4).await
+                    }
+                    Ok(ResponseMessage::JobError(error)) => {
+                        debug!("run_viewer: job {} failed with error: {}", job_id, error);
+                        return Err(ApiError::InternalError(error));
+                    }
+                    Err(e) => {
+                        return Err(ApiError::InternalError(format!(
+                            "oneshot sender dropped whilst polling a job: {}",
+                            e
+                        )));
+                    }
+                    Ok(m) => {
+                        return Err(ApiError::InternalError(format!(
+                            "unexpected response message whilst polling a job: {:?}",
+                            m
+                        )));
+                    }
+                }
+            }
+        }
+        Ok(ResponseMessage::JobError(error)) => {
+            debug!(
+                "run_viewer: job {} failed prematurely with error: {}",
+                job_id, error
+            );
+            Err(ApiError::ServiceUnavailable(error))
+        }
+        Err(e) => Err(ApiError::InternalError(format!(
+            "oneshot sender dropped whilst submitting a job: {}",
+            e
+        ))),
+        Ok(m) => Err(ApiError::InternalError(format!(
+            "unexpected response message whilst submitting a job: {:?}",
+            m
+        ))),
+    }
+}
+
 /// Runs the action (Helper function called by get_action or post_action)
 async fn run_action(
     state: State<Arc<ServiceState>>,
@@ -925,7 +1136,6 @@ async fn run_action(
     }
     let job_id = *job.id();
     state.send(Message::SubmitJob(job, tx));
-    //MAYBE TODO: use a gradually increasing poll interval or refactor messaging system to remove this latency altogether
     let mut poll_counter: usize = 0;
     let mut running = false;
     let mut pending = false;

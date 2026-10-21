@@ -16,10 +16,11 @@ use tracing::{debug, error};
 
 pub type JobId = usize;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 /// Indicated who owns a job (both by index)
 pub enum JobMaster {
     EndPoint(usize),
+    Viewer(usize, PathBuf),
     BackgroundService(usize),
 }
 
@@ -69,6 +70,10 @@ pub struct Job {
 
     /// Holds exit status (only for done jobs)
     exitstatus: Option<i32>,
+
+    /// Holds a file that will be fed to standard input (only for viewer jobs)
+    input: Option<PathBuf>,
+
     /// Holds standard output (only for done jobs)
     output: Option<String>,
     /// Holds stderr output (only for done jobs)
@@ -124,6 +129,54 @@ impl Job {
                     status_pattern: endpoint.status_pattern().clone(),
                     up_pattern: None,
                     pid: None,
+                    input: None,
+                    output: None,
+                    working_dir,
+                    current_dir,
+                    error,
+                    statuslog: String::new(),
+                    exitstatus: None,
+                    args,
+                }
+            }
+            JobMaster::Viewer(viewer_index, filepath) => {
+                let working_dir = {
+                    if let Some(project) = project {
+                        Some(project.path())
+                    } else {
+                        None
+                    }
+                };
+                let viewer = state.viewer(viewer_index);
+                let mut use_stdin = true;
+                let args: Vec<String> = viewer
+                    .args()
+                    .iter()
+                    .map(|s| {
+                        if s == "FILE" || s == "$FILE" {
+                            use_stdin = false; //file is passed in argument, no need for STDIN
+                            filepath.to_string_lossy().into_owned()
+                        } else {
+                            s.to_string()
+                        }
+                    })
+                    .collect();
+                Self {
+                    id: rand::random_range(1..usize::MAX),
+                    input: if use_stdin {
+                        None
+                    } else {
+                        Some(filepath.clone())
+                    },
+                    master: JobMaster::Viewer(viewer_index, filepath),
+                    project: project.map(|x| x.name().to_string()),
+                    user: user.as_str().to_string(),
+                    command: viewer.command().clone(),
+                    background_services,
+                    progress: None,
+                    status_pattern: None,
+                    up_pattern: None,
+                    pid: None,
                     output: None,
                     working_dir,
                     current_dir,
@@ -146,6 +199,7 @@ impl Job {
                     status_pattern: bgservice.status_pattern().clone(),
                     up_pattern: bgservice.up_pattern().clone(),
                     pid: None,
+                    input: None,
                     output: None,
                     working_dir: None,
                     current_dir,
@@ -545,11 +599,25 @@ impl Job {
                     &self.args,
                     std::env::current_dir().expect("current dir")
                 );
+
+                // an input file is only used for jobs with master JobMaster::Viewer(), it will be fed to stdin
+                let inputfile_handle = if let Some(inputfile) = self.input() {
+                    debug!("Passing inputfile {:?} via job stdin...", inputfile);
+                    Some(std::fs::File::open(inputfile).expect("failed to read file"))
+                } else {
+                    None
+                };
+
                 let process = if let Some(working_dir) = self.working_dir() {
                     if let Ok(working_dir) = working_dir.canonicalize() {
                         std::process::Command::new(command_path.into_os_string())
                             .current_dir(working_dir)
                             .args(self.args)
+                            .stdin(if let Some(inputfile_handle) = inputfile_handle {
+                                std::process::Stdio::from(inputfile_handle)
+                            } else {
+                                std::process::Stdio::null()
+                            })
                             .stdout(std::process::Stdio::piped())
                             .stderr(std::process::Stdio::piped())
                             .spawn()

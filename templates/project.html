@@ -120,11 +120,21 @@
 <h2>Output Files</h2>
 <table class="files">
 <thead>
-    <tr><th>Filename</th><th>File type</th></tr>
+    <tr><th title="click to download">Filename</th><th>File type</th><th>View with...</th></tr>
 </thead>
 <tbody>
 {% for outputfile in status.data.output_files %}
-<tr><td class="filename"><a href="{{ path }}/output/{{outputfile.name }}">{{ outputfile.name }}</a></td><td class="filetype">{{ outputfile.filetype.name }}</td></tr>
+<tr>
+    <td class="filename"><a href="{{ path }}/output/{{ outputfile.name }}" title="click to download">{{ outputfile.name }}</a></td>
+    <td class="filetype">{{ outputfile.filetype.name }}</td>
+    <td class="viewers">
+        <ul>
+        {% for viewer in outputfile.viewers %}
+            <li><a href="{{ path }}/output/{{ outputfile.name }}/{{ viewer.id }}">{{ viewer.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </td>
+</tr>
 {% endfor %}
 </tbody>
 </table>

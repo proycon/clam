@@ -1,5 +1,5 @@
 use crate::ParameterType;
-use crate::config::{EndPoint, FileName, FileType, ServiceConfig};
+use crate::config::{EndPoint, FileName, FileType, ServiceConfig, Viewer};
 use crate::error::ApiError;
 use axum::body::Body;
 use derive_getters::Getters;
@@ -271,6 +271,11 @@ impl<'a> Project<'a> {
                                     filetype: Some(filetype.clone()), //MAYBE TODO: not sure if I like so many clones of the same data (but reference not possible, tried)
                                     parameter_id: None,
                                     parameter_name: None,
+                                    viewers: filetype
+                                        .viewers()
+                                        .iter()
+                                        .filter_map(|v| self.config.viewer(v).cloned())
+                                        .collect(),
                                     name: filename,
                                 })
                             } else if self.endpoint().show_unknown_output() {
@@ -279,6 +284,7 @@ impl<'a> Project<'a> {
                                     filetype: None,
                                     parameter_id: None,
                                     parameter_name: None,
+                                    viewers: Vec::new(),
                                     name: filename,
                                 })
                             }
@@ -320,9 +326,18 @@ impl<'a> Project<'a> {
                     FileName::Exact(name) => {
                         if found_files.contains(name) {
                             input_files.push(IoFile {
-                                filetype: self.config.filetype(filetype).cloned(),
+                                filetype: self.config.filetype(filetype).cloned(), //MAYBE TODO: not sure if I like so many clones of the same data (but reference not possible, tried)
                                 parameter_id: Some(parameter.id().clone()),
                                 parameter_name: Some(parameter.name().clone()),
+                                viewers: if let Some(filetype) = self.config.filetype(filetype) {
+                                    filetype
+                                        .viewers()
+                                        .iter()
+                                        .filter_map(|v| self.config.viewer(v).cloned())
+                                        .collect()
+                                } else {
+                                    Vec::new()
+                                },
                                 name: name.clone(),
                             })
                         }
@@ -335,6 +350,15 @@ impl<'a> Project<'a> {
                                     filetype: filetype.cloned(),
                                     parameter_id: Some(parameter.id().clone()),
                                     parameter_name: Some(parameter.name().clone()),
+                                    viewers: if let Some(filetype) = filetype {
+                                        filetype
+                                            .viewers()
+                                            .iter()
+                                            .filter_map(|v| self.config.viewer(v).cloned())
+                                            .collect()
+                                    } else {
+                                        Vec::new()
+                                    },
                                     name: file,
                                 })
                             }
@@ -402,6 +426,8 @@ pub struct IoFile {
     parameter_name: Option<String>,
 
     filetype: Option<FileType>,
+
+    viewers: Vec<Viewer>,
 }
 
 impl IoFile {

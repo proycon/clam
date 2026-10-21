@@ -1,6 +1,6 @@
 use crate::EndPointMode;
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
-use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig};
+use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig, Viewer};
 use crate::dispatcher::{Message, ResponseMessage};
 use crate::error::ApiError;
 use crate::job::{Job, JobId, JobMaster};
@@ -239,6 +239,14 @@ impl ServiceState {
     /// Retrieve an endpoint by index
     pub fn try_endpoint(&self, endpoint_index: usize) -> Option<&EndPoint> {
         self.config().endpoints().get(endpoint_index)
+    }
+
+    /// Retrieve a viewer by index, will panic if it does not exist!
+    pub fn viewer(&self, viewer_index: usize) -> &Viewer {
+        self.config()
+            .viewers()
+            .get(viewer_index)
+            .expect("viewer must exist")
     }
 
     /// Get the full redirect URL for a given endpoint

@@ -230,6 +230,11 @@ table.files td.filetype {
     font-style: italic;
 }
 
+td.viewers ul {
+    margin: 0px;
+    padding: 0px;
+}
+
 pre#statuslog {
     width: 90%;
     height: 250px;

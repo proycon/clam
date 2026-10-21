@@ -24,6 +24,16 @@ user_file = "../testauthservice/users.tsv"
 id = "plaintext"
 name = "Plain Text (UTF-8)"
 contenttype = "text/plain; charset=utf-8"
+viewers = [ "textviewer" ]
+
+[[viewers]]
+id = "textviewer"
+name = "Text Viewer"
+embed = true
+#turn plain text into HTML with sed
+command = "/usr/bin/sed"
+args = [ "-e", "s/&/\\&amp;/g", "-e" , "s/</\\&lt;/g", "-e", "s/>/\\&gt;/g", "-e", "s/\\n/<br>/g" ]
+#^ -- we could have used FILE as a special argument value here to pass the file, but we don't, so CLAM passes the file as stdin, which is perfect here
 
 #---------------------------------------------------------------------------------
 

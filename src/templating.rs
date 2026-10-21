@@ -34,6 +34,10 @@ const TEMPLATE_PROJECT: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/templates/project.html"
 ));
+const TEMPLATE_VIEWER: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/templates/viewer.html"
+));
 
 pub(crate) fn init_templating() -> Engine<'static> {
     let mut engine = Engine::new();
@@ -58,6 +62,9 @@ pub(crate) fn init_templating() -> Engine<'static> {
     engine
         .add_template("project", TEMPLATE_PROJECT)
         .expect("Failed to compile project template");
+    engine
+        .add_template("viewer", TEMPLATE_VIEWER)
+        .expect("Failed to compile viewer template");
     engine.add_function("exists", |s: &str| !s.is_empty());
     engine.add_function("eq", |a: &upon::Value, b: &upon::Value| a == b);
     engine.add_function("ne", |a: &upon::Value, b: &upon::Value| a != b);

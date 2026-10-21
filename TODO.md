@@ -12,6 +12,9 @@
 - [ ] Implement viewers
     - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 - [ ] Test interface on mobile devices
+- [ ] Generate random project name if none was specified in UI
+- [ ] Search for commands in $PATH so they don't have to be absolute (without invoking a shell)
+- [ ] Fix job monitoring thread (stderr,stdout are not drained concurrently)
 
 ## In progress
 
