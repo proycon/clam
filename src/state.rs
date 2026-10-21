@@ -8,7 +8,6 @@ use crate::templating::init_templating;
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, VecDeque};
-use std::ops::Deref;
 use std::path::PathBuf;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
@@ -16,12 +15,6 @@ use tokio::sync::oneshot;
 use tracing::debug;
 
 use crate::project::{Project, ProjectKey, ProjectStatus};
-
-// TODO: implement shares
-pub struct Share {
-    path: PathBuf,
-    onetime: bool,
-}
 
 pub struct ServiceState {
     /// Jobs
@@ -34,9 +27,6 @@ pub struct ServiceState {
 
     /// Maps endpoints by index to a boolean indicating whether background services are loaded
     pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
-
-    /// Public non-discoverable shared files (bypasses authentication)
-    pub(crate) shares: RwLock<HashMap<String, Share>>,
 
     /// Map of usernames to hashed passwords (loaded from external file)
     pub(crate) user_db: RwLock<HashMap<String, String>>,
@@ -176,7 +166,6 @@ impl ServiceState {
                 BackgroundServiceState::Down;
                 config.background_services().iter().count()
             ]),
-            shares: RwLock::new(Default::default()),
             user_db: RwLock::new(if let Some(user_file) = config.auth().user_file() {
                 if !user_file.is_empty() {
                     read_user_db(&config).expect(&format!(
