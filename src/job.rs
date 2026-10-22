@@ -164,9 +164,9 @@ impl Job {
                 Self {
                     id: rand::random_range(1..usize::MAX),
                     input: if use_stdin {
-                        None
-                    } else {
                         Some(filepath.clone())
+                    } else {
+                        None
                     },
                     master: JobMaster::Viewer(viewer_index, filepath),
                     project: project.map(|x| x.name().to_string()),
