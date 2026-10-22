@@ -11,16 +11,16 @@
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
 - [ ] Test interface on mobile devices
 - [ ] Generate random project name if none was specified in UI
-- [ ] Search for commands in $PATH so they don't have to be absolute (without invoking a shell)
 
 ## In progress
 
 - [ ] Write documentation for service configuration files
-- [ ] Fix job monitoring thread (stderr,stdout are not drained concurrently)
-- [ ] Implement viewers
-    - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 
 ## Done
 
 - [x] Test OpenID Connect Authentication
 - [x] Test HTTP Basic Authentication
+- [x] Implement viewers
+    - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
+- [x] Fix job monitoring thread (stderr,stdout are not drained concurrently)
+- [x] Search for commands in $PATH so they don't have to be absolute (without invoking a shell)

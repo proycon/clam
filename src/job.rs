@@ -588,11 +588,15 @@ impl Job {
     /// This spawns a lightweight monitoring thread (native thread) which in turn spawns a child process
     pub fn spawn(self, dispatcherchannel: Sender<Message>) -> std::thread::JoinHandle<()> {
         std::thread::spawn(move || {
-            if let Ok(command_path) = self
-                .current_dir()
-                .join(PathBuf::from(&self.command))
-                .canonicalize()
-            {
+            let command_path: Option<PathBuf> = if self.command.starts_with("./") {
+                self.current_dir()
+                    .join(PathBuf::from(&self.command))
+                    .canonicalize()
+                    .ok()
+            } else {
+                Some(self.command.clone().into())
+            };
+            if let Some(command_path) = command_path {
                 debug!(
                     "Attempting to spawn job command={:?} args={:?} cwd={:?}",
                     &command_path,
