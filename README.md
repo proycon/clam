@@ -35,19 +35,22 @@ until they explicitly deleted the project.
 * **Human & Machine interface**: Designed both for automated clients as-well as human end-users.
     * **OpenAPI REST API**: The webservices you create with CLAM are fully described by an [OpenAPI](https://openapis.org) specification that is automatically generated on the basis of the configuration you provide. An additional Swagger interface is available for humans to serve as API documentation.
     * **Simple generic webinterface**: CLAM offers a simple generic web UI for human end-users. It is a server-side multi-page-application with only minimal vanilla Javascript and no additional client-side frameworks/libraries.
+* Supports both long-running **batch jobs** with multiple input and output files (**projects**), as well as quick request-response jobs (**actions**)
 * **Authentication**: Choose between two forms of authentication (or none at all, not recommended if you make use of **projects**)
     * HTTP Basic Authentication
     * OpenID Connect (OIDC) Authentication
     * The two can be used simultaneously if needed.
 * **Background services**: Support for long-running background services that are shared between runs from multiple users. CLAM takes care of starting when they're used and stopping them when they have been idle for a while. This is useful if your underlying application has a client/server model and/or relies on
 large in-memory models (also on GPU).
+* **Viewers**: You can tie in viewers to visualise output files of certain types. Viewers are simply your own scripts or tools that convert a certain format to HTML.
 * **Automatic Job Scheduling**: Projects that can't be run right away due to lack of system resources are scheduled and picked up when resources are available again.
 
 CLAM v4 is written in Rust, but it is completely agnostic to your underlying
-tool which can be written in any language. CLAM is also **written with full
+tool which can be written in any language. It aspires to be a fairly
+**minimal** yet flexible tool you can use to wrap around your own tools and
+scripts to be able to serve them over the web. CLAM is **written with full
 human attention without AI/LLMS**, no parts have been vibe-coded or written by
-agents. The [contributing guidelines](CONTRIBUTING.md) also ensure it stays
-this way.
+agents. The [contributor guidelines](CONTRIBUTING.md) ensure it stays this way.
 
 ## Installation
 

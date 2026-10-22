@@ -29,13 +29,26 @@ At the root of the configuration, the following fields are available:
 *url* (string)
 	Base URL where this webservice is served. This is required if you use OpenID Connect authentication. Do not add a trailing slash.
 *rootdir* (string)
-	Base path on the file system where the user files for the webservice are stored at runtime, must be writable by the user the clam runs as. Defaults to current working directory if not set.
+	Base path on the file system where the user files for the webservice are
+	stored at runtime, must be writable by the user the clam runs as. Defaults
+	to current working directory if not set.
 *documentation_url* (string)
 	URL for extra documentation
 *sourcerepo* (string)
-	Link to a source code repository where the source code of the webservice or the underlying tool is maintained
+	Link to a source code repository where the source code of the webservice or
+	the underlying tool is maintained
 *termsofservice* (string)
 	The terms of service, either full text or a URL.
+*disable_input_download* (boolean)
+	Set this to _true_ if you don't want users to download input files. This can
+	prevent the service being abused as a file sharing service.
+*disable_ui* (boolean)
+	Set to _true_ to disable the web UI entirely, only the Web API will be
+	available then.
+*custom_css* (string)
+    Custom stylesheet to associate with the web UI. Use a full URL or start with / (i.e. relative to url)
+*custom_js* (string)
+    Custom javascript to associate with the web UI. Use a full URL or start with / (i.e. relative to url)
 
 Example:
 
@@ -135,15 +148,23 @@ oauth_client_secret = "mysecret"
 oauth_scope = [ "openid" ]
 ```
 
-# FILETYPES CONFIGURATION
-
-TODO: To be written...
-
 # ENDPOINTS CONFIGURATION
 
 TODO: To be written...
 
+# FILETYPES CONFIGURATION
+
+TODO: To be written...
+
+# VIEWERS CONFIGURATION
+
+TODO: To be written...
+
 # BACKGROUND_SERVICES CONFIGURATION
+
+TODO: To be written...
+
+# DISPATCHER CONFIGURATION
 
 TODO: To be written...
 

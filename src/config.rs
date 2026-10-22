@@ -74,16 +74,8 @@ pub struct ServiceConfig {
     #[serde(default)]
     auth: AuthConfig,
 
-    /// CORS
-    allow_origin: Option<String>,
-
     #[serde(default)]
     dispatcher: DispatcherConfig,
-
-    /// If set, do **NOT** add the current working directory clamservice is launched from to the $PATH.
-    /// By default this is set so wrapper scripts can be easily located.
-    #[serde(default)]
-    keep_path: bool,
 
     /// Regular expression to extract percentages from lines matching the status pattern, this usually does not require adaptation as the default suffices
     #[serde(
@@ -110,10 +102,10 @@ pub struct ServiceConfig {
     #[serde(default)]
     disable_input_download: bool,
 
-    /// Custom stylesheet to associate with the webservice. Use a full URL or start with / (relative to url)
+    /// Custom stylesheet to associate with the Web UI. Use a full URL or start with / (i.e. relative to url)
     custom_css: Option<String>,
 
-    /// Custom javascript to associate with the webservice. Use a full URL or start with / (relative to url)
+    /// Custom javascript to associate with the Web UI. Use a full URL or start with / (i.e. relative to url)
     custom_js: Option<String>,
 }
 
