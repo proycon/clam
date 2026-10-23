@@ -49,7 +49,7 @@ and are presented the output, which may consist of multiple files.
 
 CLAM is suitable both for simple runs with a quick turn-around (we call them
 **actions**), as well as batch processing which may take a long time to process
-in the background (we call those **projects**). Actions provide a response
+in the background (we call those *projects*). Actions provide a response
 immediately, projects need to be *polled* at a regular interval for their
 completion status. Unlike actions, projects allow multiple input and output
 files. Users can come back to their projects to inspect the output at any time
@@ -57,24 +57,23 @@ until they explicitly deleted the project.
 
 # FEATURES
 
-- **Human & Machine interface**: Designed both for automated clients as-well as human end-users.
-	- **OpenAPI REST API**: The webservices you create with CLAM are fully described by an OpenAPI (https://openapis.org) specification that is automatically generated on the basis of the configuration you provide. An additional Swagger interface is available for humans to serve as API documentation.
-	- **Simple generic webinterface**: CLAM offers a simple generic web UI for human end-users. It is a server-side multi-page-application with only minimal vanilla Javascript and no additional client-side frameworks/libraries.
-- **Authentication**: Choose between two forms of authentication (or none at all, not recommended if you make use of **projects**)
+- *Human & Machine interface*: Designed both for automated clients as-well as human end-users.
+	- *OpenAPI REST API*: The webservices you create with CLAM are fully described by an OpenAPI (https://openapis.org) specification that is automatically generated on the basis of the configuration you provide. An additional Swagger interface is available for humans to serve as API documentation.
+	- *Simple generic webinterface*: CLAM offers a simple generic web UI for human end-users. It is a server-side multi-page-application with only minimal vanilla Javascript and no additional client-side frameworks/libraries.
+- *Authentication*: Choose between two forms of authentication (or none at all, not recommended if you make use of *projects*)
 	- HTTP Basic Authentication
 	- OpenID Connect (OIDC) Authentication
 	- The two can be used simultaneously if needed.
-- **Background services**: Support for long-running background services that are shared between runs from multiple users. CLAM takes care of starting when they're used and stopping them when they have been idle for a while. This is useful if your underlying application has a client/server model and/or relies on
+- *Background services*: Support for long-running background services that are shared between runs from multiple users. CLAM takes care of starting when they're used and stopping them when they have been idle for a while. This is useful if your underlying application has a client/server model and/or relies on
 large in-memory models (also on GPU).
-- **Automatic Job Scheduling**: Projects that can't be run right away due to lack of system resources are scheduled and picked up when resources are available again.
-- **Single binary**: CLAM itself comes, after compilation, as a single self-contained binary. You do not need any
+- *Automatic Job Scheduling*: Projects that can't be run right away due to lack of system resources are scheduled and picked up when resources are available again.
+- *Single binary*: CLAM itself comes, after compilation, as a single self-contained binary. You do not need any
   database servers or web servers for it to run.
 
 CLAM v4 is written in Rust, but it is completely agnostic to your underlying
-tool which can be written in any language. CLAM is also **written with full
-human attention without AI/LLMS**, no parts have been vibe-coded or written by
-agents. The contributing guidelines also ensure it stays
-this way.
+tool which can be written in any language. CLAM is also *written with full
+human attention without AI/LLMS*, no parts have been vibe-coded or written by
+agents. The contributing guidelines also ensure it stays this way.
 
 # WEB API
 

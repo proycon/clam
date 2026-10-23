@@ -1,7 +1,7 @@
 # CLAM
 
 CLAM turns command-line applications into RESTful webservice with a
-web-interface, so both automated client and humans can interact with your tool
+web-interface, so both automated clients and humans can interact with your tool
 over the web.
 
 ## Introduction
@@ -46,11 +46,11 @@ large in-memory models (also on GPU).
 * **Automatic Job Scheduling**: Projects that can't be run right away due to lack of system resources are scheduled and picked up when resources are available again.
 
 CLAM v4 is written in Rust, but it is completely agnostic to your underlying
-tool which can be written in any language. It aspires to be a fairly
-**minimal** yet flexible tool you can use to wrap around your own tools and
-scripts to be able to serve them over the web. CLAM is **written with full
+tool which can be written in any language. It aspires to be a fairly **minimal** yet
+flexible tool you can use to wrap around your own tools and scripts to be able to serve them over the web. CLAM is **written with full
 human attention without AI/LLMS**, no parts have been vibe-coded or written by
-agents. The [contributor guidelines](CONTRIBUTING.md) ensure it stays this way.
+agents. The [contributor guidelines](CONTRIBUTING.md) ensure it stays
+this way.
 
 ## Installation
 

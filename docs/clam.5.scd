@@ -4,12 +4,29 @@ clam(5)
 
 clam - Turns command-line applications into RESTful webservice with a web-interface, so both automated client and humans can interact with your tool over the web.
 
-# SYNTAX
+# INTRODUCTION
 
 A CLAM service is configured via a single configuration file in *TOML* syntax.
 See https://toml.io/en/ for generic information about TOML if you are not
 familiar with the syntax. It greatly helps the reading of this document to be
 acquainted with it.
+
+# TABLE OF CONTENTS
+
+- _GENERAL CONFIGURATION_
+- _LICENSE CONFIGURATION_
+- _CONTACT CONFIGURATION_
+- _AUTHENTICATION CONFIGURATION_
+- _ENDPOINTS CONFIGURATION_
+	- _ENDPOINT COMMAND CONFIGURATION_
+	- _ENDPOINT PARAMETER CONFIGURATION_
+	- _PARAMETER TYPES_
+	- _OUTPUT TYPES CONFIGURATION_
+- _FILETYPES CONFIGURATION_
+- _VIEWERS CONFIGURATION_
+- _BACKGROUND SERVICES CONFIGURATION_
+- _DISPATCHER CONFIGURATION_
+- _TEMPLATING OR ENVIRONMENT VARIABLES_
 
 # GENERAL CONFIGURATION
 
@@ -199,13 +216,13 @@ public = true
 	Defines input parameters that can be set by the user. See the section _ENDPOINT PARAMETER CONFIGURATION_ further below. 
 *background_services* (list of strings, ids of background services)
 	List of background services to start for this endpoint, they are referred to by their ID. This refers
-	to services you defined in the root-level *background_services* section. Read section _BACKGROUND_SERVICES_CONFIGURATION_.
+	to services you defined in the root-level *background_services* section. Read section _BACKGROUND SERVICES CONFIGURATION_.
 	CLAM will ensure that the background service is up whenever this endpoint is used.
 
 ## ENDPOINT COMMAND CONFIGURATION
 
 *command* (string)
-	Command to invoke, just the executable without any arguments (those are in `args`).
+	Command to invoke, just the executable without any arguments (those are in _args_).
 	This can be any tool or script in any language. In non-trivial situations it
 	is common to write a so-called *wrapper script* and put that here,
 	and have the wrapper script call the actual underlying tool and perform
@@ -217,12 +234,12 @@ public = true
 	404 (Not Found). Any other error will result in a HTTP 500 (Internal Error).
 *args*
 	Arguments to pass to the command. These can be either literal arguments,
-	(e.g. `args = [ "-a","-b","--foo","bar" ] or
+	(e.g. _args = [ "-a","-b","--foo","bar" ]_ or
 	explicit references to parameters from which the value should be taken. If
 	you just leave this empty, all parameters you defined will be automatically converted
 	to command arguments. This is simplest and often what you want. If you do populate this 
 	yourself _and_ still want this automatic
-	behaviour too, set ``auto_add_args = true``. This is used mainly in situations
+	behaviour too, set _auto_add_args = true_. This is used mainly in situations
 	where you have some literal arguments first, and want the rest to be derived
 	from the parameters. Referencing parameters explicitly
 	takes the following form (repeat for every parameter you want in the command
@@ -314,7 +331,7 @@ The fields are:
 *name*
 	Human-readable name for the parameter, this is what will be shown in the interface.
 *type*
-	The type of parameter, this also carries extra constraints you want to impose. See the examples above and the section __PARAMETER TYPES__ below.
+	The type of parameter, this also carries extra constraints you want to impose. See the examples above and the section _PARAMETER TYPES_ below.
 *required* (boolean)
 	Determines if the parameter is mandatory to be provided by the user
 	(defaults to false)
@@ -535,7 +552,7 @@ The following fields are available:
 	is common to write a so-called *wrapper script* and put that here,
 	and have the wrapper script call the actual underlying tool and perform
 	some of the necessary translations you need. Whatever tool or script you
-	call, _it is vital that it respects exit code conventions_ and returns exit
+	call, *it is vital that it respects exit code conventions* and returns exit
 	code 0 on success and non-zero on failure. Furthermore, in action mode (and for viewers),
 	CLAM interprets interprets exitcodes 40,43 and 44, and maps them to,
 	respectively HTTP 400 (Bad Request), HTTP 403 (Permission Denied), and HTTP
@@ -593,12 +610,21 @@ you often want to make configurable as in the following example:
 url = "$BASE_URL"
 ```
 
-CLAM itself does **NOT** support this syntax directly, but relies on external tools like `envsubst` to do this for you.
+CLAM itself does **NOT** support this syntax directly, but relies on external tools like _envsubst_ to do this for you.
 The procedure is simple:
 
-- have your service configuration in a template file like `yourservice.def.toml`, edit only this file and commit it your git repository.
-- Generate the final configuration from your template file with envsubst: `envsubst < yourservice.def.toml > yourservice.toml` . We recommend to have a `Makefile` handle this for you.
-- Run `clam --config yourservice.toml` as usual.
+- have your service configuration in a template file like _yourservice.def.toml_, edit only this file and commit it your git repository.
+- Generate the final configuration from your template file with _envsubst_. We recommend to have a _Makefile_ handle this for you.
+
+```
+envsubst < yourservice.def.toml > yourservice.toml` . 
+```
+
+- Then start as usual:
+
+```
+clam --config yourservice.toml
+```
 
 
 # SEE ALSO

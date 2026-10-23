@@ -1,12 +1,8 @@
-__pycache__/
-build/
-env/
-CLAM.egg-info/
-*.py[cod]
+/target
+/docs/clam.1
+/docs/clam.5
+/docs/index.html
+/docs/clam.1.html
+/docs/clam.2.html
 *~
 tests/testservice/data
-
-
-# Added by cargo
-
-/target
