@@ -204,7 +204,7 @@ pub enum EndPointMode {
 
     /// In project mode, responses do not come immediately after a POST request but clients poll for status at regular intervals using a GET request and must first CREATE a project and optionally PUT files.
     /// Users can DELETE projects when done, or leave them to come back later.
-    /// This allows the job to run over long periods of time and allows (multiple) file-based output.
+    /// This allows the job to run over long periods of time and allows (multiple) file-based input and output (batch processing).
     /// All endpoint paths are suffixed with the project ID
     /// The GET endpoint presents the staging area (files), an in progress state, or the output files, depending on the state of the project
     #[default]
@@ -264,10 +264,6 @@ pub struct EndPoint {
     #[serde(default)]
     parameters: Vec<Parameter>,
 
-    #[serde(default)]
-    /// Maps exit codes to error messages
-    errorstates: Vec<ErrorState>,
-
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
     #[serde(
         deserialize_with = "deserialize_opt_regex",
@@ -314,10 +310,6 @@ pub struct BackgroundService {
     #[serde(default)]
     /// Static arguments to pass to the background service
     args: Vec<String>,
-
-    /// Maps exit codes to error messages
-    #[serde(default)]
-    errorstates: Vec<ErrorState>,
 
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
     #[serde(
@@ -559,13 +551,13 @@ impl std::fmt::Display for ParameterType {
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
 pub struct Parameter {
-    /// Identifier for the parameter, used as variable name in queries or fields in multipart data (depending on context)
+    /// Identifier for the parameter, used as variable name in url-encoded queries or fields in multipart data (depending on context)
     id: String,
 
     /// The type of parameter
     r#type: ParameterType,
 
-    /// Human-readable name for the parameter
+    /// Human-readable name for the parameter, this is what will be shown in the interface.
     name: String,
 
     /// Human-readable description of the parameter
@@ -579,7 +571,8 @@ pub struct Parameter {
     #[serde(default)]
     multiple: bool,
 
-    /// the full parameter flag that is used to pass this parameter to the underlying tool, this includes any = sign
+    /// the full parameter flag that is used to pass this parameter to the underlying tool, this includes any = sign.
+    // Leave empty for positional arguments.
     flag: Option<String>,
 }
 
@@ -691,12 +684,6 @@ pub struct Viewer {
     /// List of background services required for this endpoint, by ID, multiple allowed
     #[serde(default)]
     background_services: Vec<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ErrorState {
-    code: u8,
-    message: String,
 }
 
 impl ServiceConfig {
