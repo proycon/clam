@@ -1,0 +1,17 @@
+name: Publish
+on:
+  push:
+    branches: [clam-4.0]
+jobs:
+  publish:
+    runs-on: codeberg-tiny
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          cd docs
+          make site
+      - uses: actions/git-pages@v2
+        with:
+          site: https://${{ forgejo.event.repository.owner.username }}.codeberg.page/${{ forgejo.event.repository.name }}/
+          token: ${{ forgejo.token }}
+          source: docs/
