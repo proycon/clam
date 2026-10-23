@@ -14,7 +14,6 @@
 
 ## In progress
 
-- [ ] Write documentation for service configuration files
 
 ## Done
 
@@ -24,3 +23,4 @@
     - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 - [x] Fix job monitoring thread (stderr,stdout are not drained concurrently)
 - [x] Search for commands in $PATH so they don't have to be absolute (without invoking a shell)
+- [x] Write documentation for service configuration files

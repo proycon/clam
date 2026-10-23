@@ -67,6 +67,8 @@ until they explicitly deleted the project.
 - **Background services**: Support for long-running background services that are shared between runs from multiple users. CLAM takes care of starting when they're used and stopping them when they have been idle for a while. This is useful if your underlying application has a client/server model and/or relies on
 large in-memory models (also on GPU).
 - **Automatic Job Scheduling**: Projects that can't be run right away due to lack of system resources are scheduled and picked up when resources are available again.
+- **Single binary**: CLAM itself comes, after compilation, as a single self-contained binary. You do not need any
+  database servers or web servers for it to run.
 
 CLAM v4 is written in Rust, but it is completely agnostic to your underlying
 tool which can be written in any language. CLAM is also **written with full
