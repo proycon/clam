@@ -11,6 +11,8 @@
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
 - [ ] Test interface on mobile devices
 - [ ] Generate random project name if none was specified in UI
+- [ ] Pagination for input and output files
+- [ ] UI polishing
 
 ## In progress
 

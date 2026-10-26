@@ -38,4 +38,3 @@ clean:
     		-e 's/\(href="[^" ]*\) \([^"]*"\)/\1_\2/' \
         	-e 't loop' > "$@" #this last sed statement replace spaces in href attributes with underscores
 
-
