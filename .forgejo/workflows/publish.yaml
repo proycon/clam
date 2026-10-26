@@ -10,7 +10,7 @@ jobs:
       - name: Install pandoc
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc
+          sudo apt-get install -y pandoc re2c gcc
       - name: Install scd2html
         run: |
           git clone https://git.sr.ht/~bitfehler/scd2html /tmp/scd2html
