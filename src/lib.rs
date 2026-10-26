@@ -14,7 +14,6 @@ pub use dispatcher::*;
 pub use error::*;
 pub use service::*;
 pub use state::*;
-pub use templating::*;
 
 use const_format::concatcp;
 

@@ -1,9 +1,9 @@
+use crate::ClamResponse;
 use crate::error::ApiError;
 use crate::state::ServiceState;
-use crate::{ClamResponse, EndPointMode};
 use axum::extract::{Path, Request};
 use axum::extract::{Query, State};
-use axum::http::{HeaderValue, StatusCode, header};
+use axum::http::{StatusCode, header};
 use axum::middleware::Next;
 use axum::response::Response;
 use axum::response::{IntoResponse, Redirect};

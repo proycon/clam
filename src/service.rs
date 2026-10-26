@@ -1485,6 +1485,7 @@ impl ParameterMap {
         ParameterMap(param_map)
     }
 
+    #[allow(unused)]
     pub(crate) fn get(&self, parameter_id: &str) -> Option<&ParameterValue> {
         self.iter()
             .find_map(|(k, v)| if k == parameter_id { Some(v) } else { None })

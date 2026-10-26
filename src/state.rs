@@ -455,7 +455,7 @@ impl ParameterValue {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct ParameterMap(pub(crate) Vec<(String, ParameterValue)>);
+pub struct ParameterMap(pub(crate) Vec<(String, ParameterValue)>);
 
 impl ParameterMap {
     pub(crate) fn new() -> Self {
