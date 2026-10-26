@@ -205,6 +205,9 @@ button.remove  {
     float: right;
     border-radius: 25px;
 }
+button.addmore {
+    border-radius: 25px;
+}
 textarea {
     height: 200px;
     border: 1px solid var(--form-border);
@@ -233,6 +236,7 @@ table.files td.filetype {
 td.viewers ul {
     margin: 0px;
     padding: 0px;
+    list-style-type: none;
 }
 
 pre#statuslog {
