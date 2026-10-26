@@ -25,6 +25,10 @@ pub struct ServiceState {
     /// Maps projects (pertaining to users and endpoints) to jobs, facilitates quick lookup of project status
     pub(crate) project_job_map: RwLock<HashMap<ProjectKey, JobId>>,
 
+    /// Maps projects to users who may adopt the project in a transfer. The string "*" is reserved for all users (first come first serve).
+    /// Note: project transfers are not persistant accross runs
+    pub(crate) project_transfer_map: RwLock<HashMap<ProjectKey, String>>,
+
     /// Maps endpoints by index to a boolean indicating whether background services are loaded
     pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
 
@@ -162,6 +166,7 @@ impl ServiceState {
             running_jobs: RwLock::new(Default::default()),
             done_jobs: RwLock::new(Default::default()),
             project_job_map: RwLock::new(Default::default()),
+            project_transfer_map: RwLock::new(Default::default()),
             bgservicestate_map: RwLock::new(vec![
                 BackgroundServiceState::Down;
                 config.background_services().iter().count()

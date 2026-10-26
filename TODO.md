@@ -2,6 +2,12 @@
 
 ## Backlog
 
+- [ ] Test interface on mobile devices
+- [ ] Pagination for input and output files
+- [ ] UI polishing
+
+## In progress
+
 - [ ] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
        It can create a project and upload files with its own API key;
@@ -9,12 +15,6 @@
     - [ ] The user the *transfer* endpoint to claim the project *from* (query parameter) a particular user.
           This URL can be provided to the user by a tool like the Switchboard after it has released a project.
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
-- [ ] Test interface on mobile devices
-- [ ] Pagination for input and output files
-- [ ] UI polishing
-
-## In progress
-
 
 ## Done
 

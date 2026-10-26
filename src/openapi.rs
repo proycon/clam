@@ -587,6 +587,67 @@ impl EndPoint {
                         upload_inputfile_operation,
                     );
                 }
+
+                //GET $project/transfer
+                let mut transfer_operation = Operation::new();
+                transfer_operation.summary = Some(format!(
+                    "{} - Initiate project transfer",
+                    self.name().as_deref().unwrap_or_default()
+                ));
+                transfer_operation.description = Some(self.description().clone().unwrap_or_else(|| {
+                    "Transfers ownership of a project to another user (the other user needs to call the `adopt` endpoint)".to_string()
+                }));
+                transfer_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "200",
+                        ResponseBuilder::new()
+                            .description("Returned when project transfer is initiated succesfully, it returns an adoption URL that should be given to the user that will be adopting the project"),
+                    )
+                    .response(
+                        "404",
+                        apierror_response("Returned when the project does not exist", error_schema),
+                    )
+                    .into();
+                transfer_operation.parameters = Some(vec![
+                    ParameterBuilder::new()
+                        .name("to_user")
+                        .description(Some(
+                            "Username of the user to transfer to, or `*` for any user.",
+                        ))
+                        .parameter_in(ParameterIn::Path)
+                        .build(),
+                ]);
+                paths.add_path_operation(
+                    format!("{}/{{project}}/transfer", self.normpath()),
+                    vec![HttpMethod::Get],
+                    transfer_operation,
+                );
+
+                //GET adopt/
+                let mut adopt_operation = Operation::new();
+                adopt_operation.summary = Some(format!(
+                    "{} - Adopt a project and finish project transfer",
+                    self.name().as_deref().unwrap_or_default()
+                ));
+                adopt_operation.description = Some(self.description().clone().unwrap_or_else(|| {
+                    "Transfers ownership of a project to another user (the other user needs initiate the transfer first using the `transfer` endpoint)".to_string()
+                }));
+                adopt_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "302",
+                        ResponseBuilder::new()
+                            .description("On succesfull adoption, you will be redirected to the transferred project"),
+                    )
+                    .response(
+                        "403",
+                        apierror_response("Returned when the user or project does not exist or no transfer has been initiated", error_schema),
+                    )
+                    .into();
+                paths.add_path_operation(
+                    format!("{}/adopt/{{from_user}}/{{project}}", self.normpath()),
+                    vec![HttpMethod::Get],
+                    adopt_operation,
+                );
             }
         }
     }

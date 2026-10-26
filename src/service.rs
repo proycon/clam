@@ -313,6 +313,20 @@ impl Service {
                     delete(delete_input_file).layer(Extension(endpoint_index)),
                 );
 
+                //Transfer endpoint
+                let transferpath = format!("{}/{{project}}/transfer", endpoint.normpath(),);
+                router = router.route(
+                    transferpath.as_str(),
+                    get(transfer_project).layer(Extension(endpoint_index)),
+                );
+
+                //Adopt endpoint
+                let adoptpath = format!("{}/adopt/{{from_user}}/{{project}}", endpoint.normpath(),);
+                router = router.route(
+                    adoptpath.as_str(),
+                    get(adopt_project).layer(Extension(endpoint_index)),
+                );
+
                 router
             }
             EndPointMode::Action => {
@@ -1313,6 +1327,93 @@ async fn post_action(
     }
     let contenttype: String = contenttype.into();
     run_action(state, endpoint_index, &user, param_map, contenttype).await
+}
+
+#[derive(Deserialize)]
+struct TransferParams {
+    to_user: String,
+}
+
+async fn transfer_project(
+    Path(project): Path<String>,
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+    params: Query<TransferParams>,
+) -> Result<ClamResponse, ApiError> {
+    if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
+        if params.to_user.len() > 256 || params.to_user.contains('/') {
+            //we can't actually validate usernames, as we don't know them, but we can reject long payloads as a precaution
+            Err(ApiError::PermissionDenied("Invalid username".into()))
+        } else {
+            if let Ok(mut project_transfer_map) = state.project_transfer_map.write() {
+                project_transfer_map
+                    .entry(project.key().clone())
+                    .and_modify(|e| *e = params.to_user.clone())
+                    .or_insert(params.to_user.clone());
+                let url = format!(
+                    "{}/adopt/{}/{}",
+                    project.endpoint().normpath(),
+                    user.as_str(),
+                    project.name()
+                );
+                Ok(ClamResponse::Text(url))
+            } else {
+                Err(ApiError::InternalError(
+                    "Project transfer map lock poisoned".into(),
+                )) //should not happen
+            }
+        }
+    } else {
+        Err(ApiError::NotFound("No such project".into()))
+    }
+}
+
+async fn adopt_project(
+    Path((from_user, project)): Path<(String, String)>,
+    Extension(endpoint_index): Extension<usize>,
+    Extension(user): Extension<CurrentUser>,
+    state: State<Arc<ServiceState>>,
+) -> Result<ClamResponse, ApiError> {
+    if from_user.len() < 256
+        && !from_user.contains('/')
+        && project.len() < 256
+        && !project.contains('/')
+    {
+        if let Ok(oldproject) =
+            Project::new(&project, from_user.as_str(), endpoint_index, state.config())
+        {
+            if oldproject.exists() {
+                //check permission and remove the entry if accepted
+                let mut access = false;
+                if let Ok(mut project_transfer_map) = state.project_transfer_map.write() {
+                    let entry = project_transfer_map.get(oldproject.key());
+                    {
+                        let entry = entry.map(|s| s.as_str());
+                        access = entry == Some(user.as_str()) || entry == Some("*");
+                    }
+                    if access {
+                        project_transfer_map.remove(oldproject.key());
+                    }
+                }
+                if access {
+                    if let Ok(newproject) =
+                        Project::new(project, user.as_str(), endpoint_index, state.config())
+                    {
+                        if std::fs::rename(oldproject.path(), newproject.path()).is_ok() {
+                            let url = format!(
+                                "{}/{}",
+                                oldproject.endpoint().normpath(),
+                                newproject.name()
+                            );
+                            return Ok(ClamResponse::RedirectGet(url));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Err(ApiError::PermissionDenied("Adoption denied".into()))
 }
 
 async fn shutdown_signal(state: Arc<ServiceState>) {
