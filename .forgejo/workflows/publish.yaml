@@ -7,6 +7,14 @@ jobs:
     runs-on: codeberg-tiny
     steps:
       - uses: actions/checkout@v7
+      - name: Install pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+      - name: Install scd2html
+        run: |
+          git clone https://git.sr.ht/~bitfehler/scd2html /tmp/scd2html
+          sudo make -C /tmp/scd2html install
       - run: |
           cd docs
           make site
