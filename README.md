@@ -76,8 +76,8 @@ After installation, CLAM is available as `clam`.
 
 Documentation is available in manual pages (and online):
 
-* See `man clam` (or [here](/docs/clam.1.scd)) for documentation on running CLAM.
-* See `man 5 clam` (or [here](/docs/clam.5.scd)) for documentation on writing a service configuration file for your CLAM webservice.
+* See `man clam` (or [here](https://proycon.codeberg.page/clam/clam.1.html)) for documentation on running CLAM.
+* See `man 5 clam` (or [here](https://proycon.codeberg.page/clam/clam.5.html)) for documentation on writing a service configuration file for your CLAM webservice.
 
 ## History
 
