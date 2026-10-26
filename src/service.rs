@@ -599,8 +599,12 @@ async fn post_create_project(
     state: State<Arc<ServiceState>>,
     form: Form<CreateForm>,
 ) -> Result<ClamResponse, ApiError> {
-    if let Ok(project) = Project::new(&form.project, user.as_str(), endpoint_index, state.config())
-    {
+    let name: String = if !form.project.is_empty() {
+        form.project.clone()
+    } else {
+        Uuid::new_v4().into()
+    };
+    if let Ok(project) = Project::new(name, user.as_str(), endpoint_index, state.config()) {
         if let Err(e) = project.create() {
             Err(e.into())
         } else {
