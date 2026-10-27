@@ -636,7 +636,7 @@ impl EndPoint {
                     .response(
                         "302",
                         ResponseBuilder::new()
-                            .description("On succesfull adoption, you will be redirected to the transferred project"),
+                            .description("On succesful adoption, you will be redirected to the transferred project"),
                     )
                     .response(
                         "403",
