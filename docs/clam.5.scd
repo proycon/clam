@@ -166,6 +166,13 @@ oauth_client_secret = "mysecret"
 oauth_scope = [ "openid" ]
 ```
 
+When you register your webservice with your openid provider, make sure to always provide the
+following redirect URL (substitute the example domain for your own):
+
+```
+https://yourservice.example.org/oidc/callback
+```
+
 # ENDPOINTS CONFIGURATION
 
 The endpoints form the heart of the service configuration, here you determine what
