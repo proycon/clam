@@ -518,7 +518,7 @@ async fn get_project(
                         Some(upon::value! {
                             name: project.endpoint().name().clone().unwrap_or_default(),
                             description: project.endpoint().description().clone().unwrap_or_default(),
-                            parentpath: format!("{}/{}", project.endpoint().normpath(), "projects"),
+                            parenturl: format!("{}{}/{}", state.config().url().as_deref().unwrap_or_default(), project.endpoint().normpath(), "projects"),
                             project: project.name(),
                             path: format!("{}/{}", project.endpoint().normpath(), project.name()),
                             refresh: match projectstatus {
