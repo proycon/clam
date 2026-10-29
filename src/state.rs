@@ -29,6 +29,9 @@ pub struct ServiceState {
     /// Note: project transfers are not persistant accross runs
     pub(crate) project_transfer_map: RwLock<HashMap<ProjectKey, String>>,
 
+    /// Sessions are only used by the adopt/ endpoint to temporarily carry data over the authentication. It maps a random ID (a negative number) to the project key of the project that is to be adopted
+    pub(crate) session_adoption_map: RwLock<HashMap<isize, ProjectKey>>,
+
     /// Maps endpoints by index to a boolean indicating whether background services are loaded
     pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
 
@@ -167,6 +170,7 @@ impl ServiceState {
             done_jobs: RwLock::new(Default::default()),
             project_job_map: RwLock::new(Default::default()),
             project_transfer_map: RwLock::new(Default::default()),
+            session_adoption_map: RwLock::new(Default::default()),
             bgservicestate_map: RwLock::new(vec![
                 BackgroundServiceState::Down;
                 config.background_services().iter().count()

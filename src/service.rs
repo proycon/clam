@@ -182,7 +182,7 @@ impl Service {
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
             routes = routes.merge(
                 self.configure_endpoint(i, endpoint)
-                    .route_layer(from_fn_with_state((state.clone(), i), auth)),
+                    .route_layer(from_fn_with_state((state.clone(), i as isize), auth)),
             );
         }
 

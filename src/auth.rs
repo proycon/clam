@@ -40,7 +40,7 @@ pub struct OpenIdConfiguration {
 /// Auth code as passed from the OIDC IdP to our callback endpoint after succesful login
 pub struct AuthRequest {
     code: String,
-    state: usize,
+    state: isize,
 }
 
 #[derive(Deserialize)]
@@ -76,15 +76,63 @@ impl CurrentUser {
     }
 }
 
-type AuthState = (Arc<ServiceState>, usize); //holds state and endpoint index
+type AuthState = (Arc<ServiceState>, isize); //holds state and endpoint index (positive numbers) or transfer ID (negative numbers)
+
+impl ServiceState {
+    /// We passed the endpoint_index as state in the original auth request, now we pick it up again
+    /// so we can derive the actual endpoint to redrect to from it redirect_uri from it.
+    /// This the 'state' field during authorization can either directly encode an endpoint_index (if it's >=0),
+    /// or it references a transfer ID (negative number) that needs to be looked up in an internal map first
+    pub(crate) fn endpoint_index_from_authstate(
+        &self,
+        state_value: isize,
+    ) -> Result<usize, StatusCode> {
+        if state_value >= 0 {
+            //normal situation
+            return Ok(state_value as usize);
+        } else if let Ok(session_adoption_map) = self.session_adoption_map.read() {
+            //valid transfer ID
+            if let Some(projectkey) = session_adoption_map.get(&state_value) {
+                return Ok(projectkey.endpoint_index());
+            }
+        }
+        Err(StatusCode::UNAUTHORIZED)
+    }
+
+    pub(crate) fn redirect_url_from_authstate(
+        &self,
+        state_value: isize,
+    ) -> Result<String, StatusCode> {
+        if state_value >= 0 {
+            //normal situation
+            return self
+                .redirect_url(state_value as usize)
+                .ok_or(StatusCode::UNAUTHORIZED);
+        } else if let Ok(mut session_adoption_map) = self.session_adoption_map.write() {
+            //valid transfer ID for an adoption
+            if let Some(projectkey) = session_adoption_map.remove(&state_value) {
+                //redirect to adoption URL
+                let adopt_url = format!(
+                    "{}/adopt/{}/{}",
+                    self.config().url().clone().unwrap_or_default(),
+                    projectkey.user(),
+                    projectkey.name()
+                );
+                return Ok(adopt_url);
+            }
+        }
+        Err(StatusCode::UNAUTHORIZED)
+    }
+}
 
 /// Authentication middleware function
 /// adds username to the request if login succesful
 pub(crate) async fn auth(
-    State((state, endpoint_index)): State<AuthState>,
+    State((state, state_value)): State<AuthState>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    let endpoint_index = state.endpoint_index_from_authstate(state_value)?;
     let endpoint = state.endpoint(endpoint_index);
     let auth_header = req
         .headers()
@@ -139,9 +187,12 @@ pub(crate) async fn auth(
 
         if state.oauthcredentials.enabled() {
             // Redirect to login page for OIDC
-            return Ok(
-                ClamResponse::RedirectGet(format!("/login/{}", endpoint_index)).into_response(),
-            );
+            return Ok(ClamResponse::RedirectGet(format!(
+                "{}/login/{}",
+                state.config().url().as_deref().unwrap_or_default(),
+                endpoint_index
+            ))
+            .into_response());
         } else {
             return Ok((
                 StatusCode::UNAUTHORIZED,
@@ -290,13 +341,10 @@ pub async fn callback_handler(
     Query(auth_req): Query<AuthRequest>,
 ) -> Result<(CookieJar, Redirect), StatusCode> {
     if let Some(openidconfig) = state.openidconfig.as_ref() {
-        // we passed the endpoint_index as state in the original auth request, now we pick it up again
-        // so we can derive the actual endpoint to redrect to from it redirect_uri from it
-        let redirect_uri = state.redirect_url(auth_req.state);
-        if redirect_uri.is_none() {
-            debug!("Invalid endpoint_index provided to OIDC callback!");
-            return Err(StatusCode::UNAUTHORIZED);
-        }
+        // we passed the endpoint_index as state in the original auth request, the following
+        // function picks it up again and also handled adopted (if a transfer ID was passed as state
+        // instead of an endpoint_index)
+        let redirect_uri = state.redirect_url_from_authstate(auth_req.state)?;
 
         let client = reqwest::Client::new();
 
@@ -340,7 +388,7 @@ pub async fn callback_handler(
             let updated_jar = jar.add(cookie);
 
             // Redirect
-            return Ok((updated_jar, Redirect::to(redirect_uri.as_ref().unwrap())));
+            return Ok((updated_jar, Redirect::to(redirect_uri.as_str())));
         }
     }
     Err(StatusCode::UNAUTHORIZED)
