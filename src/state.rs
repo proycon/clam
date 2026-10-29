@@ -273,6 +273,8 @@ impl ServiceState {
                     }
                 ));
             }
+        } else {
+            unreachable!("redirect_url can't be called if no base url was configured");
         }
         None
     }
