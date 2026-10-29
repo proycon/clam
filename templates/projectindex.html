@@ -25,7 +25,7 @@
 
 <div class="block">
 <h2>New project?</h2>
-<form method="post" action="{{ normpath }}/projects" type="application/x-www-form-urlencoded">
+<form method="post" action="{{ config.url }}{{ normpath }}/projects" type="application/x-www-form-urlencoded">
     <table class="parameters">
         <tr><th>
         <label>Project name</label>
@@ -43,7 +43,7 @@
 <h2>Existing Projects</h2>
 <ul>
 {% for project in projects %}
-<li><a href="{{ normpath }}/{{ project }}">{{ project }}</a></li>
+<li><a href="{{ config.url }}{{ normpath }}/{{ project }}">{{ project }}</a></li>
 {% endfor %}
 </ul>
 </div>

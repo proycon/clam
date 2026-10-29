@@ -186,9 +186,22 @@ impl Service {
             );
         }
 
+        // The OpenAPI path is retrieved by the client so we need to process config.url and extract the prefix (if any)
+        let openapi_json_path = format!(
+            "{}/openapi.json",
+            state
+                .config()
+                .url()
+                .as_deref()
+                .and_then(|url| url.split_once("://"))
+                .and_then(|(_, host_and_path)| host_and_path.find('/').map(|i| &host_and_path[i..]))
+                .unwrap_or("")
+                .trim_end_matches('/')
+        );
+
         let router = Router::new()
             .merge(routes)
-            .merge(SwaggerUi::new("/info").url("/openapi.json", state.openapi.clone()))
+            .merge(SwaggerUi::new("/info").url(openapi_json_path, state.openapi.clone()))
             .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 

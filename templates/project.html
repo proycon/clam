@@ -41,13 +41,13 @@
 </thead>
 <tbody>
 {% for inputfile in status.data.input_files %}
-<tr><td class="filename"><a href="{{ path }}/{{ inputfile.parameter_id }}/{{inputfile.name }}">{{ inputfile.name }}</a></td><td class="parameter">{{inputfile.parameter_name}}</td><td class="filetype">{{ inputfile.filetype.name }}</td></tr>
+<tr><td class="filename"><a href="{{ config.url }}{{ path }}/{{ inputfile.parameter_id }}/{{inputfile.name }}">{{ inputfile.name }}</a></td><td class="parameter">{{inputfile.parameter_name}}</td><td class="filetype">{{ inputfile.filetype.name }}</td></tr>
 {% endfor %}
 </tbody>
 </table>
 </div>
 
-<form method="post" action="{{ path }}" enctype="multipart/form-data">
+<form method="post" action="{{ config.url }}{{ path }}" enctype="multipart/form-data">
 
 <div class="block">
 <h2>Parameters</h2>
@@ -64,7 +64,7 @@
 </form>
 <div class="block">
     <div class="dangerbuttons">
-        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+        <form method="post" action="{{ config.url }}{{ path }}/delete" enctype="application/x-www-form-urlencoded">
             <input type="submit" value="Delete this project" title="All input files will be lost">
         </form>
     </div>
@@ -90,10 +90,10 @@
 </div>
 <div class="block">
     <div class="dangerbuttons">
-        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+        <form method="post" action="{{ config.url }}{{ path }}/delete" enctype="application/x-www-form-urlencoded">
             <input type="submit" value="Cancel and delete project" title="All results and input files and will be lost">
         </form>
-        <form method="post" action="{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
+        <form method="post" action="{{ config.url }}{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
             <input type="submit" value="Cancel and restart" title="This offers you the opportunity to go back to the staging state to resubmit parameters and try again. All results will be lost, but input files will be retained.">
         </form>
     </div>

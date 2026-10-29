@@ -45,9 +45,9 @@
 <div class="block">
     <div class="porch">
         {% if endpoint.is_project %}
-            <a href="{{ endpoint.normpath }}/projects" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+            <a href="{{ config.url }}{{ endpoint.normpath }}/projects" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
         {% else %}
-            <a href="{{ endpoint.path }}" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
+            <a href="{{ config.url }}{{ endpoint.path }}" type="button" title="{{ endpoint.name }}" aria-label="{{ endpoint.name }}" aria-description="{{ endpoint.description }}">Continue ▸▸▸</a>
         {% endif %}
     </div>
     <h2>{{ endpoint.name }}</h2>

@@ -6,19 +6,14 @@
     <meta http-equiv="refresh" content="{{ refresh }}">
     {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {% if config.url %}
-    <base href="{{ config.url }}/">
-    {% else %}
-    <base href="/">
-    {% endif %}
     <title>{{ config.name }}</title>
     <link rel="stylesheet" href="main.css" type="text/css">
     {% if config.custom_css %}
-    <link rel="stylesheet" href="{{ config.custom_css }}" type="text/css">
+    <link rel="stylesheet" href="{{ config.url }}/{{ config.custom_css }}" type="text/css">
     {% endif %}
     <script type="text/javascript" src="ui.js"></script>
     {% if config.custom_js %}
-    <script type="text/javascript" src="{{ config.custom_js }}"></script>
+    <script type="text/javascript" src="{{ config.url }}/{{ config.custom_js }}"></script>
     {% endif %}
 </head>
 <body>
