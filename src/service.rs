@@ -1666,13 +1666,34 @@ impl ParameterMap {
                             } else if let Some(filepath) =
                                 project.input_file(parameter_id.as_str(), filename, false)
                             {
-                                if let Err(e) = std::fs::rename(tmpfilepath, filepath) {
-                                    err = Some(ApiError::InternalError(format!(
-                                        "Failed to finish upload for parameter {}, file {}: {}",
-                                        parameter.id(),
-                                        filename,
-                                        e
-                                    )));
+                                match std::fs::rename(&tmpfilepath, &filepath) {
+                                    Ok(()) => (),
+                                    Err(e) if e.kind() == std::io::ErrorKind::CrossesDevices => {
+                                        if let Err(e2) = std::fs::copy(&tmpfilepath, filepath) {
+                                            err = Some(ApiError::InternalError(format!(
+                                                "Failed to finish upload (copy) for parameter {}, file {}: {}",
+                                                parameter.id(),
+                                                filename,
+                                                e2
+                                            )));
+                                        }
+                                        if let Err(e2) = std::fs::remove_file(tmpfilepath) {
+                                            err = Some(ApiError::InternalError(format!(
+                                                "Failed to finish upload (removal) for parameter {}, file {}: {}",
+                                                parameter.id(),
+                                                filename,
+                                                e2
+                                            )));
+                                        }
+                                    }
+                                    Err(e) => {
+                                        err = Some(ApiError::InternalError(format!(
+                                            "Failed to finish upload for parameter {}, file {}: {}",
+                                            parameter.id(),
+                                            filename,
+                                            e
+                                        )));
+                                    }
                                 }
                             } else {
                                 //or if input is not accepted for any other reason, delete it
