@@ -1,5 +1,4 @@
 name = "testauth"
-summary = "Test authentication"
 description = "Test service for authentication, doesn't do anything useful"
 authors = [ "Maarten van Gompel" ]
 affiliation = "CLST, Radboud University"

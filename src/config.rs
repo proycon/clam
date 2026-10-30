@@ -14,6 +14,7 @@ use std::path::PathBuf;
 const INVALID_FILENAME_CHARS: [char; 4] = ['/', '\n', '\t', ';'];
 
 #[derive(Deserialize, Serialize, Default, Getters, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct ServiceConfig {
     /// The version of the webservice, increment this on subsequent releases. Semantic versioning is strongly recommended.
     version: String,
@@ -109,6 +110,7 @@ pub struct ServiceConfig {
 }
 
 #[derive(Deserialize, Serialize, Clone, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct DispatcherConfig {
     /// Maximum number of running jobs at the same time. Note that this also includes background service jobs.
     #[serde(default = "default_max_running_jobs")]
@@ -152,6 +154,7 @@ fn default_max_body_size() -> usize {
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
 /// Authorization Configuration, points to external files that holds credentials so it is
 /// easier to separate the service configuration from secret configurations.
+#[serde(deny_unknown_fields)]
 pub struct AuthConfig {
     /// Path to a tab separated file of usernames and SHA-256 hashed passwords for HTTP Basic Authentication. An empty string value is also allowed to disable this.
     user_file: Option<String>,
@@ -161,6 +164,7 @@ pub struct AuthConfig {
 }
 
 #[derive(Deserialize, Serialize, Default, Clone, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct OAuthCredentials {
     /// URL from where to obtain the OpenID configuration at run-time, is usually something like https://example.com/.well-known/openid-configuration
     /// and obtained once when the service starts
@@ -220,6 +224,7 @@ pub enum CommandArg {
 }
 
 #[derive(Deserialize, Serialize, Default, Getters, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct EndPoint {
     /// The path where the endpoint is accessible, this also serves as the primary identifier for the endpoint. All paths must begin with a slash (/) and should NOT have an additional trailing slash
     path: String,
@@ -287,6 +292,7 @@ pub struct EndPoint {
 }
 
 #[derive(Deserialize, Serialize, Default, Getters, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct BackgroundService {
     /// Identifier for this background service
     id: String,
@@ -351,6 +357,7 @@ pub enum FileConflictResolution {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "parametertype")]
+#[serde(deny_unknown_fields)]
 pub enum ParameterType {
     /// Open-valued text
     String {
@@ -543,6 +550,7 @@ impl std::fmt::Display for ParameterType {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct Parameter {
     /// Identifier for the parameter, used as variable name in url-encoded queries or fields in multipart data (depending on context)
     id: String,
@@ -624,6 +632,7 @@ where
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct FileType {
     /// Internal ID
     id: String,
@@ -640,6 +649,7 @@ pub struct FileType {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct OutputFile {
     /// name of the type of output
     name: String,
@@ -652,6 +662,7 @@ pub struct OutputFile {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, Getters)]
+#[serde(deny_unknown_fields)]
 pub struct Viewer {
     /// ID for the viewer, this is referenced from file types and appears in URLs
     id: String,
