@@ -398,37 +398,15 @@ impl ServiceState {
                     .background_service_index_by_id(bgservice.as_str())
                     .expect("background service must exist");
                 if let Ok(bgservicestate_map) = self.bgservicestate_map.read() {
-                    match bgservicestate_map.get(bgindex) {
-                        Some(BackgroundServiceState::Failed { errormsg }) => {
-                            return Some(ProjectStatus::Done {
-                                success: false,
-                                statuslog: Some(format!(
-                                    "A background service failed: {}",
-                                    errormsg
-                                )),
-                                input_files: Vec::new(),
-                                output_files: Vec::new(),
-                            });
-                        }
-                        None | Some(BackgroundServiceState::Down { .. }) => {
-                            //shouldn't really happen
-                            debug!("background service is down");
-                            return Some(ProjectStatus::Done {
-                                success: false,
-                                statuslog: Some(format!("A background service is down",)),
-                                input_files: Vec::new(),
-                                output_files: Vec::new(),
-                            });
-                        }
-                        Some(BackgroundServiceState::Loading { .. })
-                        | Some(BackgroundServiceState::Terminating { .. }) => {
-                            debug!(
-                                "background service is loading or terminating, but we have no job id!",
-                            );
-                            //shouldn't really happen either I think
-                            return Some(ProjectStatus::Scheduled);
-                        }
-                        Some(BackgroundServiceState::Up { .. }) => {}
+                    if let Some(BackgroundServiceState::Failed { errormsg }) =
+                        bgservicestate_map.get(bgindex)
+                    {
+                        return Some(ProjectStatus::Done {
+                            success: false,
+                            statuslog: Some(format!("A background service failed: {}", errormsg)),
+                            input_files: Vec::new(),
+                            output_files: Vec::new(),
+                        });
                     }
                 }
             }
