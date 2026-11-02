@@ -570,6 +570,7 @@ async fn submit_project(
         //ensure necessary background services are scheduled or already running
         for bgservice in job.background_services().iter() {
             state.schedule_background_service(*bgservice).await?
+            //reaching this stage this doesn't necessarily mean that the background service is up and ready!
         }
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));

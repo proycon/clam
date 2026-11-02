@@ -5,6 +5,7 @@
 - [ ] Test interface on mobile devices
 - [ ] Pagination for input and output files
 - [ ] UI polishing
+- [ ] UI: add some UI error messages instead of raw json
 
 ## In progress
 

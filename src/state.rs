@@ -353,9 +353,7 @@ impl ServiceState {
         let job_id = if let Ok(project_job_map) = self.project_job_map.read() {
             project_job_map.get(project.key()).map(|x| x.clone())
         } else {
-            return Some(ProjectStatus::Staging {
-                input_files: project.input_files(),
-            });
+            None
         };
 
         if let Some(job_id) = job_id {
@@ -392,6 +390,49 @@ impl ServiceState {
         // no associated job found
         // check if there are any output files or not (job may have run during a previous
         // incarnation of this webservice)
+
+        if !project.endpoint().background_services().is_empty() {
+            //derive status from background services if possible
+            for bgservice in project.endpoint().background_services() {
+                let bgindex = self
+                    .background_service_index_by_id(bgservice.as_str())
+                    .expect("background service must exist");
+                if let Ok(bgservicestate_map) = self.bgservicestate_map.read() {
+                    match bgservicestate_map.get(bgindex) {
+                        Some(BackgroundServiceState::Failed { errormsg }) => {
+                            return Some(ProjectStatus::Done {
+                                success: false,
+                                statuslog: Some(format!(
+                                    "A background service failed: {}",
+                                    errormsg
+                                )),
+                                input_files: Vec::new(),
+                                output_files: Vec::new(),
+                            });
+                        }
+                        None | Some(BackgroundServiceState::Down { .. }) => {
+                            //shouldn't really happen
+                            debug!("background service is down");
+                            return Some(ProjectStatus::Done {
+                                success: false,
+                                statuslog: Some(format!("A background service is down",)),
+                                input_files: Vec::new(),
+                                output_files: Vec::new(),
+                            });
+                        }
+                        Some(BackgroundServiceState::Loading { .. })
+                        | Some(BackgroundServiceState::Terminating { .. }) => {
+                            debug!(
+                                "background service is loading or terminating, but we have no job id!",
+                            );
+                            //shouldn't really happen either I think
+                            return Some(ProjectStatus::Scheduled);
+                        }
+                        Some(BackgroundServiceState::Up { .. }) => {}
+                    }
+                }
+            }
+        }
 
         if project.path().exists() {
             let output_files = project.output_files();
