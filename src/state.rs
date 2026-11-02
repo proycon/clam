@@ -32,7 +32,7 @@ pub struct ServiceState {
     /// Sessions are only used by the adopt/ endpoint to temporarily carry data over the authentication. It maps a random ID (a negative number) to the project key of the project that is to be adopted
     pub(crate) session_adoption_map: RwLock<HashMap<isize, ProjectKey>>,
 
-    /// Maps endpoints by index to a boolean indicating whether background services are loaded
+    /// Maps endpoints by index to an enum indicating whether background services are loaded
     pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
 
     /// Map of usernames to hashed passwords (loaded from external file)

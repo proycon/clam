@@ -147,7 +147,12 @@ impl Dispatcher {
                             .unwrap()
                             .as_secs() as usize,
                         job: *job.id(),
-                    }
+                    };
+                    debug!(
+                        "Associated background service #{} with job {} and state Loading",
+                        index + 1,
+                        job.id(),
+                    );
                 }
                 Some(BackgroundServiceState::Up { .. })
                 | Some(BackgroundServiceState::Loading { .. })
@@ -363,6 +368,12 @@ impl Dispatcher {
                                         } else {
                                             BackgroundServiceState::Failed { errormsg: error }
                                         };
+                                        debug!(
+                                            "Job {} finished, background service #{} is now {:?}",
+                                            job.id(),
+                                            bgservice_index + 1,
+                                            bgservicestate_map[bgservice_index]
+                                        );
                                     }
                                     //cancel all running jobs or pending jobs that depend on this background service
                                     for (job_id, job) in running_jobs.iter() {
@@ -409,6 +420,12 @@ impl Dispatcher {
                                     {
                                         bgservicestate_map[bgservice_index] =
                                             BackgroundServiceState::Failed { errormsg: error };
+                                        debug!(
+                                            "Job {} failed to start, background service #{} is now {:?}",
+                                            job.id(),
+                                            bgservice_index + 1,
+                                            bgservicestate_map[bgservice_index]
+                                        );
                                     }
                                 } else {
                                     job.set_error(error.clone());
@@ -453,7 +470,10 @@ impl Dispatcher {
                                     if let Ok(mut bgservicestate_map) =
                                         self.state.bgservicestate_map.write()
                                     {
-                                        debug!("background service {} signaled it is up!", job_id);
+                                        debug!(
+                                            "background service #{} (job {}), signaled it is up!",
+                                            *index, job_id
+                                        );
                                         bgservicestate_map[*index] = BackgroundServiceState::Up {
                                             last_used_time: SystemTime::now()
                                                 .duration_since(UNIX_EPOCH)
@@ -489,6 +509,11 @@ impl Dispatcher {
                                                     job.kill();
                                                 }
                                             }
+                                            debug!(
+                                                "background service #{} (job {}), is terminating!",
+                                                i + 1,
+                                                *job
+                                            );
                                             *state =
                                                 BackgroundServiceState::Terminating { job: *job }
                                         }
