@@ -588,6 +588,33 @@ impl EndPoint {
                     );
                 }
 
+                //GET outputfile
+                let mut get_outputfile_operation = Operation::new();
+                get_outputfile_operation.summary = Some(format!(
+                    "{} - Retrieves the specified output file by filename",
+                    self.name().as_deref().unwrap_or_default(),
+                ));
+                get_outputfile_operation.responses = ResponsesBuilder::new()
+                    .response(
+                        "200",
+                        ResponseBuilder::new().description(
+                            "The body of the output file, with the appropriate Content-Type",
+                        ),
+                    )
+                    .response(
+                        "404",
+                        apierror_response(
+                            "Returned when the specified output file does not exist",
+                            error_schema,
+                        ),
+                    )
+                    .into();
+                paths.add_path_operation(
+                    format!("{}/{{project}}/output/{{filename}}", self.normpath(),),
+                    vec![HttpMethod::Get],
+                    get_outputfile_operation,
+                );
+
                 //GET $project/transfer
                 let mut transfer_operation = Operation::new();
                 transfer_operation.summary = Some(format!(

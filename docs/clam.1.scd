@@ -84,6 +84,78 @@ The exact Web API is shaped based on the configuration you provide to CLAM. The 
 *GET* _/info/_
 	Web-interface for API inspection (Swagger)
 
+## ACTION ENDPOINTS
+
+A typical request for an *action* endpoint is very straightforward looks as follows:
+
+*POST/GET* _$ENDPOINT_
+	A *POST* or *GET* request on the action endpoint, providing the necessary
+	query parameters for the action. For *POST* requests they be passed either
+	as _application/x-www-form-urlencoded_ or _multipart/form-data_. If all goes
+	well, the endpoint will respond with HTTP 200 and the output of the action.
+
+## PROJECT ENDPOINTS
+
+A typical workflow for a *project* endpoint is a bit more involved, and consists of the
+following stages, in order:
+
+*PUT* _$ENDPOINT/$PROJECT_
+	Creates a new project on the project endpoint
+*PUT* _$ENDPOINT/$PARAMETER/$FILENAME_
+	Uploads a file for a given parameter, repeat as many times as needed or
+	skip this entirely and provide *all* files at once in the next step
+*POST* _$ENDPOINT/$PROJECT_
+	Start project run by passing all parameters as either
+	_application/x-www-form-urlencoded_ or _multipart/form-data_. Files may also
+	be uploaded separately as explained above.
+*GET* _$ENDPOINT/$PROJECT_
+	Poll the project, this returns a JSON response with, amongst others, 
+	the state in which the project is: Staging, Running or Done.
+	Poll at a regular interval until the project is Done. 
+*GET* _$ENDPOINT/$PROJECT/output/$FILENAME_
+	Retrieve the output file (the previous request will provide a list of all
+	output files when a project is done.)
+*DELETE* _$ENDPOINT/$PROJECT_
+	Deletes the project and all associated files
+
+For most of the above requests, make sure to pass the following HTTP header:
+
+```
+Accept: application/json
+```
+
+If you pass _text/html_ you will be presented with the interface, which is what
+your web browser will do by default.
+
+You will also need to pass the necessary _Authorization_ header if HTTP Basic
+Authentication or OpenID Connect is enabled, which is always strongly
+recommended for project endpoints.
+
+You can have multiple distinct project endpoints per CLAM service, though you
+will most commonly find just one.
+
+## PROJECT TRANSFER
+
+You can transfer your project to another user (a specific one or anyone) by
+calling the following endpoint:
+
+*GET* _$ENDPOINT/$PROJECT/transfer_
+	Initiate project transfer. Pass query parameter *to_user* with the name of
+	the specific user to pass the project to, or a single asterisk for anyone.
+	The endpoint will respond with an adoption URL that should be passed to the
+	receiving user. That URL will look as follows:
+
+*GET* _$ENDPOINT/adopt/$FROM_USER/$PROJECT_
+	This will return a HTTP 302 on succesful adoption and redirect to the project poll
+	endpoint.
+
+A project will only be transferred after both calls complete in this order.
+
+## PROJECT LISTING
+
+*GET* _$ENDPOINT/projects_
+	Returns a list of all projects (for a given project endpoint)
+
 # SOURCE & CONTRIBUTING
 
 See https://codeberg.org/proycon/clam
