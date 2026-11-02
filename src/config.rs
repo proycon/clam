@@ -157,9 +157,15 @@ fn default_max_body_size() -> usize {
 #[serde(deny_unknown_fields)]
 pub struct AuthConfig {
     /// Path to a tab separated file of usernames and SHA-256 hashed passwords for HTTP Basic Authentication. An empty string value is also allowed to disable this.
+    #[serde(default)]
     user_file: Option<String>,
 
+    /// Salt for HTTP Basic Authentication, this will be prepended prior to hashing the password and thereby ensures the password store is more secure
+    #[serde(default)]
+    salt: Option<String>,
+
     /// Path to a toml file holding the OAuth2 credentials/configuration for OAuth2/OpenID Connect authentication. An empty string value is also allowed to disable this.
+    #[serde(default)]
     oauth_config_file: Option<String>,
 }
 

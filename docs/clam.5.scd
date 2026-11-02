@@ -127,10 +127,13 @@ email = "proycon@anaproy.nl"
 
 You can have one *auth* section with the following fields:
 
-*user_file* (string)
+*user_file* (string, optional)
 	Path to a tab separated file that holds user names and hashed passwords for HTTP Basic
 	Authentication. Setting this enables HTTP Basic Authentication.
-*oauth_config_file* (string)
+*salt* (string, optional)
+	The salt (a string to prepend to the password prior to hashing). Used for
+	HTTP Basic Authentication.
+*oauth_config_file* (string, optional)
 	Path to a TOML file that holds the configuration for OpenID Connect. Setting this
 	enabled OpenID Authentication.
 
@@ -140,7 +143,15 @@ a version controlled repository.
 
 ## USER_FILE
 
-The user file is a simple tab separated file with on each line a username, a tab and a SHA256 hashed password (hex notation).
+The user file is a simple tab separated file with on each line a username, a tab
+and a SHA256 hashed password (hex notation). If *salt* is set (recommended),
+that string will be prepended to the password prior to hashing, so the entry
+in the user file must be hashed in the same way. You can compute a hash as
+follows:
+
+```
+echo "${SALT}${PASSWORD}" | sha256sum
+```
 
 ## OAUTH_CONFIG_FILE
 

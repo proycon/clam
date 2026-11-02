@@ -215,10 +215,17 @@ fn validate_basic_auth(credentials: &str, state: &ServiceState) -> Option<String
             let mut fields = credentials.splitn(2, ':');
             if let (Some(user), Some(password)) = (fields.next(), fields.next()) {
                 // hash password (SHA256)
-                let pwhash: String = Sha256::digest(password.as_bytes())
-                    .iter()
-                    .map(|byte| format!("{byte:02x}"))
-                    .collect();
+                let pwhash: String = Sha256::digest(
+                    format!(
+                        "{}{}",
+                        state.config().auth().salt().as_deref().unwrap_or_default(),
+                        password
+                    )
+                    .as_bytes(),
+                )
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect();
                 //lookup in user database
                 if let Ok(user_db) = state.user_db.read() {
                     if let Some(ref_pwhash) = user_db.get(user) {

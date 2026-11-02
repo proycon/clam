@@ -48,7 +48,7 @@ parameters and (if needed) uploading input files. They then start the system
 and are presented the output, which may consist of multiple files.
 
 CLAM is suitable both for simple runs with a quick turn-around (we call them
-**actions**), as well as batch processing which may take a long time to process
+*actions*), as well as batch processing which may take a long time to process
 in the background (we call those *projects*). Actions provide a response
 immediately, projects need to be *polled* at a regular interval for their
 completion status. Unlike actions, projects allow multiple input and output
