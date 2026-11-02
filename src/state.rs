@@ -303,6 +303,12 @@ impl ServiceState {
             match bgservicestate_map.get(index) {
                 Some(BackgroundServiceState::Up { .. })
                 | Some(BackgroundServiceState::Loading { .. }) => return Ok(()), //we are already loading or up, nothing to do
+                Some(BackgroundServiceState::Failed { errormsg }) => {
+                    return Err(ApiError::ServiceUnavailable(format!(
+                        "Background service failed: {}",
+                        errormsg
+                    )));
+                }
                 _ => {}
             }
         }
@@ -322,7 +328,10 @@ impl ServiceState {
                 debug!("Background service #{} job submitted", index + 1);
                 Ok(())
             }
-            Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
+            Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(format!(
+                "Background service failed: {}",
+                error
+            ))),
             Err(e) => Err(ApiError::InternalError(format!(
                 "oneshot sender dropped whilst submitting a background service job: {}",
                 e
