@@ -574,11 +574,7 @@ async fn submit_project(
         let (tx, rx) = oneshot::channel();
         state.send(Message::SubmitJob(job, tx));
         match rx.await {
-            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::RedirectGet(format!(
-                "{}{}",
-                state.config().url().as_deref().unwrap_or_default(),
-                project.url(),
-            ))),
+            Ok(ResponseMessage::JobSubmitted) => Ok(ClamResponse::RedirectGet(project.url())),
             Ok(ResponseMessage::JobError(error)) => Err(ApiError::ServiceUnavailable(error)),
             Err(e) => Err(ApiError::InternalError(format!(
                 "oneshot sender dropped whilst submitting a job: {}",
@@ -734,7 +730,7 @@ async fn cancel_project(
         for file in project.output_files() {
             std::fs::remove_file(file.path(&project))?;
         }
-        Ok(ClamResponse::RedirectGet(format!("{}", project.url())))
+        Ok(ClamResponse::RedirectGet(project.url()))
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
