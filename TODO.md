@@ -5,11 +5,9 @@
 - [ ] Test interface on mobile devices
 - [ ] Pagination for input and output files
 - [ ] UI polishing
-- [ ] UI: add some UI error messages instead of raw json
 
 ## In progress
 
-- [ ] Propagate error feedback when a background job fails
 - [x] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
        It can create a project and upload files with its own API key;
@@ -20,6 +18,8 @@
 
 ## Done
 
+- [x] UI: add some UI error messages instead of raw json
+- [x] Propagate error feedback when a background job fails
 - [x] Implement viewers
     - Viewers will be kept as simple as possible and use the existing command/job structure. If external services are desired then users need to implement a script for it.
 - [x] Fix job monitoring thread (stderr,stdout are not drained concurrently)

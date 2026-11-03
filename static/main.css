@@ -193,7 +193,7 @@ span.required {
     color: darkorange;
     cursor: help;
 }
-.error {
+td div.error {
     font-weight: bold;
     color: red;
 }
@@ -263,4 +263,14 @@ div.dangerbuttons input[type="submit"] {
     background: #aa0000;
     cursor: pointer;
     color: white;
+}
+
+div.block > div.error {
+    background: #f5c7cb;
+    border-radius: 25px;
+    text-align: center;
+    padding: 20px;
+}
+div.block > div.error h2 {
+    color: red;
 }

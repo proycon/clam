@@ -1,0 +1,18 @@
+{% include "header" %}
+
+<div class="block">
+<button type="button" onclick="history.back()">◂ Back</button>
+</div>
+
+<div class="block">
+
+<div class="error">
+<h2>{{ title }} ({{ statuscode }})</h2>
+
+<p>{{ message }}</p>
+
+</div>
+
+</div>
+
+{% include "footer" %}

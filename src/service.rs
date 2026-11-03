@@ -367,7 +367,7 @@ impl Service {
     }
 }
 
-async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiError> {
+async fn get_api(state: &State<Arc<ServiceState>>) -> Result<ClamResponse, ApiError> {
     match state.openapi.to_json() {
         Ok(apidoc) => {
             return Ok(ClamResponse::Body {
@@ -382,21 +382,21 @@ async fn get_api(state: State<Arc<ServiceState>>) -> Result<ClamResponse, ApiErr
     }
 }
 
-async fn get_css() -> Result<ClamResponse, ApiError> {
+async fn get_css() -> Result<ClamResponse, Response> {
     Ok(ClamResponse::Body {
         stream: CSS.into(),
         contenttype: "text/css".into(),
     })
 }
 
-async fn get_js() -> Result<ClamResponse, ApiError> {
+async fn get_js() -> Result<ClamResponse, Response> {
     Ok(ClamResponse::Body {
         stream: JS.into(),
         contenttype: "text/javascript".into(),
     })
 }
 
-async fn get_backpng() -> Result<ClamResponse, ApiError> {
+async fn get_backpng() -> Result<ClamResponse, Response> {
     Ok(ClamResponse::Body {
         stream: BACKPNG.into(),
         contenttype: "image/png".into(),
@@ -406,9 +406,9 @@ async fn get_backpng() -> Result<ClamResponse, ApiError> {
 async fn get_landingpage(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
-        Ok(CONTENT_TYPE_JSON) => get_api(state).await,
+        Ok(CONTENT_TYPE_JSON) => get_api(&state).await,
         Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
             state.render_template("landingpage", "text/html; charset=utf-8", None)
         }
@@ -416,6 +416,7 @@ async fn get_landingpage(
             "Accept header could not be satisfied (try application/json)",
         )),
     }
+    .map_render_error(state.as_ref(), request.headers())
 }
 
 /// Presents a list of projects for a given user and endpoint
@@ -424,7 +425,7 @@ async fn get_projects(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     let endpoint = state.endpoint(endpoint_index);
     match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
         Ok(CONTENT_TYPE_JSON) => match project_index(user.as_str(), endpoint, state.config()) {
@@ -456,7 +457,7 @@ async fn get_projects(
         _ => Err(ApiError::NotAcceptable(
             "Accept header could not be satisfied (try application/json)",
         )),
-    }
+    }.map_render_error(state.as_ref(), request.headers())
 }
 
 async fn get_project(
@@ -464,8 +465,9 @@ async fn get_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
             Ok(CONTENT_TYPE_JSON) => {
@@ -543,7 +545,7 @@ async fn get_project(
     } else {
         debug!("project name invalid");
         Err(ApiError::InvalidName("project name invalid"))
-    }
+    }.map_render_error(state.as_ref(), &headers)
 }
 
 async fn submit_project(
@@ -551,10 +553,13 @@ async fn submit_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     mut param_map: ParameterMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        param_map.finish_uploads(state.endpoint(endpoint_index), &project)?;
+        param_map
+            .finish_uploads(state.endpoint(endpoint_index), &project)
+            .map_render_error(state.as_ref(), &headers)?;
         debug!("Received project parameters: {:?}", param_map);
         let job = Job::new(
             &state,
@@ -565,11 +570,14 @@ async fn submit_project(
             param_map,
         );
         if let Some(error) = job.error {
-            return Err(ApiError::ParameterError(error));
+            return Err(ApiError::ParameterError(error).render_error(state.as_ref(), &headers));
         }
         //ensure necessary background services are scheduled or already running
         for bgservice in job.background_services().iter() {
-            state.schedule_background_service(*bgservice).await?
+            state
+                .schedule_background_service(*bgservice)
+                .await
+                .map_render_error(state.as_ref(), &headers)?
             //reaching this stage this doesn't necessarily mean that the background service is up and ready!
         }
         let (tx, rx) = oneshot::channel();
@@ -589,6 +597,7 @@ async fn submit_project(
     } else {
         Err(ApiError::NotFound("No such project".into()))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn create_project(
@@ -596,8 +605,9 @@ async fn create_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     method: Method,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         if let Err(e) = project.create() {
             Err(e.into())
@@ -610,6 +620,7 @@ async fn create_project(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 #[derive(Deserialize)]
@@ -621,8 +632,9 @@ async fn post_create_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     form: Form<CreateForm>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     let name: String = if !form.project.is_empty() {
         form.project.clone()
     } else {
@@ -637,6 +649,7 @@ async fn post_create_project(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 /// Helper function to cancel a job pertaining to a project
@@ -700,9 +713,12 @@ async fn delete_project(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     method: Method,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        cancel_job_in_project(project.key().clone(), (*state).clone()).await?;
+        cancel_job_in_project(project.key().clone(), (*state).clone())
+            .await
+            .map_render_error(state.as_ref(), &headers)?;
         if let Err(e) = project.delete() {
             Err(e.into())
         } else {
@@ -717,6 +733,7 @@ async fn delete_project(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn cancel_project(
@@ -724,17 +741,23 @@ async fn cancel_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        cancel_job_in_project(project.key().clone(), (*state).clone()).await?;
+        cancel_job_in_project(project.key().clone(), (*state).clone())
+            .await
+            .map_render_error(state.as_ref(), &headers)?;
         // Delete all output files (this will effectively put the project back in Staging state)
         for file in project.output_files() {
-            std::fs::remove_file(file.path(&project))?;
+            std::fs::remove_file(file.path(&project))
+                .map_err(|e| Into::<ApiError>::into(e))
+                .map_render_error(state.as_ref(), &headers)?;
         }
         Ok(ClamResponse::RedirectGet(project.url()))
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn download_output_file(
@@ -742,11 +765,15 @@ async fn download_output_file(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         //download output file without keeping it all in memory
         if let Some(filepath) = project.output_file(filename.as_str()) {
-            let stream: axum::body::Body = project.file_body(&filepath).await?;
+            let stream: axum::body::Body = project
+                .file_body(&filepath)
+                .await
+                .map_render_error(state.as_ref(), &headers)?;
             let contenttype = if let Some(filetype) = project.output_filetype(filename.as_str()) {
                 filetype.contenttype().to_string()
             } else {
@@ -762,6 +789,7 @@ async fn download_output_file(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn download_input_file(
@@ -769,20 +797,26 @@ async fn download_input_file(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if state.config().disable_input_download() {
         return Err(ApiError::PermissionDenied(
             "Input file download is disabled".into(),
-        ));
+        ))
+        .map_render_error(state.as_ref(), &headers);
     }
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
-            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for download"))?;
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for download"))
+            .map_render_error(state.as_ref(), &headers)?;
         //download input file without keeping it all in memory
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), true) {
-            let stream: axum::body::Body = project.file_body(&filepath).await?;
+            let stream: axum::body::Body = project
+                .file_body(&filepath)
+                .await
+                .map_render_error(state.as_ref(), &headers)?;
             let contenttype = if let Some(filetype) = parameter.filetype(state.config()) {
                 filetype.contenttype().to_string()
             } else {
@@ -798,6 +832,7 @@ async fn download_input_file(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn upload_input_file(
@@ -805,8 +840,9 @@ async fn upload_input_file(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     request: Request<Body>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         debug!(
             "upload_input_file: project={}, parameter_id={}, filename={}",
@@ -817,31 +853,44 @@ async fn upload_input_file(
         let parameter = project
             .endpoint()
             .parameter(parameter_id.as_str())
-            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
-        let filename = parameter.validate_filename(filename.as_str())?;
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))
+            .map_render_error(state.as_ref(), &headers)?;
+        let filename = parameter
+            .validate_filename(filename.as_str())
+            .map_render_error(state.as_ref(), &headers)?;
         //upload input file without keeping it all in memory
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), false)
         {
             //MAYBE TODO: Check for matching content-type? We just accept anything as-is right now
             let mut body_stream = request.into_body().into_data_stream();
-            project.create_parameter_dir(parameter_id.as_str())?;
+            project
+                .create_parameter_dir(parameter_id.as_str())
+                .map_err(|e| Into::<ApiError>::into(e))
+                .map_render_error(state.as_ref(), &headers)?;
             let mut file = File::create(&filepath)
                 .await
-                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {}", e)))?;
+                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {}", e)))
+                .map_render_error(state.as_ref(), &headers)?;
 
             // Stream chunks directly from the network to the disk
             while let Some(chunk_result) = body_stream.next().await {
-                let chunk = chunk_result.map_err(|e| {
-                    ApiError::UploadError(format!("Network error while streaming: {e}"))
-                })?;
-                file.write_all(&chunk).await.map_err(|e| {
-                    ApiError::InternalError(format!("Failed to write uploaded chunk: {e}"))
-                })?;
+                let chunk = chunk_result
+                    .map_err(|e| {
+                        ApiError::UploadError(format!("Network error while streaming: {e}"))
+                    })
+                    .map_render_error(state.as_ref(), &headers)?;
+                file.write_all(&chunk)
+                    .await
+                    .map_err(|e| {
+                        ApiError::InternalError(format!("Failed to write uploaded chunk: {e}"))
+                    })
+                    .map_render_error(state.as_ref(), &headers)?;
             }
 
-            file.flush().await.map_err(|e| {
-                ApiError::InternalError(format!("Failed to flush after upload: {e}"))
-            })?;
+            file.flush()
+                .await
+                .map_err(|e| ApiError::InternalError(format!("Failed to flush after upload: {e}")))
+                .map_render_error(state.as_ref(), &headers)?;
 
             Ok(ClamResponse::Created())
         } else {
@@ -853,6 +902,7 @@ async fn upload_input_file(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn upload_input_file_multipart(
@@ -860,52 +910,67 @@ async fn upload_input_file_multipart(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     mut multipart: Multipart,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     let project = Project::new(project, user.as_str(), endpoint_index, state.config())
-        .map_err(|_| ApiError::InvalidName("project name invalid"))?;
+        .map_err(|_| ApiError::InvalidName("project name invalid"))
+        .map_render_error(state.as_ref(), &headers)?;
 
     let parameter = project
         .endpoint()
         .parameter(parameter_id.as_str())
-        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+        .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))
+        .map_render_error(state.as_ref(), &headers)?;
 
     // Iterate through all the fields/files in the multipart form submission
     while let Some(mut field) = multipart
         .next_field()
         .await
-        .map_err(|e| ApiError::UploadError(format!("Upload error in Multipart: {e}")))?
+        .map_err(|e| ApiError::UploadError(format!("Upload error in Multipart: {e}")))
+        .map_render_error(state.as_ref(), &headers)?
     {
         if field.file_name().is_none() || field.file_name() == Some("") {
             //ignore empty file fields
             continue;
         }
-        let filename = parameter.validate_filename(field.name().unwrap_or_default())?;
+        let filename = parameter
+            .validate_filename(field.name().unwrap_or_default())
+            .map_render_error(state.as_ref(), &headers)?;
 
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), false)
         {
-            project.create_parameter_dir(parameter_id.as_str())?;
+            project
+                .create_parameter_dir(parameter_id.as_str())
+                .map_err(|e| Into::<ApiError>::into(e))
+                .map_render_error(state.as_ref(), &headers)?;
             let mut file = File::create(&filepath)
                 .await
-                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {e}")))?;
+                .map_err(|e| ApiError::InternalError(format!("Failed to create file: {e}")))
+                .map_render_error(state.as_ref(), &headers)?;
 
             while let Some(chunk_result) = field.next().await {
-                let chunk = chunk_result.map_err(|e| {
-                    ApiError::UploadError(format!("Error reading multipart upload chunk: {e}"))
-                })?;
+                let chunk = chunk_result
+                    .map_err(|e| {
+                        ApiError::UploadError(format!("Error reading multipart upload chunk: {e}"))
+                    })
+                    .map_render_error(state.as_ref(), &headers)?;
 
-                file.write_all(&chunk).await.map_err(|e| {
-                    ApiError::InternalError(format!("File upload write error: {e}"))
-                })?;
+                file.write_all(&chunk)
+                    .await
+                    .map_err(|e| ApiError::InternalError(format!("File upload write error: {e}")))
+                    .map_render_error(state.as_ref(), &headers)?;
             }
 
-            file.flush().await.map_err(|e| {
-                ApiError::InternalError(format!("Flush error after file upload: {e}"))
-            })?;
+            file.flush()
+                .await
+                .map_err(|e| ApiError::InternalError(format!("Flush error after file upload: {e}")))
+                .map_render_error(state.as_ref(), &headers)?;
         } else {
             return Err(ApiError::NotFound(
                 "Input file path generation failed".into(),
-            ));
+            ))
+            .map_render_error(state.as_ref(), &headers);
         }
     }
 
@@ -917,16 +982,20 @@ async fn delete_input_file(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         project
             .endpoint()
             .parameter(parameter_id.as_str())
-            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))?;
+            .ok_or_else(|| ApiError::InvalidName("Invalid parameter specified for upload"))
+            .map_render_error(state.as_ref(), &headers)?;
 
         //delete input file
         if let Some(filepath) = project.input_file(parameter_id.as_str(), filename.as_str(), true) {
-            std::fs::remove_file(filepath)?;
+            std::fs::remove_file(filepath)
+                .map_err(|e| Into::<ApiError>::into(e))
+                .map_render_error(state.as_ref(), &headers)?;
             Ok(ClamResponse::NoContent())
         } else {
             Err(ApiError::NotFound("Input file not found".into()))
@@ -934,6 +1003,7 @@ async fn delete_input_file(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn viewer(
@@ -941,7 +1011,8 @@ async fn viewer(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     let state2 = (*state).clone();
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         //download output file without keeping it all in memory
@@ -976,6 +1047,7 @@ async fn viewer(
     } else {
         Err(ApiError::InvalidName("project name invalid"))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 /// Runs the action (Helper function called by viewer)
@@ -1139,7 +1211,7 @@ async fn run_viewer(
 
 /// Runs the action (Helper function called by get_action or post_action)
 async fn run_action(
-    state: State<Arc<ServiceState>>,
+    state: &ServiceState,
     endpoint_index: usize,
     user: &CurrentUser,
     query: ParameterMap,
@@ -1274,7 +1346,7 @@ async fn get_action(
     Extension(user): Extension<CurrentUser>,
     headers: HeaderMap<HeaderValue>,
     query: Query<Vec<(String, String)>>,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     let endpoint = state.endpoint(endpoint_index);
     let mut accepted_data = vec![CONTENT_TYPE_HTML];
     if let Some(filetype) = endpoint.filetype() {
@@ -1300,7 +1372,7 @@ async fn get_action(
         Ok(filetype) => {
             let filetype = filetype.to_string();
             run_action(
-                state,
+                state.as_ref(),
                 endpoint_index,
                 &user,
                 ParameterMap(
@@ -1318,6 +1390,7 @@ async fn get_action(
             "Accept header could not be satisfied (try a POST request instead if you don't know what to expect)",
         )),
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 /// Runs the action.
@@ -1325,8 +1398,9 @@ async fn post_action(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     param_map: ParameterMap,
-) -> Result<ClamResponse, ApiError> {
+) -> Result<ClamResponse, Response> {
     //we ignore Accept headers for POST and just deliver what the action provides
     let mut contenttype = CONTENT_TYPE_PLAINTEXT;
     let endpoint = state.endpoint(endpoint_index);
@@ -1336,7 +1410,15 @@ async fn post_action(
         }
     }
     let contenttype: String = contenttype.into();
-    run_action(state, endpoint_index, &user, param_map, contenttype).await
+    run_action(
+        state.as_ref(),
+        endpoint_index,
+        &user,
+        param_map,
+        contenttype,
+    )
+    .await
+    .map_render_error(state.as_ref(), &headers)
 }
 
 #[derive(Deserialize)]
@@ -1350,7 +1432,8 @@ async fn transfer_project(
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
     params: Query<TransferParams>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
         if params.to_user.len() > 256 || params.to_user.contains('/') {
             //we can't actually validate usernames, as we don't know them, but we can reject long payloads as a precaution
@@ -1377,6 +1460,7 @@ async fn transfer_project(
     } else {
         Err(ApiError::NotFound("No such project".into()))
     }
+    .map_render_error(state.as_ref(), &headers)
 }
 
 async fn adopt_project(
@@ -1384,7 +1468,8 @@ async fn adopt_project(
     Extension(endpoint_index): Extension<usize>,
     Extension(user): Extension<CurrentUser>,
     state: State<Arc<ServiceState>>,
-) -> Result<ClamResponse, ApiError> {
+    headers: HeaderMap<HeaderValue>,
+) -> Result<ClamResponse, Response> {
     if from_user.len() < 256
         && !from_user.contains('/')
         && project.len() < 256
@@ -1424,6 +1509,7 @@ async fn adopt_project(
         }
     }
     Err(ApiError::PermissionDenied("Adoption denied".into()))
+        .map_render_error(state.as_ref(), &headers)
 }
 
 async fn shutdown_signal(state: Arc<ServiceState>) {
@@ -1750,5 +1836,48 @@ fn negotiate_content_type<'a>(
         }
     } else {
         Ok(offer_types[0])
+    }
+}
+
+trait RenderError {
+    fn render_error(self, state: &ServiceState, headers: &HeaderMap<HeaderValue>) -> Response;
+}
+
+impl RenderError for ApiError {
+    fn render_error(
+        self: ApiError,
+        state: &ServiceState,
+        headers: &HeaderMap<HeaderValue>,
+    ) -> Response {
+        match negotiate_content_type(headers, &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
+            Ok(CONTENT_TYPE_HTML) => {
+                if !state.config().disable_ui() {
+                    self.into_html_response(state)
+                } else {
+                    self.into_json_response()
+                }
+            }
+            Ok(CONTENT_TYPE_JSON) => self.into_json_response(),
+            Err(error) => error.into_json_response(),
+            _ => unreachable!("no other content types expected here"),
+        }
+    }
+}
+
+trait MapRenderError<T> {
+    fn map_render_error(
+        self,
+        state: &ServiceState,
+        headers: &HeaderMap<HeaderValue>,
+    ) -> Result<T, Response>;
+}
+
+impl<T> MapRenderError<T> for Result<T, ApiError> {
+    fn map_render_error(
+        self: Result<T, ApiError>,
+        state: &ServiceState,
+        headers: &HeaderMap<HeaderValue>,
+    ) -> Result<T, Response> {
+        self.map_err(|error| error.render_error(state, headers))
     }
 }

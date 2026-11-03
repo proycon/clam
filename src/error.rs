@@ -1,3 +1,5 @@
+use crate::service::ClamResponse;
+use crate::state::ServiceState;
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Json, Response},
@@ -75,9 +77,9 @@ impl Serialize for ApiError {
     }
 }
 
-impl IntoResponse for ApiError {
-    fn into_response(self) -> Response {
-        let statuscode = match self {
+impl ApiError {
+    pub fn statuscode(&self) -> StatusCode {
+        match self {
             Self::InternalError(..) | Self::TemplateError(..) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::PermissionDenied(..) => StatusCode::FORBIDDEN,
             Self::ServiceUnavailable(..) => StatusCode::SERVICE_UNAVAILABLE,
@@ -86,10 +88,100 @@ impl IntoResponse for ApiError {
                 StatusCode::BAD_REQUEST
             }
             _ => StatusCode::NOT_FOUND,
+        }
+    }
+
+    pub fn into_json_response(self) -> Response {
+        (self.statuscode(), Json(self)).into_response()
+    }
+
+    pub fn into_html_response(self, state: &ServiceState) -> Response {
+        let statuscode = self.statuscode();
+        let statuscode_int = statuscode.as_u16();
+        let context = match self {
+            Self::NotFound(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Not Found",
+                    message: s,
+                }
+            }
+            Self::NotAcceptable(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Not Acceptable",
+                    message: s,
+                }
+            }
+            Self::PermissionDenied(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Permission Denied",
+                    message: s,
+                }
+            }
+            Self::ParameterError(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Parameter Error",
+                    message: s,
+                }
+            }
+            Self::UploadError(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Upload Error",
+                    message: s,
+                }
+            }
+            Self::InternalError(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Internal Error",
+                    message: s,
+                }
+            }
+            Self::TemplateError(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Template Error",
+                    message: format!("{}", s),
+                }
+            }
+            Self::ServiceUnavailable(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Service Unavailable",
+                    message: s,
+                }
+            }
+            Self::InvalidName(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Service Unavailable",
+                    message: s,
+                }
+            }
         };
-        (statuscode, Json(self)).into_response()
+        match state.render_template("error", "text/html; charset=utf-8", Some(context)) {
+            Ok(ClamResponse::Text(s)) => (statuscode, s).into_response(),
+            Ok(ClamResponse::Body {
+                stream,
+                contenttype: _,
+            }) => (statuscode, stream).into_response(),
+            Ok(_) => unreachable!("Unexpected ClamResponse in ApiError::into_html_response()"),
+            Err(s) => s.into_json_response(), //if the templating system returns an error at this point it will be returned as JSON instead of HTML (to prevent recursive loops)
+        }
     }
 }
+
+/*
+impl IntoResponse for ApiError {
+    fn into_response(self) -> Response {
+        self.into_json_response()
+    }
+}
+*/
 
 /*
 impl From<ClamError> for ApiError {
