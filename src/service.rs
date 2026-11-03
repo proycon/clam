@@ -407,7 +407,11 @@ async fn get_landingpage(
     state: State<Arc<ServiceState>>,
     request: Request<Body>,
 ) -> Result<ClamResponse, Response> {
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
+    match negotiate_content_type(
+        request.headers(),
+        &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON],
+        None,
+    ) {
         Ok(CONTENT_TYPE_JSON) => get_api(&state).await,
         Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => {
             state.render_template("landingpage", "text/html; charset=utf-8", None)
@@ -427,7 +431,7 @@ async fn get_projects(
     request: Request<Body>,
 ) -> Result<ClamResponse, Response> {
     let endpoint = state.endpoint(endpoint_index);
-    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
+    match negotiate_content_type(request.headers(), &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON], None) {
         Ok(CONTENT_TYPE_JSON) => match project_index(user.as_str(), endpoint, state.config()) {
             Ok(projects) => Ok(ClamResponse::JsonList(
                 projects.into_iter().map(|project| project.into()).collect(),
@@ -469,7 +473,7 @@ async fn get_project(
     request: Request<Body>,
 ) -> Result<ClamResponse, Response> {
     if let Ok(project) = Project::new(project, user.as_str(), endpoint_index, state.config()) {
-        match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML]) {
+        match negotiate_content_type(request.headers(), &[CONTENT_TYPE_JSON, CONTENT_TYPE_HTML], None) {
             Ok(CONTENT_TYPE_JSON) => {
                 if let Some(projectstatus) = state.project_status(&project) {
                     Ok(ClamResponse::ProjectResponse(projectstatus))
@@ -1357,7 +1361,7 @@ async fn get_action(
             }
         }
     }
-    match negotiate_content_type(&headers, &accepted_data) {
+    match negotiate_content_type(&headers, &accepted_data, None) {
         Ok(CONTENT_TYPE_HTML) if !state.config().disable_ui() => state.render_template(
             "action",
             "text/html; charset=utf-8",
@@ -1805,6 +1809,7 @@ impl ParameterMap {
 fn negotiate_content_type<'a>(
     headers: &HeaderMap<HeaderValue>,
     offer_types: &[&'a str],
+    fallback: Option<&'a str>,
 ) -> Result<&'a str, ApiError> {
     if let Some(accept_types) = headers.get(axum::http::header::ACCEPT) {
         let mut match_accept_index = None;
@@ -1831,6 +1836,8 @@ fn negotiate_content_type<'a>(
         }
         if let Some(matching_offer) = matching_offer {
             Ok(matching_offer)
+        } else if let Some(fallback) = fallback {
+            Ok(fallback)
         } else {
             Err(ApiError::NotAcceptable("No matching content type on offer"))
         }
@@ -1849,7 +1856,11 @@ impl RenderError for ApiError {
         state: &ServiceState,
         headers: &HeaderMap<HeaderValue>,
     ) -> Response {
-        match negotiate_content_type(headers, &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON]) {
+        match negotiate_content_type(
+            headers,
+            &[CONTENT_TYPE_HTML, CONTENT_TYPE_JSON],
+            Some(CONTENT_TYPE_JSON),
+        ) {
             Ok(CONTENT_TYPE_HTML) => {
                 if !state.config().disable_ui() {
                     self.into_html_response(state)
