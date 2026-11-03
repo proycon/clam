@@ -11,6 +11,10 @@
     --statuslog-fg: white;
 }
 
+@view-transition {
+  navigation: auto;
+}
+
 body {
     font-family: sans-serif;
     margin: 0px;
