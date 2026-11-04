@@ -21,7 +21,7 @@ acquainted with it.
 	- _ENDPOINT COMMAND CONFIGURATION_
 	- _ENDPOINT PARAMETER CONFIGURATION_
 	- _PARAMETER TYPES_
-	- _OUTPUT TYPES CONFIGURATION_
+	- _OUTPUT FILES CONFIGURATION_
 - _FILETYPES CONFIGURATION_
 - _VIEWERS CONFIGURATION_
 - _BACKGROUND SERVICES CONFIGURATION_
@@ -236,6 +236,10 @@ public = true
 	List of background services to start for this endpoint, they are referred to by their ID. This refers
 	to services you defined in the root-level *background_services* section. Read section _BACKGROUND SERVICES CONFIGURATION_.
 	CLAM will ensure that the background service is up whenever this endpoint is used.
+*show_unknown_output* (bool)
+	Set to true to show all output files, even if they don't match any
+	pattern you defined in _OUTPUT FILES CONFIGURATION_. This is generally not
+	recommended.
 
 ## ENDPOINT COMMAND CONFIGURATION
 
