@@ -9,6 +9,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Debug;
 use std::fs;
 use std::io::Read;
+use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 
 const INVALID_FILENAME_CHARS: [char; 4] = ['/', '\n', '\t', ';'];
@@ -217,6 +218,13 @@ pub enum EndPointMode {
     /// to the authenticated sections
     /// It is typically served at path `/` and used as a landing page.
     LandingPage,
+}
+
+impl EndPointMode {
+    /// Does this endpoint mode require a command to be set? Used during validation
+    pub fn requires_command(&self) -> bool {
+        self == &Self::Action || self == &Self::Project
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
@@ -754,6 +762,16 @@ impl ServiceConfig {
         None
     }
 
+    /// Get a background service index by name
+    pub fn background_service(&self, name: &str) -> Option<usize> {
+        for (i, v) in self.background_services().iter().enumerate() {
+            if v.id == name {
+                return Some(i);
+            }
+        }
+        None
+    }
+
     /// Validate the configuration
     pub fn validate(&self) -> Result<(), ClamError> {
         for filetype in self.filetypes.iter() {
@@ -761,6 +779,12 @@ impl ServiceConfig {
         }
         for endpoint in self.endpoints.iter() {
             endpoint.validate(self)?
+        }
+        for viewer in self.viewers.iter() {
+            viewer.validate(self)?
+        }
+        for bgservice in self.background_services.iter() {
+            bgservice.validate(self)?
         }
         if self.endpoints().is_empty() {
             Err(ClamError::ConfigValidationError(format!(
@@ -798,8 +822,32 @@ impl EndPoint {
     }
 
     pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        if let Some(command) = self.command() {
+            if !validate_command(command.as_str()) {
+                return Err(ClamError::ConfigValidationError(format!(
+                    "Command for endpoint {} not found or no executable permission: {}",
+                    self.path, command
+                )));
+            }
+        } else if self.mode().requires_command() {
+            return Err(ClamError::ConfigValidationError(format!(
+                "No command defined for endpoint {}",
+                self.path
+            )));
+        }
         for parameter in self.parameters.iter() {
             parameter.validate(config)?
+        }
+        for outputfile in self.outputfiles() {
+            outputfile.validate(config)?
+        }
+        for bgservice in self.background_services() {
+            if config.background_service(bgservice.as_str()).is_none() {
+                return Err(ClamError::ConfigValidationError(format!(
+                    "Endpoint '{}' references undefined background service {}",
+                    self.path, bgservice
+                )));
+            }
         }
         if self.path.is_empty() || self.path.chars().next() != Some('/') {
             Err(ClamError::ConfigValidationError(format!(
@@ -837,6 +885,14 @@ impl EndPoint {
 impl FileType {
     /// validation just after config parsing
     pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        for viewer in self.viewers() {
+            if config.viewer(viewer.as_str()).is_none() {
+                return Err(ClamError::ConfigValidationError(format!(
+                    "File type {} references undefined viewer {}",
+                    self.id, viewer
+                )));
+            }
+        }
         let id_pattern = config
             .id_pattern()
             .as_ref()
@@ -854,5 +910,90 @@ impl FileType {
         } else {
             Ok(())
         }
+    }
+}
+
+impl OutputFile {
+    /// validation just after config parsing
+    pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        if config.filetype(self.r#type().as_str()).is_none() {
+            Err(ClamError::ConfigValidationError(format!(
+                "Output file {} references undefined filetype {}",
+                self.name(),
+                self.r#type().as_str(),
+            )))
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl Viewer {
+    /// validation just after config parsing
+    pub fn validate(&self, config: &ServiceConfig) -> Result<(), ClamError> {
+        for bgservice in self.background_services() {
+            if config.background_service(bgservice.as_str()).is_none() {
+                return Err(ClamError::ConfigValidationError(format!(
+                    "Viewer {} references undefined background service {}",
+                    self.id, bgservice
+                )));
+            }
+        }
+        if !validate_command(self.command()) {
+            return Err(ClamError::ConfigValidationError(format!(
+                "Command for viewer {} not found or no executable permission: {}",
+                self.id,
+                self.command()
+            )));
+        }
+        Ok(())
+    }
+}
+
+impl BackgroundService {
+    pub fn validate(&self, _config: &ServiceConfig) -> Result<(), ClamError> {
+        if let Some(command) = self.command() {
+            if !validate_command(command.as_str()) {
+                return Err(ClamError::ConfigValidationError(format!(
+                    "Command for background service {} not found or no executable permission: {}",
+                    self.id, command
+                )));
+            }
+        } else {
+            return Err(ClamError::ConfigValidationError(format!(
+                "No command defined for background service {}",
+                self.id
+            )));
+        }
+        Ok(())
+    }
+}
+
+/// tests if a command exists and is executable, better find out at init time than later
+pub fn validate_command(command: &str) -> bool {
+    if command.starts_with("./") {
+        std::env::current_dir()
+            .expect("current dir must work")
+            .join(PathBuf::from(&command))
+            .canonicalize()
+            .ok()
+            .is_some()
+    } else if command.starts_with("/") {
+        let path: PathBuf = command.into();
+        path.exists()
+            && path
+                .metadata()
+                .map(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+                .unwrap_or(false)
+    } else {
+        //look in $PATH
+        std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()).any(|dir| {
+            let path = dir.join(Into::<PathBuf>::into(command));
+            path.exists()
+                && path
+                    .metadata()
+                    .map(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+                    .unwrap_or(false)
+        })
     }
 }

@@ -9,6 +9,7 @@ use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use tokio::fs::File;
 use tokio_util::io::ReaderStream;
+use tracing::{debug, error};
 
 const FORBIDDEN_CHARS: [char; 7] = [' ', '/', '\\', '\'', '\'', '*', ','];
 
@@ -249,12 +250,26 @@ impl<'a> Project<'a> {
             match outputfile.filename() {
                 FileName::Exact(name) => {
                     if name == filename {
-                        return self.config.filetype(outputfile.r#type().as_str());
+                        let filetype = self.config.filetype(outputfile.r#type().as_str());
+                        if filetype.is_none() {
+                            error!(
+                                "Configuration error, filetype {} is referenced from output files but not defined in file types!",
+                                outputfile.r#type().as_str()
+                            );
+                        }
+                        return filetype;
                     }
                 }
                 FileName::Pattern(pattern) => {
                     if pattern.is_match(filename) {
-                        return self.config.filetype(outputfile.r#type().as_str());
+                        let filetype = self.config.filetype(outputfile.r#type().as_str());
+                        if filetype.is_none() {
+                            error!(
+                                "Configuration error, filetype {} is referenced from output files but not defined in file types!",
+                                outputfile.r#type().as_str()
+                            );
+                        }
+                        return filetype;
                     }
                 }
             }
@@ -293,11 +308,18 @@ impl<'a> Project<'a> {
                                     name: filename,
                                 })
                             }
+                        } else {
+                            error!("Detected output file with invalid filename: {:?}", path)
                         }
                     }
                 }
             }
         }
+        debug!(
+            "Found {} output files in {:?}",
+            output_files.len(),
+            self.path()
+        );
         output_files
     }
 
