@@ -19,11 +19,15 @@ See section _INTRODUCTION_ and section _FEATURES_ for an overview of what CLAM i
 
 *--debug*
 	Output debug information
-*-b*, *--bind* _host_:_port_
-	The host and port to bind to, defaults to 127.0.0.1:8080
 *-c*, *--config* _file_
 	The configuration file, this should be a _toml_ file. See *clam*(5) for
 	configuration instructions.
+*--check*
+	Only validate the configuration and then exit, do not start the service.
+*--disable-ui*
+	Disable the web interface
+*--quiet*
+	Quiet mode, output as little as possible
 *--version*
 	Print program version and exit.
 *-h* *--help*
