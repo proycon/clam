@@ -5,6 +5,7 @@
 - [ ] Test interface on mobile devices
 - [ ] Pagination for input and output files
 - [ ] UI polishing
+- [ ] Add logout function for OIDC (clear cookies)
 
 ## In progress
 

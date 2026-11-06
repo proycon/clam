@@ -96,7 +96,8 @@ impl ServiceState {
                 return Ok(projectkey.endpoint_index());
             }
         }
-        Err(StatusCode::UNAUTHORIZED)
+        debug!("authentication state value is not a valid endpoint");
+        Err(StatusCode::FORBIDDEN)
     }
 
     pub(crate) fn redirect_url_from_authstate(
@@ -105,12 +106,16 @@ impl ServiceState {
     ) -> Result<String, StatusCode> {
         if state_value >= 0 {
             //normal situation
-            return self
-                .redirect_url(state_value as usize)
-                .ok_or(StatusCode::UNAUTHORIZED);
+            return self.redirect_url(state_value as usize).ok_or({
+                debug!("authentication state value is not a valid endpoint");
+                StatusCode::FORBIDDEN
+            });
         } else if let Ok(mut session_adoption_map) = self.session_adoption_map.write() {
             //valid transfer ID for an adoption
             if let Some(projectkey) = session_adoption_map.remove(&state_value) {
+                debug!(
+                    "authentication state value is a valid adoption, redirecting to adoption URL"
+                );
                 //redirect to adoption URL
                 let adopt_url = format!(
                     "{}/adopt/{}/{}",
@@ -121,7 +126,8 @@ impl ServiceState {
                 return Ok(adopt_url);
             }
         }
-        Err(StatusCode::UNAUTHORIZED)
+        debug!("authentication state value does not correspond with an adoptable project");
+        Err(StatusCode::FORBIDDEN)
     }
 }
 
@@ -200,35 +206,35 @@ pub(crate) async fn auth(
         // No authentication information supplied, that's okay
         // for public endpoints (or whenever no authentication is enabled for the entire service)
         // we are user 'anonymous'
+        debug!("No authentication enabled/required here, anonymous login accepted...");
         req.extensions_mut().insert(CurrentUser(None));
+        Ok(next.run(req).await)
     } else {
         //Not a public endpoint, we are unauthorized and need to login!
 
         if state.oauthcredentials.enabled() {
             debug!("Authentication required but not provided, redirecting to OIDC login");
             // Redirect to login page for OIDC
-            return Ok(ClamResponse::RedirectGet(format!(
+            Ok(ClamResponse::RedirectGet(format!(
                 "{}/login/{}",
                 state.config().url().as_deref().unwrap_or_default(),
                 endpoint_index
             ))
-            .into_response());
+            .into_response())
         } else {
             debug!(
                 "Authentication required but not provided, requesting HTTP Basic Authentication"
             );
-            return Ok((
+            Ok((
                 StatusCode::UNAUTHORIZED,
                 [(
                     header::WWW_AUTHENTICATE,
                     format!("Basic realm=\"{}\"", state.config().name()),
                 )],
             )
-                .into_response());
+                .into_response())
         }
     }
-
-    return Ok(next.run(req).await);
 }
 
 /// Validate HTTP Basic Authentication against the service's user database
@@ -390,7 +396,7 @@ pub async fn callback_handler(
 
         let client = reqwest::Client::new();
 
-        //let state_as_str = format!("{}", auth_req.state);
+        let state_as_str = format!("{}", auth_req.state);
         let params = [
             ("grant_type", "authorization_code"),
             ("code", &auth_req.code),
@@ -406,7 +412,7 @@ pub async fn callback_handler(
                     .as_ref()
                     .expect("openid_redirect_url should have been computed earlier"),
             ),
-            //("state", &state_as_str),
+            ("state", &state_as_str),
         ];
 
         let res = client
@@ -428,10 +434,23 @@ pub async fn callback_handler(
 
             // Add the cookie to the jar
             let updated_jar = jar.add(cookie);
+            debug!(
+                "Login successful, adding authentication cookie and redirecting to {}",
+                redirect_uri
+            );
 
             // Redirect
-            return Ok((updated_jar, Redirect::to(redirect_uri.as_str())));
+            Ok((updated_jar, Redirect::to(redirect_uri.as_str())))
+        } else {
+            debug!(
+                "OIDC token verification failed with error {}: {}",
+                res.status(),
+                res.text().await.unwrap()
+            );
+            Err(StatusCode::UNAUTHORIZED)
         }
+    } else {
+        debug!("OIDC callback endpoint was called but not enabled");
+        Err(StatusCode::FORBIDDEN)
     }
-    Err(StatusCode::UNAUTHORIZED)
 }
