@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
 
-use tracing::debug;
+use tracing::{debug, error};
 
 use jsonwebtoken;
 
@@ -179,6 +179,7 @@ pub(crate) async fn auth(
 
     //no header supplied
     //fallback: get OIDC token from cookie
+    let mut fail = false;
     if let Some(cookie_header) = req.headers().get(header::COOKIE) {
         for cookie in cookie_header.to_str().unwrap().split(";") {
             let mut iter = cookie.splitn(2, '=');
@@ -193,16 +194,18 @@ pub(crate) async fn auth(
                         return Ok(next.run(req).await);
                     } else {
                         debug!(
-                            "OAuth2 authentication failed: auth_token in cookie no longer valid"
+                            "OAuth2 authentication failed: auth_token in cookie no longer valid.. we need a new login attempt"
                         );
-                        return Err(StatusCode::UNAUTHORIZED);
+                        fail = true;
                     }
                 }
             }
         }
     }
 
-    if endpoint.public() || (!state.oauthcredentials.enabled() && !state.basicauth_enabled()) {
+    if !fail
+        && (endpoint.public() || (!state.oauthcredentials.enabled() && !state.basicauth_enabled()))
+    {
         // No authentication information supplied, that's okay
         // for public endpoints (or whenever no authentication is enabled for the entire service)
         // we are user 'anonymous'
@@ -400,11 +403,6 @@ pub async fn callback_handler(
         let params = [
             ("grant_type", "authorization_code"),
             ("code", &auth_req.code),
-            ("client_id", state.oauthcredentials.oauth_client_id.as_str()),
-            (
-                "client_secret",
-                state.oauthcredentials.oauth_client_secret.as_str(),
-            ),
             (
                 "redirect_uri",
                 state
@@ -415,15 +413,37 @@ pub async fn callback_handler(
             ("state", &state_as_str),
         ];
 
-        let res = client
+        let res = match client
             .post(openidconfig.token_endpoint.as_str())
             .form(&params)
+            .basic_auth(
+                state.oauthcredentials.oauth_client_id.as_str(),
+                Some(state.oauthcredentials.oauth_client_secret.as_str()),
+            )
             .send()
             .await
-            .expect("Failed to send token request");
+        {
+            Ok(res) => res,
+            Err(e) => {
+                error!(
+                    "Failed to contact OpenID provider for token verification: {}",
+                    e
+                );
+                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+        };
 
         if res.status().is_success() {
-            let token_data: TokenResponse = res.json().await.unwrap();
+            let token_data: TokenResponse = match res.json().await {
+                Ok(token_data) => token_data,
+                Err(e) => {
+                    error!(
+                        "Failed to parse JSON token response from OpenID provider: {}",
+                        e
+                    );
+                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                }
+            };
 
             //Build session cookie with the OIDC token
             let mut cookie = Cookie::new("auth_token", token_data.access_token);
