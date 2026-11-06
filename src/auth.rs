@@ -167,7 +167,7 @@ pub(crate) async fn auth(
             }
         }
         _ => {
-            debug!("No authentication headers found request");
+            debug!("No authentication headers found in HTTP request, trying cookies next...");
         }
     };
 
@@ -296,12 +296,15 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
                     validation.set_issuer(&[state.openidconfig.as_ref().unwrap().issuer.as_str()]);
 
                     // We use serde_json::Value as a generic claims struct just to verify the signature
-                    if let Ok(token_data) =
-                        jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation)
-                    {
-                        // Return email if available, otherwise fall back to the subject string
-                        debug!("...success");
-                        return Some(token_data.claims.email.unwrap_or(token_data.claims.sub));
+                    match jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation) {
+                        Ok(token_data) => {
+                            // Return email if available, otherwise fall back to the subject string
+                            debug!("...success");
+                            return Some(token_data.claims.email.unwrap_or(token_data.claims.sub));
+                        }
+                        Err(e) => {
+                            debug!("error decoding/verifying json web token: {}", e);
+                        }
                     }
                 }
                 _ => {
