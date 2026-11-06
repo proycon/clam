@@ -271,12 +271,18 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
 
     let header = match jsonwebtoken::decode_header(token) {
         Ok(h) => h,
-        Err(_) => return None,
+        Err(e) => {
+            debug!("error decoding json web token header: {}", e);
+            return None;
+        }
     };
 
     let key_id = match header.kid {
         Some(k) => k,
-        None => return None,
+        None => {
+            debug!("No key ID found");
+            return None;
+        }
     };
 
     // Look up the matching public key in our cached JWKS
@@ -287,7 +293,10 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
                     let decoding_key =
                         match jsonwebtoken::DecodingKey::from_rsa_components(&rsa.n, &rsa.e) {
                             Ok(k) => k,
-                            Err(_) => return None,
+                            Err(e) => {
+                                debug!("error decoding key: {}", e);
+                                return None;
+                            }
                         };
 
                     // Validate the token signature and claims
