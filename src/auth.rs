@@ -178,7 +178,7 @@ pub(crate) async fn auth(
     };
 
     //no header supplied
-    //fallback: get OIDC token from cookie
+    //fallback: get access token from cookie
     let mut fail = false;
     if let Some(cookie_header) = req.headers().get(header::COOKIE) {
         for cookie in cookie_header.to_str().unwrap().split(";") {
@@ -445,12 +445,14 @@ pub async fn callback_handler(
                 }
             };
 
-            //Build session cookie with the OIDC token
+            // Build session cookie with the OIDC token  we return the access_token directly to the user
+            // rather than holding it server-side. This has some security implications.
+            // MAYBE TODO: hold server-side session store with access taken, and hand out a proxy token instead
             let mut cookie = Cookie::new("auth_token", token_data.access_token);
             cookie.set_path(state.oauthcredentials.cookie_path().clone());
             cookie.set_http_only(true);
             cookie.set_secure(true); // https only
-            cookie.set_same_site(axum_extra::extract::cookie::SameSite::Lax); // Protects against CSRF
+            cookie.set_same_site(axum_extra::extract::cookie::SameSite::Lax); // Protects against CSRF, 'Strict' interferes with login flow
 
             // Add the cookie to the jar
             let updated_jar = jar.add(cookie);
