@@ -142,21 +142,33 @@ pub(crate) async fn auth(
     match auth_header {
         Some(auth) if auth.starts_with("Basic ") => {
             if let Some(user_id) = validate_basic_auth(&auth[6..], &state) {
+                debug!(
+                    "Basic authentication succeeded as {} (from header)",
+                    user_id
+                );
                 req.extensions_mut().insert(CurrentUser(Some(user_id)));
                 return Ok(next.run(req).await);
             } else {
+                debug!("Basic authentication failed (header provided but failed check)");
                 return Err(StatusCode::UNAUTHORIZED);
             }
         }
         Some(auth) if auth.starts_with("Bearer ") => {
             if let Some(user_id) = validate_oidc_token(&auth[7..], &state).await {
+                debug!(
+                    "OAuth2 authentication succeeded as {} (from header)",
+                    user_id
+                );
                 req.extensions_mut().insert(CurrentUser(Some(user_id)));
                 return Ok(next.run(req).await);
             } else {
+                debug!("OAuth2 authentication failed (header provided but failed check)");
                 return Err(StatusCode::UNAUTHORIZED);
             }
         }
-        _ => {}
+        _ => {
+            debug!("No authentication headers found request");
+        }
     };
 
     //no header supplied
@@ -167,9 +179,16 @@ pub(crate) async fn auth(
             if let (Some(name), Some(value)) = (iter.next(), iter.next()) {
                 if name.trim() == "auth_token" {
                     if let Some(user_id) = validate_oidc_token(value.trim(), &state).await {
+                        debug!(
+                            "OAuth2 authentication succeeded as {} (from cookie)",
+                            user_id
+                        );
                         req.extensions_mut().insert(CurrentUser(Some(user_id)));
                         return Ok(next.run(req).await);
                     } else {
+                        debug!(
+                            "OAuth2 authentication failed: auth_token in cookie no longer valid"
+                        );
                         return Err(StatusCode::UNAUTHORIZED);
                     }
                 }
@@ -186,6 +205,7 @@ pub(crate) async fn auth(
         //Not a public endpoint, we are unauthorized and need to login!
 
         if state.oauthcredentials.enabled() {
+            debug!("Authentication required but not provided, redirecting to OIDC login");
             // Redirect to login page for OIDC
             return Ok(ClamResponse::RedirectGet(format!(
                 "{}/login/{}",
@@ -194,6 +214,9 @@ pub(crate) async fn auth(
             ))
             .into_response());
         } else {
+            debug!(
+                "Authentication required but not provided, requesting HTTP Basic Authentication"
+            );
             return Ok((
                 StatusCode::UNAUTHORIZED,
                 [(
