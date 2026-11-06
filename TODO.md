@@ -5,10 +5,11 @@
 - [ ] Test interface on mobile devices
 - [ ] Pagination for input and output files
 - [ ] UI polishing
-- [ ] Add logout function for OIDC (clear cookies)
 
 ## In progress
 
+- [ ] Add logout function for OIDC (clear cookies)
+- [ ] Expire sessions
 - [x] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
        It can create a project and upload files with its own API key;

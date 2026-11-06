@@ -1,10 +1,10 @@
-use crate::EndPointMode;
 use crate::auth::{OpenIdConfiguration, get_jwks, get_openid_config};
 use crate::config::{BackgroundService, EndPoint, OAuthCredentials, ServiceConfig, Viewer};
 use crate::dispatcher::{Message, ResponseMessage};
 use crate::error::ApiError;
 use crate::job::{Job, JobId, JobMaster};
 use crate::templating::init_templating;
+use crate::{EndPointMode, OidcSession};
 use core::default::Default;
 use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, VecDeque};
@@ -29,8 +29,12 @@ pub struct ServiceState {
     /// Note: project transfers are not persistant accross runs
     pub(crate) project_transfer_map: RwLock<HashMap<ProjectKey, String>>,
 
-    /// Sessions are only used by the adopt/ endpoint to temporarily carry data over the authentication. It maps a random ID (a negative number) to the project key of the project that is to be adopted
+    /// Adoption sessions are only used by the adopt/ endpoint to temporarily carry data over the authentication. It maps a random ID (a negative number) to the project key of the project that is to be adopted
+    /// There is no relation with the OpenID session map here.
     pub(crate) session_adoption_map: RwLock<HashMap<isize, ProjectKey>>,
+
+    /// OpenID sessions, session ID is a UUID and passed to the user as a cookie, OidcSession hold the access_token and user name server-side
+    pub(crate) openid_session_map: RwLock<HashMap<String, OidcSession>>,
 
     /// Maps endpoints by index to an enum indicating whether background services are loaded
     pub(crate) bgservicestate_map: RwLock<Vec<BackgroundServiceState>>,
@@ -171,6 +175,7 @@ impl ServiceState {
             project_job_map: RwLock::new(Default::default()),
             project_transfer_map: RwLock::new(Default::default()),
             session_adoption_map: RwLock::new(Default::default()),
+            openid_session_map: RwLock::new(Default::default()),
             bgservicestate_map: RwLock::new(vec![
                 BackgroundServiceState::Down;
                 config.background_services().iter().count()

@@ -12,6 +12,8 @@ use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+use uuid::Uuid;
 
 use tracing::{debug, error};
 
@@ -47,8 +49,16 @@ pub struct AuthRequest {
 struct OidcClaims {
     // The standard OIDC claim for user emails
     email: Option<String>,
-    // Fallback unique identifier if email isn't present
+
+    // Issuer identifier: the OIDC provider that issued this ID token, this is URL, we don't really use this because we only have one configured anyway
+    #[allow(dead_code)]
+    iss: String,
+
+    // Subject identifier: a stable, provider-specific ID for the authenticated user.
     sub: String,
+
+    /// Whether the provider says the email address has been verified.
+    email_verified: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -57,6 +67,28 @@ pub struct TokenResponse {
     id_token: Option<String>,
     token_type: String,
     expires_in: i64,
+}
+
+pub struct OidcSession {
+    username: String,
+
+    // whilst we could store the access token here, we don't really have any need for it after the user has logged in,
+    // we're not calling any other APIs on the user's behalf nor requesting more data from the UserInfo endpoint.
+    // so we don't keep it
+    //access_token: String,
+
+    //UNIX epoch timestamp for expiration
+    expiration: usize,
+}
+
+impl OidcSession {
+    pub fn expired(&self) -> bool {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as usize;
+        now > self.expiration
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Default)]
@@ -129,6 +161,26 @@ impl ServiceState {
         debug!("authentication state value does not correspond with an adoptable project");
         Err(StatusCode::FORBIDDEN)
     }
+
+    /// Validated a OIDC Session ID (our own bookkeeping)
+    pub fn validate_session_id(&self, session_id: &str) -> Option<String> {
+        if let Ok(session_map) = self.openid_session_map.read() {
+            if let Some(session) = session_map.get(session_id) {
+                //check expiration
+                if session.expired() {
+                    debug!("OIDC Session expired");
+                    return None;
+                }
+                debug!("OIDC authentication succeeded as {}", session.username);
+                Some(session.username.clone())
+            } else {
+                debug!("OIDC authentication failed (invalid session id)");
+                None
+            }
+        } else {
+            panic!("Session lock poisoned!") //shouldn't happen
+        }
+    }
 }
 
 /// Authentication middleware function
@@ -160,16 +212,12 @@ pub(crate) async fn auth(
             }
         }
         Some(auth) if auth.starts_with("Bearer ") => {
-            if let Some(user_id) = validate_oidc_token(&auth[7..], &state).await {
-                debug!(
-                    "OAuth2 authentication succeeded as {} (from header)",
-                    user_id
-                );
-                req.extensions_mut().insert(CurrentUser(Some(user_id)));
+            if let Some(username) = state.validate_session_id(auth[7..].trim()) {
+                //validate_session_id will also output some debug info
+                req.extensions_mut().insert(CurrentUser(Some(username)));
                 return Ok(next.run(req).await);
             } else {
-                debug!("OAuth2 authentication failed (header provided but failed check)");
-                return Err(StatusCode::UNAUTHORIZED);
+                debug!("Oidc validation based on headers failed, falling back to cookies next...");
             }
         }
         _ => {
@@ -178,24 +226,19 @@ pub(crate) async fn auth(
     };
 
     //no header supplied
-    //fallback: get access token from cookie
+    //fallback: get access token from cookie (to be expected for OIDC)
     let mut fail = false;
     if let Some(cookie_header) = req.headers().get(header::COOKIE) {
         for cookie in cookie_header.to_str().unwrap().split(";") {
             let mut iter = cookie.splitn(2, '=');
             if let (Some(name), Some(value)) = (iter.next(), iter.next()) {
-                if name.trim() == "auth_token" {
-                    if let Some(user_id) = validate_oidc_token(value.trim(), &state).await {
-                        debug!(
-                            "OAuth2 authentication succeeded as {} (from cookie)",
-                            user_id
-                        );
-                        req.extensions_mut().insert(CurrentUser(Some(user_id)));
+                if name.trim() == "session_id" {
+                    if let Some(username) = state.validate_session_id(value.trim()) {
+                        //validate_session_id will also output some debug info
+                        req.extensions_mut().insert(CurrentUser(Some(username)));
                         return Ok(next.run(req).await);
                     } else {
-                        debug!(
-                            "OAuth2 authentication failed: auth_token in cookie no longer valid.. we need a new login attempt"
-                        );
+                        // session is invalid or expired, we need a new one
                         fail = true;
                     }
                 }
@@ -203,8 +246,8 @@ pub(crate) async fn auth(
         }
     }
 
-    if !fail
-        && (endpoint.public() || (!state.oauthcredentials.enabled() && !state.basicauth_enabled()))
+    if endpoint.public()
+        || (!fail && !state.oauthcredentials.enabled() && !state.basicauth_enabled())
     {
         // No authentication information supplied, that's okay
         // for public endpoints (or whenever no authentication is enabled for the entire service)
@@ -272,9 +315,9 @@ fn validate_basic_auth(credentials: &str, state: &ServiceState) -> Option<String
     None
 }
 
-/// Validates an OIDC token, return the user's email as user identifier if possible, otherwise a unique subject ID
+/// Validates an OIDC ID token, return the user's email as user identifier if possible, otherwise a unique subject ID
 /// Returns None if validation did not succeed
-async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String> {
+async fn validate_id_token(token: &str, state: &ServiceState) -> Option<String> {
     //Decode the token header to find which key was used to sign it
     debug!("Validating OIDC token...");
 
@@ -316,9 +359,19 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
                     // We use serde_json::Value as a generic claims struct just to verify the signature
                     match jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation) {
                         Ok(token_data) => {
-                            // Return email if available, otherwise fall back to the subject string
+                            // Return email if available, otherwise fall back to the subject string namespaced by the provider
                             debug!("...success");
-                            return Some(token_data.claims.email.unwrap_or(token_data.claims.sub));
+
+                            if token_data.claims.email_verified == Some(true) {
+                                if let Some(email) = token_data.claims.email {
+                                    return Some(email);
+                                }
+                            }
+
+                            // fallback username, usually we should namespace the subject ID with
+                            // claims.iss but we only allow one provider anyway and using it means
+                            // we trust the issuer
+                            return Some(token_data.claims.sub);
                         }
                         Err(e) => {
                             debug!("error decoding/verifying json web token: {}", e);
@@ -326,8 +379,8 @@ async fn validate_oidc_token(token: &str, state: &ServiceState) -> Option<String
                     }
                 }
                 _ => {
-                    eprintln!(
-                        "WARNING: OIDC provider uses an algorithm we have not implemented! (only RSA is supported)"
+                    error!(
+                        "OIDC provider uses an algorithm we have not implemented! (only RSA is supported)"
                     );
                 }
             }
@@ -445,10 +498,42 @@ pub async fn callback_handler(
                 }
             };
 
-            // Build session cookie with the OIDC token  we return the access_token directly to the user
-            // rather than holding it server-side. This has some security implications.
-            // MAYBE TODO: hold server-side session store with access taken, and hand out a proxy token instead
-            let mut cookie = Cookie::new("auth_token", token_data.access_token);
+            if token_data.id_token.is_none() {
+                debug!("ID token verification failed",);
+                return Err(StatusCode::UNAUTHORIZED);
+            }
+
+            //get username from the id_token and validate it
+            let username =
+                match validate_id_token(token_data.id_token.as_deref().unwrap(), &state).await {
+                    Some(username) => username,
+                    None => {
+                        error!("ID token verification failed");
+                        return Err(StatusCode::UNAUTHORIZED);
+                    }
+                };
+
+            // Now we create a session
+            let session_id: String = Uuid::new_v4().into();
+            if let Ok(mut session_map) = state.openid_session_map.write() {
+                let now = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs() as usize;
+                session_map.insert(
+                    session_id.clone(),
+                    OidcSession {
+                        username,
+                        expiration: now + token_data.expires_in as usize,
+                    },
+                );
+            } else {
+                error!("OIDC Session lock poisoned");
+                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+
+            // And we hand the session id to the user
+            let mut cookie = Cookie::new("session_id", session_id);
             cookie.set_path(state.oauthcredentials.cookie_path().clone());
             cookie.set_http_only(true);
             cookie.set_secure(true); // https only
@@ -461,7 +546,7 @@ pub async fn callback_handler(
                 redirect_uri
             );
 
-            // Redirect
+            // Redirect to the actually requested endpoint
             Ok((updated_jar, Redirect::to(redirect_uri.as_str())))
         } else {
             debug!(
