@@ -98,7 +98,7 @@ fn read_user_db(config: &ServiceConfig) -> Result<HashMap<String, String>, std::
             let f = std::fs::File::open(user_file)?;
             let reader = std::io::BufReader::new(f);
             for line in std::io::BufRead::lines(reader) {
-                let line = line.unwrap();
+                let line = line?;
                 let parts: Vec<&str> = line.split('\t').collect();
                 if parts.len() >= 2 {
                     let username = parts[0];
