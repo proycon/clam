@@ -8,8 +8,6 @@
 
 ## In progress
 
-- [ ] Fix output files and viewer path, missing prefix
-- [ ] Add logout function for OIDC (clear cookies)
 - [ ] Expire sessions
 - [x] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
@@ -21,6 +19,8 @@
 
 ## Done
 
+- [x] Fix output files and viewer path, missing prefix
+- [x] Add logout function for OIDC (clear cookies)
 - [x] UI: add some UI error messages instead of raw json
 - [x] Propagate error feedback when a background job fails
 - [x] Implement viewers

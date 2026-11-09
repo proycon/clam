@@ -128,7 +128,9 @@ header h1 {
     font-size: 1.25rem;
     white-space: nowrap;
 }
-
+header a, header a:visited, header a:hover {
+    color: white;
+}
 footer {
     font-family: monospace;
     font-size: 80%;
@@ -277,4 +279,10 @@ div.block > div.error {
 }
 div.block > div.error h2 {
     color: red;
+}
+header div.user {
+    padding: 5px;
+    text-align: right;
+    float: right;
+    color: white;
 }

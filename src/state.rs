@@ -206,7 +206,7 @@ impl ServiceState {
                 None
             } else {
                 let config: upon::Value = (&config).into();
-                Some(upon::value! { config: config, refresh: 0 })
+                Some(upon::value! { config: config, refresh: 0, user: "" })
             },
             tainted,
             config,

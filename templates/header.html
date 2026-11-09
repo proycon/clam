@@ -20,6 +20,7 @@
     <div id="gradient"></div>
     <header>
         <h1>{{ config.name }}</h1>
-        <nav>
-        </nav>
+        {% if user %}
+        <div class="user">{{ user }} {% if user | ne: "anonymous" %}[<a href="{{config.url}}/logout">logout</a>]{% endif %}</div>
+        {% endif %}
     </header>

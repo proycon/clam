@@ -1,5 +1,5 @@
 use crate::ResponseMessage;
-use crate::auth::{CurrentUser, auth, callback_handler, login_handler};
+use crate::auth::{CurrentUser, auth, callback_handler, login_handler, logout_handler};
 use crate::config::{EndPoint, EndPointMode, FileName, FileType, ParameterType, ServiceConfig};
 use crate::dispatcher::{Dispatcher, Message};
 use crate::error::ApiError;
@@ -177,7 +177,8 @@ impl Service {
             .route("/ui.js", get(get_js))
             .route("/back.png", get(get_backpng))
             .route("/login/{endpoint_index}", get(login_handler))
-            .route("/oidc/callback", get(callback_handler)); //this is the redirect URI
+            .route("/oidc/callback", get(callback_handler)) //this is the redirect URI
+            .route("/logout", get(logout_handler));
 
         for (i, endpoint) in self.config.endpoints().iter().enumerate() {
             routes = routes.merge(
@@ -450,6 +451,7 @@ async fn get_projects(
                     description: endpoint.description().clone().unwrap_or_default(),
                     path: endpoint.path(),
                     normpath: endpoint.normpath(),
+                    user: user.as_str().to_string(),
                     projects: projects.into_iter().map(|project| project.into()).collect::<Vec<String>>(),
                 }),
             ),
@@ -527,6 +529,7 @@ async fn get_project(
                             parenturl: format!("{}{}/{}", state.config().url().as_deref().unwrap_or_default(), project.endpoint().normpath(), "projects"),
                             project: project.name(),
                             path: format!("{}/{}", project.endpoint().normpath(), project.name()),
+                            user: user.as_str().to_string(),
                             refresh: match projectstatus {
                                 ProjectStatus::Running { .. } | ProjectStatus::Scheduled=> 3,
                                 _ => 0,
@@ -1370,6 +1373,7 @@ async fn get_action(
                 description: endpoint.description().clone().unwrap_or_default(),
                 path: endpoint.path(),
                 normpath: endpoint.normpath(),
+                user: user.as_str().to_string(),
                 parameters: endpoint.parameters(),
             }),
         ),

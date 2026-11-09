@@ -183,6 +183,20 @@ impl ServiceState {
     }
 }
 
+pub(crate) fn get_session_id(req: &Request) -> Option<&str> {
+    if let Some(cookie_header) = req.headers().get(header::COOKIE) {
+        for cookie in cookie_header.to_str().unwrap().split(";") {
+            let mut iter = cookie.splitn(2, '=');
+            if let (Some(name), Some(value)) = (iter.next(), iter.next()) {
+                if name.trim() == "session_id" {
+                    return Some(value.trim());
+                }
+            }
+        }
+    }
+    None
+}
+
 /// Authentication middleware function
 /// adds username to the request if login succesful
 pub(crate) async fn auth(
@@ -228,21 +242,14 @@ pub(crate) async fn auth(
     //no header supplied
     //fallback: get access token from cookie (to be expected for OIDC)
     let mut fail = false;
-    if let Some(cookie_header) = req.headers().get(header::COOKIE) {
-        for cookie in cookie_header.to_str().unwrap().split(";") {
-            let mut iter = cookie.splitn(2, '=');
-            if let (Some(name), Some(value)) = (iter.next(), iter.next()) {
-                if name.trim() == "session_id" {
-                    if let Some(username) = state.validate_session_id(value.trim()) {
-                        //validate_session_id will also output some debug info
-                        req.extensions_mut().insert(CurrentUser(Some(username)));
-                        return Ok(next.run(req).await);
-                    } else {
-                        // session is invalid or expired, we need a new one
-                        fail = true;
-                    }
-                }
-            }
+    if let Some(session_id) = get_session_id(&req) {
+        if let Some(username) = state.validate_session_id(session_id) {
+            //validate_session_id will also output some debug info
+            req.extensions_mut().insert(CurrentUser(Some(username)));
+            return Ok(next.run(req).await);
+        } else {
+            // session is invalid or expired, we need a new one
+            fail = true;
         }
     }
 
@@ -409,6 +416,42 @@ pub(crate) async fn login_handler(
     } else {
         ApiError::NotFound("OAuth2 login endpoint is not enabled on this service".into())
             .into_json_response()
+    }
+}
+
+/// Log the user out by forgetting the session
+pub(crate) async fn logout_handler(
+    State(state): State<Arc<ServiceState>>,
+    jar: CookieJar,
+    req: Request,
+) -> Response {
+    if state.openidconfig.is_some() {
+        // Remove the session
+        if let Some(session_id) = get_session_id(&req) {
+            if let Ok(mut session_map) = state.openid_session_map.write() {
+                session_map.remove(session_id);
+            } else {
+                error!("OIDC Session lock poisoned");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "OIDC session lock poisoined",
+                )
+                    .into_response();
+            }
+        }
+
+        // Remove the cookie and redirect back to landing page
+        let redirect_url = state.config().url().as_deref().unwrap_or("/");
+        (jar.remove("session_id"), Redirect::temporary(&redirect_url)).into_response()
+    } else {
+        //no OIDC, basic authentication has no real logout, return 401 in an attempt to make the browser forget the credentials
+        return (
+            StatusCode::UNAUTHORIZED,
+            format!(
+                "Attempting logout even though HTTP Basic Authentication has no real logout mechanism, click <a href=\"{}\">here</a> to continue and clear browser data if this did not work.",
+                state.config().url().as_deref().unwrap_or("/")
+            ),
+        ).into_response();
     }
 }
 
