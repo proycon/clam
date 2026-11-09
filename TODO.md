@@ -8,6 +8,8 @@
 
 ## In progress
 
+- [ ] oidc: query userinfo endpoint for user email
+
 ## Done but need testing
 
 - [x] Implement a mechanism for project transfer between users
