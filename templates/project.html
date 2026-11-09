@@ -141,10 +141,10 @@
 </div>
 <div class="block ">
     <div class="dangerbuttons">
-        <form method="post" action="{{ path }}/delete" enctype="application/x-www-form-urlencoded">
+        <form method="post" action="{{ config.url }}{{ path }}/delete" enctype="application/x-www-form-urlencoded">
             <input type="submit" value="Delete this project" title="All results and input files will be lost">
         </form>
-        <form method="post" action="{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
+        <form method="post" action="{{ config.url }}{{ path }}/cancel" enctype="application/x-www-form-urlencoded">
             <input type="submit" value="Discard all results and restart" title="This offers you the opportunity to go back to the staging state to resubmit parameters and try again. All results will be lost, but input files will be retained.">
         </form>
     </div>
