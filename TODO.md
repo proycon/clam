@@ -8,6 +8,7 @@
 
 ## In progress
 
+- [ ] Fix output files and viewer path, missing prefix
 - [ ] Add logout function for OIDC (clear cookies)
 - [ ] Expire sessions
 - [x] Implement a mechanism for project transfer between users
