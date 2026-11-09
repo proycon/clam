@@ -180,9 +180,11 @@ impl Dispatcher {
             .dispatcher()
             .checkbackgroundservices_interval();
         let mut counter = 0;
+        let mut counter2 = 0;
         tokio::task::spawn(async move {
             loop {
                 counter += 1;
+                counter2 += 1;
                 if let Ok(sender) = state.sender.read() {
                     if let Err(e) = sender.send(Message::StartJobs) {
                         eprintln!("ERROR: Ticker send failed: {}", e);
@@ -193,6 +195,19 @@ impl Dispatcher {
                         if let Err(e) = sender.send(Message::CheckBackgroundServices) {
                             eprintln!("ERROR: Ticker send failed: {}", e);
                             break;
+                        }
+                    }
+                    // clean up expired OIDC sessions every 10 minutes
+                    if counter2 >= 600 {
+                        counter2 = 0;
+                        if state.openidconfig.is_some() {
+                            if let Ok(mut session_map) = state.openid_session_map.write() {
+                                let now = SystemTime::now()
+                                    .duration_since(UNIX_EPOCH)
+                                    .unwrap()
+                                    .as_secs() as usize;
+                                session_map.retain(|_, session| now < session.expiration());
+                            }
                         }
                     }
                 }

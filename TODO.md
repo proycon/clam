@@ -8,7 +8,8 @@
 
 ## In progress
 
-- [ ] Expire sessions
+## Done but need testing
+
 - [x] Implement a mechanism for project transfer between users
     -  This also accommodates projects like the CLARIN switchboard.
        It can create a project and upload files with its own API key;
@@ -19,6 +20,7 @@
 
 ## Done
 
+- [x] Expire sessions
 - [x] Fix output files and viewer path, missing prefix
 - [x] Add logout function for OIDC (clear cookies)
 - [x] UI: add some UI error messages instead of raw json

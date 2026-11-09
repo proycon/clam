@@ -9,6 +9,7 @@ use axum::response::Response;
 use axum::response::{IntoResponse, Redirect};
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
+use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
@@ -69,6 +70,7 @@ pub struct TokenResponse {
     expires_in: i64,
 }
 
+#[derive(Clone, Getters)]
 pub struct OidcSession {
     username: String,
 
