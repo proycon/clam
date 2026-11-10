@@ -2,14 +2,14 @@
 
 ## Backlog
 
-- [ ] Test interface on mobile devices
-- [ ] Less intrusive status page refreshes
-- [ ] Pagination for input and output files
 - [ ] UI polishing
+    - [ ] Pagination for input and output files
+    - [ ] Test interface on mobile devices
+    - [ ] Less intrusive status page refreshes
+- [ ] Fix swagger validator errors (see bottom-right corner of swagger UI)
 
 ## In progress
 
-- [ ] Fix OpenAPI/swagger endpoint
 
 ## Done but need testing
 
@@ -24,6 +24,7 @@
 
 ## Done
 
+- [x] Fix OpenAPI/swagger endpoint
 - [x] oidc: query userinfo endpoint for user email
 - [x] Expire sessions
 - [x] Fix output files and viewer path, missing prefix
