@@ -518,6 +518,7 @@ pub async fn callback_handler(
 
         let res = match client
             .post(openidconfig.token_endpoint.as_str())
+            .header(header::ACCEPT, "application/json")
             .form(&params)
             .basic_auth(
                 state.oauthcredentials.oauth_client_id.as_str(),
@@ -577,28 +578,33 @@ pub async fn callback_handler(
             if !username.chars().any(|c| c == '@') {
                 match client
                     .get(openidconfig.userinfo_endpoint.as_deref().unwrap())
+                    .header(header::ACCEPT, "application/json")
                     .bearer_auth(token_data.access_token)
                     .send()
                     .await
                 {
-                    Ok(res) => match res.json::<UserInfo>().await {
-                        Ok(userinfo_data) => match userinfo_data.email {
-                            Some(email) => username = email,
-                            None => {
-                                warn!(
-                                    "Userinfo reply from OpenID provider did not contain an email address",
+                    Ok(res) => {
+                        let statuscode = res.status().as_u16();
+                        match res.json::<UserInfo>().await {
+                            Ok(userinfo_data) => match userinfo_data.email {
+                                Some(email) => username = email,
+                                None => {
+                                    warn!(
+                                        "Userinfo reply (HTTP {}) from OpenID provider did not contain an email address",
+                                        statuscode
+                                    );
+                                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                                }
+                            },
+                            Err(e) => {
+                                error!(
+                                    "Failed to decode userinfo JSON response (HTTP {}) from OpenID provider (no email field?): {}",
+                                    statuscode, e
                                 );
                                 return Err(StatusCode::INTERNAL_SERVER_ERROR);
                             }
-                        },
-                        Err(e) => {
-                            error!(
-                                "Failed to decode userinfo JSON response from OpenID provider (no email field?): {}",
-                                e
-                            );
-                            return Err(StatusCode::INTERNAL_SERVER_ERROR);
                         }
-                    },
+                    }
                     Err(e) => {
                         error!(
                             "Failed to contact OpenID provider for userinfo verification: {}",
