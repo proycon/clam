@@ -166,7 +166,8 @@ The TOML configuration file for OpenID Connect has the following mandatory field
 *oauth_client_secret* (string)
 	The secret for your service, as registered with the remote provider.
 *oauth_client_scope* (list of strings)
-	The Oauth scope, this is at least always: `[ "openid" ]`
+	The Oauth scope, this is at least always: `[ "openid" ]` and preferably `[
+	"openid" , "email" ]`
 
 Example:
 
@@ -174,7 +175,7 @@ Example:
 openid_configuration_url = "https://oidc-provider.example.org/.well-known/openid-configuration"
 oauth_client_id = "myservice"
 oauth_client_secret = "mysecret"
-oauth_scope = [ "openid" ]
+oauth_scope = [ "openid", "email" ]
 ```
 
 When you register your webservice with your openid provider, make sure to always provide the

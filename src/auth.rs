@@ -16,7 +16,7 @@ use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
-use tracing::{debug, error};
+use tracing::{debug, error, warn};
 
 use jsonwebtoken;
 
@@ -46,7 +46,7 @@ pub struct AuthRequest {
     state: isize,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct OidcClaims {
     // The standard OIDC claim for user emails
     email: Option<String>,
@@ -548,15 +548,61 @@ pub async fn callback_handler(
                 return Err(StatusCode::UNAUTHORIZED);
             }
 
-            //get username from the id_token and validate it
-            let username =
+            if token_data.id_token.is_none() {
+                error!("Failed to obtain ID token from  OpenID provider");
+                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+
+            //validate id_token and get username (email or fallback)
+            let mut username =
                 match validate_id_token(token_data.id_token.as_deref().unwrap(), &state).await {
-                    Some(username) => username,
+                    Some(u) => u,
                     None => {
                         error!("ID token verification failed");
                         return Err(StatusCode::UNAUTHORIZED);
                     }
                 };
+
+            if openidconfig.userinfo_endpoint.is_none() {
+                error!("No userinfo endpoint known");
+                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+
+            //query userinfo endpoint for username (email actually) if what we got thus-far doesn't look like an email address (very crude check)
+            if !username.chars().any(|c| c == '@') {
+                match client
+                    .get(openidconfig.userinfo_endpoint.as_deref().unwrap())
+                    .bearer_auth(token_data.access_token)
+                    .send()
+                    .await
+                {
+                    Ok(res) => match res.json::<OidcClaims>().await {
+                        Ok(userinfo_data) => match userinfo_data.email {
+                            Some(email) => username = email,
+                            None => {
+                                warn!(
+                                    "Userinfo reply from OpenID provider did not contain an email address, received: {:?}",
+                                    userinfo_data
+                                );
+                            }
+                        },
+                        Err(e) => {
+                            error!(
+                                "Failed to decode userinfo JSON response from OpenID provider: {}",
+                                e
+                            );
+                            return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                        }
+                    },
+                    Err(e) => {
+                        error!(
+                            "Failed to contact OpenID provider for userinfo verification: {}",
+                            e
+                        );
+                        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                    }
+                };
+            }
 
             // Now we create a session
             let session_id: String = Uuid::new_v4().into();
