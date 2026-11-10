@@ -3,12 +3,13 @@
 ## Backlog
 
 - [ ] Test interface on mobile devices
+- [ ] Less intrusive status page refreshes
 - [ ] Pagination for input and output files
 - [ ] UI polishing
 
 ## In progress
 
-- [ ] oidc: query userinfo endpoint for user email
+- [ ] Fix OpenAPI/swagger endpoint
 
 ## Done but need testing
 
@@ -22,6 +23,7 @@
 
 ## Done
 
+- [x] oidc: query userinfo endpoint for user email
 - [x] Expire sessions
 - [x] Fix output files and viewer path, missing prefix
 - [x] Add logout function for OIDC (clear cookies)
