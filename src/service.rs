@@ -199,11 +199,11 @@ impl Service {
         let openapi_json_path = format!("{}/openapi.json", prefix);
 
         let router = Router::new()
-            .merge(routes)
             .merge(
                 SwaggerUi::new(format!("{}/info", prefix))
                     .url(openapi_json_path, state.openapi.clone()),
             )
+            .merge(routes)
             .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 
