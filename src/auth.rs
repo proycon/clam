@@ -62,6 +62,11 @@ struct OidcClaims {
     email_verified: Option<bool>,
 }
 
+#[derive(Debug, Deserialize)]
+struct UserInfo {
+    email: Option<String>,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct TokenResponse {
     access_token: String,
@@ -576,19 +581,19 @@ pub async fn callback_handler(
                     .send()
                     .await
                 {
-                    Ok(res) => match res.json::<OidcClaims>().await {
+                    Ok(res) => match res.json::<UserInfo>().await {
                         Ok(userinfo_data) => match userinfo_data.email {
                             Some(email) => username = email,
                             None => {
                                 warn!(
-                                    "Userinfo reply from OpenID provider did not contain an email address, received: {:?}",
-                                    userinfo_data
+                                    "Userinfo reply from OpenID provider did not contain an email address",
                                 );
+                                return Err(StatusCode::INTERNAL_SERVER_ERROR);
                             }
                         },
                         Err(e) => {
                             error!(
-                                "Failed to decode userinfo JSON response from OpenID provider: {}",
+                                "Failed to decode userinfo JSON response from OpenID provider (no email field?): {}",
                                 e
                             );
                             return Err(StatusCode::INTERNAL_SERVER_ERROR);
