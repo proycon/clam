@@ -188,20 +188,21 @@ impl Service {
         }
 
         // The OpenAPI path is retrieved by the client so we need to process config.url and extract the prefix (if any)
-        let prefix = state
-            .config()
-            .url()
-            .as_deref()
-            .and_then(|url| url.split_once("://"))
-            .and_then(|(_, host_and_path)| host_and_path.find('/').map(|i| &host_and_path[i..]))
-            .unwrap_or("")
-            .trim_end_matches('/');
-        let openapi_json_path = format!("{}/openapi.json", prefix);
+        let openapi_url = format!(
+            "{}/openapi.json",
+            state
+                .config()
+                .url()
+                .as_deref()
+                .unwrap_or("")
+                .trim_end_matches('/')
+        );
 
         let router = Router::new()
             .merge(
-                SwaggerUi::new(format!("{}/info", prefix))
-                    .url(openapi_json_path, state.openapi.clone()),
+                SwaggerUi::new("/info")
+                    .url("/openapi.json", state.openapi.clone())
+                    .config(utoipa_swagger_ui::Config::from(openapi_url)),
             )
             .merge(routes)
             .layer(TraceLayer::new_for_http())
