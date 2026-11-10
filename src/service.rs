@@ -187,7 +187,6 @@ impl Service {
             );
         }
 
-        // The OpenAPI path is retrieved by the client so we need to process config.url and extract the prefix (if any)
         let openapi_url = format!(
             "{}/openapi.json",
             state

@@ -40,7 +40,7 @@ impl From<&ServiceConfig> for OpenApi {
             let mut operation = Operation::new();
             operation.summary = Some("Swagger interface".to_string());
             operation.description = Some(
-                "Presents the interactive Swagger Web-UI for human end-users, allowing them to explore the full webservice API"
+                "Presents the interactive Swagger Web-UI for human end-users, allowing them to explore the full webservice API. Note that in some cases this requires a trailing slash to work!"
                     .to_string(),
             );
             operation.responses = ResponsesBuilder::new()
@@ -51,7 +51,7 @@ impl From<&ServiceConfig> for OpenApi {
                         .description("Swagger UI"),
                 )
                 .into();
-            paths.add_path_operation("/info", vec![HttpMethod::Get], operation);
+            paths.add_path_operation("/info/", vec![HttpMethod::Get], operation);
         }
 
         for endpoint in config.endpoints().iter() {

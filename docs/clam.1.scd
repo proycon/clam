@@ -86,7 +86,8 @@ The exact Web API is shaped based on the configuration you provide to CLAM. The 
 *GET* _/openapi.json_
 	Full OpenAPI specification
 *GET* _/info/_
-	Web-interface for API inspection (Swagger)
+	Web-interface for API inspection (Swagger). Note that the trailing slash is required
+	in certain instances.
 
 ## ACTION ENDPOINTS
 
