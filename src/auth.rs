@@ -1,9 +1,10 @@
 use crate::ClamResponse;
 use crate::error::ApiError;
+use crate::service::MapRenderError;
 use crate::state::ServiceState;
 use axum::extract::{Path, Request};
 use axum::extract::{Query, State};
-use axum::http::{StatusCode, header};
+use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
 use axum::middleware::Next;
 use axum::response::Response;
 use axum::response::{IntoResponse, Redirect};
@@ -125,7 +126,7 @@ impl ServiceState {
     pub(crate) fn endpoint_index_from_authstate(
         &self,
         state_value: isize,
-    ) -> Result<usize, StatusCode> {
+    ) -> Result<usize, ApiError> {
         if state_value >= 0 {
             //normal situation
             return Ok(state_value as usize);
@@ -139,21 +140,21 @@ impl ServiceState {
             "authentication state value ({}) is not a valid endpoint",
             state_value
         );
-        Err(StatusCode::FORBIDDEN)
+        Err(ApiError::PermissionDenied("Invalid adoption".into()))
     }
 
     pub(crate) fn redirect_url_from_authstate(
         &self,
         state_value: isize,
-    ) -> Result<String, StatusCode> {
+    ) -> Result<String, ApiError> {
         if state_value >= 0 {
             //normal situation
-            return self.redirect_url(state_value as usize).ok_or({
+            return self.redirect_url(state_value as usize).ok_or_else(|| {
                 debug!(
-                    "authentication state value ({}) is not a valid endpoint",
+                    "authentication state value ({}) is not a valid endpoint, unable to find redirect url",
                     state_value
                 );
-                StatusCode::FORBIDDEN
+                ApiError::PermissionDenied("Invalid endpoint".into())
             });
         } else if let Ok(mut session_adoption_map) = self.session_adoption_map.write() {
             //valid transfer ID for an adoption
@@ -172,7 +173,7 @@ impl ServiceState {
             }
         }
         debug!("authentication state value does not correspond with an adoptable project");
-        Err(StatusCode::FORBIDDEN)
+        Err(ApiError::PermissionDenied("Invalid adoption".into()))
     }
 
     /// Validated a OIDC Session ID (our own bookkeeping)
@@ -214,10 +215,13 @@ pub(crate) fn get_session_id(req: &Request) -> Option<&str> {
 /// adds username to the request if login succesful
 pub(crate) async fn auth(
     State((state, state_value)): State<AuthState>,
+    headers: HeaderMap<HeaderValue>,
     mut req: Request,
     next: Next,
-) -> Result<Response, StatusCode> {
-    let endpoint_index = state.endpoint_index_from_authstate(state_value)?;
+) -> Result<Response, Response> {
+    let endpoint_index = state
+        .endpoint_index_from_authstate(state_value)
+        .map_render_error(state.as_ref(), &headers)?;
     let endpoint = state.endpoint(endpoint_index);
     let auth_header = req
         .headers()
@@ -235,7 +239,8 @@ pub(crate) async fn auth(
                 return Ok(next.run(req).await);
             } else {
                 debug!("Basic authentication failed (header provided but failed check)");
-                return Err(StatusCode::UNAUTHORIZED);
+                return Err(ApiError::Unauthorized("Basic authentication failed"))
+                    .map_render_error(state.as_ref(), &headers)?;
             }
         }
         Some(auth) if auth.starts_with("Bearer ") => {
@@ -497,14 +502,17 @@ pub fn get_jwks(url: &str) -> jsonwebtoken::jwk::JwkSet {
 /// Handles the callback and exchanges the code for a token
 pub async fn callback_handler(
     State(state): State<Arc<ServiceState>>,
+    headers: HeaderMap<HeaderValue>,
     jar: CookieJar,
     Query(auth_req): Query<AuthRequest>,
-) -> Result<(CookieJar, Redirect), StatusCode> {
+) -> Result<(CookieJar, Redirect), Response> {
     if let Some(openidconfig) = state.openidconfig.as_ref() {
         // we passed the endpoint_index as state in the original auth request, the following
-        // function picks it up again and also handled adopted (if a transfer ID was passed as state
+        // function picks it up again and also handles adoption (if a transfer ID was passed as state
         // instead of an endpoint_index)
-        let redirect_uri = state.redirect_url_from_authstate(auth_req.state)?;
+        let redirect_uri = state
+            .redirect_url_from_authstate(auth_req.state)
+            .map_render_error(state.as_ref(), &headers)?;
 
         let client = reqwest::Client::new();
 
@@ -538,7 +546,10 @@ pub async fn callback_handler(
                     "Failed to contact OpenID provider for token verification: {}",
                     e
                 );
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                return Err(ApiError::InternalError(
+                    "Failed to contact OpenID provider for token verification".into(),
+                ))
+                .map_render_error(state.as_ref(), &headers);
             }
         };
 
@@ -550,18 +561,24 @@ pub async fn callback_handler(
                         "Failed to parse JSON token response from OpenID provider: {}",
                         e
                     );
-                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                    return Err(ApiError::InternalError(
+                        "Failed to parse JSON token response from OpenID provider".into(),
+                    ))
+                    .map_render_error(state.as_ref(), &headers);
                 }
             };
 
             if token_data.id_token.is_none() {
-                debug!("ID token verification failed",);
-                return Err(StatusCode::UNAUTHORIZED);
+                return Err(ApiError::Unauthorized("ID token verification failed"))
+                    .map_render_error(state.as_ref(), &headers);
             }
 
             if token_data.id_token.is_none() {
-                error!("Failed to obtain ID token from  OpenID provider");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                error!("Failed to obtain ID token from OpenID provider");
+                return Err(ApiError::Unauthorized(
+                    "Failed to obtain token from OpenID provider",
+                ))
+                .map_render_error(state.as_ref(), &headers);
             }
 
             //validate id_token and get username (email or fallback)
@@ -570,17 +587,20 @@ pub async fn callback_handler(
                     Some(u) => u,
                     None => {
                         error!("ID token verification failed");
-                        return Err(StatusCode::UNAUTHORIZED);
+                        return Err(ApiError::Unauthorized("ID token verification failed"))
+                            .map_render_error(state.as_ref(), &headers);
                     }
                 };
 
             if openidconfig.userinfo_endpoint.is_none() {
                 error!("No userinfo endpoint known");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                return Err(ApiError::InternalError("No userinfo endpoint known".into()))
+                    .map_render_error(state.as_ref(), &headers);
             }
 
             //query userinfo endpoint for username (email actually) if what we got thus-far doesn't look like an email address (very crude check)
             if !username.chars().any(|c| c == '@') {
+                debug!("Querying userinfo endpoint");
                 match client
                     .get(openidconfig.userinfo_endpoint.as_deref().unwrap())
                     .bearer_auth(token_data.access_token)
@@ -597,7 +617,10 @@ pub async fn callback_handler(
                                         "Userinfo reply (HTTP {}) from OpenID provider did not contain an email address",
                                         statuscode
                                     );
-                                    return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                                    return Err(ApiError::InternalError(
+                                        "OpenID provider did not return an email address".into(),
+                                    ))
+                                    .map_render_error(state.as_ref(), &headers);
                                 }
                             },
                             Err(e) => {
@@ -605,7 +628,11 @@ pub async fn callback_handler(
                                     "Failed to decode userinfo JSON response (HTTP {}) from OpenID provider (no email field?): {}",
                                     statuscode, e
                                 );
-                                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                                return Err(ApiError::InternalError(
+                                    "Failed to decode userinfo response from OpenID provider"
+                                        .into(),
+                                ))
+                                .map_render_error(state.as_ref(), &headers);
                             }
                         }
                     }
@@ -614,7 +641,10 @@ pub async fn callback_handler(
                             "Failed to contact OpenID provider for userinfo verification: {}",
                             e
                         );
-                        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                        return Err(ApiError::InternalError(
+                            "Failed to contact OpenID provider for userinfo verification".into(),
+                        ))
+                        .map_render_error(state.as_ref(), &headers);
                     }
                 };
             }
@@ -635,7 +665,10 @@ pub async fn callback_handler(
                 );
             } else {
                 error!("OIDC Session lock poisoned");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+                return Err(ApiError::InternalError(
+                    "OIDC Session lock poisoined".into(),
+                ))
+                .map_render_error(state.as_ref(), &headers);
             }
 
             // And we hand the session id to the user
@@ -660,10 +693,10 @@ pub async fn callback_handler(
                 res.status(),
                 res.text().await.unwrap()
             );
-            Err(StatusCode::UNAUTHORIZED)
+            Err(ApiError::Unauthorized("Token verification failed"))
         }
     } else {
         debug!("OIDC callback endpoint was called but not enabled");
-        Err(StatusCode::FORBIDDEN)
-    }
+        Err(ApiError::PermissionDenied("OIDC is not enabled".into()))
+    }.map_render_error(state.as_ref(), &headers)
 }

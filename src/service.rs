@@ -1851,7 +1851,7 @@ fn negotiate_content_type<'a>(
     }
 }
 
-trait RenderError {
+pub trait RenderError {
     fn render_error(self, state: &ServiceState, headers: &HeaderMap<HeaderValue>) -> Response;
 }
 
@@ -1880,7 +1880,7 @@ impl RenderError for ApiError {
     }
 }
 
-trait MapRenderError<T> {
+pub trait MapRenderError<T> {
     fn map_render_error(
         self,
         state: &ServiceState,

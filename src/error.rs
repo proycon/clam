@@ -21,6 +21,7 @@ pub enum ApiError {
     /// client-side upload error (HTTP 400)
     UploadError(String),
     NotFound(String),
+    Unauthorized(&'static str),
     NotAcceptable(&'static str),
     PermissionDenied(String),
     ParameterError(String),
@@ -42,6 +43,10 @@ impl Serialize for ApiError {
             }
             Self::NotAcceptable(s) => {
                 state.serialize_field("type", "NotAcceptable")?;
+                state.serialize_field("message", s)?;
+            }
+            Self::Unauthorized(s) => {
+                state.serialize_field("type", "Unauthorized")?;
                 state.serialize_field("message", s)?;
             }
             Self::PermissionDenied(s) => {
@@ -84,6 +89,7 @@ impl ApiError {
             Self::PermissionDenied(..) => StatusCode::FORBIDDEN,
             Self::ServiceUnavailable(..) => StatusCode::SERVICE_UNAVAILABLE,
             Self::NotAcceptable(..) => StatusCode::NOT_ACCEPTABLE,
+            Self::Unauthorized(..) => StatusCode::UNAUTHORIZED,
             Self::ParameterError(..) | Self::InvalidName(..) | Self::UploadError(..) => {
                 StatusCode::BAD_REQUEST
             }
@@ -110,6 +116,13 @@ impl ApiError {
                 upon::value! {
                     statuscode: statuscode_int,
                     title: "Not Acceptable",
+                    message: s,
+                }
+            }
+            Self::Unauthorized(s) => {
+                upon::value! {
+                    statuscode: statuscode_int,
+                    title: "Unauthorized",
                     message: s,
                 }
             }
