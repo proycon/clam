@@ -4,9 +4,9 @@ use crate::dispatcher::{Message, ResponseMessage};
 use crate::error::ApiError;
 use crate::job::{Job, JobId, JobMaster};
 use crate::templating::init_templating;
-use crate::{EndPointMode, OidcSession};
+use crate::{EndPointMode, OidcSession, usable_signing_key};
 use core::default::Default;
-use jsonwebtoken::jwk::{JwkSet, KeyAlgorithm};
+use jsonwebtoken::jwk::JwkSet;
 use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
 use std::sync::RwLock;
@@ -237,16 +237,12 @@ impl ServiceState {
     }
 
     /// Get the first key Id from the jwks store, this is used as a fallback
-    pub fn first_key_id(&self) -> Option<String> {
+    pub fn first_key(&self) -> Option<jsonwebtoken::jwk::Jwk> {
         if let Some(jwksetlock) = self.jwkset.as_ref() {
             if let Ok(jwkset) = jwksetlock.read() {
                 for key in jwkset.keys.iter() {
-                    if key.common.public_key_use == Some(jsonwebtoken::jwk::PublicKeyUse::Signature)
-                        && key.common.key_algorithm == Some(KeyAlgorithm::RS256)
-                    {
-                        if let Some(s) = key.common.key_id.as_ref() {
-                            return Some(s.clone());
-                        }
+                    if usable_signing_key(key) {
+                        return Some(key.clone());
                     }
                 }
             }
@@ -460,7 +456,7 @@ impl ServiceState {
         let mut have_auth = false;
         if self.config().auth().oauth_config_file().is_some() {
             if let Some(openidconfig) = self.openidconfig.as_ref() {
-                if self.first_key_id().is_none() {
+                if self.first_key().is_none() {
                     error!(
                         "No usable signing key obtained from OpenID Provider! (from a total of {} keys)",
                         self.jwkset

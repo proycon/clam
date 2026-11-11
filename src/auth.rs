@@ -358,27 +358,19 @@ fn validate_id_token(
         }
     };
 
-    let key_id = match header.kid {
-        Some(k) => k,
-        None => {
-            warn!(
-                "No key ID provided for ID token verification, falling back to first (only?) known key in JWKs store"
-            );
-            if let Some(k) = state.first_key_id() {
-                k
-            } else {
-                error!("No signing keys known!");
-                return None;
-            }
-        }
-    };
-
     let mut rotate = false; //set when signing keys need to be reobtained
 
     // Look up the matching public key in our cached JWKS
     if let Some(jwksetlock) = state.jwkset.as_ref() {
         if let Ok(jwkset) = jwksetlock.read() {
-            if let Some(jwk) = jwkset.find(&key_id) {
+            if let Some(jwk) = if let Some(key_id) = header.kid.as_ref() {
+                jwkset.find(&key_id)
+            } else {
+                warn!(
+                    "No key ID provided for ID token verification, will fall back to first usable key in JWKs store"
+                );
+                jwkset.keys.iter().filter(|k| usable_signing_key(k)).next()
+            } {
                 match jwk.algorithm {
                     jsonwebtoken::jwk::AlgorithmParameters::RSA(ref rsa) => {
                         if header.alg != jsonwebtoken::Algorithm::RS256 {
@@ -450,7 +442,7 @@ fn validate_id_token(
                     }
                 }
             } else {
-                //the signing keys may have rotated, we don't support this scenario yet.. restart CLAM
+                //the signing keys may have rotated, we will obtain them again (we will do this only once)
                 debug!("Key ID not found.. provider's signing keys may have changed)");
                 rotate = true;
             }
@@ -459,6 +451,7 @@ fn validate_id_token(
         }
 
         if rotate && allow_reobtain_jwkset {
+            //we will do this only once
             debug!("Re-obtaining provider's signing keys");
             if let Some(jwksetlock) = state.jwkset.as_ref() {
                 match get_jwks(
@@ -479,7 +472,7 @@ fn validate_id_token(
                     }
                 }
             }
-            warn!("Key ID wasn't found, retrying with new keys");
+            warn!("Key ID wasn't found (or none provided), retrying with new keys");
             return validate_id_token(token, state, false);
         }
     }
@@ -771,4 +764,19 @@ pub async fn callback_handler(
         debug!("OIDC callback endpoint was called but not enabled");
         Err(ApiError::PermissionDenied("OIDC is not enabled".into()))
     }.map_render_error(state.as_ref(), &headers)
+}
+
+/// Checks if a signing key in the JWTSet is usable
+pub fn usable_signing_key(key: &jsonwebtoken::jwk::Jwk) -> bool {
+    //fields are often optional (by spec) so we allow for None too
+    (key.common.public_key_use.is_none()
+        || key.common.public_key_use == Some(jsonwebtoken::jwk::PublicKeyUse::Signature))
+        && (key.common.key_algorithm.is_none()
+            || key.common.key_algorithm == Some(jsonwebtoken::jwk::KeyAlgorithm::RS256))
+        && (key.common.key_operations.is_none()
+            || key
+                .common
+                .key_operations
+                .as_ref()
+                .is_some_and(|ops| ops.contains(&jsonwebtoken::jwk::KeyOperations::Verify)))
 }
