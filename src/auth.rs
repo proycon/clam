@@ -391,9 +391,6 @@ fn validate_id_token(
 
                         if jwk.common.public_key_use
                             != Some(jsonwebtoken::jwk::PublicKeyUse::Signature)
-                            || jwk.common.key_operations.as_ref().is_some_and(|ops| {
-                                !ops.contains(&jsonwebtoken::jwk::KeyOperations::Verify)
-                            })
                             || jwk.common.key_algorithm
                                 != Some(jsonwebtoken::jwk::KeyAlgorithm::RS256)
                         {
@@ -464,15 +461,22 @@ fn validate_id_token(
         if rotate && allow_reobtain_jwkset {
             debug!("Re-obtaining provider's signing keys");
             if let Some(jwksetlock) = state.jwkset.as_ref() {
-                if let Ok(mut jwkset) = jwksetlock.write() {
-                    *jwkset = get_jwks(
-                        state
-                            .openidconfig
-                            .as_ref()
-                            .expect("openidconfig must exist")
-                            .jwks_uri
-                            .as_str(),
-                    );
+                match get_jwks(
+                    state
+                        .openidconfig
+                        .as_ref()
+                        .expect("openidconfig must exist")
+                        .jwks_uri
+                        .as_str(),
+                ) {
+                    Ok(newjwkset) => {
+                        if let Ok(mut jwkset) = jwksetlock.write() {
+                            *jwkset = newjwkset
+                        }
+                    }
+                    Err(e) => {
+                        error!("Reobtaining OIDC provider's signing keys failed! {}", e);
+                    }
                 }
             }
             warn!("Key ID wasn't found, retrying with new keys");
@@ -557,14 +561,14 @@ pub fn get_openid_config(url: &str) -> Result<OpenIdConfiguration, String> {
 }
 
 // Get JSON Web Key Set
-pub fn get_jwks(url: &str) -> jsonwebtoken::jwk::JwkSet {
+pub fn get_jwks(url: &str) -> Result<jsonwebtoken::jwk::JwkSet, &'static str> {
     let mut response = ureq::get(url)
         .call()
-        .expect("Failed to obtain JSON Web Token Set from identity provider");
+        .map_err(|_| "Failed to obtain JSON Web Token Set from identity provider")?;
     response
         .body_mut()
         .read_json::<jsonwebtoken::jwk::JwkSet>()
-        .expect("Failed to parse JWKS")
+        .map_err(|_| "Failed to parse JWKS")
 }
 
 /// Handles the callback and exchanges the code for a token

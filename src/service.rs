@@ -152,19 +152,11 @@ impl Service {
 
     #[tokio::main]
     pub async fn run(&self) {
-        let bind = self.config.listen().as_deref().unwrap_or("127.0.0.1:8080");
-        let listener = tokio::net::TcpListener::bind(bind)
-            .await
-            .unwrap_or_else(|e| {
-                error!("{}", e);
-                std::process::exit(1)
-            });
-        info!("listening on {}", bind);
-
         let dispatcher = Dispatcher::new(self.config.clone());
         //launch the dispatcher/job manager as a background thread
         //this is a non-blocking function that spawns the thread and returns immediately
         let state: Arc<ServiceState> = dispatcher.state(); //the dispatcher initiates the state for us
+        state.validate(); //will exit on error
         if let Err(e) = state.healthy() {
             error!(e);
             return;
@@ -207,6 +199,15 @@ impl Service {
             .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 
+        let bind = self.config.listen().as_deref().unwrap_or("127.0.0.1:8080");
+        let listener = tokio::net::TcpListener::bind(bind)
+            .await
+            .unwrap_or_else(|e| {
+                error!("{}", e);
+                std::process::exit(1)
+            });
+
+        info!("listening on {}", bind);
         axum::serve(listener, router.into_make_service())
             .with_graceful_shutdown(shutdown_signal(state))
             .await

@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use std::sync::RwLock;
 use std::sync::mpsc::Sender;
 use tokio::sync::oneshot;
-use tracing::debug;
+use tracing::{debug, error, info, warn};
 
 use crate::project::{Project, ProjectKey, ProjectStatus};
 
@@ -162,7 +162,10 @@ impl ServiceState {
 
         // get JSON Web Token Set for OIDC
         let jwkset = if let Some(openidconfig) = openidconfig.as_ref() {
-            Some(RwLock::new(get_jwks(openidconfig.jwks_uri.as_str())))
+            Some(RwLock::new(
+                get_jwks(openidconfig.jwks_uri.as_str())
+                    .expect("Failed to get JSON Web Token Set for OIDC"),
+            ))
         } else {
             None
         };
@@ -239,9 +242,6 @@ impl ServiceState {
             if let Ok(jwkset) = jwksetlock.read() {
                 for key in jwkset.keys.iter() {
                     if key.common.public_key_use == Some(jsonwebtoken::jwk::PublicKeyUse::Signature)
-                        && key.common.key_operations.as_ref().is_some_and(|ops| {
-                            ops.contains(&jsonwebtoken::jwk::KeyOperations::Verify)
-                        })
                         && key.common.key_algorithm == Some(KeyAlgorithm::RS256)
                     {
                         if let Some(s) = key.common.key_id.as_ref() {
@@ -453,6 +453,50 @@ impl ServiceState {
         Some(ProjectStatus::Staging {
             input_files: project.input_files(),
         })
+    }
+
+    /// Extra validation (after config validation), will exit on problems
+    pub fn validate(&self) {
+        let mut have_auth = false;
+        if self.config().auth().oauth_config_file().is_some() {
+            if let Some(openidconfig) = self.openidconfig.as_ref() {
+                if self.first_key_id().is_none() {
+                    error!(
+                        "No usable signing key obtained from OpenID Provider! (from a total of {} keys)",
+                        self.jwkset
+                            .as_ref()
+                            .expect("JWKSet not found")
+                            .read()
+                            .expect("JWKSet not readable")
+                            .keys
+                            .len()
+                    );
+                    std::process::exit(3);
+                }
+                info!("OpenID Connect initialised, issuer={}", openidconfig.issuer);
+            } else {
+                error!("OpenID Connect not initialised!");
+                std::process::exit(3);
+            }
+            have_auth = true;
+        }
+        if let Ok(user_db) = self.user_db.read() {
+            let l = user_db.len();
+            if l > 0 {
+                have_auth = true;
+                info!("HTTP Basic Authentication enabled with {} users", l);
+            }
+        }
+        if !have_auth {
+            for endpoint in self.config.endpoints() {
+                if endpoint.mode() == &EndPointMode::Project {
+                    warn!(
+                        "No authentication enabled even though there are project endpoints active; it is recommended to **NOT** expose this service publicly!",
+                    );
+                    break;
+                }
+            }
+        }
     }
 }
 
