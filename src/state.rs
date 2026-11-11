@@ -6,7 +6,7 @@ use crate::job::{Job, JobId, JobMaster};
 use crate::templating::init_templating;
 use crate::{EndPointMode, OidcSession};
 use core::default::Default;
-use jsonwebtoken::jwk::JwkSet;
+use jsonwebtoken::jwk::{JwkSet, KeyAlgorithm};
 use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
 use std::sync::RwLock;
@@ -60,7 +60,7 @@ pub struct ServiceState {
     pub(crate) openapi: utoipa::openapi::OpenApi,
 
     /// JSON Web Key Set to efficiently validate tokens (it should never be fetched on each request, but fetched and cached as otherwise it is inefficient)
-    pub(crate) jwkset: Option<JwkSet>,
+    pub(crate) jwkset: Option<RwLock<JwkSet>>,
 
     pub(crate) templating: Option<upon::Engine<'static>>,
     pub(crate) template_context: Option<upon::Value>,
@@ -162,7 +162,7 @@ impl ServiceState {
 
         // get JSON Web Token Set for OIDC
         let jwkset = if let Some(openidconfig) = openidconfig.as_ref() {
-            Some(get_jwks(openidconfig.jwks_uri.as_str()))
+            Some(RwLock::new(get_jwks(openidconfig.jwks_uri.as_str())))
         } else {
             None
         };
@@ -231,6 +231,27 @@ impl ServiceState {
 
     pub fn config(&self) -> &ServiceConfig {
         &self.config
+    }
+
+    /// Get the first key Id from the jwks store, this is used as a fallback
+    pub fn first_key_id(&self) -> Option<String> {
+        if let Some(jwksetlock) = self.jwkset.as_ref() {
+            if let Ok(jwkset) = jwksetlock.read() {
+                for key in jwkset.keys.iter() {
+                    if key.common.public_key_use == Some(jsonwebtoken::jwk::PublicKeyUse::Signature)
+                        && key.common.key_operations.as_ref().is_some_and(|ops| {
+                            ops.contains(&jsonwebtoken::jwk::KeyOperations::Verify)
+                        })
+                        && key.common.key_algorithm == Some(KeyAlgorithm::RS256)
+                    {
+                        if let Some(s) = key.common.key_id.as_ref() {
+                            return Some(s.clone());
+                        }
+                    }
+                }
+            }
+        }
+        None
     }
 
     /// Send a message to the dispatcher

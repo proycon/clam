@@ -342,7 +342,11 @@ fn validate_basic_auth(credentials: &str, state: &ServiceState) -> Option<String
 
 /// Validates an OIDC ID token, return the user's email as user identifier if possible, otherwise a unique subject ID
 /// Returns None if validation did not succeed
-async fn validate_id_token(token: &str, state: &ServiceState) -> Option<String> {
+fn validate_id_token(
+    token: &str,
+    state: &ServiceState,
+    allow_reobtain_jwkset: bool,
+) -> Option<String> {
     //Decode the token header to find which key was used to sign it
     debug!("Validating OIDC token...");
 
@@ -357,58 +361,122 @@ async fn validate_id_token(token: &str, state: &ServiceState) -> Option<String> 
     let key_id = match header.kid {
         Some(k) => k,
         None => {
-            debug!("No key ID found");
-            return None;
+            warn!(
+                "No key ID provided for ID token verification, falling back to first (only?) known key in JWKs store"
+            );
+            if let Some(k) = state.first_key_id() {
+                k
+            } else {
+                error!("No signing keys known!");
+                return None;
+            }
         }
     };
 
+    let mut rotate = false; //set when signing keys need to be reobtained
+
     // Look up the matching public key in our cached JWKS
-    if let Some(jwkset) = state.jwkset.as_ref() {
-        if let Some(jwk) = jwkset.find(&key_id) {
-            match jwk.algorithm {
-                jsonwebtoken::jwk::AlgorithmParameters::RSA(ref rsa) => {
-                    let decoding_key =
-                        match jsonwebtoken::DecodingKey::from_rsa_components(&rsa.n, &rsa.e) {
-                            Ok(k) => k,
-                            Err(e) => {
-                                debug!("error decoding key: {}", e);
-                                return None;
-                            }
-                        };
-
-                    // Validate the token signature and claims
-                    let mut validation = jsonwebtoken::Validation::new(header.alg);
-                    validation.set_audience(&[&state.oauthcredentials.oauth_client_id]);
-                    validation.set_issuer(&[state.openidconfig.as_ref().unwrap().issuer.as_str()]);
-
-                    // We use serde_json::Value as a generic claims struct just to verify the signature
-                    match jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation) {
-                        Ok(token_data) => {
-                            // Return email if available, otherwise fall back to the subject string namespaced by the provider
-                            debug!("...success");
-
-                            if token_data.claims.email_verified == Some(true) {
-                                if let Some(email) = token_data.claims.email {
-                                    return Some(email);
-                                }
-                            }
-
-                            // fallback username, usually we should namespace the subject ID with
-                            // claims.iss but we only allow one provider anyway and using it means
-                            // we trust the issuer
-                            return Some(token_data.claims.sub);
+    if let Some(jwksetlock) = state.jwkset.as_ref() {
+        if let Ok(jwkset) = jwksetlock.read() {
+            if let Some(jwk) = jwkset.find(&key_id) {
+                match jwk.algorithm {
+                    jsonwebtoken::jwk::AlgorithmParameters::RSA(ref rsa) => {
+                        if header.alg != jsonwebtoken::Algorithm::RS256 {
+                            debug!(
+                                "OIDC ID Token validation Expected RS256 token, got {:?} instead",
+                                header.alg
+                            );
+                            return None;
                         }
-                        Err(e) => {
-                            debug!("error decoding/verifying json web token: {}", e);
+
+                        if jwk.common.public_key_use
+                            != Some(jsonwebtoken::jwk::PublicKeyUse::Signature)
+                            || jwk.common.key_operations.as_ref().is_some_and(|ops| {
+                                !ops.contains(&jsonwebtoken::jwk::KeyOperations::Verify)
+                            })
+                            || jwk.common.key_algorithm
+                                != Some(jsonwebtoken::jwk::KeyAlgorithm::RS256)
+                        {
+                            debug!(
+                                "Stored signing key for OIDC Token validation does not meet requirements, got {:?}",
+                                jwk
+                            );
+                            return None;
+                        }
+
+                        let decoding_key =
+                            match jsonwebtoken::DecodingKey::from_rsa_components(&rsa.n, &rsa.e) {
+                                Ok(k) => k,
+                                Err(e) => {
+                                    debug!("error decoding key: {}", e);
+                                    return None;
+                                }
+                            };
+
+                        // Validate the token signature and claims
+                        let mut validation = jsonwebtoken::Validation::new(header.alg);
+                        validation.set_audience(&[&state.oauthcredentials.oauth_client_id]);
+                        validation.set_issuer(&[state
+                            .openidconfig
+                            .as_ref()
+                            .unwrap()
+                            .issuer
+                            .as_str()]);
+
+                        // We use serde_json::Value as a generic claims struct just to verify the signature
+                        match jsonwebtoken::decode::<OidcClaims>(token, &decoding_key, &validation)
+                        {
+                            Ok(token_data) => {
+                                // Return email if available, otherwise fall back to the subject string
+                                debug!("...success");
+
+                                if token_data.claims.email_verified == Some(true) {
+                                    if let Some(email) = token_data.claims.email {
+                                        return Some(email);
+                                    }
+                                }
+
+                                // fallback username, usually we should namespace the subject ID with
+                                // claims.iss but we only allow one provider anyway and using it means
+                                // we trust the issuer
+                                return Some(token_data.claims.sub);
+                            }
+                            Err(e) => {
+                                debug!("error decoding/verifying json web token: {}", e);
+                            }
                         }
                     }
+                    _ => {
+                        error!(
+                            "OIDC provider uses an algorithm we have not implemented! (only RSA is supported)"
+                        );
+                    }
                 }
-                _ => {
-                    error!(
-                        "OIDC provider uses an algorithm we have not implemented! (only RSA is supported)"
+            } else {
+                //the signing keys may have rotated, we don't support this scenario yet.. restart CLAM
+                debug!("Key ID not found.. provider's signing keys may have changed)");
+                rotate = true;
+            }
+        } else {
+            panic!("JWKS set lock poisoined");
+        }
+
+        if rotate && allow_reobtain_jwkset {
+            debug!("Re-obtaining provider's signing keys");
+            if let Some(jwksetlock) = state.jwkset.as_ref() {
+                if let Ok(mut jwkset) = jwksetlock.write() {
+                    *jwkset = get_jwks(
+                        state
+                            .openidconfig
+                            .as_ref()
+                            .expect("openidconfig must exist")
+                            .jwks_uri
+                            .as_str(),
                     );
                 }
             }
+            warn!("Key ID wasn't found, retrying with new keys");
+            return validate_id_token(token, state, false);
         }
     }
     debug!("...failed");
@@ -583,7 +651,7 @@ pub async fn callback_handler(
 
             //validate id_token and get username (email or fallback)
             let mut username =
-                match validate_id_token(token_data.id_token.as_deref().unwrap(), &state).await {
+                match validate_id_token(token_data.id_token.as_deref().unwrap(), &state, true) {
                     Some(u) => u,
                     None => {
                         error!("ID token verification failed");
