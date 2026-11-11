@@ -135,7 +135,10 @@ impl ServiceState {
                 return Ok(projectkey.endpoint_index());
             }
         }
-        debug!("authentication state value is not a valid endpoint");
+        debug!(
+            "authentication state value ({}) is not a valid endpoint",
+            state_value
+        );
         Err(StatusCode::FORBIDDEN)
     }
 
@@ -146,7 +149,10 @@ impl ServiceState {
         if state_value >= 0 {
             //normal situation
             return self.redirect_url(state_value as usize).ok_or({
-                debug!("authentication state value is not a valid endpoint");
+                debug!(
+                    "authentication state value ({}) is not a valid endpoint",
+                    state_value
+                );
                 StatusCode::FORBIDDEN
             });
         } else if let Ok(mut session_adoption_map) = self.session_adoption_map.write() {
@@ -518,7 +524,6 @@ pub async fn callback_handler(
 
         let res = match client
             .post(openidconfig.token_endpoint.as_str())
-            .header(header::ACCEPT, "application/json")
             .form(&params)
             .basic_auth(
                 state.oauthcredentials.oauth_client_id.as_str(),
@@ -578,7 +583,6 @@ pub async fn callback_handler(
             if !username.chars().any(|c| c == '@') {
                 match client
                     .get(openidconfig.userinfo_endpoint.as_deref().unwrap())
-                    .header(header::ACCEPT, "application/json")
                     .bearer_auth(token_data.access_token)
                     .send()
                     .await
