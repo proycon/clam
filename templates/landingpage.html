@@ -16,7 +16,7 @@
         {% if config.documentation_url | exists %}
         <tr><th>Documentation</th><td class="documentation"><a href="{{ config.documentation_url }}">{{ config.documentation_url }}</a></td></tr>
         {% endif %}
-        <tr><th>Web API Documentation</th><td class="documentation"><a href="/info">OpenAPI Specification</a></td></tr>
+        <tr><th>Web API Documentation</th><td class="documentation"><a href="{{ config.url }}/info/">OpenAPI Specification</a></td></tr>
         {% if config.contact_name | exists %}
         <tr><th>Contact</th><td class="contact">{% if config.contact_email | exists %}<a href="mailto:{{ config.contact_email }}">{% endif %}{{ config.contact_name }}{% if config.contact_email | exists %}</a>{% endif %}</td></tr>
         {% endif %}
