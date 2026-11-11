@@ -198,12 +198,12 @@ impl Service {
         );
 
         let router = Router::new()
+            .merge(routes)
             .merge(
                 SwaggerUi::new("/info")
                     .url("/openapi.json", state.openapi.clone())
                     .config(utoipa_swagger_ui::Config::from(openapi_url)),
             )
-            .merge(routes)
             .layer(TraceLayer::new_for_http())
             .with_state(state.clone());
 
