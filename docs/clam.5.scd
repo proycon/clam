@@ -233,6 +233,10 @@ public = true
 	It is discouraged to make any *Project* endpoints public.
 *parameters*
 	Defines input parameters that can be set by the user. See the section _ENDPOINT PARAMETER CONFIGURATION_ further below. 
+*parameters_from*
+	You may also point back to an earlier defined endpoint (by path) and copy the
+	parameters from that one. This saves some duplication. These copied parameters will
+	be appended to the custom ones you defined for this endpoint.
 *background_services* (list of strings, ids of background services)
 	List of background services to start for this endpoint, they are referred to by their ID. This refers
 	to services you defined in the root-level *background_services* section. Read section _BACKGROUND SERVICES CONFIGURATION_.
@@ -282,11 +286,13 @@ parameter_id = "someparameter"
 	The file type of the output, used with only with endpoints in *Action* mode.
 	This refers back to file type you defined in the root level *filetypes*
 	section. Read section _FILETYPES CONFIGURATION_ further below.
-*output_files*
+*outputfiles*
 	Defines what output files can be expected. Only used with endpoints in
 	*Project* mode.
 	See section _OUTPUT FILES CONFIGURATION_ further below.
-
+*outputfiles_from*
+	You may also point back to an earlier defined endpoint (by path) and copy the
+	output files from that one. This saves some duplication.
 
 ## ENDPOINT PARAMETER CONFIGURATION
 

@@ -6,6 +6,7 @@ use crate::error::{ApiError, ClamError};
 use derive_getters::Getters;
 use regex::Regex;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::fs;
 use std::io::Read;
@@ -276,6 +277,10 @@ pub struct EndPoint {
     #[serde(default)]
     parameters: Vec<Parameter>,
 
+    #[serde(default)]
+    /// Copy parameters from an earlier defined endpoint, refer to the endpoint by path. This may save some repetition.
+    parameters_from: Option<String>,
+
     /// Regular expression to select which stderr lines propagate to the webinterface's status message
     #[serde(
         deserialize_with = "deserialize_opt_regex",
@@ -290,6 +295,10 @@ pub struct EndPoint {
     /// Output file definitions  (ties matching filenames to filetypes)
     #[serde(default)]
     outputfiles: Vec<OutputFile>,
+
+    #[serde(default)]
+    /// Copy output files from an earlier defined endpoint, refer to the endpoint by path. This may save some repetition.
+    outputfiles_from: Option<String>,
 
     /// Show unknown output files (for project mode), will show output files that can not be associated to types and content types (i.e. for which no correct configuration is set up), this may be a security hazard as it can expose your process's intermediate files
     #[serde(default)]
@@ -772,11 +781,48 @@ impl ServiceConfig {
         None
     }
 
-    /// Validate the configuration
-    pub fn validate(&self) -> Result<(), ClamError> {
+    /// Validate the configuration, also processes any copy directives
+    pub fn validate(&mut self) -> Result<(), ClamError> {
         for filetype in self.filetypes.iter() {
             filetype.validate(self)?
         }
+
+        //process parameters_from and outputfiles_from directives to copy data and prevent duplication in the configuration
+        // (this could be store more efficient in memory with references instead of copies but we're not bothering with that complexity)
+        let mut append_parameters: BTreeMap<usize, Vec<Parameter>> = BTreeMap::new();
+        let mut append_outputfiles: BTreeMap<usize, Vec<OutputFile>> = BTreeMap::new();
+        for (i, endpoint) in self.endpoints.iter().enumerate() {
+            if let Some(parameters_from) = endpoint.parameters_from() {
+                if let Some(reference) = self
+                    .endpoints()
+                    .iter()
+                    .filter(|e| e.path() == parameters_from)
+                    .next()
+                {
+                    append_parameters.insert(i, reference.parameters.clone());
+                }
+            }
+            if let Some(outputfiles_from) = endpoint.outputfiles_from() {
+                if let Some(reference) = self
+                    .endpoints()
+                    .iter()
+                    .filter(|e| e.path() == outputfiles_from)
+                    .next()
+                {
+                    append_outputfiles.insert(i, reference.outputfiles.clone());
+                }
+            }
+        }
+        for (i, parameters) in append_parameters {
+            let endpoint = self.endpoints.get_mut(i).unwrap();
+            endpoint.parameters.extend(parameters);
+        }
+        for (i, outputfiles) in append_outputfiles {
+            let endpoint = self.endpoints.get_mut(i).unwrap();
+            endpoint.outputfiles.extend(outputfiles);
+        }
+        //(end)
+
         for endpoint in self.endpoints.iter() {
             endpoint.validate(self)?
         }
