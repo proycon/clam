@@ -809,7 +809,7 @@ impl ProjectStatus {
                     "stage",
                     ObjectBuilder::new()
                         .schema_type(Type::String)
-                        .description(Some("Stage of the project: Staging, Running, or Done")),
+                        .description(Some("Stage of the project: Staging, Running, or Done (mind the casing, first letter is uppercase)")),
                 )
                 .property(
                     "data",
@@ -827,12 +827,26 @@ impl ProjectStatus {
                                     .schema_type(Type::String)
                                     .description(Some("Human-readable status or error message (used in Running or Done stages)")),
                             )
-                            .property("input_files", ObjectBuilder::new().schema_type(Type::Array)
-                                    .description(Some("List of input files provided (Staging stage)")),
+                            .property("input_files", ArrayBuilder::new().items(
+                                        ObjectBuilder::new().property("name",ObjectBuilder::new().schema_type(Type::String).description(Some("The filename, does not contain any further path components")))
+                                        .property("parameter_id", ObjectBuilder::new().description(Some("The ID of the parameter for which the file was uploaded")))
+                                        .property("parameter_name", ObjectBuilder::new().description(Some("Human-readable name/label of the parameter for which the file was uploaded")))
+                                        .property("filetype", ObjectBuilder::new()
+                                            .property("id", ObjectBuilder::new().description(Some("The ID of the filetype")))
+                                            .property("name", ObjectBuilder::new().description(Some("Human-readable name of the filetype")))
+                                            .property("contenttype", ObjectBuilder::new().description(Some("Content type (MIME) as returned in HTTP responses")))
+                                            .description(Some("The file type/format")))
+                                )
+                                .description(Some("List of input files provided (Staging stage)")),
                             )
-                            .property(
-                                "output_files",
-                                ObjectBuilder::new().schema_type(Type::Array)
+                            .property("output_files", ArrayBuilder::new().items(
+                                        ObjectBuilder::new().property("name",ObjectBuilder::new().schema_type(Type::String).description(Some("The filename, does not contain any further path components")))
+                                        .property("filetype", ObjectBuilder::new()
+                                            .property("id", ObjectBuilder::new().description(Some("The ID of the filetype")))
+                                            .property("name", ObjectBuilder::new().description(Some("Human-readable name of the filetype")))
+                                            .property("contenttype", ObjectBuilder::new().description(Some("Content type (MIME) as returned in HTTP responses")))
+                                            .description(Some("The file type/format")))
+                                    )
                                     .description(Some("List of output files produced (Done stage)")),
                             )
                             .property("progress", ObjectBuilder::new().schema_type(Type::Integer)
