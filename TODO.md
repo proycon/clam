@@ -7,6 +7,7 @@
     - [ ] Test interface on mobile devices
     - [ ] Less intrusive status page refreshes
 - [ ] Fix swagger validator errors (see bottom-right corner of swagger UI)
+    - [ ] Update utoipa dependency
 
 ## In progress
 
@@ -20,10 +21,10 @@
     - [x] The user the *transfer* endpoint to claim the project *from* (query parameter) a particular user.
           This URL can be provided to the user by a tool like the Switchboard after it has released a project.
           The challenge is that the users will land on an unauthenticated endpoint and the project name and sender have to be carried over until after the user authenticated.
-- [ ] Basic auth in hybrid/production setting
 
 ## Done
 
+- [x] Basic auth in hybrid/production setting
 - [x] Fix OpenAPI/swagger endpoint
 - [x] oidc: query userinfo endpoint for user email
 - [x] Expire sessions
