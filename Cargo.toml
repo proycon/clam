@@ -13,28 +13,28 @@ keywords = [ "webservice", "rest"]
 [dependencies]
 axum = { version = "0.8.9", features = ["multipart", "macros"] }
 axum-extra = { version = "0.12.6", features = ["cookie"] }
-base64 = "0.22.1"
-clap = { version = "4.5.60", features = ["derive"] }
+base64 = "0.23.1"
+clap = { version = "4.6.10", features = ["derive"] }
 const_format = "0.2.36"
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
 futures-util = "0.3.32"
 jsonwebtoken = { version = "10.4.0", features = ["rust_crypto"] }
-md5 = "0.8.0"
+md5 = "0.8.1"
 sha2 = "0.11.1"
 nix = { version = "0.31.3", features = ["signal"]}
-rand = "0.10.1"
-regex = "1.13.0"
-reqwest = { version = "0.13.4", features = ["blocking", "form", "json"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
-tokio = { version = "1.52.0", features = ["signal", "macros", "rt-multi-thread", "fs"] }
-tokio-util = { version = "0.7.18", features = [ "io" ]}
-toml = "1.1.2"
-tower-http = { version = "0.6.8", features = ["trace", "normalize-path"] }
+rand = "0.10.4"
+regex = "1.13.2"
+reqwest = { version = "0.13.5", features = ["blocking", "form", "json"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["signal", "macros", "rt-multi-thread", "fs"] }
+tokio-util = { version = "0.7.20", features = [ "io" ]}
+toml = "1.2.3"
+tower-http = { version = "0.7.1", features = ["trace", "normalize-path"] }
 tracing = "0.1.44"
 tracing-subscriber = "0.3.23"
 upon = { version = "0.11.0", features = ["serde"] }
 ureq = { version = "3.4.2", features = ["json"] }
 utoipa = { version = "5.5.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
-uuid = { version = "1.26.1", features = ["v4"] }
+uuid = { version = "1.29.3", features = ["v4"] }
