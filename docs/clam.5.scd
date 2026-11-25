@@ -351,6 +351,17 @@ flag = "-S"
 parametertype = "Selection"
 choices = [ "apple", "pear", "banana" ]
 default = [ "pear" ]
+
+[[endpoints.parameters]]
+id = "language"
+name = "Selection test 2"
+description = "Selection test parameter (2)"
+required = false
+flag = "-L"
+
+[endpoints.parameters.type]
+parametertype = "Selection"
+choices = [ { id = "nl", label = "Dutch" }, { id = "en", label = "English" } ]
 ```
 
 The fields are:
@@ -406,8 +417,10 @@ filename = { nametype = "Pattern", value = "\\.txt$" }
 *filetype* (string, mandatory only for File)
 	This refers to an ID you defined in *filetypes*, see Section _FILETYPE
 	CONFIGURATION_ further below.
-*choices* (list of strings)
-	All possibler values for this (only for Selection)
+*choices* (list of strings, or a list of tables with fields "id" and "label")
+	All possible values for this parameter (only for Selection). A distinction
+	can be made between the actual id that will be passed as a value for the
+	parameter and the label that will only be presented in the interface to human end-users.
 *multiple* (boolean)
 	Allow multiple choices (only for Selection), defaults to false
 

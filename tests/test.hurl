@@ -82,6 +82,26 @@ Content-type: text/plain
 -i 5 -f 3.14 -S pear
 ```
 
+# Parameter test: selection
+GET http://127.0.0.1:8080/paramtest?selection=apple
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-f 3.14 -S apple
+```
+
+# Parameter test: selection
+GET http://127.0.0.1:8080/paramtest?language=nl
+accept: text/plain
+HTTP 200
+Content-type: text/plain
+[Asserts]
+```
+-f 3.14 -S pear -L nl
+```
+
 # Parameter test: integer out of bounds
 GET http://127.0.0.1:8080/paramtest?int=11
 accept: text/plain

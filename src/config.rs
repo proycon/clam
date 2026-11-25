@@ -448,7 +448,7 @@ pub enum ParameterType {
 
     /// Selection amongst predefined values
     Selection {
-        choices: Vec<String>,
+        choices: Vec<Choice>,
         /// Allow multiple choices
         #[serde(default)]
         multiple: bool,
@@ -456,6 +456,36 @@ pub enum ParameterType {
         #[serde(default)]
         default: Option<Vec<String>>,
     },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(untagged)]
+#[serde(deny_unknown_fields)]
+pub enum Choice {
+    KeyValue { id: String, label: String },
+    String(String),
+}
+
+impl PartialEq<str> for Choice {
+    fn eq(&self, other: &str) -> bool {
+        self.id() == other
+    }
+}
+
+impl Choice {
+    pub fn id(&self) -> &str {
+        match self {
+            Self::String(s) => s.as_str(),
+            Self::KeyValue { id, label: _ } => id.as_str(),
+        }
+    }
+
+    pub fn label(&self) -> &str {
+        match self {
+            Self::String(s) => s.as_str(),
+            Self::KeyValue { id: _, label } => label.as_str(),
+        }
+    }
 }
 
 impl Parameter {

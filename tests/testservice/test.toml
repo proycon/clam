@@ -193,3 +193,14 @@ flag = "-S"
 parametertype = "Selection"
 choices = [ "apple", "pear", "banana" ]
 default = [ "pear" ]
+
+[[endpoints.parameters]]
+id = "language"
+name = "Selection test 2"
+description = "Selection test parameter (2)"
+required = false
+flag = "-L"
+
+[endpoints.parameters.type]
+parametertype = "Selection"
+choices = [ { id = "nl", label = "Dutch" }, { id = "en", label = "English" } ]

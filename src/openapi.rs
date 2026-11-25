@@ -904,7 +904,11 @@ impl ParameterType {
                 .default(default.clone().map(|x| x.into()))
                 .description(Some(format!(
                     "String value from the following predefined list: {} {}",
-                    choices.join(", "),
+                    choices
+                        .iter()
+                        .map(|c| c.id())
+                        .collect::<Vec<&str>>()
+                        .join(", "),
                     if *multiple {
                         "(multiple comma-separated values are allowed)"
                     } else {

@@ -386,7 +386,11 @@ impl Job {
                                                 error += &format!(
                                                     "parameter {}: value must be one of {}, multiple comma-separated values allowed\n",
                                                     parameter.id(),
-                                                    choices.join(", ")
+                                                    choices
+                                                        .iter()
+                                                        .map(|c| c.id())
+                                                        .collect::<Vec<&str>>()
+                                                        .join(", ")
                                                 );
                                                 break; //don't pile up errors if there are multiple mismatches for this same value
                                             }
@@ -396,7 +400,11 @@ impl Job {
                                             error += &format!(
                                                 "parameter {}: value must be one of {}\n",
                                                 parameter.id(),
-                                                choices.join(", ")
+                                                choices
+                                                    .iter()
+                                                    .map(|c| c.id())
+                                                    .collect::<Vec<&str>>()
+                                                    .join(", ")
                                             );
                                         }
                                     }

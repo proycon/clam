@@ -73,6 +73,13 @@ pub(crate) fn init_templating() -> Engine<'static> {
     engine.add_function("exists", |s: &str| !s.is_empty());
     engine.add_function("eq", |a: &upon::Value, b: &upon::Value| a == b);
     engine.add_function("ne", |a: &upon::Value, b: &upon::Value| a != b);
+    engine.add_function("is_str", |a: &upon::Value| {
+        if let upon::Value::String(_) = a {
+            true
+        } else {
+            false
+        }
+    });
     engine.add_function("test", |a: bool| a);
     engine.add_function(
         "contains",

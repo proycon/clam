@@ -18,7 +18,11 @@
     {% else if parameter.type.parametertype | eq: "Selection" %}
     <select id="{{ parameter.id }}" name="{{ parameter.id }}"{% if parameter.type.multiple %} multiple{% endif %}{% if parameter.description %} title="{{ parameter.description }}"{% endif %}{% if parameter.required %} required{% endif %}>
         {% for choice in parameter.type.choices %}
+        {% if choice | is_str %}
         <option value="{{ choice }}"{% if parameter.type.default | contains: choice %} selected{% endif %}>{{ choice }}</option>
+        {% else %}
+        <option value="{{ choice.id }}"{% if parameter.type.default | contains: choice.id %} selected{% endif %}>{{ choice.label }}</option>
+        {% endif %}
         {% endfor %}
     </select>
     {% else if parameter.type.parametertype | eq: "File" %}
